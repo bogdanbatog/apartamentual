@@ -87,111 +87,46 @@
 
                 <!-- Filter Bar -->
                 <div class="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
-                    <select class="px-3 py-2 border border-gray-300 rounded-md">
-                        <option>Toate locațiile</option>
-                        <option>București</option>
-                        <option>Cluj-Napoca</option>
-                        <option>Timișoara</option>
-                        <option>Iași</option>
+                    <select id="location-filter" class="px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">Toate locațiile</option>
                     </select>
-                    <select class="px-3 py-2 border border-gray-300 rounded-md">
-                        <option>Toate tipurile</option>
-                        <option>Construcție nouă</option>
-                        <option>Renovare</option>
+                    <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">Toate statusurile</option>
+                        <option value="active">Activ</option>
+                        <option value="under_review">În analiză</option>
+                        <option value="reserved">Rezervat</option>
+                        <option value="sold">Vândut</option>
                     </select>
-                    <select class="px-3 py-2 border border-gray-300 rounded-md">
-                        <option>Toate stadiile</option>
-                        <option>Propunere</option>
-                        <option>Analiză în curs</option>
-                        <option>Aprobat pentru dezvoltare</option>
+                    <select id="analysis-filter" class="px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">Toate analizele</option>
+                        <option value="completed">Analiză completă</option>
+                        <option value="in_progress">Analiză în curs</option>
+                        <option value="pending">Fără analiză</option>
                     </select>
                 </div>
 
+                <!-- Loading State -->
+                <div id="loading" class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Se încarcă terenurile...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p class="text-red-800">A apărut o eroare la încărcarea terenurilor. Te rugăm să încerci din nou.</p>
+                    <button id="retry-btn" class="mt-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                        Încearcă din nou
+                    </button>
+                </div>
+
                 <!-- Terrain List -->
-                <div class="grid-2">
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Teren București – Sector 2</h3>
-                            <span class="badge bg-green-100 text-green-800">Disponibil</span>
-                        </div>
-                        <p class="subtitle mb-4">Teren de 2000 mp în zona Colentina, aproape de transport public</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Suprafață:</strong> 2000 mp</div>
-                            <div><strong>Zonă:</strong> Sector 2</div>
-                            <div><strong>Preț:</strong> 150 €/mp</div>
-                            <div><strong>Apartamente:</strong> 8-12</div>
-                        </div>
-                        <div class="flex gap-2 text-xs">
-                            <span class="badge bg-blue-100 text-blue-800">Analiză generală: da</span>
-                            <span class="badge bg-yellow-100 text-yellow-800">Analiză specifică: în curs</span>
-                        </div>
-                        <div class="mt-4">
-                            <a href="/teren-bucuresti-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
+                <div id="terrain-list" class="grid-2 hidden">
+                    <!-- Terrain cards will be dynamically inserted here -->
+                </div>
 
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Teren Cluj – Zona Sopor</h3>
-                            <span class="badge bg-yellow-100 text-yellow-800">În analiză</span>
-                        </div>
-                        <p class="subtitle mb-4">Teren de 1500 mp în zona Sopor, cu acces la utilități</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Suprafață:</strong> 1500 mp</div>
-                            <div><strong>Zonă:</strong> Sopor</div>
-                            <div><strong>Preț:</strong> 120 €/mp</div>
-                            <div><strong>Apartamente:</strong> 6-8</div>
-                        </div>
-                        <div class="flex gap-2 text-xs">
-                            <span class="badge bg-red-100 text-red-800">Analiză generală: nu</span>
-                            <span class="badge bg-red-100 text-red-800">Analiză specifică: nu</span>
-                        </div>
-                        <div class="mt-4">
-                            <a href="/teren-cluj-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Teren Timișoara – Zona Giroc</h3>
-                            <span class="badge bg-green-100 text-green-800">Aprobat</span>
-                        </div>
-                        <p class="subtitle mb-4">Teren de 1800 mp în Giroc, cu toate autorizațiile necesare</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Suprafață:</strong> 1800 mp</div>
-                            <div><strong>Zonă:</strong> Giroc</div>
-                            <div><strong>Preț:</strong> 100 €/mp</div>
-                            <div><strong>Apartamente:</strong> 8-10</div>
-                        </div>
-                        <div class="flex gap-2 text-xs">
-                            <span class="badge bg-green-100 text-green-800">Analiză generală: da</span>
-                            <span class="badge bg-green-100 text-green-800">Analiză specifică: da</span>
-                        </div>
-                        <div class="mt-4">
-                            <a href="/teren-timisoara-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Teren Iași – Zona Copou</h3>
-                            <span class="badge bg-blue-100 text-blue-800">Propunere</span>
-                        </div>
-                        <p class="subtitle mb-4">Teren de 1200 mp în zona Copou, aproape de universitate</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Suprafață:</strong> 1200 mp</div>
-                            <div><strong>Zonă:</strong> Copou</div>
-                            <div><strong>Preț:</strong> 80 €/mp</div>
-                            <div><strong>Apartamente:</strong> 4-6</div>
-                        </div>
-                        <div class="flex gap-2 text-xs">
-                            <span class="badge bg-red-100 text-red-800">Analiză generală: nu</span>
-                            <span class="badge bg-red-100 text-red-800">Analiză specifică: nu</span>
-                        </div>
-                        <div class="mt-4">
-                            <a href="/teren-iasi-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
+                <!-- No Results -->
+                <div id="no-results" class="hidden text-center py-8">
+                    <p class="text-gray-600">Nu s-au găsit terenuri care să corespundă criteriilor selectate.</p>
                 </div>
 
                 <!-- Call to Action -->
@@ -212,5 +147,6 @@
     <script src="nav.js"></script>
     <script src="footer.js"></script>
     <script src="app.js"></script>
+    <script src="terenuri.js"></script>
 </body>
 </html>
