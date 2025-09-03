@@ -109,3 +109,75 @@ a:hover {
 .transition {
     transition: all 0.15s ease-in-out;
 }
+/* Teren Details Page Specific Styles */
+.teren-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.teren-image-container img {
+    transition: transform 0.3s ease;
+}
+
+.teren-image-container:hover img {
+    transform: scale(1.02);
+}
+
+.image-modal {
+    backdrop-filter: blur(4px);
+}
+
+.analysis-section {
+    border-left: 4px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.analysis-section:hover {
+    border-left-color: #e5e7eb;
+}
+
+/* Responsive improvements for details page */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 0.75rem;
+    }
+    
+    .grid.lg\\:grid-cols-2 {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .flex.gap-3 {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .flex.gap-3 a {
+        text-align: center;
+    }
+}
+
+/* Loading animation improvements */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Error state improvements */
+.error-icon {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}

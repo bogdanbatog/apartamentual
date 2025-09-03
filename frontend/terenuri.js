@@ -97,7 +97,7 @@ function createTerrainCard(teren) {
                 <span class="badge ${analizaSpecifica.class}">Analiză specifică: ${analizaSpecifica.text}</span>
             </div>
             <div class="mt-4">
-                <a href="/teren-${teren.id}.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
+                <a href="/teren-details.html?id=${teren.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
             </div>
         </div>
     `;
