@@ -1,13 +1,13 @@
 // Navigation component
 function createNavigation(currentPage = '') {
     const navItems = [
-        { href: "index.html", label: "Acasă", id: "home" },
-        { href: "ce-este-apartamentual.html", label: "Ce este", id: "about" },
-        { href: "terenuri.html", label: "Terenuri", id: "land" },
-        { href: "grupuri.html", label: "Grupuri", id: "groups" },
-        { href: "proiecte.html", label: "Proiecte", id: "projects" },
-        // { href: "parteneri.html", label: "Parteneri", id: "partners" },
-        { href: "news.html", label: "News/Blog", id: "news" }
+        { href: "/index.html", label: "Acasă", id: "home" },
+        { href: "/ce-este/index.html", label: "Ce este", id: "about" },
+        { href: "/terenuri.html", label: "Terenuri", id: "land" },
+        { href: "/grupuri.html", label: "Grupuri", id: "groups" },
+        { href: "/proiecte.html", label: "Proiecte", id: "projects" },
+        // { href: "/parteneri.html", label: "Parteneri", id: "partners" },
+        { href: "/news.html", label: "News/Blog", id: "news" }
     ];
 
     const navHTML = `
@@ -66,7 +66,7 @@ function loadNavigation(currentPage = '') {
 function getCurrentPage() {
     const path = window.location.pathname;
     if (path === '/' || path === '/index.html') return 'home';
-    if (path.includes('ce-este-apartamentual')) return 'about';
+    if (path.includes('ce-este')) return 'about';
     if (path.includes('terenuri')) return 'land';
     if (path.includes('grupuri')) return 'groups';
     if (path.includes('proiecte')) return 'projects';

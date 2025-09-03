@@ -7,9 +7,9 @@ function createFooter() {
             <div class="container flex flex-wrap items-center justify-between gap-4">
                 <p>© ${currentYear} ApartamenTUal</p>
                 <div class="flex gap-4">
-                    <a href="termeni.html">Termeni</a>
-                    <a href="gdpr.html">GDPR</a>
-                    <a href="contact.html">Contact</a>
+                    <a href="/termeni.html">Termeni</a>
+                    <a href="/gdpr.html">GDPR</a>
+                    <a href="/contact.html">Contact</a>
                 </div>
             </div>
         </footer>

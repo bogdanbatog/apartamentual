@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cum Funcționează - Ghid pentru Grupuri de Construcție</title>
+    <meta name="description" content="Ghid pas cu pas pentru organizarea unui grup de construcție Baugruppen în România.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Auth Modal -->
+            <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Autentificare</h2>
+                        <button id="close-auth-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <!-- Auth State Display -->
+                    <div id="auth-state" class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 hidden">
+                        <p class="text-blue-800">Bine ai venit, <span id="user-email" class="font-semibold"></span>!</p>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <div id="login-form" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
+                            <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button id="login-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                                Autentificare
+                            </button>
+                            
+                            <button id="signup-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
+                                Înregistrare
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <div id="logout-section" class="hidden">
+                        <button id="logout-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                            Deconectare
+                        </button>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div id="message" class="mt-4 hidden"></div>
+                </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <!-- Breadcrumb -->
+                <nav class="mb-6 text-sm">
+                    <a href="../index.html" class="text-blue-600 hover:underline">Acasă</a> 
+                    <span class="mx-2">›</span>
+                    <a href="index.html" class="text-blue-600 hover:underline">Ce este ApartamenTUal</a>
+                    <span class="mx-2">›</span>
+                    <span class="text-gray-600">Cum funcționează</span>
+                </nav>
+
+                <div class="grid gap-8">
+                    <div>
+                        <h1 class="text-3xl mb-4">Cum Funcționează - Ghid Complet</h1>
+                        <p class="subtitle">Pașii concreti pentru organizarea unui grup de construcție de succes</p>
+                    </div>
+
+                    <!-- Timeline Overview -->
+                    <section class="card">
+                        <h2 class="text-2xl mb-6">Cronologia unui Proiect</h2>
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">1</div>
+                                <div>
+                                    <h3 class="font-semibold mb-1">Formarea Grupului</h3>
+                                    <p class="text-sm subtitle">2-6 luni • Găsirea membrilor compatibili și stabilirea obiectivelor</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">2</div>
+                                <div>
+                                    <h3 class="font-semibold mb-1">Căutarea și Achiziția Terenului</h3>
+                                    <p class="text-sm subtitle">3-12 luni • Identificarea, evaluarea și cumpărarea terenului</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold">3</div>
+                                <div>
+                                    <h3 class="font-semibold mb-1">Proiectarea</h3>
+                                    <p class="text-sm subtitle">6-12 luni • Dezvoltarea proiectului arhitectural și obținerea autorizațiilor</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold">4</div>
+                                <div>
+                                    <h3 class="font-semibold mb-1">Construcția</h3>
+                                    <p class="text-sm subtitle">12-24 luni • Execuția lucrărilor și finalizarea proiectului</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Phase 1: Group Formation -->
+                    <section class="card">
+                        <h2 class="text-2xl mb-4">Faza 1: Formarea Grupului</h2>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">1.1 Găsirea Membrilor</h3>
+                            <p class="mb-4">Un grup de construcție de succes are în mod tipic între 6-15 familii, în funcție de dimensiunea proiectului.</p>
+                            
+                            <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                                <h4 class="font-semibold mb-2">Modalități de găsire a membrilor:</h4>
+                                <ul class="space-y-1 text-sm">
+                                    <li>• Platforma ApartamenTUal - conectarea cu persoane cu obiective similare</li>
+                                    <li>• Rețele sociale și grupuri locale de interes</li>
+                                    <li>• Recomandări din cercul de prieteni și familie</li>
+                                    <li>• Evenimente și workshopuri despre locuire alternativă</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">1.2 Stabilirea Compatibilității</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="border border-gray-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Aspecte financiare</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Buget disponibil per membru</li>
+                                        <li>• Capacitate de finanțare</li>
+                                        <li>• Așteptări privind profitabilitatea</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="border border-gray-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Preferințe de locuire</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Dimensiunea locuinței dorite</li>
+                                        <li>• Locația preferată</li>
+                                        <li>• Standarde de calitate și finisaje</li>
+                                    </ul>
+                                </div>
+
+                                <div class="border border-gray-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Valori și stil de viață</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Atitudine față de viața comunitară</li>
+                                        <li>• Preocupări pentru sustenabilitate</li>
+                                        <li>• Toleranța la risc și incertitudine</li>
+                                    </ul>
+                                </div>
+
+                                <div class="border border-gray-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Disponibilitate</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Timpul disponibil pentru implicare</li>
+                                        <li>• Flexibilitatea în programare</li>
+                                        <li>• Angajamentul pe termen lung</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <h4 class="font-semibold mb-2">⚠️ Important:</h4>
+                            <p class="text-sm">Această fază este crucială - incompatibilitățile nerezolvate la început se vor amplifica pe parcursul proiectului. Investiți timp în cunoașterea reciprocă!</p>
+                        </div>
+                    </section>
+
+                    <!-- Phase 2: Land Acquisition -->
+                    <section class="card">
+                        <h2 class="text-2xl mb-4">Faza 2: Căutarea și Achiziția Terenului</h2>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">2.1 Criterii de Selecție</h3>
+                            <div class="grid-3">
+                                <div class="bg-gray-50 p-4 rounded">
+                                    <h4 class="font-semibold mb-2">Locație</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Accesibilitate transport</li>
+                                        <li>• Proximitate servicii</li>
+                                        <li>• Potențial de dezvoltare</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-4 rounded">
+                                    <h4 class="font-semibold mb-2">Caracteristici tehnice</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Dimensiunea și forma</li>
+                                        <li>• Configurația terenului</li>
+                                        <li>• Accesul la utilități</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-gray-50 p-4 rounded">
+                                    <h4 class="font-semibold mb-2">Aspecte juridice</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Situația juridică clară</li>
+                                        <li>• Zoning și restricții</li>
+                                        <li>• Istoric al terenului</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">2.2 Procesul de Achiziție</h3>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-blue-500 pl-4">
+                                    <h4 class="font-semibold mb-1">Evaluarea preliminară</h4>
+                                    <p class="text-sm">Analiză urbanistică, studiu de fezabilitate, estimarea costurilor de dezvoltare</p>
+                                </div>
+
+                                <div class="border-l-4 border-green-500 pl-4">
+                                    <h4 class="font-semibold mb-1">Due diligence juridic</h4>
+                                    <p class="text-sm">Verificarea documentelor, situației juridice și a eventualelor sarcini</p>
+                                </div>
+
+                                <div class="border-l-4 border-orange-500 pl-4">
+                                    <h4 class="font-semibold mb-1">Negocierea și achiziția</h4>
+                                    <p class="text-sm">Stabilirea prețului, termeni de plată și finalizarea tranzacției</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Phase 3: Design -->
+                    <section class="card">
+                        <h2 class="text-2xl mb-4">Faza 3: Proiectarea</h2>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">3.1 Echipa de Proiectare</h3>
+                            <p class="mb-4">Selectarea unei echipe de arhitecți și ingineri cu experiență în proiecte colaborative.</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Criterii de selecție:</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Experiența în proiecte comunitare</li>
+                                        <li>• Abordarea participativă în design</li>
+                                        <li>• Înțelegerea conceptului Baugruppen</li>
+                                        <li>• Portfolio de proiecte sustenabile</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Procesul colaborativ:</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Workshop-uri de co-design</li>
+                                        <li>• Sesiuni de feedback periodic</li>
+                                        <li>• Votarea deciziilor majore</li>
+                                        <li>• Transparența costurilor</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">3.2 Etapele Proiectării</h3>
+                            <div class="space-y-3">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Studiu de fezabilitate</h4>
+                                        <span class="badge">2-4 săptămâni</span>
+                                    </div>
+                                    <p class="text-sm">Analiza terenului, potențialul de construire, estimări preliminare</p>
+                                </div>
+
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Concept arhitectural</h4>
+                                        <span class="badge">1-2 luni</span>
+                                    </div>
+                                    <p class="text-sm">Masterplanul, tipologia locuințelor, spațiile comune</p>
+                                </div>
+
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Proiect tehnic</h4>
+                                        <span class="badge">3-6 luni</span>
+                                    </div>
+                                    <p class="text-sm">Planuri detaliate, documentația pentru autorizare</p>
+                                </div>
+
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-semibold">Documentația de execuție</h4>
+                                        <span class="badge">2-3 luni</span>
+                                    </div>
+                                    <p class="text-sm">Detalii constructive, specificații tehnice, documentația pentru antreprenori</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Phase 4: Construction -->
+                    <section class="card">
+                        <h2 class="text-2xl mb-4">Faza 4: Construcția</h2>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">4.1 Selectarea Antreprenorului</h3>
+                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-4">
+                                <h4 class="font-semibold mb-2">Modalități de selectare:</h4>
+                                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <strong>Licitație închisă:</strong>
+                                        <p>Mai multe oferte de la antreprenori preselectați</p>
+                                    </div>
+                                    <div>
+                                        <strong>Parteneriat:</strong>
+                                        <p>Colaborare directă cu un antreprenor de încredere</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-3">4.2 Managementul Construcției</h3>
+                            <div class="grid-3">
+                                <div class="text-center">
+                                    <div class="text-3xl mb-2">👷</div>
+                                    <h4 class="font-semibold mb-2">Supervizare</h4>
+                                    <p class="text-sm">Monitorizarea progresului și calității lucrărilor</p>
+                                </div>
+
+                                <div class="text-center">
+                                    <div class="text-3xl mb-2">💰</div>
+                                    <h4 class="font-semibold mb-2">Controlul costurilor</h4>
+                                    <p class="text-sm">Gestionarea bugetului și aprobarea cheltuielilor</p>
+                                </div>
+
+                                <div class="text-center">
+                                    <div class="text-3xl mb-2">📋</div>
+                                    <h4 class="font-semibold mb-2">Comunicarea</h4>
+                                    <p class="text-sm">Informarea regulată a membrilor despre progres</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Success Factors -->
+                    <section class="card">
+                        <h2 class="text-2xl mb-4">Factori Critici de Succes</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-3 text-green-600">✅ Ce să faci:</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Stabilește obiective clare și realiste de la început</li>
+                                    <li>• Investește în comunicare și procese transparente</li>
+                                    <li>• Lucrează cu profesioniști cu experiență relevanți</li>
+                                    <li>• Creează rezerve financiare pentru neprevăzut (10-15%)</li>
+                                    <li>• Documentează toate deciziile și acordurile</li>
+                                    <li>• Planifică pentru scenarii de ieșire din grup</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-semibold mb-3 text-red-600">❌ Ce să eviți:</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Să fii prea optimist cu bugetele și termenele</li>
+                                    <li>• Să ignori diferențele de opinie între membri</li>
+                                    <li>• Să economisești la consultanță juridică și tehnică</li>
+                                    <li>• Să iei decizii importante fără consultarea grupului</li>
+                                    <li>• Să amâni rezolvarea conflictelor</li>
+                                    <li>• Să nu ai planuri de backup pentru problemele majore</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Next Steps -->
+                    <div class="mt-8 p-6 bg-gray-50 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-4">Următorii pași:</h3>
+                        <div class="grid-2">
+                            <a href="exemple-europa.html" class="card hover:shadow-soft transition">
+                                <h4 class="font-semibold mb-2">Exemple din Europa →</h4>
+                                <p class="text-sm subtitle">Vezi cum funcționează în practică proiectele de succes</p>
+                            </a>
+                            <a href="legislatia-romania.html" class="card hover:shadow-soft transition">
+                                <h4 class="font-semibold mb-2">Legislația din România →</h4>
+                                <p class="text-sm subtitle">Înțelege cadrul legal pentru grupurile de construcție</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="../nav.js"></script>
+    <script src="../footer.js"></script>
+    <script src="../app.js"></script>
+</body>
+</html>
