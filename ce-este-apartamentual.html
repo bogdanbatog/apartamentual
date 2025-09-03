@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ApartamenTUal - Construim împreună, împărțim costurile, câștigăm comunitatea</title>
-    <meta name="description" content="Platformă pentru grupuri de construcție (Baugruppen) și co-housing în România.">
+    <title>Ce este ApartamenTUal - Platformă pentru grupuri de construcție</title>
+    <meta name="description" content="Definiții, diferențe Baugruppen vs. co-housing, ghid de funcționare, exemple din Europa, legislație în România și testimoniale.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="styles.css">
@@ -30,7 +30,7 @@
                 <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold">Autentificare</h2>
-                        <button id="close-auth-modal" class="text-gray-500 hover:text-gray-700">&times;</button>
+                        <button id="close-auth-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
                     </div>
                     
                     <!-- Auth State Display -->
@@ -73,33 +73,55 @@
                 </div>
             </div>
 
-            <!-- Home Page Content -->
-            <section class="grid gap-10">
-                <div class="text-center max-w-3xl mx-auto">
-                    <h1 class="text-4xl md:text-5xl">Construim împreună, împărțim costurile, câștigăm comunitatea.</h1>
-                    <p class="mt-4 subtitle">Platformă pentru grupuri de construcție (Baugruppen) și co-housing în România.</p>
-                    <div class="mt-6 flex flex-wrap justify-center gap-3">
-                        <a href="/terenuri-propune.html"><button class="primary">Propune un teren</button></a>
-                        <a href="/grupuri.html"><button class="primary">Găsește un grup</button></a>
-                        <a href="/terenuri-analize.html"><button class="primary">Cere o analiză</button></a>
+            <div class="grid gap-8">
+                <h1 class="text-3xl">Ce este ApartamenTUal</h1>
+                <p class="subtitle">Definiții, diferențe Baugruppen vs. co-housing, ghid de funcționare, exemple din Europa, legislație în România și testimoniale.</p>
+                
+                <div class="grid-2">
+                    <a href="/prezentare-generala.html" class="card hover:shadow-soft transition">
+                        <h3 class="text-lg">Prezentare generală</h3>
+                        <p class="subtitle mt-2">Baugruppen vs. co-housing, definiții și concepte de bază</p>
+                    </a>
+                    
+                    <a href="/cum-functioneaza.html" class="card hover:shadow-soft transition">
+                        <h3 class="text-lg">Cum funcționează – ghid</h3>
+                        <p class="subtitle mt-2">Ghid pas cu pas pentru organizarea unui grup de construcție</p>
+                    </a>
+                    
+                    <a href="/exemple-europa.html" class="card hover:shadow-soft transition">
+                        <h3 class="text-lg">Exemple din Europa</h3>
+                        <p class="subtitle mt-2">Studii de caz și proiecte de succes din alte țări</p>
+                    </a>
+                    
+                    <a href="/legislatia-romania.html" class="card hover:shadow-soft transition">
+                        <h3 class="text-lg">Legislația din România</h3>
+                        <p class="subtitle mt-2">Cadrul legal și reglementări pentru grupurile de construcție</p>
+                    </a>
+                    
+                    <a href="/testimoniale.html" class="card hover:shadow-soft transition">
+                        <h3 class="text-lg">Testimoniale</h3>
+                        <p class="subtitle mt-2">Experiențele oamenilor care au construit în grup</p>
+                    </a>
+                </div>
+                
+                <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+                    <h2 class="text-xl mb-4">De ce să construiești în grup?</h2>
+                    <div class="grid-3">
+                        <div>
+                            <h3 class="font-semibold mb-2">🏗️ Costuri reduse</h3>
+                            <p class="text-sm">Împărțim costurile pentru teren, proiectare și construcție</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-2">🤝 Comunitate</h3>
+                            <p class="text-sm">Construim relații și o comunitate de vecini</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-2">🎯 Personalizare</h3>
+                            <p class="text-sm">Influențăm designul și calitatea construcției</p>
+                        </div>
                     </div>
                 </div>
-
-                <div class="grid-3">
-                    <a href="/ce-este-apartamentual.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Ce este ApartamenTUal</h3>
-                        <p class="subtitle mt-2">Ghiduri, exemple, legislație, testimoniale.</p>
-                    </a>
-                    <a href="/terenuri.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Terenuri</h3>
-                        <p class="subtitle mt-2">Propune/descoperă terenuri și cere analize urbanistice.</p>
-                    </a>
-                    <a href="/grupuri.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Grupuri</h3>
-                        <p class="subtitle mt-2">Formează sau alătură-te unui grup compatibil.</p>
-                    </a>
-                </div>
-            </section>
+            </div>
         </div>
     </main>
 

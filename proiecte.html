@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proiecte - ApartamenTUal</title>
+    <meta name="description" content="Descoperă proiecte finalizate și în curs de desfășurare ale comunității ApartamenTUal.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Auth Modal -->
+            <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Autentificare</h2>
+                        <button id="close-auth-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <!-- Auth State Display -->
+                    <div id="auth-state" class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 hidden">
+                        <p class="text-blue-800">Bine ai venit, <span id="user-email" class="font-semibold"></span>!</p>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <div id="login-form" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
+                            <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button id="login-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                                Autentificare
+                            </button>
+                            
+                            <button id="signup-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
+                                Înregistrare
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <div id="logout-section" class="hidden">
+                        <button id="logout-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                            Deconectare
+                        </button>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div id="message" class="mt-4 hidden"></div>
+                </div>
+            </div>
+
+            <div class="grid gap-8">
+                <div>
+                    <h1 class="text-3xl">Proiecte</h1>
+                    <p class="subtitle mt-2">Descoperă proiecte finalizate și în curs de desfășurare</p>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid-3">
+                    <div class="card text-center">
+                        <div class="text-3xl font-bold text-green-600">12</div>
+                        <div class="text-sm subtitle">Proiecte finalizate</div>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-3xl font-bold text-blue-600">8</div>
+                        <div class="text-sm subtitle">În construcție</div>
+                    </div>
+                    <div class="card text-center">
+                        <div class="text-3xl font-bold text-orange-600">15</div>
+                        <div class="text-sm subtitle">În planificare</div>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="flex gap-2 border-b">
+                    <button class="px-4 py-2 border-b-2 border-blue-600 text-blue-600">Toate</button>
+                    <button class="px-4 py-2 text-gray-600 hover:text-blue-600">Finalizate</button>
+                    <button class="px-4 py-2 text-gray-600 hover:text-blue-600">În construcție</button>
+                    <button class="px-4 py-2 text-gray-600 hover:text-blue-600">În planificare</button>
+                </div>
+
+                <!-- Featured Projects -->
+                <div class="grid gap-6">
+                    <div class="card">
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-xl">Verde Residence București</h3>
+                                    <span class="badge bg-green-100 text-green-800">Finalizat</span>
+                                </div>
+                                <p class="subtitle mb-4">Primul proiect Baugruppen finalizat în România - 12 apartamente ecologice în Sectorul 2</p>
+                                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                                    <div><strong>Locație:</strong> București, Sector 2</div>
+                                    <div><strong>Apartamente:</strong> 12</div>
+                                    <div><strong>Finalizat:</strong> Septembrie 2023</div>
+                                    <div><strong>Costuri:</strong> 1200 €/mp</div>
+                                </div>
+                                <div class="flex gap-2 mb-4">
+                                    <span class="badge bg-green-100 text-green-800">NZEB</span>
+                                    <span class="badge bg-blue-100 text-blue-800">Spații comune</span>
+                                    <span class="badge bg-purple-100 text-purple-800">Grădină</span>
+                                </div>
+                                <p class="text-sm">Proiect pilot care demonstrează viabilitatea conceptului Baugruppen în România. Include apartamente de 2-4 camere, spații comune, grădină și sisteme eco.</p>
+                            </div>
+                            <div class="bg-gray-200 rounded-lg h-48 flex items-center justify-center">
+                                <span class="text-gray-500">Imagine proiect</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-xl">Vila Cooperativa Cluj</h3>
+                                    <span class="badge bg-blue-100 text-blue-800">În construcție</span>
+                                </div>
+                                <p class="subtitle mb-4">Case în stil cohousing cu accent pe viața comunitară</p>
+                                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                                    <div><strong>Locație:</strong> Cluj-Napoca, Florești</div>
+                                    <div><strong>Case:</strong> 8</div>
+                                    <div><strong>Finalizare:</strong> Mai 2024</div>
+                                    <div><strong>Costuri:</strong> 950 €/mp</div>
+                                </div>
+                                <div class="flex gap-2 mb-4">
+                                    <span class="badge bg-purple-100 text-purple-800">Cohousing</span>
+                                    <span class="badge bg-green-100 text-green-800">Casa comună</span>
+                                    <span class="badge bg-orange-100 text-orange-800">Grădi private</span>
+                                </div>
+                                <p class="text-sm">Proiect de 8 case cu grădini private și o casă comună cu bucătărie, săli de evenimente și birou. Accent pe sustenabilitate și viață comunitară.</p>
+                            </div>
+                            <div class="bg-gray-200 rounded-lg h-48 flex items-center justify-center">
+                                <span class="text-gray-500">Imagine proiect</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-xl">Senior Living Timișoara</h3>
+                                    <span class="badge bg-orange-100 text-orange-800">În planificare</span>
+                                </div>
+                                <p class="subtitle mb-4">Proiect dedicat seniorilor cu servicii integrate</p>
+                                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+                                    <div><strong>Locație:</strong> Timișoara</div>
+                                    <div><strong>Apartamente:</strong> 16</div>
+                                    <div><strong>Start:</strong> Septembrie 2024</div>
+                                    <div><strong>Costuri:</strong> 1000 €/mp</div>
+                                </div>
+                                <div class="flex gap-2 mb-4">
+                                    <span class="badge bg-orange-100 text-orange-800">55+</span>
+                                    <span class="badge bg-blue-100 text-blue-800">Accessible</span>
+                                    <span class="badge bg-green-100 text-green-800">Servicii</span>
+                                </div>
+                                <p class="text-sm">Primul proiect senior living din România bazat pe conceptul Baugruppen. Include apartamente adaptate, spații de socializare și servicii de asistență.</p>
+                            </div>
+                            <div class="bg-gray-200 rounded-lg h-48 flex items-center justify-center">
+                                <span class="text-gray-500">Imagine proiect</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="mt-8">
+                    <h2 class="text-2xl mb-6">Cronologia proiectelor</h2>
+                    <div class="space-y-4">
+                        <div class="flex gap-4">
+                            <div class="w-4 h-4 bg-green-600 rounded-full mt-1"></div>
+                            <div>
+                                <div class="font-semibold">Septembrie 2023</div>
+                                <div class="text-sm subtitle">Verde Residence București - primul proiect finalizat</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-4 h-4 bg-blue-600 rounded-full mt-1"></div>
+                            <div>
+                                <div class="font-semibold">Noiembrie 2023</div>
+                                <div class="text-sm subtitle">Start construcție Vila Cooperativa Cluj</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-4 h-4 bg-orange-600 rounded-full mt-1"></div>
+                            <div>
+                                <div class="font-semibold">Ianuarie 2024</div>
+                                <div class="text-sm subtitle">Lansarea platformei ApartamenTUal</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-4 h-4 bg-purple-600 rounded-full mt-1"></div>
+                            <div>
+                                <div class="font-semibold">Mai 2024 (planificat)</div>
+                                <div class="text-sm subtitle">Finalizarea Vila Cooperativa Cluj</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call to Action -->
+                <div class="mt-8 p-6 bg-green-50 rounded-lg text-center">
+                    <h2 class="text-xl mb-2">Vrei să faci parte din următorul proiect?</h2>
+                    <p class="subtitle mb-4">Alătură-te unui grup existent sau propune un nou proiect</p>
+                    <div class="flex justify-center gap-3">
+                        <a href="/grupuri.html"><button class="primary">Găsește un grup</button></a>
+                        <a href="/terenuri-propune.html"><button class="primary">Propune un teren</button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="nav.js"></script>
+    <script src="footer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

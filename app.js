@@ -8,13 +8,7 @@ let supabase;
 // Initialize the app
 function initApp() {
     try {
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-            showMessage('Please configure your Supabase URL and API key in app.js.', 'error');
-            return;
-        }
-        
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        document.getElementById('config-notice').classList.add('hidden');
         
         // Check if user is already logged in
         checkAuth();
@@ -39,9 +33,37 @@ async function checkAuth() {
 
 // Set up event listeners
 function setupEventListeners() {
-    document.getElementById('login-btn').addEventListener('click', signIn);
-    document.getElementById('signup-btn').addEventListener('click', signUp);
-    document.getElementById('logout-btn').addEventListener('click', signOut);
+    const authToggle = document.getElementById('auth-toggle');
+    const authModal = document.getElementById('auth-modal');
+    const closeAuthModal = document.getElementById('close-auth-modal');
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    if (authToggle) {
+        authToggle.addEventListener('click', () => {
+            authModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeAuthModal) {
+        closeAuthModal.addEventListener('click', () => {
+            authModal.classList.add('hidden');
+        });
+    }
+
+    // Close modal when clicking outside
+    if (authModal) {
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                authModal.classList.add('hidden');
+            }
+        });
+    }
+
+    if (loginBtn) loginBtn.addEventListener('click', signIn);
+    if (signupBtn) signupBtn.addEventListener('click', signUp);
+    if (logoutBtn) logoutBtn.addEventListener('click', signOut);
     
     // Allow Enter key to trigger sign in
     document.addEventListener('keypress', function(e) {
@@ -135,18 +157,21 @@ function updateUI(user) {
     const logoutSection = document.getElementById('logout-section');
     const authState = document.getElementById('auth-state');
     const userEmail = document.getElementById('user-email');
+    const authToggle = document.getElementById('auth-toggle');
     
     if (user) {
         // User is logged in
-        loginForm.classList.add('hidden');
-        logoutSection.classList.remove('hidden');
-        authState.classList.remove('hidden');
-        userEmail.textContent = user.email;
+        if (loginForm) loginForm.classList.add('hidden');
+        if (logoutSection) logoutSection.classList.remove('hidden');
+        if (authState) authState.classList.remove('hidden');
+        if (userEmail) userEmail.textContent = user.email;
+        if (authToggle) authToggle.textContent = 'Profil';
     } else {
         // User is logged out
-        loginForm.classList.remove('hidden');
-        logoutSection.classList.add('hidden');
-        authState.classList.add('hidden');
+        if (loginForm) loginForm.classList.remove('hidden');
+        if (logoutSection) logoutSection.classList.add('hidden');
+        if (authState) authState.classList.add('hidden');
+        if (authToggle) authToggle.textContent = 'Login/Sign Up';
     }
 }
 

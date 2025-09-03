@@ -1,0 +1,111 @@
+/* ApartamenTUal Common Styles */
+
+/* Container and Layout */
+.container { 
+    max-width: 72rem; 
+    margin: 0 auto; 
+    padding: 0 1rem; 
+}
+
+/* Component Styles */
+.badge { 
+    display: inline-flex; 
+    align-items: center; 
+    border-radius: 9999px; 
+    padding: 0.25rem 0.75rem; 
+    font-size: 0.75rem; 
+    font-weight: 500; 
+    background-color: #f3f4f6; 
+}
+
+.card { 
+    border: 1px solid #e5e7eb; 
+    border-radius: 1rem; 
+    padding: 1.25rem; 
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+    background-color: white; 
+}
+
+.card:hover { 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+    transition: box-shadow 0.15s;
+}
+
+/* Button Styles */
+button.primary { 
+    background-color: #111827; 
+    color: white; 
+    border-radius: 0.75rem; 
+    padding: 0.5rem 1rem; 
+    transition: background-color 0.15s;
+    border: none;
+    cursor: pointer;
+}
+
+button.primary:hover { 
+    background-color: #000; 
+}
+
+/* Grid Layouts */
+.grid-3 { 
+    display: grid; 
+    gap: 1.5rem; 
+}
+
+@media (min-width: 768px) { 
+    .grid-3 { 
+        grid-template-columns: repeat(3, 1fr); 
+    } 
+}
+
+.grid-2 { 
+    display: grid; 
+    gap: 1.5rem; 
+}
+
+@media (min-width: 768px) { 
+    .grid-2 { 
+        grid-template-columns: repeat(2, 1fr); 
+    } 
+}
+
+/* Typography */
+.subtitle { 
+    color: #4b5563; 
+}
+
+h1, h2, h3 { 
+    font-weight: 600; 
+}
+
+/* Links */
+a { 
+    color: #2563eb; 
+}
+
+a:hover { 
+    text-decoration: underline; 
+}
+
+/* Badge Variants */
+.badge.bg-green-100 { background-color: #dcfce7; }
+.badge.text-green-800 { color: #166534; }
+.badge.bg-blue-100 { background-color: #dbeafe; }
+.badge.text-blue-800 { color: #1e40af; }
+.badge.bg-yellow-100 { background-color: #fef3c7; }
+.badge.text-yellow-800 { color: #92400e; }
+.badge.bg-red-100 { background-color: #fee2e2; }
+.badge.text-red-800 { color: #991b1b; }
+.badge.bg-purple-100 { background-color: #f3e8ff; }
+.badge.text-purple-800 { color: #6b21a8; }
+.badge.bg-orange-100 { background-color: #fed7aa; }
+.badge.text-orange-800 { color: #9a3412; }
+
+/* Utility Classes */
+.shadow-soft {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.transition {
+    transition: all 0.15s ease-in-out;
+}

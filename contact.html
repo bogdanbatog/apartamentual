@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - ApartamenTUal</title>
+    <meta name="description" content="Contactează echipa ApartamenTUal pentru întrebări despre platforma de grupuri de construcție.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Auth Modal -->
+            <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Autentificare</h2>
+                        <button id="close-auth-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <!-- Auth State Display -->
+                    <div id="auth-state" class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 hidden">
+                        <p class="text-blue-800">Bine ai venit, <span id="user-email" class="font-semibold"></span>!</p>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <div id="login-form" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
+                            <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button id="login-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                                Autentificare
+                            </button>
+                            
+                            <button id="signup-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
+                                Înregistrare
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <div id="logout-section" class="hidden">
+                        <button id="logout-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                            Deconectare
+                        </button>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div id="message" class="mt-4 hidden"></div>
+                </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto grid gap-8">
+                <div>
+                    <h1 class="text-3xl">Contact</h1>
+                    <p class="subtitle mt-2">Avem întrebări despre ApartamenTUal? Suntem aici să te ajutăm!</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Contact Form -->
+                    <div class="card">
+                        <h2 class="text-xl mb-4">Trimite un mesaj</h2>
+                        <form class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">Nume</label>
+                                    <input type="text" id="firstName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Prenume</label>
+                                    <input type="text" id="lastName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="contactEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="contactEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subiect</label>
+                                <select id="subject" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Selectează subiectul</option>
+                                    <option>Întrebări generale</option>
+                                    <option>Probleme tehnice</option>
+                                    <option>Propunere parteneriat</option>
+                                    <option>Feedback/Sugestii</option>
+                                    <option>Altele</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="messageText" class="block text-sm font-medium text-gray-700 mb-1">Mesaj</label>
+                                <textarea id="messageText" rows="5" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Scrie mesajul tău aici..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full primary">Trimite mesajul</button>
+                        </form>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="space-y-6">
+                        <div class="card">
+                            <h3 class="text-lg mb-3">📧 Email</h3>
+                            <p class="text-sm subtitle mb-2">Pentru întrebări generale:</p>
+                            <a href="mailto:hello@apartamentual.ro" class="text-blue-600">hello@apartamentual.ro</a>
+                            <p class="text-sm subtitle mt-3 mb-2">Pentru suport tehnic:</p>
+                            <a href="mailto:support@apartamentual.ro" class="text-blue-600">support@apartamentual.ro</a>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="text-lg mb-3">💬 Chat online</h3>
+                            <p class="text-sm subtitle mb-3">Suntem disponibili pentru chat în timpul programului de lucru:</p>
+                            <p class="text-sm"><strong>Luni - Vineri:</strong> 9:00 - 17:00</p>
+                            <button class="primary mt-3">Începe chat</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="text-lg mb-3">📍 Adresă</h3>
+                            <p class="text-sm">
+                                ApartamenTUal SRL<br>
+                                Str. Exemplu nr. 123<br>
+                                Sector 1, București<br>
+                                România
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="text-lg mb-3">🌐 Social Media</h3>
+                            <div class="flex gap-3">
+                                <a href="#" class="text-blue-600">Facebook</a>
+                                <a href="#" class="text-blue-600">LinkedIn</a>
+                                <a href="#" class="text-blue-600">Instagram</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="card">
+                    <h2 class="text-xl mb-4">Întrebări frecvente</h2>
+                    <div class="space-y-4">
+                        <div class="border-b pb-4">
+                            <h3 class="font-semibold mb-2">Ce este ApartamenTUal?</h3>
+                            <p class="text-sm subtitle">ApartamenTUal este o platformă care conectează persoanele interesate să construiască împreună locuințe, bazată pe conceptul german Baugruppen și pe principiile co-housing-ului.</p>
+                        </div>
+                        
+                        <div class="border-b pb-4">
+                            <h3 class="font-semibold mb-2">Costă ceva să folosesc platforma?</h3>
+                            <p class="text-sm subtitle">Înregistrarea și navegarea pe platformă sunt gratuite. Taxe pot fi aplicate pentru anumite servicii premium sau consultanță specializată.</p>
+                        </div>
+                        
+                        <div class="border-b pb-4">
+                            <h3 class="font-semibold mb-2">Cum funcționează grupurile de construcție?</h3>
+                            <p class="text-sm subtitle">Grupurile se formează din persoane cu obiective similare care doresc să construiască împreună. Membrii colaborează pentru achiziționarea terenului, proiectarea și construcția locuințelor.</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold mb-2">Oferiti suport juridic și tehnic?</h3>
+                            <p class="text-sm subtitle">Da, colaborăm cu experți în domeniu pentru a oferi consultanță juridică, tehnică și arhitecturală grupurilor care doresc acest serviciu.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response Time -->
+                <div class="p-4 bg-blue-50 rounded-lg text-center">
+                    <p class="text-sm">📞 <strong>Timp de răspuns:</strong> Ne străduim să răspundem la toate mesajele în maxim 24 de ore în zilele lucrătoare.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="nav.js"></script>
+    <script src="footer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
