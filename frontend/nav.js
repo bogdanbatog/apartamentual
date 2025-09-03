@@ -7,7 +7,7 @@ function createNavigation(currentPage = '') {
         { href: "/grupuri.html", label: "Grupuri", id: "groups" },
         { href: "/proiecte.html", label: "Proiecte", id: "projects" },
         // { href: "/parteneri.html", label: "Parteneri", id: "partners" },
-        { href: "/news.html", label: "News/Blog", id: "news" }
+        // { href: "/news.html", label: "News/Blog", id: "news" }
     ];
 
     const navHTML = `
