@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termeni și Condiții - ApartamenTUal</title>
+    <meta name="description" content="Termenii și condițiile de utilizare ale platformei ApartamenTUal pentru grupuri de construcție.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Auth Modal -->
+            <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Autentificare</h2>
+                        <button id="close-auth-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <!-- Auth State Display -->
+                    <div id="auth-state" class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 hidden">
+                        <p class="text-blue-800">Bine ai venit, <span id="user-email" class="font-semibold"></span>!</p>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <div id="login-form" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
+                            <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button id="login-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                                Autentificare
+                            </button>
+                            
+                            <button id="signup-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
+                                Înregistrare
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <div id="logout-section" class="hidden">
+                        <button id="logout-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                            Deconectare
+                        </button>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div id="message" class="mt-4 hidden"></div>
+                </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl mb-4">Termeni și Condiții</h1>
+                    <p class="subtitle">Actualizat pentru ultima dată: 3 septembrie 2024</p>
+                </div>
+
+                <div class="prose max-w-none space-y-8">
+                    <section class="card">
+                        <h2 class="text-xl mb-4">1. Acceptarea Termenilor</h2>
+                        <p class="mb-4">
+                            Prin accesarea și utilizarea platformei ApartamenTUal ("Platforma", "Serviciul"), acceptați să fiți legat de acești Termeni și Condiții ("Termenii"). Dacă nu sunteți de acord cu acești termeni, vă rugăm să nu utilizați Serviciul.
+                        </p>
+                        <p>
+                            ApartamenTUal SRL ("Compania", "noi", "nouă") operează platforma care facilitează conectarea persoanelor interesate să construiască împreună locuințe pe baza conceptelor Baugruppen și co-housing.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">2. Descrierea Serviciului</h2>
+                        <p class="mb-4">
+                            ApartamenTUal este o platformă online care:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>Conectează persoane interesate să formeze grupuri de construcție</li>
+                            <li>Facilitează descoperirea și propunerea terenurilor pentru dezvoltare</li>
+                            <li>Oferă informații despre legislația și procesele de construcție în grup</li>
+                            <li>Pune la dispoziție resurse educaționale despre conceptele Baugruppen și co-housing</li>
+                            <li>Facilitează comunicarea între membri grupurilor și profesioniștii din domeniu</li>
+                        </ul>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">3. Contul de Utilizator</h2>
+                        <h3 class="text-lg mb-3">3.1 Înregistrarea</h3>
+                        <p class="mb-4">
+                            Pentru a accesa anumite funcționalități ale Platformei, trebuie să vă creați un cont. Vă angajați să furnizați informații corecte, complete și actualizate.
+                        </p>
+                        
+                        <h3 class="text-lg mb-3">3.2 Securitatea Contului</h3>
+                        <p class="mb-4">
+                            Sunteți responsabil pentru menținerea confidențialității parolei și a informațiilor contului. Notificați-ne imediat în cazul oricărei utilizări neautorizate a contului dumneavoastră.
+                        </p>
+
+                        <h3 class="text-lg mb-3">3.3 Eligibilitatea</h3>
+                        <p>
+                            Trebuie să aveți cel puțin 18 ani pentru a utiliza Serviciul. Prin utilizarea Platformei, confirmați că întruniți această condiție de vârstă.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">4. Utilizarea Platformei</h2>
+                        <h3 class="text-lg mb-3">4.1 Utilizare Permisă</h3>
+                        <p class="mb-4">Vă acordăm o licență limitată, non-exclusivă și revocabilă pentru a accesa și utiliza Platforma în scopuri personale, non-comerciale.</p>
+                        
+                        <h3 class="text-lg mb-3">4.2 Utilizare Interzisă</h3>
+                        <p class="mb-2">Nu puteți utiliza Platforma pentru:</p>
+                        <ul class="list-disc pl-6 space-y-1 mb-4">
+                            <li>Activități ilegale sau frauduloase</li>
+                            <li>Distribuirea de conținut ofensator, defăimător sau obscen</li>
+                            <li>Încălcarea drepturilor de proprietate intelectuală</li>
+                            <li>Spam sau trimiterea de mesaje nesolicitare</li>
+                            <li>Interferarea cu funcționarea Platformei</li>
+                            <li>Utilizarea automată a Platformei (bots, scraping, etc.)</li>
+                        </ul>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">5. Conținutul Utilizatorilor</h2>
+                        <h3 class="text-lg mb-3">5.1 Responsabilitatea pentru Conținut</h3>
+                        <p class="mb-4">
+                            Sunteți exclusiv responsabil pentru conținutul pe care îl postați pe Platformă. Nu endorsăm și nu ne asumăm responsabilitatea pentru acuratețea sau legalitatea conținutului utilizatorilor.
+                        </p>
+
+                        <h3 class="text-lg mb-3">5.2 Licența pentru Conținut</h3>
+                        <p class="mb-4">
+                            Prin postarea conținutului, ne acordați o licență mondial, non-exclusivă, fără taxe pentru a utiliza, modifica și afișa conținutul în legătură cu operarea Platformei.
+                        </p>
+
+                        <h3 class="text-lg mb-3">5.3 Moderarea Conținutului</h3>
+                        <p>
+                            Ne rezervăm dreptul de a modera, edita sau elimina orice conținut care încalcă acești Termeni, fără notificare prealabilă.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">6. Tranzacții și Plăți</h2>
+                        <p class="mb-4">
+                            Platforma facilitează conectarea utilizatorilor, dar nu procesează direct tranzacții imobiliare. Toate tranzacțiile și acordurile dintre utilizatori se desfășoară pe propria lor răspundere.
+                        </p>
+                        <p>
+                            Pentru servicii premium sau consultanță specializată, pot fi aplicate taxe care vor fi comunicate clar înainte de utilizare.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">7. Proprietatea Intelectuală</h2>
+                        <p class="mb-4">
+                            Platforma ApartamenTUal, inclusiv designul, textele, graficele, logo-urile și software-ul, este proprietatea ApartamenTUal SRL și este protejată prin legi privind drepturile de autor și mărcile comerciale.
+                        </p>
+                        <p>
+                            Nu puteți copia, modifica, distribui sau utiliza în mod comercial elementele Platformei fără permisiunea noastră scrisă.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">8. Limitarea Răspunderii</h2>
+                        <p class="mb-4">
+                            Platforma este furnizată "ca atare", fără garanții de orice tip. Nu garantăm acuratețea, completitudinea sau utilitatea informațiilor de pe Platformă.
+                        </p>
+                        <p class="mb-4">
+                            Nu suntem răspunzători pentru:
+                        </p>
+                        <ul class="list-disc pl-6 space-y-1">
+                            <li>Daunele directe, indirecte sau consecutive rezultate din utilizarea Platformei</li>
+                            <li>Pierderea de date, profituri sau oportunități de afaceri</li>
+                            <li>Acțiunile sau omisiunile altor utilizatori ai Platformei</li>
+                            <li>Problemele tehnice sau întreruperile serviciului</li>
+                        </ul>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">9. Suspendarea și Închiderea Contului</h2>
+                        <p class="mb-4">
+                            Ne rezervăm dreptul de a suspenda sau închide contul dumneavoastră în cazul încălcării acestor Termeni, fără notificare prealabilă și fără obligația de a furniza explicații.
+                        </p>
+                        <p>
+                            Puteți închide contul în orice moment prin accesarea setărilor contului sau prin contactarea echipei de suport.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">10. Modificări ale Termenilor</h2>
+                        <p class="mb-4">
+                            Ne rezervăm dreptul de a modifica acești Termeni în orice moment. Modificările vor intra în vigoare la publicarea pe Platformă.
+                        </p>
+                        <p>
+                            Utilizarea continuă a Platformei după modificări constituie acceptarea noilor Termeni.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">11. Legea Aplicabilă și Jurisdicția</h2>
+                        <p class="mb-4">
+                            Acești Termeni sunt guvernați de legea română. Orice dispute vor fi rezolvate în instanțele competente din România.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">12. Contact</h2>
+                        <p class="mb-4">
+                            Pentru întrebări privind acești Termeni, ne puteți contacta:
+                        </p>
+                        <div class="bg-gray-50 p-4 rounded">
+                            <p><strong>ApartamenTUal SRL</strong></p>
+                            <p>Email: <a href="mailto:legal@apartamentual.ro" class="text-blue-600">legal@apartamentual.ro</a></p>
+                            <p>Telefon: +40 XXX XXX XXX</p>
+                            <p>Adresă: Str. Exemplu nr. 123, Sector 1, București, România</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="nav.js"></script>
+    <script src="footer.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
