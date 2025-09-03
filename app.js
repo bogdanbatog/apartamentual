@@ -1,0 +1,180 @@
+// Supabase configuration
+const SUPABASE_URL = 'https://glbvbbgmcobtswwlktic.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYnZiYmdtY29idHN3d2xrdGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4ODgyMDMsImV4cCI6MjA3MjQ2NDIwM30.1Gd2UKwjVOJC_3iHxKOhV5KJkl_D1vpa8j_lHNiQIII';
+
+// Initialize Supabase client
+let supabase;
+
+// Initialize the app
+function initApp() {
+    try {
+        if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+            showMessage('Please configure your Supabase URL and API key in app.js.', 'error');
+            return;
+        }
+        
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        document.getElementById('config-notice').classList.add('hidden');
+        
+        // Check if user is already logged in
+        checkAuth();
+        
+        // Set up event listeners
+        setupEventListeners();
+        
+    } catch (error) {
+        showMessage('Error initializing Supabase: ' + error.message, 'error');
+    }
+}
+
+// Check authentication state
+async function checkAuth() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        updateUI(user);
+    } catch (error) {
+        showMessage('Error checking auth state: ' + error.message, 'error');
+    }
+}
+
+// Set up event listeners
+function setupEventListeners() {
+    document.getElementById('login-btn').addEventListener('click', signIn);
+    document.getElementById('signup-btn').addEventListener('click', signUp);
+    document.getElementById('logout-btn').addEventListener('click', signOut);
+    
+    // Allow Enter key to trigger sign in
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('login-form').classList.contains('hidden')) {
+            signIn();
+        }
+    });
+    
+    // Listen for auth changes
+    supabase.auth.onAuthStateChange((event, session) => {
+        updateUI(session?.user || null);
+    });
+}
+
+// Sign in function
+async function signIn() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+        showMessage('Please enter both email and password.', 'error');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+        
+        if (error) {
+            showMessage('Sign in failed: ' + error.message, 'error');
+        } else {
+            showMessage('Signed in successfully!', 'success');
+            clearForm();
+        }
+    } catch (error) {
+        showMessage('Error during sign in: ' + error.message, 'error');
+    }
+}
+
+// Sign up function
+async function signUp() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+        showMessage('Please enter both email and password.', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showMessage('Password must be at least 6 characters long.', 'error');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+        
+        if (error) {
+            showMessage('Sign up failed: ' + error.message, 'error');
+        } else {
+            showMessage('Sign up successful! Please check your email for verification.', 'success');
+            clearForm();
+        }
+    } catch (error) {
+        showMessage('Error during sign up: ' + error.message, 'error');
+    }
+}
+
+// Sign out function
+async function signOut() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            showMessage('Sign out failed: ' + error.message, 'error');
+        } else {
+            showMessage('Signed out successfully!', 'success');
+        }
+    } catch (error) {
+        showMessage('Error during sign out: ' + error.message, 'error');
+    }
+}
+
+// Update UI based on authentication state
+function updateUI(user) {
+    const loginForm = document.getElementById('login-form');
+    const logoutSection = document.getElementById('logout-section');
+    const authState = document.getElementById('auth-state');
+    const userEmail = document.getElementById('user-email');
+    
+    if (user) {
+        // User is logged in
+        loginForm.classList.add('hidden');
+        logoutSection.classList.remove('hidden');
+        authState.classList.remove('hidden');
+        userEmail.textContent = user.email;
+    } else {
+        // User is logged out
+        loginForm.classList.remove('hidden');
+        logoutSection.classList.add('hidden');
+        authState.classList.add('hidden');
+    }
+}
+
+// Show messages
+function showMessage(text, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.classList.remove('hidden');
+    messageDiv.className = 'mt-4 p-3 rounded-md text-sm';
+    
+    if (type === 'success') {
+        messageDiv.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+    } else {
+        messageDiv.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+    }
+    
+    messageDiv.textContent = text;
+    
+    // Hide message after 5 seconds
+    setTimeout(() => {
+        messageDiv.classList.add('hidden');
+    }, 5000);
+}
+
+// Clear form inputs
+function clearForm() {
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
+}
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', initApp);

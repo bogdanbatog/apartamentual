@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">ApartamenTUal</h1>
+            
+            <!-- Auth State Display -->
+            <div id="auth-state" class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 hidden">
+                <p class="text-blue-800">Welcome, <span id="user-email" class="font-semibold"></span>!</p>
+            </div>
+            
+            <!-- Configuration Notice -->
+            <div id="config-notice" class="mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                <p class="text-yellow-800 text-sm">
+                    <strong>Configuration needed:</strong> Please update the Supabase URL and API key in app.js.
+                </p>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div class="space-y-3">
+                    <button id="login-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                        Sign In
+                    </button>
+                    
+                    <button id="signup-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200">
+                        Sign Up
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Logout Button (hidden by default) -->
+            <div id="logout-section" class="hidden">
+                <button id="logout-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-200">
+                    Sign Out
+                </button>
+            </div>
+            
+            <!-- Error/Success Messages -->
+            <div id="message" class="mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
