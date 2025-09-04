@@ -9,10 +9,10 @@ const statusMapping = {
 
 // Analysis status mapping
 const analysisMapping = {
-    'completed': { text: 'Completă', class: 'bg-green-100 text-green-800' },
-    'in_progress': { text: 'În curs', class: 'bg-yellow-100 text-yellow-800' },
-    'pending': { text: 'În așteptare', class: 'bg-red-100 text-red-800' },
-    'rejected': { text: 'Respinsă', class: 'bg-red-100 text-red-800' }
+    'completed': { text: 'da', class: 'bg-green-100 text-green-800' },
+    'in_progress': { text: 'în curs', class: 'bg-yellow-100 text-yellow-800' },
+    'pending': { text: 'nu', class: 'bg-red-100 text-red-800' },
+    'rejected': { text: 'respinsă', class: 'bg-red-100 text-red-800' }
 };
 
 // Extract teren ID from URL query parameter
@@ -190,6 +190,15 @@ function displayTerenDetails(teren) {
     const specificBadge = document.getElementById('analiza-specifica-badge');
     specificBadge.textContent = `Analiză specifică: ${analizaSpecifica.text}`;
     specificBadge.className = `badge ${analizaSpecifica.class}`;
+    
+    // Show "Cere o analiză" button only if one of the analyses is pending
+    const actionButtons = document.getElementById('action-buttons');
+    const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';
+    if (hasPendingAnalysis) {
+        actionButtons.classList.remove('hidden');
+    } else {
+        actionButtons.classList.add('hidden');
+    }
     
     // Image handling with support for both Storage URLs and legacy blob data
     const imageContainer = document.getElementById('teren-image-container');
