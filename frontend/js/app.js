@@ -31,6 +31,15 @@ async function checkAuth() {
     }
 }
 
+
+// Function to clear custom auth message
+function clearCustomAuthMessage() {
+    const customMessage = document.getElementById('custom-auth-message');
+    if (customMessage) {
+        customMessage.classList.add('hidden');
+    }
+}
+
 // Set up event listeners
 function setupEventListeners() {
     const authToggle = document.getElementById('auth-toggle');
@@ -49,6 +58,7 @@ function setupEventListeners() {
     if (closeAuthModal) {
         closeAuthModal.addEventListener('click', () => {
             authModal.classList.add('hidden');
+            clearCustomAuthMessage();
         });
     }
 
@@ -57,6 +67,7 @@ function setupEventListeners() {
         authModal.addEventListener('click', (e) => {
             if (e.target === authModal) {
                 authModal.classList.add('hidden');
+                clearCustomAuthMessage();
             }
         });
     }

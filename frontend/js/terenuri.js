@@ -163,13 +163,69 @@ function showError() {
     noResultsEl.classList.add('hidden');
 }
 
+// Authentication functions
+async function checkUserAuthentication() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        return user !== null;
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        return false;
+    }
+}
+
+function showAuthModalWithMessage(message) {
+    const authModal = document.getElementById('auth-modal');
+    const loginForm = document.getElementById('login-form');
+    
+    if (authModal && loginForm) {
+        // Add custom message before the login form
+        let customMessage = document.getElementById('custom-auth-message');
+        if (!customMessage) {
+            customMessage = document.createElement('div');
+            customMessage.id = 'custom-auth-message';
+            customMessage.className = 'mb-4 p-3 bg-blue-50 text-blue-800 rounded-md text-sm';
+            loginForm.parentNode.insertBefore(customMessage, loginForm);
+        }
+        customMessage.textContent = message;
+        customMessage.classList.remove('hidden');
+        
+        authModal.classList.remove('hidden');
+    }
+}
+
+async function handlePropuneTerenClick(event) {
+    event.preventDefault();
+    
+    const isAuthenticated = await checkUserAuthentication();
+    
+    if (isAuthenticated) {
+        // User is authenticated, redirect to the propose terrain page
+        window.location.href = '/terenuri-propune.html';
+    } else {
+        // User is not authenticated, show auth modal with custom message
+        showAuthModalWithMessage('Va rugam sa va inregistrati sau sa intrati in contul dvs. pentru a adauga un teren.');
+    }
+}
+
 // Event listeners
 locationFilter.addEventListener('change', filterTerenuri);
 statusFilter.addEventListener('change', filterTerenuri);
 analysisFilter.addEventListener('change', filterTerenuri);
 retryBtn.addEventListener('click', fetchTerenuri);
 
+// Set up authentication checks for "Propune teren" buttons
+function setupPropuneTerenButtons() {
+    // Find all "Propune teren" buttons and links
+    const propuneTerenLinks = document.querySelectorAll('a[href="/terenuri-propune.html"]');
+    
+    propuneTerenLinks.forEach(link => {
+        link.addEventListener('click', handlePropuneTerenClick);
+    });
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     fetchTerenuri();
-}); 
+    setupPropuneTerenButtons();
+});

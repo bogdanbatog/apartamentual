@@ -5,7 +5,7 @@ function createNavigation(currentPage = '') {
         { href: "/ce-este/index.html", label: "Ce este", id: "about" },
         { href: "/terenuri.html", label: "Terenuri", id: "land" },
         { href: "/grupuri.html", label: "Grupuri", id: "groups" },
-        { href: "/proiecte.html", label: "Proiecte", id: "projects" },
+        // { href: "/proiecte.html", label: "Proiecte", id: "projects" },
         // { href: "/parteneri.html", label: "Parteneri", id: "partners" },
         // { href: "/news.html", label: "News/Blog", id: "news" }
     ];
@@ -21,7 +21,6 @@ function createNavigation(currentPage = '') {
                 </nav>
                 <div class="flex gap-3">
                     <button id="auth-toggle" class="badge">Login/Sign Up</button>
-                    <a href="terenuri-propune.html" class="badge">Propune teren</a>
                 </div>
             </div>
             

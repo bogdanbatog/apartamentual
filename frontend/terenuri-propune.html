@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terenuri - ApartamenTUal</title>
+    <meta name="description" content="Descoperă terenuri disponibile pentru grupuri de construcție și cere analize urbanistice.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+
+            <div class="grid gap-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl">Adauga un teren</h1>
+                        <p class="subtitle mt-2">Adauga un teren pentru a-l putea propune altor persoane</p>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/auth-modal.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/terenuri.js"></script>
+</body>
+</html>
