@@ -125,6 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Pentru a adauga un teren trebuie sa fiti autentificat');
             }
 
+            console.log('Authenticated user:', user.id); // Debug: check user ID
+
             const formData = new FormData(form);
             
             // Validate form data
@@ -155,6 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 analiza_generala_status: 'pending',
                 analiza_specifica_status: 'pending'
             };
+
+            console.log('Terrain data to insert:', terenData); // Debug: check data being inserted
 
             // Insert into Supabase
             const { data, error } = await supabase
