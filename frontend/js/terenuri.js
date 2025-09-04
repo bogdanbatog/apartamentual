@@ -79,8 +79,16 @@ function createTerrainCard(teren) {
         ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
         : 'N/A';
 
+    // Get image URL - prefer new image_url field over legacy poza blob
+    const imageUrl = teren.image_url || null;
+    const imageSection = imageUrl ? 
+        `<div class="mb-3">
+            <img src="${imageUrl}" alt="${teren.titlu}" class="w-full h-32 object-cover rounded-lg" onerror="this.style.display='none';">
+        </div>` : '';
+
     return `
         <div class="card">
+            ${imageSection}
             <div class="flex justify-between items-start mb-3">
                 <h3 class="text-lg">${teren.titlu || 'Teren fără titlu'}</h3>
                 <span class="badge ${status.class}">${status.text}</span>

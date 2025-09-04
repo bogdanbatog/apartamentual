@@ -40,25 +40,50 @@ document.addEventListener('DOMContentLoaded', function() {
         return errors;
     }
 
-    // Convert image file to base64 (for BYTEA storage)
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            if (!file) {
-                resolve(null);
-                return;
+    // Upload image to Supabase Storage
+    async function uploadImageToStorage(file, userId) {
+        if (!file) {
+            return null;
+        }
+
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            throw new Error('Imaginea este prea mare. Marimea maxima permisa este 5MB.');
+        }
+
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            throw new Error('Fisierul selectat nu este o imagine valida.');
+        }
+
+        try {
+            // Generate unique filename with user ID as folder
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+            // Upload to Supabase Storage
+            const { data, error } = await supabase.storage
+                .from('terrain-images')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) {
+                console.error('Storage upload error:', error);
+                throw new Error('Eroare la uploadul imaginii: ' + error.message);
             }
 
-            // Check file size (5MB limit)
-            if (file.size > 5 * 1024 * 1024) {
-                reject(new Error('Imaginea este prea mare. Marimea maxima permisa este 5MB.'));
-                return;
-            }
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('terrain-images')
+                .getPublicUrl(fileName);
 
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]); // Remove data:image/... prefix
-            reader.onerror = () => reject(new Error('Eroare la citirea imaginii'));
-            reader.readAsDataURL(file);
-        });
+            return publicUrl;
+        } catch (error) {
+            console.error('Image upload error:', error);
+            throw error;
+        }
     }
 
     // Show/hide states
@@ -109,10 +134,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Process image file if uploaded
-            let pozaBase64 = null;
+            let imageUrl = null;
             const pozaFile = formData.get('poza');
             if (pozaFile && pozaFile.size > 0) {
-                pozaBase64 = await fileToBase64(pozaFile);
+                imageUrl = await uploadImageToStorage(pozaFile, user.id);
             }
 
             // Prepare data for database insertion
@@ -125,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 pret_pe_mp: formData.get('pret_pe_mp') ? parseFloat(formData.get('pret_pe_mp')) : null,
                 nr_apartamente_min: formData.get('nr_apartamente_min') ? parseInt(formData.get('nr_apartamente_min')) : null,
                 nr_apartamente_max: formData.get('nr_apartamente_max') ? parseInt(formData.get('nr_apartamente_max')) : null,
-                poza: pozaBase64,
+                image_url: imageUrl,
                 status: 'active',
                 analiza_generala_status: 'pending',
                 analiza_specifica_status: 'pending'

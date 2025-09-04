@@ -21,7 +21,22 @@ function getTerenIdFromUrl() {
     return urlParams.get('id');
 }
 
-// Improved binary to base64 conversion with format detection
+// Get image URL from storage or fallback to legacy blob data
+function getImageUrl(teren) {
+    // First, try the new image_url field (Supabase Storage)
+    if (teren.image_url) {
+        return teren.image_url;
+    }
+    
+    // Fallback to legacy poza field (blob data) for backward compatibility
+    if (teren.poza) {
+        return binaryToBase64(teren.poza);
+    }
+    
+    return null;
+}
+
+// Legacy binary to base64 conversion (kept for backward compatibility)
 function binaryToBase64(binaryData) {
     if (!binaryData) return null;
     
@@ -176,27 +191,23 @@ function displayTerenDetails(teren) {
     specificBadge.textContent = `Analiză specifică: ${analizaSpecifica.text}`;
     specificBadge.className = `badge ${analizaSpecifica.class}`;
     
-    // Image handling with improved error handling
+    // Image handling with support for both Storage URLs and legacy blob data
     const imageContainer = document.getElementById('teren-image-container');
     const noImageDiv = document.getElementById('no-image');
     const imageEl = document.getElementById('teren-image');
     
-    if (teren.poza) {
-        const base64Image = binaryToBase64(teren.poza);
-        if (base64Image) {
-            imageEl.src = base64Image;
-            imageEl.alt = `Imagine teren - ${teren.titlu}`;
-            imageEl.onerror = function() {
-                console.error('Failed to load image');
-                imageContainer.classList.add('hidden');
-                noImageDiv.classList.remove('hidden');
-            };
-            imageContainer.classList.remove('hidden');
-            noImageDiv.classList.add('hidden');
-        } else {
+    const imageUrl = getImageUrl(teren);
+    
+    if (imageUrl) {
+        imageEl.src = imageUrl;
+        imageEl.alt = `Imagine teren - ${teren.titlu}`;
+        imageEl.onerror = function() {
+            console.error('Failed to load image from URL:', imageUrl);
             imageContainer.classList.add('hidden');
             noImageDiv.classList.remove('hidden');
-        }
+        };
+        imageContainer.classList.remove('hidden');
+        noImageDiv.classList.add('hidden');
     } else {
         imageContainer.classList.add('hidden');
         noImageDiv.classList.remove('hidden');
