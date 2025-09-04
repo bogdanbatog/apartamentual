@@ -21,72 +21,14 @@ function getTerenIdFromUrl() {
     return urlParams.get('id');
 }
 
-// Get image URL from storage or fallback to legacy blob data
+// Get image URL from storage
 function getImageUrl(teren) {
     // First, try the new image_url field (Supabase Storage)
     if (teren.image_url) {
         return teren.image_url;
     }
-    
-    // Fallback to legacy poza field (blob data) for backward compatibility
-    if (teren.poza) {
-        return binaryToBase64(teren.poza);
-    }
-    
-    return null;
-}
 
-// Legacy binary to base64 conversion (kept for backward compatibility)
-function binaryToBase64(binaryData) {
-    if (!binaryData) return null;
-    
-    try {
-        // If it's already a base64 string, return it
-        if (typeof binaryData === 'string') {
-            return binaryData.startsWith('data:') ? binaryData : `data:image/jpeg;base64,${binaryData}`;
-        }
-        
-        // Handle ArrayBuffer or Uint8Array
-        let bytes;
-        if (binaryData instanceof ArrayBuffer) {
-            bytes = new Uint8Array(binaryData);
-        } else if (binaryData instanceof Uint8Array) {
-            bytes = binaryData;
-        } else {
-            // Try to convert to Uint8Array
-            bytes = new Uint8Array(binaryData);
-        }
-        
-        // Detect image format from magic bytes
-        let mimeType = 'image/jpeg'; // default
-        if (bytes.length >= 4) {
-            // PNG: 89 50 4E 47
-            if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
-                mimeType = 'image/png';
-            }
-            // GIF: 47 49 46 38
-            else if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
-                mimeType = 'image/gif';
-            }
-            // WebP: 52 49 46 46 (RIFF) + WebP
-            else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && 
-                     bytes.length >= 12 && 
-                     bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
-                mimeType = 'image/webp';
-            }
-        }
-        
-        // Convert to binary string
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        
-        return `data:${mimeType};base64,${btoa(binary)}`;
-    } catch (error) {
-        console.error('Error converting binary data to base64:', error);
-        return null;
-    }
+    return null;
 }
 
 // Format date
