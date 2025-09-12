@@ -1,6 +1,11 @@
 let allTerenuri = [];
 let filteredTerenuri = [];
 
+// Pagination constants and state
+const ITEMS_PER_PAGE = 10; // Hardcoded constant for testing
+let currentPage = 1;
+let totalPages = 1;
+
 // DOM elements
 const loadingEl = document.getElementById('loading');
 const errorEl = document.getElementById('error');
@@ -10,6 +15,10 @@ const retryBtn = document.getElementById('retry-btn');
 const locationFilter = document.getElementById('location-filter');
 const statusFilter = document.getElementById('status-filter');
 const analysisFilter = document.getElementById('analysis-filter');
+const paginationEl = document.getElementById('pagination');
+const prevPageBtn = document.getElementById('prev-page');
+const nextPageBtn = document.getElementById('next-page');
+const pageNumbersEl = document.getElementById('page-numbers');
 
 // Status mapping for display
 const statusMapping = {
@@ -111,10 +120,11 @@ function createTerrainCard(teren) {
     `;
 }
 
-// Render terrain cards
+// Render terrain cards with pagination
 function renderTerenuri() {
     if (filteredTerenuri.length === 0) {
         terrainListEl.classList.add('hidden');
+        paginationEl.classList.add('hidden');
         noResultsEl.classList.remove('hidden');
         return;
     }
@@ -122,7 +132,84 @@ function renderTerenuri() {
     noResultsEl.classList.add('hidden');
     terrainListEl.classList.remove('hidden');
     
-    terrainListEl.innerHTML = filteredTerenuri.map(createTerrainCard).join('');
+    // Calculate pagination
+    totalPages = Math.ceil(filteredTerenuri.length / ITEMS_PER_PAGE);
+    currentPage = Math.min(currentPage, totalPages); // Ensure current page doesn't exceed total pages
+    
+    // Get items for current page
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentPageItems = filteredTerenuri.slice(startIndex, endIndex);
+    
+    // Render current page items
+    terrainListEl.innerHTML = currentPageItems.map(createTerrainCard).join('');
+    
+    // Update pagination controls
+    updatePaginationControls();
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+    if (totalPages <= 1) {
+        paginationEl.classList.add('hidden');
+        return;
+    }
+    
+    paginationEl.classList.remove('hidden');
+    
+    // Update prev/next buttons
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
+    
+    // Update page numbers
+    pageNumbersEl.innerHTML = '';
+    
+    // Show up to 5 page numbers around current page
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // Add page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.textContent = i;
+        pageBtn.className = `px-3 py-2 border rounded-md ${
+            i === currentPage 
+                ? 'bg-blue-600 text-white border-blue-600' 
+                : 'border-gray-300 hover:bg-gray-50'
+        }`;
+        pageBtn.addEventListener('click', () => goToPage(i));
+        pageNumbersEl.appendChild(pageBtn);
+    }
+}
+
+// Navigate to specific page
+function goToPage(page) {
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderTerenuri();
+    }
+}
+
+// Navigate to previous page
+function goToPreviousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTerenuri();
+    }
+}
+
+// Navigate to next page
+function goToNextPage() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTerenuri();
+    }
 }
 
 // Filter terenuri based on selected filters
@@ -149,6 +236,8 @@ function filterTerenuri() {
         return matchesLocation && matchesStatus && matchesAnalysis;
     });
 
+    // Reset to first page when filtering
+    currentPage = 1;
     renderTerenuri();
 }
 
@@ -221,6 +310,8 @@ locationFilter.addEventListener('change', filterTerenuri);
 statusFilter.addEventListener('change', filterTerenuri);
 analysisFilter.addEventListener('change', filterTerenuri);
 retryBtn.addEventListener('click', fetchTerenuri);
+prevPageBtn.addEventListener('click', goToPreviousPage);
+nextPageBtn.addEventListener('click', goToNextPage);
 
 // Set up authentication checks for "Propune teren" buttons
 function setupPropuneTerenButtons() {
