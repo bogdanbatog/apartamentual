@@ -12,6 +12,7 @@ Creates the `profiles` table with:
 - Additional fields: `first_name`, `last_name`, `phone`
 - Timestamps: `created_at`, `updated_at`
 - Proper indexes and RLS policies
+- `is_super_admin()` security definer function to avoid RLS recursion
 
 ### 2. `006_migrate_auth_users_to_profiles.sql`
 Data migration script that:
@@ -25,6 +26,15 @@ Updates existing RLS policies to:
 - Use the new `profiles` table instead of directly accessing `auth.users`
 - Add comprehensive admin policies for super admins
 - Allow super admins to manage all terenuri operations including soft-deleted records
+
+### 4. `008_fix_profiles_rls_recursion.sql`
+Fixes infinite recursion in profiles RLS policies by:
+- Creating `is_super_admin()` security definer function
+- Updating policies to use the function instead of querying profiles table
+- Adding policy for users to insert their own profiles
+
+### 5. `009_fix_terenuri_policies_recursion.sql`
+Updates terenuri policies to use the `is_super_admin()` function to avoid recursion
 
 ## Key Features
 
@@ -55,6 +65,8 @@ To apply these migrations, run them in order:
 1. `005_create_profiles_table.sql`
 2. `006_migrate_auth_users_to_profiles.sql`
 3. `007_update_terenuri_policies_for_profiles.sql`
+4. `008_fix_profiles_rls_recursion.sql` (if you encounter recursion errors)
+5. `009_fix_terenuri_policies_recursion.sql` (if you encounter recursion errors)
 
 ## Query Examples
 

@@ -51,41 +51,44 @@ CREATE POLICY "Users can update their own profile" ON profiles
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
 
+-- Create a security definer function to check if current user is super admin
+-- This function bypasses RLS and directly checks auth.users to avoid recursion
+CREATE OR REPLACE FUNCTION public.is_super_admin()
+RETURNS BOOLEAN
+LANGUAGE SQL
+SECURITY DEFINER
+STABLE
+AS $$
+    SELECT COALESCE(
+        (SELECT is_super_admin FROM auth.users WHERE id = auth.uid()),
+        false
+    );
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.is_super_admin() TO authenticated;
+
 -- Policy 3: Super admins can view all profiles
 CREATE POLICY "Super admins can view all profiles" ON profiles
     FOR SELECT TO authenticated 
-    USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE user_id = auth.uid() AND is_super_admin = true
-        )
-    );
+    USING (public.is_super_admin());
 
 -- Policy 4: Super admins can update all profiles
 CREATE POLICY "Super admins can update all profiles" ON profiles
     FOR UPDATE TO authenticated 
-    USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE user_id = auth.uid() AND is_super_admin = true
-        )
-    )
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE user_id = auth.uid() AND is_super_admin = true
-        )
-    );
+    USING (public.is_super_admin())
+    WITH CHECK (public.is_super_admin());
 
 -- Policy 5: Super admins can insert new profiles
 CREATE POLICY "Super admins can insert profiles" ON profiles
     FOR INSERT TO authenticated 
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE user_id = auth.uid() AND is_super_admin = true
-        )
-    );
+    WITH CHECK (public.is_super_admin());
+
+-- Policy 6: Users can insert their own profile (for the trigger)
+-- This allows the handle_new_user function to work
+CREATE POLICY "Users can insert their own profile" ON profiles
+    FOR INSERT TO authenticated 
+    WITH CHECK (auth.uid() = user_id);
 
 -- Add comments for documentation
 COMMENT ON TABLE profiles IS 'User profiles with additional information beyond auth.users';
@@ -95,3 +98,4 @@ COMMENT ON COLUMN profiles.is_super_admin IS 'Flag indicating if user has super 
 COMMENT ON COLUMN profiles.first_name IS 'User first name';
 COMMENT ON COLUMN profiles.last_name IS 'User last name';
 COMMENT ON COLUMN profiles.phone IS 'User phone number';
+COMMENT ON FUNCTION public.is_super_admin() IS 'Security definer function to check if current user is super admin without RLS recursion';
