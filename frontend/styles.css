@@ -46,6 +46,34 @@ button.primary:hover {
     background-color: #000; 
 }
 
+button.secondary { 
+    background-color: #6b7280; 
+    color: white; 
+    border-radius: 0.75rem; 
+    padding: 0.5rem 1rem; 
+    transition: background-color 0.15s;
+    border: none;
+    cursor: pointer;
+}
+
+button.secondary:hover { 
+    background-color: #4b5563; 
+}
+
+button.danger { 
+    background-color: #dc2626; 
+    color: white; 
+    border-radius: 0.75rem; 
+    padding: 0.5rem 1rem; 
+    transition: background-color 0.15s;
+    border: none;
+    cursor: pointer;
+}
+
+button.danger:hover { 
+    background-color: #b91c1c; 
+}
+
 /* Grid Layouts */
 .grid-3 { 
     display: grid; 
