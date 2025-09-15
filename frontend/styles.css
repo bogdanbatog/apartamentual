@@ -31,6 +31,15 @@
     transition: box-shadow 0.15s;
 }
 
+.card-disabled {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.card-disabled:hover {
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+}
+
 /* Button Styles */
 button.primary { 
     background-color: #111827; 

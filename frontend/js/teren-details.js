@@ -129,12 +129,44 @@ function displayTerenDetails(teren, userProfile) {
     // Update page title
     document.title = `${teren.titlu} - ApartamenTUal`;
     
+    // Check if teren is disabled (soft deleted)
+    const isDisabled = teren.deleted_at !== null;
+    
+    // Add disabled indicator to the page
+    if (isDisabled) {
+        // Add disabled badge to the top of the page
+        const backButton = document.querySelector('.mb-6');
+        if (backButton && !document.getElementById('disabled-indicator')) {
+            const disabledIndicator = document.createElement('div');
+            disabledIndicator.id = 'disabled-indicator';
+            disabledIndicator.className = 'mb-4 p-3 bg-red-50 border border-red-200 rounded-lg';
+            disabledIndicator.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-red-800 font-medium">Acest teren este dezactivat</span>
+                </div>
+            `;
+            backButton.insertAdjacentElement('afterend', disabledIndicator);
+        }
+        
+        // Apply visual styling to the main content
+        const mainContent = document.querySelector('.grid.lg\\:grid-cols-2');
+        if (mainContent) {
+            mainContent.classList.add('opacity-75');
+        }
+    }
+    
     // Basic information
     document.getElementById('teren-title').textContent = teren.titlu || 'Teren fără titlu';
     document.getElementById('teren-description').textContent = teren.descriere || 'Fără descriere disponibilă';
     
-    // Status
-    const status = statusMapping[teren.status] || { text: teren.status, class: 'bg-gray-100 text-gray-800' };
+    // Status - show disabled status if applicable
+    let status = statusMapping[teren.status] || { text: teren.status, class: 'bg-gray-100 text-gray-800' };
+    if (isDisabled) {
+        status = { text: 'Dezactivat', class: 'bg-red-100 text-red-800' };
+    }
     const statusEl = document.getElementById('teren-status');
     statusEl.textContent = status.text;
     statusEl.className = `badge ${status.class}`;
@@ -192,6 +224,14 @@ function displayTerenDetails(teren, userProfile) {
     if (imageUrl) {
         imageEl.src = imageUrl;
         imageEl.alt = `Imagine teren - ${teren.titlu}`;
+        
+        // Apply disabled styling to image if teren is disabled
+        if (isDisabled) {
+            imageEl.classList.add('opacity-50');
+        } else {
+            imageEl.classList.remove('opacity-50');
+        }
+        
         imageEl.onerror = function() {
             console.error('Failed to load image from URL:', imageUrl);
             imageContainer.classList.add('hidden');

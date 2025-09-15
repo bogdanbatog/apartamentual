@@ -37,16 +37,50 @@ const analysisMapping = {
     'rejected': { text: 'respinsă', class: 'bg-red-100 text-red-800' }
 };
 
+// Fetch user profile data
+async function fetchUserProfile() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+        if (error) {
+            console.error("Error fetching user profile:", error);
+            return null;
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+    }
+}
+
 // Fetch terenuri from Supabase
 async function fetchTerenuri() {
     try {
         showLoading();
         
-        const { data, error } = await supabase
+        // Check if user is super admin to determine query
+        const userProfile = await fetchUserProfile();
+        const isSuperAdmin = userProfile?.is_super_admin;
+        
+        let query = supabase
             .from('terenuri')
             .select('*')
-            .eq('status', 'active')
             .order('data_adaugat', { ascending: false });
+            
+        // If not super admin, only show active and non-deleted terenuri
+        if (!isSuperAdmin) {
+            query = query.eq('status', 'active').is('deleted_at', null);
+        }
+
+        const { data, error } = await query;
 
         if (error) {
             throw error;
@@ -88,32 +122,47 @@ function createTerrainCard(teren) {
         ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
         : 'N/A';
 
+    // Check if teren is disabled (soft deleted)
+    const isDisabled = teren.deleted_at !== null;
+    
     // Get image URL - prefer new image_url field over legacy poza blob
     const imageUrl = teren.image_url || null;
+    const imageOpacity = isDisabled ? 'opacity-50' : '';
     const imageSection = imageUrl ? 
         `<div class="mb-3">
-            <img src="${imageUrl}" alt="${teren.titlu}" class="w-full h-32 object-cover rounded-lg" onerror="this.style.display='none';">
+            <img src="${imageUrl}" alt="${teren.titlu}" class="w-full h-32 object-cover rounded-lg ${imageOpacity}" onerror="this.style.display='none';">
+        </div>` : '';
+
+    // Card styling - grayed out for disabled terenuri
+    const cardClass = isDisabled ? 'card card-disabled' : 'card';
+    const contentOpacity = isDisabled ? 'opacity-75' : '';
+    
+    // Disabled label
+    const disabledLabel = isDisabled ? 
+        `<div class="mb-3">
+            <span class="badge bg-red-100 text-red-800">Dezactivat</span>
         </div>` : '';
 
     return `
-        <div class="card">
+        <div class="${cardClass}">
+            ${disabledLabel}
             ${imageSection}
-            <div class="flex justify-between items-start mb-3">
+            <div class="flex justify-between items-start mb-3 ${contentOpacity}">
                 <h3 class="text-lg">${teren.titlu || 'Teren fără titlu'}</h3>
                 <span class="badge ${status.class}">${status.text}</span>
             </div>
-            <p class="subtitle mb-4">${teren.descriere || 'Fără descriere disponibilă'}</p>
-            <div class="grid grid-cols-2 gap-2 text-sm mb-4">
+            <p class="subtitle mb-4 ${contentOpacity}">${teren.descriere || 'Fără descriere disponibilă'}</p>
+            <div class="grid grid-cols-2 gap-2 text-sm mb-4 ${contentOpacity}">
                 <div><strong>Suprafață:</strong> ${teren.suprafata ? teren.suprafata + ' mp' : 'N/A'}</div>
                 <div><strong>Zonă:</strong> ${teren.zona || 'N/A'}</div>
                 <div><strong>Preț:</strong> ${teren.pret_pe_mp ? teren.pret_pe_mp + ' €/mp' : 'N/A'}</div>
                 <div><strong>Apartamente:</strong> ${apartamenteRange}</div>
             </div>
-            <div class="flex gap-2 text-xs">
+            <div class="flex gap-2 text-xs ${contentOpacity}">
                 <span class="badge ${analizaGenerala.class}">Analiză generală: ${analizaGenerala.text}</span>
                 <span class="badge ${analizaSpecifica.class}">Analiză specifică: ${analizaSpecifica.text}</span>
             </div>
-            <div class="mt-4">
+            <div class="mt-4 ${contentOpacity}">
                 <a href="/teren-details.html?id=${teren.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
             </div>
         </div>
