@@ -9,6 +9,134 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!form) return;
 
+    // Check if we're in edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editTerenId = urlParams.get('edit');
+    const isEditMode = !!editTerenId;
+    let currentTerrain = null;
+
+    // Load terrain data for editing
+    async function loadTerrainData(terenId) {
+        try {
+            showLoading();
+            
+            // Check authentication first
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) {
+                throw new Error('Pentru a edita un teren trebuie sa fiti autentificat');
+            }
+
+            // Load terrain data
+            const { data: teren, error } = await supabase
+                .from('terenuri')
+                .select('*')
+                .eq('id', terenId)
+                .single();
+
+            if (error) {
+                console.error('Error loading terrain:', error);
+                throw new Error('Nu s-a putut incarca terenul pentru editare');
+            }
+
+            if (!teren) {
+                throw new Error('Terenul nu a fost gasit');
+            }
+
+            // Check if user can edit this terrain
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            const canEdit = profile && (
+                (profile.user_id === teren.created_by_user_id) || 
+                profile.is_super_admin
+            );
+
+            if (!canEdit) {
+                throw new Error('Nu aveti permisiunea sa editati acest teren');
+            }
+
+            currentTerrain = teren;
+            populateForm(teren);
+            updateUIForEditMode();
+            hideLoading();
+
+        } catch (error) {
+            console.error('Error loading terrain for edit:', error);
+            showError(error.message || 'Eroare la incarcarea terenului pentru editare');
+        }
+    }
+
+    // Populate form with terrain data
+    function populateForm(teren) {
+        document.getElementById('titlu').value = teren.titlu || '';
+        document.getElementById('descriere').value = teren.descriere || '';
+        document.getElementById('zona').value = teren.zona || '';
+        document.getElementById('suprafata').value = teren.suprafata || '';
+        document.getElementById('pret_pe_mp').value = teren.pret_pe_mp || '';
+        document.getElementById('nr_apartamente_min').value = teren.nr_apartamente_min || '';
+        document.getElementById('nr_apartamente_max').value = teren.nr_apartamente_max || '';
+        
+        // Show current image if exists
+        if (teren.image_url) {
+            showCurrentImage(teren.image_url);
+        }
+    }
+
+    // Show current image in edit mode
+    function showCurrentImage(imageUrl) {
+        const pozaField = document.getElementById('poza');
+        if (pozaField && pozaField.parentNode) {
+            // Create current image display
+            const currentImageDiv = document.createElement('div');
+            currentImageDiv.id = 'current-image-display';
+            currentImageDiv.className = 'mt-2 p-3 bg-gray-50 rounded-md border';
+            currentImageDiv.innerHTML = `
+                <p class="text-sm font-medium text-gray-700 mb-2">Imagine actuală:</p>
+                <img src="${imageUrl}" alt="Imagine curentă" class="w-32 h-32 object-cover rounded-md" onerror="this.parentElement.style.display='none';">
+                <p class="text-xs text-gray-500 mt-1">Încărcați o imagine nouă pentru a o înlocui sau lăsați câmpul gol pentru a păstra imaginea actuală</p>
+            `;
+            
+            // Insert after the file input
+            pozaField.parentNode.insertBefore(currentImageDiv, pozaField.nextSibling);
+        }
+    }
+
+    // Update UI for edit mode
+    function updateUIForEditMode() {
+        // Update page title
+        document.title = 'Editează teren - ApartamenTUal';
+        
+        // Update main heading
+        const mainHeading = document.querySelector('h1');
+        if (mainHeading) {
+            mainHeading.textContent = 'Editează terenul';
+        }
+
+        // Update subtitle
+        const subtitle = document.querySelector('.subtitle');
+        if (subtitle) {
+            subtitle.textContent = 'Modifică informațiile despre teren';
+        }
+
+        // Update submit button text
+        submitBtn.textContent = 'Salvează modificările';
+
+        // Update loading text
+        const loadingText = document.querySelector('#form-loading p');
+        if (loadingText) {
+            loadingText.textContent = 'Se salvează modificările...';
+        }
+
+        // Update success message
+        const successText = document.querySelector('#form-success p');
+        if (successText) {
+            successText.textContent = 'Terenul a fost modificat cu succes!';
+        }
+    }
+
     // Form validation
     function validateForm(formData) {
         const errors = [];
@@ -122,7 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check authentication
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (authError || !user) {
-                throw new Error('Pentru a adauga un teren trebuie sa fiti autentificat');
+                const actionText = isEditMode ? 'edita' : 'adauga';
+                throw new Error(`Pentru a ${actionText} un teren trebuie sa fiti autentificat`);
             }
 
             console.log('Authenticated user:', user.id); // Debug: check user ID
@@ -136,15 +265,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Process image file if uploaded
-            let imageUrl = null;
+            let imageUrl = isEditMode && currentTerrain ? currentTerrain.image_url : null;
             const pozaFile = formData.get('poza');
             if (pozaFile && pozaFile.size > 0) {
                 imageUrl = await uploadImageToStorage(pozaFile, user.id);
             }
 
-            // Prepare data for database insertion
+            // Prepare data for database operation
             const terenData = {
-                created_by_user_id: user.id,
                 titlu: formData.get('titlu').trim(),
                 descriere: formData.get('descriere')?.trim() || null,
                 zona: formData.get('zona').trim(),
@@ -152,33 +280,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 pret_pe_mp: formData.get('pret_pe_mp') ? parseFloat(formData.get('pret_pe_mp')) : null,
                 nr_apartamente_min: formData.get('nr_apartamente_min') ? parseInt(formData.get('nr_apartamente_min')) : null,
                 nr_apartamente_max: formData.get('nr_apartamente_max') ? parseInt(formData.get('nr_apartamente_max')) : null,
-                image_url: imageUrl,
-                status: 'active',
-                analiza_generala_status: 'pending',
-                analiza_specifica_status: 'pending'
+                image_url: imageUrl
             };
 
-            console.log('Terrain data to insert:', terenData); // Debug: check data being inserted
+            // Add creation-specific fields for new terrains
+            if (!isEditMode) {
+                terenData.created_by_user_id = user.id;
+                terenData.status = 'active';
+                terenData.analiza_generala_status = 'pending';
+                terenData.analiza_specifica_status = 'pending';
+            }
 
-            // Insert into Supabase
-            const { data, error } = await supabase
-                .from('terenuri')
-                .insert([terenData])
-                .select();
+            console.log('Terrain data to save:', terenData); // Debug: check data being saved
 
-            if (error) {
-                console.error('Supabase error:', error);
-                throw new Error('Eroare la salvarea terenului: ' + error.message);
+            let result;
+            if (isEditMode) {
+                // Update existing terrain
+                result = await supabase
+                    .from('terenuri')
+                    .update(terenData)
+                    .eq('id', editTerenId)
+                    .select();
+            } else {
+                // Insert new terrain
+                result = await supabase
+                    .from('terenuri')
+                    .insert([terenData])
+                    .select();
+            }
+
+            if (result.error) {
+                console.error('Supabase error:', result.error);
+                const actionText = isEditMode ? 'modificarea' : 'salvarea';
+                throw new Error(`Eroare la ${actionText} terenului: ` + result.error.message);
             }
 
             showSuccess();
             
-            // Reset form after successful submission
-            form.reset();
+            if (!isEditMode) {
+                // Reset form after successful creation
+                form.reset();
+            }
 
-            // Redirect to terrain list after 2 seconds
+            // Redirect after 2 seconds
             setTimeout(() => {
-                window.location.href = '/terenuri.html';
+                if (isEditMode) {
+                    // Redirect back to terrain details
+                    window.location.href = `/teren-details.html?id=${editTerenId}`;
+                } else {
+                    // Redirect to terrain list
+                    window.location.href = '/terenuri.html';
+                }
             }, 2000);
 
         } catch (error) {
@@ -208,5 +360,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         nrApartMinInput.addEventListener('input', validateApartmentNumbers);
         nrApartMaxInput.addEventListener('input', validateApartmentNumbers);
+    }
+
+    // Initialize edit mode if needed
+    if (isEditMode) {
+        loadTerrainData(editTerenId);
     }
 });
