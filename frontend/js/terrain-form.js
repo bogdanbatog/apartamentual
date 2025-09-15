@@ -14,6 +14,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const editTerenId = urlParams.get('edit');
     const isEditMode = !!editTerenId;
     let currentTerrain = null;
+    let isSuperAdmin = false;
+
+    // Check if user is super admin and show/hide analysis section
+    async function checkSuperAdminAndToggleAnalysisSection() {
+        try {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) {
+                return;
+            }
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_super_admin')
+                .eq('user_id', user.id)
+                .single();
+
+            isSuperAdmin = profile?.is_super_admin || false;
+            
+            const analysisSection = document.getElementById('analysis-section');
+            if (analysisSection) {
+                if (isSuperAdmin) {
+                    analysisSection.classList.remove('hidden');
+                } else {
+                    analysisSection.classList.add('hidden');
+                }
+            }
+        } catch (error) {
+            console.error('Error checking super admin status:', error);
+        }
+    }
 
     // Load terrain data for editing
     async function loadTerrainData(terenId) {
@@ -78,6 +108,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('pret_pe_mp').value = teren.pret_pe_mp || '';
         document.getElementById('nr_apartamente_min').value = teren.nr_apartamente_min || '';
         document.getElementById('nr_apartamente_max').value = teren.nr_apartamente_max || '';
+        
+        // Populate analysis fields if user is super admin
+        if (isSuperAdmin) {
+            document.getElementById('analiza_generala_status').value = teren.analiza_generala_status || 'pending';
+            document.getElementById('analiza_generala_text').value = teren.analiza_generala_text || '';
+            document.getElementById('analiza_specifica_status').value = teren.analiza_specifica_status || 'pending';
+            document.getElementById('analiza_specifica_text').value = teren.analiza_specifica_text || '';
+        }
         
         // Show current image if exists
         if (teren.image_url) {
@@ -283,6 +321,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 image_url: imageUrl
             };
 
+            // Add analysis fields if user is super admin
+            if (isSuperAdmin) {
+                terenData.analiza_generala_status = formData.get('analiza_generala_status') || 'pending';
+                terenData.analiza_generala_text = formData.get('analiza_generala_text')?.trim() || null;
+                terenData.analiza_specifica_status = formData.get('analiza_specifica_status') || 'pending';
+                terenData.analiza_specifica_text = formData.get('analiza_specifica_text')?.trim() || null;
+            }
+
             // Add creation-specific fields for new terrains
             if (!isEditMode) {
                 terenData.created_by_user_id = user.id;
@@ -362,7 +408,9 @@ document.addEventListener('DOMContentLoaded', function() {
         nrApartMaxInput.addEventListener('input', validateApartmentNumbers);
     }
 
-    // Initialize edit mode if needed
+    // Initialize super admin check and edit mode if needed
+    checkSuperAdminAndToggleAnalysisSection();
+    
     if (isEditMode) {
         loadTerrainData(editTerenId);
     }

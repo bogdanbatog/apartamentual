@@ -104,6 +104,58 @@
                             </div>
                         </div>
 
+                        <!-- Analysis fields (Super Admin only) -->
+                        <div id="analysis-section" class="hidden">
+                            <h2 class="text-xl mb-4">Analize (Doar Super Admin)</h2>
+                            <div class="grid gap-6">
+                                <!-- General Analysis -->
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Analiza Generală</h3>
+                                    <div class="grid gap-4">
+                                        <div>
+                                            <label for="analiza_generala_status" class="block text-sm font-medium text-gray-700 mb-1">Status Analiza Generală</label>
+                                            <select id="analiza_generala_status" name="analiza_generala_status"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="pending">În așteptare</option>
+                                                <option value="in_progress">În progres</option>
+                                                <option value="completed">Completă</option>
+                                                <option value="rejected">Respinsă</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="analiza_generala_text" class="block text-sm font-medium text-gray-700 mb-1">Text Analiza Generală</label>
+                                            <textarea id="analiza_generala_text" name="analiza_generala_text" rows="4"
+                                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                      placeholder="Rezultatele și observațiile din analiza generală..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Specific Analysis -->
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Analiza Specifică</h3>
+                                    <div class="grid gap-4">
+                                        <div>
+                                            <label for="analiza_specifica_status" class="block text-sm font-medium text-gray-700 mb-1">Status Analiza Specifică</label>
+                                            <select id="analiza_specifica_status" name="analiza_specifica_status"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="pending">În așteptare</option>
+                                                <option value="in_progress">În progres</option>
+                                                <option value="completed">Completă</option>
+                                                <option value="rejected">Respinsă</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="analiza_specifica_text" class="block text-sm font-medium text-gray-700 mb-1">Text Analiza Specifică</label>
+                                            <textarea id="analiza_specifica_text" name="analiza_specifica_text" rows="4"
+                                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                      placeholder="Rezultatele și observațiile din analiza specifică..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Loading state -->
                         <div id="form-loading" class="hidden text-center py-4">
                             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
