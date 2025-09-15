@@ -139,6 +139,12 @@ function createGrupCard(grup) {
     
     return `
         <div class="card">
+            ${grup.image_url ? `
+                <div class="w-full h-48 bg-gray-200 rounded-lg overflow-hidden mb-4">
+                    <img src="${grup.image_url}" alt="${escapeHtml(grup.nume)}" class="w-full h-full object-cover" 
+                         onerror="this.parentElement.style.display='none'">
+                </div>
+            ` : ''}
             <div class="flex justify-between items-start mb-3">
                 <h3 class="text-lg">${escapeHtml(grup.nume)}</h3>
                 <span class="badge ${statusInfo.class}">${statusInfo.text}</span>

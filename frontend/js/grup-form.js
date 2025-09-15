@@ -187,8 +187,8 @@ function populateForm(group) {
     document.getElementById('is_disabled').checked = group.is_disabled || false;
     
     // Show existing image if available
-    if (group.poza) {
-        previewImgEl.src = `data:image/jpeg;base64,${group.poza}`;
+    if (group.image_url) {
+        previewImgEl.src = group.image_url;
         imagePreviewEl.classList.remove('hidden');
     }
 }
@@ -231,23 +231,16 @@ async function handleFormSubmit(e) {
         // Handle image upload
         const imageFile = formData.get('poza');
         if (imageFile && imageFile.size > 0) {
-            // Check file size (5MB limit)
-            if (imageFile.size > 5 * 1024 * 1024) {
-                showError('Imaginea este prea mare. Dimensiunea maximă permisă este 5MB.');
+            try {
+                const imageUrl = await uploadImageToStorage(imageFile, currentUser.id);
+                groupData.image_url = imageUrl;
+            } catch (error) {
+                showError(error.message);
                 return;
             }
-            
-            // Check file type
-            if (!imageFile.type.startsWith('image/')) {
-                showError('Fișierul selectat nu este o imagine validă.');
-                return;
-            }
-            
-            const base64Image = await convertToBase64(imageFile);
-            groupData.poza = base64Image;
-        } else if (isEditMode && currentGroup && currentGroup.poza) {
+        } else if (isEditMode && currentGroup && currentGroup.image_url) {
             // Keep existing image if no new one uploaded
-            groupData.poza = currentGroup.poza;
+            groupData.image_url = currentGroup.image_url;
         }
         
         // Set owner for new groups
@@ -314,18 +307,53 @@ async function handleFormSubmit(e) {
     }
 }
 
-// Convert file to base64
-function convertToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            // Remove data:image/jpeg;base64, prefix
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-        };
-        reader.onerror = error => reject(error);
-    });
+// Upload image to Supabase Storage
+async function uploadImageToStorage(file, userId) {
+    if (!file) {
+        return null;
+    }
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Imaginea este prea mare. Dimensiunea maximă permisă este 5MB.');
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+        throw new Error('Fișierul selectat nu este o imagine validă.');
+    }
+
+    try {
+        // Generate unique filename with user ID as folder
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+            .from('group-images')
+            .upload(fileName, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (error) {
+            console.error('Storage upload error:', error);
+            if (error.message.includes('Bucket not found')) {
+                throw new Error('Bucket-ul pentru imagini nu a fost configurat. Contactați administratorul.');
+            }
+            throw new Error('Eroare la uploadul imaginii: ' + error.message);
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('group-images')
+            .getPublicUrl(fileName);
+
+        return publicUrl;
+    } catch (error) {
+        console.error('Image upload error:', error);
+        throw error;
+    }
 }
 
 // Handle image preview

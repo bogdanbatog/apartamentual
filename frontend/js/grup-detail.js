@@ -185,10 +185,14 @@ function renderGroupDetails() {
     statusEl.className = `badge ${statusInfo.class}`;
     
     // Group image
-    if (currentGroup.poza) {
+    if (currentGroup.image_url) {
         const imageContainer = document.getElementById('group-image-container');
         const image = document.getElementById('group-image');
-        image.src = `data:image/jpeg;base64,${currentGroup.poza}`;
+        image.src = currentGroup.image_url;
+        image.onerror = function() {
+            console.error('Failed to load group image:', currentGroup.image_url);
+            imageContainer.style.display = 'none';
+        };
         imageContainer.style.display = 'block';
     }
     
