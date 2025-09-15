@@ -250,6 +250,9 @@ function renderGroupDetails() {
     
     // Render join/leave section
     renderJoinSection();
+    
+    // Render owner actions
+    renderOwnerActions();
 }
 
 // Render join/leave section based on user status
@@ -304,6 +307,22 @@ function renderJoinSection() {
     const leaveBtn = document.getElementById('leave-group-btn');
     if (leaveBtn) {
         leaveBtn.addEventListener('click', leaveGroup);
+    }
+}
+
+// Render owner actions
+function renderOwnerActions() {
+    const ownerActions = document.getElementById('owner-actions');
+    const editGroupBtn = document.getElementById('edit-group-btn');
+    
+    if (!ownerActions || !editGroupBtn) return;
+    
+    // Show owner actions if current user is the group owner
+    if (currentUser && currentGroup && currentUser.id === currentGroup.owner_user_id) {
+        ownerActions.style.display = 'block';
+        editGroupBtn.href = `/grup-form.html?id=${currentGroup.id}`;
+    } else {
+        ownerActions.style.display = 'none';
     }
 }
 
