@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const isEditMode = !!editTerenId;
     let currentTerrain = null;
     let isSuperAdmin = false;
+    let analizaGeneralaEditor = null;
+    let analizaSpecificaEditor = null;
 
     // Check if user is super admin and show/hide analysis section
     async function checkSuperAdminAndToggleAnalysisSection() {
@@ -42,6 +44,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error checking super admin status:', error);
+        }
+    }
+
+    // Initialize TinyMDE editors
+    function initializeTinyMDE() {
+        try {
+            // Initialize analiza_generala editor
+            if (document.getElementById('analiza_generala_editor')) {
+                analizaGeneralaEditor = new TinyMDE.Editor({
+                    element: 'analiza_generala_editor',
+                    placeholder: 'Rezultatele și observațiile din analiza generală...'
+                });
+            }
+
+            // Initialize analiza_specifica editor
+            if (document.getElementById('analiza_specifica_editor')) {
+                analizaSpecificaEditor = new TinyMDE.Editor({
+                    element: 'analiza_specifica_editor',
+                    placeholder: 'Rezultatele și observațiile din analiza specifică...'
+                });
+            }
+        } catch (error) {
+            console.error('Error initializing TinyMDE editors:', error);
         }
     }
 
@@ -112,9 +137,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Populate analysis fields if user is super admin
         if (isSuperAdmin) {
             document.getElementById('analiza_generala_status').value = teren.analiza_generala_status || 'pending';
-            document.getElementById('analiza_generala_text').value = teren.analiza_generala_text || '';
             document.getElementById('analiza_specifica_status').value = teren.analiza_specifica_status || 'pending';
-            document.getElementById('analiza_specifica_text').value = teren.analiza_specifica_text || '';
+            
+            // Set content in TinyMDE editors
+            if (analizaGeneralaEditor) {
+                analizaGeneralaEditor.setContent(teren.analiza_generala_text || '');
+            }
+            if (analizaSpecificaEditor) {
+                analizaSpecificaEditor.setContent(teren.analiza_specifica_text || '');
+            }
         }
         
         // Show current image if exists
@@ -324,9 +355,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add analysis fields if user is super admin
             if (isSuperAdmin) {
                 terenData.analiza_generala_status = formData.get('analiza_generala_status') || 'pending';
-                terenData.analiza_generala_text = formData.get('analiza_generala_text')?.trim() || null;
                 terenData.analiza_specifica_status = formData.get('analiza_specifica_status') || 'pending';
-                terenData.analiza_specifica_text = formData.get('analiza_specifica_text')?.trim() || null;
+                
+                // Get content from TinyMDE editors
+                if (analizaGeneralaEditor) {
+                    terenData.analiza_generala_text = analizaGeneralaEditor.getContent()?.trim() || null;
+                } else {
+                    terenData.analiza_generala_text = formData.get('analiza_generala_text')?.trim() || null;
+                }
+                
+                if (analizaSpecificaEditor) {
+                    terenData.analiza_specifica_text = analizaSpecificaEditor.getContent()?.trim() || null;
+                } else {
+                    terenData.analiza_specifica_text = formData.get('analiza_specifica_text')?.trim() || null;
+                }
             }
 
             // Add creation-specific fields for new terrains
@@ -410,6 +452,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize super admin check and edit mode if needed
     checkSuperAdminAndToggleAnalysisSection();
+    
+    // Initialize TinyMDE editors after a short delay to ensure DOM is ready
+    setTimeout(() => {
+        initializeTinyMDE();
+    }, 100);
     
     if (isEditMode) {
         loadTerrainData(editTerenId);

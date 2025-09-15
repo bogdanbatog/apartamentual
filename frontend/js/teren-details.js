@@ -15,6 +15,29 @@ const analysisMapping = {
     'rejected': { text: 'respinsă', class: 'bg-red-100 text-red-800' }
 };
 
+// Simple markdown renderer
+function renderMarkdown(text) {
+    if (!text) return '';
+    
+    return text
+        // Headers (process in order from most specific to least)
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        // Bold (must come before italic)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic (simplified regex for better compatibility)
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        // Code blocks
+        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+        // Inline code
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        // Links
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        // Line breaks
+        .replace(/\n/g, '<br>');
+}
+
 // Extract teren ID from URL query parameter
 function getTerenIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -250,7 +273,16 @@ function displayTerenDetails(teren, userProfile) {
     
     // Show general analysis only if status is completed and text exists
     if (teren.analiza_generala_status === 'completed' && teren.analiza_generala_text) {
-        document.getElementById('general-analysis-text').textContent = teren.analiza_generala_text;
+        // Render markdown content
+        try {
+            const generalElement = document.getElementById('general-analysis-text');
+            const renderedHtml = renderMarkdown(teren.analiza_generala_text);
+            generalElement.innerHTML = renderedHtml;
+        } catch (error) {
+            console.error('Error rendering general analysis markdown:', error);
+            // Fallback to plain text if markdown rendering fails
+            document.getElementById('general-analysis-text').textContent = teren.analiza_generala_text;
+        }
         generalSection.classList.remove('hidden');
     } else {
         generalSection.classList.add('hidden');
@@ -258,7 +290,16 @@ function displayTerenDetails(teren, userProfile) {
     
     // Show specific analysis only if status is completed and text exists
     if (teren.analiza_specifica_status === 'completed' && teren.analiza_specifica_text) {
-        document.getElementById('specific-analysis-text').textContent = teren.analiza_specifica_text;
+        // Render markdown content
+        try {
+            const specificElement = document.getElementById('specific-analysis-text');
+            const renderedHtml = renderMarkdown(teren.analiza_specifica_text);
+            specificElement.innerHTML = renderedHtml;
+        } catch (error) {
+            console.error('Error rendering specific analysis markdown:', error);
+            // Fallback to plain text if markdown rendering fails
+            document.getElementById('specific-analysis-text').textContent = teren.analiza_specifica_text;
+        }
         specificSection.classList.remove('hidden');
     } else {
         specificSection.classList.add('hidden');
