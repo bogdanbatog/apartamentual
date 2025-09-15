@@ -318,9 +318,10 @@ function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, ter
     
     // Add "Cere o analiză" button if there are pending analyses
     if (hasPendingAnalysis) {
-        const cereAnalizaBtn = document.createElement('a');
-        cereAnalizaBtn.href = '/terenuri-analize.html';
-        cereAnalizaBtn.innerHTML = '<button class="primary">Cere o analiză</button>';
+        const cereAnalizaBtn = document.createElement('button');
+        cereAnalizaBtn.className = 'primary';
+        cereAnalizaBtn.textContent = 'Cere o analiză';
+        cereAnalizaBtn.onclick = () => openAnalysisModal(teren);
         actionButtons.appendChild(cereAnalizaBtn);
     }
     
@@ -432,6 +433,26 @@ document.addEventListener("DOMContentLoaded", function() {
     if (retryBtn) {
         retryBtn.addEventListener("click", fetchTerenDetails);
     }
+    
+    // Add email button event listener
+    const sendEmailBtn = document.getElementById("send-email-btn");
+    if (sendEmailBtn) {
+        sendEmailBtn.addEventListener("click", function() {
+            // Get current teren data from the page
+            const terenId = getTerenIdFromUrl();
+            if (terenId) {
+                // We need to get the teren data, but since we don't have it in scope here,
+                // we'll create a simple version with the data we can get from the DOM
+                const teren = {
+                    titlu: document.getElementById('teren-title')?.textContent || 'Teren fără titlu',
+                    suprafata: document.getElementById('teren-suprafata')?.textContent?.replace(' mp', '') || 'N/A',
+                    zona: document.getElementById('teren-zona')?.textContent || 'N/A',
+                    pret_pe_mp: document.getElementById('teren-pret')?.textContent?.replace(' €/mp', '') || 'N/A'
+                };
+                sendAnalysisEmail(teren);
+            }
+        });
+    }
 });
 
 
@@ -446,9 +467,78 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Analysis Modal Functions
+function openAnalysisModal(teren) {
+    // Populate email content with teren details
+    const terenUrl = window.location.href;
+    const emailSubject = `Solicitare analiză teren - ${teren.titlu || 'Teren fără titlu'}`;
+    
+    const emailContent = `Bună ziua,
+
+Solicit o analiză pentru următorul teren:
+
+Titlu: ${teren.titlu || 'N/A'}
+URL: ${terenUrl}
+Suprafață: ${teren.suprafata ? teren.suprafata + ' mp' : 'N/A'}
+Zonă: ${teren.zona || 'N/A'}
+Preț pe mp: ${teren.pret_pe_mp ? teren.pret_pe_mp + ' EUR/mp' : 'N/A'}
+
+Tipul de analiză solicitat: [Vă rog să specificați: Analiză Generală (100 EUR) sau Analiză Specifică (500 EUR)]
+
+Vă rog să îmi trimiteți detaliile pentru plata corespunzătoare.
+
+Mulțumesc,
+[Numele dumneavoastră]`;
+
+    // Update email content in modal
+    document.getElementById('email-subject').textContent = emailSubject;
+    document.getElementById('email-content').textContent = emailContent;
+    
+    // Show modal
+    document.getElementById('analysis-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeAnalysisModal() {
+    document.getElementById('analysis-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto'; // Restore scrolling
+}
+
+function sendAnalysisEmail(teren) {
+    const terenUrl = window.location.href;
+    const emailSubject = `Solicitare analiză teren - ${teren.titlu || 'Teren fără titlu'}`;
+    
+    const emailContent = `Bună ziua,
+
+Solicit o analiză pentru următorul teren:
+
+Titlu: ${teren.titlu || 'N/A'}
+URL: ${terenUrl}
+Suprafață: ${teren.suprafata ? teren.suprafata + ' mp' : 'N/A'}
+Zonă: ${teren.zona || 'N/A'}
+Preț pe mp: ${teren.pret_pe_mp ? teren.pret_pe_mp + ' EUR/mp' : 'N/A'}
+
+Tipul de analiză solicitat: [Vă rog să specificați: Analiză Generală (100 EUR) sau Analiză Specifică (500 EUR)]
+
+Vă rog să îmi trimiteți detaliile pentru plata corespunzătoare.
+
+Mulțumesc,
+[Numele dumneavoastră]`;
+
+    // Create mailto link
+    const mailtoLink = `mailto:office@ltfbstudio.ro?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailContent)}`;
+    
+    // Open email client
+    window.location.href = mailtoLink;
+    
+    // Close modal after opening email client
+    closeAnalysisModal();
+}
+
 // Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeImageModal();
+        closeAnalysisModal();
     }
 });
