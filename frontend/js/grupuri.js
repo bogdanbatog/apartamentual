@@ -114,6 +114,9 @@ function renderGrupuri() {
         return;
     }
     
+    // Hide no results message when there are results
+    hideNoResults();
+    
     const html = filteredGrupuri.map(grup => createGrupCard(grup)).join('');
     grupuriListEl.innerHTML = html;
 }
@@ -280,6 +283,13 @@ function showNoResults() {
     }
     if (grupuriListEl) {
         grupuriListEl.innerHTML = '';
+    }
+}
+
+// Hide no results message
+function hideNoResults() {
+    if (noResultsEl) {
+        noResultsEl.style.display = 'none';
     }
 }
 
