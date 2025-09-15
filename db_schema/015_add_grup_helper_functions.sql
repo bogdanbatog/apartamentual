@@ -2,6 +2,7 @@
 -- These functions provide convenient ways to manage group memberships and check permissions
 
 -- Function to check if a user is a member of a group
+-- Note: This function should not be used in RLS policies to avoid recursion
 CREATE OR REPLACE FUNCTION public.is_group_member(grup_id_param UUID, user_id_param UUID DEFAULT auth.uid())
 RETURNS BOOLEAN
 LANGUAGE SQL

@@ -59,21 +59,21 @@
 
                 <!-- Filter Bar -->
                 <div class="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
-                    <select class="px-3 py-2 border border-gray-300 rounded-md">
+                    <select id="location-filter" class="px-3 py-2 border border-gray-300 rounded-md">
                         <option>Toate locațiile</option>
                         <option>București</option>
                         <option>Cluj-Napoca</option>
                         <option>Timișoara</option>
                         <option>Iași</option>
                     </select>
-                    <select class="px-3 py-2 border border-gray-300 rounded-md">
+                    <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded-md">
                         <option>Toate stadiile</option>
                         <option>În formare</option>
                         <option>Opțiune teren</option>
                         <option>Proiectare</option>
                         <option>Construcție</option>
                     </select>
-                    <select class="px-3 py-2 border border-gray-300 rounded-md">
+                    <select id="type-filter" class="px-3 py-2 border border-gray-300 rounded-md">
                         <option>Toate tipurile</option>
                         <option>Apartamente</option>
                         <option>Case</option>
@@ -81,99 +81,43 @@
                     </select>
                 </div>
 
+                <!-- Loading and Error States -->
+                <div id="loading" class="text-center py-8" style="display: none;">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2 text-gray-600">Se încarcă grupurile...</p>
+                </div>
+
+                <div id="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6" style="display: none;">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Eroare la încărcarea grupurilor</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p id="error-message"></p>
+                            </div>
+                            <div class="mt-4">
+                                <button id="retry-btn" class="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    Încearcă din nou
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Results Message -->
+                <div id="no-results" class="text-center py-8" style="display: none;">
+                    <div class="text-gray-400 text-6xl mb-4">🔍</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Nu s-au găsit grupuri</h3>
+                    <p class="text-gray-600">Încearcă să modifici filtrele sau să creezi un grup nou.</p>
+                </div>
+
                 <!-- Groups List -->
-                <div class="grid-2">
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Grup București Central</h3>
-                            <span class="badge bg-green-100 text-green-800">În formare</span>
-                        </div>
-                        <p class="subtitle mb-4">Grup pentru apartamente în zona centrală a Bucureștiului</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Locație:</strong> București, Sector 1</div>
-                            <div><strong>Membri actuali:</strong> 4/8</div>
-                            <div><strong>Tip locuințe:</strong> Apartamente</div>
-                            <div><strong>Buget/mp:</strong> 1200-1500 €</div>
-                        </div>
-                        <div class="flex gap-2 text-xs mb-4">
-                            <span class="badge bg-blue-100 text-blue-800">Familii cu copii</span>
-                            <span class="badge bg-green-100 text-green-800">Eco-friendly</span>
-                        </div>
-                        <p class="text-sm mb-4">Căutăm 4 familii pentru un proiect de apartamente sustenabile în centrul capitalei. Accent pe spații comune și eficiență energetică.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Creat: 15 Ian 2024</span>
-                            <a href="/grup-bucuresti-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Grup Cluj Verde</h3>
-                            <span class="badge bg-yellow-100 text-yellow-800">Opțiune teren</span>
-                        </div>
-                        <p class="subtitle mb-4">Case ecologice în zona metropolitană Cluj</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Locație:</strong> Cluj, zona Florești</div>
-                            <div><strong>Membri actuali:</strong> 6/6</div>
-                            <div><strong>Tip locuințe:</strong> Case</div>
-                            <div><strong>Buget/mp:</strong> 800-1000 €</div>
-                        </div>
-                        <div class="flex gap-2 text-xs mb-4">
-                            <span class="badge bg-green-100 text-green-800">Eco-friendly</span>
-                            <span class="badge bg-purple-100 text-purple-800">Co-housing</span>
-                        </div>
-                        <p class="text-sm mb-4">Grup complet cu opțiune pe un teren de 3000mp. Proiect de case pasive cu grădină comunitară și spații comune.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Creat: 3 Dec 2023</span>
-                            <a href="/grup-cluj-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Grup Timișoara Seniors</h3>
-                            <span class="badge bg-blue-100 text-blue-800">Proiectare</span>
-                        </div>
-                        <p class="subtitle mb-4">Proiect senior-friendly în Timișoara</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Locație:</strong> Timișoara</div>
-                            <div><strong>Membri actuali:</strong> 8/8</div>
-                            <div><strong>Tip locuințe:</strong> Apartamente</div>
-                            <div><strong>Buget/mp:</strong> 900-1100 €</div>
-                        </div>
-                        <div class="flex gap-2 text-xs mb-4">
-                            <span class="badge bg-orange-100 text-orange-800">55+</span>
-                            <span class="badge bg-blue-100 text-blue-800">Accessible design</span>
-                        </div>
-                        <p class="text-sm mb-4">Grup pentru persoane 55+ cu focus pe design accesibil și servicii de proximitate. În faza de proiectare.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Creat: 20 Oct 2023</span>
-                            <a href="/grup-timisoara-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg">Grup Iași Students</h3>
-                            <span class="badge bg-green-100 text-green-800">În formare</span>
-                        </div>
-                        <p class="subtitle mb-4">Locuințe pentru tineri profesioniști</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                            <div><strong>Locație:</strong> Iași, zona Copou</div>
-                            <div><strong>Membri actuali:</strong> 3/6</div>
-                            <div><strong>Tip locuințe:</strong> Apartamente</div>
-                            <div><strong>Buget/mp:</strong> 700-900 €</div>
-                        </div>
-                        <div class="flex gap-2 text-xs mb-4">
-                            <span class="badge bg-red-100 text-red-800">25-35 ani</span>
-                            <span class="badge bg-purple-100 text-purple-800">Tech-oriented</span>
-                        </div>
-                        <p class="text-sm mb-4">Căutăm tineri profesioniști (25-35 ani) pentru un proiect modern cu spații de co-working și tech amenities.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-500">Creat: 8 Feb 2024</span>
-                            <a href="/grup-iasi-1.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
-                        </div>
-                    </div>
+                <div id="grupuri-list" class="grid-2">
+                    <!-- Groups will be loaded dynamically here -->
                 </div>
 
                 <!-- How it works section -->
@@ -207,5 +151,6 @@
     <script src="js/footer.js"></script>
     <script src="js/auth-modal.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/grupuri.js"></script>
 </body>
 </html>

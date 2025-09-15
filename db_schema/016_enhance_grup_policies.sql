@@ -59,7 +59,6 @@ CREATE POLICY "Authenticated users can view active groups" ON grup
     USING (
         is_disabled = false AND (
             status = 'active' OR 
-            public.is_group_member(id) OR 
             public.is_group_owner(id) OR 
             public.is_super_admin()
         )
