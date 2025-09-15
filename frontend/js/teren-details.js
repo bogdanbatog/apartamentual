@@ -244,18 +244,20 @@ function displayTerenDetails(teren, userProfile) {
         noImageDiv.classList.remove('hidden');
     }
     
-    // Analysis details
+    // Analysis details - only show if status is completed
     const generalSection = document.getElementById('general-analysis-section');
     const specificSection = document.getElementById('specific-analysis-section');
     
-    if (teren.analiza_generala_text) {
+    // Show general analysis only if status is completed and text exists
+    if (teren.analiza_generala_status === 'completed' && teren.analiza_generala_text) {
         document.getElementById('general-analysis-text').textContent = teren.analiza_generala_text;
         generalSection.classList.remove('hidden');
     } else {
         generalSection.classList.add('hidden');
     }
     
-    if (teren.analiza_specifica_text) {
+    // Show specific analysis only if status is completed and text exists
+    if (teren.analiza_specifica_status === 'completed' && teren.analiza_specifica_text) {
         document.getElementById('specific-analysis-text').textContent = teren.analiza_specifica_text;
         specificSection.classList.remove('hidden');
     } else {
