@@ -156,7 +156,7 @@ function createGrupCard(grup) {
             <p class="text-sm mb-4">${escapeHtml(grup.descriere || '')}</p>
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-500">Creat: ${createdDate}</span>
-                <a href="/grup-${grup.id}.html" class="text-blue-600 hover:underline">Vezi detalii →</a>
+                <a href="/grup-detail.html?grup=${grup.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
             </div>
         </div>
     `;

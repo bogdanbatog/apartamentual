@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalii Grup - ApartamenTUal</title>
+    <meta name="description" content="Vezi detaliile complete ale grupului și alătură-te dacă ești compatibil.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Loading State -->
+            <div id="loading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">Se încarcă detaliile grupului...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6" style="display: none;">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Eroare la încărcarea grupului</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p id="error-message"></p>
+                        </div>
+                        <div class="mt-4">
+                            <button id="retry-btn" class="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Încearcă din nou
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Not Found -->
+            <div id="not-found" class="text-center py-8" style="display: none;">
+                <div class="text-gray-400 text-6xl mb-4">🔍</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Grupul nu a fost găsit</h3>
+                <p class="text-gray-600 mb-4">Grupul pe care îl cauți nu există sau nu este disponibil.</p>
+                <a href="/grupuri.html" class="text-blue-600 hover:underline">← Înapoi la grupuri</a>
+            </div>
+
+            <!-- Group Details Content -->
+            <div id="group-content" style="display: none;">
+                <!-- Header Section -->
+                <div class="mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                        <div>
+                            <h1 id="group-name" class="text-3xl font-bold mb-2"></h1>
+                            <p id="group-location" class="text-lg text-gray-600"></p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <span id="group-status" class="badge text-sm"></span>
+                            <div id="join-section" class="flex gap-2">
+                                <!-- Join button will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Group Image -->
+                    <div id="group-image-container" class="w-full h-64 bg-gray-200 rounded-lg overflow-hidden mb-6" style="display: none;">
+                        <img id="group-image" src="" alt="Group image" class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Left Column - Main Info -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Description -->
+                        <div class="card">
+                            <h2 class="text-xl font-semibold mb-4">Despre grup</h2>
+                            <p id="group-description" class="text-gray-700 leading-relaxed"></p>
+                        </div>
+
+                        <!-- Project Details -->
+                        <div class="card">
+                            <h2 class="text-xl font-semibold mb-4">Detalii proiect</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">Apartamente dorite</h3>
+                                    <p id="apartments-desired" class="text-gray-600"></p>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">Buget maxim per apartament</h3>
+                                    <p id="budget-per-apartment" class="text-gray-600"></p>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">Data începerii proiectului</h3>
+                                    <p id="project-start-date" class="text-gray-600"></p>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">Data finalizării proiectului</h3>
+                                    <p id="project-end-date" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Group Tags -->
+                        <div id="group-tags-section" class="card" style="display: none;">
+                            <h2 class="text-xl font-semibold mb-4">Caracteristici grup</h2>
+                            <div id="group-tags" class="flex flex-wrap gap-2">
+                                <!-- Tags will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Sidebar -->
+                    <div class="space-y-6">
+                        <!-- Membership Info -->
+                        <div class="card">
+                            <h2 class="text-xl font-semibold mb-4">Membri</h2>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Membri actuali:</span>
+                                    <span id="current-members" class="font-semibold"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Membri maximi:</span>
+                                    <span id="max-members" class="font-semibold"></span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="membership-progress" class="bg-blue-600 h-2 rounded-full transition-all duration-300"></div>
+                                </div>
+                                <p id="membership-status-text" class="text-sm text-gray-600"></p>
+                            </div>
+                        </div>
+
+                        <!-- Group Owner -->
+                        <div class="card">
+                            <h2 class="text-xl font-semibold mb-4">Administrator grup</h2>
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-blue-600 font-semibold text-sm">👤</span>
+                                </div>
+                                <div>
+                                    <p id="group-owner-name" class="font-medium"></p>
+                                    <p class="text-sm text-gray-600">Administrator</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Group Stats -->
+                        <div class="card">
+                            <h2 class="text-xl font-semibold mb-4">Statistici</h2>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Creat:</span>
+                                    <span id="group-created-date" class="font-medium"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Ultima actualizare:</span>
+                                    <span id="group-updated-date" class="font-medium"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions for Group Members -->
+                        <div id="member-actions" class="card" style="display: none;">
+                            <h2 class="text-xl font-semibold mb-4">Acțiuni</h2>
+                            <div class="space-y-3">
+                                <button id="leave-group-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition duration-200">
+                                    Părăsește grupul
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back to Groups Link -->
+                <div class="mt-8 text-center">
+                    <a href="/grupuri.html" class="text-blue-600 hover:underline">← Înapoi la grupuri</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/auth-modal.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/grup-detail.js"></script>
+</body>
+</html>
