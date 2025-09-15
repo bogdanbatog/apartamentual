@@ -57,6 +57,30 @@ function closeImageModal() {
     document.body.style.overflow = 'auto'; // Restore scrolling
 }
 
+// Fetch user profile data
+async function fetchUserProfile() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+        if (error) {
+            console.error("Error fetching user profile:", error);
+            return null;
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+    }
+}
+
 // Fetch teren details
 async function fetchTerenDetails() {
     const terenId = getTerenIdFromUrl();
@@ -69,22 +93,28 @@ async function fetchTerenDetails() {
     try {
         showLoading();
         
-        const { data, error } = await supabase
-            .from('terenuri')
-            .select('*')
-            .eq('id', terenId)
-            .single();
+        // Fetch both teren details and user profile in parallel
+        const [terenResult, userProfile] = await Promise.all([
+            supabase
+                .from('terenuri')
+                .select('*')
+                .eq('id', terenId)
+                .single(),
+            fetchUserProfile()
+        ]);
 
-        if (error) {
-            throw error;
+        const { data: terenData, error: terenError } = terenResult;
+
+        if (terenError) {
+            throw terenError;
         }
 
-        if (!data) {
+        if (!terenData) {
             showNotFound();
             return;
         }
 
-        displayTerenDetails(data);
+        displayTerenDetails(terenData, userProfile);
         hideLoading();
         
     } catch (error) {
@@ -95,7 +125,7 @@ async function fetchTerenDetails() {
 }
 
 // Display teren details
-function displayTerenDetails(teren) {
+function displayTerenDetails(teren, userProfile) {
     // Update page title
     document.title = `${teren.titlu} - ApartamenTUal`;
     
@@ -133,11 +163,21 @@ function displayTerenDetails(teren) {
     specificBadge.textContent = `Analiză specifică: ${analizaSpecifica.text}`;
     specificBadge.className = `badge ${analizaSpecifica.class}`;
     
-    // Show "Cere o analiză" button only if one of the analyses is pending
+    // Determine if user can see action buttons
     const actionButtons = document.getElementById('action-buttons');
     const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';
-    if (hasPendingAnalysis) {
+    const canModify = userProfile && (
+        (userProfile.user_id === teren.user_id && !teren.deleted_at) || 
+        userProfile.is_super_admin
+    );
+    const canToggleStatus = userProfile && userProfile.is_super_admin;
+    
+    // Show action buttons if user has pending analysis OR can modify/delete
+    if (hasPendingAnalysis || canModify || canToggleStatus) {
         actionButtons.classList.remove('hidden');
+        
+        // Update button visibility
+        updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren);
     } else {
         actionButtons.classList.add('hidden');
     }
@@ -186,6 +226,97 @@ function displayTerenDetails(teren) {
     document.getElementById('teren-details').classList.remove('hidden');
 }
 
+// Update action buttons visibility and content
+function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren) {
+    const actionButtons = document.getElementById('action-buttons');
+    
+    // Clear existing buttons
+    actionButtons.innerHTML = '';
+    
+    // Add "Cere o analiză" button if there are pending analyses
+    if (hasPendingAnalysis) {
+        const cereAnalizaBtn = document.createElement('a');
+        cereAnalizaBtn.href = '/terenuri-analize.html';
+        cereAnalizaBtn.innerHTML = '<button class="primary">Cere o analiză</button>';
+        actionButtons.appendChild(cereAnalizaBtn);
+    }
+    
+    // Add "Modifica" button if user can modify
+    if (canModify) {
+        const modificaBtn = document.createElement('button');
+        modificaBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
+        modificaBtn.textContent = 'Modifică';
+        modificaBtn.onclick = () => editTeren(teren.id);
+        actionButtons.appendChild(modificaBtn);
+    }
+    
+    // Add "Dezactivează/Activează" button if user is super admin
+    if (canToggleStatus) {
+        const toggleBtn = document.createElement('button');
+        const isDeleted = teren.deleted_at !== null;
+        toggleBtn.className = isDeleted 
+            ? 'bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors'
+            : 'bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
+        toggleBtn.textContent = isDeleted ? 'Activează' : 'Dezactivează';
+        toggleBtn.onclick = () => toggleTerenStatus(teren.id, isDeleted);
+        actionButtons.appendChild(toggleBtn);
+    }
+}
+
+// Edit teren function
+function editTeren(terenId) {
+    // Redirect to edit page or open edit modal
+    window.location.href = `/terenuri-propune.html?edit=${terenId}`;
+}
+
+// Toggle teren status (activate/deactivate)
+async function toggleTerenStatus(terenId, isCurrentlyDeleted) {
+    try {
+        console.log('Starting toggleTerenStatus:', { terenId, isCurrentlyDeleted });
+        
+        // First, check if user is super admin
+        const userProfile = await fetchUserProfile();
+        console.log('User profile:', userProfile);
+        console.log('Is super admin:', userProfile?.is_super_admin);
+        
+        if (!userProfile?.is_super_admin) {
+            throw new Error('Nu aveți permisiuni de administrator pentru această operație');
+        }
+        
+        const newStatus = isCurrentlyDeleted ? null : new Date().toISOString();
+        console.log('New status:', newStatus);
+        
+        const { data, error } = await supabase
+            .from('terenuri')
+            .update({ deleted_at: newStatus })
+            .eq('id', terenId)
+            .select();
+        
+        console.log('Supabase response:', { data, error });
+        
+        if (error) {
+            console.error('Supabase error details:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
+            throw error;
+        }
+        
+        console.log('Update successful, data:', data);
+        
+        // Show success message and reload page
+        const message = isCurrentlyDeleted ? 'Terenul a fost activat cu succes!' : 'Terenul a fost dezactivat cu succes!';
+        alert(message);
+        window.location.reload();
+        
+    } catch (error) {
+        console.error('Error toggling teren status:', error);
+        alert('A apărut o eroare la modificarea statusului terenului: ' + error.message);
+    }
+}
+
 // Show/hide loading state
 function showLoading() {
     document.getElementById('loading').classList.remove('hidden');
@@ -219,6 +350,7 @@ document.addEventListener("DOMContentLoaded", function() {
         retryBtn.addEventListener("click", fetchTerenDetails);
     }
 });
+
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
