@@ -285,7 +285,8 @@ function renderGroupDetails() {
     
     // Group owner
     if (groupOwner) {
-        document.getElementById('group-owner-name').textContent = groupOwner.full_name || groupOwner.email;
+        const displayName = groupOwner.full_name || redactEmail(groupOwner.email);
+        document.getElementById('group-owner-name').textContent = displayName;
     }
     
     // Dates
@@ -474,6 +475,22 @@ function generateGroupTags(grup) {
     }
     
     return tags;
+}
+
+// Redact email to show only first few and last few characters
+function redactEmail(email) {
+    if (!email || !email.includes('@')) return email;
+    
+    const [localPart, domain] = email.split('@');
+    
+    // Show first 2 characters and last 2 characters of local part
+    if (localPart.length <= 4) {
+        // If email is very short, show first character and last character
+        return localPart.charAt(0) + '*'.repeat(localPart.length - 2) + localPart.charAt(localPart.length - 1) + '@' + domain;
+    } else {
+        // Show first 2
+        return localPart.substring(0, 2) + '*'.repeat(localPart.length - 2) + '@' + domain;
+    }
 }
 
 // Format date for display
