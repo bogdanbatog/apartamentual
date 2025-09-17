@@ -1,24 +1,11 @@
-# Set default index file
 DirectoryIndex index.html index.htm index.php
 
-# Force index.html as default
+# Ensure index.html is served as default
 <IfModule mod_dir.c>
     DirectoryIndex index.html
 </IfModule>
 
-# Disable default cPanel page
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    # Block access to cgi-sys/defaultwebpage.cgi
-    RewriteRule ^cgi-sys/defaultwebpage\.cgi$ /index.html [R=301,L]
-    # Redirect root to index.html
-    RewriteCond %{REQUEST_URI} ^/$
-    RewriteRule ^(.*)$ /index.html [L]
-</IfModule>
-
-# Additional security headers
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
-</IfModule>
+# Optional: Redirect root to index.html if needed
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^/$
+RewriteRule ^(.*)$ /index.html [L]
