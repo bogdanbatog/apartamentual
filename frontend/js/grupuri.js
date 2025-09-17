@@ -58,6 +58,9 @@ function setupGrupuriEventListeners() {
     if (retryBtn) {
         retryBtn.addEventListener('click', loadGrupuri);
     }
+
+	// Intercept clicks to create/register group to require auth
+	setupInscrieGrupButtons();
 }
 
 // Load groups from database
@@ -297,6 +300,24 @@ function hideNoResults() {
     if (noResultsEl) {
         noResultsEl.style.display = 'none';
     }
+}
+
+async function handleInscrieGrupClick(event) {
+	event.preventDefault();
+
+	const isAuthenticated = await isUserAuthenticated();
+	if (isAuthenticated) {
+		window.location.href = '/grup-form.html';
+	} else {
+		openAuthModalWithMessage('Vă rugăm să vă autentificați sau să intrați în cont pentru a înscrie un grup.');
+	}
+}
+
+function setupInscrieGrupButtons() {
+	const inscrieLinks = document.querySelectorAll('a[href="/grup-form.html"]');
+	inscrieLinks.forEach(link => {
+		link.addEventListener('click', handleInscrieGrupClick);
+	});
 }
 
 // Escape HTML to prevent XSS
