@@ -656,6 +656,14 @@ function redactEmail(email) {
     }
 }
 
+// Escape HTML to prevent XSS when rendering names/emails
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Format date for display
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
