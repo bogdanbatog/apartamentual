@@ -72,8 +72,11 @@ async function loadGroupDetails(groupId) {
         // Load current user
         await loadCurrentUser();
         
+        // Check if user is super admin to determine query
+        const isSuperAdmin = currentUser?.is_super_admin || false;
+        
         // Load group data with membership info
-        const { data: groupData, error: groupError } = await supabase
+        let query = supabase
             .from('grup')
             .select(`
                 *,
@@ -85,9 +88,14 @@ async function loadGroupDetails(groupId) {
                     joined_at
                 )
             `)
-            .eq('id', groupId)
-            .eq('is_disabled', false)
-            .single();
+            .eq('id', groupId);
+            
+        // If not super admin, only show non-disabled groups
+        if (!isSuperAdmin) {
+            query = query.eq('is_disabled', false);
+        }
+        
+        const { data: groupData, error: groupError } = await query.single();
         
         if (groupError) {
             if (groupError.code === 'PGRST116') {
@@ -176,12 +184,43 @@ function renderGroupDetails() {
     // Show content
     groupContentEl.style.display = 'block';
     
+    // Check if group is disabled
+    const isDisabled = currentGroup.is_disabled === true;
+    
+    // Add disabled indicator if group is disabled
+    if (isDisabled) {
+        const disabledIndicator = document.createElement('div');
+        disabledIndicator.className = 'mb-4 p-3 bg-red-50 border border-red-200 rounded-lg';
+        disabledIndicator.innerHTML = `
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-red-800 font-medium">Acest grup este dezactivat</span>
+            </div>
+        `;
+        
+        // Insert the disabled indicator at the top of the group content
+        const groupContent = document.getElementById('group-content');
+        if (groupContent) {
+            groupContent.insertBefore(disabledIndicator, groupContent.firstChild);
+        }
+        
+        // Apply visual styling to the main content
+        if (groupContent) {
+            groupContent.classList.add('opacity-75');
+        }
+    }
+    
     // Basic info
     document.getElementById('group-name').textContent = currentGroup.nume;
     document.getElementById('group-location').textContent = currentGroup.zona || 'Locație nespecificată';
     
-    // Status badge
-    const statusInfo = statusMapping[currentGroup.status] || { text: currentGroup.status, class: 'bg-gray-100 text-gray-800' };
+    // Status badge - show disabled status if applicable
+    let statusInfo = statusMapping[currentGroup.status] || { text: currentGroup.status, class: 'bg-gray-100 text-gray-800' };
+    if (isDisabled) {
+        statusInfo = { text: 'Dezactivat', class: 'bg-red-100 text-red-800' };
+    }
     const statusEl = document.getElementById('group-status');
     statusEl.textContent = statusInfo.text;
     statusEl.className = `badge ${statusInfo.class}`;

@@ -125,6 +125,9 @@ async function loadCurrentUser() {
                 email: user.email,
                 ...profile
             };
+            
+            // Show/hide disabled checkbox based on super admin status
+            toggleDisabledCheckboxVisibility();
         } else {
             // User not logged in, redirect to groups page
             window.location.href = '/grupuri.html';
@@ -132,6 +135,18 @@ async function loadCurrentUser() {
     } catch (error) {
         console.error('Error loading current user:', error);
         showError('Eroare la încărcarea utilizatorului. Vă rugăm să vă autentificați din nou.');
+    }
+}
+
+// Toggle visibility of disabled checkbox based on super admin status
+function toggleDisabledCheckboxVisibility() {
+    const disabledCheckboxContainer = document.querySelector('#is_disabled').closest('.flex.items-center');
+    if (disabledCheckboxContainer) {
+        if (currentUser && currentUser.is_super_admin) {
+            disabledCheckboxContainer.style.display = 'flex';
+        } else {
+            disabledCheckboxContainer.style.display = 'none';
+        }
     }
 }
 
@@ -459,6 +474,9 @@ function showForm() {
     if (loadingEl) {
         loadingEl.style.display = 'none';
     }
+    
+    // Toggle disabled checkbox visibility when showing form
+    toggleDisabledCheckboxVisibility();
 }
 
 // Show loading state

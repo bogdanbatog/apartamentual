@@ -29,6 +29,30 @@ const typeMapping = {
 
 // Markdown rendering is now handled by markdown-utils.js
 
+// Fetch user profile to check super admin status
+async function fetchUserProfile() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+        if (error) {
+            console.error("Error fetching user profile:", error);
+            return null;
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+    }
+}
+
 // Initialize the groups page
 function initGrupuri() {
     try {
@@ -73,12 +97,21 @@ async function loadGrupuri() {
 
         // Get current user (if logged in)
         let currentUser = null;
+        let userProfile = null;
         try {
             const { data: userResult } = await supabase.auth.getUser();
             currentUser = userResult && userResult.user ? userResult.user : null;
+            
+            // Get user profile to check super admin status
+            if (currentUser) {
+                userProfile = await fetchUserProfile();
+            }
         } catch (_) {
             currentUser = null;
+            userProfile = null;
         }
+
+        const isSuperAdmin = userProfile?.is_super_admin || false;
 
         // 1) Public groups (not disabled AND public)
         const { data: publicGroups, error: publicError } = await supabase
@@ -145,6 +178,30 @@ async function loadGrupuri() {
             combined = Array.from(byId.values());
         }
 
+        // 3) If super admin, also load disabled groups
+        if (isSuperAdmin) {
+            const { data: disabledGroups, error: disabledError } = await supabase
+                .from('grup')
+                .select(`
+                    *,
+                    grup_membership(
+                        id,
+                        status,
+                        role
+                    )
+                `)
+                .eq('is_disabled', true)
+                .order('created_at', { ascending: false });
+            if (disabledError) throw disabledError;
+
+            // Merge disabled groups with existing groups
+            const byId = new Map();
+            [...combined, ...(disabledGroups || [])].forEach(g => {
+                if (g && g.id && !byId.has(g.id)) byId.set(g.id, g);
+            });
+            combined = Array.from(byId.values());
+        }
+
         // Process the data to include member counts (best-effort based on visible memberships)
         allGrupuri = combined.map(grup => {
             const memberships = Array.isArray(grup.grup_membership) ? grup.grup_membership : [];
@@ -193,6 +250,9 @@ function createGrupCard(grup) {
         year: 'numeric'
     });
     
+    // Check if group is disabled
+    const isDisabled = grup.is_disabled === true;
+    
     // Determine group type based on description or other criteria
     const groupType = determineGroupType(grup);
     const typeInfo = typeMapping[groupType] || { text: groupType, class: 'bg-gray-100 text-gray-800' };
@@ -201,30 +261,42 @@ function createGrupCard(grup) {
     const tags = generateGroupTags(grup);
     
     const descriereSnippet = renderMarkdownSnippet(grup.descriere || '');
+    
+    // Card styling - grayed out for disabled groups
+    const cardClass = isDisabled ? 'card card-disabled' : 'card';
+    const contentOpacity = isDisabled ? 'opacity-75' : '';
+    
+    // Disabled label
+    const disabledLabel = isDisabled ? 
+        `<div class="mb-3">
+            <span class="badge bg-red-100 text-red-800">Dezactivat</span>
+        </div>` : '';
+    
     return `
-        <div class="card">
+        <div class="${cardClass}">
+            ${disabledLabel}
             ${grup.image_url ? `
-                <div class="w-full h-48 bg-gray-200 rounded-lg overflow-hidden mb-4">
+                <div class="w-full h-48 bg-gray-200 rounded-lg overflow-hidden mb-4 ${contentOpacity}">
                     <img src="${grup.image_url}" alt="${escapeHtml(grup.nume)}" class="w-full h-full object-cover" 
                          onerror="this.parentElement.style.display='none'">
                 </div>
             ` : ''}
-            <div class="flex justify-between items-start mb-3">
+            <div class="flex justify-between items-start mb-3 ${contentOpacity}">
                 <h3 class="text-lg">${escapeHtml(grup.nume)}</h3>
                 <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
             </div>
-            <p class="subtitle mb-4">${descriereSnippet}</p>
-            <div class="grid grid-cols-2 gap-2 text-sm mb-4">
+            <p class="subtitle mb-4 ${contentOpacity}">${descriereSnippet}</p>
+            <div class="grid grid-cols-2 gap-2 text-sm mb-4 ${contentOpacity}">
                 <div><strong>Locație:</strong> ${escapeHtml(grup.zona || '')}</div>
                 <div><strong>Membri actuali:</strong> ${grup.member_count}</div>
                 <div><strong>Tip locuințe:</strong> ${typeInfo.text}</div>
                 <div><strong>Buget/mp:</strong> ${grup.buget_max_per_apartament ? grup.buget_max_per_apartament + ' €' : 'N/A'}</div>
             </div>
-            <div class="flex gap-2 text-xs mb-4">
+            <div class="flex gap-2 text-xs mb-4 ${contentOpacity}">
                 ${tags.map(tag => `<span class="badge ${tag.class}">${tag.text}</span>`).join('')}
             </div>
-            <p class="text-sm mb-4">${descriereSnippet}</p>
-            <div class="flex justify-between items-center">
+            <p class="text-sm mb-4 ${contentOpacity}">${descriereSnippet}</p>
+            <div class="flex justify-between items-center ${contentOpacity}">
                 <span class="text-sm text-gray-500">Creat: ${createdDate}</span>
                 <a href="/grup-detail.html?grup=${grup.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
             </div>
