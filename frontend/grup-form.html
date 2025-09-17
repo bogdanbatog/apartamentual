@@ -7,6 +7,8 @@
     <meta name="description" content="Înscrie grupul tău pe platformă sau editează un grup existent.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <script src="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.css">
     <link rel="stylesheet" href="styles.css">
     <script>
         tailwind.config = {
@@ -93,9 +95,9 @@
                                 <label for="descriere" class="block text-sm font-medium text-gray-700 mb-2">
                                     Descrierea grupului <span class="text-red-500">*</span>
                                 </label>
-                                <textarea id="descriere" name="descriere" rows="4" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Descrie obiectivele și caracteristicile grupului tău..."></textarea>
+                                <div id="descriere_editor" style="height: 220px; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
+                                <textarea id="descriere" name="descriere" rows="4" required style="display: none;"></textarea>
+                                <p class="text-xs text-gray-500 mt-1">Suportă Markdown: titluri, bold, italic, liste, linkuri și cod.</p>
                             </div>
 
                             <div>
@@ -241,6 +243,7 @@
     <script src="js/footer.js"></script>
     <script src="js/auth-modal.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/markdown-utils.js"></script>
     <script src="js/grup-form.js"></script>
 </body>
 </html>

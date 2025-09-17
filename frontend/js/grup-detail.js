@@ -4,6 +4,8 @@ let currentUser = null;
 let userMembership = null;
 let groupOwner = null;
 
+// Markdown rendering is now handled by markdown-utils.js
+
 // DOM elements
 const loadingEl = document.getElementById('loading');
 const errorEl = document.getElementById('error');
@@ -196,8 +198,17 @@ function renderGroupDetails() {
         imageContainer.style.display = 'block';
     }
     
-    // Description
-    document.getElementById('group-description').textContent = currentGroup.descriere || 'Nu există descriere disponibilă.';
+    // Description (render markdown)
+    const descriereEl = document.getElementById('group-description');
+    try {
+        descriereEl.innerHTML = renderMarkdown(currentGroup.descriere || '');
+        if (!currentGroup.descriere) {
+            descriereEl.textContent = 'Nu există descriere disponibilă.';
+        }
+    } catch (error) {
+        console.error('Error rendering group description markdown:', error);
+        descriereEl.textContent = currentGroup.descriere || 'Nu există descriere disponibilă.';
+    }
     
     // Project details
     document.getElementById('apartments-desired').textContent = 

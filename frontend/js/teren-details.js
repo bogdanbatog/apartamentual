@@ -15,28 +15,7 @@ const analysisMapping = {
     'rejected': { text: 'respinsă', class: 'bg-red-100 text-red-800' }
 };
 
-// Simple markdown renderer
-function renderMarkdown(text) {
-    if (!text) return '';
-    
-    return text
-        // Headers (process in order from most specific to least)
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        // Bold (must come before italic)
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italic (simplified regex for better compatibility)
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        // Code blocks
-        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-        // Inline code
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        // Links
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-        // Line breaks
-        .replace(/\n/g, '<br>');
-}
+// Markdown rendering is now handled by markdown-utils.js
 
 // Extract teren ID from URL query parameter
 function getTerenIdFromUrl() {

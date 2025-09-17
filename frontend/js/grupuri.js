@@ -27,6 +27,8 @@ const typeMapping = {
     'Mixt': { text: 'Mixt', class: 'bg-purple-100 text-purple-800' }
 };
 
+// Markdown rendering is now handled by markdown-utils.js
+
 // Initialize the groups page
 function initGrupuri() {
     try {
@@ -198,6 +200,7 @@ function createGrupCard(grup) {
     // Generate tags based on group characteristics
     const tags = generateGroupTags(grup);
     
+    const descriereSnippet = renderMarkdownSnippet(grup.descriere || '');
     return `
         <div class="card">
             ${grup.image_url ? `
@@ -210,7 +213,7 @@ function createGrupCard(grup) {
                 <h3 class="text-lg">${escapeHtml(grup.nume)}</h3>
                 <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
             </div>
-            <p class="subtitle mb-4">${escapeHtml(grup.descriere || '')}</p>
+            <p class="subtitle mb-4">${descriereSnippet}</p>
             <div class="grid grid-cols-2 gap-2 text-sm mb-4">
                 <div><strong>Locație:</strong> ${escapeHtml(grup.zona || '')}</div>
                 <div><strong>Membri actuali:</strong> ${grup.member_count}</div>
@@ -220,7 +223,7 @@ function createGrupCard(grup) {
             <div class="flex gap-2 text-xs mb-4">
                 ${tags.map(tag => `<span class="badge ${tag.class}">${tag.text}</span>`).join('')}
             </div>
-            <p class="text-sm mb-4">${escapeHtml(grup.descriere || '')}</p>
+            <p class="text-sm mb-4">${descriereSnippet}</p>
             <div class="flex justify-between items-center">
                 <span class="text-sm text-gray-500">Creat: ${createdDate}</span>
                 <a href="/grup-detail.html?grup=${grup.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>

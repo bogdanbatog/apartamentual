@@ -3,6 +3,7 @@ let currentUser = null;
 let isEditMode = false;
 let groupId = null;
 let currentGroup = null;
+let descriereEditor = null;
 
 // DOM elements
 const loadingEl = document.getElementById('loading');
@@ -75,6 +76,31 @@ function setupGrupFormEventListeners() {
     if (startDateInput && endDateInput) {
         startDateInput.addEventListener('change', validateDates);
         endDateInput.addEventListener('change', validateDates);
+    }
+}
+
+// Initialize TinyMDE editor for group description
+function initializeDescriereEditor() {
+    try {
+        if (document.getElementById('descriere_editor')) {
+            descriereEditor = new TinyMDE.Editor({
+                element: 'descriere_editor',
+                placeholder: 'Descrie obiectivele și caracteristicile grupului tău...',
+                initialValue: '',
+                defaultValue: ''
+            });
+            
+            // Clear any default content after initialization
+            if (descriereEditor) {
+                setTimeout(() => {
+                    if (descriereEditor.getContent() && descriereEditor.getContent().includes('# Hello TinyMDE!')) {
+                        descriereEditor.setContent('');
+                    }
+                }, 100);
+            }
+        }
+    } catch (error) {
+        console.error('Error initializing TinyMDE for descriere:', error);
     }
 }
 
@@ -165,7 +191,13 @@ function populateForm(group) {
     
     // Populate form fields
     document.getElementById('nume').value = group.nume || '';
-    document.getElementById('descriere').value = group.descriere || '';
+    const descriereTextarea = document.getElementById('descriere');
+    if (descriereEditor) {
+        descriereEditor.setContent(group.descriere || '');
+        if (descriereTextarea) descriereTextarea.value = group.descriere || '';
+    } else if (descriereTextarea) {
+        descriereTextarea.value = group.descriere || '';
+    }
     document.getElementById('zona').value = group.zona || '';
     document.getElementById('max_members').value = group.max_members || '';
     document.getElementById('nr_apartamente_dorite').value = group.nr_apartamente_dorite || '';
@@ -216,7 +248,7 @@ async function handleFormSubmit(e) {
         const formData = new FormData(formEl);
         const groupData = {
             nume: formData.get('nume'),
-            descriere: formData.get('descriere'),
+            descriere: (descriereEditor ? descriereEditor.getContent() : formData.get('descriere')),
             zona: formData.get('zona'),
             max_members: parseInt(formData.get('max_members')),
             nr_apartamente_dorite: formData.get('nr_apartamente_dorite') ? parseInt(formData.get('nr_apartamente_dorite')) : null,
@@ -388,7 +420,7 @@ function validateDates() {
 // Validate form before submission
 function validateForm() {
     const nume = document.getElementById('nume').value.trim();
-    const descriere = document.getElementById('descriere').value.trim();
+    const descriere = (descriereEditor ? descriereEditor.getContent() : document.getElementById('descriere').value).trim();
     const zona = document.getElementById('zona').value;
     const maxMembers = parseInt(document.getElementById('max_members').value);
     
@@ -490,11 +522,13 @@ function hideSuccess() {
 document.addEventListener('DOMContentLoaded', async function() {
     // Wait for supabase to be available
     if (typeof supabase !== 'undefined') {
+        initializeDescriereEditor();
         await initGrupForm();
     } else {
         // Wait a bit for supabase to load
         setTimeout(async () => {
             if (typeof supabase !== 'undefined') {
+                initializeDescriereEditor();
                 await initGrupForm();
             } else {
                 showError('Supabase nu a fost încărcat. Vă rugăm să reîncărcați pagina.');

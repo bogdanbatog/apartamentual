@@ -54,16 +54,38 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('analiza_generala_editor')) {
                 analizaGeneralaEditor = new TinyMDE.Editor({
                     element: 'analiza_generala_editor',
-                    placeholder: 'Rezultatele și observațiile din analiza generală...'
+                    placeholder: 'Rezultatele și observațiile din analiza generală...',
+                    initialValue: '',
+                    defaultValue: ''
                 });
+                
+                // Clear any default content after initialization
+                if (analizaGeneralaEditor) {
+                    setTimeout(() => {
+                        if (analizaGeneralaEditor.getContent() && analizaGeneralaEditor.getContent().includes('# Hello TinyMDE!')) {
+                            analizaGeneralaEditor.setContent('');
+                        }
+                    }, 100);
+                }
             }
 
             // Initialize analiza_specifica editor
             if (document.getElementById('analiza_specifica_editor')) {
                 analizaSpecificaEditor = new TinyMDE.Editor({
                     element: 'analiza_specifica_editor',
-                    placeholder: 'Rezultatele și observațiile din analiza specifică...'
+                    placeholder: 'Rezultatele și observațiile din analiza specifică...',
+                    initialValue: '',
+                    defaultValue: ''
                 });
+                
+                // Clear any default content after initialization
+                if (analizaSpecificaEditor) {
+                    setTimeout(() => {
+                        if (analizaSpecificaEditor.getContent() && analizaSpecificaEditor.getContent().includes('# Hello TinyMDE!')) {
+                            analizaSpecificaEditor.setContent('');
+                        }
+                    }, 100);
+                }
             }
         } catch (error) {
             console.error('Error initializing TinyMDE editors:', error);
