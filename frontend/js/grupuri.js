@@ -68,12 +68,22 @@ async function loadGrupuri() {
     try {
         showLoading(true);
         hideError();
-        
-        const { data, error } = await supabase
+
+        // Get current user (if logged in)
+        let currentUser = null;
+        try {
+            const { data: userResult } = await supabase.auth.getUser();
+            currentUser = userResult && userResult.user ? userResult.user : null;
+        } catch (_) {
+            currentUser = null;
+        }
+
+        // 1) Public groups (not disabled AND public)
+        const { data: publicGroups, error: publicError } = await supabase
             .from('grup')
             .select(`
                 *,
-                grup_membership!inner(
+                grup_membership(
                     id,
                     status,
                     role
@@ -82,24 +92,72 @@ async function loadGrupuri() {
             .eq('is_disabled', false)
             .eq('is_public', true)
             .order('created_at', { ascending: false });
-        
-        if (error) {
-            throw error;
+        if (publicError) throw publicError;
+
+        let combined = Array.isArray(publicGroups) ? publicGroups : [];
+
+        // 2) If logged in, also load private groups owned by the user
+        //    and private groups where the user is an approved member.
+        if (currentUser && currentUser.id) {
+            // Owned private groups
+            const { data: ownedPrivate, error: ownedError } = await supabase
+                .from('grup')
+                .select(`
+                    *,
+                    grup_membership(
+                        id,
+                        status,
+                        role
+                    )
+                `)
+                .eq('is_disabled', false)
+                .eq('is_public', false)
+                .eq('owner_user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+            if (ownedError) throw ownedError;
+
+            // Member private groups (approved)
+            const { data: memberPrivate, error: memberError } = await supabase
+                .from('grup')
+                .select(`
+                    *,
+                    grup_membership!inner(
+                        id,
+                        status,
+                        role,
+                        user_id
+                    )
+                `)
+                .eq('is_disabled', false)
+                .eq('is_public', false)
+                .eq('grup_membership.user_id', currentUser.id)
+                .eq('grup_membership.status', 'approved')
+                .order('created_at', { ascending: false });
+            if (memberError) throw memberError;
+
+            // Merge and dedupe by id
+            const byId = new Map();
+            [...combined, ...(ownedPrivate || []), ...(memberPrivate || [])].forEach(g => {
+                if (g && g.id && !byId.has(g.id)) byId.set(g.id, g);
+            });
+            combined = Array.from(byId.values());
         }
-        
-        // Process the data to include member counts
-        allGrupuri = data.map(grup => {
-            const approvedMembers = grup.grup_membership.filter(member => member.status === 'approved');
+
+        // Process the data to include member counts (best-effort based on visible memberships)
+        allGrupuri = combined.map(grup => {
+            const memberships = Array.isArray(grup.grup_membership) ? grup.grup_membership : [];
+            const approvedMembers = memberships.filter(member => member.status === 'approved');
+            const currentMembersCount = approvedMembers.length;
             return {
                 ...grup,
-                current_members: approvedMembers.length,
-                member_count: `${approvedMembers.length}/${grup.max_members}`
+                current_members: currentMembersCount,
+                member_count: `${currentMembersCount}/${grup.max_members}`
             };
         });
-        
+
         filteredGrupuri = [...allGrupuri];
         renderGrupuri();
-        
+
     } catch (error) {
         console.error('Error loading groups:', error);
         showError('Eroare la încărcarea grupurilor: ' + error.message);
