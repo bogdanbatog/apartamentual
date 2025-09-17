@@ -309,13 +309,32 @@ function renderGroupDetails() {
     
     // Render owner actions
     renderOwnerActions();
+
+    // Render owner/super admin membership management section
+    renderOwnerMembershipSection();
 }
 
 // Render join/leave section based on user status
 function renderJoinSection() {
     const joinSection = document.getElementById('join-section');
     const memberActions = document.getElementById('member-actions');
+    const isOwner = currentUser && currentGroup && currentUser.id === currentGroup.owner_user_id;
     
+    // Reset member actions visibility by default
+    if (memberActions) {
+        memberActions.style.display = 'none';
+    }
+
+    // If current user is the owner, show owner info and no join/leave buttons
+    if (isOwner) {
+        if (joinSection) {
+            joinSection.innerHTML = `
+                <span class="badge bg-blue-100 text-blue-800">Ești creatorul acestui grup</span>
+            `;
+        }
+        return;
+    }
+
     if (!currentUser) {
         // User not logged in
         joinSection.innerHTML = `
@@ -329,7 +348,10 @@ function renderJoinSection() {
             joinSection.innerHTML = `
                 <span class="badge bg-green-100 text-green-800">Membru activ</span>
             `;
-            memberActions.style.display = 'block';
+            // Show leave button only for members who are not owners
+            if (memberActions) {
+                memberActions.style.display = 'block';
+            }
         } else if (userMembership.status === 'pending') {
             joinSection.innerHTML = `
                 <span class="badge bg-yellow-100 text-yellow-800">Cerere în așteptare</span>
@@ -379,6 +401,147 @@ function renderOwnerActions() {
         editGroupBtn.href = `/grup-form.html?id=${currentGroup.id}`;
     } else {
         ownerActions.style.display = 'none';
+    }
+}
+
+// Render owner/super admin membership management
+async function renderOwnerMembershipSection() {
+    const section = document.getElementById('owner-membership-section');
+    if (!section || !currentGroup) return;
+
+    const isOwner = currentUser && currentUser.id === currentGroup.owner_user_id;
+    const isSuperAdmin = !!(currentUser && currentUser.is_super_admin);
+
+    // Show only if owner or super admin
+    if (!isOwner && !isSuperAdmin) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+
+    // Show admin view note if super admin and not owner
+    const adminViewNote = document.getElementById('admin-view-note');
+    if (adminViewNote) {
+        if (isSuperAdmin && !isOwner) {
+            adminViewNote.style.display = 'inline';
+        } else {
+            adminViewNote.style.display = 'none';
+        }
+    }
+
+    // Prepare lists
+    const approvedList = document.getElementById('owner-members-approved');
+    const pendingList = document.getElementById('owner-members-pending');
+    const removedList = document.getElementById('owner-members-removed');
+
+    const approvedEmpty = document.getElementById('owner-members-approved-empty');
+    const pendingEmpty = document.getElementById('owner-members-pending-empty');
+    const removedEmpty = document.getElementById('owner-members-removed-empty');
+
+    if (!approvedList || !pendingList || !removedList) return;
+
+    const memberships = Array.isArray(currentGroup.grup_membership) ? currentGroup.grup_membership : [];
+
+    // Fetch profiles for all user_ids
+    const userIds = memberships.map(m => m.user_id).filter(Boolean);
+    const profilesByUserId = await fetchProfilesByUserIds(userIds);
+
+    // Build items
+    const approvedItems = memberships
+        .filter(m => m.status === 'approved')
+        .map(m => createMemberItem(m, profilesByUserId, { showApprove: false }));
+
+    const pendingItems = memberships
+        .filter(m => m.status === 'pending')
+        .map(m => createMemberItem(m, profilesByUserId, { showApprove: true }));
+
+    const removedItems = memberships
+        .filter(m => m.status === 'removed' || m.status === 'left' || m.status === 'rejected')
+        .map(m => createMemberItem(m, profilesByUserId, { showApprove: false }));
+
+    approvedList.innerHTML = approvedItems.join('');
+    pendingList.innerHTML = pendingItems.join('');
+    removedList.innerHTML = removedItems.join('');
+
+    if (approvedEmpty) approvedEmpty.style.display = approvedItems.length ? 'none' : 'block';
+    if (pendingEmpty) pendingEmpty.style.display = pendingItems.length ? 'none' : 'block';
+    if (removedEmpty) removedEmpty.style.display = removedItems.length ? 'none' : 'block';
+
+    // Wire approve buttons
+    if (pendingItems.length) {
+        pendingList.querySelectorAll('[data-approve-id]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-approve-id');
+                await approveMembership(id);
+            });
+        });
+    }
+}
+
+// Helper: fetch profiles for a set of user ids
+async function fetchProfilesByUserIds(userIds) {
+    const map = new Map();
+    const unique = Array.from(new Set(userIds)).filter(Boolean);
+    if (unique.length === 0) return map;
+
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('user_id', unique);
+        if (error) throw error;
+        (data || []).forEach(p => map.set(p.user_id, p));
+    } catch (err) {
+        console.error('Error fetching member profiles:', err);
+    }
+    return map;
+}
+
+// Helper: create list item HTML for a membership
+function createMemberItem(membership, profilesByUserId, options) {
+    const { showApprove } = options || {};
+    const profile = profilesByUserId.get(membership.user_id) || {};
+    const displayName = profile.full_name || redactEmail(profile.email || '');
+    const roleText = membership.role ? ` · rol: ${membership.role}` : '';
+    const statusBadge = membership.status === 'pending'
+        ? '<span class="badge bg-yellow-100 text-yellow-800">în așteptare</span>'
+        : membership.status === 'approved'
+            ? '<span class="badge bg-green-100 text-green-800">aprobat</span>'
+            : `<span class="badge bg-gray-100 text-gray-800">${membership.status}</span>`;
+
+    const approveButton = showApprove
+        ? `<button class="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700" data-approve-id="${membership.id}">Aprobă</button>`
+        : '';
+
+    return `
+        <li class="flex items-center justify-between">
+            <div class="truncate">
+                <span class="font-medium">${escapeHtml(displayName || 'Utilizator')}</span>
+                <span class="text-gray-500">${roleText}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                ${statusBadge}
+                ${approveButton}
+            </div>
+        </li>
+    `;
+}
+
+// Approve membership
+async function approveMembership(membershipId) {
+    if (!membershipId) return;
+    try {
+        const { error } = await supabase
+            .from('grup_membership')
+            .update({ status: 'approved', joined_at: new Date().toISOString() })
+            .eq('id', membershipId);
+        if (error) throw error;
+        // Reload details to refresh lists and counters
+        await loadGroupDetails(currentGroup.id);
+    } catch (err) {
+        console.error('Error approving membership:', err);
+        alert('Eroare la aprobare: ' + err.message);
     }
 }
 

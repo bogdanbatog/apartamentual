@@ -124,6 +124,31 @@
                                 <!-- Tags will be inserted here -->
                             </div>
                         </div>
+
+                        <!-- Owner/Super Admin Membership Management (moved to left column) -->
+                        <div id="owner-membership-section" class="card" style="display: none;">
+                            <div class="flex items-start justify-between mb-4">
+                                <h2 class="text-xl font-semibold">Gestionare membri</h2>
+                                <span id="admin-view-note" class="text-xs text-gray-600" style="display: none;">vezi aceasta sectiune pentru ca esti administrator</span>
+                            </div>
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">Membri actuali</h3>
+                                    <ul id="owner-members-approved" class="space-y-2 text-sm text-gray-700"></ul>
+                                    <p id="owner-members-approved-empty" class="text-sm text-gray-500" style="display: none;">Nu există membri aprobați încă.</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">În așteptare</h3>
+                                    <ul id="owner-members-pending" class="space-y-2 text-sm text-gray-700"></ul>
+                                    <p id="owner-members-pending-empty" class="text-sm text-gray-500" style="display: none;">Nu există cereri în așteptare.</p>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900 mb-2">Ieșiți / eliminați</h3>
+                                    <ul id="owner-members-removed" class="space-y-2 text-sm text-gray-700"></ul>
+                                    <p id="owner-members-removed-empty" class="text-sm text-gray-500" style="display: none;">Nu există membri ieșiți sau eliminați.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Right Column - Sidebar -->
@@ -195,6 +220,7 @@
                                 </a>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
