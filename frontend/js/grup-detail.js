@@ -240,8 +240,9 @@ function renderGroupDetails() {
     // Description (render markdown)
     const descriereEl = document.getElementById('group-description');
     try {
-        descriereEl.innerHTML = renderMarkdown(currentGroup.descriere || '');
-        if (!currentGroup.descriere) {
+        if (currentGroup.descriere && currentGroup.descriere.trim()) {
+            descriereEl.innerHTML = renderMarkdown(currentGroup.descriere);
+        } else {
             descriereEl.textContent = 'Nu există descriere disponibilă.';
         }
     } catch (error) {

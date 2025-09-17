@@ -46,3 +46,26 @@ function renderMarkdownSnippet(text) {
     
     return html;
 }
+
+// Helper function to render markdown content into an element with proper styling
+function renderMarkdownToElement(elementId, markdownText, fallbackText = '') {
+    const element = document.getElementById(elementId);
+    if (!element) {
+        console.error(`Element with id '${elementId}' not found`);
+        return;
+    }
+    
+    try {
+        if (markdownText && markdownText.trim()) {
+            const renderedHtml = renderMarkdown(markdownText);
+            element.innerHTML = renderedHtml;
+            // Ensure the element has the markdown-content class for proper styling
+            element.classList.add('markdown-content');
+        } else {
+            element.textContent = fallbackText;
+        }
+    } catch (error) {
+        console.error('Error rendering markdown:', error);
+        element.textContent = markdownText || fallbackText;
+    }
+}
