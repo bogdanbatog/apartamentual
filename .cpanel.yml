@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/ar4/app.ltfbstudio.ro/
+    - /bin/cp -R frontend/* $DEPLOYPATH
