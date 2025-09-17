@@ -26,7 +26,7 @@ async function initGrupForm() {
         isEditMode = !!groupId;
         
         // Set up event listeners
-        setupEventListeners();
+        setupGrupFormEventListeners();
         
         // Load current user first, then load group data if in edit mode
         await loadCurrentUser();
@@ -56,8 +56,8 @@ function getGroupIdFromUrl() {
     return urlParams.get('id');
 }
 
-// Set up event listeners
-function setupEventListeners() {
+// Set up event listeners (scoped for grup form page)
+function setupGrupFormEventListeners() {
     // Form submission
     if (formEl) {
         formEl.addEventListener('submit', handleFormSubmit);

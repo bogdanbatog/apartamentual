@@ -31,7 +31,7 @@ const typeMapping = {
 function initGrupuri() {
     try {
         // Set up event listeners
-        setupEventListeners();
+        setupGrupuriEventListeners();
         
         // Load groups data
         loadGrupuri();
@@ -41,8 +41,8 @@ function initGrupuri() {
     }
 }
 
-// Set up event listeners
-function setupEventListeners() {
+// Set up event listeners (scoped for grupuri page)
+function setupGrupuriEventListeners() {
     // Filter event listeners
     if (locationFilter) {
         locationFilter.addEventListener('change', applyFilters);

@@ -31,7 +31,7 @@ function initGrupDetail() {
         }
 
         // Set up event listeners
-        setupEventListeners();
+        setupGrupDetailEventListeners();
         
         // Load group data
         loadGroupDetails(groupId);
@@ -47,8 +47,8 @@ function getGroupIdFromUrl() {
     return urlParams.get('grup');
 }
 
-// Set up event listeners
-function setupEventListeners() {
+// Set up event listeners (scoped for group detail page)
+function setupGrupDetailEventListeners() {
     // Retry button
     if (retryBtn) {
         retryBtn.addEventListener('click', () => {
