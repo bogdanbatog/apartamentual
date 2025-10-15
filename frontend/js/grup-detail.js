@@ -630,9 +630,6 @@ function generateGroupTags(grup) {
     if (descriere.includes('co-housing') || descriere.includes('comunitar')) {
         tags.push({ text: 'Co-housing', class: 'bg-purple-100 text-purple-800' });
     }
-    if (descriere.includes('tech') || descriere.includes('modern')) {
-        tags.push({ text: 'Tech-oriented', class: 'bg-purple-100 text-purple-800' });
-    }
     if (descriere.includes('accesibil') || descriere.includes('senior')) {
         tags.push({ text: 'Accessible design', class: 'bg-blue-100 text-blue-800' });
     }

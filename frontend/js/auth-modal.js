@@ -101,3 +101,34 @@ function openAuthModalWithMessage(message) {
         authModal.classList.remove('hidden');
     }
 }
+
+// Global interceptor for any link to terenuri-propune.html
+document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('click', async (event) => {
+        // Only handle unmodified left-clicks
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        const anchor = event.target.closest('a');
+        if (!anchor || !anchor.href) return;
+
+        try {
+            const url = new URL(anchor.href, window.location.origin);
+            // Match both absolute and relative links, with or without leading slash, and allow query params
+            const isProposeTerenLink = url.pathname.endsWith('/terenuri-propune.html') || url.pathname === 'terenuri-propune.html';
+            if (!isProposeTerenLink) return;
+
+            event.preventDefault();
+
+            const authenticated = await isUserAuthenticated();
+            if (authenticated) {
+                window.location.href = url.href;
+            } else {
+                openAuthModalWithMessage('Va rugam sa va inregistrati sau sa intrati in contul dvs. pentru a adauga un teren.');
+            }
+        } catch (e) {
+            // If URL parsing fails, do nothing
+        }
+    });
+});

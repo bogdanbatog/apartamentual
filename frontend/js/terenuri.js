@@ -309,19 +309,6 @@ function showError() {
     noResultsEl.classList.add('hidden');
 }
 
-async function handlePropuneTerenClick(event) {
-    event.preventDefault();
-    
-    const isAuthenticated = await isUserAuthenticated();
-    
-    if (isAuthenticated) {
-        // User is authenticated, redirect to the propose terrain page
-        window.location.href = '/terenuri-propune.html';
-    } else {
-        // User is not authenticated, show auth modal with custom message
-        openAuthModalWithMessage('Va rugam sa va inregistrati sau sa intrati in contul dvs. pentru a adauga un teren.');
-    }
-}
 
 // Event listeners
 locationFilter.addEventListener('change', filterTerenuri);
@@ -331,18 +318,8 @@ retryBtn.addEventListener('click', fetchTerenuri);
 prevPageBtn.addEventListener('click', goToPreviousPage);
 nextPageBtn.addEventListener('click', goToNextPage);
 
-// Set up authentication checks for "Propune teren" buttons
-function setupPropuneTerenButtons() {
-    // Find all "Propune teren" buttons and links
-    const propuneTerenLinks = document.querySelectorAll('a[href="/terenuri-propune.html"]');
-    
-    propuneTerenLinks.forEach(link => {
-        link.addEventListener('click', handlePropuneTerenClick);
-    });
-}
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     fetchTerenuri();
-    setupPropuneTerenButtons();
 });
