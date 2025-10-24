@@ -112,6 +112,28 @@ function setupProfileLinks() {
         });
     }
     
+    // Set up auth toggle button click handlers
+    const authToggle = document.getElementById('auth-toggle');
+    const mobileAuthToggle = document.getElementById('mobile-auth-toggle');
+    
+    if (authToggle) {
+        authToggle.addEventListener('click', () => {
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+            }
+        });
+    }
+    
+    if (mobileAuthToggle) {
+        mobileAuthToggle.addEventListener('click', () => {
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+            }
+        });
+    }
+    
     // Set up logout button click handlers
     const navLogoutBtn = document.getElementById('nav-logout-btn');
     const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
