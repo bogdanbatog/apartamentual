@@ -151,7 +151,10 @@ async function loadCurrentUser() {
             };
         }
     } catch (error) {
-        console.error('Error loading current user:', error);
+        // Only log as error if it's not an authentication issue
+        if (error.message && !error.message.includes('Bearer token')) {
+            console.error('Error loading current user:', error);
+        }
         // Don't throw error here, just set currentUser to null
         currentUser = null;
     }
@@ -162,18 +165,41 @@ async function loadGroupOwner() {
     try {
         if (!currentGroup) return;
         
+        console.log('Loading group owner for user_id:', currentGroup.owner_user_id);
+        
         const { data: owner, error } = await supabase
             .from('profiles')
             .select('*')
             .eq('user_id', currentGroup.owner_user_id)
             .single();
         
-        if (error) throw error;
+        if (error) {
+            // Handle case where profile doesn't exist
+            if (error.code === 'PGRST116') {
+                console.log('Group owner profile not found, using fallback display');
+                groupOwner = {
+                    user_id: currentGroup.owner_user_id,
+                    email: 'profil indisponibil',
+                    full_name: 'Administrator grup'
+                };
+                return;
+            }
+            throw error;
+        }
         
+        console.log('Group owner loaded successfully:', owner);
         groupOwner = owner;
     } catch (error) {
         console.error('Error loading group owner:', error);
-        groupOwner = null;
+        console.error('Group owner_user_id:', currentGroup?.owner_user_id);
+        console.error('Error details:', error.message, error.code);
+        
+        // Fallback: create a minimal owner object
+        groupOwner = {
+            user_id: currentGroup?.owner_user_id,
+            email: 'profil indisponibil',
+            full_name: 'Administrator grup'
+        };
     }
 }
 
@@ -280,7 +306,18 @@ function renderGroupDetails() {
     // Group owner
     if (groupOwner) {
         const displayName = groupOwner.full_name || redactEmail(groupOwner.email);
-        document.getElementById('group-owner-name').textContent = displayName;
+        const ownerLink = document.getElementById('group-owner-link');
+        ownerLink.textContent = displayName;
+        
+        // Only make it a link if we have a valid profile (not fallback)
+        if (groupOwner.email !== 'profil indisponibil') {
+            ownerLink.href = `/profile-view.html?id=${groupOwner.user_id}`;
+            ownerLink.classList.add('text-blue-600', 'hover:text-blue-800', 'hover:underline');
+        } else {
+            ownerLink.href = '#';
+            ownerLink.classList.remove('text-blue-600', 'hover:text-blue-800', 'hover:underline');
+            ownerLink.classList.add('text-gray-600', 'cursor-default');
+        }
     }
     
     // Dates

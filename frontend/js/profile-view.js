@@ -6,6 +6,12 @@ let currentUser = null;
 
 // Initialize profile view
 function initProfileView() {
+    // Wait for Supabase to be initialized
+    if (typeof supabase === 'undefined') {
+        setTimeout(initProfileView, 100);
+        return;
+    }
+    
     // Get user ID from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
@@ -25,11 +31,7 @@ async function checkAuthAndLoadProfile(userId) {
         const { data: { user } } = await supabase.auth.getUser();
         currentUser = user;
         
-        if (!user) {
-            showNotAuthenticated();
-            return;
-        }
-        
+        // Always try to load the profile, regardless of authentication status
         await loadProfile(userId);
     } catch (error) {
         console.error('Error checking auth:', error);
