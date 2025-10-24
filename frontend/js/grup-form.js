@@ -69,14 +69,6 @@ function setupGrupFormEventListeners() {
         pozaInput.addEventListener('change', handleImagePreview);
     }
     
-    // Date validation
-    const startDateInput = document.getElementById('data_incepere_proiect');
-    const endDateInput = document.getElementById('data_finalizare_proiect');
-    
-    if (startDateInput && endDateInput) {
-        startDateInput.addEventListener('change', validateDates);
-        endDateInput.addEventListener('change', validateDates);
-    }
 }
 
 // Initialize TinyMDE editor for group description
@@ -216,18 +208,6 @@ function populateForm(group) {
     document.getElementById('zona').value = group.zona || '';
     document.getElementById('max_members').value = group.max_members || '';
     document.getElementById('nr_apartamente_dorite').value = group.nr_apartamente_dorite || '';
-    document.getElementById('buget_max_per_apartament').value = group.buget_max_per_apartament || '';
-    
-    // Format dates for input
-    if (group.data_incepere_proiect) {
-        const startDate = new Date(group.data_incepere_proiect);
-        document.getElementById('data_incepere_proiect').value = startDate.toISOString().split('T')[0];
-    }
-    
-    if (group.data_finalizare_proiect) {
-        const endDate = new Date(group.data_finalizare_proiect);
-        document.getElementById('data_finalizare_proiect').value = endDate.toISOString().split('T')[0];
-    }
     
     // Checkboxes
     document.getElementById('is_public').checked = group.is_public || false;
@@ -267,9 +247,10 @@ async function handleFormSubmit(e) {
             zona: formData.get('zona'),
             max_members: parseInt(formData.get('max_members')),
             nr_apartamente_dorite: formData.get('nr_apartamente_dorite') ? parseInt(formData.get('nr_apartamente_dorite')) : null,
-            buget_max_per_apartament: formData.get('buget_max_per_apartament') ? parseInt(formData.get('buget_max_per_apartament')) : null,
-            data_incepere_proiect: formData.get('data_incepere_proiect') || null,
-            data_finalizare_proiect: formData.get('data_finalizare_proiect') || null,
+            // Set reasonable defaults for non-null fields
+            buget_max_per_apartament: 100000, // Default budget of 100,000 EUR
+            data_incepere_proiect: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 1 year from now
+            data_finalizare_proiect: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 2 years from now
             is_public: formData.get('is_public') === 'on',
             is_disabled: formData.get('is_disabled') === 'on',
             status: 'active'
@@ -418,19 +399,6 @@ function handleImagePreview(e) {
     }
 }
 
-// Validate dates
-function validateDates() {
-    const startDate = document.getElementById('data_incepere_proiect').value;
-    const endDate = document.getElementById('data_finalizare_proiect').value;
-    
-    if (startDate && endDate && startDate > endDate) {
-        showError('Data începerii proiectului trebuie să fie înainte de data finalizării.');
-        return false;
-    }
-    
-    hideError();
-    return true;
-}
 
 // Validate form before submission
 function validateForm() {
@@ -459,9 +427,6 @@ function validateForm() {
         return false;
     }
     
-    if (!validateDates()) {
-        return false;
-    }
     
     return true;
 }

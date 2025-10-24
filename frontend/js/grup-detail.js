@@ -254,14 +254,8 @@ function renderGroupDetails() {
     document.getElementById('apartments-desired').textContent = 
         currentGroup.nr_apartamente_dorite ? currentGroup.nr_apartamente_dorite.toString() : 'Nespecificat';
     
-    document.getElementById('budget-per-apartment').textContent = 
-        currentGroup.buget_max_per_apartament ? `${currentGroup.buget_max_per_apartament} €` : 'Nespecificat';
-    
-    document.getElementById('project-start-date').textContent = 
-        currentGroup.data_incepere_proiect ? formatDate(currentGroup.data_incepere_proiect) : 'Nespecificat';
-    
-    document.getElementById('project-end-date').textContent = 
-        currentGroup.data_finalizare_proiect ? formatDate(currentGroup.data_finalizare_proiect) : 'Nespecificat';
+    document.getElementById('group-foundation-date').textContent = 
+        formatDate(currentGroup.created_at);
     
     // Membership info
     const approvedMembers = currentGroup.grup_membership.filter(m => m.status === 'approved');

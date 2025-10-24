@@ -290,12 +290,11 @@ function createGrupCard(grup) {
                 <div><strong>Locație:</strong> ${escapeHtml(grup.zona || '')}</div>
                 <div><strong>Membri actuali:</strong> ${grup.member_count}</div>
                 <div><strong>Tip locuințe:</strong> ${typeInfo.text}</div>
-                <div><strong>Buget/mp:</strong> ${grup.buget_max_per_apartament ? grup.buget_max_per_apartament + ' €' : 'N/A'}</div>
+                <div><strong>Data înființării:</strong> ${createdDate}</div>
             </div>
             <div class="flex gap-2 text-xs mb-4 ${contentOpacity}">
                 ${tags.map(tag => `<span class="badge ${tag.class}">${tag.text}</span>`).join('')}
             </div>
-            <p class="text-sm mb-4 ${contentOpacity}">${descriereSnippet}</p>
             <div class="flex justify-between items-center ${contentOpacity}">
                 <span class="text-sm text-gray-500">Creat: ${createdDate}</span>
                 <a href="/grup-detail.html?grup=${grup.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
