@@ -20,7 +20,15 @@ function createNavigation(currentPage = '') {
                     `).join('')}
                 </nav>
                 <div class="flex gap-3">
-                    <button id="auth-toggle" class="badge">Login/Sign Up</button>
+                    <div id="auth-section">
+                        <button id="auth-toggle" class="badge">Login/Sign Up</button>
+                    </div>
+                    <div id="profile-section" class="hidden">
+                        <div class="flex items-center gap-3">
+                            <a id="profile-link" href="#" class="text-sm text-gray-600 hover:text-gray-900">Profil</a>
+                            <button id="nav-logout-btn" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -36,6 +44,17 @@ function createNavigation(currentPage = '') {
                         <a href="${item.href}" ${currentPage === item.id ? 'class="font-semibold"' : ''}>${item.label}</a>
                     `).join('')}
                 </nav>
+                <div class="container py-3 border-t">
+                    <div id="mobile-auth-section">
+                        <button id="mobile-auth-toggle" class="w-full text-left py-2">Login/Sign Up</button>
+                    </div>
+                    <div id="mobile-profile-section" class="hidden">
+                        <div class="flex flex-col gap-2">
+                            <a id="mobile-profile-link" href="#" class="py-2">Profil</a>
+                            <button id="mobile-logout-btn" class="w-full text-left py-2">Logout</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
     `;
@@ -58,7 +77,121 @@ function loadNavigation(currentPage = '') {
                 mobileMenu.classList.toggle('hidden');
             });
         }
+        
+        // Set up profile links
+        setupProfileLinks();
     }
+}
+
+// Set up profile links and auth state
+function setupProfileLinks() {
+    // Check if user is authenticated
+    checkAuthState();
+    
+    // Set up profile link click handlers
+    const profileLink = document.getElementById('profile-link');
+    const mobileProfileLink = document.getElementById('mobile-profile-link');
+    
+    if (profileLink) {
+        profileLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const userId = getCurrentUserId();
+            if (userId) {
+                window.location.href = `/profile-view.html?id=${userId}`;
+            }
+        });
+    }
+    
+    if (mobileProfileLink) {
+        mobileProfileLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const userId = getCurrentUserId();
+            if (userId) {
+                window.location.href = `/profile-view.html?id=${userId}`;
+            }
+        });
+    }
+    
+    // Set up logout button click handlers
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+    
+    if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', async () => {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Sign out failed:', error);
+                } else {
+                    // Redirect to home page after logout
+                    window.location.href = '/index.html';
+                }
+            } catch (error) {
+                console.error('Error during sign out:', error);
+            }
+        });
+    }
+    
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', async () => {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                    console.error('Sign out failed:', error);
+                } else {
+                    // Redirect to home page after logout
+                    window.location.href = '/index.html';
+                }
+            } catch (error) {
+                console.error('Error during sign out:', error);
+            }
+        });
+    }
+}
+
+// Check authentication state and update UI
+async function checkAuthState() {
+    try {
+        if (typeof supabase === 'undefined') {
+            // Supabase not loaded yet, try again later
+            setTimeout(checkAuthState, 100);
+            return;
+        }
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        updateAuthUI(user);
+    } catch (error) {
+        console.error('Error checking auth state:', error);
+        updateAuthUI(null);
+    }
+}
+
+// Update authentication UI based on user state
+function updateAuthUI(user) {
+    const authSection = document.getElementById('auth-section');
+    const profileSection = document.getElementById('profile-section');
+    const mobileAuthSection = document.getElementById('mobile-auth-section');
+    const mobileProfileSection = document.getElementById('mobile-profile-section');
+    
+    if (user) {
+        // User is logged in
+        if (authSection) authSection.classList.add('hidden');
+        if (profileSection) profileSection.classList.remove('hidden');
+        if (mobileAuthSection) mobileAuthSection.classList.add('hidden');
+        if (mobileProfileSection) mobileProfileSection.classList.remove('hidden');
+    } else {
+        // User is not logged in
+        if (authSection) authSection.classList.remove('hidden');
+        if (profileSection) profileSection.classList.add('hidden');
+        if (mobileAuthSection) mobileAuthSection.classList.remove('hidden');
+        if (mobileProfileSection) mobileProfileSection.classList.add('hidden');
+    }
+}
+
+// Get current user ID
+function getCurrentUserId() {
+    // This will be set by the auth system
+    return window.currentUserId || null;
 }
 
 // Auto-detect current page based on URL

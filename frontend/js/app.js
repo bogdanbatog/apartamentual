@@ -47,7 +47,13 @@ function setupEventListeners() {
     const closeAuthModal = document.getElementById('close-auth-modal');
     const loginBtn = document.getElementById('login-btn');
     const signupBtn = document.getElementById('signup-btn');
-    const logoutBtn = document.getElementById('logout-btn');
+    const logoutBtn = document.getElementById('logout-btn'); // Auth modal logout button
+
+    // If auth modal elements aren't ready yet, retry after a short delay
+    if (!authModal || !loginBtn || !signupBtn) {
+        setTimeout(setupEventListeners, 50);
+        return;
+    }
 
     if (authToggle) {
         authToggle.addEventListener('click', () => {
@@ -156,6 +162,10 @@ async function signOut() {
             showMessage('Sign out failed: ' + error.message, 'error');
         } else {
             showMessage('Signed out successfully!', 'success');
+            // Redirect to home page after successful logout
+            setTimeout(() => {
+                window.location.href = '/index.html';
+            }, 1000);
         }
     } catch (error) {
         showMessage('Error during sign out: ' + error.message, 'error');
@@ -170,6 +180,9 @@ function updateUI(user) {
     const userEmail = document.getElementById('user-email');
     const authToggle = document.getElementById('auth-toggle');
     
+    // Set global user ID for navigation
+    window.currentUserId = user ? user.id : null;
+    
     if (user) {
         // User is logged in
         if (loginForm) loginForm.classList.add('hidden');
@@ -177,12 +190,22 @@ function updateUI(user) {
         if (authState) authState.classList.remove('hidden');
         if (userEmail) userEmail.textContent = user.email;
         if (authToggle) authToggle.textContent = 'Profil';
+        
+        // Update navigation auth state
+        if (typeof updateAuthUI === 'function') {
+            updateAuthUI(user);
+        }
     } else {
         // User is logged out
         if (loginForm) loginForm.classList.remove('hidden');
         if (logoutSection) logoutSection.classList.add('hidden');
         if (authState) authState.classList.add('hidden');
         if (authToggle) authToggle.textContent = 'Login/Sign Up';
+        
+        // Update navigation auth state
+        if (typeof updateAuthUI === 'function') {
+            updateAuthUI(null);
+        }
     }
 }
 

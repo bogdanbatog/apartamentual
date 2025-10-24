@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editează Profil - ApartamenTUal</title>
+    <meta name="description" content="Editează informațiile din profilul tău și preferințele pentru apartamente.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Loading State -->
+            <div id="loading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">Se încarcă profilul...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6" style="display: none;">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Eroare la încărcarea profilului</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p id="error-message"></p>
+                        </div>
+                        <div class="mt-4">
+                            <button id="retry-btn" class="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Încearcă din nou
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Not Authenticated -->
+            <div id="not-authenticated" class="text-center py-8" style="display: none;">
+                <div class="text-gray-400 text-6xl mb-4">🔒</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Trebuie să fii autentificat</h3>
+                <p class="text-gray-600 mb-4">Trebuie să te autentifici pentru a-ți edita profilul.</p>
+                <button id="edit-auth-toggle" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">
+                    Autentifică-te
+                </button>
+            </div>
+
+            <!-- Profile Edit Form -->
+            <div id="profile-edit-content" style="display: none;">
+                <!-- Header Section -->
+                <div class="mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">Editează profilul</h1>
+                            <p class="text-lg text-gray-600">Actualizează informațiile din profilul tău</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <a id="view-profile-link" href="#" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-200">
+                                Vezi profilul
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Message -->
+                <div id="success-message" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6" style="display: none;">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Profil actualizat cu succes!</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p>Informațiile din profilul tău au fost actualizate.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form id="profile-form" class="max-w-4xl mx-auto">
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <!-- Left Column -->
+                        <div class="space-y-6">
+                            <!-- Personal Information -->
+                            <div class="card">
+                                <h2 class="text-xl font-semibold mb-4">Informații personale</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">Nume</label>
+                                        <input type="text" id="first_name" name="first_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Introdu numele">
+                                    </div>
+                                    <div>
+                                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">Prenume</label>
+                                        <input type="text" id="last_name" name="last_name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Introdu prenumele">
+                                    </div>
+                                    <div>
+                                        <label for="varsta" class="block text-sm font-medium text-gray-700 mb-2">Vârsta</label>
+                                        <input type="number" id="varsta" name="varsta" min="18" max="120" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Introdu vârsta">
+                                    </div>
+                                    <div>
+                                        <label for="profesie" class="block text-sm font-medium text-gray-700 mb-2">Profesie</label>
+                                        <input type="text" id="profesie" name="profesie" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Introdu profesia">
+                                    </div>
+                                    <div>
+                                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                                        <input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Introdu numărul de telefon">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="space-y-6">
+                            <!-- Apartment Preferences -->
+                            <div class="card">
+                                <h2 class="text-xl font-semibold mb-4">Preferințe apartament</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="tip_apartament_cauta" class="block text-sm font-medium text-gray-700 mb-2">Tip apartament căutat</label>
+                                        <select id="tip_apartament_cauta" name="tip_apartament_cauta" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Selectează tipul</option>
+                                            <option value="studio">Studio</option>
+                                            <option value="1-camera">1 cameră</option>
+                                            <option value="2-camere">2 camere</option>
+                                            <option value="3-camere">3 camere</option>
+                                            <option value="4-camere">4 camere</option>
+                                            <option value="5-camere">5+ camere</option>
+                                            <option value="duplex">Duplex</option>
+                                            <option value="penthouse">Penthouse</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="zona" class="block text-sm font-medium text-gray-700 mb-2">Zona preferată</label>
+                                        <input type="text" id="zona" name="zona" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Introdu zona preferată">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="card">
+                                <h2 class="text-xl font-semibold mb-4">Informații contact</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input type="email" id="email" name="email" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500" placeholder="Email-ul tău">
+                                        <p class="text-xs text-gray-500 mt-1">Email-ul nu poate fi modificat</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="card">
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Salvează modificările
+                                    </button>
+                                    <button type="button" id="cancel-btn" class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                        Anulează
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Back Link -->
+                <div class="mt-8 text-center">
+                    <a href="/profile-view.html" class="text-blue-600 hover:underline">← Înapoi la profil</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/auth-modal.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/profile-edit.js"></script>
+</body>
+</html>
