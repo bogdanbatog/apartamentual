@@ -343,6 +343,9 @@ function renderGroupDetails() {
 
     // Render owner/super admin membership management section
     renderOwnerMembershipSection();
+
+    // Load and render linked terrains
+    loadAndRenderGroupTerrains();
 }
 
 // Render join/leave section based on user status
@@ -812,3 +815,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
 });
+
+// Fetch linked terrains and render using shared card
+async function loadAndRenderGroupTerrains() {
+    try {
+        const section = document.getElementById('group-terrains-section');
+        const listEl = document.getElementById('group-terrains-list');
+        const emptyEl = document.getElementById('group-terrains-empty');
+        if (!currentGroup || !section || !listEl || !emptyEl) return;
+
+        // Query join table with embedded terenuri
+        const { data, error } = await supabase
+            .from('grup_terenuri')
+            .select('terenuri(*)')
+            .eq('grup_id', currentGroup.id);
+        if (error) throw error;
+
+        const terrains = (data || [])
+            .map(row => row.terenuri)
+            .filter(Boolean);
+
+        if (terrains.length === 0) {
+            listEl.innerHTML = '';
+            emptyEl.style.display = 'block';
+            section.style.display = 'block';
+            return;
+        }
+
+        listEl.innerHTML = terrains.map(t => window.createTerrainCard(t)).join('');
+        emptyEl.style.display = 'none';
+        section.style.display = 'block';
+    } catch (err) {
+        console.error('Error loading linked terrains:', err);
+        // Fail silently in UI; keep section hidden if error occurs
+    }
+}
