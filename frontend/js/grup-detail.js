@@ -426,13 +426,18 @@ function renderJoinSection() {
 function renderOwnerActions() {
     const ownerActions = document.getElementById('owner-actions');
     const editGroupBtn = document.getElementById('edit-group-btn');
+    const editTerenuriBtn = document.getElementById('edit-terenuri-btn');
     
-    if (!ownerActions || !editGroupBtn) return;
+    if (!ownerActions || !editGroupBtn || !editTerenuriBtn) return;
     
-    // Show owner actions if current user is the group owner
-    if (currentUser && currentGroup && currentUser.id === currentGroup.owner_user_id) {
+    // Show owner actions if current user is the group owner or super admin
+    const isOwner = currentUser && currentGroup && currentUser.id === currentGroup.owner_user_id;
+    const isSuperAdmin = currentUser && currentUser.is_super_admin;
+    
+    if (isOwner || isSuperAdmin) {
         ownerActions.style.display = 'block';
         editGroupBtn.href = `/grup-form.html?id=${currentGroup.id}`;
+        editTerenuriBtn.href = `/grup-terenuri-edit.html?grup=${currentGroup.id}`;
     } else {
         ownerActions.style.display = 'none';
     }
@@ -828,7 +833,8 @@ async function loadAndRenderGroupTerrains() {
         const { data, error } = await supabase
             .from('grup_terenuri')
             .select('terenuri(*)')
-            .eq('grup_id', currentGroup.id);
+            .eq('grup_id', currentGroup.id)
+            .is('removed_at', null);
         if (error) throw error;
 
         const terrains = (data || [])

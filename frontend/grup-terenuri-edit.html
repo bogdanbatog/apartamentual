@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editează Terenuri Asociate - ApartamenTUal</title>
+    <meta name="description" content="Gestionează terenurile asociate acestui grup.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    maxWidth: {
+                        '6xl': '72rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1">
+        <div class="container py-8">
+            <!-- Loading State -->
+            <div id="loading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">Se încarcă...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6" style="display: none;">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Eroare</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p id="error-message"></p>
+                        </div>
+                        <div class="mt-4">
+                            <button id="retry-btn" class="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Încearcă din nou
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access Denied -->
+            <div id="access-denied" class="text-center py-8" style="display: none;">
+                <div class="text-gray-400 text-6xl mb-4">🔒</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Acces restricționat</h3>
+                <p class="text-gray-600 mb-4">Doar proprietarul grupului sau administratorii pot edita terenurile asociate.</p>
+                <a href="/grup-detail.html" id="back-to-group-link" class="text-blue-600 hover:underline">← Înapoi la grup</a>
+            </div>
+
+            <!-- Content -->
+            <div id="content" style="display: none;">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold mb-2">Editează terenuri asociate</h1>
+                    <p class="text-lg text-gray-600" id="group-name-display"></p>
+                </div>
+
+                <!-- Linked Terrains Section -->
+                <div class="card mb-8">
+                    <h2 class="text-xl font-semibold mb-4">Terenuri asociate</h2>
+                    <div id="linked-terrains-empty" class="text-sm text-gray-500" style="display: none;">
+                        Nu sunt terenuri asociate acestui grup. Adaugă terenuri din lista de mai jos.
+                    </div>
+                    <div id="linked-terrains-list" class="grid-2"></div>
+                </div>
+
+                <!-- Available Terrains Section -->
+                <div class="card">
+                    <h2 class="text-xl font-semibold mb-4">Terenuri disponibile</h2>
+                    <p class="text-sm text-gray-600 mb-4">Selectează terenurile active care nu sunt deja asociate acestui grup.</p>
+                    
+                    <div id="available-terrains-empty" class="text-sm text-gray-500" style="display: none;">
+                        Nu există terenuri disponibile pentru asociere.
+                    </div>
+
+                    <div id="available-terrains-container" style="display: none;">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titlu</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zonă</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suprafață</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preț/mp</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apartamente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acțiuni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="available-terrains-tbody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back Button -->
+                <div class="mt-8 text-center">
+                    <a href="/grup-detail.html" id="back-to-group-btn" class="text-blue-600 hover:underline">← Înapoi la grup</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/auth-modal.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/components/terrain-card.js"></script>
+    <script src="js/grup-terenuri-edit.js"></script>
+</body>
+</html>
+

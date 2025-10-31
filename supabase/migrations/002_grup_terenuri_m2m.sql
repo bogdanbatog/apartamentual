@@ -48,6 +48,41 @@ BEGIN
     END IF;
 END$$;
 
+-- Allow grup owners and super admins to insert associations
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'grup_terenuri' AND policyname = 'Group owners and super admins can insert grup_terenuri'
+    ) THEN
+        CREATE POLICY "Group owners and super admins can insert grup_terenuri" ON public.grup_terenuri
+            FOR INSERT
+            TO authenticated
+            WITH CHECK (
+                public.can_manage_group(grup_id)
+            );
+    END IF;
+END$$;
+
+-- Allow grup owners and super admins to update (for soft delete)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE schemaname = 'public' AND tablename = 'grup_terenuri' AND policyname = 'Group owners and super admins can update grup_terenuri'
+    ) THEN
+        CREATE POLICY "Group owners and super admins can update grup_terenuri" ON public.grup_terenuri
+            FOR UPDATE
+            TO authenticated
+            USING (
+                public.can_manage_group(grup_id)
+            )
+            WITH CHECK (
+                public.can_manage_group(grup_id)
+            );
+    END IF;
+END$$;
+
 COMMIT;
 
 
