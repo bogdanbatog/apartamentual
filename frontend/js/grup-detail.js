@@ -481,7 +481,7 @@ async function renderOwnerMembershipSection() {
     // Build items
     const approvedItems = memberships
         .filter(m => m.status === 'approved')
-        .map(m => createMemberItem(m, profilesByUserId, { showApprove: false }));
+        .map(m => createMemberItem(m, profilesByUserId, { showApprove: false, showRemove: true }));
 
     const pendingItems = memberships
         .filter(m => m.status === 'pending')
@@ -508,6 +508,16 @@ async function renderOwnerMembershipSection() {
             });
         });
     }
+
+    // Wire remove buttons
+    if (approvedItems.length) {
+        approvedList.querySelectorAll('[data-remove-id]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-remove-id');
+                await removeMembership(id);
+            });
+        });
+    }
 }
 
 // Helper: fetch profiles for a set of user ids
@@ -531,7 +541,7 @@ async function fetchProfilesByUserIds(userIds) {
 
 // Helper: create list item HTML for a membership
 function createMemberItem(membership, profilesByUserId, options) {
-    const { showApprove } = options || {};
+    const { showApprove, showRemove } = options || {};
     const profile = profilesByUserId.get(membership.user_id) || {};
     const displayName = profile.full_name || redactEmail(profile.email || '');
     const roleText = membership.role ? ` · rol: ${membership.role}` : '';
@@ -545,6 +555,12 @@ function createMemberItem(membership, profilesByUserId, options) {
         ? `<button class="ml-2 text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700" data-approve-id="${membership.id}">Aprobă</button>`
         : '';
 
+    // Show remove button only if allowed, for approved members, and not for the owner
+    const canShowRemove = !!showRemove && membership.status === 'approved' && currentGroup && membership.user_id !== currentGroup.owner_user_id;
+    const removeButton = canShowRemove
+        ? `<button class="ml-2 text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700" data-remove-id="${membership.id}">Elimină</button>`
+        : '';
+
     return `
         <li class="flex items-center justify-between">
             <div class="truncate">
@@ -554,6 +570,7 @@ function createMemberItem(membership, profilesByUserId, options) {
             <div class="flex items-center gap-2">
                 ${statusBadge}
                 ${approveButton}
+                ${removeButton}
             </div>
         </li>
     `;
@@ -573,6 +590,26 @@ async function approveMembership(membershipId) {
     } catch (err) {
         console.error('Error approving membership:', err);
         alert('Eroare la aprobare: ' + err.message);
+    }
+}
+
+// Remove membership (owner or super admin only, enforced by RLS)
+async function removeMembership(membershipId) {
+    if (!membershipId) return;
+    if (!confirm('Sigur dorești să elimini acest membru din grup?')) {
+        return;
+    }
+    try {
+        const { error } = await supabase
+            .from('grup_membership')
+            .update({ status: 'removed', left_at: new Date().toISOString() })
+            .eq('id', membershipId);
+        if (error) throw error;
+        // Refresh UI
+        await loadGroupDetails(currentGroup.id);
+    } catch (err) {
+        console.error('Error removing membership:', err);
+        alert('Eroare la eliminarea membrului: ' + err.message);
     }
 }
 
