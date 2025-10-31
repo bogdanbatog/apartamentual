@@ -10,17 +10,11 @@
         'inactive': { text: 'Inactiv', class: 'bg-red-100 text-red-800' }
     };
 
-    const analysisMapping = {
-        'completed': { text: 'da', class: 'bg-green-100 text-green-800' },
-        'in_progress': { text: 'în curs', class: 'bg-yellow-100 text-yellow-800' },
-        'pending': { text: 'nu', class: 'bg-red-100 text-red-800' },
-        'rejected': { text: 'respinsă', class: 'bg-red-100 text-red-800' }
-    };
+    // Analysis badges removed from card UI
 
     function createTerrainCard(teren) {
         const status = statusMapping[teren.status] || { text: teren.status, class: 'bg-gray-100 text-gray-800' };
-        const analizaGenerala = analysisMapping[teren.analiza_generala_status] || { text: teren.analiza_generala_status, class: 'bg-gray-100 text-gray-800' };
-        const analizaSpecifica = analysisMapping[teren.analiza_specifica_status] || { text: teren.analiza_specifica_status, class: 'bg-gray-100 text-gray-800' };
+        // Analysis badges removed from card UI
 
         const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max
             ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}`
@@ -56,10 +50,7 @@
                     <div><strong>Preț:</strong> ${teren.pret_pe_mp ? teren.pret_pe_mp + ' €/mp' : 'N/A'}</div>
                     <div><strong>Apartamente:</strong> ${apartamenteRange}</div>
                 </div>
-                <div class="flex gap-2 text-xs ${contentOpacity}">
-                    <span class="badge ${analizaGenerala.class}">Analiză generală: ${analizaGenerala.text}</span>
-                    <span class="badge ${analizaSpecifica.class}">Analiză specifică: ${analizaSpecifica.text}</span>
-                </div>
+                
                 <div class="mt-4 ${contentOpacity}">
                     <a href="/teren-details.html?id=${teren.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
                 </div>

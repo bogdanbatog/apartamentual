@@ -7,13 +7,7 @@ const statusMapping = {
     'inactive': { text: 'Inactiv', class: 'bg-red-100 text-red-800' }
 };
 
-// Analysis status mapping
-const analysisMapping = {
-    'completed': { text: 'da', class: 'bg-green-100 text-green-800' },
-    'in_progress': { text: 'în curs', class: 'bg-yellow-100 text-yellow-800' },
-    'pending': { text: 'nu', class: 'bg-red-100 text-red-800' },
-    'rejected': { text: 'respinsă', class: 'bg-red-100 text-red-800' }
-};
+// Analysis rendering removed from details page
 
 // Markdown rendering is now handled by markdown-utils.js
 
@@ -185,17 +179,7 @@ function displayTerenDetails(teren, userProfile) {
     
     document.getElementById('teren-data-adaugat').textContent = formatDate(teren.data_adaugat);
     
-    // Analysis badges
-    const analizaGenerala = analysisMapping[teren.analiza_generala_status] || { text: teren.analiza_generala_status, class: 'bg-gray-100 text-gray-800' };
-    const analizaSpecifica = analysisMapping[teren.analiza_specifica_status] || { text: teren.analiza_specifica_status, class: 'bg-gray-100 text-gray-800' };
-    
-    const generalBadge = document.getElementById('analiza-generala-badge');
-    generalBadge.textContent = `Analiză generală: ${analizaGenerala.text}`;
-    generalBadge.className = `badge ${analizaGenerala.class}`;
-    
-    const specificBadge = document.getElementById('analiza-specifica-badge');
-    specificBadge.textContent = `Analiză specifică: ${analizaSpecifica.text}`;
-    specificBadge.className = `badge ${analizaSpecifica.class}`;
+    // Analysis badges removed
     
     // Determine if user can see action buttons
     const actionButtons = document.getElementById('action-buttons');
@@ -246,43 +230,7 @@ function displayTerenDetails(teren, userProfile) {
         noImageDiv.classList.remove('hidden');
     }
     
-    // Analysis details - only show if status is completed
-    const generalSection = document.getElementById('general-analysis-section');
-    const specificSection = document.getElementById('specific-analysis-section');
-    
-    // Show general analysis only if status is completed and text exists
-    if (teren.analiza_generala_status === 'completed' && teren.analiza_generala_text) {
-        // Render markdown content
-        try {
-            const generalElement = document.getElementById('general-analysis-text');
-            const renderedHtml = renderMarkdown(teren.analiza_generala_text);
-            generalElement.innerHTML = renderedHtml;
-        } catch (error) {
-            console.error('Error rendering general analysis markdown:', error);
-            // Fallback to plain text if markdown rendering fails
-            document.getElementById('general-analysis-text').textContent = teren.analiza_generala_text;
-        }
-        generalSection.classList.remove('hidden');
-    } else {
-        generalSection.classList.add('hidden');
-    }
-    
-    // Show specific analysis only if status is completed and text exists
-    if (teren.analiza_specifica_status === 'completed' && teren.analiza_specifica_text) {
-        // Render markdown content
-        try {
-            const specificElement = document.getElementById('specific-analysis-text');
-            const renderedHtml = renderMarkdown(teren.analiza_specifica_text);
-            specificElement.innerHTML = renderedHtml;
-        } catch (error) {
-            console.error('Error rendering specific analysis markdown:', error);
-            // Fallback to plain text if markdown rendering fails
-            document.getElementById('specific-analysis-text').textContent = teren.analiza_specifica_text;
-        }
-        specificSection.classList.remove('hidden');
-    } else {
-        specificSection.classList.add('hidden');
-    }
+    // Analysis details removed
     
     // Show the details
     document.getElementById('teren-details').classList.remove('hidden');

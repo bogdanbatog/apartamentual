@@ -13,8 +13,6 @@ const terrainListEl = document.getElementById('terrain-list');
 const noResultsEl = document.getElementById('no-results');
 const retryBtn = document.getElementById('retry-btn');
 const locationFilter = document.getElementById('location-filter');
-const statusFilter = document.getElementById('status-filter');
-const analysisFilter = document.getElementById('analysis-filter');
 const paginationEl = document.getElementById('pagination');
 const prevPageBtn = document.getElementById('prev-page');
 const nextPageBtn = document.getElementById('next-page');
@@ -194,25 +192,11 @@ function goToNextPage() {
 // Filter terenuri based on selected filters
 function filterTerenuri() {
     const locationValue = locationFilter.value;
-    const statusValue = statusFilter.value;
-    const analysisValue = analysisFilter.value;
 
     filteredTerenuri = allTerenuri.filter(teren => {
         const matchesLocation = !locationValue || teren.zona === locationValue;
-        const matchesStatus = !statusValue || teren.status === statusValue;
-        
-        let matchesAnalysis = true;
-        if (analysisValue) {
-            if (analysisValue === 'completed') {
-                matchesAnalysis = teren.analiza_generala_status === 'completed' && teren.analiza_specifica_status === 'completed';
-            } else if (analysisValue === 'in_progress') {
-                matchesAnalysis = teren.analiza_generala_status === 'in_progress' || teren.analiza_specifica_status === 'in_progress';
-            } else if (analysisValue === 'pending') {
-                matchesAnalysis = teren.analiza_generala_status === 'pending' && teren.analiza_specifica_status === 'pending';
-            }
-        }
 
-        return matchesLocation && matchesStatus && matchesAnalysis;
+        return matchesLocation;
     });
 
     // Reset to first page when filtering
@@ -242,8 +226,6 @@ function showError() {
 
 // Event listeners
 locationFilter.addEventListener('change', filterTerenuri);
-statusFilter.addEventListener('change', filterTerenuri);
-analysisFilter.addEventListener('change', filterTerenuri);
 retryBtn.addEventListener('click', fetchTerenuri);
 prevPageBtn.addEventListener('click', goToPreviousPage);
 nextPageBtn.addEventListener('click', goToNextPage);
