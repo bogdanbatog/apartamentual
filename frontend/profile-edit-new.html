@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editare Profil - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+    <div id="navigation"></div>
+
+    <main class="flex-1 py-8">
+        <div class="container max-w-2xl mx-auto px-4">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <a href="#" id="back-link" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Înapoi la profil
+                    </a>
+                    <h1 class="text-2xl font-semibold">Editare Profil</h1>
+                </div>
+                <div id="progress-badge" class="px-3 py-1 bg-gray-100 rounded-full text-sm">0% completat</div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="card text-center py-12">
+                <div class="animate-spin w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-gray-600">Se încarcă...</p>
+            </div>
+
+            <!-- Active User Edit Form -->
+            <form id="edit-form-activ" class="space-y-6 hidden">
+                
+                <!-- Basic Info -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Informații de bază</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="pseudonym" class="block text-sm font-medium text-gray-700 mb-1">
+                                Nume / Pseudonim <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="pseudonym" name="pseudonym" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Va fi vizibil pe profilul tău public</p>
+                        </div>
+
+                        <div>
+                            <label for="profession" class="block text-sm font-medium text-gray-700 mb-1">
+                                Profesie <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="profession" name="profession" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Telefon <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" id="phone" name="phone" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Nu va fi vizibil public</p>
+                            </div>
+
+                            <div>
+                                <label for="age" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Vârstă <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" id="age" name="age" required min="18" max="100"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="checkbox" id="is_email_public" name="is_email_public" class="rounded border-gray-300">
+                                Afișează email-ul pe profil
+                            </label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="checkbox" id="is_age_public" name="is_age_public" class="rounded border-gray-300">
+                                Afișează vârsta pe profil
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apartment Preferences -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Preferințe apartament</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="preferred_rooms" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Număr camere dorit <span class="text-red-500">*</span>
+                                </label>
+                                <select id="preferred_rooms" name="preferred_rooms" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                                    <option value="">Selectează...</option>
+                                    <option value="1">1 cameră</option>
+                                    <option value="2">2 camere</option>
+                                    <option value="3">3 camere</option>
+                                    <option value="4">4 camere</option>
+                                    <option value="5+">5+ camere</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="preferred_area_sqm" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Suprafață dorită (mp) <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" id="preferred_area_sqm" name="preferred_area_sqm" required min="20" max="500"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="preferred_city" class="block text-sm font-medium text-gray-700 mb-1">
+                                Oraș preferat <span class="text-red-500">*</span>
+                            </label>
+                            <select id="preferred_city" name="preferred_city" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                                <option value="">Selectează orașul...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Zone preferate <span class="text-red-500">*</span>
+                            </label>
+                            <div id="zones-container" class="border border-gray-300 rounded-lg p-3 min-h-[80px] bg-white">
+                                <p class="text-sm text-gray-500">Selectează mai întâi un oraș</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-1">Interese și preferințe</h2>
+                    <p class="text-sm text-gray-500 mb-4">Selectează maxim 7 tag-uri care te descriu</p>
+                    
+                    <div id="tags-container" class="space-y-4">
+                        <!-- Tags loaded dynamically -->
+                    </div>
+                    <div id="tags-counter" class="text-sm text-gray-500 mt-3">0 din 7 selectate</div>
+                </div>
+
+                <!-- Description -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Descriere personală</h2>
+                    
+                    <div>
+                        <textarea id="description" name="description" rows="4"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                            placeholder="Descrie cu cuvintele tale ce îți dorești de la viitorul apartament..."></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Opțional, dar ajută la găsirea grupului potrivit</p>
+                    </div>
+                </div>
+
+                <!-- Error & Submit -->
+                <div id="form-error" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"></div>
+                
+                <div id="form-success" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                    Profilul a fost salvat cu succes!
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="submit" class="flex-1 bg-gray-900 text-white py-3 rounded-lg hover:bg-black transition font-medium">
+                        Salvează modificările
+                    </button>
+                    <a href="#" id="cancel-btn" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-center">
+                        Anulează
+                    </a>
+                </div>
+            </form>
+
+            <!-- Professional User Edit Form -->
+            <form id="edit-form-profesional" class="space-y-6 hidden">
+                
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Informații agenție</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="agency_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                Nume agenție <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="agency_name" name="agency_name" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label for="agency_website" class="block text-sm font-medium text-gray-700 mb-1">
+                                Website agenție <span class="text-red-500">*</span>
+                            </label>
+                            <input type="url" id="agency_website" name="agency_website" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                                placeholder="https://">
+                        </div>
+
+                        <div>
+                            <label for="agency_description" class="block text-sm font-medium text-gray-700 mb-1">
+                                Descriere agenție
+                            </label>
+                            <textarea id="agency_description" name="agency_description" rows="4"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                                placeholder="Descrie agenția ta..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="form-error-pro" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"></div>
+                
+                <div id="form-success-pro" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                    Profilul a fost salvat cu succes!
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="submit" class="flex-1 bg-gray-900 text-white py-3 rounded-lg hover:bg-black transition font-medium">
+                        Salvează modificările
+                    </button>
+                    <a href="#" id="cancel-btn-pro" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-center">
+                        Anulează
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <div id="footer"></div>
+    <div id="auth-modal"></div>
+
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/auth-modal.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/profile-edit-new.js"></script>
+</body>
+</html>
