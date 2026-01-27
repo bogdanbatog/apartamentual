@@ -1,0 +1,406 @@
+// Profile View Page - New Version
+// ApartamenTUal Platform
+
+let profileData = null;
+let isOwnProfile = false;
+let currentUser = null;
+
+// =====================================================
+// INITIALIZATION
+// =====================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await initProfilePage();
+});
+
+async function initProfilePage() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const profileId = urlParams.get('id');
+        
+        if (!profileId) {
+            showError('ID profil lipsă din URL');
+            return;
+        }
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        currentUser = user;
+        isOwnProfile = user && user.id === profileId;
+        
+        await loadProfile(profileId);
+        
+    } catch (error) {
+        console.error('Init error:', error);
+        showError('A apărut o eroare la încărcarea paginii');
+    }
+}
+
+// =====================================================
+// DATA LOADING
+// =====================================================
+
+async function loadProfile(profileId) {
+    try {
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select(`*, preferred_city:cities(id, name)`)
+            .eq('id', profileId)
+            .single();
+        
+        if (profileError) throw profileError;
+        if (!profile) {
+            showError('Profilul nu a fost găsit');
+            return;
+        }
+        
+        profileData = profile;
+        
+        if (profile.account_type === 'activ') {
+            await loadActiveUserData(profileId);
+        } else {
+            await loadProfessionalUserData(profileId);
+        }
+        
+        renderProfile();
+        
+    } catch (error) {
+        console.error('Load profile error:', error);
+        showError('Nu am putut încărca profilul: ' + error.message);
+    }
+}
+
+async function loadActiveUserData(profileId) {
+    try {
+        // Load user tags
+        const { data: userTags } = await supabase
+            .from('user_tags')
+            .select('tag_id, tags(id, name, category)')
+            .eq('user_id', profileId);
+        
+        profileData.tags = userTags?.map(ut => ut.tags) || [];
+        
+        // Load preferred zones
+        const { data: userZones } = await supabase
+            .from('user_preferred_zones')
+            .select('zone_id, zones(id, name, city_id)')
+            .eq('user_id', profileId);
+        
+        profileData.zones = userZones?.map(uz => uz.zones) || [];
+        
+        // Load user's groups
+        const { data: memberships } = await supabase
+            .from('grup_membri')
+            .select('grup_id, rol, status, grupuri(id, nume, descriere, oras)')
+            .eq('user_id', profileId)
+            .in('status', ['activ', 'pending']);
+        
+        profileData.groups = memberships || [];
+        
+    } catch (error) {
+        console.error('Load active user data error:', error);
+    }
+}
+
+async function loadProfessionalUserData(profileId) {
+    try {
+        const { data: terrains } = await supabase
+            .from('terenuri')
+            .select('id, titlu, oras, zona, suprafata_mp, pret_total, status')
+            .eq('posted_by', profileId)
+            .order('created_at', { ascending: false });
+        
+        profileData.postedTerrains = terrains || [];
+        
+    } catch (error) {
+        console.error('Load professional user data error:', error);
+    }
+}
+
+// =====================================================
+// RENDERING
+// =====================================================
+
+function renderProfile() {
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('profile-content').classList.remove('hidden');
+    
+    renderBasicInfo();
+    
+    if (profileData.account_type === 'activ') {
+        document.getElementById('active-user-content').classList.remove('hidden');
+        renderActiveUserContent();
+    } else {
+        document.getElementById('professional-user-content').classList.remove('hidden');
+        renderProfessionalContent();
+    }
+    
+    if (isOwnProfile) {
+        document.getElementById('edit-button-container').classList.remove('hidden');
+        document.getElementById('edit-profile-btn').href = 'profile-edit-new.html?id=' + profileData.id;
+        document.getElementById('progress-section').classList.remove('hidden');
+        renderProgressBar();
+    }
+}
+
+function renderBasicInfo() {
+    // Avatar
+    const avatar = document.getElementById('profile-avatar');
+    const name = profileData.account_type === 'activ' 
+        ? (profileData.pseudonym || 'Utilizator')
+        : (profileData.agency_name || 'Agenție');
+    avatar.textContent = name.charAt(0).toUpperCase();
+    avatar.className = profileData.account_type === 'activ'
+        ? 'w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl font-bold'
+        : 'w-24 h-24 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-3xl font-bold';
+    
+    // Name
+    document.getElementById('profile-name').textContent = name;
+    
+    // Account type badge
+    const typeBadge = document.getElementById('account-type-badge');
+    if (profileData.account_type === 'activ') {
+        typeBadge.textContent = 'Utilizator Activ';
+        typeBadge.className = 'px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm';
+    } else {
+        typeBadge.textContent = 'Agenție Imobiliară';
+        typeBadge.className = 'px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm';
+    }
+    
+    // Account status (for pending agencies)
+    if (profileData.account_status === 'pending') {
+        const statusBadge = document.getElementById('account-status-badge');
+        statusBadge.textContent = 'În așteptare aprobare';
+        statusBadge.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm';
+        statusBadge.classList.remove('hidden');
+    }
+    
+    // Profession (for active users)
+    const professionEl = document.getElementById('profile-profession');
+    if (profileData.account_type === 'activ' && profileData.profession) {
+        professionEl.textContent = profileData.profession;
+    } else {
+        professionEl.classList.add('hidden');
+    }
+    
+    // City
+    const cityEl = document.getElementById('profile-city');
+    if (profileData.preferred_city) {
+        cityEl.querySelector('span:last-child').textContent = profileData.preferred_city.name;
+    } else {
+        cityEl.classList.add('hidden');
+    }
+    
+    // Joined date
+    const joinedEl = document.getElementById('profile-joined');
+    if (profileData.created_at) {
+        const date = new Date(profileData.created_at);
+        joinedEl.querySelector('span:last-child').textContent = 'Membru din ' + date.toLocaleDateString('ro-RO', { month: 'long', year: 'numeric' });
+    }
+    
+    // Email (if public)
+    const emailEl = document.getElementById('profile-email');
+    if (profileData.is_email_public && profileData.email) {
+        emailEl.querySelector('span:last-child').textContent = profileData.email;
+        emailEl.classList.remove('hidden');
+    }
+    
+    // Age (if public)
+    const ageEl = document.getElementById('profile-age');
+    if (profileData.is_age_public && profileData.age) {
+        ageEl.querySelector('span:last-child').textContent = profileData.age + ' ani';
+        ageEl.classList.remove('hidden');
+    }
+}
+
+function renderActiveUserContent() {
+    // Apartment preferences
+    const roomsEl = document.getElementById('pref-rooms');
+    roomsEl.textContent = profileData.preferred_rooms ? profileData.preferred_rooms + ' camere' : '-';
+    
+    const areaEl = document.getElementById('pref-area');
+    areaEl.textContent = profileData.preferred_area_sqm ? profileData.preferred_area_sqm + ' mp' : '-';
+    
+    // Zones
+    const zonesEl = document.getElementById('pref-zones');
+    if (profileData.zones && profileData.zones.length > 0) {
+        zonesEl.innerHTML = profileData.zones.map(zone => 
+            `<span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${zone.name}</span>`
+        ).join('');
+    } else {
+        zonesEl.innerHTML = '<span class="text-gray-400">-</span>';
+    }
+    
+    // Tags
+    const tagsEl = document.getElementById('user-tags');
+    if (profileData.tags && profileData.tags.length > 0) {
+        tagsEl.innerHTML = profileData.tags.map(tag => 
+            `<span class="px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm">${tag.name}</span>`
+        ).join('');
+    } else {
+        tagsEl.innerHTML = '<span class="text-gray-400">Niciun tag selectat</span>';
+    }
+    
+    // Description
+    const descSection = document.getElementById('description-section');
+    const descEl = document.getElementById('user-description');
+    if (profileData.description) {
+        descEl.textContent = profileData.description;
+        descSection.classList.remove('hidden');
+    }
+    
+    // Groups
+    renderUserGroups();
+}
+
+function renderUserGroups() {
+    const container = document.getElementById('user-groups');
+    
+    if (!profileData.groups || profileData.groups.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm">Nu faci parte din niciun grup încă.</p>';
+        return;
+    }
+    
+    container.innerHTML = profileData.groups.map(membership => {
+        const group = membership.grupuri;
+        const statusBadge = membership.status === 'pending' 
+            ? '<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">În așteptare</span>'
+            : membership.rol === 'creator'
+                ? '<span class="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs">Creator</span>'
+                : '';
+        
+        return `
+            <a href="grup-detail.html?id=${group.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">${group.nume}</p>
+                        <p class="text-sm text-gray-500">${group.oras || '-'}</p>
+                    </div>
+                    ${statusBadge}
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+function renderProfessionalContent() {
+    // Website
+    const websiteEl = document.getElementById('agency-website');
+    if (profileData.agency_website) {
+        websiteEl.href = profileData.agency_website;
+        websiteEl.textContent = profileData.agency_website.replace(/^https?:\/\//, '');
+    } else {
+        websiteEl.textContent = '-';
+        websiteEl.removeAttribute('href');
+    }
+    
+    // Description
+    const descEl = document.getElementById('agency-description');
+    descEl.textContent = profileData.agency_description || '-';
+    
+    // Posted terrains
+    const terrainsContainer = document.getElementById('agency-terrains');
+    if (!profileData.postedTerrains || profileData.postedTerrains.length === 0) {
+        terrainsContainer.innerHTML = '<p class="text-gray-400 text-sm">Niciun teren postat încă.</p>';
+        return;
+    }
+    
+    terrainsContainer.innerHTML = profileData.postedTerrains.map(terrain => `
+        <a href="teren-details.html?id=${terrain.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-medium">${terrain.titlu}</p>
+                    <p class="text-sm text-gray-500">${terrain.oras || '-'} • ${terrain.suprafata_mp || '-'} mp</p>
+                </div>
+                <span class="px-2 py-0.5 ${terrain.status === 'activ' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'} rounded text-xs">
+                    ${terrain.status === 'activ' ? 'Activ' : 'Inactiv'}
+                </span>
+            </div>
+        </a>
+    `).join('');
+}
+
+function renderProgressBar() {
+    const completion = calculateCompletion();
+    
+    document.getElementById('progress-percentage').textContent = completion + '%';
+    document.getElementById('progress-bar').style.width = completion + '%';
+    
+    // Color based on completion
+    const bar = document.getElementById('progress-bar');
+    if (completion < 50) {
+        bar.className = 'bg-red-500 h-2 rounded-full transition-all duration-500';
+    } else if (completion < 80) {
+        bar.className = 'bg-yellow-500 h-2 rounded-full transition-all duration-500';
+    } else {
+        bar.className = 'bg-green-500 h-2 rounded-full transition-all duration-500';
+    }
+    
+    // Hint text
+    const hintEl = document.getElementById('progress-hint');
+    if (completion < 100) {
+        const missing = getMissingFields();
+        hintEl.textContent = 'Completează: ' + missing.join(', ');
+    } else {
+        hintEl.textContent = 'Profilul tău este complet! 🎉';
+    }
+}
+
+function calculateCompletion() {
+    if (profileData.account_type === 'activ') {
+        const fields = [
+            profileData.pseudonym,
+            profileData.profession,
+            profileData.phone,
+            profileData.age,
+            profileData.preferred_rooms,
+            profileData.preferred_area_sqm,
+            profileData.preferred_city_id,
+            profileData.zones && profileData.zones.length > 0,
+            profileData.tags && profileData.tags.length > 0,
+            profileData.description
+        ];
+        const filled = fields.filter(f => f).length;
+        return Math.round((filled / fields.length) * 100);
+    } else {
+        const fields = [
+            profileData.agency_name,
+            profileData.agency_website,
+            profileData.agency_description
+        ];
+        const filled = fields.filter(f => f).length;
+        return Math.round((filled / fields.length) * 100);
+    }
+}
+
+function getMissingFields() {
+    const missing = [];
+    
+    if (profileData.account_type === 'activ') {
+        if (!profileData.pseudonym) missing.push('nume');
+        if (!profileData.profession) missing.push('profesie');
+        if (!profileData.phone) missing.push('telefon');
+        if (!profileData.age) missing.push('vârstă');
+        if (!profileData.preferred_rooms) missing.push('nr. camere');
+        if (!profileData.preferred_area_sqm) missing.push('suprafață');
+        if (!profileData.preferred_city_id) missing.push('oraș');
+        if (!profileData.zones || profileData.zones.length === 0) missing.push('zone');
+        if (!profileData.tags || profileData.tags.length === 0) missing.push('interese');
+        if (!profileData.description) missing.push('descriere');
+    } else {
+        if (!profileData.agency_name) missing.push('nume agenție');
+        if (!profileData.agency_website) missing.push('website');
+        if (!profileData.agency_description) missing.push('descriere');
+    }
+    
+    return missing;
+}
+
+// =====================================================
+// ERROR HANDLING
+// =====================================================
+
+function showError(message) {
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('error-state').classList.remove('hidden');
+    document.getElementById('error-message').textContent = message;
+}
