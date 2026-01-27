@@ -27,13 +27,14 @@ function createAuthModal() {
                     </div>
                     
                     <div class="space-y-3">
-                        <button id="login-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
+                        <button id="login-btn" class="w-full bg-gray-900 text-white py-2 px-4 rounded-md hover:bg-black transition duration-200">
                             Autentificare
                         </button>
                         
-                        <button id="signup-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">
-                            Înregistrare
-                        </button>
+                        <div class="text-center text-sm text-gray-500">
+                            <span>Nu ai cont?</span>
+                            <a href="/register.html" class="text-blue-600 hover:underline ml-1">Creează unul nou</a>
+                        </div>
                     </div>
                 </div>
                 
