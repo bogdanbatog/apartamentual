@@ -46,11 +46,10 @@ function setupEventListeners() {
     const authModal = document.getElementById('auth-modal');
     const closeAuthModal = document.getElementById('close-auth-modal');
     const loginBtn = document.getElementById('login-btn');
-    const signupBtn = document.getElementById('signup-btn');
     const logoutBtn = document.getElementById('logout-btn'); // Auth modal logout button
 
     // If auth modal elements aren't ready yet, retry after a short delay
-    if (!authModal || !loginBtn || !signupBtn) {
+    if (!authModal || !loginBtn) {
         setTimeout(setupEventListeners, 50);
         return;
     }
@@ -79,7 +78,6 @@ function setupEventListeners() {
     }
 
     if (loginBtn) loginBtn.addEventListener('click', signIn);
-    if (signupBtn) signupBtn.addEventListener('click', signUp);
     if (logoutBtn) logoutBtn.addEventListener('click', signOut);
     
     // Allow Enter key to trigger sign in
