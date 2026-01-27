@@ -361,14 +361,14 @@ async function handleAuthSubmit(event) {
         if (data.user) {
             currentUserId = data.user.id;
             
-            // Update profile with account type
+            // Update profile with account type - USING user_id NOT id
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update({ 
                     account_type: selectedAccountType,
                     account_status: selectedAccountType === 'profesional' ? 'pending' : 'active'
                 })
-                .eq('id', data.user.id);
+                .eq('user_id', data.user.id);
             
             if (updateError) {
                 console.error('Error updating profile:', updateError);
@@ -415,11 +415,11 @@ async function handleActivProfileSubmit(event) {
             description: document.getElementById('description').value || null
         };
         
-        // Update profile
+        // Update profile - USING user_id NOT id
         const { error: profileError } = await supabase
             .from('profiles')
             .update(formData)
-            .eq('id', currentUserId);
+            .eq('user_id', currentUserId);
         
         if (profileError) throw profileError;
         
@@ -470,11 +470,11 @@ async function handleProfessionalProfileSubmit(event) {
             account_status: 'pending'
         };
         
-        // Update profile
+        // Update profile - USING user_id NOT id
         const { error: profileError } = await supabase
             .from('profiles')
             .update(formData)
-            .eq('id', currentUserId);
+            .eq('user_id', currentUserId);
         
         if (profileError) throw profileError;
         
