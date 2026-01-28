@@ -44,7 +44,7 @@ async function loadProfile(profileId) {
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select(`*, preferred_city:cities(id, name)`)
-            .eq('id', profileId)
+            .eq('user_id', profileId)
             .single();
         
         if (profileError) throw profileError;
@@ -136,7 +136,7 @@ function renderProfile() {
     
     if (isOwnProfile) {
         document.getElementById('edit-button-container').classList.remove('hidden');
-        document.getElementById('edit-profile-btn').href = 'profile-edit-new.html?id=' + profileData.id;
+        document.getElementById('edit-profile-btn').href = 'profile-edit-new.html?id=' + profileData.user_id;
         document.getElementById('progress-section').classList.remove('hidden');
         renderProgressBar();
     }
