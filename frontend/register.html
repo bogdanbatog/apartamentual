@@ -8,6 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
     <div id="navigation"></div>
@@ -240,14 +244,18 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Zone preferate <span class="text-red-500">*</span>
-                            </label>
-                            <div id="zones-container" class="border border-gray-300 rounded-lg p-3 min-h-[100px] bg-gray-50">
-                                <p class="text-sm text-gray-500">Selectează mai întâi un oraș</p>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Poți selecta mai multe zone</p>
-                        </div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        Zone preferate <span class="text-red-500">*</span>
+    </label>
+    <div id="zones-container" class="border border-gray-300 rounded-lg p-3 min-h-[100px] bg-gray-50">
+        <p class="text-sm text-gray-500">Selectează mai întâi un oraș</p>
+    </div>
+    <div id="map-container" class="hidden border border-gray-300 rounded-lg overflow-hidden">
+        <div id="bucuresti-map"></div>
+    </div>
+    <div id="selected-zones-list" class="mt-2 flex flex-wrap gap-2"></div>
+    <p class="text-xs text-gray-500 mt-1">Click pe cartiere pentru a le selecta</p>
+</div>
                     </div>
 
                     <!-- Tags -->
@@ -353,6 +361,8 @@
     <script src="js/footer.js"></script>
     <script src="js/auth-modal.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/bucuresti-cartiere.js"></script>
+    <script src="js/bucuresti-map.js"></script>
     <script src="js/register.js"></script>
 </body>
 </html>
