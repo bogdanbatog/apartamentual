@@ -238,17 +238,102 @@ function handleCityChange(event) {
     const cityId = parseInt(event.target.value);
     selectedZones = []; // Reset selected zones
     
+    // Get city name to check if it's București
+    const citySelect = document.getElementById('preferred_city');
+    const selectedOption = citySelect.options[citySelect.selectedIndex];
+    const cityName = selectedOption ? selectedOption.text : '';
+    
+    // Hide both containers initially
+    const zonesContainer = document.getElementById('zones-container');
+    const mapContainer = document.getElementById('map-container');
+    const selectedZonesList = document.getElementById('selected-zones-list');
+    
+    if (zonesContainer) zonesContainer.classList.add('hidden');
+    if (mapContainer) mapContainer.classList.add('hidden');
+    if (selectedZonesList) selectedZonesList.innerHTML = '';
+    
     if (cityId) {
-        loadZonesForCity(cityId);
+        if (cityName.toLowerCase().includes('bucurești') || cityName.toLowerCase().includes('bucharest')) {
+            // Show interactive map for București
+            if (mapContainer) {
+                mapContainer.classList.remove('hidden');
+                initBucurestiMap();
+            }
+        } else {
+            // Show regular zones for other cities
+            if (zonesContainer) zonesContainer.classList.remove('hidden');
+            loadZonesForCity(cityId);
+        }
     } else {
-        zones = [];
-        const container = document.getElementById('zones-container');
-        if (container) {
-            container.innerHTML = '<p class="text-sm text-gray-500">Selectează mai întâi un oraș</p>';
+        // No city selected - show placeholder
+        if (zonesContainer) {
+            zonesContainer.classList.remove('hidden');
+            zonesContainer.innerHTML = '<p class="text-sm text-gray-500">Selectează mai întâi un oraș</p>';
         }
     }
 }
+// Initialize București interactive map
+let bucurestiMapInstance = null;
 
+function initBucurestiMap() {
+    // Destroy existing map if any
+    if (bucurestiMapInstance) {
+        bucurestiMapInstance.destroy();
+    }
+    
+    // Create new map instance
+    bucurestiMapInstance = new BucurestiMap('bucuresti-map', {
+        maxSelections: 10,
+        onSelectionChange: (selected) => {
+            // Update selectedZones with the IDs from the map
+            selectedZones = selected.map(n => n.id);
+            
+            // Update the visual list of selected zones
+            updateSelectedZonesList(selected);
+        }
+    });
+    
+    // Make it accessible globally for the clear button
+    window.bucurestiMap = bucurestiMapInstance;
+}
+
+function updateSelectedZonesList(selected) {
+    const container = document.getElementById('selected-zones-list');
+    if (!container) return;
+    
+    if (selected.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = selected.map(zone => `
+        <span class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+            ${zone.name}
+            <button type="button" onclick="removeZoneFromMap(${zone.id})" class="hover:text-blue-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </span>
+    `).join('');
+}
+
+function removeZoneFromMap(zoneId) {
+    if (bucurestiMapInstance) {
+        bucurestiMapInstance.selectedNeighborhoods.delete(zoneId);
+        bucurestiMapInstance.geojsonLayer.eachLayer(layer => {
+            if (layer.feature.properties.id === zoneId) {
+                layer.setStyle(bucurestiMapInstance.getFeatureStyle(layer.feature, false));
+            }
+        });
+        bucurestiMapInstance.updateSelectionInfo();
+        
+        // Update selectedZones
+        const selected = bucurestiMapInstance.getSelectedNeighborhoods();
+        selectedZones = selected.map(n => n.id);
+        updateSelectedZonesList(selected);
+    }
+}
 function toggleZone(zoneId) {
     const index = selectedZones.indexOf(zoneId);
     if (index > -1) {
