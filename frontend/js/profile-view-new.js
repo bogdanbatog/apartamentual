@@ -212,7 +212,7 @@ function renderBasicInfo() {
     
     // Email (if public)
     const emailEl = document.getElementById('profile-email');
-    if (profileData.is_email_public && profileData.email) {
+    if (profileData.email && (profileData.account_type === 'profesional' || profileData.is_email_public)) {
         emailEl.querySelector('span:last-child').textContent = profileData.email;
         emailEl.classList.remove('hidden');
     }
@@ -296,6 +296,11 @@ function renderUserGroups() {
 }
 
 function renderProfessionalContent() {
+    const agencyEmailEl = document.getElementById('agency-email');
+    if (agencyEmailEl && profileData.email) {
+        agencyEmailEl.textContent = profileData.email;
+        agencyEmailEl.href = 'mailto:' + profileData.email;
+    }
     // Website
     const websiteEl = document.getElementById('agency-website');
     if (profileData.agency_website) {
