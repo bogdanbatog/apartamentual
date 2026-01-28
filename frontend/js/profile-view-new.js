@@ -41,9 +41,10 @@ async function initProfilePage() {
 
 async function loadProfile(profileId) {
     try {
+        // First get the profile without the join
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select(`*, preferred_city:cities(id, name)`)
+            .select('*')
             .eq('user_id', profileId)
             .single();
         
@@ -51,6 +52,18 @@ async function loadProfile(profileId) {
         if (!profile) {
             showError('Profilul nu a fost găsit');
             return;
+        }
+        
+        // If profile has a preferred city, fetch it separately
+        if (profile.preferred_city_id) {
+            const { data: city } = await supabase
+                .from('cities')
+                .select('id, name')
+                .eq('id', profile.preferred_city_id)
+                .single();
+            profile.preferred_city = city;
+        } else {
+            profile.preferred_city = null;
         }
         
         profileData = profile;
