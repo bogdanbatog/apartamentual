@@ -97,7 +97,7 @@ function setupProfileLinks() {
             e.preventDefault();
             const userId = getCurrentUserId();
             if (userId) {
-                window.location.href = `/profile-view.html?id=${userId}`;
+                window.location.href = `/profile-view-new.html?id=${userId}`;
             }
         });
     }
@@ -107,7 +107,7 @@ function setupProfileLinks() {
             e.preventDefault();
             const userId = getCurrentUserId();
             if (userId) {
-                window.location.href = `/profile-view.html?id=${userId}`;
+                window.location.href = `/profile-view-new.html?id=${userId}`;
             }
         });
     }
