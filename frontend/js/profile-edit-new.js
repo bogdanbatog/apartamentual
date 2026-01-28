@@ -123,7 +123,7 @@ async function loadProfile(userId) {
         const { data: profile, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', userId)
+            .eq('user_id', userId)
             .single();
         
         if (error) throw error;
@@ -427,7 +427,7 @@ async function handleActiveFormSubmit(event) {
         const { error: profileError } = await supabase
             .from('profiles')
             .update(formData)
-            .eq('id', currentUser.id);
+            .eq('user_id', currentUser.id);
         
         if (profileError) throw profileError;
         
@@ -494,7 +494,7 @@ async function handleProfessionalFormSubmit(event) {
         const { error } = await supabase
             .from('profiles')
             .update(formData)
-            .eq('id', currentUser.id);
+            .eq('user_id', currentUser.id);
         
         if (error) throw error;
         
