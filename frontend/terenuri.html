@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/terenuri.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="terenuri.css">
 </head>
 <body>
 
@@ -20,12 +21,12 @@
         </a>
         <div class="nav-links">
             <a href="index.html">Acasă</a>
-            <a href="ce-este/" >Ce este</a>
-            <a href="terenuri-v2.html" class="active">Terenuri</a>
+            <a href="ce-este/">Ce este</a>
+            <a href="terenuri.html" class="active">Terenuri</a>
             <a href="grupuri.html">Grupuri</a>
         </div>
         <div class="nav-actions">
-            <a href="terenuri-propune-v2.html" class="btn-propune-nav">
+            <a href="terenuri-propune.html" class="btn-propune-nav">
                 <i class="fas fa-plus"></i> Propune teren
             </a>
             <div class="nav-user" id="navUser" style="display:none;">
@@ -33,11 +34,11 @@
                     <i class="fas fa-user-circle"></i>
                 </button>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="profil.html"><i class="fas fa-user"></i> Profilul meu</a>
+                    <a href="profile-view-new.html"><i class="fas fa-user"></i> Profilul meu</a>
                     <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                 </div>
             </div>
-            <a href="login.html" class="btn-login-nav" id="btnLoginNav">
+            <a href="register.html" class="btn-login-nav" id="btnLoginNav">
                 <i class="fas fa-sign-in-alt"></i> Intră în cont
             </a>
         </div>
@@ -108,7 +109,7 @@
         <!-- Results count -->
         <div class="results-info">
             <span id="resultsCount">Se încarcă...</span>
-            <a href="terenuri-propune-v2.html" class="btn-propune-inline">
+            <a href="terenuri-propune.html" class="btn-propune-inline">
                 <i class="fas fa-plus-circle"></i> Propune un teren
             </a>
         </div>
@@ -130,7 +131,7 @@
             <i class="fas fa-map-marked-alt"></i>
             <h3>Niciun teren găsit</h3>
             <p>Nu am găsit terenuri care să corespundă filtrelor selectate. Încearcă să schimbi filtrele sau propune un teren nou.</p>
-            <a href="terenuri-propune-v2.html" class="btn-primary">
+            <a href="terenuri-propune.html" class="btn-primary">
                 <i class="fas fa-plus"></i> Propune un teren
             </a>
         </div>
@@ -146,7 +147,7 @@
     <div class="cta-container">
         <h2>Ai descoperit un teren potrivit?</h2>
         <p>Propune-l pe platformă și lasă comunitatea să decidă. Terenurile cele mai apreciate urcă în top.</p>
-        <a href="terenuri-propune-v2.html" class="btn-cta">
+        <a href="terenuri-propune.html" class="btn-cta">
             <i class="fas fa-plus-circle"></i> Propune un teren
         </a>
     </div>
@@ -165,7 +166,7 @@
             <h4>Navigare</h4>
             <a href="index.html">Acasă</a>
             <a href="ce-este/">Ce este</a>
-            <a href="terenuri-v2.html">Terenuri</a>
+            <a href="terenuri.html">Terenuri</a>
             <a href="grupuri.html">Grupuri</a>
         </div>
         <div class="footer-col">
@@ -215,7 +216,7 @@
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
+<script src="js/app.js"></script>
 <script src="js/orase-cartiere.js"></script>
 <script src="js/terenuri.js"></script>
 
