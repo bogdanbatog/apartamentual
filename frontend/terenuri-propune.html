@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terenuri - ApartamenTUal</title>
-    <meta name="description" content="Descoperă terenuri disponibile pentru grupuri de construcție și cere analize urbanistice.">
+    <title>Propune un teren - ApartamenTUal</title>
+    <meta name="description" content="Propune un teren pentru grupuri de construcție colaborativă.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
-    <script src="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.css">
     <link rel="stylesheet" href="styles.css">
     <script>
         tailwind.config = {
@@ -27,39 +25,59 @@
 
     <main class="flex-1">
         <div class="container py-8">
-
             <div class="grid gap-8">
+                <!-- Header -->
                 <div class="flex justify-between items-center">
                     <div>
-                        <h1 class="text-3xl">Adauga un teren</h1>
-                        <p class="subtitle mt-2">Adauga un teren pentru a-l putea propune altor persoane</p>
+                        <a href="/terenuri.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm mb-2">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            Înapoi la terenuri
+                        </a>
+                        <h1 id="page-title" class="text-3xl">Propune un teren</h1>
+                        <p id="page-subtitle" class="subtitle mt-2">Completează informațiile despre teren. După trimitere, acesta va fi revizuit de un administrator.</p>
                     </div>
                 </div>
 
-                <!-- Form pentru adaugare teren -->
-                <div class="card max-w-4xl mx-auto">
+                <!-- Auth required message (shown when not logged in) -->
+                <div id="auth-required" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <svg class="w-12 h-12 text-yellow-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <h3 class="text-lg font-medium text-yellow-800 mb-2">Autentificare necesară</h3>
+                    <p class="text-yellow-700 mb-4">Trebuie să fii autentificat pentru a propune un teren.</p>
+                    <button id="auth-required-login" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md">
+                        Autentifică-te
+                    </button>
+                </div>
+
+                <!-- Form -->
+                <div id="form-container" class="card max-w-4xl mx-auto">
                     <form id="terrain-form" class="grid gap-6">
-                        <!-- Informatii de baza -->
+                        
+                        <!-- Informații de bază -->
                         <div>
-                            <h2 class="text-xl mb-4">Informatii de baza</h2>
+                            <h2 class="text-xl mb-4">Informații de bază</h2>
                             <div class="grid gap-4">
                                 <div>
-                                    <label for="titlu" class="block text-sm font-medium text-gray-700 mb-1">Titlu*</label>
+                                    <label for="titlu" class="block text-sm font-medium text-gray-700 mb-1">Titlu teren *</label>
                                     <input type="text" id="titlu" name="titlu" required 
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                           placeholder="ex. Teren București - Sector 2">
+                                           placeholder="ex. Teren Floreasca - 1200mp">
                                 </div>
                                 <div>
-                                    <label for="descriere" class="block text-sm font-medium text-gray-700 mb-1">Descriere</label>
+                                    <label for="descriere" class="block text-sm font-medium text-gray-700 mb-1">Descriere generală <span class="text-gray-400">(opțional)</span></label>
                                     <textarea id="descriere" name="descriere" rows="4"
                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                              placeholder="Descriere detaliata a terenului, facilitati, acces, etc."></textarea>
+                                              placeholder="Descriere a terenului: acces, vecinătăți, utilități, particularități etc."></textarea>
                                 </div>
                                 <div>
-                                    <label for="poza" class="block text-sm font-medium text-gray-700 mb-1">Poza</label>
-                                    <input type="file" id="poza" name="poza" accept="image/*"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <p class="text-xs text-gray-500 mt-1">Formateaza acceptate: JPG, PNG, GIF (max 5MB)</p>
+                                    <label for="link_sursa" class="block text-sm font-medium text-gray-700 mb-1">Link sursă <span class="text-gray-400">(opțional - de unde este preluat anunțul)</span></label>
+                                    <input type="url" id="link_sursa" name="link_sursa"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="ex. https://www.imobiliare.ro/...">
+                                    <p class="text-xs text-gray-500 mt-1">Dacă terenul este preluat de pe un site de anunțuri, adaugă link-ul aici.</p>
                                 </div>
                             </div>
                         </div>
@@ -67,115 +85,140 @@
                         <!-- Localizare -->
                         <div>
                             <h2 class="text-xl mb-4">Localizare</h2>
-                            <div>
-                                <label for="zona" class="block text-sm font-medium text-gray-700 mb-1">Zona*</label>
-                                <input type="text" id="zona" name="zona" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="ex. București, Sector 2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="oras" class="block text-sm font-medium text-gray-700 mb-1">Oraș *</label>
+                                    <select id="oras" name="oras" required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Alege orașul</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="cartier" class="block text-sm font-medium text-gray-700 mb-1">Zonă / Cartier *</label>
+                                    <select id="cartier" name="cartier" required disabled
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                        <option value="">Alege mai întâi orașul</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Specificatii tehnice -->
+                        <!-- Specificații tehnice -->
                         <div>
-                            <h2 class="text-xl mb-4">Specificatii tehnice</h2>
+                            <h2 class="text-xl mb-4">Specificații</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="suprafata" class="block text-sm font-medium text-gray-700 mb-1">Suprafata (mp)*</label>
+                                    <label for="suprafata" class="block text-sm font-medium text-gray-700 mb-1">Suprafață teren (mp) *</label>
                                     <input type="number" id="suprafata" name="suprafata" required min="1"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                           placeholder="ex. 2000">
+                                           placeholder="ex. 1200">
                                 </div>
                                 <div>
-                                    <label for="pret_pe_mp" class="block text-sm font-medium text-gray-700 mb-1">Pret per mp (EUR)</label>
-                                    <input type="number" id="pret_pe_mp" name="pret_pe_mp" min="0" step="0.01"
+                                    <label for="pret_total" class="block text-sm font-medium text-gray-700 mb-1">Preț total (EUR)</label>
+                                    <input type="number" id="pret_total" name="pret_total" min="0" step="1"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                           placeholder="ex. 150.00">
+                                           placeholder="ex. 180000">
                                 </div>
-                                <div>
-                                    <label for="nr_apartamente_min" class="block text-sm font-medium text-gray-700 mb-1">Numar minim apartamente</label>
-                                    <input type="number" id="nr_apartamente_min" name="nr_apartamente_min" min="1"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                           placeholder="ex. 8">
-                                </div>
-                                <div>
-                                    <label for="nr_apartamente_max" class="block text-sm font-medium text-gray-700 mb-1">Numar maxim apartamente</label>
-                                    <input type="number" id="nr_apartamente_max" name="nr_apartamente_max" min="1"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                           placeholder="ex. 12">
+                            </div>
+                            <!-- Preț/mp calculat automat -->
+                            <div id="pret-mp-display" class="hidden mt-3 p-3 bg-blue-50 rounded-md">
+                                <span class="text-sm text-blue-800">
+                                    Preț estimat per mp: <strong id="pret-mp-calculat">-</strong> EUR/mp
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Poză -->
+                        <div>
+                            <h2 class="text-xl mb-4">Imagine teren</h2>
+                            <div>
+                                <label for="poza" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Poză teren *
+                                </label>
+                                <p class="text-xs text-gray-500 mb-2">
+                                    Obligatorie. Dacă ai adăugat un link sursă mai sus, poți prelua o captură de ecran de acolo.
+                                </p>
+                                <input type="file" id="poza" name="poza" accept="image/*"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <p class="text-xs text-gray-500 mt-1">Formate acceptate: JPG, PNG, GIF (max 5MB)</p>
+                                <!-- Image preview -->
+                                <div id="image-preview" class="hidden mt-3">
+                                    <img id="preview-img" src="" alt="Preview" class="w-48 h-32 object-cover rounded-md border">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Analysis fields (Super Admin only) -->
                         <div id="analysis-section" class="hidden">
-                            <h2 class="text-xl mb-4">Analize (Doar Super Admin)</h2>
+                            <h2 class="text-xl mb-4">Analize (Doar Admin)</h2>
                             <div class="grid gap-6">
-                                <!-- General Analysis -->
                                 <div class="border border-gray-200 rounded-lg p-4">
-                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Analiza Generală</h3>
+                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Analiză Generală</h3>
                                     <div class="grid gap-4">
                                         <div>
-                                            <label for="analiza_generala_status" class="block text-sm font-medium text-gray-700 mb-1">Status Analiza Generală</label>
+                                            <label for="analiza_generala_status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                             <select id="analiza_generala_status" name="analiza_generala_status"
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md">
                                                 <option value="pending">În așteptare</option>
                                                 <option value="in_progress">În progres</option>
                                                 <option value="completed">Completă</option>
                                                 <option value="rejected">Respinsă</option>
                                             </select>
-                                        </div>
-                                        <div>
-                                            <label for="analiza_generala_text" class="block text-sm font-medium text-gray-700 mb-1">Text Analiza Generală</label>
-                                            <div id="analiza_generala_editor" style="height: 200px; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
-                                            <textarea id="analiza_generala_text" name="analiza_generala_text" style="display: none;"></textarea>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Specific Analysis -->
                                 <div class="border border-gray-200 rounded-lg p-4">
-                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Analiza Specifică</h3>
+                                    <h3 class="text-lg font-medium text-gray-800 mb-3">Analiză Specifică</h3>
                                     <div class="grid gap-4">
                                         <div>
-                                            <label for="analiza_specifica_status" class="block text-sm font-medium text-gray-700 mb-1">Status Analiza Specifică</label>
+                                            <label for="analiza_specifica_status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                             <select id="analiza_specifica_status" name="analiza_specifica_status"
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md">
                                                 <option value="pending">În așteptare</option>
                                                 <option value="in_progress">În progres</option>
                                                 <option value="completed">Completă</option>
                                                 <option value="rejected">Respinsă</option>
                                             </select>
-                                        </div>
-                                        <div>
-                                            <label for="analiza_specifica_text" class="block text-sm font-medium text-gray-700 mb-1">Text Analiza Specifică</label>
-                                            <div id="analiza_specifica_editor" style="height: 200px; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
-                                            <textarea id="analiza_specifica_text" name="analiza_specifica_text" style="display: none;"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Admin: Approve/Status section (only visible to admin in edit mode) -->
+                        <div id="admin-status-section" class="hidden">
+                            <h2 class="text-xl mb-4">Status teren (Admin)</h2>
+                            <div>
+                                <label for="admin-status" class="block text-sm font-medium text-gray-700 mb-1">Status publicare</label>
+                                <select id="admin-status" name="admin_status"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option value="pending">În așteptare aprobare</option>
+                                    <option value="active">Activ (aprobat)</option>
+                                    <option value="inactive">Inactiv</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Loading state -->
                         <div id="form-loading" class="hidden text-center py-4">
                             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                            <p class="mt-2 text-gray-600">Se salveaza terenul...</p>
+                            <p class="mt-2 text-gray-600">Se salvează terenul...</p>
                         </div>
 
                         <!-- Error state -->
                         <div id="form-error" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p class="text-red-800" id="error-message">A aparut o eroare. Te rugam sa incerci din nou.</p>
+                            <p class="text-red-800" id="error-message">A apărut o eroare. Te rugăm să încerci din nou.</p>
                         </div>
 
                         <!-- Success state -->
                         <div id="form-success" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
-                            <p class="text-green-800">Terenul a fost adaugat cu succes!</p>
+                            <p class="text-green-800" id="success-message">Terenul a fost trimis cu succes! Va fi vizibil după aprobare de către un administrator.</p>
                         </div>
 
                         <!-- Buttons -->
                         <div class="flex gap-4 pt-4">
                             <button type="submit" id="submit-btn" class="primary flex-1">
-                                Adauga terenul
+                                Trimite terenul pentru aprobare
                             </button>
                             <button type="button" onclick="window.history.back()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                                 Anulare
@@ -193,7 +236,7 @@
     <script src="js/footer.js"></script>
     <script src="js/auth-modal.js"></script>
     <script src="js/app.js"></script>
-    <script src="js/terenuri.js"></script>
-    <script src="js/terrain-form.js"></script>
+    <script src="js/orase-cartiere.js"></script>
+    <script src="js/terrain-form-v2.js"></script>
 </body>
 </html>
