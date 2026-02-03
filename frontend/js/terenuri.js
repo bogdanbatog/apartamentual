@@ -436,7 +436,7 @@ function createTerenCard(teren, index) {
                 <button class="btn-add-group" onclick="handleAddToGroup('${teren.id}')" title="Adaugă la un grup">
                     <i class="fas fa-users"></i> Grup
                 </button>
-                <a href="teren-detalii.html?id=${teren.id}" class="btn-vezi-detalii">
+                <a href="teren-details.html?id=${teren.id}" class="btn-vezi-detalii">
                     Detalii <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -458,7 +458,7 @@ window.handleLike = async function(terenId) {
     if (!currentUser) {
         showToast('Trebuie să fii conectat pentru a adăuga la favorite.', 'info');
         // Optionally redirect to login
-        setTimeout(() => window.location.href = 'login.html', 1500);
+        setTimeout(() => window.location.href = 'register.html', 1500);
         return;
     }
 
@@ -541,7 +541,7 @@ function updateLikeCountDisplay(terenId) {
 window.handleAddToGroup = function(terenId) {
     if (!currentUser) {
         showToast('Trebuie să fii conectat pentru această acțiune.', 'info');
-        setTimeout(() => window.location.href = 'login.html', 1500);
+        setTimeout(() => window.location.href = 'register.html', 1500);
         return;
     }
 
