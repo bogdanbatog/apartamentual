@@ -4,6 +4,11 @@
            Add to Profile, Add to Group
    ═══════════════════════════════════════════ */
 
+// ── OWN SUPABASE CLIENT (avoids conflict with app.js) ──
+const SUPABASE_URL_T = 'https://glbvbbgmcobtswwlktic.supabase.co';
+const SUPABASE_ANON_KEY_T = 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
+const sb = window.supabase.createClient(SUPABASE_URL_T, SUPABASE_ANON_KEY_T);
+
 // ── DOM REFERENCES ────────────────────────
 const DOM = {
     filterOras:       document.getElementById('filterOras'),
@@ -41,40 +46,11 @@ let likesCountMap = {};           // { teren_id: count }
 let currentTerenForGroup = null;  // teren ID when opening "add to group" modal
 
 // ── INIT ──────────────────────────────────
-// Wait for supabase client to be ready (created by app.js)
-function waitForSupabase(maxWait = 5000) {
-    return new Promise((resolve, reject) => {
-        // supabase is declared as `let supabase` in app.js
-        // and assigned inside initApp() on DOMContentLoaded
-        const start = Date.now();
-        function check() {
-            if (typeof supabase !== 'undefined' && supabase && supabase.from) {
-                resolve();
-            } else if (Date.now() - start > maxWait) {
-                reject(new Error('Supabase client not ready'));
-            } else {
-                setTimeout(check, 50);
-            }
-        }
-        check();
-    });
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
     initNav();
     populateOrasFilter();
     bindFilterEvents();
     bindModalEvents();
-    
-    try {
-        await waitForSupabase();
-    } catch(e) {
-        console.error('Supabase init timeout:', e);
-        DOM.loadingState.style.display = 'none';
-        DOM.emptyState.style.display = 'block';
-        return;
-    }
-    
     await checkAuth();
     await loadTerenuri();
 });
@@ -84,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ══════════════════════════════════════════
 async function checkAuth() {
     try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if (user) {
             currentUser = user;
             DOM.navUser.style.display = 'block';
@@ -99,7 +75,7 @@ async function checkAuth() {
 
 async function loadUserLikes(userId) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
             .from('terenuri_likes')
             .select('teren_id')
             .eq('user_id', userId);
@@ -130,7 +106,7 @@ function initNav() {
     // Logout
     if (DOM.btnLogout) {
         DOM.btnLogout.addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await sb.auth.signOut();
             window.location.reload();
         });
     }
@@ -262,7 +238,7 @@ async function loadTerenuri() {
 
     try {
         // Fetch all approved terenuri
-        const { data, error } = await supabase
+        const { data, error } = await sb
             .from('terenuri')
             .select('*')
             .eq('status', 'approved')
@@ -288,7 +264,7 @@ async function loadTerenuri() {
 async function loadLikesCounts() {
     try {
         // Get counts grouped by teren_id
-        const { data, error } = await supabase
+        const { data, error } = await sb
             .from('terenuri_likes')
             .select('teren_id');
 
@@ -499,7 +475,7 @@ window.handleLike = async function(terenId) {
     try {
         if (isCurrentlyLiked) {
             // Remove like
-            const { error } = await supabase
+            const { error } = await sb
                 .from('terenuri_likes')
                 .delete()
                 .eq('user_id', currentUser.id)
@@ -513,7 +489,7 @@ window.handleLike = async function(terenId) {
 
         } else {
             // Add like
-            const { error } = await supabase
+            const { error } = await sb
                 .from('terenuri_likes')
                 .insert({ user_id: currentUser.id, teren_id: terenId });
 
