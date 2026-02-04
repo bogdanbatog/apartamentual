@@ -41,11 +41,40 @@ let likesCountMap = {};           // { teren_id: count }
 let currentTerenForGroup = null;  // teren ID when opening "add to group" modal
 
 // ── INIT ──────────────────────────────────
+// Wait for supabase client to be ready (created by app.js)
+function waitForSupabase(maxWait = 5000) {
+    return new Promise((resolve, reject) => {
+        // supabase is declared as `let supabase` in app.js
+        // and assigned inside initApp() on DOMContentLoaded
+        const start = Date.now();
+        function check() {
+            if (typeof supabase !== 'undefined' && supabase && supabase.from) {
+                resolve();
+            } else if (Date.now() - start > maxWait) {
+                reject(new Error('Supabase client not ready'));
+            } else {
+                setTimeout(check, 50);
+            }
+        }
+        check();
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     initNav();
     populateOrasFilter();
     bindFilterEvents();
     bindModalEvents();
+    
+    try {
+        await waitForSupabase();
+    } catch(e) {
+        console.error('Supabase init timeout:', e);
+        DOM.loadingState.style.display = 'none';
+        DOM.emptyState.style.display = 'block';
+        return;
+    }
+    
     await checkAuth();
     await loadTerenuri();
 });
