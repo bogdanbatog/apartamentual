@@ -487,5 +487,219 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeImageModal();
         closeAnalysisModal();
+        closeGroupModal();
+        closeShareModal();
     }
+});
+
+// ══════════════════════════════════════════
+//  ACTION BUTTONS: Add to Profile, Add to Group, Share
+// ══════════════════════════════════════════
+
+let currentTerenData = null;
+let userLikedThisTeren = false;
+
+// Store teren data when loaded for use in action buttons
+function storeTerenData(teren) {
+    currentTerenData = teren;
+}
+
+// Check if user has liked this teren
+async function checkIfUserLiked(terenId) {
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return false;
+        
+        const { data, error } = await sb
+            .from('terenuri_likes')
+            .select('id')
+            .eq('teren_id', terenId)
+            .eq('user_id', user.id)
+            .single();
+        
+        return !error && data;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Update Add to Profile button state
+function updateAddToProfileButton(isLiked) {
+    const btn = document.getElementById('btn-add-to-profile');
+    const btnText = document.getElementById('btn-add-to-profile-text');
+    if (!btn || !btnText) return;
+    
+    userLikedThisTeren = isLiked;
+    
+    if (isLiked) {
+        btn.classList.add('bg-orange-50', 'border-orange-400');
+        btn.querySelector('svg').classList.add('text-orange-500', 'fill-current');
+        btn.querySelector('svg').classList.remove('text-gray-500');
+        btnText.textContent = 'Salvat în profil';
+    } else {
+        btn.classList.remove('bg-orange-50', 'border-orange-400');
+        btn.querySelector('svg').classList.remove('text-orange-500', 'fill-current');
+        btn.querySelector('svg').classList.add('text-gray-500');
+        btnText.textContent = 'Adaugă la profil';
+    }
+}
+
+// Add to Profile (like/unlike)
+async function toggleAddToProfile() {
+    const terenId = getTerenIdFromUrl();
+    if (!terenId) return;
+    
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) {
+            showToast('Trebuie să fii autentificat pentru a salva terenuri.');
+            setTimeout(() => window.location.href = 'register.html', 1500);
+            return;
+        }
+        
+        if (userLikedThisTeren) {
+            // Unlike
+            const { error } = await sb
+                .from('terenuri_likes')
+                .delete()
+                .eq('teren_id', terenId)
+                .eq('user_id', user.id);
+            
+            if (!error) {
+                updateAddToProfileButton(false);
+                showToast('Teren eliminat din profil');
+            }
+        } else {
+            // Like
+            const { error } = await sb
+                .from('terenuri_likes')
+                .insert({ teren_id: terenId, user_id: user.id });
+            
+            if (!error) {
+                updateAddToProfileButton(true);
+                showToast('Teren salvat în profil!');
+            }
+        }
+    } catch (e) {
+        console.error('Error toggling like:', e);
+        showToast('A apărut o eroare');
+    }
+}
+
+// Add to Group Modal
+function openGroupModal() {
+    document.getElementById('group-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeGroupModal() {
+    document.getElementById('group-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Share Modal
+function openShareModal() {
+    document.getElementById('share-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeShareModal() {
+    document.getElementById('share-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Share via Email
+function shareViaEmail() {
+    const title = currentTerenData?.titlu || 'Teren interesant';
+    const url = window.location.href;
+    const subject = `Uite un teren interesant: ${title}`;
+    const body = `Salut!\n\nAm găsit un teren care mi s-a părut interesant și am vrut să ți-l arăt:\n\n${title}\n${url}\n\nVezi detaliile pe ApartamenTUal!`;
+    
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    closeShareModal();
+}
+
+// Share via WhatsApp
+function shareViaWhatsApp() {
+    const title = currentTerenData?.titlu || 'Teren interesant';
+    const url = window.location.href;
+    const text = `Uite un teren interesant pe ApartamenTUal: ${title}\n${url}`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    closeShareModal();
+}
+
+// Copy link to clipboard
+async function copyLinkToClipboard() {
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+        showToast('Link copiat!');
+        closeShareModal();
+    } catch (e) {
+        // Fallback for older browsers
+        const input = document.createElement('input');
+        input.value = window.location.href;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Link copiat!');
+        closeShareModal();
+    }
+}
+
+// Toast notification
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    if (!toast || !toastMessage) return;
+    
+    toastMessage.textContent = message;
+    toast.classList.remove('translate-y-20', 'opacity-0');
+    
+    setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+    }, 3000);
+}
+
+// Setup action button event listeners
+document.addEventListener('DOMContentLoaded', async function() {
+    // Add to Profile button
+    const btnAddToProfile = document.getElementById('btn-add-to-profile');
+    if (btnAddToProfile) {
+        btnAddToProfile.addEventListener('click', toggleAddToProfile);
+        
+        // Check initial like state
+        const terenId = getTerenIdFromUrl();
+        if (terenId) {
+            const isLiked = await checkIfUserLiked(terenId);
+            updateAddToProfileButton(isLiked);
+        }
+    }
+    
+    // Add to Group button
+    const btnAddToGroup = document.getElementById('btn-add-to-group');
+    if (btnAddToGroup) {
+        btnAddToGroup.addEventListener('click', openGroupModal);
+    }
+    
+    // Share button
+    const btnShare = document.getElementById('btn-share');
+    if (btnShare) {
+        btnShare.addEventListener('click', openShareModal);
+    }
+    
+    // Share modal buttons
+    const shareEmail = document.getElementById('share-email');
+    if (shareEmail) shareEmail.addEventListener('click', shareViaEmail);
+    
+    const shareWhatsApp = document.getElementById('share-whatsapp');
+    if (shareWhatsApp) shareWhatsApp.addEventListener('click', shareViaWhatsApp);
+    
+    const shareCopy = document.getElementById('share-copy');
+    if (shareCopy) shareCopy.addEventListener('click', copyLinkToClipboard);
+    
+    // Close modals when clicking outside
+    document.getElementById('group-modal')?.addEventListener('click', closeGroupModal);
+    document.getElementById('share-modal')?.addEventListener('click', closeShareModal);
 });
