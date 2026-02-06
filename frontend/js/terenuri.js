@@ -362,8 +362,8 @@ function createTerenCard(teren, index) {
         : '';
 
     // Image
-    const imageHtml = teren.imagine_url
-        ? `<img src="${escapeHtml(teren.imagine_url)}" alt="${escapeHtml(teren.titlu)}" loading="lazy">`
+    const imageHtml = teren.image_url
+        ? `<img src="${escapeHtml(teren.image_url)}" alt="${escapeHtml(teren.titlu)}" loading="lazy">`
         : `<div class="image-placeholder"><i class="fas fa-mountain-sun"></i></div>`;
 
     // Location string
