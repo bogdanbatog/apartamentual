@@ -1,5 +1,10 @@
 // Status mapping for display
 const statusMapping = {
+    'pending': { text: 'În așteptare', class: 'bg-yellow-100 text-yellow-800' },
+    'approved': { text: 'Aprobat', class: 'bg-green-100 text-green-800' },
+    'rejected': { text: 'Respins', class: 'bg-red-100 text-red-800' },
+    'disabled': { text: 'Dezactivat', class: 'bg-gray-100 text-gray-800' },
+    // Legacy statuses for backwards compatibility
     'active': { text: 'Disponibil', class: 'bg-green-100 text-green-800' },
     'under_review': { text: 'În analiză', class: 'bg-yellow-100 text-yellow-800' },
     'reserved': { text: 'Rezervat', class: 'bg-blue-100 text-blue-800' },
@@ -170,7 +175,23 @@ function displayTerenDetails(teren, userProfile) {
     // Basic details
     document.getElementById('teren-suprafata').textContent = teren.suprafata ? `${teren.suprafata} mp` : 'N/A';
     document.getElementById('teren-zona').textContent = teren.zona || 'N/A';
+    
+    // Preț total
+    if (teren.pret_total) {
+        document.getElementById('teren-pret-total').textContent = `${Number(teren.pret_total).toLocaleString('ro-RO')} €`;
+    } else {
+        document.getElementById('teren-pret-total').textContent = '—';
+    }
+    
     document.getElementById('teren-pret').textContent = teren.pret_pe_mp ? `${teren.pret_pe_mp} €/mp` : 'N/A';
+    
+    // Link sursă
+    if (teren.link_sursa) {
+        const linkSursaRow = document.getElementById('link-sursa-row');
+        const linkSursaEl = document.getElementById('teren-link-sursa');
+        linkSursaRow.classList.remove('hidden');
+        linkSursaEl.href = teren.link_sursa;
+    }
     
     const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max 
         ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
