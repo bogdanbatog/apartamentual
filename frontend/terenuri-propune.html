@@ -58,28 +58,14 @@
                         
                         <!-- Link sursă - PRIMUL -->
                         <div>
-                            <h2 class="text-xl mb-4">Link anunț <span class="text-sm font-normal text-gray-400">(opțional dar recomandat)</span></h2>
+                            <h2 class="text-xl mb-4">Link anunț <span class="text-sm font-normal text-gray-400">(opțional)</span></h2>
                             <div class="grid gap-4">
                                 <div>
                                     <label for="link_sursa" class="block text-sm font-medium text-gray-700 mb-1">Link sursă anunț</label>
-                                    <div class="flex gap-2">
-                                        <input type="url" id="link_sursa" name="link_sursa"
-                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                               placeholder="ex. https://www.imobiliare.ro/... sau https://www.storia.ro/...">
-                                        <button type="button" id="btn-extract-data" 
-                                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition flex items-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                                disabled>
-                                            <svg id="extract-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                                            </svg>
-                                            <span id="extract-text">Extrage</span>
-                                        </button>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-1">Lipește link-ul anunțului și apasă "Extrage" pentru a prelua automat imaginea și titlul.</p>
-                                </div>
-                                <!-- Extract status message -->
-                                <div id="extract-status" class="hidden p-3 rounded-md text-sm">
-                                    <span id="extract-status-text"></span>
+                                    <input type="url" id="link_sursa" name="link_sursa"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="ex. https://www.imobiliare.ro/... sau https://www.storia.ro/...">
+                                    <p class="text-xs text-gray-500 mt-1">Dacă terenul e preluat de pe un site de anunțuri, adaugă link-ul aici. Copiază titlul și imaginea din anunț în câmpurile de mai jos.</p>
                                 </div>
                             </div>
                         </div>
@@ -153,32 +139,11 @@
                         <div>
                             <h2 class="text-xl mb-4">Imagine teren</h2>
                             <div>
-                                <!-- Extracted image preview -->
-                                <div id="extracted-image-preview" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                                    <div class="flex items-start gap-4">
-                                        <img id="extracted-img" src="" alt="Imagine extrasă" class="w-48 h-32 object-cover rounded-md border">
-                                        <div class="flex-1">
-                                            <p class="text-sm font-medium text-green-800 mb-2">
-                                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                                Imagine preluată din anunț
-                                            </p>
-                                            <p class="text-xs text-green-700">Această imagine va fi folosită pentru teren. Poți încărca o altă imagine mai jos dacă preferi.</p>
-                                        </div>
-                                        <button type="button" id="btn-remove-extracted" class="text-gray-400 hover:text-gray-600">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
                                 <label for="poza" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span id="poza-label">Poză teren *</span>
+                                    Poză teren *
                                 </label>
-                                <p id="poza-hint" class="text-xs text-gray-500 mb-2">
-                                    Obligatorie. Poți încărca o imagine sau extrage una din link-ul anunțului.
+                                <p class="text-xs text-gray-500 mb-2">
+                                    Obligatorie. Dacă ai adăugat un link sursă mai sus, poți salva imaginea de acolo și o încarci aici.
                                 </p>
                                 <input type="file" id="poza" name="poza" accept="image/*"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -188,8 +153,6 @@
                                     <img id="preview-img" src="" alt="Preview" class="w-48 h-32 object-cover rounded-md border">
                                 </div>
                             </div>
-                            <!-- Hidden field to store extracted image URL -->
-                            <input type="hidden" id="extracted_image_url" name="extracted_image_url">
                         </div>
 
                         <!-- Analysis fields (Super Admin only) -->
