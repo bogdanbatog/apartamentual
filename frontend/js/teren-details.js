@@ -664,27 +664,52 @@ function showToast(message) {
 
 // Setup action button event listeners
 document.addEventListener('DOMContentLoaded', async function() {
-    // Add to Profile button
+    // Check user account type
+    let userAccountType = null;
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (user) {
+            const { data: profile } = await sb
+                .from('profiles')
+                .select('account_type')
+                .eq('user_id', user.id)
+                .single();
+            userAccountType = profile?.account_type || 'activ';
+        }
+    } catch (e) {
+        console.warn('Could not get user account type:', e);
+    }
+    
+    // Hide action buttons for professional accounts (except Share)
     const btnAddToProfile = document.getElementById('btn-add-to-profile');
-    if (btnAddToProfile) {
-        btnAddToProfile.addEventListener('click', toggleAddToProfile);
+    const btnAddToGroup = document.getElementById('btn-add-to-group');
+    const btnShare = document.getElementById('btn-share');
+    
+    if (userAccountType === 'profesional') {
+        // Hide like and group buttons for agencies
+        if (btnAddToProfile) btnAddToProfile.style.display = 'none';
+        if (btnAddToGroup) btnAddToGroup.style.display = 'none';
+        // Share remains visible
+    } else {
+        // Setup for active users
+        if (btnAddToProfile) {
+            btnAddToProfile.addEventListener('click', toggleAddToProfile);
+            
+            // Check initial like state
+            const terenId = getTerenIdFromUrl();
+            if (terenId) {
+                const isLiked = await checkIfUserLiked(terenId);
+                updateAddToProfileButton(isLiked);
+            }
+        }
         
-        // Check initial like state
-        const terenId = getTerenIdFromUrl();
-        if (terenId) {
-            const isLiked = await checkIfUserLiked(terenId);
-            updateAddToProfileButton(isLiked);
+        // Add to Group button
+        if (btnAddToGroup) {
+            btnAddToGroup.addEventListener('click', openGroupModal);
         }
     }
     
-    // Add to Group button
-    const btnAddToGroup = document.getElementById('btn-add-to-group');
-    if (btnAddToGroup) {
-        btnAddToGroup.addEventListener('click', openGroupModal);
-    }
-    
-    // Share button
-    const btnShare = document.getElementById('btn-share');
+    // Share button - available for everyone
     if (btnShare) {
         btnShare.addEventListener('click', openShareModal);
     }
