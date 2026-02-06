@@ -42,13 +42,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     filterTerenId = urlParams.get('teren');
     
-    await checkAuth();
+    const accountType = await checkAuth();
     
     if (!currentUser) {
         // Show auth overlay for non-logged users
         DOM.authOverlay.style.display = 'flex';
         DOM.mainContent.style.filter = 'blur(8px)';
         DOM.mainContent.style.pointerEvents = 'none';
+        return;
+    }
+    
+    // Block access for professional accounts (agencies)
+    if (accountType === 'profesional') {
+        DOM.authOverlay.style.display = 'flex';
+        DOM.mainContent.style.filter = 'blur(8px)';
+        DOM.mainContent.style.pointerEvents = 'none';
+        // Update overlay message for agencies
+        const overlayContent = DOM.authOverlay.querySelector('.auth-overlay-content');
+        if (overlayContent) {
+            overlayContent.innerHTML = `
+                <div class="auth-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h2>Acces restricționat</h2>
+                <p>Conturile de agenție imobiliară nu au acces la lista de utilizatori.</p>
+                <div class="auth-buttons">
+                    <a href="terenuri.html" class="btn-primary">Înapoi la terenuri</a>
+                </div>
+            `;
+        }
         return;
     }
     
@@ -71,10 +93,20 @@ async function checkAuth() {
             currentUser = user;
             DOM.navUser.style.display = 'block';
             DOM.btnLoginNav.style.display = 'none';
+            
+            // Get account type
+            const { data: profile } = await sb
+                .from('profiles')
+                .select('account_type')
+                .eq('user_id', user.id)
+                .single();
+            
+            return profile?.account_type || 'activ';
         }
     } catch (e) {
         console.warn('Auth check failed:', e);
     }
+    return null;
 }
 
 // ── LOAD DATA ──
