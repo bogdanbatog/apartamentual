@@ -18,209 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const isEditMode = !!editTerenId;
     let currentTerrain = null;
     let isSuperAdmin = false;
-    let extractedImageUrl = null; // Store extracted image URL
-
-    // === LINK EXTRACTION ===
-    const linkInput = document.getElementById('link_sursa');
-    const extractBtn = document.getElementById('btn-extract-data');
-    const extractIcon = document.getElementById('extract-icon');
-    const extractText = document.getElementById('extract-text');
-    const extractStatus = document.getElementById('extract-status');
-    const extractStatusText = document.getElementById('extract-status-text');
-    const extractedImagePreview = document.getElementById('extracted-image-preview');
-    const extractedImg = document.getElementById('extracted-img');
-    const btnRemoveExtracted = document.getElementById('btn-remove-extracted');
-    const pozaLabel = document.getElementById('poza-label');
-    const pozaHint = document.getElementById('poza-hint');
-
-    // Enable/disable extract button based on link input
-    if (linkInput && extractBtn) {
-        linkInput.addEventListener('input', function() {
-            const url = this.value.trim();
-            extractBtn.disabled = !isValidUrl(url);
-        });
-
-        extractBtn.addEventListener('click', handleExtractData);
-    }
-
-    // Remove extracted image
-    if (btnRemoveExtracted) {
-        btnRemoveExtracted.addEventListener('click', function() {
-            extractedImageUrl = null;
-            extractedImagePreview.classList.add('hidden');
-            document.getElementById('extracted_image_url').value = '';
-            updatePozaRequirement(true); // Make poza required again
-        });
-    }
-
-    function isValidUrl(string) {
-        try {
-            const url = new URL(string);
-            return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch (_) {
-            return false;
-        }
-    }
-
-    async function handleExtractData() {
-        const url = linkInput.value.trim();
-        if (!isValidUrl(url)) return;
-
-        // Show loading state
-        extractBtn.disabled = true;
-        extractIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>';
-        extractIcon.classList.add('animate-spin');
-        extractText.textContent = 'Se extrage...';
-        showExtractStatus('info', 'Se preiau datele din anunț...');
-
-        try {
-            // Use a CORS proxy or backend endpoint to fetch the page
-            // For now, we'll use allorigins.win as a CORS proxy
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-            
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error('Nu am putut accesa link-ul');
-            
-            const data = await response.json();
-            const html = data.contents;
-            
-            // Parse HTML to extract meta tags
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            // Extract og:image (main image)
-            let imageUrl = getMetaContent(doc, 'og:image') || 
-                           getMetaContent(doc, 'twitter:image') ||
-                           getFirstImage(doc);
-            
-            // Extract title
-            let title = getMetaContent(doc, 'og:title') || 
-                        doc.querySelector('title')?.textContent || '';
-            
-            // Clean up title
-            title = cleanTitle(title);
-            
-            // Results
-            let extractedCount = 0;
-            
-            // Set title if found and field is empty
-            const titluInput = document.getElementById('titlu');
-            if (title && titluInput && !titluInput.value.trim()) {
-                titluInput.value = title;
-                extractedCount++;
-            }
-            
-            // Set image if found
-            if (imageUrl) {
-                // Make sure image URL is absolute
-                if (imageUrl.startsWith('//')) {
-                    imageUrl = 'https:' + imageUrl;
-                } else if (imageUrl.startsWith('/')) {
-                    const urlObj = new URL(url);
-                    imageUrl = urlObj.origin + imageUrl;
-                }
-                
-                extractedImageUrl = imageUrl;
-                document.getElementById('extracted_image_url').value = imageUrl;
-                extractedImg.src = imageUrl;
-                extractedImagePreview.classList.remove('hidden');
-                updatePozaRequirement(false); // Make poza optional since we have extracted image
-                extractedCount++;
-            }
-            
-            // Show result
-            if (extractedCount > 0) {
-                const messages = [];
-                if (title && titluInput && titluInput.value === title) messages.push('titlu');
-                if (imageUrl) messages.push('imagine');
-                showExtractStatus('success', `Am extras: ${messages.join(', ')}. Completează restul câmpurilor manual.`);
-            } else {
-                showExtractStatus('warning', 'Nu am găsit date de extras. Completează manual câmpurile.');
-            }
-
-        } catch (error) {
-            console.error('Extract error:', error);
-            showExtractStatus('error', 'Nu am putut extrage datele. Verifică link-ul sau completează manual.');
-        } finally {
-            // Reset button
-            extractBtn.disabled = false;
-            extractIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>';
-            extractIcon.classList.remove('animate-spin');
-            extractText.textContent = 'Extrage';
-        }
-    }
-
-    function getMetaContent(doc, property) {
-        const meta = doc.querySelector(`meta[property="${property}"]`) || 
-                     doc.querySelector(`meta[name="${property}"]`);
-        return meta?.getAttribute('content') || null;
-    }
-
-    function getFirstImage(doc) {
-        // Try to find main content image
-        const selectors = [
-            'article img',
-            '.gallery img',
-            '.photos img',
-            'main img',
-            '#content img'
-        ];
-        for (const selector of selectors) {
-            const img = doc.querySelector(selector);
-            if (img && img.src) return img.src;
-        }
-        return null;
-    }
-
-    function cleanTitle(title) {
-        // Remove common suffixes from real estate sites
-        const removeParts = [
-            ' - Imobiliare.ro',
-            ' - Storia.ro',
-            ' - OLX.ro',
-            ' | Imobiliare.ro',
-            ' | Storia.ro',
-            ' | OLX.ro',
-            ' - Anunturi imobiliare',
-            ' de vanzare'
-        ];
-        for (const part of removeParts) {
-            title = title.replace(new RegExp(part, 'gi'), '');
-        }
-        return title.trim();
-    }
-
-    function showExtractStatus(type, message) {
-        extractStatus.classList.remove('hidden', 'bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-red-50', 
-                                        'text-blue-800', 'text-green-800', 'text-yellow-800', 'text-red-800');
-        
-        const colors = {
-            info: ['bg-blue-50', 'text-blue-800'],
-            success: ['bg-green-50', 'text-green-800'],
-            warning: ['bg-yellow-50', 'text-yellow-800'],
-            error: ['bg-red-50', 'text-red-800']
-        };
-        
-        extractStatus.classList.add(...colors[type]);
-        extractStatusText.textContent = message;
-        
-        // Auto-hide after 5 seconds for success
-        if (type === 'success') {
-            setTimeout(() => extractStatus.classList.add('hidden'), 5000);
-        }
-    }
-
-    function updatePozaRequirement(required) {
-        const pozaInput = document.getElementById('poza');
-        if (required) {
-            pozaLabel.innerHTML = 'Poză teren *';
-            pozaHint.textContent = 'Obligatorie. Poți încărca o imagine sau extrage una din link-ul anunțului.';
-            // Don't set required attribute - we handle this in validation
-        } else {
-            pozaLabel.innerHTML = 'Poză teren <span class="text-gray-400">(opțional - ai deja o imagine)</span>';
-            pozaHint.textContent = 'Ai deja o imagine din anunț. Poți încărca alta dacă preferi.';
-        }
-    }
 
     // === DROPDOWN-URI ORAȘ / CARTIER ===
     const orasSelect = document.getElementById('oras');
@@ -479,18 +276,15 @@ document.addEventListener('DOMContentLoaded', function() {
             errors.push('Suprafața trebuie să fie mai mare decât 0');
         }
 
-        // Poza obligatorie la creare (nu la editare) - acceptă și imagine extrasă
+        // Poza obligatorie la creare (nu la editare)
         if (!isEditMode) {
             const pozaFile = formData.get('poza');
-            const hasUploadedFile = pozaFile && pozaFile.size > 0;
-            const hasExtractedImage = extractedImageUrl && extractedImageUrl.length > 0;
-            
-            if (!hasUploadedFile && !hasExtractedImage) {
-                errors.push('Imaginea terenului este obligatorie (încarcă una sau extrage din link)');
+            if (!pozaFile || pozaFile.size === 0) {
+                errors.push('Imaginea terenului este obligatorie');
             }
         }
 
-        // Validare poză dimensiune (dacă e upload)
+        // Validare poză dimensiune
         const pozaFile = formData.get('poza');
         if (pozaFile && pozaFile.size > 0) {
             if (pozaFile.size > 5 * 1024 * 1024) {
@@ -548,16 +342,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(validationErrors.join('\n'));
             }
 
-            // Upload imagine sau folosește imaginea extrasă
+            // Upload imagine
             let imageUrl = isEditMode && currentTerrain ? currentTerrain.image_url : null;
             const pozaFile = formData.get('poza');
-            
             if (pozaFile && pozaFile.size > 0) {
-                // User uploaded a file - use that
                 imageUrl = await uploadImageToStorage(pozaFile, user.id);
-            } else if (extractedImageUrl) {
-                // Use extracted image URL directly
-                imageUrl = extractedImageUrl;
             }
 
             // Calcul preț/mp
