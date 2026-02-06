@@ -1,3 +1,8 @@
+// ── OWN SUPABASE CLIENT (avoids conflict with app.js) ──
+const SUPABASE_URL_TD = 'https://glbvbbgmcobtswwlktic.supabase.co';
+const SUPABASE_ANON_KEY_TD = 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
+const sb = window.supabase.createClient(SUPABASE_URL_TD, SUPABASE_ANON_KEY_TD);
+
 // Status mapping for display
 const statusMapping = {
     'pending': { text: 'În așteptare', class: 'bg-yellow-100 text-yellow-800' },
@@ -61,7 +66,7 @@ function closeImageModal() {
 // Fetch user profile data
 async function fetchUserProfile() {
     try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if (!user) return null;
 
         const { data, error } = await supabase
@@ -406,13 +411,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait for Supabase to be initialized
-    if (typeof supabase !== 'undefined') {
-        fetchTerenDetails();
-    } else {
-        // Wait a bit for app.js to initialize
-        setTimeout(fetchTerenDetails, 100);
-    }
+    fetchTerenDetails();
 });
 
 // Analysis Modal Functions
