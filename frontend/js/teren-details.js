@@ -99,15 +99,12 @@ async function fetchTerenDetails() {
     try {
         showLoading();
         
-        // Fetch both teren details and user profile in parallel
-        const [terenResult, userProfile] = await Promise.all([
-            supabase
-                .from('terenuri')
-                .select('*')
-                .eq('id', terenId)
-                .single(),
-            fetchUserProfile()
-        ]);
+        // Fetch teren details
+        const terenResult = await sb
+            .from('terenuri')
+            .select('*')
+            .eq('id', terenId)
+            .single();
 
         const { data: terenData, error: terenError } = terenResult;
 
@@ -119,6 +116,23 @@ async function fetchTerenDetails() {
             showNotFound();
             return;
         }
+        
+        // Fetch creator profile separately if created_by_user_id exists
+        let creatorProfile = null;
+        if (terenData.created_by_user_id) {
+            const { data: creator } = await sb
+                .from('profiles')
+                .select('pseudonym, agency_name, account_type, user_id')
+                .eq('user_id', terenData.created_by_user_id)
+                .single();
+            creatorProfile = creator;
+        }
+        
+        // Attach creator to teren data
+        terenData.creator = creatorProfile;
+        
+        // Fetch user profile for permissions
+        const userProfile = await fetchUserProfile();
 
         displayTerenDetails(terenData, userProfile);
         hideLoading();
@@ -204,6 +218,29 @@ function displayTerenDetails(teren, userProfile) {
     document.getElementById('teren-apartamente').textContent = apartamenteRange;
     
     document.getElementById('teren-data-adaugat').textContent = formatDate(teren.data_adaugat);
+    
+    // Adăugat de (creator info)
+    const adaugatDeEl = document.getElementById('teren-adaugat-de');
+    if (adaugatDeEl && teren.creator) {
+        const creator = teren.creator;
+        const isAgency = creator.account_type === 'profesional';
+        const displayName = isAgency ? creator.agency_name : creator.pseudonym;
+        const icon = isAgency 
+            ? '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>'
+            : '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+        const badge = isAgency
+            ? '<span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">Agenție</span>'
+            : '<span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Utilizator</span>';
+        
+        // Link to profile for active users, no link for agencies
+        if (isAgency) {
+            adaugatDeEl.innerHTML = `${icon} <span>${displayName || 'Agenție'}</span> ${badge}`;
+        } else {
+            adaugatDeEl.innerHTML = `${icon} <a href="profile-view-new.html?id=${creator.user_id}" class="text-blue-600 hover:underline">${displayName || 'Utilizator'}</a> ${badge}`;
+        }
+    } else if (adaugatDeEl) {
+        adaugatDeEl.textContent = 'Necunoscut';
+    }
     
     // Analysis badges removed
     
