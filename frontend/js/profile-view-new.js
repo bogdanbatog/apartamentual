@@ -16,15 +16,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function initProfilePage() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
-        const profileId = urlParams.get('id');
+        let profileId = urlParams.get('id');
         
-        if (!profileId) {
-            showError('ID profil lipsă din URL');
-            return;
-        }
-        
+        // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         currentUser = user;
+        
+        // If no ID in URL, use current user's ID (viewing own profile)
+        if (!profileId) {
+            if (user) {
+                profileId = user.id;
+                // Update URL without reload
+                window.history.replaceState({}, '', `profile-view-new.html?id=${profileId}`);
+            } else {
+                showError('Trebuie să fii autentificat pentru a vedea profilul');
+                return;
+            }
+        }
+        
         isOwnProfile = user && user.id === profileId;
         
         await loadProfile(profileId);
@@ -108,6 +117,17 @@ async function loadActiveUserData(profileId) {
             .in('status', ['activ', 'pending']);
         
         profileData.groups = memberships || [];
+        
+        // Load favorite terrains (from terenuri_likes)
+        const { data: likes } = await supabase
+            .from('terenuri_likes')
+            .select('teren_id, terenuri(id, titlu, oras, cartier, suprafata, pret_total, image_url, status)')
+            .eq('user_id', profileId);
+        
+        // Filter only approved terrains
+        profileData.favoriteTerrains = likes
+            ?.filter(l => l.terenuri && l.terenuri.status === 'approved')
+            ?.map(l => l.terenuri) || [];
         
     } catch (error) {
         console.error('Load active user data error:', error);
@@ -261,8 +281,49 @@ function renderActiveUserContent() {
         descSection.classList.remove('hidden');
     }
     
+    // Favorite Terrains
+    renderFavoriteTerrains();
+    
     // Groups
     renderUserGroups();
+}
+
+function renderFavoriteTerrains() {
+    const container = document.getElementById('favorite-terrains');
+    
+    if (!profileData.favoriteTerrains || profileData.favoriteTerrains.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm">Nu ai terenuri favorite încă.</p>';
+        return;
+    }
+    
+    container.innerHTML = profileData.favoriteTerrains.map(terrain => {
+        const location = [terrain.oras, terrain.cartier].filter(Boolean).join(', ') || 'Locație nespecificată';
+        const price = terrain.pret_total ? Number(terrain.pret_total).toLocaleString('ro-RO') + ' €' : '-';
+        const surface = terrain.suprafata ? terrain.suprafata + ' mp' : '-';
+        
+        return `
+            <a href="teren-details.html?id=${terrain.id}" class="flex items-center gap-4 p-4 border rounded-lg hover:border-gray-400 hover:shadow-sm transition">
+                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    ${terrain.image_url 
+                        ? `<img src="${terrain.image_url}" alt="${terrain.titlu}" class="w-full h-full object-cover">`
+                        : `<div class="w-full h-full flex items-center justify-center text-gray-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                          </div>`
+                    }
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium truncate">${terrain.titlu}</p>
+                    <p class="text-sm text-gray-500">${location}</p>
+                    <p class="text-sm"><span class="text-orange-600 font-medium">${price}</span> • ${surface}</p>
+                </div>
+                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        `;
+    }).join('');
 }
 
 function renderUserGroups() {
