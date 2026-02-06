@@ -124,6 +124,10 @@
                                     <span id="teren-zona"></span>
                                 </div>
                                 <div class="flex justify-between">
+                                    <span class="font-medium">Preț total:</span>
+                                    <span id="teren-pret-total" class="text-orange-600 font-semibold"></span>
+                                </div>
+                                <div class="flex justify-between">
                                     <span class="font-medium">Preț pe mp:</span>
                                     <span id="teren-pret"></span>
                                 </div>
@@ -134,6 +138,15 @@
                                 <div class="flex justify-between">
                                     <span class="font-medium">Data adăugat:</span>
                                     <span id="teren-data-adaugat"></span>
+                                </div>
+                                <div id="link-sursa-row" class="flex justify-between items-center hidden">
+                                    <span class="font-medium">Sursă:</span>
+                                    <a id="teren-link-sursa" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-blue-600 hover:text-blue-800 hover:underline">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        Vezi anunțul original
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -221,7 +234,7 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-3">Email de solicitare</h3>
                         <div class="bg-gray-50 rounded-lg p-4 border">
                             <div class="text-sm text-gray-600 mb-2">
-                                <strong>Pentru:</strong> admin@apartamentual.ro<br>
+                                <strong>Pentru:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f392979e9a9db39283928187929e969d8786929fdd819c">[email&#160;protected]</a><br>
                                 <strong>Subiect:</strong> <span id="email-subject">Solicitare analiză teren</span>
                             </div>
                             <div class="text-sm text-gray-800 whitespace-pre-line" id="email-content">
@@ -264,11 +277,5 @@ Mulțumesc,
 
     <div id="footer"></div>
 
-    <script src="js/nav.js"></script>
-    <script src="js/footer.js"></script>
-    <script src="js/auth-modal.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/markdown-utils.js"></script>
-    <script src="js/teren-details.js"></script>
-</body>
-</html>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="js/nav.js"></script>
+    
