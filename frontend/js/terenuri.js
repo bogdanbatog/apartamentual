@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ══════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════
+let userAccountType = null; // 'activ' or 'profesional'
+
 async function checkAuth() {
     try {
         const { data: { user } } = await sb.auth.getUser();
@@ -65,8 +67,20 @@ async function checkAuth() {
             currentUser = user;
             DOM.navUser.style.display = 'block';
             DOM.btnLoginNav.style.display = 'none';
-            // Load user's likes
-            await loadUserLikes(user.id);
+            
+            // Get user profile to check account type
+            const { data: profile } = await sb
+                .from('profiles')
+                .select('account_type')
+                .eq('user_id', user.id)
+                .single();
+            
+            userAccountType = profile?.account_type || 'activ';
+            
+            // Load user's likes only for active users
+            if (userAccountType === 'activ') {
+                await loadUserLikes(user.id);
+            }
         }
     } catch (e) {
         console.warn('Auth check failed:', e);
@@ -464,8 +478,13 @@ function bindCardInteractions() {
 window.handleLike = async function(terenId) {
     if (!currentUser) {
         showToast('Trebuie să fii conectat pentru a adăuga la favorite.', 'info');
-        // Optionally redirect to login
         setTimeout(() => window.location.href = 'register.html', 1500);
+        return;
+    }
+    
+    // Block for professional accounts (agencies)
+    if (userAccountType === 'profesional') {
+        showToast('Conturile de agenție nu pot adăuga terenuri la favorite.', 'info');
         return;
     }
 
@@ -552,11 +571,29 @@ window.viewInterestedUsers = function(terenId) {
         return;
     }
     
+    // Block for professional accounts (agencies)
+    if (userAccountType === 'profesional') {
+        showToast('Conturile de agenție nu pot accesa lista de utilizatori.', 'info');
+        return;
+    }
+    
     // Navigate to utilizatori page with teren filter
     window.location.href = `utilizatori.html?teren=${terenId}`;
 };
 
 window.viewInterestedGroups = function(terenId) {
+    if (!currentUser) {
+        showToast('Trebuie să fii conectat pentru a vedea grupurile.', 'info');
+        setTimeout(() => window.location.href = 'register.html', 1500);
+        return;
+    }
+    
+    // Block for professional accounts (agencies)
+    if (userAccountType === 'profesional') {
+        showToast('Conturile de agenție nu pot accesa lista de grupuri.', 'info');
+        return;
+    }
+    
     // Navigate to grupuri page with teren filter
     window.location.href = `grupuri.html?teren=${terenId}`;
 };
