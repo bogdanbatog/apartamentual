@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilizatori - ApartamenTUal</title>
+    <meta name="description" content="Descoperă utilizatori activi care caută co-housing în România.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="utilizatori.css">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-text">Apartamen<span class="logo-highlight">TU</span>al</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Acasă</a>
+                <a href="ce-este.html" class="nav-link">Ce este</a>
+                <a href="terenuri.html" class="nav-link">Terenuri</a>
+                <a href="utilizatori.html" class="nav-link active">Utilizatori</a>
+                <a href="grupuri.html" class="nav-link">Grupuri</a>
+            </div>
+            <div class="nav-actions">
+                <a href="register.html" class="btn-nav-login" id="btn-login-nav">
+                    <i class="fas fa-sign-in-alt"></i> Intră în cont
+                </a>
+                <div class="nav-user" id="nav-user" style="display: none;">
+                    <a href="profile-view-new.html" class="btn-nav-profile">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </div>
+            <button class="nav-mobile-toggle" id="mobile-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- AUTH REQUIRED OVERLAY (for non-logged users) -->
+    <div id="auth-overlay" class="auth-overlay" style="display: none;">
+        <div class="auth-overlay-content">
+            <div class="auth-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2>Secțiune privată</h2>
+            <p>Trebuie să ai cont pentru a vedea profilurile utilizatorilor.</p>
+            <div class="auth-buttons">
+                <a href="register.html" class="btn-primary">Creează cont</a>
+                <a href="register.html" class="btn-secondary">Intră în cont</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Utilizatori activi</h1>
+                <p class="hero-subtitle">
+                    Descoperă persoane care caută co-housing în România.
+                    Găsește vecini potriviți pentru proiectul tău.
+                </p>
+            </div>
+        </section>
+
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-city"></i> ORAȘ
+                    </label>
+                    <select id="filter-oras" class="filter-select">
+                        <option value="">Toate orașele</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-map-marker-alt"></i> ZONĂ
+                    </label>
+                    <select id="filter-zona" class="filter-select" disabled>
+                        <option value="">Alege mai întâi orașul</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-tags"></i> INTERES
+                    </label>
+                    <select id="filter-interes" class="filter-select">
+                        <option value="">Toate interesele</option>
+                    </select>
+                </div>
+                <button class="btn-reset-filters" id="btn-reset">
+                    <i class="fas fa-times-circle"></i> Resetează
+                </button>
+            </div>
+
+            <!-- Active filters display -->
+            <div class="active-filters" id="active-filters" style="display: none;">
+                <span class="active-filters-label">Filtre active:</span>
+                <div class="active-filters-tags" id="active-filters-tags"></div>
+            </div>
+
+            <!-- Teren filter (when coming from a terrain) -->
+            <div class="teren-filter-banner" id="teren-filter-banner" style="display: none;">
+                <div class="teren-filter-content">
+                    <i class="fas fa-heart"></i>
+                    <span>Afișăm utilizatorii interesați de terenul: <strong id="teren-filter-name"></strong></span>
+                    <button class="btn-clear-teren-filter" id="btn-clear-teren-filter">
+                        <i class="fas fa-times"></i> Arată toți utilizatorii
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results count -->
+            <div class="results-info">
+                <span id="results-count">0 utilizatori găsiți</span>
+            </div>
+        </section>
+
+        <!-- Users Grid -->
+        <section class="users-section">
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Se încarcă utilizatorii...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-users-slash"></i>
+                </div>
+                <h3>Niciun utilizator găsit</h3>
+                <p>Nu am găsit utilizatori care să corespundă filtrelor selectate.</p>
+            </div>
+
+            <!-- Users Grid -->
+            <div id="users-grid" class="users-grid"></div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 ApartamenTUal</p>
+            <div class="footer-links">
+                <a href="termeni.html">Termeni</a>
+                <a href="gdpr.html">GDPR</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/orase-cartiere.js"></script>
+    <script src="js/utilizatori.js"></script>
+</body>
+</html>
