@@ -76,7 +76,12 @@ function populateCartierSelect(selectElement, oras, placeholder = "Alege zona / 
     selectElement.innerHTML = `<option value="">${placeholder}</option>`;
     if (!oras) return;
     
-    getCartiere(oras).forEach(cartier => {
+    // Sortare alfabetică a cartierelor
+    const cartiereSortate = getCartiere(oras).slice().sort((a, b) => 
+        a.localeCompare(b, 'ro', { sensitivity: 'base' })
+    );
+    
+    cartiereSortate.forEach(cartier => {
         const option = document.createElement('option');
         option.value = cartier;
         option.textContent = cartier;
