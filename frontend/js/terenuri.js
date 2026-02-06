@@ -422,7 +422,6 @@ function createTerenCard(teren, index) {
             </div>
 
             ${sourceHtml}
-            ${groupsHtml}
         </div>
 
         <!-- Footer / Actions -->
@@ -438,8 +437,11 @@ function createTerenCard(teren, index) {
                 <span class="teren-likes-count">${likes === 1 ? 'interesat' : 'interesați'}</span>
             </div>
             <div class="teren-card-actions">
-                <button class="btn-add-group" onclick="handleAddToGroup('${teren.id}')" title="Adaugă la un grup">
-                    <i class="fas fa-users"></i> Grup
+                <button class="btn-view-interested" onclick="viewInterestedUsers('${teren.id}')" title="Vezi utilizatorii interesați">
+                    <i class="fas fa-user"></i>
+                </button>
+                <button class="btn-view-groups" onclick="viewInterestedGroups('${teren.id}')" title="Vezi grupurile interesate">
+                    <i class="fas fa-users"></i>
                 </button>
                 <a href="teren-details.html?id=${teren.id}" class="btn-vezi-detalii">
                     Detalii <i class="fas fa-arrow-right"></i>
@@ -540,9 +542,26 @@ function updateLikeCountDisplay(terenId) {
 }
 
 // ══════════════════════════════════════════
-//  ADD TO GROUP
+//  VIEW INTERESTED USERS / GROUPS
 // ══════════════════════════════════════════
 
+window.viewInterestedUsers = function(terenId) {
+    if (!currentUser) {
+        showToast('Trebuie să fii conectat pentru a vedea utilizatorii.', 'info');
+        setTimeout(() => window.location.href = 'register.html', 1500);
+        return;
+    }
+    
+    // Navigate to utilizatori page with teren filter
+    window.location.href = `utilizatori.html?teren=${terenId}`;
+};
+
+window.viewInterestedGroups = function(terenId) {
+    // Navigate to grupuri page with teren filter
+    window.location.href = `grupuri.html?teren=${terenId}`;
+};
+
+// Keep handleAddToGroup for backwards compatibility (teren-details page uses it)
 window.handleAddToGroup = function(terenId) {
     if (!currentUser) {
         showToast('Trebuie să fii conectat pentru această acțiune.', 'info');
