@@ -474,6 +474,13 @@ async function handleActivProfileSubmit(event) {
     
     const errorDiv = document.getElementById('profile-error');
     
+    // Validate pseudonym (required)
+    const pseudonym = document.getElementById('pseudonym').value.trim();
+    if (!pseudonym) {
+        showError(errorDiv, 'Te rugăm să completezi un nume sau pseudonim');
+        return;
+    }
+    
     // Validate required fields
     if (selectedZones.length === 0) {
         showError(errorDiv, 'Te rugăm să selectezi cel puțin o zonă preferată');
@@ -488,7 +495,7 @@ async function handleActivProfileSubmit(event) {
     try {
         // Get form data
         const formData = {
-            pseudonym: document.getElementById('pseudonym').value,
+            pseudonym: pseudonym,
             profession: document.getElementById('profession').value,
             phone: document.getElementById('phone').value,
             age: parseInt(document.getElementById('age').value),
