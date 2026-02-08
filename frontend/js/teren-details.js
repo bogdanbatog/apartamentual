@@ -1,15 +1,5 @@
-// ── OWN SUPABASE CLIENT (avoids conflict with app.js) ──
-const SUPABASE_URL_TD = 'https://glbvbbgmcobtswwlktic.supabase.co';
-const SUPABASE_ANON_KEY_TD = 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
-const sb = window.supabase.createClient(SUPABASE_URL_TD, SUPABASE_ANON_KEY_TD);
-
 // Status mapping for display
 const statusMapping = {
-    'pending': { text: 'În așteptare', class: 'bg-yellow-100 text-yellow-800' },
-    'approved': { text: 'Aprobat', class: 'bg-green-100 text-green-800' },
-    'rejected': { text: 'Respins', class: 'bg-red-100 text-red-800' },
-    'disabled': { text: 'Dezactivat', class: 'bg-gray-100 text-gray-800' },
-    // Legacy statuses for backwards compatibility
     'active': { text: 'Disponibil', class: 'bg-green-100 text-green-800' },
     'under_review': { text: 'În analiză', class: 'bg-yellow-100 text-yellow-800' },
     'reserved': { text: 'Rezervat', class: 'bg-blue-100 text-blue-800' },
@@ -17,9 +7,10 @@ const statusMapping = {
     'inactive': { text: 'Inactiv', class: 'bg-red-100 text-red-800' }
 };
 
-// Analysis rendering removed from details page
-
-// Markdown rendering is now handled by markdown-utils.js
+// Global state for group likes
+let userGroups = [];
+let terenGroupLikes = [];
+let currentTerenId = null;
 
 // Extract teren ID from URL query parameter
 function getTerenIdFromUrl() {
@@ -29,11 +20,9 @@ function getTerenIdFromUrl() {
 
 // Get image URL from storage
 function getImageUrl(teren) {
-    // First, try the new image_url field (Supabase Storage)
     if (teren.image_url) {
         return teren.image_url;
     }
-
     return null;
 }
 
@@ -54,19 +43,19 @@ function openImageModal() {
     if (imageSrc) {
         document.getElementById('modal-image').src = imageSrc;
         document.getElementById('image-modal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
     }
 }
 
 function closeImageModal() {
     document.getElementById('image-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto'; // Restore scrolling
+    document.body.style.overflow = 'auto';
 }
 
 // Fetch user profile data
 async function fetchUserProfile() {
     try {
-        const { data: { user } } = await sb.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
 
         const { data, error } = await supabase
@@ -87,9 +76,196 @@ async function fetchUserProfile() {
     }
 }
 
+// Fetch user's groups (where they are active member)
+async function fetchUserGroups() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const { data, error } = await supabase
+            .from('grup_membri')
+            .select(`
+                grup_id,
+                grupuri:grup_id (
+                    id,
+                    nume,
+                    status
+                )
+            `)
+            .eq('user_id', user.id)
+            .eq('status', 'activ');
+
+        if (error) {
+            console.error("Error fetching user groups:", error);
+            return [];
+        }
+
+        // Extract and filter valid groups
+        return (data || [])
+            .map(m => m.grupuri)
+            .filter(g => g && g.status !== 'arhivat');
+    } catch (error) {
+        console.error("Error fetching user groups:", error);
+        return [];
+    }
+}
+
+// Fetch which groups have liked this teren
+async function fetchTerenGroupLikes(terenId) {
+    try {
+        const { data, error } = await supabase
+            .from('terenuri_likes_grupuri')
+            .select('grup_id')
+            .eq('teren_id', terenId);
+
+        if (error) {
+            console.error("Error fetching teren group likes:", error);
+            return [];
+        }
+
+        return (data || []).map(l => l.grup_id);
+    } catch (error) {
+        console.error("Error fetching teren group likes:", error);
+        return [];
+    }
+}
+
+// Toggle group like for teren
+async function toggleGroupLike(grupId) {
+    if (!currentTerenId) return;
+
+    const isLiked = terenGroupLikes.includes(grupId);
+    
+    try {
+        if (isLiked) {
+            // Remove like
+            const { error } = await supabase
+                .from('terenuri_likes_grupuri')
+                .delete()
+                .eq('teren_id', currentTerenId)
+                .eq('grup_id', grupId);
+
+            if (error) throw error;
+            
+            terenGroupLikes = terenGroupLikes.filter(id => id !== grupId);
+            showToast('Terenul a fost eliminat din favoritele grupului.', 'success');
+        } else {
+            // Add like
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                showToast('Trebuie să fii autentificat.', 'error');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('terenuri_likes_grupuri')
+                .insert({
+                    teren_id: currentTerenId,
+                    grup_id: grupId,
+                    added_by: user.id
+                });
+
+            if (error) throw error;
+            
+            terenGroupLikes.push(grupId);
+            showToast('Terenul a fost adăugat la favoritele grupului!', 'success');
+        }
+
+        // Update UI
+        renderGroupLikesSection();
+        
+    } catch (error) {
+        console.error('Error toggling group like:', error);
+        showToast('A apărut o eroare. Încearcă din nou.', 'error');
+    }
+}
+
+// Render group likes section
+function renderGroupLikesSection() {
+    const container = document.getElementById('group-likes-section');
+    if (!container) return;
+
+    // No groups - hide section
+    if (userGroups.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.classList.remove('hidden');
+    
+    const groupsHtml = userGroups.map(group => {
+        const isLiked = terenGroupLikes.includes(group.id);
+        return `
+            <button 
+                onclick="toggleGroupLike('${group.id}')"
+                class="flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                    isLiked 
+                        ? 'bg-orange-100 border-orange-300 text-orange-800' 
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-orange-300 hover:bg-orange-50'
+                }"
+            >
+                <svg class="w-5 h-5 ${isLiked ? 'text-orange-500' : 'text-gray-400'}" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span class="font-medium">${escapeHtml(group.nume)}</span>
+                ${isLiked ? '<span class="text-xs bg-orange-200 px-2 py-0.5 rounded">Adăugat</span>' : ''}
+            </button>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                Adaugă la favoritele grupului
+            </h3>
+            <p class="text-sm text-gray-600 mb-3">Selectează grupurile care ar putea fi interesate de acest teren:</p>
+            <div class="flex flex-wrap gap-2">
+                ${groupsHtml}
+            </div>
+        </div>
+    `;
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast-notification');
+    existingToasts.forEach(t => t.remove());
+
+    const toast = document.createElement('div');
+    toast.className = `toast-notification fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all transform translate-y-0 ${
+        type === 'success' ? 'bg-green-600 text-white' :
+        type === 'error' ? 'bg-red-600 text-white' :
+        'bg-gray-800 text-white'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => toast.classList.add('opacity-100'), 10);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Escape HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Fetch teren details
 async function fetchTerenDetails() {
     const terenId = getTerenIdFromUrl();
+    currentTerenId = terenId;
     
     if (!terenId) {
         showNotFound();
@@ -99,12 +275,17 @@ async function fetchTerenDetails() {
     try {
         showLoading();
         
-        // Fetch teren details
-        const terenResult = await sb
-            .from('terenuri')
-            .select('*')
-            .eq('id', terenId)
-            .single();
+        // Fetch teren details, user profile, user groups, and teren group likes in parallel
+        const [terenResult, userProfile, groups, groupLikes] = await Promise.all([
+            supabase
+                .from('terenuri')
+                .select('*')
+                .eq('id', terenId)
+                .single(),
+            fetchUserProfile(),
+            fetchUserGroups(),
+            fetchTerenGroupLikes(terenId)
+        ]);
 
         const { data: terenData, error: terenError } = terenResult;
 
@@ -116,25 +297,13 @@ async function fetchTerenDetails() {
             showNotFound();
             return;
         }
-        
-        // Fetch creator profile separately if created_by_user_id exists
-        let creatorProfile = null;
-        if (terenData.created_by_user_id) {
-            const { data: creator } = await sb
-                .from('profiles')
-                .select('pseudonym, agency_name, account_type, user_id')
-                .eq('user_id', terenData.created_by_user_id)
-                .single();
-            creatorProfile = creator;
-        }
-        
-        // Attach creator to teren data
-        terenData.creator = creatorProfile;
-        
-        // Fetch user profile for permissions
-        const userProfile = await fetchUserProfile();
+
+        // Store groups and likes in global state
+        userGroups = groups;
+        terenGroupLikes = groupLikes;
 
         displayTerenDetails(terenData, userProfile);
+        renderGroupLikesSection();
         hideLoading();
         
     } catch (error) {
@@ -154,7 +323,6 @@ function displayTerenDetails(teren, userProfile) {
     
     // Add disabled indicator to the page
     if (isDisabled) {
-        // Add disabled badge to the top of the page
         const backButton = document.querySelector('.mb-6');
         if (backButton && !document.getElementById('disabled-indicator')) {
             const disabledIndicator = document.createElement('div');
@@ -171,7 +339,6 @@ function displayTerenDetails(teren, userProfile) {
             backButton.insertAdjacentElement('afterend', disabledIndicator);
         }
         
-        // Apply visual styling to the main content
         const mainContent = document.querySelector('.grid.lg\\:grid-cols-2');
         if (mainContent) {
             mainContent.classList.add('opacity-75');
@@ -182,7 +349,7 @@ function displayTerenDetails(teren, userProfile) {
     document.getElementById('teren-title').textContent = teren.titlu || 'Teren fără titlu';
     document.getElementById('teren-description').textContent = teren.descriere || 'Fără descriere disponibilă';
     
-    // Status - show disabled status if applicable
+    // Status
     let status = statusMapping[teren.status] || { text: teren.status, class: 'bg-gray-100 text-gray-800' };
     if (isDisabled) {
         status = { text: 'Dezactivat', class: 'bg-red-100 text-red-800' };
@@ -194,57 +361,16 @@ function displayTerenDetails(teren, userProfile) {
     // Basic details
     document.getElementById('teren-suprafata').textContent = teren.suprafata ? `${teren.suprafata} mp` : 'N/A';
     document.getElementById('teren-zona').textContent = teren.zona || 'N/A';
-    
-    // Preț total
-    if (teren.pret_total) {
-        document.getElementById('teren-pret-total').textContent = `${Number(teren.pret_total).toLocaleString('ro-RO')} €`;
-    } else {
-        document.getElementById('teren-pret-total').textContent = '—';
-    }
-    
     document.getElementById('teren-pret').textContent = teren.pret_pe_mp ? `${teren.pret_pe_mp} €/mp` : 'N/A';
-    
-    // Link sursă
-    if (teren.link_sursa) {
-        const linkSursaRow = document.getElementById('link-sursa-row');
-        const linkSursaEl = document.getElementById('teren-link-sursa');
-        linkSursaRow.classList.remove('hidden');
-        linkSursaEl.href = teren.link_sursa;
-    }
     
     const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max 
         ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
         : 'N/A';
-    document.getElementById('teren-apartamente-value').textContent = apartamenteRange;
+    document.getElementById('teren-apartamente').textContent = apartamenteRange;
     
     document.getElementById('teren-data-adaugat').textContent = formatDate(teren.data_adaugat);
     
-    // Adăugat de (creator info)
-    const adaugatDeEl = document.getElementById('teren-adaugat-de');
-    if (adaugatDeEl && teren.creator) {
-        const creator = teren.creator;
-        const isAgency = creator.account_type === 'profesional';
-        const displayName = isAgency ? creator.agency_name : creator.pseudonym;
-        const icon = isAgency 
-            ? '<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>'
-            : '<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
-        const badge = isAgency
-            ? '<span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">Agenție</span>'
-            : '<span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Utilizator</span>';
-        
-        // Link to profile for active users, no link for agencies
-        if (isAgency) {
-            adaugatDeEl.innerHTML = `${icon} <span>${displayName || 'Agenție'}</span> ${badge}`;
-        } else {
-            adaugatDeEl.innerHTML = `${icon} <a href="profile-view-new.html?id=${creator.user_id}" class="text-blue-600 hover:underline">${displayName || 'Utilizator'}</a> ${badge}`;
-        }
-    } else if (adaugatDeEl) {
-        adaugatDeEl.textContent = 'Necunoscut';
-    }
-    
-    // Analysis badges removed
-    
-    // Determine if user can see action buttons
+    // Action buttons
     const actionButtons = document.getElementById('action-buttons');
     const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';
     const canModify = userProfile && (
@@ -253,17 +379,14 @@ function displayTerenDetails(teren, userProfile) {
     );
     const canToggleStatus = userProfile && userProfile.is_super_admin;
     
-    // Show action buttons if user has pending analysis OR can modify/delete
     if (hasPendingAnalysis || canModify || canToggleStatus) {
         actionButtons.classList.remove('hidden');
-        
-        // Update button visibility
         updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren);
     } else {
         actionButtons.classList.add('hidden');
     }
     
-    // Image handling with support for both Storage URLs and legacy blob data
+    // Image handling
     const imageContainer = document.getElementById('teren-image-container');
     const noImageDiv = document.getElementById('no-image');
     const imageEl = document.getElementById('teren-image');
@@ -274,18 +397,12 @@ function displayTerenDetails(teren, userProfile) {
         imageEl.src = imageUrl;
         imageEl.alt = `Imagine teren - ${teren.titlu}`;
         
-        // Apply disabled styling to image if teren is disabled
         if (isDisabled) {
             imageEl.classList.add('opacity-50');
         } else {
             imageEl.classList.remove('opacity-50');
         }
         
-        imageEl.onerror = function() {
-            console.error('Failed to load image from URL:', imageUrl);
-            imageContainer.classList.add('hidden');
-            noImageDiv.classList.remove('hidden');
-        };
         imageContainer.classList.remove('hidden');
         noImageDiv.classList.add('hidden');
     } else {
@@ -293,27 +410,14 @@ function displayTerenDetails(teren, userProfile) {
         noImageDiv.classList.remove('hidden');
     }
     
-    // Analysis details removed
-    
-    // Show the details
+    // Show teren details section
     document.getElementById('teren-details').classList.remove('hidden');
 }
 
-// Update action buttons visibility and content
+// Update action buttons
 function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren) {
     const actionButtons = document.getElementById('action-buttons');
-    
-    // Clear existing buttons
     actionButtons.innerHTML = '';
-    
-    // Add "Cere o analiză" button if there are pending analyses
-    if (hasPendingAnalysis) {
-        const cereAnalizaBtn = document.createElement('button');
-        cereAnalizaBtn.className = 'primary';
-        cereAnalizaBtn.textContent = 'Cere o analiză';
-        cereAnalizaBtn.onclick = () => openAnalysisModal(teren);
-        actionButtons.appendChild(cereAnalizaBtn);
-    }
     
     // Add "Modifica" button if user can modify
     if (canModify) {
@@ -339,26 +443,19 @@ function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, ter
 
 // Edit teren function
 function editTeren(terenId) {
-    // Redirect to edit page or open edit modal
     window.location.href = `/terenuri-propune.html?edit=${terenId}`;
 }
 
 // Toggle teren status (activate/deactivate)
 async function toggleTerenStatus(terenId, isCurrentlyDeleted) {
     try {
-        console.log('Starting toggleTerenStatus:', { terenId, isCurrentlyDeleted });
-        
-        // First, check if user is super admin
         const userProfile = await fetchUserProfile();
-        console.log('User profile:', userProfile);
-        console.log('Is super admin:', userProfile?.is_super_admin);
         
         if (!userProfile?.is_super_admin) {
             throw new Error('Nu aveți permisiuni de administrator pentru această operație');
         }
         
         const newStatus = isCurrentlyDeleted ? null : new Date().toISOString();
-        console.log('New status:', newStatus);
         
         const { data, error } = await supabase
             .from('terenuri')
@@ -366,21 +463,10 @@ async function toggleTerenStatus(terenId, isCurrentlyDeleted) {
             .eq('id', terenId)
             .select();
         
-        console.log('Supabase response:', { data, error });
-        
         if (error) {
-            console.error('Supabase error details:', {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code
-            });
             throw error;
         }
         
-        console.log('Update successful, data:', data);
-        
-        // Show success message and reload page
         const message = isCurrentlyDeleted ? 'Terenul a fost activat cu succes!' : 'Terenul a fost dezactivat cu succes!';
         alert(message);
         window.location.reload();
@@ -417,22 +503,18 @@ function showNotFound() {
     document.getElementById("teren-details").classList.add("hidden");
 }
 
-// Add retry button event listener
-document.addEventListener("DOMContentLoaded", function() {
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
     const retryBtn = document.getElementById("retry-btn");
     if (retryBtn) {
         retryBtn.addEventListener("click", fetchTerenDetails);
     }
     
-    // Add email button event listener
     const sendEmailBtn = document.getElementById("send-email-btn");
     if (sendEmailBtn) {
         sendEmailBtn.addEventListener("click", function() {
-            // Get current teren data from the page
             const terenId = getTerenIdFromUrl();
             if (terenId) {
-                // We need to get the teren data, but since we don't have it in scope here,
-                // we'll create a simple version with the data we can get from the DOM
                 const teren = {
                     titlu: document.getElementById('teren-title')?.textContent || 'Teren fără titlu',
                     suprafata: document.getElementById('teren-suprafata')?.textContent?.replace(' mp', '') || 'N/A',
@@ -443,17 +525,17 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-});
 
-
-// Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-    fetchTerenDetails();
+    // Wait for Supabase to be initialized
+    if (typeof supabase !== 'undefined') {
+        fetchTerenDetails();
+    } else {
+        setTimeout(fetchTerenDetails, 100);
+    }
 });
 
 // Analysis Modal Functions
 function openAnalysisModal(teren) {
-    // Populate email content with teren details
     const terenUrl = window.location.href;
     const emailSubject = `Solicitare analiză teren - ${teren.titlu || 'Teren fără titlu'}`;
     
@@ -474,18 +556,16 @@ Vă rog să îmi trimiteți detaliile pentru plata corespunzătoare.
 Mulțumesc,
 [Numele dumneavoastră]`;
 
-    // Update email content in modal
     document.getElementById('email-subject').textContent = emailSubject;
     document.getElementById('email-content').textContent = emailContent;
     
-    // Show modal
     document.getElementById('analysis-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 function closeAnalysisModal() {
     document.getElementById('analysis-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto'; // Restore scrolling
+    document.body.style.overflow = 'auto';
 }
 
 function sendAnalysisEmail(teren) {
@@ -509,259 +589,16 @@ Vă rog să îmi trimiteți detaliile pentru plata corespunzătoare.
 Mulțumesc,
 [Numele dumneavoastră]`;
 
-    // Create mailto link
     const mailtoLink = `mailto:office@ltfbstudio.ro?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailContent)}`;
     
-    // Open email client
     window.location.href = mailtoLink;
-    
-    // Close modal after opening email client
     closeAnalysisModal();
 }
 
-// Close modal with Escape key
+// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeImageModal();
         closeAnalysisModal();
-        closeGroupModal();
-        closeShareModal();
     }
-});
-
-// ══════════════════════════════════════════
-//  ACTION BUTTONS: Add to Profile, Add to Group, Share
-// ══════════════════════════════════════════
-
-let currentTerenData = null;
-let userLikedThisTeren = false;
-
-// Store teren data when loaded for use in action buttons
-function storeTerenData(teren) {
-    currentTerenData = teren;
-}
-
-// Check if user has liked this teren
-async function checkIfUserLiked(terenId) {
-    try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) return false;
-        
-        const { data, error } = await sb
-            .from('terenuri_likes')
-            .select('id')
-            .eq('teren_id', terenId)
-            .eq('user_id', user.id)
-            .single();
-        
-        return !error && data;
-    } catch (e) {
-        return false;
-    }
-}
-
-// Update Add to Profile button state
-function updateAddToProfileButton(isLiked) {
-    const btn = document.getElementById('btn-add-to-profile');
-    const btnText = document.getElementById('btn-add-to-profile-text');
-    if (!btn || !btnText) return;
-    
-    userLikedThisTeren = isLiked;
-    
-    if (isLiked) {
-        btn.classList.add('bg-orange-50', 'border-orange-400');
-        btn.querySelector('svg').classList.add('text-orange-500', 'fill-current');
-        btn.querySelector('svg').classList.remove('text-gray-500');
-        btnText.textContent = 'Salvat în profil';
-    } else {
-        btn.classList.remove('bg-orange-50', 'border-orange-400');
-        btn.querySelector('svg').classList.remove('text-orange-500', 'fill-current');
-        btn.querySelector('svg').classList.add('text-gray-500');
-        btnText.textContent = 'Adaugă la profil';
-    }
-}
-
-// Add to Profile (like/unlike)
-async function toggleAddToProfile() {
-    const terenId = getTerenIdFromUrl();
-    if (!terenId) return;
-    
-    try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (!user) {
-            showToast('Trebuie să fii autentificat pentru a salva terenuri.');
-            setTimeout(() => window.location.href = 'register.html', 1500);
-            return;
-        }
-        
-        if (userLikedThisTeren) {
-            // Unlike
-            const { error } = await sb
-                .from('terenuri_likes')
-                .delete()
-                .eq('teren_id', terenId)
-                .eq('user_id', user.id);
-            
-            if (!error) {
-                updateAddToProfileButton(false);
-                showToast('Teren eliminat din profil');
-            }
-        } else {
-            // Like
-            const { error } = await sb
-                .from('terenuri_likes')
-                .insert({ teren_id: terenId, user_id: user.id });
-            
-            if (!error) {
-                updateAddToProfileButton(true);
-                showToast('Teren salvat în profil!');
-            }
-        }
-    } catch (e) {
-        console.error('Error toggling like:', e);
-        showToast('A apărut o eroare');
-    }
-}
-
-// Add to Group Modal
-function openGroupModal() {
-    document.getElementById('group-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeGroupModal() {
-    document.getElementById('group-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-// Share Modal
-function openShareModal() {
-    document.getElementById('share-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeShareModal() {
-    document.getElementById('share-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-// Share via Email
-function shareViaEmail() {
-    const title = currentTerenData?.titlu || 'Teren interesant';
-    const url = window.location.href;
-    const subject = `Uite un teren interesant: ${title}`;
-    const body = `Salut!\n\nAm găsit un teren care mi s-a părut interesant și am vrut să ți-l arăt:\n\n${title}\n${url}\n\nVezi detaliile pe ApartamenTUal!`;
-    
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    closeShareModal();
-}
-
-// Share via WhatsApp
-function shareViaWhatsApp() {
-    const title = currentTerenData?.titlu || 'Teren interesant';
-    const url = window.location.href;
-    const text = `Uite un teren interesant pe ApartamenTUal: ${title}\n${url}`;
-    
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-    closeShareModal();
-}
-
-// Copy link to clipboard
-async function copyLinkToClipboard() {
-    try {
-        await navigator.clipboard.writeText(window.location.href);
-        showToast('Link copiat!');
-        closeShareModal();
-    } catch (e) {
-        // Fallback for older browsers
-        const input = document.createElement('input');
-        input.value = window.location.href;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        showToast('Link copiat!');
-        closeShareModal();
-    }
-}
-
-// Toast notification
-function showToast(message) {
-    const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toast-message');
-    if (!toast || !toastMessage) return;
-    
-    toastMessage.textContent = message;
-    toast.classList.remove('translate-y-20', 'opacity-0');
-    
-    setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-    }, 3000);
-}
-
-// Setup action button event listeners
-document.addEventListener('DOMContentLoaded', async function() {
-    // Check user account type
-    let userAccountType = null;
-    try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (user) {
-            const { data: profile } = await sb
-                .from('profiles')
-                .select('account_type')
-                .eq('user_id', user.id)
-                .single();
-            userAccountType = profile?.account_type || 'activ';
-        }
-    } catch (e) {
-        console.warn('Could not get user account type:', e);
-    }
-    
-    // Hide action buttons for professional accounts (except Share)
-    const btnAddToProfile = document.getElementById('btn-add-to-profile');
-    const btnAddToGroup = document.getElementById('btn-add-to-group');
-    const btnShare = document.getElementById('btn-share');
-    
-    if (userAccountType === 'profesional') {
-        // Hide like and group buttons for agencies
-        if (btnAddToProfile) btnAddToProfile.style.display = 'none';
-        if (btnAddToGroup) btnAddToGroup.style.display = 'none';
-        // Share remains visible
-    } else {
-        // Setup for active users
-        if (btnAddToProfile) {
-            btnAddToProfile.addEventListener('click', toggleAddToProfile);
-            
-            // Check initial like state
-            const terenId = getTerenIdFromUrl();
-            if (terenId) {
-                const isLiked = await checkIfUserLiked(terenId);
-                updateAddToProfileButton(isLiked);
-            }
-        }
-        
-        // Add to Group button
-        if (btnAddToGroup) {
-            btnAddToGroup.addEventListener('click', openGroupModal);
-        }
-    }
-    
-    // Share button - available for everyone
-    if (btnShare) {
-        btnShare.addEventListener('click', openShareModal);
-    }
-    
-    // Share modal buttons
-    const shareEmail = document.getElementById('share-email');
-    if (shareEmail) shareEmail.addEventListener('click', shareViaEmail);
-    
-    const shareWhatsApp = document.getElementById('share-whatsapp');
-    if (shareWhatsApp) shareWhatsApp.addEventListener('click', shareViaWhatsApp);
-    
-    const shareCopy = document.getElementById('share-copy');
-    if (shareCopy) shareCopy.addEventListener('click', copyLinkToClipboard);
-    
-    // Close modals when clicking outside
-    document.getElementById('group-modal')?.addEventListener('click', closeGroupModal);
-    document.getElementById('share-modal')?.addEventListener('click', closeShareModal);
 });
