@@ -33,6 +33,9 @@
                     <a href="profile-view-new.html" class="btn-nav-profile">
                         <i class="fas fa-user"></i>
                     </a>
+                    <button id="btn-logout-nav" class="btn-nav-profile" title="Deconectare" style="margin-left: 8px; cursor: pointer; background: none; border: none; color: inherit; font-size: inherit;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </div>
             <button class="nav-mobile-toggle" id="mobile-toggle">
@@ -160,7 +163,24 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
     <script src="js/orase-cartiere.js"></script>
     <script src="js/utilizatori.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('btn-logout-nav');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                        await sb.auth.signOut();
+                        window.location.href = '/index.html';
+                    } catch (e) {
+                        console.error('Logout error:', e);
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
