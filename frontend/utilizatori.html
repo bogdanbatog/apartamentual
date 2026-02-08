@@ -29,13 +29,19 @@
                 <a href="register.html" class="btn-nav-login" id="btn-login-nav">
                     <i class="fas fa-sign-in-alt"></i> Intră în cont
                 </a>
-                <div class="nav-user" id="nav-user" style="display: none;">
-                    <a href="profile-view-new.html" class="btn-nav-profile">
+                <div class="nav-user" id="nav-user" style="display: none; position: relative;">
+                    <button class="btn-nav-profile" id="btn-profile-toggle" style="cursor: pointer; background: #f97316; border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; display: flex; align-items: center; justify-content: center;">
                         <i class="fas fa-user"></i>
-                    </a>
-                    <button id="btn-logout-nav" class="btn-nav-profile" title="Deconectare" style="margin-left: 8px; cursor: pointer; background: none; border: none; color: inherit; font-size: inherit;">
-                        <i class="fas fa-sign-out-alt"></i>
                     </button>
+                    <div id="profile-dropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 200px; z-index: 100; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <a href="profile-view-new.html" style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; color: #334155; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <i class="fas fa-user" style="color: #64748b; width: 16px;"></i> Profilul meu
+                        </a>
+                        <div style="height: 1px; background: #e2e8f0; margin: 0 12px;"></div>
+                        <button id="btn-logout-nav" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 18px; color: #334155; font-size: 14px; font-weight: 500; background: none; border: none; text-align: left; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                            <i class="fas fa-sign-out-alt" style="color: #64748b; width: 16px;"></i> Deconectare
+                        </button>
+                    </div>
                 </div>
             </div>
             <button class="nav-mobile-toggle" id="mobile-toggle">
@@ -168,7 +174,26 @@
     <script src="js/utilizatori.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const profileToggle = document.getElementById('btn-profile-toggle');
+            const dropdown = document.getElementById('profile-dropdown');
             const logoutBtn = document.getElementById('btn-logout-nav');
+
+            // Toggle dropdown
+            if (profileToggle && dropdown) {
+                profileToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                });
+
+                // Close on click outside
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target) && e.target !== profileToggle) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }
+
+            // Logout
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
                     try {
