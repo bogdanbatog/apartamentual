@@ -229,6 +229,56 @@ function renderGroupLikesSection() {
     `;
 }
 
+// Toggle personal teren like (add to profile favorites)
+async function toggleTerenLike(terenId) {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            showToast('Trebuie să fii autentificat.', 'error');
+            return;
+        }
+
+        // Check if already liked
+        const { data: existing } = await supabase
+            .from('terenuri_likes')
+            .select('id')
+            .eq('teren_id', terenId)
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        const btnLike = document.getElementById('btn-like-profil');
+
+        if (existing) {
+            // Remove like
+            await supabase
+                .from('terenuri_likes')
+                .delete()
+                .eq('teren_id', terenId)
+                .eq('user_id', user.id);
+            
+            if (btnLike) {
+                btnLike.querySelector('svg').setAttribute('fill', 'none');
+                btnLike.classList.remove('bg-orange-50', 'border-orange-300');
+            }
+            showToast('Terenul a fost eliminat din favorite.', 'success');
+        } else {
+            // Add like
+            await supabase
+                .from('terenuri_likes')
+                .insert({ teren_id: terenId, user_id: user.id });
+            
+            if (btnLike) {
+                btnLike.querySelector('svg').setAttribute('fill', 'currentColor');
+                btnLike.classList.add('bg-orange-50', 'border-orange-300');
+            }
+            showToast('Terenul a fost adăugat la favorite!', 'success');
+        }
+    } catch (error) {
+        console.error('Error toggling teren like:', error);
+        showToast('A apărut o eroare.', 'error');
+    }
+}
+
 // Toast notification
 function showToast(message, type = 'info') {
     // Remove existing toasts
@@ -302,7 +352,7 @@ async function fetchTerenDetails() {
         userGroups = groups;
         terenGroupLikes = groupLikes;
 
-        displayTerenDetails(terenData, userProfile);
+        await displayTerenDetails(terenData, userProfile);
         renderGroupLikesSection();
         hideLoading();
         
@@ -314,7 +364,7 @@ async function fetchTerenDetails() {
 }
 
 // Display teren details
-function displayTerenDetails(teren, userProfile) {
+async function displayTerenDetails(teren, userProfile) {
     // Update page title
     document.title = `${teren.titlu} - ApartamenTUal`;
     
@@ -361,14 +411,113 @@ function displayTerenDetails(teren, userProfile) {
     // Basic details
     document.getElementById('teren-suprafata').textContent = teren.suprafata ? `${teren.suprafata} mp` : 'N/A';
     document.getElementById('teren-zona').textContent = teren.zona || 'N/A';
+    
+    // Preț total
+    const pretTotalEl = document.getElementById('teren-pret-total');
+    if (teren.pret_total) {
+        pretTotalEl.textContent = `${Number(teren.pret_total).toLocaleString('ro-RO')} €`;
+    } else {
+        pretTotalEl.textContent = 'N/A';
+    }
+    
+    // Preț pe mp
     document.getElementById('teren-pret').textContent = teren.pret_pe_mp ? `${teren.pret_pe_mp} €/mp` : 'N/A';
     
+    // Număr apartamente - cu link "cere o analiză" dacă N/A
+    const apartamenteEl = document.getElementById('teren-apartamente');
     const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max 
         ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
-        : 'N/A';
-    document.getElementById('teren-apartamente').textContent = apartamenteRange;
+        : null;
+    if (apartamenteRange) {
+        apartamenteEl.textContent = apartamenteRange;
+    } else {
+        apartamenteEl.innerHTML = '<a href="#" id="apartamente-cere-analiza" class="text-blue-600 hover:underline">Cere o analiză</a>';
+        const apartLink = document.getElementById('apartamente-cere-analiza');
+        if (apartLink) {
+            apartLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openAnalysisModal(teren);
+            });
+        }
+    }
     
     document.getElementById('teren-data-adaugat').textContent = formatDate(teren.data_adaugat);
+    
+    // Sursă
+    const sursaRow = document.getElementById('teren-sursa-row');
+    const sursaEl = document.getElementById('teren-sursa');
+    if (teren.link_sursa && sursaRow && sursaEl) {
+        sursaEl.href = teren.link_sursa;
+        sursaRow.classList.remove('hidden');
+    }
+    
+    // Adăugat de (posted_by / user_id)
+    const adaugatDeRow = document.getElementById('teren-adaugat-de-row');
+    const adaugatDeEl = document.getElementById('teren-adaugat-de');
+    const postedByUserId = teren.posted_by || teren.user_id;
+    if (postedByUserId && adaugatDeRow && adaugatDeEl) {
+        try {
+            const { data: posterProfile } = await supabase
+                .from('profiles')
+                .select('pseudonym, agency_name, account_type, user_id')
+                .eq('user_id', postedByUserId)
+                .single();
+            
+            if (posterProfile) {
+                const posterName = posterProfile.account_type === 'profesional' 
+                    ? (posterProfile.agency_name || 'Agenție') 
+                    : (posterProfile.pseudonym || 'Utilizator');
+                adaugatDeEl.textContent = posterName;
+                adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
+                adaugatDeRow.classList.remove('hidden');
+            }
+        } catch (e) {
+            console.warn('Could not load poster profile:', e);
+        }
+    }
+    
+    // User action buttons (show if logged in)
+    const userActionBtns = document.getElementById('user-action-buttons');
+    if (userProfile && userActionBtns) {
+        userActionBtns.classList.remove('hidden');
+        
+        // Like to profile
+        const btnLikeProfil = document.getElementById('btn-like-profil');
+        if (btnLikeProfil) {
+            btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
+        }
+        
+        // Like to group - toggle group likes section visibility
+        const btnLikeGrup = document.getElementById('btn-like-grup');
+        if (btnLikeGrup) {
+            btnLikeGrup.addEventListener('click', () => {
+                const groupSection = document.getElementById('group-likes-section');
+                if (groupSection) {
+                    groupSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+        
+        // Share button
+        const btnShare = document.getElementById('btn-share');
+        if (btnShare) {
+            btnShare.addEventListener('click', () => {
+                const url = window.location.href;
+                if (navigator.share) {
+                    navigator.share({ title: teren.titlu, url: url });
+                } else if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url);
+                    showToast('Link copiat în clipboard!', 'success');
+                }
+            });
+        }
+    }
+    
+    // Cere o analiză button
+    const btnCereAnaliza = document.getElementById('btn-cere-analiza');
+    if (btnCereAnaliza) {
+        btnCereAnaliza.addEventListener('click', () => openAnalysisModal(teren));
+    }
     
     // Action buttons
     const actionButtons = document.getElementById('action-buttons');
