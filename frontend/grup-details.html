@@ -603,16 +603,32 @@ async function loadGroupDetails() {
         currentGroup = group;
         
         // Load members
-        const { data: membersData } = await sb
+        const { data: membersData, error: membersError } = await sb
             .from('grup_membri')
-            .select(`
-                *,
-                profile:profiles(pseudonym, user_id)
-            `)
+            .select('*')
             .eq('grup_id', groupId)
             .eq('status', 'activ');
         
+        console.log('Members data:', membersData, 'Error:', membersError);
+        
         members = membersData || [];
+        
+        // Load profiles for members
+        if (members.length > 0) {
+            const userIds = members.map(m => m.user_id);
+            const { data: profilesData } = await sb
+                .from('profiles')
+                .select('user_id, pseudonym')
+                .in('user_id', userIds);
+            
+            // Attach profile to each member
+            if (profilesData) {
+                members = members.map(m => ({
+                    ...m,
+                    profile: profilesData.find(p => p.user_id === m.user_id)
+                }));
+            }
+        }
         
         // Check if current user is member/admin
         if (currentUser) {
