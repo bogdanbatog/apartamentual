@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalii Grup - ApartamenTUal</title>
+    <meta name="description" content="Detalii despre grupul de co-housing.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="grupuri.css">
+    <style>
+        /* Additional styles for details page */
+        .page-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .back-link:hover {
+            color: #f97316;
+        }
+        
+        /* Group Header */
+        .grup-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .grup-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .grup-header h1 {
+            font-size: 1.75rem;
+            color: #1e293b;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .grup-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        
+        .grup-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        
+        .grup-header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-action {
+            padding: 0.625rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: #f97316;
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: #ea580c;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .btn-danger {
+            background: white;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .btn-danger:hover {
+            background: #fef2f2;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+        }
+        
+        .btn-whatsapp:hover {
+            background: #20bd5a;
+        }
+        
+        /* Status badge large */
+        .status-badge-lg {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        /* Sections */
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-card h2 {
+            font-size: 1.125rem;
+            color: #1e293b;
+            margin: 0 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-card h2 i {
+            color: #f97316;
+        }
+        
+        /* Description */
+        .grup-description {
+            color: #475569;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        
+        .no-description {
+            color: #94a3b8;
+            font-style: italic;
+        }
+        
+        /* Members */
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .member-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+        
+        .member-card:hover {
+            background: #f1f5f9;
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #475569;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .member-name {
+            font-weight: 500;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .member-role {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .member-badge {
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .admin-badge {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Terenuri favorite */
+        .terenuri-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .teren-card-mini {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+        
+        .teren-card-mini:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+        }
+        
+        .teren-card-mini img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        
+        .teren-card-mini-info h4 {
+            font-size: 0.9375rem;
+            color: #1e293b;
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .teren-card-mini-info p {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        .empty-section {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+        
+        .empty-section i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+        
+        /* Admin section */
+        .admin-section {
+            border-top: 1px solid #e2e8f0;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+        }
+        
+        .admin-section h3 {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin: 0 0 1rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-selector {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .status-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .status-btn:hover {
+            border-color: #cbd5e1;
+        }
+        
+        .status-btn.active {
+            border-color: #f97316;
+            background: #fff7ed;
+        }
+        
+        /* Loading */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        /* Member only sections */
+        .member-only {
+            display: none;
+        }
+        
+        .member-only.visible {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            .grup-header-top {
+                flex-direction: column;
+            }
+            
+            .grup-header-actions {
+                width: 100%;
+            }
+            
+            .btn-action {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .members-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="main-nav">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">
+            <span class="logo-apart">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Acasă</a>
+            <a href="ce-este/">Ce este</a>
+            <a href="terenuri.html">Terenuri</a>
+            <a href="utilizatori.html">Utilizatori</a>
+            <a href="grupuri.html" class="active">Grupuri</a>
+        </div>
+        <div class="nav-actions">
+            <div class="nav-user" id="navUser" style="display:none;">
+                <button class="btn-user-avatar" id="btnUserAvatar">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="profile-view-new.html"><i class="fas fa-user"></i> Profilul meu</a>
+                    <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
+                </div>
+            </div>
+            <a href="register.html" class="btn-login-nav" id="btnLoginNav">
+                <i class="fas fa-sign-in-alt"></i> Intră în cont
+            </a>
+        </div>
+        <button class="nav-mobile-toggle" id="navMobileToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<div class="page-content">
+    <a href="grupuri.html" class="back-link">
+        <i class="fas fa-arrow-left"></i> Înapoi la grupuri
+    </a>
+    
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-state">
+        <div class="spinner"></div>
+        <p>Se încarcă detaliile grupului...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div id="errorState" class="section-card" style="display: none;">
+        <div class="empty-section">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Grupul nu a fost găsit</h3>
+            <p>Grupul pe care îl cauți nu există sau a fost șters.</p>
+            <a href="grupuri.html" class="btn-action btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-arrow-left"></i> Înapoi la grupuri
+            </a>
+        </div>
+    </div>
+    
+    <!-- Group Content -->
+    <div id="groupContent" style="display: none;">
+        <!-- Header -->
+        <div class="grup-header">
+            <div class="grup-header-top">
+                <div>
+                    <h1 id="grupNume">Nume Grup</h1>
+                    <div class="grup-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> <span id="grupLocation">București</span></span>
+                        <span><i class="fas fa-users"></i> <span id="grupMembriCount">0</span>/<span id="grupMaxMembri">20</span> membri</span>
+                        <span><i class="fas fa-calendar"></i> Creat <span id="grupCreatedAt">azi</span></span>
+                    </div>
+                </div>
+                <span id="grupStatus" class="status-badge-lg status-explorare">🟡 În explorare</span>
+            </div>
+            
+            <div class="grup-header-actions" id="headerActions">
+                <!-- Actions will be populated by JS -->
+            </div>
+        </div>
+        
+        <!-- Description -->
+        <div class="section-card">
+            <h2><i class="fas fa-info-circle"></i> Descriere</h2>
+            <p id="grupDescriere" class="grup-description">Fără descriere.</p>
+        </div>
+        
+        <!-- Members -->
+        <div class="section-card">
+            <h2><i class="fas fa-users"></i> Membri (<span id="membriCountTitle">0</span>)</h2>
+            <div id="membersGrid" class="members-grid">
+                <!-- Members will be populated by JS -->
+            </div>
+        </div>
+        
+        <!-- Terenuri favorite - Member only -->
+        <div id="terenuriSection" class="section-card member-only">
+            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului</h2>
+            <div id="terenuriGrid" class="terenuri-grid">
+                <div class="empty-section">
+                    <i class="fas fa-map"></i>
+                    <p>Niciun teren adăugat încă.</p>
+                    <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
+                        <i class="fas fa-search"></i> Explorează terenuri
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Journal & Checklist - Member only (Coming soon) -->
+        <div id="journalSection" class="section-card member-only">
+            <h2><i class="fas fa-book"></i> Jurnal & Checklist</h2>
+            <div class="empty-section">
+                <i class="fas fa-tools"></i>
+                <p>Funcționalitate în dezvoltare.</p>
+            </div>
+        </div>
+        
+        <!-- Admin Section - Admin only -->
+        <div id="adminSection" class="section-card" style="display: none;">
+            <h2><i class="fas fa-cog"></i> Administrare grup</h2>
+            
+            <div class="admin-section">
+                <h3>Schimbă statusul grupului</h3>
+                <div class="status-selector">
+                    <button class="status-btn" data-status="activ" onclick="changeStatus('activ')">
+                        🟢 Activ
+                    </button>
+                    <button class="status-btn" data-status="explorare" onclick="changeStatus('explorare')">
+                        🟡 În explorare
+                    </button>
+                    <button class="status-btn" data-status="inchis" onclick="changeStatus('inchis')">
+                        🔴 Închis
+                    </button>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h3>Link WhatsApp</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="url" id="whatsappInput" placeholder="https://chat.whatsapp.com/..." 
+                           style="flex: 1; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                    <button class="btn-action btn-secondary" onclick="saveWhatsApp()">
+                        <i class="fas fa-save"></i> Salvează
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+// ── SUPABASE CLIENT ──
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── STATE ──
+let currentUser = null;
+let currentGroup = null;
+let isMember = false;
+let isAdmin = false;
+let members = [];
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', async () => {
+    initNav();
+    await checkAuth();
+    await loadGroupDetails();
+});
+
+// ── NAV ──
+function initNav() {
+    const btnUserAvatar = document.getElementById('btnUserAvatar');
+    const userDropdown = document.getElementById('userDropdown');
+    const btnLogout = document.getElementById('btnLogout');
+    
+    if (btnUserAvatar) {
+        btnUserAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', () => {
+            userDropdown.classList.remove('show');
+        });
+    }
+    
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async () => {
+            await sb.auth.signOut();
+            window.location.reload();
+        });
+    }
+}
+
+// ── AUTH ──
+async function checkAuth() {
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (user) {
+            currentUser = user;
+            document.getElementById('navUser').style.display = 'block';
+            document.getElementById('btnLoginNav').style.display = 'none';
+        }
+    } catch (e) {
+        console.warn('Auth check failed:', e);
+    }
+}
+
+// ── LOAD GROUP DETAILS ──
+async function loadGroupDetails() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const groupId = urlParams.get('id');
+    
+    if (!groupId) {
+        showError();
+        return;
+    }
+    
+    try {
+        // Load group
+        const { data: group, error: groupError } = await sb
+            .from('grupuri')
+            .select('*')
+            .eq('id', groupId)
+            .single();
+        
+        if (groupError || !group) {
+            showError();
+            return;
+        }
+        
+        currentGroup = group;
+        
+        // Load members
+        const { data: membersData } = await sb
+            .from('grup_membri')
+            .select(`
+                *,
+                profile:profiles(pseudonym, user_id)
+            `)
+            .eq('grup_id', groupId)
+            .eq('status', 'activ');
+        
+        members = membersData || [];
+        
+        // Check if current user is member/admin
+        if (currentUser) {
+            isMember = members.some(m => m.user_id === currentUser.id);
+            isAdmin = group.admin_id === currentUser.id;
+        }
+        
+        // Load terenuri favorite (if member)
+        let terenuri = [];
+        if (isMember) {
+            const { data: terenuriData } = await sb
+                .from('terenuri_likes_grupuri')
+                .select(`
+                    *,
+                    teren:terenuri(id, titlu, zona, imagine_url)
+                `)
+                .eq('grup_id', groupId);
+            terenuri = terenuriData || [];
+        }
+        
+        // Render everything
+        renderGroupDetails(group, members, terenuri);
+        
+    } catch (e) {
+        console.error('Error loading group:', e);
+        showError();
+    }
+}
+
+// ── RENDER GROUP DETAILS ──
+function renderGroupDetails(group, members, terenuri) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('groupContent').style.display = 'block';
+    
+    // Update page title
+    document.title = `${group.nume} - ApartamenTUal`;
+    
+    // Header info
+    document.getElementById('grupNume').textContent = group.nume;
+    document.getElementById('grupLocation').textContent = group.zona 
+        ? `${group.oras}, ${group.zona}` 
+        : group.oras || 'Locație nespecificată';
+    document.getElementById('grupMembriCount').textContent = members.length;
+    document.getElementById('grupMaxMembri').textContent = group.max_membri;
+    document.getElementById('grupCreatedAt').textContent = formatDate(group.created_at);
+    
+    // Status
+    const statusEl = document.getElementById('grupStatus');
+    const statusLabels = {
+        activ: '🟢 Activ',
+        explorare: '🟡 În explorare',
+        inchis: '🔴 Închis',
+        arhivat: '⚫ Arhivat'
+    };
+    statusEl.textContent = statusLabels[group.status] || group.status;
+    statusEl.className = `status-badge-lg status-${group.status}`;
+    
+    // Description
+    const descEl = document.getElementById('grupDescriere');
+    if (group.descriere) {
+        descEl.textContent = group.descriere;
+        descEl.classList.remove('no-description');
+    } else {
+        descEl.textContent = 'Acest grup nu are încă o descriere.';
+        descEl.classList.add('no-description');
+    }
+    
+    // Actions
+    renderActions(group);
+    
+    // Members
+    renderMembers(members, group.admin_id);
+    
+    // Member-only sections
+    if (isMember) {
+        document.querySelectorAll('.member-only').forEach(el => el.classList.add('visible'));
+        renderTerenuri(terenuri);
+    }
+    
+    // Admin section
+    if (isAdmin) {
+        document.getElementById('adminSection').style.display = 'block';
+        document.querySelector(`.status-btn[data-status="${group.status}"]`)?.classList.add('active');
+        document.getElementById('whatsappInput').value = group.link_whatsapp || '';
+    }
+}
+
+// ── RENDER ACTIONS ──
+function renderActions(group) {
+    const actionsEl = document.getElementById('headerActions');
+    let html = '';
+    
+    if (isMember) {
+        // WhatsApp link
+        if (group.link_whatsapp) {
+            html += `
+                <a href="${escapeHtml(group.link_whatsapp)}" target="_blank" class="btn-action btn-whatsapp">
+                    <i class="fab fa-whatsapp"></i> Grup WhatsApp
+                </a>
+            `;
+        }
+        
+        // Invite
+        html += `
+            <button class="btn-action btn-secondary" onclick="inviteMember()">
+                <i class="fas fa-user-plus"></i> Invită
+            </button>
+        `;
+        
+        // Leave (if not admin or if there are other members)
+        if (!isAdmin || members.length > 1) {
+            html += `
+                <button class="btn-action btn-danger" onclick="leaveGroup()">
+                    <i class="fas fa-sign-out-alt"></i> Părăsește
+                </button>
+            `;
+        }
+    } else if (currentUser) {
+        // Can join?
+        const canJoin = (group.status === 'activ' || group.status === 'explorare') 
+                        && members.length < group.max_membri;
+        if (canJoin) {
+            html += `
+                <button class="btn-action btn-primary" onclick="joinGroup()">
+                    <i class="fas fa-user-plus"></i> Alătură-te grupului
+                </button>
+            `;
+        } else if (group.status === 'inchis') {
+            html += `<span style="color: #94a3b8;">Grupul nu mai acceptă membri noi.</span>`;
+        } else {
+            html += `<span style="color: #94a3b8;">Grupul este plin.</span>`;
+        }
+    } else {
+        html += `
+            <a href="register.html" class="btn-action btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Conectează-te pentru a te alătura
+            </a>
+        `;
+    }
+    
+    actionsEl.innerHTML = html;
+}
+
+// ── RENDER MEMBERS ──
+function renderMembers(members, adminId) {
+    document.getElementById('membriCountTitle').textContent = members.length;
+    
+    const grid = document.getElementById('membersGrid');
+    
+    if (members.length === 0) {
+        grid.innerHTML = `
+            <div class="empty-section">
+                <i class="fas fa-users"></i>
+                <p>Niciun membru încă.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = members.map(m => {
+        const name = m.profile?.pseudonym || 'Utilizator';
+        const initial = name.charAt(0).toUpperCase();
+        const isAdminMember = m.user_id === adminId;
+        
+        return `
+            <a href="profile-view-new.html?id=${m.user_id}" class="member-card">
+                <div class="member-avatar">${initial}</div>
+                <div class="member-info">
+                    <div class="member-name">${escapeHtml(name)}</div>
+                    <div class="member-role">Membru din ${formatDate(m.joined_at)}</div>
+                </div>
+                ${isAdminMember ? '<span class="member-badge admin-badge">Admin</span>' : ''}
+            </a>
+        `;
+    }).join('');
+}
+
+// ── RENDER TERENURI ──
+function renderTerenuri(terenuri) {
+    const grid = document.getElementById('terenuriGrid');
+    
+    if (!terenuri || terenuri.length === 0) {
+        return; // Keep default empty state
+    }
+    
+    grid.innerHTML = terenuri.map(t => {
+        const teren = t.teren;
+        if (!teren) return '';
+        
+        return `
+            <a href="teren-details.html?id=${teren.id}" class="teren-card-mini">
+                <img src="${teren.imagine_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
+                <div class="teren-card-mini-info">
+                    <h4>${escapeHtml(teren.titlu)}</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(teren.zona || 'Zonă nespecificată')}</p>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+// ── ACTIONS ──
+window.joinGroup = async function() {
+    if (!currentUser || !currentGroup) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .insert({
+                grup_id: currentGroup.id,
+                user_id: currentUser.id
+            });
+        
+        if (error) throw error;
+        
+        showToast('Te-ai alăturat grupului!', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (e) {
+        console.error('Join error:', e);
+        showToast('Eroare la alăturare.', 'error');
+    }
+};
+
+window.leaveGroup = async function() {
+    if (!currentUser || !currentGroup) return;
+    
+    if (!confirm('Sigur vrei să părăsești grupul?')) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .delete()
+            .eq('grup_id', currentGroup.id)
+            .eq('user_id', currentUser.id);
+        
+        if (error) throw error;
+        
+        showToast('Ai părăsit grupul.', 'success');
+        setTimeout(() => window.location.href = 'grupuri.html', 1000);
+        
+    } catch (e) {
+        console.error('Leave error:', e);
+        showToast('Eroare la părăsire.', 'error');
+    }
+};
+
+window.inviteMember = function() {
+    // TODO: Implement invitation modal
+    showToast('Funcționalitate în dezvoltare.', 'info');
+};
+
+window.changeStatus = async function(newStatus) {
+    if (!isAdmin || !currentGroup) return;
+    
+    try {
+        const { error } = await sb
+            .from('grupuri')
+            .update({ status: newStatus, updated_at: new Date().toISOString() })
+            .eq('id', currentGroup.id);
+        
+        if (error) throw error;
+        
+        // Update UI
+        document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.status-btn[data-status="${newStatus}"]`).classList.add('active');
+        
+        const statusLabels = {
+            activ: '🟢 Activ',
+            explorare: '🟡 În explorare',
+            inchis: '🔴 Închis'
+        };
+        document.getElementById('grupStatus').textContent = statusLabels[newStatus];
+        document.getElementById('grupStatus').className = `status-badge-lg status-${newStatus}`;
+        
+        showToast('Status actualizat!', 'success');
+        
+    } catch (e) {
+        console.error('Status change error:', e);
+        showToast('Eroare la actualizare.', 'error');
+    }
+};
+
+window.saveWhatsApp = async function() {
+    if (!isAdmin || !currentGroup) return;
+    
+    const link = document.getElementById('whatsappInput').value.trim();
+    
+    try {
+        const { error } = await sb
+            .from('grupuri')
+            .update({ link_whatsapp: link || null, updated_at: new Date().toISOString() })
+            .eq('id', currentGroup.id);
+        
+        if (error) throw error;
+        
+        showToast('Link salvat!', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (e) {
+        console.error('Save WhatsApp error:', e);
+        showToast('Eroare la salvare.', 'error');
+    }
+};
+
+// ── HELPERS ──
+function showError() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'block';
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'azi';
+    if (diffDays === 1) return 'ieri';
+    if (diffDays < 7) return `acum ${diffDays} zile`;
+    if (diffDays < 30) return `acum ${Math.floor(diffDays / 7)} săptămâni`;
+    
+    return date.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+</script>
+</body>
+</html>
