@@ -1,458 +1,444 @@
+// ═══════════════════════════════════════════════════════════
+// GRUPURI.JS - Logica pentru pagina de grupuri
+// ═══════════════════════════════════════════════════════════
+
+// ── SUPABASE CLIENT ──
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── DOM ELEMENTS ──
+const DOM = {
+    // Filters
+    filterOras: document.getElementById('filterOras'),
+    filterStatus: document.getElementById('filterStatus'),
+    filterSort: document.getElementById('filterSort'),
+    btnResetFilters: document.getElementById('btnResetFilters'),
+    // Teren filter banner
+    terenFilterBanner: document.getElementById('terenFilterBanner'),
+    terenFilterName: document.getElementById('terenFilterName'),
+    btnClearTerenFilter: document.getElementById('btnClearTerenFilter'),
+    // My groups
+    myGroupsSection: document.getElementById('myGroupsSection'),
+    myGroupsGrid: document.getElementById('myGroupsGrid'),
+    // Main content
+    contentTitle: document.getElementById('contentTitle'),
+    grupuriCount: document.getElementById('grupuriCount'),
+    loadingState: document.getElementById('loadingState'),
+    emptyState: document.getElementById('emptyState'),
+    grupuriGrid: document.getElementById('grupuriGrid'),
+    // Nav
+    navUser: document.getElementById('navUser'),
+    btnLoginNav: document.getElementById('btnLoginNav'),
+    btnUserAvatar: document.getElementById('btnUserAvatar'),
+    userDropdown: document.getElementById('userDropdown'),
+    btnLogout: document.getElementById('btnLogout'),
+    navMobileToggle: document.getElementById('navMobileToggle'),
+    // Toast
+    toastContainer: document.getElementById('toastContainer'),
+};
+
+// ── STATE ──
+let currentUser = null;
+let userAccountType = null;
 let allGrupuri = [];
-let filteredGrupuri = [];
+let myGrupuri = new Set(); // IDs of groups user is member of
+let filterTerenId = null;
 
-// DOM elements
-const loadingEl = document.getElementById('loading');
-const errorEl = document.getElementById('error');
-const grupuriListEl = document.getElementById('grupuri-list');
-const noResultsEl = document.getElementById('no-results');
-const retryBtn = document.getElementById('retry-btn');
-const locationFilter = document.getElementById('location-filter');
-const statusFilter = document.getElementById('status-filter');
-const typeFilter = document.getElementById('type-filter');
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check URL params for teren filter
+    const urlParams = new URLSearchParams(window.location.search);
+    filterTerenId = urlParams.get('teren');
+    
+    initNav();
+    populateOrasFilter();
+    bindFilterEvents();
+    await checkAuth();
+    await loadGrupuri();
+});
 
-// Status mapping for display
-const statusMapping = {
-    'active': { text: 'În formare', class: 'bg-green-100 text-green-800' },
-    'inactive': { text: 'Inactiv', class: 'bg-gray-100 text-gray-800' },
-    'full': { text: 'Complet', class: 'bg-blue-100 text-blue-800' },
-    'completed': { text: 'Finalizat', class: 'bg-purple-100 text-purple-800' },
-    'cancelled': { text: 'Anulat', class: 'bg-red-100 text-red-800' }
-};
-
-// Type mapping for display
-const typeMapping = {
-    'Apartamente': { text: 'Apartamente', class: 'bg-blue-100 text-blue-800' },
-    'Case': { text: 'Case', class: 'bg-green-100 text-green-800' },
-    'Mixt': { text: 'Mixt', class: 'bg-purple-100 text-purple-800' }
-};
-
-// Markdown rendering is now handled by markdown-utils.js
-
-// Fetch user profile to check super admin status
-async function fetchUserProfile() {
-    try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null;
-
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-
-        if (error) {
-            console.error("Error fetching user profile:", error);
-            return null;
-        }
-
-        return data;
-    } catch (error) {
-        console.error("Error fetching user profile:", error);
-        return null;
-    }
-}
-
-// Initialize the groups page
-function initGrupuri() {
-    try {
-        // Set up event listeners
-        setupGrupuriEventListeners();
-        
-        // Load groups data
-        loadGrupuri();
-        
-    } catch (error) {
-        showError('Error initializing groups page: ' + error.message);
-    }
-}
-
-// Set up event listeners (scoped for grupuri page)
-function setupGrupuriEventListeners() {
-    // Filter event listeners
-    if (locationFilter) {
-        locationFilter.addEventListener('change', applyFilters);
-    }
-    if (statusFilter) {
-        statusFilter.addEventListener('change', applyFilters);
-    }
-    if (typeFilter) {
-        typeFilter.addEventListener('change', applyFilters);
+// ── NAV ──
+function initNav() {
+    if (DOM.btnUserAvatar) {
+        DOM.btnUserAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            DOM.userDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', () => {
+            DOM.userDropdown.classList.remove('show');
+        });
     }
     
-    // Retry button
-    if (retryBtn) {
-        retryBtn.addEventListener('click', loadGrupuri);
+    if (DOM.btnLogout) {
+        DOM.btnLogout.addEventListener('click', async () => {
+            await sb.auth.signOut();
+            window.location.reload();
+        });
     }
-
-	// Intercept clicks to create/register group to require auth
-	setupInscrieGrupButtons();
+    
+    if (DOM.navMobileToggle) {
+        DOM.navMobileToggle.addEventListener('click', () => {
+            // Mobile menu toggle - to be implemented
+        });
+    }
 }
 
-// Load groups from database
-async function loadGrupuri() {
+// ── AUTH ──
+async function checkAuth() {
     try {
-        showLoading(true);
-        hideError();
-
-        // Get current user (if logged in)
-        let currentUser = null;
-        let userProfile = null;
-        try {
-            const { data: userResult } = await supabase.auth.getUser();
-            currentUser = userResult && userResult.user ? userResult.user : null;
+        const { data: { user } } = await sb.auth.getUser();
+        if (user) {
+            currentUser = user;
+            DOM.navUser.style.display = 'block';
+            DOM.btnLoginNav.style.display = 'none';
             
-            // Get user profile to check super admin status
-            if (currentUser) {
-                userProfile = await fetchUserProfile();
-            }
-        } catch (_) {
-            currentUser = null;
-            userProfile = null;
+            // Get account type
+            const { data: profile } = await sb
+                .from('profiles')
+                .select('account_type')
+                .eq('user_id', user.id)
+                .single();
+            
+            userAccountType = profile?.account_type || 'activ';
+            
+            // Load user's group memberships
+            await loadMyGroups();
         }
+    } catch (e) {
+        console.warn('Auth check failed:', e);
+    }
+}
 
-        const isSuperAdmin = userProfile?.is_super_admin || false;
+// ── LOAD MY GROUPS ──
+async function loadMyGroups() {
+    if (!currentUser) return;
+    
+    try {
+        const { data, error } = await sb
+            .from('grup_membri')
+            .select('grup_id')
+            .eq('user_id', currentUser.id)
+            .eq('status', 'activ');
+        
+        if (!error && data) {
+            myGrupuri = new Set(data.map(d => d.grup_id));
+        }
+    } catch (e) {
+        console.warn('Could not load user groups:', e);
+    }
+}
 
-        // 1) Public groups (not disabled AND public)
-        const { data: publicGroups, error: publicError } = await supabase
-            .from('grup')
+// ── POPULATE FILTERS ──
+function populateOrasFilter() {
+    if (!DOM.filterOras) return;
+    
+    const orase = getOrase();
+    orase.forEach(oras => {
+        const opt = document.createElement('option');
+        opt.value = oras;
+        opt.textContent = oras;
+        DOM.filterOras.appendChild(opt);
+    });
+}
+
+// ── BIND EVENTS ──
+function bindFilterEvents() {
+    DOM.filterOras?.addEventListener('change', applyFilters);
+    DOM.filterStatus?.addEventListener('change', applyFilters);
+    DOM.filterSort?.addEventListener('change', applyFilters);
+    
+    DOM.btnResetFilters?.addEventListener('click', () => {
+        DOM.filterOras.value = '';
+        DOM.filterStatus.value = '';
+        DOM.filterSort.value = 'recent';
+        applyFilters();
+    });
+    
+    DOM.btnClearTerenFilter?.addEventListener('click', () => {
+        filterTerenId = null;
+        DOM.terenFilterBanner.style.display = 'none';
+        // Update URL
+        const url = new URL(window.location);
+        url.searchParams.delete('teren');
+        window.history.replaceState({}, '', url);
+        applyFilters();
+    });
+}
+
+// ── LOAD GRUPURI ──
+async function loadGrupuri() {
+    showLoading();
+    
+    try {
+        let query = sb
+            .from('grupuri')
             .select(`
                 *,
-                grup_membership(
-                    id,
-                    status,
-                    role
-                )
+                membri:grup_membri(count)
             `)
-            .eq('is_disabled', false)
-            .eq('is_public', true)
-            .order('created_at', { ascending: false });
-        if (publicError) throw publicError;
-
-        let combined = Array.isArray(publicGroups) ? publicGroups : [];
-
-        // 2) If logged in, also load private groups owned by the user
-        //    and private groups where the user is an approved member.
-        if (currentUser && currentUser.id) {
-            // Owned private groups
-            const { data: ownedPrivate, error: ownedError } = await supabase
-                .from('grup')
-                .select(`
-                    *,
-                    grup_membership(
-                        id,
-                        status,
-                        role
-                    )
-                `)
-                .eq('is_disabled', false)
-                .eq('is_public', false)
-                .eq('owner_user_id', currentUser.id)
-                .order('created_at', { ascending: false });
-            if (ownedError) throw ownedError;
-
-            // Member private groups (approved)
-            const { data: memberPrivate, error: memberError } = await supabase
-                .from('grup')
-                .select(`
-                    *,
-                    grup_membership!inner(
-                        id,
-                        status,
-                        role,
-                        user_id
-                    )
-                `)
-                .eq('is_disabled', false)
-                .eq('is_public', false)
-                .eq('grup_membership.user_id', currentUser.id)
-                .eq('grup_membership.status', 'approved')
-                .order('created_at', { ascending: false });
-            if (memberError) throw memberError;
-
-            // Merge and dedupe by id
-            const byId = new Map();
-            [...combined, ...(ownedPrivate || []), ...(memberPrivate || [])].forEach(g => {
-                if (g && g.id && !byId.has(g.id)) byId.set(g.id, g);
-            });
-            combined = Array.from(byId.values());
+            .neq('status', 'arhivat');
+        
+        // If filtering by teren
+        if (filterTerenId) {
+            // First get grup IDs that liked this teren
+            const { data: likesData } = await sb
+                .from('terenuri_likes_grupuri')
+                .select('grup_id')
+                .eq('teren_id', filterTerenId);
+            
+            if (likesData && likesData.length > 0) {
+                const grupIds = likesData.map(l => l.grup_id);
+                query = query.in('id', grupIds);
+            } else {
+                // No groups liked this teren
+                allGrupuri = [];
+                renderGrupuri([]);
+                await loadTerenName();
+                return;
+            }
+            
+            await loadTerenName();
         }
-
-        // 3) If super admin, also load disabled groups
-        if (isSuperAdmin) {
-            const { data: disabledGroups, error: disabledError } = await supabase
-                .from('grup')
-                .select(`
-                    *,
-                    grup_membership(
-                        id,
-                        status,
-                        role
-                    )
-                `)
-                .eq('is_disabled', true)
-                .order('created_at', { ascending: false });
-            if (disabledError) throw disabledError;
-
-            // Merge disabled groups with existing groups
-            const byId = new Map();
-            [...combined, ...(disabledGroups || [])].forEach(g => {
-                if (g && g.id && !byId.has(g.id)) byId.set(g.id, g);
-            });
-            combined = Array.from(byId.values());
-        }
-
-        // Process the data to include member counts (best-effort based on visible memberships)
-        allGrupuri = combined.map(grup => {
-            const memberships = Array.isArray(grup.grup_membership) ? grup.grup_membership : [];
-            const approvedMembers = memberships.filter(member => member.status === 'approved');
-            const currentMembersCount = approvedMembers.length;
-            return {
-                ...grup,
-                current_members: currentMembersCount,
-                member_count: `${currentMembersCount}/${grup.max_members}`
-            };
-        });
-
-        filteredGrupuri = [...allGrupuri];
-        renderGrupuri();
-
-    } catch (error) {
-        console.error('Error loading groups:', error);
-        showError('Eroare la încărcarea grupurilor: ' + error.message);
-    } finally {
-        showLoading(false);
+        
+        const { data, error } = await query;
+        
+        if (error) throw error;
+        
+        allGrupuri = data || [];
+        applyFilters();
+        
+    } catch (e) {
+        console.error('Error loading grupuri:', e);
+        showToast('Eroare la încărcarea grupurilor.', 'error');
+        hideLoading();
     }
 }
 
-// Render groups to the page
-function renderGrupuri() {
-    if (!grupuriListEl) return;
+// ── LOAD TEREN NAME (for filter banner) ──
+async function loadTerenName() {
+    if (!filterTerenId) return;
     
-    if (filteredGrupuri.length === 0) {
-        showNoResults();
+    try {
+        const { data } = await sb
+            .from('terenuri')
+            .select('titlu')
+            .eq('id', filterTerenId)
+            .single();
+        
+        if (data) {
+            DOM.terenFilterName.textContent = data.titlu;
+            DOM.terenFilterBanner.style.display = 'block';
+        }
+    } catch (e) {
+        console.warn('Could not load teren name:', e);
+    }
+}
+
+// ── APPLY FILTERS ──
+function applyFilters() {
+    let filtered = [...allGrupuri];
+    
+    // Filter by oras
+    const oras = DOM.filterOras?.value;
+    if (oras) {
+        filtered = filtered.filter(g => g.oras === oras);
+    }
+    
+    // Filter by status
+    const status = DOM.filterStatus?.value;
+    if (status) {
+        filtered = filtered.filter(g => g.status === status);
+    }
+    
+    // Sort
+    const sort = DOM.filterSort?.value || 'recent';
+    switch (sort) {
+        case 'recent':
+            filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            break;
+        case 'activitate':
+            filtered.sort((a, b) => new Date(b.last_activity_at) - new Date(a.last_activity_at));
+            break;
+        case 'membri':
+            filtered.sort((a, b) => (b.membri?.[0]?.count || 0) - (a.membri?.[0]?.count || 0));
+            break;
+    }
+    
+    // Prioritize by status (activ > explorare > inchis)
+    if (sort === 'recent' || sort === 'activitate') {
+        const statusOrder = { activ: 0, explorare: 1, inchis: 2 };
+        filtered.sort((a, b) => {
+            const orderDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
+            if (orderDiff !== 0) return orderDiff;
+            return 0; // Keep secondary sort
+        });
+    }
+    
+    renderGrupuri(filtered);
+}
+
+// ── RENDER GRUPURI ──
+function renderGrupuri(grupuri) {
+    hideLoading();
+    
+    // Update count
+    DOM.grupuriCount.textContent = `${grupuri.length} grupuri`;
+    
+    // Show/hide empty state
+    if (grupuri.length === 0) {
+        DOM.emptyState.style.display = 'block';
+        DOM.grupuriGrid.innerHTML = '';
+        DOM.myGroupsSection.style.display = 'none';
         return;
     }
     
-    // Hide no results message when there are results
-    hideNoResults();
+    DOM.emptyState.style.display = 'none';
     
-    const html = filteredGrupuri.map(grup => createGrupCard(grup)).join('');
-    grupuriListEl.innerHTML = html;
+    // Separate my groups
+    const myGroups = grupuri.filter(g => myGrupuri.has(g.id));
+    const otherGroups = grupuri.filter(g => !myGrupuri.has(g.id));
+    
+    // Render my groups section
+    if (myGroups.length > 0 && currentUser) {
+        DOM.myGroupsSection.style.display = 'block';
+        DOM.myGroupsGrid.innerHTML = myGroups.map(g => renderGrupCard(g, true)).join('');
+    } else {
+        DOM.myGroupsSection.style.display = 'none';
+    }
+    
+    // Render other groups
+    DOM.grupuriGrid.innerHTML = otherGroups.map(g => renderGrupCard(g, false)).join('');
 }
 
-// Create HTML for a single group card
-function createGrupCard(grup) {
-    const statusInfo = statusMapping[grup.status] || { text: grup.status, class: 'bg-gray-100 text-gray-800' };
-    const createdDate = new Date(grup.created_at).toLocaleDateString('ro-RO', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    });
+// ── RENDER GRUP CARD ──
+function renderGrupCard(grup, isMember) {
+    const statusLabels = {
+        activ: '🟢 Activ',
+        explorare: '🟡 În explorare',
+        inchis: '🔴 Închis',
+        arhivat: '⚫ Arhivat'
+    };
     
-    // Check if group is disabled
-    const isDisabled = grup.is_disabled === true;
+    const statusClass = `status-${grup.status}`;
+    const membriCount = grup.membri?.[0]?.count || 0;
+    const activityBadge = getActivityBadge(grup.last_activity_at);
     
-    // Determine group type based on description or other criteria
-    const groupType = determineGroupType(grup);
-    const typeInfo = typeMapping[groupType] || { text: groupType, class: 'bg-gray-100 text-gray-800' };
+    const location = grup.oras ? 
+        (grup.zona ? `${grup.oras}, ${grup.zona}` : grup.oras) : 
+        'Locație nespecificată';
     
-    // Generate tags based on group characteristics
-    const tags = generateGroupTags(grup);
+    const description = grup.descriere || 'Fără descriere.';
     
-    const descriereSnippet = renderMarkdownSnippet(grup.descriere || '');
-    
-    // Card styling - grayed out for disabled groups
-    const cardClass = isDisabled ? 'card card-disabled' : 'card';
-    const contentOpacity = isDisabled ? 'opacity-75' : '';
-    
-    // Disabled label
-    const disabledLabel = isDisabled ? 
-        `<div class="mb-3">
-            <span class="badge bg-red-100 text-red-800">Dezactivat</span>
-        </div>` : '';
+    // Determine if user can join
+    const canJoin = currentUser && 
+                    userAccountType === 'activ' && 
+                    !isMember && 
+                    (grup.status === 'activ' || grup.status === 'explorare') &&
+                    membriCount < grup.max_membri;
     
     return `
-        <div class="${cardClass}">
-            ${disabledLabel}
-            ${grup.image_url ? `
-                <div class="w-full h-48 bg-gray-200 rounded-lg overflow-hidden mb-4 ${contentOpacity}">
-                    <img src="${grup.image_url}" alt="${escapeHtml(grup.nume)}" class="w-full h-full object-cover" 
-                         onerror="this.parentElement.style.display='none'">
+        <div class="grup-card" data-grup-id="${grup.id}">
+            <div class="grup-card-header">
+                <div class="grup-card-header-top">
+                    <h3>
+                        <a href="grup-details.html?id=${grup.id}">${escapeHtml(grup.nume)}</a>
+                        ${isMember ? '<span class="member-badge">Membru</span>' : ''}
+                    </h3>
+                    <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
                 </div>
-            ` : ''}
-            <div class="flex justify-between items-start mb-3 ${contentOpacity}">
-                <h3 class="text-lg">${escapeHtml(grup.nume)}</h3>
-                <span class="badge ${statusInfo.class}">${statusInfo.text}</span>
+                <div class="grup-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    ${escapeHtml(location)}
+                </div>
             </div>
-            <p class="subtitle mb-4 ${contentOpacity}">${descriereSnippet}</p>
-            <div class="grid grid-cols-2 gap-2 text-sm mb-4 ${contentOpacity}">
-                <div><strong>Locație:</strong> ${escapeHtml(grup.zona || '')}</div>
-                <div><strong>Membri actuali:</strong> ${grup.member_count}</div>
-                <div><strong>Tip locuințe:</strong> ${typeInfo.text}</div>
-                <div><strong>Data înființării:</strong> ${createdDate}</div>
+            <div class="grup-card-body">
+                <p class="grup-description">${escapeHtml(description)}</p>
             </div>
-            <div class="flex gap-2 text-xs mb-4 ${contentOpacity}">
-                ${tags.map(tag => `<span class="badge ${tag.class}">${tag.text}</span>`).join('')}
-            </div>
-            <div class="flex justify-between items-center ${contentOpacity}">
-                <span class="text-sm text-gray-500">Creat: ${createdDate}</span>
-                <a href="/grup-detail.html?grup=${grup.id}" class="text-blue-600 hover:underline">Vezi detalii →</a>
+            <div class="grup-card-footer">
+                <div class="grup-stats">
+                    <span class="grup-stat">
+                        <i class="fas fa-users"></i>
+                        ${membriCount}/${grup.max_membri}
+                    </span>
+                    <span class="activity-badge activity-${activityBadge.class}">
+                        ${activityBadge.label}
+                    </span>
+                </div>
+                <div class="grup-card-actions">
+                    <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
+                    ${canJoin ? `<button class="btn-alatura" onclick="joinGroup('${grup.id}')">Alătură-te</button>` : ''}
+                </div>
             </div>
         </div>
     `;
 }
 
-// Determine group type based on group data
-function determineGroupType(grup) {
-    const descriere = (grup.descriere || '').toLowerCase();
-    const nume = (grup.nume || '').toLowerCase();
+// ── GET ACTIVITY BADGE ──
+function getActivityBadge(lastActivity) {
+    if (!lastActivity) return { class: 'inactiv', label: 'Inactiv' };
     
-    if (descriere.includes('case') || nume.includes('case')) {
-        return 'Case';
-    } else if (descriere.includes('apartament') || nume.includes('apartament')) {
-        return 'Apartamente';
+    const now = new Date();
+    const last = new Date(lastActivity);
+    const daysDiff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+    
+    if (daysDiff < 14) {
+        return { class: 'recent', label: 'Activ recent' };
+    } else if (daysDiff < 45) {
+        return { class: 'moderat', label: 'Moderat activ' };
     } else {
-        return 'Mixt';
+        return { class: 'inactiv', label: 'Inactiv' };
     }
 }
 
-// Generate tags based on group characteristics
-function generateGroupTags(grup) {
-    const tags = [];
-    const descriere = (grup.descriere || '').toLowerCase();
-    const nume = (grup.nume || '').toLowerCase();
-    
-    // Age-based tags
-    if (descriere.includes('senior') || nume.includes('senior') || descriere.includes('55+')) {
-        tags.push({ text: '55+', class: 'bg-orange-100 text-orange-800' });
-    }
-    if (descriere.includes('tineri') || descriere.includes('25-35') || nume.includes('student')) {
-        tags.push({ text: '25-35 ani', class: 'bg-red-100 text-red-800' });
+// ── JOIN GROUP ──
+window.joinGroup = async function(grupId) {
+    if (!currentUser) {
+        showToast('Trebuie să fii conectat pentru a te alătura unui grup.', 'info');
+        setTimeout(() => window.location.href = 'register.html', 1500);
+        return;
     }
     
-    // Lifestyle tags
-    if (descriere.includes('eco') || descriere.includes('sustenabil') || descriere.includes('verde')) {
-        tags.push({ text: 'Eco-friendly', class: 'bg-green-100 text-green-800' });
-    }
-    if (descriere.includes('familie') || descriere.includes('copii')) {
-        tags.push({ text: 'Familii cu copii', class: 'bg-blue-100 text-blue-800' });
-    }
-    if (descriere.includes('co-housing') || descriere.includes('comunitar')) {
-        tags.push({ text: 'Co-housing', class: 'bg-purple-100 text-purple-800' });
-    }
-    if (descriere.includes('tech') || descriere.includes('modern')) {
-        tags.push({ text: 'Tech-oriented', class: 'bg-purple-100 text-purple-800' });
-    }
-    if (descriere.includes('accesibil') || descriere.includes('senior')) {
-        tags.push({ text: 'Accessible design', class: 'bg-blue-100 text-blue-800' });
+    if (userAccountType === 'profesional') {
+        showToast('Conturile de agenție nu pot face parte din grupuri.', 'info');
+        return;
     }
     
-    return tags;
-}
-
-// Apply filters to groups
-function applyFilters() {
-    const locationValue = locationFilter ? locationFilter.value : '';
-    const statusValue = statusFilter ? statusFilter.value : '';
-    const typeValue = typeFilter ? typeFilter.value : '';
-    
-    filteredGrupuri = allGrupuri.filter(grup => {
-        // Location filter
-        if (locationValue && locationValue !== 'Toate locațiile') {
-            const location = grup.zona || '';
-            if (!location.toLowerCase().includes(locationValue.toLowerCase())) {
-                return false;
-            }
-        }
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .insert({
+                grup_id: grupId,
+                user_id: currentUser.id
+            });
         
-        // Status filter
-        if (statusValue && statusValue !== 'Toate stadiile') {
-            const statusMap = {
-                'În formare': 'active',
-                'Opțiune teren': 'active',
-                'Proiectare': 'active',
-                'Construcție': 'active'
-            };
-            const expectedStatus = statusMap[statusValue];
-            if (expectedStatus && grup.status !== expectedStatus) {
-                return false;
-            }
-        }
+        if (error) throw error;
         
-        // Type filter
-        if (typeValue && typeValue !== 'Toate tipurile') {
-            const groupType = determineGroupType(grup);
-            if (groupType !== typeValue) {
-                return false;
-            }
-        }
+        myGrupuri.add(grupId);
+        showToast('Te-ai alăturat grupului cu succes!', 'success');
         
-        return true;
-    });
-    
-    renderGrupuri();
-}
-
-// Show loading state
-function showLoading(show) {
-    if (loadingEl) {
-        loadingEl.style.display = show ? 'block' : 'none';
+        // Reload to update UI
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (e) {
+        console.error('Join group error:', e);
+        if (e.message?.includes('max_membri')) {
+            showToast('Grupul este plin.', 'error');
+        } else {
+            showToast('Eroare la alăturare. Încearcă din nou.', 'error');
+        }
     }
+};
+
+// ── HELPERS ──
+function showLoading() {
+    DOM.loadingState.style.display = 'block';
+    DOM.grupuriGrid.innerHTML = '';
+    DOM.emptyState.style.display = 'none';
 }
 
-// Show error message
-function showError(message) {
-    if (errorEl) {
-        errorEl.textContent = message;
-        errorEl.style.display = 'block';
-    }
-    console.error(message);
+function hideLoading() {
+    DOM.loadingState.style.display = 'none';
 }
 
-// Hide error message
-function hideError() {
-    if (errorEl) {
-        errorEl.style.display = 'none';
-    }
-}
-
-// Show no results message
-function showNoResults() {
-    if (noResultsEl) {
-        noResultsEl.style.display = 'block';
-    }
-    if (grupuriListEl) {
-        grupuriListEl.innerHTML = '';
-    }
-}
-
-// Hide no results message
-function hideNoResults() {
-    if (noResultsEl) {
-        noResultsEl.style.display = 'none';
-    }
-}
-
-async function handleInscrieGrupClick(event) {
-	event.preventDefault();
-
-	const isAuthenticated = await isUserAuthenticated();
-	if (isAuthenticated) {
-		window.location.href = '/grup-form.html';
-	} else {
-		openAuthModalWithMessage('Vă rugăm să vă autentificați sau să intrați în cont pentru a înscrie un grup.');
-	}
-}
-
-function setupInscrieGrupButtons() {
-	const inscrieLinks = document.querySelectorAll('a[href="/grup-form.html"]');
-	inscrieLinks.forEach(link => {
-		link.addEventListener('click', handleInscrieGrupClick);
-	});
-}
-
-// Escape HTML to prevent XSS
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -460,19 +446,13 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for supabase to be available
-    if (typeof supabase !== 'undefined') {
-        initGrupuri();
-    } else {
-        // Wait a bit for supabase to load
-        setTimeout(() => {
-            if (typeof supabase !== 'undefined') {
-                initGrupuri();
-            } else {
-                showError('Supabase nu a fost încărcat. Vă rugăm să reîncărcați pagina.');
-            }
-        }, 1000);
-    }
-});
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    DOM.toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3500);
+}
