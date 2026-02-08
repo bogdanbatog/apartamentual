@@ -639,14 +639,25 @@ async function loadGroupDetails() {
         // Load terenuri favorite (if member)
         let terenuri = [];
         if (isMember) {
-            const { data: terenuriData } = await sb
+            // First get the likes
+            const { data: likesData, error: likesError } = await sb
                 .from('terenuri_likes_grupuri')
-                .select(`
-                    *,
-                    teren:terenuri(id, titlu, zona, imagine_url)
-                `)
+                .select('teren_id')
                 .eq('grup_id', groupId);
-            terenuri = terenuriData || [];
+            
+            console.log('Likes data:', likesData, 'Error:', likesError);
+            
+            if (likesData && likesData.length > 0) {
+                // Then get the terenuri details
+                const terenIds = likesData.map(l => l.teren_id);
+                const { data: terenuriData } = await sb
+                    .from('terenuri')
+                    .select('id, titlu, zona, image_url')
+                    .in('id', terenIds);
+                
+                console.log('Terenuri data:', terenuriData);
+                terenuri = (terenuriData || []).map(t => ({ teren: t }));
+            }
         }
         
         // Render everything
@@ -820,7 +831,7 @@ function renderTerenuri(terenuri) {
         
         return `
             <a href="teren-details.html?id=${teren.id}" class="teren-card-mini">
-                <img src="${teren.imagine_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
+                <img src="${teren.image_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
                 <div class="teren-card-mini-info">
                     <h4>${escapeHtml(teren.titlu)}</h4>
                     <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(teren.zona || 'Zonă nespecificată')}</p>
