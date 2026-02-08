@@ -58,8 +58,8 @@ async function initProfilePage() {
         
         // If no ID in URL, use current user's ID (viewing own profile)
         if (!profileId) {
-            if (user) {
-                profileId = user.id;
+            if (currentUser) {
+                profileId = currentUser.id;
                 // Update URL without reload
                 window.history.replaceState({}, '', `profile-view-new.html?id=${profileId}`);
             } else {
@@ -68,7 +68,7 @@ async function initProfilePage() {
             }
         }
         
-        isOwnProfile = user && user.id === profileId;
+        isOwnProfile = currentUser && currentUser.id === profileId;
         
         await loadProfile(profileId);
         
