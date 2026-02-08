@@ -4,8 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 // ── SUPABASE CLIENT ──
-const SUPABASE_URL = 'https://glbvbbgmcobtswwlktic.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
+// SUPABASE_URL and SUPABASE_ANON_KEY are defined in supabase-config.js
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── STATE ──
