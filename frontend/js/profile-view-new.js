@@ -10,17 +10,51 @@ let currentUser = null;
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for supabase to be initialized by app.js
+    await waitForSupabase();
     await initProfilePage();
 });
 
+// Wait for supabase client to be available
+function waitForSupabase() {
+    return new Promise((resolve) => {
+        if (typeof supabase !== 'undefined' && supabase && supabase.auth) {
+            resolve();
+            return;
+        }
+        const interval = setInterval(() => {
+            if (typeof supabase !== 'undefined' && supabase && supabase.auth) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 50);
+        // Timeout after 5 seconds
+        setTimeout(() => {
+            clearInterval(interval);
+            resolve();
+        }, 5000);
+    });
+}
+
 async function initProfilePage() {
     try {
+        // Verify supabase is available
+        if (typeof supabase === 'undefined' || !supabase || !supabase.auth) {
+            showError('Eroare la inițializarea aplicației. Reîncărcați pagina.');
+            return;
+        }
+        
         const urlParams = new URLSearchParams(window.location.search);
         let profileId = urlParams.get('id');
         
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        currentUser = user;
+        // Get current user (may be null if not logged in)
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            currentUser = user;
+        } catch (authError) {
+            console.warn('Auth check failed (user may not be logged in):', authError);
+            currentUser = null;
+        }
         
         // If no ID in URL, use current user's ID (viewing own profile)
         if (!profileId) {
