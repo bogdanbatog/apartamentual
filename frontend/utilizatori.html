@@ -172,7 +172,6 @@
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async () => {
                     try {
-                        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                         await sb.auth.signOut();
                         window.location.href = '/index.html';
                     } catch (e) {
