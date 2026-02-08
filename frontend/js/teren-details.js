@@ -215,7 +215,7 @@ function displayTerenDetails(teren, userProfile) {
     const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max 
         ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
         : 'N/A';
-    document.getElementById('teren-apartamente').textContent = apartamenteRange;
+    document.getElementById('teren-apartamente-value').textContent = apartamenteRange;
     
     document.getElementById('teren-data-adaugat').textContent = formatDate(teren.data_adaugat);
     
