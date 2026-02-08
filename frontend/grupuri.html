@@ -4,149 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grupuri - ApartamenTUal</title>
-    <meta name="description" content="Găsește sau formează grupuri compatibile pentru construcție în comun.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    maxWidth: {
-                        '6xl': '72rem',
-                    }
-                }
-            }
-        }
-    </script>
+    <meta name="description" content="Descoperă grupuri de co-housing sau creează-ți propriul grup.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="grupuri.css">
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-900">
-    <div id="navigation"></div>
-
-    <main class="flex-1">
-        <div class="container py-8">
-
-            <div class="grid gap-8">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-3xl">Grupuri</h1>
-                        <p class="subtitle mt-2">Găsește grupuri compatibile sau formează unul nou</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <a href="/grup-form.html"><button class="primary">Înscrie grup</button></a>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="grid-2">
-                    <div class="card text-center">
-                        <div class="text-3xl mb-3">🤝</div>
-                        <h3 class="text-lg mb-2">Alătură-te unui grup</h3>
-                        <p class="subtitle text-sm">Găsește grupuri active care caută noi membri</p>
-                        <p class="text-sm">Înscrie-te ca membru in pagina de detalii a grupului</p>
-                    </div>
-                    <a href="/grup-form.html" class="card text-center">
-                        <div class="text-3xl mb-3">👥</div>
-                        <h3 class="text-lg mb-2">Înscrie grupul tău</h3>
-                        <p class="subtitle text-sm">Ai deja un grup? Înscrie-l pe platformă</p>
-                    </a>
-                </div>
-
-                <!-- Filter Bar -->
-                <div class="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
-                    <select id="location-filter" class="px-3 py-2 border border-gray-300 rounded-md">
-                        <option>Toate locațiile</option>
-                        <option>București</option>
-                        <option>Cluj-Napoca</option>
-                        <option>Timișoara</option>
-                        <option>Iași</option>
-                    </select>
-                    <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded-md">
-                        <option>Toate stadiile</option>
-                        <option>În formare</option>
-                        <option>Opțiune teren</option>
-                        <option>Proiectare</option>
-                        <option>Construcție</option>
-                    </select>
-                    <select id="type-filter" class="px-3 py-2 border border-gray-300 rounded-md">
-                        <option>Toate tipurile</option>
-                        <option>Apartamente</option>
-                        <option>Case</option>
-                        <option>Mixt</option>
-                    </select>
-                </div>
-
-                <!-- Loading and Error States -->
-                <div id="loading" class="text-center py-8" style="display: none;">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <p class="mt-2 text-gray-600">Se încarcă grupurile...</p>
-                </div>
-
-                <div id="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6" style="display: none;">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">Eroare la încărcarea grupurilor</h3>
-                            <div class="mt-2 text-sm text-red-700">
-                                <p id="error-message"></p>
-                            </div>
-                            <div class="mt-4">
-                                <button id="retry-btn" class="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                    Încearcă din nou
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- No Results Message -->
-                <div id="no-results" class="text-center py-8" style="display: none;">
-                    <div class="text-gray-400 text-6xl mb-4">🔍</div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Nu s-au găsit grupuri</h3>
-                    <p class="text-gray-600">Încearcă să modifici filtrele sau să creezi un grup nou.</p>
-                </div>
-
-                <!-- Groups List -->
-                <div id="grupuri-list" class="grid-2">
-                    <!-- Groups will be loaded dynamically here -->
-                </div>
-
-                <!-- How it works section -->
-                <div class="mt-8 p-6 bg-blue-50 rounded-lg">
-                    <h2 class="text-xl mb-4">Cum funcționează?</h2>
-                    <div class="grid-3 text-center">
-                        <div>
-                            <div class="text-2xl mb-2">1️⃣</div>
-                            <h3 class="font-semibold mb-2">Găsește sau creează</h3>
-                            <p class="text-sm">Caută un grup compatibil sau înscrie grupul tău</p>
-                        </div>
-                        <div>
-                            <div class="text-2xl mb-2">2️⃣</div>
-                            <h3 class="font-semibold mb-2">Conectează-te</h3>
-                            <p class="text-sm">Ia legătura cu membrii și stabiliți obiectivele comune</p>
-                        </div>
-                        <div>
-                            <div class="text-2xl mb-2">3️⃣</div>
-                            <h3 class="font-semibold mb-2">Construiți împreună</h3>
-                            <p class="text-sm">Colaborați pentru a-și realiza visul de locuire</p>
-                        </div>
-                    </div>
+<body>
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="main-nav">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">
+            <span class="logo-apart">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Acasă</a>
+            <a href="ce-este/">Ce este</a>
+            <a href="terenuri.html">Terenuri</a>
+            <a href="utilizatori.html">Utilizatori</a>
+            <a href="grupuri.html" class="active">Grupuri</a>
+        </div>
+        <div class="nav-actions">
+            <a href="grup-nou.html" class="btn-creeaza-grup">
+                <i class="fas fa-plus"></i> Creează grup
+            </a>
+            <div class="nav-user" id="navUser" style="display:none;">
+                <button class="btn-user-avatar" id="btnUserAvatar">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="profile-view-new.html"><i class="fas fa-user"></i> Profilul meu</a>
+                    <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                 </div>
             </div>
+            <a href="register.html" class="btn-login-nav" id="btnLoginNav">
+                <i class="fas fa-sign-in-alt"></i> Intră în cont
+            </a>
         </div>
-    </main>
+        <button class="nav-mobile-toggle" id="navMobileToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</nav>
 
-    <div id="footer"></div>
+<!-- ═══════════════ HERO SECTION ═══════════════ -->
+<section class="grupuri-hero">
+    <div class="hero-content">
+        <h1>Grupuri de co-housing</h1>
+        <p>Găsește un grup care îți împărtășește viziunea sau creează-ți propriul grup și invită-ți prietenii.</p>
+    </div>
+</section>
 
-    <script src="js/nav.js"></script>
-    <script src="js/footer.js"></script>
-    <script src="js/auth-modal.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/markdown-utils.js"></script>
-    <script src="js/grupuri.js"></script>
+<!-- ═══════════════ FILTERS ═══════════════ -->
+<section class="filters-section">
+    <div class="filters-container">
+        <div class="filter-group">
+            <label><i class="fas fa-city"></i> Oraș</label>
+            <select id="filterOras">
+                <option value="">Toate orașele</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="fas fa-signal"></i> Status</label>
+            <select id="filterStatus">
+                <option value="">Toate</option>
+                <option value="activ">🟢 Activ</option>
+                <option value="explorare">🟡 În explorare</option>
+                <option value="inchis">🔴 Închis</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="fas fa-sort"></i> Sortare</label>
+            <select id="filterSort">
+                <option value="recent">Cele mai recente</option>
+                <option value="activitate">Activitate recentă</option>
+                <option value="membri">Număr membri</option>
+            </select>
+        </div>
+        <button class="btn-filter-reset" id="btnResetFilters" title="Resetează filtre">
+            <i class="fas fa-times"></i> Resetează
+        </button>
+    </div>
+</section>
+
+<!-- ═══════════════ TEREN FILTER BANNER ═══════════════ -->
+<div id="terenFilterBanner" class="teren-filter-banner" style="display: none;">
+    <div class="banner-content">
+        <i class="fas fa-filter"></i>
+        <span id="terenFilterText">Afișăm grupurile interesate de terenul: </span>
+        <strong id="terenFilterName"></strong>
+        <button id="btnClearTerenFilter" class="btn-clear-filter">
+            <i class="fas fa-times"></i> Arată toate grupurile
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════ MY GROUPS SECTION ═══════════════ -->
+<section id="myGroupsSection" class="my-groups-section" style="display: none;">
+    <div class="section-header">
+        <h2><i class="fas fa-users"></i> Grupurile mele</h2>
+    </div>
+    <div id="myGroupsGrid" class="grupuri-grid">
+        <!-- My groups cards here -->
+    </div>
+</section>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<main class="main-content">
+    <div class="content-header">
+        <h2 id="contentTitle">Toate grupurile</h2>
+        <span id="grupuriCount" class="count-badge">0 grupuri</span>
+    </div>
+    
+    <div id="loadingState" class="loading-state">
+        <div class="spinner"></div>
+        <p>Se încarcă grupurile...</p>
+    </div>
+    
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <i class="fas fa-users-slash"></i>
+        <h3>Nu am găsit grupuri</h3>
+        <p>Modifică filtrele sau creează primul grup!</p>
+        <a href="grup-nou.html" class="btn-primary">
+            <i class="fas fa-plus"></i> Creează un grup
+        </a>
+    </div>
+    
+    <div id="grupuriGrid" class="grupuri-grid">
+        <!-- Group cards here -->
+    </div>
+</main>
+
+<!-- ═══════════════ CTA SECTION ═══════════════ -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Nu ai găsit grupul potrivit?</h2>
+        <p>Creează-ți propriul grup și invită persoane cu aceeași viziune.</p>
+        <a href="grup-nou.html" class="btn-cta">
+            <i class="fas fa-plus"></i> Creează un grup nou
+        </a>
+    </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="main-footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <span class="logo-apart">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+            <p>Platformă pentru grupuri de construcție și co-housing în România.</p>
+        </div>
+        <div class="footer-links">
+            <h4>Navigare</h4>
+            <a href="index.html">Acasă</a>
+            <a href="ce-este/">Ce este</a>
+            <a href="terenuri.html">Terenuri</a>
+            <a href="utilizatori.html">Utilizatori</a>
+            <a href="grupuri.html">Grupuri</a>
+        </div>
+        <div class="footer-links">
+            <h4>Legal</h4>
+            <a href="termeni.html">Termeni și condiții</a>
+            <a href="gdpr.html">GDPR</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2025 ApartamenTUal. Toate drepturile rezervate.</p>
+    </div>
+</footer>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/orase-cartiere.js"></script>
+<script src="js/grupuri.js"></script>
 </body>
 </html>
