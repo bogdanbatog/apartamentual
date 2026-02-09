@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceptă invitația - ApartamenTUal</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            color: #1e293b;
+            padding: 1rem;
+        }
+        .invite-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 440px;
+            width: 100%;
+            padding: 2.5rem;
+            text-align: center;
+        }
+        .invite-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.5rem;
+        }
+        .invite-icon.loading { background: #e0f2fe; color: #0284c7; }
+        .invite-icon.success { background: #d1fae5; color: #059669; }
+        .invite-icon.error { background: #fee2e2; color: #dc2626; }
+        .invite-icon.auth { background: #fef3c7; color: #d97706; }
+        
+        h1 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+        p { color: #64748b; line-height: 1.6; margin-bottom: 1.5rem; }
+        .grup-name { color: #f97316; font-weight: 600; }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-primary { background: #f97316; color: white; }
+        .btn-primary:hover { background: #ea580c; }
+        .btn-secondary { background: #f1f5f9; color: #475569; }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn + .btn { margin-left: 0.5rem; }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #f97316;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="invite-card" id="card">
+    <!-- Loading state -->
+    <div id="stateLoading">
+        <div class="spinner"></div>
+        <h1>Se procesează invitația...</h1>
+        <p>Te rugăm să aștepți câteva secunde.</p>
+    </div>
+    
+    <!-- Success state -->
+    <div id="stateSuccess" style="display:none;">
+        <div class="invite-icon success"><i class="fas fa-check"></i></div>
+        <h1>Bine ai venit!</h1>
+        <p>Te-ai alăturat cu succes grupului <span class="grup-name" id="grupNameSuccess"></span>.</p>
+        <a href="#" id="btnGoToGroup" class="btn btn-primary">
+            <i class="fas fa-users"></i> Mergi la grup
+        </a>
+    </div>
+    
+    <!-- Auth required state -->
+    <div id="stateAuth" style="display:none;">
+        <div class="invite-icon auth"><i class="fas fa-sign-in-alt"></i></div>
+        <h1>Conectează-te pentru a continua</h1>
+        <p>Ai fost invitat/ă în grupul <span class="grup-name" id="grupNameAuth"></span>. Trebuie să te autentifici pentru a accepta invitația.</p>
+        <a href="#" id="btnRegister" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Creează cont / Intră în cont
+        </a>
+    </div>
+    
+    <!-- Error state -->
+    <div id="stateError" style="display:none;">
+        <div class="invite-icon error"><i class="fas fa-times"></i></div>
+        <h1 id="errorTitle">Invitație invalidă</h1>
+        <p id="errorMessage">Această invitație nu este validă sau a expirat.</p>
+        <a href="grupuri.html" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Înapoi la grupuri
+        </a>
+    </div>
+    
+    <!-- Already member state -->
+    <div id="stateAlready" style="display:none;">
+        <div class="invite-icon success"><i class="fas fa-user-check"></i></div>
+        <h1>Ești deja membru!</h1>
+        <p>Faci deja parte din grupul <span class="grup-name" id="grupNameAlready"></span>.</p>
+        <a href="#" id="btnGoToGroupAlready" class="btn btn-primary">
+            <i class="fas fa-users"></i> Mergi la grup
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function showState(stateId) {
+    ['stateLoading', 'stateSuccess', 'stateAuth', 'stateError', 'stateAlready'].forEach(id => {
+        document.getElementById(id).style.display = id === stateId ? 'block' : 'none';
+    });
+}
+
+function showError(title, message) {
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorMessage').textContent = message;
+    showState('stateError');
+}
+
+async function processInvitation() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (!token) {
+        showError('Link invalid', 'Acest link nu conține un token de invitație valid.');
+        return;
+    }
+    
+    try {
+        // 1. Look up the invitation
+        const { data: invitation, error: invError } = await sb
+            .from('grup_invitations')
+            .select('id, grup_id, email, status, created_at')
+            .eq('token', token)
+            .maybeSingle();
+        
+        if (invError || !invitation) {
+            showError('Invitație negăsită', 'Această invitație nu există sau link-ul este incorect.');
+            return;
+        }
+        
+        // Check if already used
+        if (invitation.status === 'accepted') {
+            showError('Invitație deja folosită', 'Această invitație a fost deja acceptată.');
+            return;
+        }
+        
+        if (invitation.status === 'expired' || invitation.status === 'cancelled') {
+            showError('Invitație expirată', 'Această invitație nu mai este validă.');
+            return;
+        }
+        
+        // Check expiry (7 days)
+        const created = new Date(invitation.created_at);
+        const now = new Date();
+        const daysDiff = (now - created) / (1000 * 60 * 60 * 24);
+        if (daysDiff > 7) {
+            // Update status to expired
+            await sb.from('grup_invitations').update({ status: 'expired' }).eq('id', invitation.id);
+            showError('Invitație expirată', 'Această invitație a expirat. Cere o nouă invitație de la un membru al grupului.');
+            return;
+        }
+        
+        // 2. Get group info
+        const { data: group } = await sb
+            .from('grupuri')
+            .select('id, nume, max_membri')
+            .eq('id', invitation.grup_id)
+            .single();
+        
+        if (!group) {
+            showError('Grup negăsit', 'Grupul asociat acestei invitații nu mai există.');
+            return;
+        }
+        
+        // 3. Check if user is logged in
+        const { data: { user } } = await sb.auth.getUser();
+        
+        if (!user) {
+            // Not logged in - show auth state with return URL
+            document.getElementById('grupNameAuth').textContent = group.nume;
+            const returnUrl = encodeURIComponent(window.location.href);
+            document.getElementById('btnRegister').href = `register.html?redirect=${returnUrl}`;
+            showState('stateAuth');
+            return;
+        }
+        
+        // 4. Check if already a member
+        const { data: existingMember } = await sb
+            .from('grup_membri')
+            .select('id, status')
+            .eq('grup_id', group.id)
+            .eq('user_id', user.id)
+            .maybeSingle();
+        
+        if (existingMember && existingMember.status === 'activ') {
+            document.getElementById('grupNameAlready').textContent = group.nume;
+            document.getElementById('btnGoToGroupAlready').href = `grup-details.html?id=${group.id}`;
+            // Still mark invitation as accepted
+            await sb.from('grup_invitations').update({ status: 'accepted' }).eq('id', invitation.id);
+            showState('stateAlready');
+            return;
+        }
+        
+        // 5. Check group capacity
+        const { count } = await sb
+            .from('grup_membri')
+            .select('id', { count: 'exact', head: true })
+            .eq('grup_id', group.id)
+            .eq('status', 'activ');
+        
+        if (count >= group.max_membri) {
+            showError('Grup plin', 'Grupul a atins numărul maxim de membri. Contactează adminul grupului.');
+            return;
+        }
+        
+        // 6. Add user to group
+        if (existingMember) {
+            // Reactivate
+            await sb
+                .from('grup_membri')
+                .update({ status: 'activ', joined_at: new Date().toISOString() })
+                .eq('id', existingMember.id);
+        } else {
+            const { error: joinError } = await sb
+                .from('grup_membri')
+                .insert({
+                    grup_id: group.id,
+                    user_id: user.id,
+                    status: 'activ'
+                });
+            
+            if (joinError) throw joinError;
+        }
+        
+        // 7. Mark invitation as accepted
+        await sb
+            .from('grup_invitations')
+            .update({ status: 'accepted' })
+            .eq('id', invitation.id);
+        
+        // 8. Show success
+        document.getElementById('grupNameSuccess').textContent = group.nume;
+        document.getElementById('btnGoToGroup').href = `grup-details.html?id=${group.id}`;
+        showState('stateSuccess');
+        
+    } catch (e) {
+        console.error('Error processing invitation:', e);
+        showError('Eroare', 'A apărut o eroare la procesarea invitației. Te rugăm să încerci din nou.');
+    }
+}
+
+// Run
+processInvitation();
+</script>
+</body>
+</html>
