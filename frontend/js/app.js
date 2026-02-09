@@ -112,6 +112,13 @@ async function signIn() {
         } else {
             showMessage('Signed in successfully!', 'success');
             clearForm();
+            
+            // Check for redirect URL (e.g. from invitation link)
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectUrl = urlParams.get('redirect');
+            if (redirectUrl) {
+                window.location.href = decodeURIComponent(redirectUrl);
+            }
         }
     } catch (error) {
         showMessage('Error during sign in: ' + error.message, 'error');
