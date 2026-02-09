@@ -158,7 +158,7 @@ async function processInvitation() {
         // 1. Look up the invitation
         const { data: invitation, error: invError } = await sb
             .from('grup_invitations')
-            .select('id, grup_id, email, status, created_at')
+            .select('id, grup_id, invited_email, status, expires_at')
             .eq('token', token)
             .maybeSingle();
         
@@ -178,12 +178,8 @@ async function processInvitation() {
             return;
         }
         
-        // Check expiry (7 days)
-        const created = new Date(invitation.created_at);
-        const now = new Date();
-        const daysDiff = (now - created) / (1000 * 60 * 60 * 24);
-        if (daysDiff > 7) {
-            // Update status to expired
+        // Check expiry
+        if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
             await sb.from('grup_invitations').update({ status: 'expired' }).eq('id', invitation.id);
             showError('Invitație expirată', 'Această invitație a expirat. Cere o nouă invitație de la un membru al grupului.');
             return;
