@@ -826,7 +826,7 @@ async function loadGroupDetails() {
         
         const { data: zonesData } = await sb
             .from('grup_preferred_zones')
-            .select('zone_name')
+            .select('zone_id, zones(id, name)')
             .eq('grup_id', groupId);
         groupZones = zonesData || [];
         
@@ -890,9 +890,35 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         const zoneSection = document.getElementById('zoneSection');
         const zoneContainer = document.getElementById('grupZones');
         zoneSection.style.display = 'block';
-        zoneContainer.innerHTML = groupZones.map(z => 
-            `<span class="tag-chip zone"><i class="fas fa-map-pin"></i> ${escapeHtml(z.zone_name)}</span>`
-        ).join('');
+        
+        // Load user zones for matching
+        let userZoneIds = [];
+        if (currentUser) {
+            try {
+                const { data: userZones } = await sb
+                    .from('user_preferred_zones')
+                    .select('zone_id')
+                    .eq('user_id', currentUser.id);
+                userZoneIds = (userZones || []).map(z => z.zone_id);
+            } catch(e) {}
+        }
+        
+        let zoneMatchCount = 0;
+        zoneContainer.innerHTML = groupZones.map(z => {
+            const zone = z.zones;
+            if (!zone) return '';
+            const isMatch = userZoneIds.includes(zone.id);
+            if (isMatch) zoneMatchCount++;
+            return `<span class="tag-chip ${isMatch ? 'match' : 'zone'}"><i class="fas fa-${isMatch ? 'check' : 'map-pin'}"></i> ${escapeHtml(zone.name)}</span>`;
+        }).join('');
+        
+        // Show zone matching info
+        if (currentUser && !isMember && zoneMatchCount > 0) {
+            const matchEl = document.createElement('div');
+            matchEl.className = 'matching-info';
+            matchEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> Ai ${zoneMatchCount} ${zoneMatchCount === 1 ? 'zonă comună' : 'zone comune'} cu acest grup.`;
+            zoneContainer.after(matchEl);
+        }
     }
     
     // Tags
