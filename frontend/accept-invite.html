@@ -359,6 +359,14 @@ async function processInvitation() {
     }
 }
 
+// Listen for auth state changes (e.g. user confirms email in another tab)
+sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+        // User just signed in (possibly from email confirmation in another tab)
+        window.location.reload();
+    }
+});
+
 // Run
 processInvitation();
 </script>
