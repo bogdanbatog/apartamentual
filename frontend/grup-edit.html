@@ -476,7 +476,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
 <script>
-<script>
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DOM = {
@@ -529,41 +528,56 @@ async function checkAuth() {
 }
 
 async function loadGroupForEdit() {
-    const { data: group, error } = await sb.from('grupuri').select('*').eq('id', groupId).single();
-    if (error || !group) { showToast('Grupul nu a fost găsit.', 'error'); setTimeout(() => window.location.href = 'grupuri.html', 2000); return; }
-    if (group.admin_id !== currentUser.id) { showToast('Doar adminul poate edita.', 'error'); setTimeout(() => window.location.href = `grup-details.html?id=${groupId}`, 2000); return; }
-    
-    currentGroup = group;
-    document.getElementById('nume').value = group.nume || '';
-    document.getElementById('descriere').value = group.descriere || '';
-    document.getElementById('max_membri').value = group.max_membri || 20;
-    document.getElementById('link_whatsapp').value = group.link_whatsapp || '';
-    DOM.oras.value = group.oras || '';
-    if (group.oras) await populateZoneCheckboxes(group.oras);
-    
-    const statusRadio = document.querySelector(`input[name="status"][value="${group.status}"]`);
-    if (statusRadio) statusRadio.checked = true;
-    
-    // Load existing zones (now zone_id)
-    const { data: zones } = await sb.from('grup_preferred_zones').select('zone_id').eq('grup_id', groupId);
-    if (zones) {
-        zones.forEach(z => {
-            const chip = document.querySelector(`.zone-chip[data-zone-id="${z.zone_id}"]`);
-            if (chip) { chip.classList.add('selected'); selectedZones.push(z.zone_id); }
-        });
+    try {
+        const { data: group, error } = await sb.from('grupuri').select('*').eq('id', groupId).single();
+        if (error || !group) { 
+            console.error('Group load error:', error);
+            showToast('Grupul nu a fost găsit.', 'error'); 
+            setTimeout(() => window.location.href = 'grupuri.html', 2000); 
+            return; 
+        }
+        if (group.admin_id !== currentUser.id) { 
+            showToast('Doar adminul poate edita.', 'error'); 
+            setTimeout(() => window.location.href = `grup-details.html?id=${groupId}`, 2000); 
+            return; 
+        }
+        
+        currentGroup = group;
+        document.getElementById('nume').value = group.nume || '';
+        document.getElementById('descriere').value = group.descriere || '';
+        document.getElementById('max_membri').value = group.max_membri || 20;
+        document.getElementById('link_whatsapp').value = group.link_whatsapp || '';
+        DOM.oras.value = group.oras || '';
+        if (group.oras) await populateZoneCheckboxes(group.oras);
+        
+        const statusRadio = document.querySelector(`input[name="status"][value="${group.status}"]`);
+        if (statusRadio) statusRadio.checked = true;
+        
+        // Load existing zones (zone_id)
+        const { data: zones } = await sb.from('grup_preferred_zones').select('zone_id').eq('grup_id', groupId);
+        if (zones) {
+            zones.forEach(z => {
+                const chip = document.querySelector(`.zone-chip[data-zone-id="${z.zone_id}"]`);
+                if (chip) { chip.classList.add('selected'); selectedZones.push(z.zone_id); }
+            });
+        }
+        
+        // Load existing tags
+        const { data: tags } = await sb.from('grup_tags').select('tag_id').eq('grup_id', groupId);
+        if (tags) {
+            selectedTags = tags.map(t => t.tag_id);
+            document.querySelectorAll('.tag-btn').forEach(btn => {
+                if (selectedTags.includes(parseInt(btn.dataset.tagId))) btn.classList.add('selected');
+            });
+            updateTagsCounter();
+        }
+        
+        DOM.formCard.style.display = 'block';
+    } catch (e) {
+        console.error('loadGroupForEdit error:', e);
+        showToast('Eroare la încărcarea grupului: ' + e.message, 'error');
+        DOM.formCard.style.display = 'block'; // Show form anyway so user sees something
     }
-    
-    // Load existing tags
-    const { data: tags } = await sb.from('grup_tags').select('tag_id').eq('grup_id', groupId);
-    if (tags) {
-        selectedTags = tags.map(t => t.tag_id);
-        document.querySelectorAll('.tag-btn').forEach(btn => {
-            if (selectedTags.includes(parseInt(btn.dataset.tagId))) btn.classList.add('selected');
-        });
-        updateTagsCounter();
-    }
-    
-    DOM.formCard.style.display = 'block';
 }
 
 // ── TAGS ──
