@@ -737,9 +737,10 @@ async function checkAuth() {
 }
 
 // ── LOAD GROUP DETAILS ──
+let groupId = null;
 async function loadGroupDetails() {
     const urlParams = new URLSearchParams(window.location.search);
-    const groupId = urlParams.get('id');
+    groupId = urlParams.get('id');
     
     if (!groupId) {
         showError();
@@ -824,11 +825,20 @@ async function loadGroupDetails() {
         let groupZones = [];
         let groupTags = [];
         
+        // Load zones - separate queries since join may not work
         const { data: zonesData } = await sb
             .from('grup_preferred_zones')
-            .select('zone_id, zones(id, name)')
+            .select('zone_id')
             .eq('grup_id', groupId);
-        groupZones = zonesData || [];
+        
+        if (zonesData && zonesData.length > 0) {
+            const zoneIds = zonesData.map(z => z.zone_id);
+            const { data: zoneDetails } = await sb
+                .from('zones')
+                .select('id, name')
+                .in('id', zoneIds);
+            groupZones = zoneDetails || [];
+        }
         
         const { data: tagsData } = await sb
             .from('grup_tags')
@@ -904,9 +914,7 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         }
         
         let zoneMatchCount = 0;
-        zoneContainer.innerHTML = groupZones.map(z => {
-            const zone = z.zones;
-            if (!zone) return '';
+        zoneContainer.innerHTML = groupZones.map(zone => {
             const isMatch = userZoneIds.includes(zone.id);
             if (isMatch) zoneMatchCount++;
             return `<span class="tag-chip ${isMatch ? 'match' : 'zone'}"><i class="fas fa-${isMatch ? 'check' : 'map-pin'}"></i> ${escapeHtml(zone.name)}</span>`;
