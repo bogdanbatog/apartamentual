@@ -475,7 +475,6 @@
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
-<script src="js/orase-cartiere.js"></script>
 <script>
 // ── SUPABASE CLIENT ──
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -588,35 +587,47 @@ function updateTagsCounter() {
     }
 }
 
-// ── ZONES MULTI-SELECT ──
-function populateZoneCheckboxes(oras) {
+// ── ZONES MULTI-SELECT (from Supabase) ──
+let allZonesCache = {};
+
+async function populateZoneCheckboxes(orasName) {
     const group = document.getElementById('zone-group');
     const container = document.getElementById('zone-checkboxes');
     
-    if (!oras) {
+    if (!orasName) {
         group.style.display = 'none';
         selectedZones = [];
         return;
     }
     
-    const cartiere = getCartiere(oras);
-    if (!cartiere || cartiere.length === 0) {
+    // Get city id
+    const { data: city } = await sb.from('cities').select('id').eq('name', orasName).single();
+    if (!city) {
         group.style.display = 'none';
         return;
     }
     
+    // Get zones for this city
+    const { data: zones } = await sb.from('zones').select('id, name').eq('city_id', city.id).order('name');
+    if (!zones || zones.length === 0) {
+        group.style.display = 'none';
+        return;
+    }
+    
+    // Cache zones for later use
+    allZonesCache[orasName] = zones;
+    
     group.style.display = 'block';
     selectedZones = [];
     
-    const sorted = cartiere.slice().sort((a, b) => a.localeCompare(b, 'ro'));
-    container.innerHTML = sorted.map(cartier => `
-        <span class="zone-chip" data-zone="${cartier}" onclick="toggleZone(this)">${cartier}</span>
+    container.innerHTML = zones.map(z => `
+        <span class="zone-chip" data-zone-id="${z.id}" data-zone-name="${z.name}" onclick="toggleZone(this)">${z.name}</span>
     `).join('');
 }
 
 function toggleZone(el) {
-    const zoneName = el.dataset.zone;
-    const idx = selectedZones.indexOf(zoneName);
+    const zoneId = parseInt(el.dataset.zoneId);
+    const idx = selectedZones.indexOf(zoneId);
     if (idx > -1) {
         selectedZones.splice(idx, 1);
         el.classList.remove('selected');
@@ -625,7 +636,7 @@ function toggleZone(el) {
             showToast('Poți selecta maximum 10 zone.', 'error');
             return;
         }
-        selectedZones.push(zoneName);
+        selectedZones.push(zoneId);
         el.classList.add('selected');
     }
 }
@@ -633,8 +644,9 @@ function toggleZone(el) {
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
     initNav();
-    populateOrasSelect();
+    await populateOrasSelect();
     bindEvents();
+    await loadTags();
     await checkAuth();
 });
 
@@ -694,14 +706,16 @@ async function checkAuth() {
 }
 
 // ── POPULATE SELECTS ──
-function populateOrasSelect() {
-    const orase = getOrase();
-    orase.forEach(oras => {
-        const opt = document.createElement('option');
-        opt.value = oras;
-        opt.textContent = oras;
-        DOM.oras.appendChild(opt);
-    });
+async function populateOrasSelect() {
+    const { data: cities } = await sb.from('cities').select('id, name').order('name');
+    if (cities) {
+        cities.forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city.name;
+            opt.textContent = city.name;
+            DOM.oras.appendChild(opt);
+        });
+    }
 }
 
 function populateZonaSelect(oras) {
@@ -750,8 +764,12 @@ async function handleSubmit(e) {
     DOM.btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se creează...';
     
     try {
-        // Build zona string from selected zones (first one or comma-separated)
-        const zonaStr = selectedZones.length > 0 ? selectedZones[0] : null;
+        // Build zona string from selected zones
+        let zonaStr = null;
+        if (selectedZones.length > 0 && allZonesCache[oras]) {
+            const firstZone = allZonesCache[oras].find(z => z.id === selectedZones[0]);
+            zonaStr = firstZone ? firstZone.name : null;
+        }
         
         const { data, error } = await sb
             .from('grupuri')
@@ -771,11 +789,11 @@ async function handleSubmit(e) {
         
         if (error) throw error;
         
-        // Save preferred zones
+        // Save preferred zones (using zone_id)
         if (selectedZones.length > 0) {
-            const zoneInserts = selectedZones.map(zone => ({
+            const zoneInserts = selectedZones.map(zoneId => ({
                 grup_id: data.id,
-                zone_name: zone
+                zone_id: zoneId
             }));
             const { error: zonesError } = await sb
                 .from('grup_preferred_zones')
