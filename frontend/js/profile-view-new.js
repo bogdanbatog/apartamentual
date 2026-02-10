@@ -144,13 +144,30 @@ async function loadActiveUserData(profileId) {
         profileData.zones = userZones?.map(uz => uz.zones) || [];
         
         // Load user's groups
-        const { data: memberships } = await supabase
+        const { data: memberships, error: groupsError } = await supabase
             .from('grup_membri')
-            .select('grup_id, rol, status, grupuri(id, nume, descriere, oras)')
+            .select('grup_id, status')
             .eq('user_id', profileId)
-            .in('status', ['activ', 'pending']);
+            .eq('status', 'activ');
         
-        profileData.groups = memberships || [];
+        if (groupsError) {
+            console.error('Error loading groups:', groupsError);
+            profileData.groups = [];
+        } else if (memberships && memberships.length > 0) {
+            // Load group details separately
+            const groupIds = memberships.map(m => m.grup_id);
+            const { data: groups } = await supabase
+                .from('grupuri')
+                .select('id, nume, descriere, oras, status, admin_id')
+                .in('id', groupIds);
+            
+            profileData.groups = memberships.map(m => ({
+                ...m,
+                grupuri: groups?.find(g => g.id === m.grup_id) || null
+            })).filter(m => m.grupuri);
+        } else {
+            profileData.groups = [];
+        }
         
         // Load favorite terrains (from terenuri_likes)
         const { data: likes } = await supabase
@@ -370,20 +387,36 @@ function renderUserGroups() {
     
     container.innerHTML = profileData.groups.map(membership => {
         const group = membership.grupuri;
-        const statusBadge = membership.status === 'pending' 
-            ? '<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">În așteptare</span>'
-            : membership.rol === 'creator'
-                ? '<span class="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs">Creator</span>'
-                : '';
+        if (!group) return '';
+        
+        const isAdmin = group.admin_id === profileData.user_id;
+        const statusBadge = isAdmin
+            ? '<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">Admin</span>'
+            : '';
+        
+        const statusColors = {
+            'activ': 'bg-green-100 text-green-800',
+            'explorare': 'bg-blue-100 text-blue-800',
+            'inchis': 'bg-gray-100 text-gray-600'
+        };
+        const statusLabel = {
+            'activ': 'Activ',
+            'explorare': 'În explorare',
+            'inchis': 'Închis'
+        };
+        const groupStatus = group.status || 'explorare';
         
         return `
-            <a href="grup-detail.html?id=${group.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
+            <a href="grup-details.html?id=${group.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="font-medium">${group.nume}</p>
                         <p class="text-sm text-gray-500">${group.oras || '-'}</p>
                     </div>
-                    ${statusBadge}
+                    <div class="flex gap-2">
+                        ${statusBadge}
+                        <span class="px-2 py-0.5 ${statusColors[groupStatus]} rounded text-xs">${statusLabel[groupStatus]}</span>
+                    </div>
                 </div>
             </a>
         `;
