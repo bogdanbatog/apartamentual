@@ -236,6 +236,90 @@
                 flex-direction: column;
             }
         }
+        
+        .checkbox-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .zone-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .zone-chip:hover {
+            border-color: #f97316;
+        }
+        
+        .zone-chip.selected {
+            background: #fff7ed;
+            border-color: #f97316;
+            color: #ea580c;
+        }
+        
+        .zone-chip input {
+            display: none;
+        }
+        
+        .tags-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .tag-category-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tag-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .tag-btn {
+            padding: 0.375rem 0.875rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #475569;
+        }
+        
+        .tag-btn:hover {
+            border-color: #94a3b8;
+        }
+        
+        .tag-btn.selected {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+        
+        .hint-inline {
+            font-weight: 400;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
@@ -324,11 +408,27 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="zona">Zonă preferată</label>
-                    <select id="zona" name="zona" disabled>
-                        <option value="">Selectează mai întâi orașul</option>
-                    </select>
+                    <label>Nr. max membri</label>
+                    <input type="number" id="max_membri" name="max_membri" min="2" max="50" value="20"
+                           placeholder="ex: 20">
+                    <p class="hint">Implicit 20. Poate fi schimbat mai târziu.</p>
                 </div>
+            </div>
+            
+            <!-- Zone preferate (multi-select) -->
+            <div class="form-group" id="zone-group" style="display: none;">
+                <label>Zone preferate <span class="hint-inline">(selectează una sau mai multe)</span></label>
+                <div id="zone-checkboxes" class="checkbox-grid"></div>
+                <p class="hint">Selectează zonele în care grupul ar dori să construiască.</p>
+            </div>
+            
+            <!-- Tag-uri / Interese -->
+            <div class="form-group">
+                <label>Interese și preferințe <span class="hint-inline">(max 7)</span></label>
+                <div id="tags-container" class="tags-grid">
+                    <p class="hint">Se încarcă...</p>
+                </div>
+                <p id="tags-counter" class="hint">0 din 7 selectate</p>
             </div>
             
             <div class="form-group">
@@ -388,7 +488,6 @@ const DOM = {
     form: document.getElementById('createGroupForm'),
     btnSubmit: document.getElementById('btnSubmit'),
     oras: document.getElementById('oras'),
-    zona: document.getElementById('zona'),
     navUser: document.getElementById('navUser'),
     btnLoginNav: document.getElementById('btnLoginNav'),
     btnUserAvatar: document.getElementById('btnUserAvatar'),
@@ -399,6 +498,135 @@ const DOM = {
 
 // ── STATE ──
 let currentUser = null;
+let selectedZones = [];
+let selectedTags = [];
+let allTags = [];
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', async () => {
+    initNav();
+    populateOrasSelect();
+    bindEvents();
+    await loadTags();
+    await checkAuth();
+});
+
+// ── LOAD TAGS ──
+async function loadTags() {
+    try {
+        const { data, error } = await sb
+            .from('tags')
+            .select('*')
+            .order('category, name');
+        
+        if (error) throw error;
+        allTags = data || [];
+        renderTags();
+    } catch (e) {
+        console.error('Error loading tags:', e);
+    }
+}
+
+function renderTags() {
+    const container = document.getElementById('tags-container');
+    if (!container || allTags.length === 0) return;
+    
+    const grouped = allTags.reduce((acc, tag) => {
+        if (!acc[tag.category]) acc[tag.category] = [];
+        acc[tag.category].push(tag);
+        return acc;
+    }, {});
+    
+    const categoryNames = {
+        'apartament': 'Despre Apartament',
+        'imobil': 'Despre Imobil',
+        'comunitate': 'Despre Comunitate'
+    };
+    
+    container.innerHTML = Object.entries(grouped).map(([category, tags]) => `
+        <div>
+            <p class="tag-category-title">${categoryNames[category] || category}</p>
+            <div class="tag-buttons">
+                ${tags.map(tag => `
+                    <button type="button" class="tag-btn" data-tag-id="${tag.id}" onclick="toggleTag(${tag.id})">
+                        ${tag.name}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+    
+    updateTagsCounter();
+}
+
+function toggleTag(tagId) {
+    const idx = selectedTags.indexOf(tagId);
+    if (idx > -1) {
+        selectedTags.splice(idx, 1);
+    } else {
+        if (selectedTags.length >= 7) {
+            showToast('Poți selecta maximum 7 tag-uri.', 'error');
+            return;
+        }
+        selectedTags.push(tagId);
+    }
+    
+    // Update UI
+    document.querySelectorAll('.tag-btn').forEach(btn => {
+        const id = parseInt(btn.dataset.tagId);
+        btn.classList.toggle('selected', selectedTags.includes(id));
+    });
+    
+    updateTagsCounter();
+}
+
+function updateTagsCounter() {
+    const counter = document.getElementById('tags-counter');
+    if (counter) {
+        counter.textContent = `${selectedTags.length} din 7 selectate`;
+        counter.style.color = selectedTags.length >= 7 ? '#ea580c' : '#64748b';
+    }
+}
+
+// ── ZONES MULTI-SELECT ──
+function populateZoneCheckboxes(oras) {
+    const group = document.getElementById('zone-group');
+    const container = document.getElementById('zone-checkboxes');
+    
+    if (!oras) {
+        group.style.display = 'none';
+        selectedZones = [];
+        return;
+    }
+    
+    const cartiere = getCartiere(oras);
+    if (!cartiere || cartiere.length === 0) {
+        group.style.display = 'none';
+        return;
+    }
+    
+    group.style.display = 'block';
+    selectedZones = [];
+    
+    const sorted = cartiere.slice().sort((a, b) => a.localeCompare(b, 'ro'));
+    container.innerHTML = sorted.map(cartier => `
+        <label class="zone-chip" onclick="toggleZone(this, '${cartier.replace(/'/g, "\\'")}')">
+            <input type="checkbox" value="${cartier}">
+            ${cartier}
+        </label>
+    `).join('');
+}
+
+function toggleZone(el, zoneName) {
+    const idx = selectedZones.indexOf(zoneName);
+    if (idx > -1) {
+        selectedZones.splice(idx, 1);
+        el.classList.remove('selected');
+    } else {
+        selectedZones.push(zoneName);
+        el.classList.add('selected');
+    }
+}
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
@@ -475,30 +703,7 @@ function populateOrasSelect() {
 }
 
 function populateZonaSelect(oras) {
-    DOM.zona.innerHTML = '';
-    
-    if (!oras) {
-        DOM.zona.innerHTML = '<option value="">Selectează mai întâi orașul</option>';
-        DOM.zona.disabled = true;
-        return;
-    }
-    
-    const cartiere = getCartiere(oras);
-    DOM.zona.disabled = false;
-    
-    const defaultOpt = document.createElement('option');
-    defaultOpt.value = '';
-    defaultOpt.textContent = 'Toate zonele';
-    DOM.zona.appendChild(defaultOpt);
-    
-    // Sort alphabetically
-    const sorted = cartiere.slice().sort((a, b) => a.localeCompare(b, 'ro'));
-    sorted.forEach(cartier => {
-        const opt = document.createElement('option');
-        opt.value = cartier;
-        opt.textContent = cartier;
-        DOM.zona.appendChild(opt);
-    });
+    populateZoneCheckboxes(oras);
 }
 
 // ── EVENTS ──
@@ -523,7 +728,7 @@ async function handleSubmit(e) {
     const nume = formData.get('nume')?.trim();
     const descriere = formData.get('descriere')?.trim();
     const oras = formData.get('oras');
-    const zona = formData.get('zona');
+    const max_membri = parseInt(document.getElementById('max_membri')?.value) || 20;
     const link_whatsapp = formData.get('link_whatsapp')?.trim();
     const status = formData.get('status') || 'explorare';
     
@@ -543,13 +748,17 @@ async function handleSubmit(e) {
     DOM.btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se creează...';
     
     try {
+        // Build zona string from selected zones (first one or comma-separated)
+        const zonaStr = selectedZones.length > 0 ? selectedZones[0] : null;
+        
         const { data, error } = await sb
             .from('grupuri')
             .insert({
                 nume,
                 descriere: descriere || null,
                 oras,
-                zona: zona || null,
+                zona: zonaStr,
+                max_membri: max_membri,
                 link_whatsapp: link_whatsapp || null,
                 status,
                 created_by: currentUser.id,
@@ -559,6 +768,37 @@ async function handleSubmit(e) {
             .single();
         
         if (error) throw error;
+        
+        // Save preferred zones
+        if (selectedZones.length > 0) {
+            const zoneInserts = selectedZones.map(zone => ({
+                grup_id: data.id,
+                zone_name: zone
+            }));
+            const { error: zonesError } = await sb
+                .from('grup_preferred_zones')
+                .insert(zoneInserts);
+            if (zonesError) console.error('Error saving zones:', zonesError);
+        }
+        
+        // Save tags
+        if (selectedTags.length > 0) {
+            const tagInserts = selectedTags.map(tagId => ({
+                grup_id: data.id,
+                tag_id: tagId
+            }));
+            const { error: tagsError } = await sb
+                .from('grup_tags')
+                .insert(tagInserts);
+            if (tagsError) console.error('Error saving tags:', tagsError);
+        }
+        
+        // Add creator as member
+        await sb.from('grup_membri').insert({
+            grup_id: data.id,
+            user_id: currentUser.id,
+            status: 'activ'
+        });
         
         showToast('Grupul a fost creat cu succes!', 'success');
         
