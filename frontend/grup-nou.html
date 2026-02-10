@@ -320,6 +320,36 @@
             color: #94a3b8;
             font-size: 0.875rem;
         }
+        
+        .selected-zones-display {
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+        }
+        
+        .selected-zones-display .selected-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            background: #f97316;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin: 0.125rem;
+            cursor: pointer;
+        }
+        
+        .selected-zones-display .selected-chip:hover {
+            background: #ea580c;
+        }
+        
+        .selected-zones-display .selected-chip .remove-x {
+            font-weight: bold;
+            margin-left: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -417,7 +447,11 @@
             
             <!-- Zone preferate (multi-select) -->
             <div class="form-group" id="zone-group" style="display: none;">
-                <label>Zone preferate <span class="hint-inline">(selectează una sau mai multe)</span></label>
+                <label>Zone preferate <span class="hint-inline">(max 10)</span></label>
+                <div id="selected-zones-display" class="selected-zones-display" style="display: none;">
+                    <p class="hint" style="margin-bottom: 0.25rem; font-weight: 500; color: #475569;">Selectate (<span id="zone-count">0</span>):</p>
+                    <div id="selected-zones-chips"></div>
+                </div>
                 <div id="zone-checkboxes" class="checkbox-grid"></div>
                 <p class="hint">Selectează zonele în care grupul ar dori să construiască.</p>
             </div>
@@ -639,6 +673,38 @@ function toggleZone(el) {
         selectedZones.push(zoneId);
         el.classList.add('selected');
     }
+    updateSelectedZonesDisplay();
+}
+
+function removeZone(zoneId) {
+    const idx = selectedZones.indexOf(zoneId);
+    if (idx > -1) {
+        selectedZones.splice(idx, 1);
+        const chip = document.querySelector(`.zone-chip[data-zone-id="${zoneId}"]`);
+        if (chip) chip.classList.remove('selected');
+        updateSelectedZonesDisplay();
+    }
+}
+
+function updateSelectedZonesDisplay() {
+    const display = document.getElementById('selected-zones-display');
+    const chipsContainer = document.getElementById('selected-zones-chips');
+    const countEl = document.getElementById('zone-count');
+    
+    if (selectedZones.length === 0) {
+        display.style.display = 'none';
+        return;
+    }
+    
+    display.style.display = 'block';
+    countEl.textContent = selectedZones.length;
+    
+    // Get zone names from the chips in the grid
+    chipsContainer.innerHTML = selectedZones.map(zId => {
+        const gridChip = document.querySelector(`.zone-chip[data-zone-id="${zId}"]`);
+        const name = gridChip ? gridChip.dataset.zoneName : zId;
+        return `<span class="selected-chip" onclick="removeZone(${zId})">${name} <span class="remove-x">×</span></span>`;
+    }).join('');
 }
 
 // ── INIT ──
