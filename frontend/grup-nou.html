@@ -610,19 +610,21 @@ function populateZoneCheckboxes(oras) {
     
     const sorted = cartiere.slice().sort((a, b) => a.localeCompare(b, 'ro'));
     container.innerHTML = sorted.map(cartier => `
-        <label class="zone-chip" onclick="toggleZone(this, '${cartier.replace(/'/g, "\\'")}')">
-            <input type="checkbox" value="${cartier}">
-            ${cartier}
-        </label>
+        <span class="zone-chip" data-zone="${cartier}" onclick="toggleZone(this)">${cartier}</span>
     `).join('');
 }
 
-function toggleZone(el, zoneName) {
+function toggleZone(el) {
+    const zoneName = el.dataset.zone;
     const idx = selectedZones.indexOf(zoneName);
     if (idx > -1) {
         selectedZones.splice(idx, 1);
         el.classList.remove('selected');
     } else {
+        if (selectedZones.length >= 10) {
+            showToast('Poți selecta maximum 10 zone.', 'error');
+            return;
+        }
         selectedZones.push(zoneName);
         el.classList.add('selected');
     }
