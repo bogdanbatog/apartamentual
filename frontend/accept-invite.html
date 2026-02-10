@@ -209,6 +209,15 @@ async function processInvitation() {
             return;
         }
         
+        // 3b. Verify email matches invitation
+        if (user.email.toLowerCase() !== invitation.invited_email.toLowerCase()) {
+            showError(
+                'Email diferit', 
+                `Această invitație a fost trimisă la ${invitation.invited_email}. Tu ești logat/ă cu ${user.email}. Deconectează-te și autentifică-te cu adresa corectă.`
+            );
+            return;
+        }
+        
         // 4. Check if already a member
         const { data: existingMember } = await sb
             .from('grup_membri')
