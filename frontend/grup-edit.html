@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editează grupul - ApartamenTUal</title>
+    <meta name="description" content="Creează un grup nou de co-housing și invită persoane cu aceeași viziune.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="grupuri.css">
+    <style>
+        /* Additional styles for form page */
+        .form-section {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.75rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-header p {
+            color: #64748b;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group label .required {
+            color: #ef4444;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f97316;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-group .hint {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin-top: 0.375rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn-submit {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            background: #f97316;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-submit:hover {
+            background: #ea580c;
+        }
+        
+        .btn-submit:disabled {
+            background: #fdba74;
+            cursor: not-allowed;
+        }
+        
+        .btn-cancel {
+            padding: 0.875rem 1.5rem;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .btn-cancel:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        
+        .status-options {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .status-option {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .status-option input {
+            display: none;
+        }
+        
+        .status-option label {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .status-option input:checked + label {
+            border-color: #f97316;
+            background: #fff7ed;
+        }
+        
+        .status-option label .status-icon {
+            display: block;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-option label .status-name {
+            font-size: 0.875rem;
+            color: #334155;
+        }
+        
+        /* Auth required overlay */
+        .auth-required {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .auth-required i {
+            font-size: 3rem;
+            color: #f97316;
+            margin-bottom: 1rem;
+        }
+        
+        .auth-required h2 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-required p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+        
+        .auth-required .btn-login {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #f97316;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .agency-blocked {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .agency-blocked i {
+            font-size: 3rem;
+            color: #ef4444;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .status-options {
+                flex-direction: column;
+            }
+        }
+        
+        .checkbox-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .zone-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .zone-chip:hover {
+            border-color: #f97316;
+        }
+        
+        .zone-chip.selected {
+            background: #fff7ed;
+            border-color: #f97316;
+            color: #ea580c;
+        }
+        
+        .zone-chip input {
+            display: none;
+        }
+        
+        .tags-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .tag-category-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tag-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .tag-btn {
+            padding: 0.375rem 0.875rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #475569;
+        }
+        
+        .tag-btn:hover {
+            border-color: #94a3b8;
+        }
+        
+        .tag-btn.selected {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+        
+        .hint-inline {
+            font-weight: 400;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="main-nav">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">
+            <span class="logo-apart">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Acasă</a>
+            <a href="ce-este/">Ce este</a>
+            <a href="terenuri.html">Terenuri</a>
+            <a href="utilizatori.html">Utilizatori</a>
+            <a href="grupuri.html" class="active">Grupuri</a>
+        </div>
+        <div class="nav-actions">
+            <div class="nav-user" id="navUser" style="display:none;">
+                <button class="btn-user-avatar" id="btnUserAvatar">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="profile-view-new.html"><i class="fas fa-user"></i> Profilul meu</a>
+                    <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
+                </div>
+            </div>
+            <a href="register.html" class="btn-login-nav" id="btnLoginNav">
+                <i class="fas fa-sign-in-alt"></i> Intră în cont
+            </a>
+        </div>
+        <button class="nav-mobile-toggle" id="navMobileToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<section class="form-section">
+    <!-- Auth Required State -->
+    <div id="authRequired" class="form-card auth-required" style="display: none;">
+        <i class="fas fa-lock"></i>
+        <h2>Autentificare necesară</h2>
+        <p>Trebuie să fii conectat pentru a crea un grup.</p>
+        <a href="register.html" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Conectează-te
+        </a>
+    </div>
+    
+    <!-- Agency Blocked State -->
+    <div id="agencyBlocked" class="form-card agency-blocked" style="display: none;">
+        <i class="fas fa-ban"></i>
+        <h2>Acces restricționat</h2>
+        <p>Conturile de agenție imobiliară nu pot crea grupuri de co-housing.</p>
+        <a href="grupuri.html" class="btn-cancel">
+            <i class="fas fa-arrow-left"></i> Înapoi la grupuri
+        </a>
+    </div>
+    
+    <!-- Create Group Form -->
+    <div id="formCard" class="form-card" style="display: none;">
+        <div class="form-header">
+            <h1>Editează grupul</h1>
+            <p>Modifică informațiile grupului tău</p>
+        </div>
+        
+        <form id="createGroupForm">
+            <div class="form-group">
+                <label for="nume">Numele grupului <span class="required">*</span></label>
+                <input type="text" id="nume" name="nume" required maxlength="100" 
+                       placeholder="ex: Coliving București Nord">
+                <p class="hint">Alege un nume descriptiv și ușor de reținut.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="descriere">Descriere</label>
+                <textarea id="descriere" name="descriere" maxlength="1000"
+                          placeholder="Descrie viziunea grupului, ce tip de proiect căutați, preferințe..."></textarea>
+                <p class="hint">O descriere bună atrage membrii potriviți.</p>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="oras">Oraș <span class="required">*</span></label>
+                    <select id="oras" name="oras" required>
+                        <option value="">Selectează orașul</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nr. max membri</label>
+                    <input type="number" id="max_membri" name="max_membri" min="2" max="50" value="20"
+                           placeholder="ex: 20">
+                    <p class="hint">Implicit 20. Poate fi schimbat mai târziu.</p>
+                </div>
+            </div>
+            
+            <!-- Zone preferate (multi-select) -->
+            <div class="form-group" id="zone-group" style="display: none;">
+                <label>Zone preferate <span class="hint-inline">(selectează una sau mai multe)</span></label>
+                <div id="zone-checkboxes" class="checkbox-grid"></div>
+                <p class="hint">Selectează zonele în care grupul ar dori să construiască.</p>
+            </div>
+            
+            <!-- Tag-uri / Interese -->
+            <div class="form-group">
+                <label>Interese și preferințe <span class="hint-inline">(max 7)</span></label>
+                <div id="tags-container" class="tags-grid">
+                    <p class="hint">Se încarcă...</p>
+                </div>
+                <p id="tags-counter" class="hint">0 din 7 selectate</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="link_whatsapp">Link grup WhatsApp</label>
+                <input type="url" id="link_whatsapp" name="link_whatsapp" 
+                       placeholder="https://chat.whatsapp.com/...">
+                <p class="hint">Opțional. Poți adăuga link-ul mai târziu.</p>
+            </div>
+            
+            <div class="form-group">
+                <label>Status inițial</label>
+                <div class="status-options">
+                    <div class="status-option">
+                        <input type="radio" name="status" id="status-explorare" value="explorare" checked>
+                        <label for="status-explorare">
+                            <span class="status-icon">🟡</span>
+                            <span class="status-name">În explorare</span>
+                        </label>
+                    </div>
+                    <div class="status-option">
+                        <input type="radio" name="status" id="status-activ" value="activ">
+                        <label for="status-activ">
+                            <span class="status-icon">🟢</span>
+                            <span class="status-name">Activ</span>
+                        </label>
+                    </div>
+                </div>
+                <p class="hint">„În explorare" = grup nou, încă discutați. „Activ" = căutați activ membri sau terenuri.</p>
+            </div>
+            
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn-cancel">Anulează</a>
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <i class="fas fa-save"></i> Salvează modificările
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/orase-cartiere.js"></script>
+<script>
+<script>
+// ── SUPABASE CLIENT ──
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const DOM = {
+    authRequired: document.getElementById('authRequired'),
+    agencyBlocked: document.getElementById('agencyBlocked'),
+    formCard: document.getElementById('formCard'),
+    form: document.getElementById('createGroupForm'),
+    btnSubmit: document.getElementById('btnSubmit'),
+    oras: document.getElementById('oras'),
+    navUser: document.getElementById('navUser'),
+    btnLoginNav: document.getElementById('btnLoginNav'),
+    btnUserAvatar: document.getElementById('btnUserAvatar'),
+    userDropdown: document.getElementById('userDropdown'),
+    btnLogout: document.getElementById('btnLogout'),
+    toastContainer: document.getElementById('toastContainer'),
+};
+
+let currentUser = null;
+let selectedZones = [];
+let selectedTags = [];
+let allTags = [];
+let groupId = null;
+let currentGroup = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    groupId = new URLSearchParams(window.location.search).get('id');
+    if (!groupId) { window.location.href = 'grupuri.html'; return; }
+    initNav();
+    populateOrasSelect();
+    bindEvents();
+    await loadTags();
+    await checkAuth();
+});
+
+function initNav() {
+    if (DOM.btnUserAvatar) {
+        DOM.btnUserAvatar.addEventListener('click', (e) => { e.stopPropagation(); DOM.userDropdown.classList.toggle('show'); });
+        document.addEventListener('click', () => { DOM.userDropdown.classList.remove('show'); });
+    }
+    if (DOM.btnLogout) {
+        DOM.btnLogout.addEventListener('click', async () => { await sb.auth.signOut(); window.location.href = 'grupuri.html'; });
+    }
+}
+
+async function checkAuth() {
+    try {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) { DOM.authRequired.style.display = 'block'; return; }
+        currentUser = user;
+        DOM.navUser.style.display = 'block';
+        DOM.btnLoginNav.style.display = 'none';
+        await loadGroupForEdit();
+    } catch (e) { DOM.authRequired.style.display = 'block'; }
+}
+
+async function loadGroupForEdit() {
+    const { data: group, error } = await sb.from('grupuri').select('*').eq('id', groupId).single();
+    if (error || !group) { showToast('Grupul nu a fost găsit.', 'error'); setTimeout(() => window.location.href = 'grupuri.html', 2000); return; }
+    if (group.admin_id !== currentUser.id) { showToast('Doar adminul poate edita.', 'error'); setTimeout(() => window.location.href = `grup-details.html?id=${groupId}`, 2000); return; }
+    
+    currentGroup = group;
+    document.getElementById('nume').value = group.nume || '';
+    document.getElementById('descriere').value = group.descriere || '';
+    document.getElementById('max_membri').value = group.max_membri || 20;
+    document.getElementById('link_whatsapp').value = group.link_whatsapp || '';
+    DOM.oras.value = group.oras || '';
+    if (group.oras) populateZoneCheckboxes(group.oras);
+    
+    const statusRadio = document.querySelector(`input[name="status"][value="${group.status}"]`);
+    if (statusRadio) statusRadio.checked = true;
+    
+    // Load existing zones
+    const { data: zones } = await sb.from('grup_preferred_zones').select('zone_name').eq('grup_id', groupId);
+    if (zones) {
+        zones.forEach(z => {
+            const chip = document.querySelector(`.zone-chip[data-zone="${z.zone_name}"]`);
+            if (chip) { chip.classList.add('selected'); selectedZones.push(z.zone_name); }
+        });
+    }
+    
+    // Load existing tags
+    const { data: tags } = await sb.from('grup_tags').select('tag_id').eq('grup_id', groupId);
+    if (tags) {
+        selectedTags = tags.map(t => t.tag_id);
+        document.querySelectorAll('.tag-btn').forEach(btn => {
+            if (selectedTags.includes(parseInt(btn.dataset.tagId))) btn.classList.add('selected');
+        });
+        updateTagsCounter();
+    }
+    
+    DOM.formCard.style.display = 'block';
+}
+
+async function loadTags() {
+    const { data } = await sb.from('tags').select('*').order('category, name');
+    allTags = data || [];
+    renderTags();
+}
+
+function renderTags() {
+    const container = document.getElementById('tags-container');
+    if (!container || !allTags.length) return;
+    const grouped = allTags.reduce((acc, t) => { (acc[t.category] = acc[t.category] || []).push(t); return acc; }, {});
+    const names = { 'apartament': 'Despre Apartament', 'imobil': 'Despre Imobil', 'comunitate': 'Despre Comunitate' };
+    container.innerHTML = Object.entries(grouped).map(([cat, tags]) => `
+        <div><p class="tag-category-title">${names[cat] || cat}</p>
+        <div class="tag-buttons">${tags.map(t => `<button type="button" class="tag-btn" data-tag-id="${t.id}" onclick="toggleTag(${t.id})">${t.name}</button>`).join('')}</div></div>
+    `).join('');
+    updateTagsCounter();
+}
+
+function toggleTag(id) {
+    const idx = selectedTags.indexOf(id);
+    if (idx > -1) selectedTags.splice(idx, 1);
+    else { if (selectedTags.length >= 7) { showToast('Max 7 tag-uri.', 'error'); return; } selectedTags.push(id); }
+    document.querySelectorAll('.tag-btn').forEach(b => b.classList.toggle('selected', selectedTags.includes(parseInt(b.dataset.tagId))));
+    updateTagsCounter();
+}
+
+function updateTagsCounter() {
+    const c = document.getElementById('tags-counter');
+    if (c) { c.textContent = `${selectedTags.length} din 7 selectate`; c.style.color = selectedTags.length >= 7 ? '#ea580c' : '#64748b'; }
+}
+
+function populateOrasSelect() {
+    getOrase().forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; DOM.oras.appendChild(opt); });
+}
+
+function populateZoneCheckboxes(oras) {
+    const grp = document.getElementById('zone-group'), ctn = document.getElementById('zone-checkboxes');
+    if (!oras) { grp.style.display = 'none'; selectedZones = []; return; }
+    const cartiere = getCartiere(oras);
+    if (!cartiere || !cartiere.length) { grp.style.display = 'none'; return; }
+    grp.style.display = 'block';
+    selectedZones = [];
+    ctn.innerHTML = cartiere.slice().sort((a,b) => a.localeCompare(b,'ro')).map(c => `<span class="zone-chip" data-zone="${c}" onclick="toggleZone(this)">${c}</span>`).join('');
+}
+
+function toggleZone(el) {
+    const z = el.dataset.zone, idx = selectedZones.indexOf(z);
+    if (idx > -1) { selectedZones.splice(idx, 1); el.classList.remove('selected'); }
+    else { if (selectedZones.length >= 10) { showToast('Max 10 zone.', 'error'); return; } selectedZones.push(z); el.classList.add('selected'); }
+}
+
+function bindEvents() {
+    DOM.oras.addEventListener('change', () => populateZoneCheckboxes(DOM.oras.value));
+    DOM.form.addEventListener('submit', handleSubmit);
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+    if (!currentUser || !currentGroup) return;
+    const fd = new FormData(DOM.form);
+    const nume = fd.get('nume')?.trim(), descriere = fd.get('descriere')?.trim(), oras = fd.get('oras');
+    const max_membri = parseInt(document.getElementById('max_membri')?.value) || 20;
+    const link_whatsapp = fd.get('link_whatsapp')?.trim(), status = fd.get('status') || currentGroup.status;
+    
+    if (!nume) { showToast('Numele este obligatoriu.', 'error'); return; }
+    if (!oras) { showToast('Selectează un oraș.', 'error'); return; }
+    
+    DOM.btnSubmit.disabled = true;
+    DOM.btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se salvează...';
+    
+    try {
+        const { error } = await sb.from('grupuri').update({
+            nume, descriere: descriere || null, oras, zona: selectedZones[0] || null,
+            max_membri, link_whatsapp: link_whatsapp || null, status, updated_at: new Date().toISOString()
+        }).eq('id', groupId);
+        if (error) throw error;
+        
+        await sb.from('grup_preferred_zones').delete().eq('grup_id', groupId);
+        if (selectedZones.length) await sb.from('grup_preferred_zones').insert(selectedZones.map(z => ({ grup_id: groupId, zone_name: z })));
+        
+        await sb.from('grup_tags').delete().eq('grup_id', groupId);
+        if (selectedTags.length) await sb.from('grup_tags').insert(selectedTags.map(t => ({ grup_id: groupId, tag_id: t })));
+        
+        showToast('Grupul a fost actualizat!', 'success');
+        setTimeout(() => { window.location.href = `grup-details.html?id=${groupId}`; }, 1000);
+    } catch (e) {
+        showToast('Eroare: ' + e.message, 'error');
+        DOM.btnSubmit.disabled = false;
+        DOM.btnSubmit.innerHTML = '<i class="fas fa-save"></i> Salvează modificările';
+    }
+}
+
+function showToast(msg, type = 'info') {
+    const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg;
+    DOM.toastContainer.appendChild(t); setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>
