@@ -155,8 +155,8 @@
                             </div>
                         </div>
 
-                        <!-- User Action Buttons -->
-                        <div id="user-action-buttons" class="flex flex-wrap gap-3 mb-6 hidden">
+                        <!-- User Action Buttons + Cere o analiză on same row -->
+                        <div id="user-action-buttons" class="flex flex-wrap items-center gap-3 mb-6 hidden">
                             <button id="btn-like-profil" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
                                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
@@ -169,17 +169,13 @@
                                 </svg>
                                 Trimite unui prieten
                             </button>
-                        </div>
-
-                        <!-- Cere o analiză -->
-                        <div class="mb-6">
-                            <button id="btn-cere-analiza" class="bg-gray-900 hover:bg-black text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                            <button id="btn-cere-analiza" class="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-lg transition text-sm ml-auto">
                                 Cere o analiză
                             </button>
                         </div>
 
                         <!-- Group Likes Section (populated by JS if user has groups) -->
-                        <div id="group-likes-section" class="hidden"></div>
+                        <div id="group-likes-section" class="hidden mb-6"></div>
 
                         <!-- Action Buttons -->
                         <div id="action-buttons" class="flex gap-3 hidden">
