@@ -154,6 +154,7 @@
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function showState(stateId) {
+    currentState = stateId;
     ['stateLoading', 'stateSuccess', 'stateAuth', 'stateError', 'stateAlready'].forEach(id => {
         document.getElementById(id).style.display = id === stateId ? 'block' : 'none';
     });
@@ -374,9 +375,10 @@ async function processInvitation() {
 }
 
 // Listen for auth state changes (e.g. user confirms email in another tab)
+let currentState = 'loading';
 sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-        // User just signed in (possibly from email confirmation in another tab)
+    if (event === 'SIGNED_IN' && session?.user && currentState === 'stateAuth') {
+        // User just signed in while viewing the auth screen - reload to process
         window.location.reload();
     }
 });
