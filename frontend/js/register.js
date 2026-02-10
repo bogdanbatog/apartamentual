@@ -429,6 +429,15 @@ async function handleAuthSubmit(event) {
     }
     
     try {
+        // Check if there's a redirect URL (e.g. from invitation)
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect');
+        
+        // Build email redirect - if coming from invitation, redirect confirmation to invite link
+        const emailRedirectTo = redirectUrl 
+            ? decodeURIComponent(redirectUrl)
+            : window.location.origin;
+        
         // Create account
         const { data, error } = await supabase.auth.signUp({
             email: email,
@@ -436,7 +445,8 @@ async function handleAuthSubmit(event) {
             options: {
                 data: {
                     account_type: selectedAccountType
-                }
+                },
+                emailRedirectTo: emailRedirectTo
             }
         });
         
