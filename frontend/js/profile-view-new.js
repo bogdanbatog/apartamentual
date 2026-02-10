@@ -204,7 +204,7 @@ async function loadProfessionalUserData(profileId) {
 // RENDERING
 // =====================================================
 
-function renderProfile() {
+async function renderProfile() {
     document.getElementById('loading-state').classList.add('hidden');
     document.getElementById('profile-content').classList.remove('hidden');
     
@@ -212,7 +212,7 @@ function renderProfile() {
     
     if (profileData.account_type === 'activ') {
         document.getElementById('active-user-content').classList.remove('hidden');
-        renderActiveUserContent();
+        await renderActiveUserContent();
     } else {
         document.getElementById('professional-user-content').classList.remove('hidden');
         renderProfessionalContent();
@@ -296,7 +296,7 @@ function renderBasicInfo() {
     }
 }
 
-function renderActiveUserContent() {
+async function renderActiveUserContent() {
     // Apartment preferences
     const roomsEl = document.getElementById('pref-rooms');
     roomsEl.textContent = profileData.preferred_rooms ? profileData.preferred_rooms + ' camere' : '-';
@@ -307,9 +307,24 @@ function renderActiveUserContent() {
     // Zones
     const zonesEl = document.getElementById('pref-zones');
     if (profileData.zones && profileData.zones.length > 0) {
-        zonesEl.innerHTML = profileData.zones.map(zone => 
-            `<span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${zone.name}</span>`
-        ).join('');
+        // Load current user's zones for matching
+        let myZoneIds = [];
+        if (!isOwnProfile && currentUser) {
+            try {
+                const { data: myZones } = await supabase
+                    .from('user_preferred_zones')
+                    .select('zone_id')
+                    .eq('user_id', currentUser.id);
+                myZoneIds = (myZones || []).map(z => z.zone_id);
+            } catch(e) {}
+        }
+        
+        zonesEl.innerHTML = profileData.zones.map(zone => {
+            const isMatch = !isOwnProfile && myZoneIds.includes(zone.id);
+            return isMatch
+                ? `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-full text-sm">✓ ${zone.name}</span>`
+                : `<span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${zone.name}</span>`;
+        }).join('');
     } else {
         zonesEl.innerHTML = '<span class="text-gray-400">-</span>';
     }
@@ -317,9 +332,41 @@ function renderActiveUserContent() {
     // Tags
     const tagsEl = document.getElementById('user-tags');
     if (profileData.tags && profileData.tags.length > 0) {
-        tagsEl.innerHTML = profileData.tags.map(tag => 
-            `<span class="px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm">${tag.name}</span>`
-        ).join('');
+        // Load current user's tags for matching
+        let myTagIds = [];
+        if (!isOwnProfile && currentUser) {
+            try {
+                const { data: myTags } = await supabase
+                    .from('user_tags')
+                    .select('tag_id')
+                    .eq('user_id', currentUser.id);
+                myTagIds = (myTags || []).map(t => t.tag_id);
+            } catch(e) {}
+        }
+        
+        let matchCount = 0;
+        tagsEl.innerHTML = profileData.tags.map(tag => {
+            const isMatch = !isOwnProfile && myTagIds.includes(tag.id);
+            if (isMatch) matchCount++;
+            return isMatch
+                ? `<span class="px-3 py-1.5 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-full text-sm">✓ ${tag.name}</span>`
+                : `<span class="px-3 py-1.5 bg-gray-900 text-white rounded-full text-sm">${tag.name}</span>`;
+        }).join('');
+        
+        // Show matching info for other profiles
+        if (!isOwnProfile && matchCount >= 4) {
+            tagsEl.insertAdjacentHTML('afterend', `
+                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                    ⭐ <strong>Compatibilitate ridicată!</strong> Ai ${matchCount} interese comune cu acest utilizator.
+                </div>
+            `);
+        } else if (!isOwnProfile && matchCount > 0) {
+            tagsEl.insertAdjacentHTML('afterend', `
+                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                    ✓ Ai ${matchCount} ${matchCount === 1 ? 'interes comun' : 'interese comune'} cu acest utilizator.
+                </div>
+            `);
+        }
     } else {
         tagsEl.innerHTML = '<span class="text-gray-400">Niciun tag selectat</span>';
     }
