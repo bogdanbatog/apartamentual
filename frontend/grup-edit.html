@@ -475,10 +475,8 @@
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
-<script src="js/orase-cartiere.js"></script>
 <script>
 <script>
-// ── SUPABASE CLIENT ──
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DOM = {
@@ -496,18 +494,14 @@ const DOM = {
     toastContainer: document.getElementById('toastContainer'),
 };
 
-let currentUser = null;
-let selectedZones = [];
-let selectedTags = [];
-let allTags = [];
-let groupId = null;
-let currentGroup = null;
+let currentUser = null, selectedZones = [], selectedTags = [], allTags = [], groupId = null, currentGroup = null;
+let allZonesCache = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
     groupId = new URLSearchParams(window.location.search).get('id');
     if (!groupId) { window.location.href = 'grupuri.html'; return; }
     initNav();
-    populateOrasSelect();
+    await populateOrasSelect();
     bindEvents();
     await loadTags();
     await checkAuth();
@@ -545,17 +539,17 @@ async function loadGroupForEdit() {
     document.getElementById('max_membri').value = group.max_membri || 20;
     document.getElementById('link_whatsapp').value = group.link_whatsapp || '';
     DOM.oras.value = group.oras || '';
-    if (group.oras) populateZoneCheckboxes(group.oras);
+    if (group.oras) await populateZoneCheckboxes(group.oras);
     
     const statusRadio = document.querySelector(`input[name="status"][value="${group.status}"]`);
     if (statusRadio) statusRadio.checked = true;
     
-    // Load existing zones
-    const { data: zones } = await sb.from('grup_preferred_zones').select('zone_name').eq('grup_id', groupId);
+    // Load existing zones (now zone_id)
+    const { data: zones } = await sb.from('grup_preferred_zones').select('zone_id').eq('grup_id', groupId);
     if (zones) {
         zones.forEach(z => {
-            const chip = document.querySelector(`.zone-chip[data-zone="${z.zone_name}"]`);
-            if (chip) { chip.classList.add('selected'); selectedZones.push(z.zone_name); }
+            const chip = document.querySelector(`.zone-chip[data-zone-id="${z.zone_id}"]`);
+            if (chip) { chip.classList.add('selected'); selectedZones.push(z.zone_id); }
         });
     }
     
@@ -572,6 +566,7 @@ async function loadGroupForEdit() {
     DOM.formCard.style.display = 'block';
 }
 
+// ── TAGS ──
 async function loadTags() {
     const { data } = await sb.from('tags').select('*').order('category, name');
     allTags = data || [];
@@ -603,24 +598,39 @@ function updateTagsCounter() {
     if (c) { c.textContent = `${selectedTags.length} din 7 selectate`; c.style.color = selectedTags.length >= 7 ? '#ea580c' : '#64748b'; }
 }
 
-function populateOrasSelect() {
-    getOrase().forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; DOM.oras.appendChild(opt); });
+// ── CITIES & ZONES FROM SUPABASE ──
+async function populateOrasSelect() {
+    const { data: cities } = await sb.from('cities').select('id, name').order('name');
+    if (cities) {
+        cities.forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city.name;
+            opt.textContent = city.name;
+            DOM.oras.appendChild(opt);
+        });
+    }
 }
 
-function populateZoneCheckboxes(oras) {
+async function populateZoneCheckboxes(orasName) {
     const grp = document.getElementById('zone-group'), ctn = document.getElementById('zone-checkboxes');
-    if (!oras) { grp.style.display = 'none'; selectedZones = []; return; }
-    const cartiere = getCartiere(oras);
-    if (!cartiere || !cartiere.length) { grp.style.display = 'none'; return; }
+    if (!orasName) { grp.style.display = 'none'; selectedZones = []; return; }
+    
+    const { data: city } = await sb.from('cities').select('id').eq('name', orasName).single();
+    if (!city) { grp.style.display = 'none'; return; }
+    
+    const { data: zones } = await sb.from('zones').select('id, name').eq('city_id', city.id).order('name');
+    if (!zones || !zones.length) { grp.style.display = 'none'; return; }
+    
+    allZonesCache[orasName] = zones;
     grp.style.display = 'block';
     selectedZones = [];
-    ctn.innerHTML = cartiere.slice().sort((a,b) => a.localeCompare(b,'ro')).map(c => `<span class="zone-chip" data-zone="${c}" onclick="toggleZone(this)">${c}</span>`).join('');
+    ctn.innerHTML = zones.map(z => `<span class="zone-chip" data-zone-id="${z.id}" data-zone-name="${z.name}" onclick="toggleZone(this)">${z.name}</span>`).join('');
 }
 
 function toggleZone(el) {
-    const z = el.dataset.zone, idx = selectedZones.indexOf(z);
+    const zId = parseInt(el.dataset.zoneId), idx = selectedZones.indexOf(zId);
     if (idx > -1) { selectedZones.splice(idx, 1); el.classList.remove('selected'); }
-    else { if (selectedZones.length >= 10) { showToast('Max 10 zone.', 'error'); return; } selectedZones.push(z); el.classList.add('selected'); }
+    else { if (selectedZones.length >= 10) { showToast('Max 10 zone.', 'error'); return; } selectedZones.push(zId); el.classList.add('selected'); }
 }
 
 function bindEvents() {
@@ -628,6 +638,7 @@ function bindEvents() {
     DOM.form.addEventListener('submit', handleSubmit);
 }
 
+// ── SUBMIT (UPDATE) ──
 async function handleSubmit(e) {
     e.preventDefault();
     if (!currentUser || !currentGroup) return;
@@ -643,15 +654,24 @@ async function handleSubmit(e) {
     DOM.btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se salvează...';
     
     try {
+        // Get zone name for the zona column
+        let zonaStr = null;
+        if (selectedZones.length > 0 && allZonesCache[oras]) {
+            const firstZone = allZonesCache[oras].find(z => z.id === selectedZones[0]);
+            zonaStr = firstZone ? firstZone.name : null;
+        }
+        
         const { error } = await sb.from('grupuri').update({
-            nume, descriere: descriere || null, oras, zona: selectedZones[0] || null,
+            nume, descriere: descriere || null, oras, zona: zonaStr,
             max_membri, link_whatsapp: link_whatsapp || null, status, updated_at: new Date().toISOString()
         }).eq('id', groupId);
         if (error) throw error;
         
+        // Update zones with zone_id
         await sb.from('grup_preferred_zones').delete().eq('grup_id', groupId);
-        if (selectedZones.length) await sb.from('grup_preferred_zones').insert(selectedZones.map(z => ({ grup_id: groupId, zone_name: z })));
+        if (selectedZones.length) await sb.from('grup_preferred_zones').insert(selectedZones.map(zId => ({ grup_id: groupId, zone_id: zId })));
         
+        // Update tags
         await sb.from('grup_tags').delete().eq('grup_id', groupId);
         if (selectedTags.length) await sb.from('grup_tags').insert(selectedTags.map(t => ({ grup_id: groupId, tag_id: t })));
         
