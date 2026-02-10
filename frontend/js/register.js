@@ -625,12 +625,13 @@ function showSuccess(accountType) {
     if (accountType === 'activ') {
         titleEl.textContent = 'Bine ai venit!';
         if (redirectUrl) {
-            textEl.innerHTML = 'Contul tău a fost creat cu succes!<br><br>📧 <strong>Verifică-ți emailul</strong> pentru a confirma contul, apoi accesează din nou link-ul de invitație pentru a te alătura grupului.';
+            const decodedUrl = decodeURIComponent(redirectUrl);
+            textEl.innerHTML = 'Contul tău a fost creat cu succes!<br><br>📧 <strong>Verifică-ți emailul</strong> pentru a confirma contul.<br>După confirmare, apasă butonul de mai jos.';
             // Update the success link to point to redirect
             const successLink = document.getElementById('success-link');
             if (successLink) {
-                successLink.href = decodeURIComponent(redirectUrl);
-                successLink.textContent = 'Am confirmat — mergi la invitație';
+                successLink.href = decodedUrl;
+                successLink.textContent = '✓ Am confirmat — acceptă invitația';
             }
         } else {
             textEl.textContent = 'Contul tău a fost creat cu succes. Verifică-ți emailul pentru confirmare, apoi poți explora grupurile și terenurile disponibile.';
