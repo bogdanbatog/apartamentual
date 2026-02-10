@@ -211,10 +211,25 @@ async function processInvitation() {
         
         // 3b. Verify email matches invitation
         if (user.email.toLowerCase() !== invitation.invited_email.toLowerCase()) {
-            showError(
-                'Email diferit', 
-                `Această invitație a fost trimisă la ${invitation.invited_email}. Tu ești logat/ă cu ${user.email}. Deconectează-te și autentifică-te cu adresa corectă.`
-            );
+            document.getElementById('errorTitle').textContent = 'Email diferit';
+            document.getElementById('errorMessage').innerHTML = `Această invitație a fost trimisă la <strong>${invitation.invited_email}</strong>. Tu ești logat/ă cu <strong>${user.email}</strong>.<br><br>Apasă butonul de mai jos pentru a te deconecta și a accesa invitația cu contul corect.`;
+            
+            // Replace the back button with a logout button
+            const errorDiv = document.getElementById('stateError');
+            const existingBtn = errorDiv.querySelector('a');
+            if (existingBtn) {
+                const logoutBtn = document.createElement('button');
+                logoutBtn.className = 'btn btn-primary';
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Deconectează-te';
+                logoutBtn.addEventListener('click', async () => {
+                    await sb.auth.signOut();
+                    window.location.reload();
+                });
+                existingBtn.parentNode.insertBefore(logoutBtn, existingBtn);
+                existingBtn.style.marginLeft = '0.5rem';
+            }
+            
+            showState('stateError');
             return;
         }
         
