@@ -32,8 +32,14 @@ async function checkExistingSession() {
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-            // User is already logged in, redirect to profile
-            window.location.href = '/profile-view.html?id=' + user.id;
+            // Check for redirect URL (e.g. from invitation link)
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectUrl = urlParams.get('redirect');
+            if (redirectUrl) {
+                window.location.href = decodeURIComponent(redirectUrl);
+            } else {
+                window.location.href = '/profile-view.html?id=' + user.id;
+            }
         }
     } catch (error) {
         console.error('Error checking session:', error);
@@ -607,6 +613,10 @@ function showSuccess(accountType) {
     // Hide step 3
     document.getElementById('step3').classList.add('hidden');
     
+    // Check for redirect URL (e.g. from invitation link)
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect');
+    
     // Show success message
     const successDiv = document.getElementById('success-message');
     const titleEl = document.getElementById('success-title');
@@ -614,7 +624,15 @@ function showSuccess(accountType) {
     
     if (accountType === 'activ') {
         titleEl.textContent = 'Bine ai venit!';
-        textEl.textContent = 'Contul tău a fost creat cu succes. Acum poți explora grupurile și terenurile disponibile.';
+        if (redirectUrl) {
+            textEl.textContent = 'Contul tău a fost creat cu succes. Te redirecționăm...';
+            // Auto-redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = decodeURIComponent(redirectUrl);
+            }, 2000);
+        } else {
+            textEl.textContent = 'Contul tău a fost creat cu succes. Acum poți explora grupurile și terenurile disponibile.';
+        }
     } else {
         titleEl.textContent = 'Cerere trimisă!';
         textEl.innerHTML = 'Cererea ta de înregistrare a fost trimisă.<br>Vei primi un email când contul tău este aprobat de administratori.';
