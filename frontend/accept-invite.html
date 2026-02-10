@@ -185,7 +185,19 @@ async function processInvitation() {
             return;
         }
         
-        // 2. Get group info
+        // 2. Check if user is logged in FIRST (before querying grupuri which needs auth)
+        const { data: { user } } = await sb.auth.getUser();
+        
+        if (!user) {
+            // Not logged in - show auth state with return URL (without group name since we can't query it)
+            document.getElementById('grupNameAuth').textContent = 'un grup pe ApartamenTUal';
+            const returnUrl = encodeURIComponent(window.location.href);
+            document.getElementById('btnRegister').href = `register.html?redirect=${returnUrl}`;
+            showState('stateAuth');
+            return;
+        }
+        
+        // 3. Get group info (now we're authenticated, RLS allows it)
         const { data: group } = await sb
             .from('grupuri')
             .select('id, nume, max_membri')
@@ -194,18 +206,6 @@ async function processInvitation() {
         
         if (!group) {
             showError('Grup negăsit', 'Grupul asociat acestei invitații nu mai există.');
-            return;
-        }
-        
-        // 3. Check if user is logged in
-        const { data: { user } } = await sb.auth.getUser();
-        
-        if (!user) {
-            // Not logged in - show auth state with return URL
-            document.getElementById('grupNameAuth').textContent = group.nume;
-            const returnUrl = encodeURIComponent(window.location.href);
-            document.getElementById('btnRegister').href = `register.html?redirect=${returnUrl}`;
-            showState('stateAuth');
             return;
         }
         
