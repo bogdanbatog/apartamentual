@@ -1108,20 +1108,13 @@ async function sendInvitation() {
         
         if (insertError) throw insertError;
         
-        // Build invite link and mailto
+        // Build invite link
         const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}`;
         const grupName = currentGroup.nume || 'un grup';
         
-        const subject = `Invitație în grupul "${grupName}" pe ApartamenTUal`;
-        const body = `Salut!\n\nAi fost invitat/ă să te alături grupului "${grupName}" pe platforma ApartamenTUal.\n\nApartamenTUal este o platformă de co-housing din România, unde grupuri de persoane se organizează pentru a construi împreună.\n\nAcceptă invitația aici:\n${inviteLink}\n\nDacă nu ai încă cont, te poți înregistra și apoi accesa link-ul.\n\nNe vedem în grup!`;
-        
-        const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        
-        // Open mail client
-        window.location.href = mailtoLink;
-        
-        showToast('Invitație creată! Trimite emailul din clientul tău.', 'success');
+        // Show success with link to copy
         closeInviteModal();
+        showInviteLinkModal(inviteLink, email, grupName);
         
     } catch (e) {
         console.error('Error sending invitation:', e);
@@ -1129,6 +1122,68 @@ async function sendInvitation() {
         errorEl.style.display = 'block';
     }
 }
+
+function showInviteLinkModal(link, email, grupName) {
+    // Remove existing modal if any
+    const existing = document.getElementById('inviteLinkModal');
+    if (existing) existing.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'inviteLinkModal';
+    modal.className = 'modal-overlay';
+    modal.style.display = 'flex';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    
+    modal.innerHTML = `
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle" style="color: #059669;"></i> Invitație creată!</h2>
+                <button class="modal-close" onclick="document.getElementById('inviteLinkModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #64748b; margin-bottom: 1rem;">Invitație creată pentru <strong>${escapeHtml(email)}</strong>. Trimite-i link-ul de mai jos:</p>
+                
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <input type="text" value="${link}" readonly id="inviteLinkInput"
+                           style="flex: 1; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8125rem; background: #f8fafc; color: #475569;">
+                    <button onclick="copyInviteLink()" class="btn-action btn-primary" style="white-space: nowrap;">
+                        <i class="fas fa-copy"></i> Copiază
+                    </button>
+                </div>
+                
+                <p style="font-size: 0.8125rem; color: #94a3b8; margin-bottom: 1rem;">Sau trimite direct prin:</p>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <a href="mailto:${email}?subject=${encodeURIComponent(`Invitație în grupul "${grupName}" pe ApartamenTUal`)}&body=${encodeURIComponent(`Salut!\n\nTe invit în grupul "${grupName}" pe ApartamenTUal.\n\nAcceptă invitația aici:\n${link}\n\nNe vedem în grup!`)}" 
+                       class="btn-action btn-secondary" target="_blank">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                    <a href="https://wa.me/?text=${encodeURIComponent(`Te invit în grupul "${grupName}" pe ApartamenTUal! Acceptă invitația: ${link}`)}" 
+                       class="btn-action btn-whatsapp" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action btn-secondary" onclick="document.getElementById('inviteLinkModal').remove()">Închide</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+window.copyInviteLink = function() {
+    const input = document.getElementById('inviteLinkInput');
+    if (input) {
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast('Link copiat în clipboard!', 'success');
+        }).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            showToast('Link copiat!', 'success');
+        });
+    }
+};
 
 window.changeStatus = async function(newStatus) {
     if (!isAdmin || !currentGroup) return;
