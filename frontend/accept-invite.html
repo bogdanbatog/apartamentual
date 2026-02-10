@@ -189,8 +189,12 @@ async function processInvitation() {
         const { data: { user } } = await sb.auth.getUser();
         
         if (!user) {
-            // Not logged in - show auth state with return URL (without group name since we can't query it)
-            document.getElementById('grupNameAuth').textContent = 'un grup pe ApartamenTUal';
+            // Not logged in - show auth state with return URL
+            // Try to get group name from URL parameter
+            const grupNameFromUrl = urlParams.get('grup');
+            const displayName = grupNameFromUrl ? `„${decodeURIComponent(grupNameFromUrl)}"` : 'un grup';
+            document.getElementById('grupNameAuth').textContent = displayName;
+            document.querySelector('#stateAuth p').innerHTML = `Ai fost invitat/ă în grupul <span class="grup-name">${displayName}</span> de pe platforma <strong>ApartamenTUal</strong>. Trebuie să te autentifici pentru a accepta invitația.`;
             const returnUrl = encodeURIComponent(window.location.href);
             document.getElementById('btnRegister').href = `register.html?redirect=${returnUrl}`;
             showState('stateAuth');
