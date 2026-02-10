@@ -1109,8 +1109,8 @@ async function sendInvitation() {
         if (insertError) throw insertError;
         
         // Build invite link
-        const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}`;
         const grupName = currentGroup.nume || 'un grup';
+        const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}&grup=${encodeURIComponent(grupName)}`;
         
         // Show success with link to copy
         closeInviteModal();
