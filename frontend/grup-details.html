@@ -989,7 +989,7 @@ function renderActions(group) {
         }
     } else {
         html += `
-            <a href="register.html" class="btn-action btn-primary">
+            <a href="#" class="btn-action btn-primary" onclick="event.preventDefault(); document.getElementById('auth-modal').classList.remove('hidden');">
                 <i class="fas fa-sign-in-alt"></i> Conectează-te pentru a te alătura
             </a>
         `;
