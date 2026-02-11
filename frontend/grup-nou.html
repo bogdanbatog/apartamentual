@@ -703,29 +703,11 @@ function updateSelectedZonesDisplay() {
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
-    initNav();
     await populateOrasSelect();
     bindEvents();
     await loadTags();
     await checkAuth();
 });
-
-// ── NAV ──
-function initNav() {
-    if (DOM.btnUserAvatar) {
-        DOM.btnUserAvatar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            DOM.userDropdown.classList.toggle('show');
-        });
-        document.addEventListener('click', () => DOM.userDropdown.classList.remove('show'));
-    }
-    if (DOM.btnLogout) {
-        DOM.btnLogout.addEventListener('click', async () => {
-            await sb.auth.signOut();
-            window.location.href = 'grupuri.html';
-        });
-    }
-}
 
 // ── AUTH ──
 async function checkAuth() {
@@ -738,8 +720,6 @@ async function checkAuth() {
         }
         
         currentUser = user;
-        DOM.navUser.style.display = 'block';
-        DOM.btnLoginNav.style.display = 'none';
         
         // Check account type
         const { data: profile } = await sb
