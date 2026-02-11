@@ -1,61 +1,63 @@
-// ══════════════════════════════════════════════════════════════
-// FAQ COMPONENT — ApartamenTUal
-// Single source of truth. Include on any page with <div id="faq-container"></div>
-// ══════════════════════════════════════════════════════════════
-
 (function() {
 
-const faqItems = [
+var faqItems = [
     {
         question: "Ce este un Baugruppen?",
-        answer: "Baugruppen (în germană „grup de construcție") este un model de dezvoltare imobiliară în care un grup de viitori proprietari se unesc pentru a-și construi împreună clădirea, controlând costurile și calitatea. Fiecare membru participă la decizii și își personalizează locuința."
+        answer: 'Baugruppen (in germana "grup de constructie") este un model de dezvoltare imobiliara in care un grup de viitori proprietari se unesc pentru a-si construi impreuna cladirea, controland costurile si calitatea. Fiecare membru participa la decizii si isi personalizeaza locuinta.'
     },
     {
-        question: "Cum mă pot alătura unui grup?",
-        answer: "După ce îți creezi un cont și completezi profilul cu preferințele tale, poți explora grupurile existente și solicita să te alături celor care îți corespund. Algoritmul nostru îți va sugera și grupuri compatibile bazat pe zona, bugetul și stilul de viață dorit."
+        question: "Cum ma pot alatura unui grup?",
+        answer: "Dupa ce iti creezi un cont si completezi profilul cu preferintele tale, poti explora grupurile existente si solicita sa te alaturi celor care iti corespund. Algoritmul nostru iti va sugera si grupuri compatibile bazat pe zona, bugetul si stilul de viata dorit."
     },
     {
-        question: "Ce costuri implică participarea?",
-        answer: "Utilizarea platformei ApartamenTUal este gratuită. Costurile efective apar doar când grupul decide să avanseze cu un proiect concret: achiziția terenului, proiectare, autorizații și construcție. Acestea sunt împărțite proporțional între membrii grupului."
+        question: "Ce costuri implica participarea?",
+        answer: "Utilizarea platformei ApartamenTUal este gratuita. Costurile efective apar doar cand grupul decide sa avanseze cu un proiect concret: achizitia terenului, proiectare, autorizatii si constructie. Acestea sunt impartite proportional intre membrii grupului."
     },
     {
-        question: "Este legal în România?",
-        answer: "Da, modelul Baugruppen este perfect legal în România. Grupurile se pot organiza sub diverse forme juridice (asociație, cooperativă, SRL) în funcție de specificul proiectului. Oferim ghiduri și recomandări de specialiști în drept imobiliar pentru fiecare etapă."
+        question: "Este legal in Romania?",
+        answer: "Da, modelul Baugruppen este perfect legal in Romania. Grupurile se pot organiza sub diverse forme juridice (asociatie, cooperativa, SRL) in functie de specificul proiectului. Oferim ghiduri si recomandari de specialisti in drept imobiliar pentru fiecare etapa."
     }
 ];
 
 function renderFAQ() {
-    const container = document.getElementById('faq-container');
+    var container = document.getElementById('faq-container');
     if (!container) return;
 
-    container.innerHTML = faqItems.map((item, i) => `
-        <div class="faq-item border border-gray-200 rounded-xl overflow-hidden" style="border-color: #e2e8f0;">
-            <button class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors" onclick="toggleFaq(this)" style="cursor:pointer; background:none; border:none; font-family:inherit;">
-                <span style="font-weight:600; font-size:16px; color:#0f172a;">${item.question}</span>
-                <span class="faq-icon" style="color:#f97316; font-size:22px; transition:transform 0.3s;">+</span>
-            </button>
-            <div class="faq-content" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease-out; padding:0 24px;">
-                <p style="padding-bottom:20px; color:#475569; font-size:14px; line-height:1.7;">${item.answer}</p>
-            </div>
-        </div>
-    `).join('');
+    var html = '';
+    for (var i = 0; i < faqItems.length; i++) {
+        var item = faqItems[i];
+        html += '<div class="faq-item" style="border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; margin-bottom:12px;">';
+        html += '<button onclick="toggleFaq(this)" style="width:100%; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; text-align:left; cursor:pointer; background:none; border:none; font-family:inherit; transition:background 0.2s;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'none\'">';
+        html += '<span style="font-weight:600; font-size:16px; color:#0f172a;">' + item.question + '</span>';
+        html += '<span class="faq-icon" style="color:#f97316; font-size:22px; transition:transform 0.3s; flex-shrink:0; margin-left:16px;">+</span>';
+        html += '</button>';
+        html += '<div class="faq-content" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease-out; padding:0 24px;">';
+        html += '<p style="padding-bottom:20px; color:#475569; font-size:14px; line-height:1.7;">' + item.answer + '</p>';
+        html += '</div>';
+        html += '</div>';
+    }
+    container.innerHTML = html;
 }
 
-// Toggle function (global)
 window.toggleFaq = function(button) {
-    const faqItem = button.parentElement;
-    const content = faqItem.querySelector('.faq-content');
-    const icon = faqItem.querySelector('.faq-icon');
-    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+    var faqItem = button.parentElement;
+    var content = faqItem.querySelector('.faq-content');
+    var icon = faqItem.querySelector('.faq-icon');
+    var isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
 
-    // Close all
-    document.querySelectorAll('.faq-content').forEach(c => c.style.maxHeight = '0px');
-    document.querySelectorAll('.faq-icon').forEach(i => { i.textContent = '+'; i.style.transform = ''; });
+    var allContents = document.querySelectorAll('.faq-content');
+    var allIcons = document.querySelectorAll('.faq-icon');
+    for (var j = 0; j < allContents.length; j++) {
+        allContents[j].style.maxHeight = '0px';
+    }
+    for (var k = 0; k < allIcons.length; k++) {
+        allIcons[k].textContent = '+';
+        allIcons[k].style.transform = '';
+    }
 
-    // Open clicked if was closed
     if (!isOpen) {
         content.style.maxHeight = content.scrollHeight + 'px';
-        icon.textContent = '×';
+        icon.textContent = String.fromCharCode(215);
         icon.style.transform = 'rotate(45deg)';
     }
 };
