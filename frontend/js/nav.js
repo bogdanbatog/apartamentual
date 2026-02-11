@@ -14,7 +14,7 @@ function createNavigation(currentPage = '') {
     const navHTML = `
         <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
             <div class="container flex items-center justify-between py-3">
-                <a href="index.html" class="font-bold text-xl">ApartamenTUal</a>
+                <a href="/index.html" class="font-bold text-xl">ApartamenTUal</a>
                 <nav class="hidden md:flex flex-wrap gap-4 text-sm">
                     ${navItems.map(item => `
                         <a href="${item.href}" ${currentPage === item.id ? 'class="font-semibold"' : ''}>${item.label}</a>
@@ -119,18 +119,16 @@ function setupProfileLinks() {
     
     if (authToggle) {
         authToggle.addEventListener('click', () => {
-            const authModal = document.getElementById('auth-modal');
-            if (authModal) {
-                authModal.classList.remove('hidden');
+            if (typeof openLoginModal === 'function') {
+                openLoginModal();
             }
         });
     }
     
     if (mobileAuthToggle) {
         mobileAuthToggle.addEventListener('click', () => {
-            const authModal = document.getElementById('auth-modal');
-            if (authModal) {
-                authModal.classList.remove('hidden');
+            if (typeof openLoginModal === 'function') {
+                openLoginModal();
             }
         });
     }
@@ -142,13 +140,11 @@ function setupProfileLinks() {
     if (navLogoutBtn) {
         navLogoutBtn.addEventListener('click', async () => {
             try {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    console.error('Sign out failed:', error);
-                } else {
-                    // Redirect to home page after logout
-                    window.location.href = '/index.html';
-                }
+                var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
+                var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
+                var client = window.supabase.createClient(url, key);
+                await client.auth.signOut();
+                window.location.href = '/index.html';
             } catch (error) {
                 console.error('Error during sign out:', error);
             }
@@ -158,13 +154,11 @@ function setupProfileLinks() {
     if (mobileLogoutBtn) {
         mobileLogoutBtn.addEventListener('click', async () => {
             try {
-                const { error } = await supabase.auth.signOut();
-                if (error) {
-                    console.error('Sign out failed:', error);
-                } else {
-                    // Redirect to home page after logout
-                    window.location.href = '/index.html';
-                }
+                var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
+                var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
+                var client = window.supabase.createClient(url, key);
+                await client.auth.signOut();
+                window.location.href = '/index.html';
             } catch (error) {
                 console.error('Error during sign out:', error);
             }
@@ -175,13 +169,20 @@ function setupProfileLinks() {
 // Check authentication state and update UI
 async function checkAuthState() {
     try {
-        if (typeof supabase === 'undefined') {
-            // Supabase not loaded yet, try again later
+        if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
             setTimeout(checkAuthState, 100);
             return;
         }
         
-        const { data: { user } } = await supabase.auth.getUser();
+        var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
+        var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
+        var client = window.supabase.createClient(url, key);
+        
+        const { data: { user } } = await client.auth.getUser();
+        
+        // Set global user ID for profile links
+        window.currentUserId = user ? user.id : null;
+        
         updateAuthUI(user);
     } catch (error) {
         console.error('Error checking auth state:', error);
