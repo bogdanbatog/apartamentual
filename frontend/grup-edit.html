@@ -536,30 +536,17 @@ let allZonesCache = {};
 document.addEventListener('DOMContentLoaded', async () => {
     groupId = new URLSearchParams(window.location.search).get('id');
     if (!groupId) { window.location.href = 'grupuri.html'; return; }
-    initNav();
     await populateOrasSelect();
     bindEvents();
     await loadTags();
     await checkAuth();
 });
 
-function initNav() {
-    if (DOM.btnUserAvatar) {
-        DOM.btnUserAvatar.addEventListener('click', (e) => { e.stopPropagation(); DOM.userDropdown.classList.toggle('show'); });
-        document.addEventListener('click', () => DOM.userDropdown.classList.remove('show'));
-    }
-    if (DOM.btnLogout) {
-        DOM.btnLogout.addEventListener('click', async () => { await sb.auth.signOut(); window.location.href = 'grupuri.html'; });
-    }
-}
-
 async function checkAuth() {
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { DOM.authRequired.style.display = 'block'; return; }
         currentUser = user;
-        DOM.navUser.style.display = 'block';
-        DOM.btnLoginNav.style.display = 'none';
         await loadGroupForEdit();
     } catch (e) { DOM.authRequired.style.display = 'block'; }
 }
