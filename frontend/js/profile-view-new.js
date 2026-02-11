@@ -380,49 +380,208 @@ async function renderActiveUserContent() {
     }
     
     // Favorite Terrains
-    renderFavoriteTerrains();
+    await renderFavoriteTerrains();
     
     // Groups
     renderUserGroups();
 }
 
-function renderFavoriteTerrains() {
+async function renderFavoriteTerrains() {
     const container = document.getElementById('favorite-terrains');
     
     if (!profileData.favoriteTerrains || profileData.favoriteTerrains.length === 0) {
         container.innerHTML = '<p class="text-gray-400 text-sm">Nu ai terenuri favorite încă.</p>';
         return;
     }
+
+    // Load notes for all favorite terrains (only for own profile)
+    let notesMap = {};
+    if (isOwnProfile && currentUser) {
+        try {
+            const terenIds = profileData.favoriteTerrains.map(t => t.id);
+            const { data, error } = await supabase
+                .from('user_teren_notes')
+                .select('id, teren_id, content, updated_at')
+                .eq('user_id', currentUser.id)
+                .in('teren_id', terenIds);
+            if (!error && data) {
+                data.forEach(n => { notesMap[n.teren_id] = n; });
+            }
+        } catch (e) {
+            console.error('Load notes error:', e);
+        }
+    }
     
     container.innerHTML = profileData.favoriteTerrains.map(terrain => {
         const location = [terrain.oras, terrain.cartier].filter(Boolean).join(', ') || 'Locație nespecificată';
         const price = terrain.pret_total ? Number(terrain.pret_total).toLocaleString('ro-RO') + ' €' : '-';
         const surface = terrain.suprafata ? terrain.suprafata + ' mp' : '-';
+        const note = notesMap[terrain.id] || null;
+        const hasNote = note && note.content;
         
+        let noteHtml = '';
+        if (isOwnProfile) {
+            noteHtml = `
+                <div class="teren-note-section" data-teren="${terrain.id}" data-note-id="${hasNote ? note.id : ''}">
+                    <div class="teren-note-wrapper">
+                        <div class="teren-note-header">
+                            <span class="teren-note-label">
+                                <i class="fas fa-sticky-note"></i> Nota mea
+                            </span>
+                            ${hasNote ? '<span class="teren-note-time">' + _noteTimeAgo(note.updated_at) + '</span>' : ''}
+                        </div>
+                        <div class="teren-note-display ${hasNote ? '' : 'tn-hidden'}" id="note-display-${terrain.id}">
+                            <p class="teren-note-text">${hasNote ? _noteEscape(note.content) : ''}</p>
+                            <div class="teren-note-actions">
+                                <button class="note-btn-edit" onclick="_noteEdit('${terrain.id}')" title="Editeaza">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="note-btn-delete" onclick="_noteDelete('${terrain.id}')" title="Sterge nota">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="teren-note-editor ${hasNote ? 'tn-hidden' : ''}" id="note-editor-${terrain.id}">
+                            <textarea id="note-input-${terrain.id}" placeholder="Adauga o nota privata despre acest teren..." maxlength="5000" rows="2">${hasNote ? _noteEscape(note.content) : ''}</textarea>
+                            <div class="teren-note-editor-actions">
+                                ${hasNote ? '<button class="note-btn-cancel" onclick="_noteCancel(\'' + terrain.id + '\')">Anuleaza</button>' : ''}
+                                <button class="note-btn-save" onclick="_noteSave('${terrain.id}')">
+                                    <i class="fas fa-check"></i> Salveaza
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         return `
-            <a href="teren-details.html?id=${terrain.id}" class="flex items-center gap-4 p-4 border rounded-lg hover:border-gray-400 hover:shadow-sm transition">
-                <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                    ${terrain.image_url 
-                        ? `<img src="${terrain.image_url}" alt="${terrain.titlu}" class="w-full h-full object-cover">`
-                        : `<div class="w-full h-full flex items-center justify-center text-gray-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                          </div>`
-                    }
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium truncate">${terrain.titlu}</p>
-                    <p class="text-sm text-gray-500">${location}</p>
-                    <p class="text-sm"><span class="text-orange-600 font-medium">${price}</span> • ${surface}</p>
-                </div>
-                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </a>
+            <div class="teren-fav-card">
+                <a href="teren-details.html?id=${terrain.id}" class="flex items-center gap-4 p-4 border rounded-lg hover:border-gray-400 hover:shadow-sm transition" style="border-bottom-left-radius:${isOwnProfile ? '0' : ''};border-bottom-right-radius:${isOwnProfile ? '0' : ''}">
+                    <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                        ${terrain.image_url 
+                            ? `<img src="${terrain.image_url}" alt="${terrain.titlu}" class="w-full h-full object-cover">`
+                            : `<div class="w-full h-full flex items-center justify-center text-gray-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                              </div>`
+                        }
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">${terrain.titlu}</p>
+                        <p class="text-sm text-gray-500">${location}</p>
+                        <p class="text-sm"><span class="text-orange-600 font-medium">${price}</span> • ${surface}</p>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                ${noteHtml}
+            </div>
         `;
     }).join('');
 }
+
+// ── NOTES FUNCTIONS ──
+
+function _noteEscape(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function _noteTimeAgo(dateStr) {
+    if (!dateStr) return '';
+    const now = new Date();
+    const date = new Date(dateStr);
+    const mins = Math.floor((now - date) / 60000);
+    if (mins < 1) return 'acum';
+    if (mins < 60) return 'acum ' + mins + ' min';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return 'acum ' + hrs + 'h';
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return 'acum ' + days + 'z';
+    return 'acum ' + Math.floor(days / 30) + ' luni';
+}
+
+window._noteEdit = function(terenId) {
+    const display = document.getElementById('note-display-' + terenId);
+    const editor = document.getElementById('note-editor-' + terenId);
+    if (display) display.classList.add('tn-hidden');
+    if (editor) {
+        editor.classList.remove('tn-hidden');
+        const ta = document.getElementById('note-input-' + terenId);
+        if (ta) ta.focus();
+    }
+};
+
+window._noteCancel = function(terenId) {
+    const display = document.getElementById('note-display-' + terenId);
+    const editor = document.getElementById('note-editor-' + terenId);
+    if (display) display.classList.remove('tn-hidden');
+    if (editor) editor.classList.add('tn-hidden');
+};
+
+window._noteSave = async function(terenId) {
+    const ta = document.getElementById('note-input-' + terenId);
+    if (!ta) return;
+    const content = ta.value.trim();
+    if (!content || !currentUser) return;
+
+    ta.disabled = true;
+    const section = document.querySelector('.teren-note-section[data-teren="' + terenId + '"]');
+    const existingId = section ? section.getAttribute('data-note-id') : '';
+
+    try {
+        let result;
+        if (existingId) {
+            result = await supabase
+                .from('user_teren_notes')
+                .update({ content: content, updated_at: new Date().toISOString() })
+                .eq('id', existingId)
+                .select()
+                .single();
+        } else {
+            result = await supabase
+                .from('user_teren_notes')
+                .insert({ user_id: currentUser.id, teren_id: terenId, content: content })
+                .select()
+                .single();
+        }
+
+        if (result.error) throw result.error;
+
+        // Re-render all favorite terrains to reflect changes
+        await renderFavoriteTerrains();
+
+    } catch (e) {
+        console.error('Save note error:', e);
+        alert('Eroare la salvarea notei.');
+    } finally {
+        ta.disabled = false;
+    }
+};
+
+window._noteDelete = async function(terenId) {
+    const section = document.querySelector('.teren-note-section[data-teren="' + terenId + '"]');
+    const noteId = section ? section.getAttribute('data-note-id') : '';
+    if (!noteId) return;
+    if (!confirm('Stergi nota?')) return;
+
+    try {
+        const { error } = await supabase
+            .from('user_teren_notes')
+            .delete()
+            .eq('id', noteId);
+
+        if (error) throw error;
+        await renderFavoriteTerrains();
+
+    } catch (e) {
+        console.error('Delete note error:', e);
+        alert('Eroare la stergerea notei.');
+    }
+};
 
 function renderUserGroups() {
     const container = document.getElementById('user-groups');
