@@ -7,6 +7,8 @@
     <meta name="description" content="Creează un grup nou de co-housing și invită persoane cu aceeași viziune.">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="grupuri.css">
     <style>
         /* Additional styles for form page */
@@ -353,38 +355,7 @@
     </style>
 </head>
 <body>
-<!-- ═══════════════ NAVBAR ═══════════════ -->
-<nav class="main-nav">
-    <div class="nav-container">
-        <a href="index.html" class="nav-logo">
-            <span class="logo-apart">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
-        </a>
-        <div class="nav-links">
-            <a href="index.html">Acasă</a>
-            <a href="ce-este/">Ce este</a>
-            <a href="terenuri.html">Terenuri</a>
-            <a href="utilizatori.html">Utilizatori</a>
-            <a href="grupuri.html" class="active">Grupuri</a>
-        </div>
-        <div class="nav-actions">
-            <div class="nav-user" id="navUser" style="display:none;">
-                <button class="btn-user-avatar" id="btnUserAvatar">
-                    <i class="fas fa-user-circle"></i>
-                </button>
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="profile-view-new.html"><i class="fas fa-user"></i> Profilul meu</a>
-                    <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
-                </div>
-            </div>
-            <a href="register.html" class="btn-login-nav" id="btnLoginNav">
-                <i class="fas fa-sign-in-alt"></i> Intră în cont
-            </a>
-        </div>
-        <button class="nav-mobile-toggle" id="navMobileToggle">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-</nav>
+<div id="navigation"></div>
 
 <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
 <section class="form-section">
@@ -505,10 +476,14 @@
 
 <!-- ═══════════════ TOAST ═══════════════ -->
 <div id="toastContainer" class="toast-container"></div>
+<div id="auth-modal"></div>
 
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/auth-modal.js"></script>
+<script src="js/app.js"></script>
 <script>
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -519,11 +494,6 @@ const DOM = {
     form: document.getElementById('createGroupForm'),
     btnSubmit: document.getElementById('btnSubmit'),
     oras: document.getElementById('oras'),
-    navUser: document.getElementById('navUser'),
-    btnLoginNav: document.getElementById('btnLoginNav'),
-    btnUserAvatar: document.getElementById('btnUserAvatar'),
-    userDropdown: document.getElementById('userDropdown'),
-    btnLogout: document.getElementById('btnLogout'),
     toastContainer: document.getElementById('toastContainer'),
 };
 
@@ -533,30 +503,17 @@ let allZonesCache = {};
 document.addEventListener('DOMContentLoaded', async () => {
     groupId = new URLSearchParams(window.location.search).get('id');
     if (!groupId) { window.location.href = 'grupuri.html'; return; }
-    initNav();
     await populateOrasSelect();
     bindEvents();
     await loadTags();
     await checkAuth();
 });
 
-function initNav() {
-    if (DOM.btnUserAvatar) {
-        DOM.btnUserAvatar.addEventListener('click', (e) => { e.stopPropagation(); DOM.userDropdown.classList.toggle('show'); });
-        document.addEventListener('click', () => { DOM.userDropdown.classList.remove('show'); });
-    }
-    if (DOM.btnLogout) {
-        DOM.btnLogout.addEventListener('click', async () => { await sb.auth.signOut(); window.location.href = 'grupuri.html'; });
-    }
-}
-
 async function checkAuth() {
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { DOM.authRequired.style.display = 'block'; return; }
         currentUser = user;
-        DOM.navUser.style.display = 'block';
-        DOM.btnLoginNav.style.display = 'none';
         await loadGroupForEdit();
     } catch (e) { DOM.authRequired.style.display = 'block'; }
 }
