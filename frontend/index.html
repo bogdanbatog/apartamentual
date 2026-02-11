@@ -625,62 +625,10 @@
                     <h2 class="font-display text-4xl md:text-5xl font-medium text-brand-950">Întrebări frecvente</h2>
                 </div>
                 
+                
                 <div class="space-y-4" id="faq-container">
-                    <div class="faq-item border border-brand-200 rounded-xl overflow-hidden">
-                        <button class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-brand-50 transition-colors" onclick="toggleFaq(this)">
-                            <span class="font-display text-lg font-medium text-brand-950">Ce este un Baugruppen?</span>
-                            <span class="faq-icon text-accent text-2xl transition-transform duration-300">+</span>
-                        </button>
-                        <div class="faq-content px-6">
-                            <p class="pb-5 text-brand-600 leading-relaxed">
-                                Baugruppen (în germană "grup de construcție") este un model de dezvoltare imobiliară în care un grup de viitori proprietari 
-                                se unesc pentru a-și construi împreună clădirea, controlând costurile și calitatea. 
-                                Fiecare membru participă la decizii și își personalizează locuința.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item border border-brand-200 rounded-xl overflow-hidden">
-                        <button class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-brand-50 transition-colors" onclick="toggleFaq(this)">
-                            <span class="font-display text-lg font-medium text-brand-950">Cum mă pot alătura unui grup?</span>
-                            <span class="faq-icon text-accent text-2xl transition-transform duration-300">+</span>
-                        </button>
-                        <div class="faq-content px-6">
-                            <p class="pb-5 text-brand-600 leading-relaxed">
-                                După ce îți creezi un cont și completezi profilul cu preferințele tale, poți explora grupurile existente 
-                                și solicita să te alături celor care îți corespund. Algoritmul nostru îți va sugera și grupuri compatibile 
-                                bazat pe zona, bugetul și stilul de viață dorit.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item border border-brand-200 rounded-xl overflow-hidden">
-                        <button class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-brand-50 transition-colors" onclick="toggleFaq(this)">
-                            <span class="font-display text-lg font-medium text-brand-950">Ce costuri implică participarea?</span>
-                            <span class="faq-icon text-accent text-2xl transition-transform duration-300">+</span>
-                        </button>
-                        <div class="faq-content px-6">
-                            <p class="pb-5 text-brand-600 leading-relaxed">
-                                Utilizarea platformei ApartamenTUal este gratuită. Costurile efective apar doar când grupul decide să avanseze 
-                                cu un proiect concret: achiziția terenului, proiectare, autorizații și construcție. Acestea sunt împărțite 
-                                proporțional între membrii grupului.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item border border-brand-200 rounded-xl overflow-hidden">
-                        <button class="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-brand-50 transition-colors" onclick="toggleFaq(this)">
-                            <span class="font-display text-lg font-medium text-brand-950">Este legal în România?</span>
-                            <span class="faq-icon text-accent text-2xl transition-transform duration-300">+</span>
-                        </button>
-                        <div class="faq-content px-6">
-                            <p class="pb-5 text-brand-600 leading-relaxed">
-                                Da, modelul Baugruppen este perfect legal în România. Grupurile se pot organiza sub diverse forme juridice 
-                                (asociație, cooperativă, SRL) în funcție de specificul proiectului. Oferim ghiduri și recomandări de 
-                                specialiști în drept imobiliar pentru fiecare etapă.
-                            </p>
-                        </div>
-                    </div>
+                    <!-- Populated by faq.js -->
+                </div>
                 </div>
                 
                 <div class="text-center mt-12">
@@ -740,17 +688,12 @@
     <div id="footer"></div>
 
     <script src="js/supabase-config.js"></script>
+    <script src="js/faq.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
     <script src="js/login-modal.js"></script>
     
     <script>
-        function toggleFaq(button) {
-            const faqItem = button.parentElement;
-            const isActive = faqItem.classList.contains('active');
-            document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active'));
-            if (!isActive) faqItem.classList.add('active');
-        }
         
         async function shareWebsite() {
             const shareData = {
