@@ -696,36 +696,18 @@ let members = [];
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
-    initNav();
     await checkAuth();
     await loadGroupDetails();
 });
 
-function initNav() {
-    const btnUserAvatar = document.getElementById('btnUserAvatar');
-    const userDropdown = document.getElementById('userDropdown');
-    const btnLogout = document.getElementById('btnLogout');
-    if (btnUserAvatar) {
-        btnUserAvatar.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); });
-        document.addEventListener('click', () => userDropdown.classList.remove('show'));
-    }
-    if (btnLogout) {
-        btnLogout.addEventListener('click', async () => { await sb.auth.signOut(); window.location.reload(); });
-    }
-}
-
-// ── AUTH ──
-async function checkAuth() {
-    try {
-        const { data: { user } } = await sb.auth.getUser();
-        if (user) {
-            currentUser = user;
-            document.getElementById('navUser').style.display = 'block';
-            document.getElementById('btnLoginNav').style.display = 'none';
+function checkAuth() {
+    return sb.auth.getUser().then(function(res) {
+        if (res.data && res.data.user) {
+            currentUser = res.data.user;
         }
-    } catch (e) {
+    }).catch(function(e) {
         console.warn('Auth check failed:', e);
-    }
+    });
 }
 
 // ── LOAD GROUP DETAILS ──
