@@ -277,6 +277,157 @@
             color: #64748b;
             margin: 0;
         }
+
+        /* Teren comment card */
+        .teren-with-comments {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .teren-with-comments .teren-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .teren-with-comments .teren-header img {
+            width: 64px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .teren-with-comments .teren-header h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin: 0;
+        }
+        .teren-with-comments .teren-header h4 a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .teren-with-comments .teren-header h4 a:hover {
+            color: #f97316;
+        }
+        .teren-with-comments .teren-header p {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin: 2px 0 0;
+        }
+        .teren-comments-area {
+            padding: 12px 16px;
+        }
+        .teren-comments-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        .teren-comment {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .teren-comment:last-child {
+            border-bottom: none;
+        }
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            flex-shrink: 0;
+        }
+        .comment-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .comment-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+        .comment-author {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #334155;
+        }
+        .comment-time {
+            font-size: 0.6875rem;
+            color: #94a3b8;
+        }
+        .comment-text {
+            font-size: 0.8125rem;
+            color: #475569;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .comment-delete {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        .comment-delete:hover {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+        .comment-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .comment-input-row input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .comment-input-row input:focus {
+            border-color: #f97316;
+        }
+        .comment-input-row button {
+            padding: 8px 16px;
+            background: #f97316;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .comment-input-row button:hover {
+            background: #ea580c;
+        }
+        .comment-input-row button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .no-comments {
+            text-align: center;
+            padding: 16px;
+            color: #94a3b8;
+            font-size: 0.8125rem;
+        }
         
         .empty-section {
             text-align: center;
@@ -1066,20 +1217,166 @@ function renderTerenuri(terenuri) {
         return; // Keep default empty state
     }
     
+    // Change grid to vertical layout for comments
+    grid.style.display = 'flex';
+    grid.style.flexDirection = 'column';
+    grid.style.gap = '16px';
+    
     grid.innerHTML = terenuri.map(t => {
         const teren = t.teren;
         if (!teren) return '';
         
         return `
-            <a href="teren-details.html?id=${teren.id}" class="teren-card-mini">
-                <img src="${teren.image_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
-                <div class="teren-card-mini-info">
-                    <h4>${escapeHtml(teren.titlu)}</h4>
-                    <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(teren.zona || 'Zonă nespecificată')}</p>
+            <div class="teren-with-comments">
+                <div class="teren-header">
+                    <img src="${teren.image_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
+                    <div>
+                        <h4><a href="teren-details.html?id=${teren.id}">${escapeHtml(teren.titlu)}</a></h4>
+                        <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(teren.zona || 'Zona nespecificata')}</p>
+                    </div>
                 </div>
-            </a>
+                <div class="teren-comments-area">
+                    <div class="teren-comments-list" id="comments-${teren.id}">
+                        <div class="no-comments"><i class="fas fa-spinner fa-spin"></i> Se incarca...</div>
+                    </div>
+                    <div class="comment-input-row">
+                        <input type="text" id="input-${teren.id}" placeholder="Scrie un comentariu..." maxlength="2000"
+                            onkeydown="if(event.key==='Enter')addComment('${teren.id}')">
+                        <button onclick="addComment('${teren.id}')">Trimite</button>
+                    </div>
+                </div>
+            </div>
         `;
     }).join('');
+    
+    // Load comments for each teren
+    terenuri.forEach(t => {
+        if (t.teren) loadComments(t.teren.id);
+    });
+}
+
+// ── COMMENTS ──
+async function loadComments(terenId) {
+    const container = document.getElementById('comments-' + terenId);
+    if (!container) return;
+    
+    try {
+        const { data, error } = await sb
+            .from('grup_teren_comments')
+            .select('id, content, created_at, user_id')
+            .eq('grup_id', currentGroup.id)
+            .eq('teren_id', terenId)
+            .order('created_at', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div class="no-comments">Niciun comentariu inca. Fii primul!</div>';
+            return;
+        }
+        
+        // Get profile names for comment authors
+        const userIds = [...new Set(data.map(c => c.user_id))];
+        const { data: profiles } = await sb
+            .from('profiles')
+            .select('user_id, pseudonym')
+            .in('user_id', userIds);
+        
+        const profileMap = {};
+        (profiles || []).forEach(p => { profileMap[p.user_id] = p.pseudonym || 'Anonim'; });
+        
+        container.innerHTML = data.map(c => {
+            const name = profileMap[c.user_id] || 'Anonim';
+            const initials = name.substring(0, 2).toUpperCase();
+            const time = timeAgo(c.created_at);
+            const isOwn = currentUser && c.user_id === currentUser.id;
+            
+            return `
+                <div class="teren-comment">
+                    <div class="comment-avatar">${initials}</div>
+                    <div class="comment-body">
+                        <div class="comment-meta">
+                            <span class="comment-author">${escapeHtml(name)}</span>
+                            <span class="comment-time">${time}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(c.content)}</div>
+                    </div>
+                    ${isOwn ? '<button class="comment-delete" onclick="deleteComment(\'' + c.id + '\', \'' + terenId + '\')" title="Sterge"><i class="fas fa-trash-alt"></i></button>' : ''}
+                </div>
+            `;
+        }).join('');
+        
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+        
+    } catch (e) {
+        console.error('Load comments error:', e);
+        container.innerHTML = '<div class="no-comments">Eroare la incarcarea comentariilor.</div>';
+    }
+}
+
+window.addComment = async function(terenId) {
+    const input = document.getElementById('input-' + terenId);
+    if (!input) return;
+    
+    const content = input.value.trim();
+    if (!content || !currentUser || !currentGroup) return;
+    
+    input.disabled = true;
+    
+    try {
+        const { error } = await sb
+            .from('grup_teren_comments')
+            .insert({
+                grup_id: currentGroup.id,
+                teren_id: terenId,
+                user_id: currentUser.id,
+                content: content
+            });
+        
+        if (error) throw error;
+        
+        input.value = '';
+        await loadComments(terenId);
+        
+    } catch (e) {
+        console.error('Add comment error:', e);
+        showToast('Eroare la adaugarea comentariului.', 'error');
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+};
+
+window.deleteComment = async function(commentId, terenId) {
+    if (!confirm('Stergi comentariul?')) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_teren_comments')
+            .delete()
+            .eq('id', commentId);
+        
+        if (error) throw error;
+        
+        await loadComments(terenId);
+        
+    } catch (e) {
+        console.error('Delete comment error:', e);
+        showToast('Eroare la stergerea comentariului.', 'error');
+    }
+};
+
+function timeAgo(dateStr) {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return 'acum';
+    if (diff < 3600) return Math.floor(diff / 60) + ' min';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' ore';
+    if (diff < 604800) return Math.floor(diff / 86400) + ' zile';
+    return date.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' });
 }
 
 // ── ACTIONS ──
