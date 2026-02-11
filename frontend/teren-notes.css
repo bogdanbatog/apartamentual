@@ -1,0 +1,164 @@
+/* teren-notes.css — Stiluri pentru note private pe terenuri favorite */
+
+.teren-note-section {
+    margin-top: -4px;
+    margin-bottom: 12px;
+}
+
+.teren-note-wrapper {
+    background: #fffbf5;
+    border: 1px solid #fed7aa;
+    border-radius: 0 0 10px 10px;
+    border-top: 1px dashed #fdba74;
+    padding: 10px 14px;
+}
+
+.teren-note-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.teren-note-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #c2410c;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.teren-note-label i {
+    font-size: 0.7rem;
+}
+
+.teren-note-time {
+    font-size: 0.6875rem;
+    color: #9ca3af;
+}
+
+/* Display mode */
+.teren-note-display {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.teren-note-display.hidden {
+    display: none;
+}
+
+.teren-note-text {
+    flex: 1;
+    font-size: 0.8125rem;
+    color: #475569;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.teren-note-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.note-btn-edit,
+.note-btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    transition: all 0.15s;
+}
+
+.note-btn-edit:hover {
+    color: #f97316;
+    background: #fff7ed;
+}
+
+.note-btn-delete:hover {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+/* Editor mode */
+.teren-note-editor {
+    display: block;
+}
+
+.teren-note-editor.hidden {
+    display: none;
+}
+
+.teren-note-editor textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    line-height: 1.5;
+    color: #334155;
+    background: white;
+    resize: vertical;
+    min-height: 44px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.teren-note-editor textarea:focus {
+    border-color: #f97316;
+}
+
+.teren-note-editor textarea::placeholder {
+    color: #94a3b8;
+}
+
+.teren-note-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.note-btn-save {
+    padding: 5px 14px;
+    background: #f97316;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.note-btn-save:hover {
+    background: #ea580c;
+}
+
+.note-btn-cancel {
+    padding: 5px 14px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.note-btn-cancel:hover {
+    background: #e2e8f0;
+}
