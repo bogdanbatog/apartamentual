@@ -104,12 +104,8 @@
         msg.style.display = 'none';
         
         try {
-            // Create a fresh client or use existing one
-            var client = (typeof supabase !== 'undefined' && supabase) 
-                ? supabase 
-                : (typeof sb !== 'undefined' && sb) 
-                    ? sb 
-                    : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            // Create our own client - guaranteed to work
+            var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
             var result = await client.auth.signInWithPassword({ email: email, password: password });
             
