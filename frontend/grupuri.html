@@ -36,7 +36,7 @@
                     <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                 </div>
             </div>
-            <a href="register.html" class="btn-login-nav" id="btnLoginNav">
+            <a href="#" class="btn-login-nav" id="btnLoginNav" onclick="event.preventDefault(); openLoginModal();">
                 <i class="fas fa-sign-in-alt"></i> Intră în cont
             </a>
         </div>
@@ -178,6 +178,7 @@
 <!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/login-modal.js"></script>
 <script src="js/orase-cartiere.js"></script>
 <script src="js/grupuri.js"></script>
 </body>
