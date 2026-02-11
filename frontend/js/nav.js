@@ -1,238 +1,197 @@
-// Navigation component
-function createNavigation(currentPage = '') {
-    const navItems = [
-        { href: "/index.html", label: "Acasă", id: "home" },
-        { href: "/ce-este/index.html", label: "Ce este", id: "about" },
-        { href: "/terenuri.html", label: "Terenuri", id: "land" },
-        { href: "/utilizatori.html", label: "Utilizatori", id: "users" },
-        { href: "/grupuri.html", label: "Grupuri", id: "groups" },
-        // { href: "/proiecte.html", label: "Proiecte", id: "projects" },
-        // { href: "/parteneri.html", label: "Parteneri", id: "partners" },
-        // { href: "/news.html", label: "News/Blog", id: "news" }
-    ];
+// ══════════════════════════════════════════════════════════════
+// UNIFIED NAVIGATION COMPONENT — ApartamenTUal
+// Used on ALL pages: Acasă, Ce este, Terenuri, Utilizatori, Grupuri, etc.
+// ══════════════════════════════════════════════════════════════
 
-    const navHTML = `
-        <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
-            <div class="container flex items-center justify-between py-3">
-                <a href="/index.html" class="font-bold text-xl">ApartamenTUal</a>
-                <nav class="hidden md:flex flex-wrap gap-4 text-sm">
-                    ${navItems.map(item => `
-                        <a href="${item.href}" ${currentPage === item.id ? 'class="font-semibold"' : ''}>${item.label}</a>
-                    `).join('')}
-                </nav>
-                <div class="flex gap-3">
-                    <div id="auth-section">
-                        <button id="auth-toggle" class="badge">Login/Sign Up</button>
-                    </div>
-                    <div id="profile-section" class="hidden">
-                        <div class="flex items-center gap-3">
-                            <a id="profile-link" href="#" class="text-sm text-gray-600 hover:text-gray-900">Profil</a>
-                            <button id="nav-logout-btn" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Mobile menu toggle -->
-            <button id="mobile-menu-toggle" class="md:hidden container py-2 text-sm">
-                ☰ Meniu
-            </button>
-            
-            <!-- Mobile menu -->
-            <div id="mobile-menu" class="hidden md:hidden border-t">
-                <nav class="container py-3 flex flex-col gap-2 text-sm">
-                    ${navItems.map(item => `
-                        <a href="${item.href}" ${currentPage === item.id ? 'class="font-semibold"' : ''}>${item.label}</a>
-                    `).join('')}
-                </nav>
-                <div class="container py-3 border-t">
-                    <div id="mobile-auth-section">
-                        <button id="mobile-auth-toggle" class="w-full text-left py-2">Login/Sign Up</button>
-                    </div>
-                    <div id="mobile-profile-section" class="hidden">
-                        <div class="flex flex-col gap-2">
-                            <a id="mobile-profile-link" href="#" class="py-2">Profil</a>
-                            <button id="mobile-logout-btn" class="w-full text-left py-2">Logout</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-    `;
+(function() {
 
-    return navHTML;
+function getPageConfig() {
+    const path = window.location.pathname;
+    
+    let currentPage = '';
+    let ctaButton = null;
+    
+    if (path === '/' || (path.endsWith('/index.html') && !path.includes('ce-este'))) {
+        currentPage = 'home';
+    } else if (path.includes('ce-este')) {
+        currentPage = 'about';
+    } else if (path.includes('teren')) {
+        currentPage = 'land';
+        ctaButton = { href: '/terenuri-propune.html', icon: 'fa-plus', label: 'Propune teren' };
+    } else if (path.includes('utilizatori')) {
+        currentPage = 'users';
+    } else if (path.includes('grup')) {
+        currentPage = 'groups';
+        ctaButton = { href: '/grup-nou.html', icon: 'fa-plus', label: 'Creează grup' };
+    } else if (path.includes('register')) {
+        currentPage = 'register';
+    }
+    
+    return { currentPage, ctaButton };
 }
 
-// Function to inject navigation into the page
-function loadNavigation(currentPage = '') {
+function createNavigation() {
+    const { currentPage, ctaButton } = getPageConfig();
+    
+    const navItems = [
+        { href: '/index.html', label: 'Acasă', id: 'home' },
+        { href: '/ce-este/', label: 'Ce este', id: 'about' },
+        { href: '/terenuri.html', label: 'Terenuri', id: 'land' },
+        { href: '/utilizatori.html', label: 'Utilizatori', id: 'users' },
+        { href: '/grupuri.html', label: 'Grupuri', id: 'groups' },
+    ];
+
+    const navLinksHTML = navItems.map(item => {
+        const isActive = currentPage === item.id;
+        return `<a href="${item.href}" class="unified-nav-link ${isActive ? 'active' : ''}">${item.label}</a>`;
+    }).join('');
+
+    const ctaHTML = ctaButton 
+        ? `<a href="${ctaButton.href}" class="unified-btn-cta"><i class="fas ${ctaButton.icon}"></i> ${ctaButton.label}</a>` 
+        : '';
+
+    return `
+    <nav class="unified-nav">
+        <div class="unified-nav-inner">
+            <a href="/index.html" class="unified-nav-logo">
+                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+            </a>
+            <div class="unified-nav-links">
+                ${navLinksHTML}
+            </div>
+            <div class="unified-nav-actions">
+                ${ctaHTML}
+                <div class="unified-nav-user" id="navUser" style="display:none;">
+                    <button class="unified-btn-avatar" id="btnUserAvatar">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    <div class="unified-user-dropdown" id="userDropdown">
+                        <a href="#" id="navProfileLink"><i class="fas fa-user"></i> Profilul meu</a>
+                        <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
+                    </div>
+                </div>
+                <a href="#" class="unified-btn-login" id="btnLoginNav" onclick="event.preventDefault(); if(typeof openLoginModal==='function') openLoginModal();">
+                    <i class="fas fa-sign-in-alt"></i> Intră în cont
+                </a>
+            </div>
+            <button class="unified-nav-burger" id="navMobileToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="unified-nav-mobile" id="navMobileMenu" style="display:none;">
+            ${navLinksHTML}
+            ${ctaHTML}
+            <a href="#" class="unified-btn-login" id="btnLoginNavMobile" onclick="event.preventDefault(); if(typeof openLoginModal==='function') openLoginModal();">
+                <i class="fas fa-sign-in-alt"></i> Intră în cont
+            </a>
+        </div>
+    </nav>`;
+}
+
+function loadNavigation() {
+    // Try #navigation container first (Acasă, Ce este pages)
     const navContainer = document.getElementById('navigation');
     if (navContainer) {
-        navContainer.innerHTML = createNavigation(currentPage);
-        
-        // Set up mobile menu toggle
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        if (mobileMenuToggle && mobileMenu) {
-            mobileMenuToggle.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-        }
-        
-        // Set up profile links
-        setupProfileLinks();
+        navContainer.innerHTML = createNavigation();
+        setupNavBehavior();
+        checkAuthState();
+        return;
+    }
+    // If no container, try replacing existing nav (Terenuri, Grupuri, Utilizatori)
+    const existingNav = document.querySelector('nav.navbar, nav.main-nav');
+    if (existingNav) {
+        const wrapper = document.createElement('div');
+        wrapper.id = 'navigation';
+        wrapper.innerHTML = createNavigation();
+        existingNav.parentNode.replaceChild(wrapper, existingNav);
+        setupNavBehavior();
+        checkAuthState();
     }
 }
 
-// Set up profile links and auth state
-function setupProfileLinks() {
-    // Check if user is authenticated
-    checkAuthState();
-    
-    // Set up profile link click handlers
-    const profileLink = document.getElementById('profile-link');
-    const mobileProfileLink = document.getElementById('mobile-profile-link');
-    
+function setupNavBehavior() {
+    // Mobile toggle
+    const mobileToggle = document.getElementById('navMobileToggle');
+    const mobileMenu = document.getElementById('navMobileMenu');
+    if (mobileToggle && mobileMenu) {
+        mobileToggle.addEventListener('click', () => {
+            const isOpen = mobileMenu.style.display !== 'none';
+            mobileMenu.style.display = isOpen ? 'none' : 'flex';
+            mobileToggle.querySelector('i').className = isOpen ? 'fas fa-bars' : 'fas fa-times';
+        });
+    }
+
+    // User avatar dropdown
+    const avatarBtn = document.getElementById('btnUserAvatar');
+    const dropdown = document.getElementById('userDropdown');
+    if (avatarBtn && dropdown) {
+        avatarBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', () => dropdown.classList.remove('show'));
+    }
+
+    // Profile link
+    const profileLink = document.getElementById('navProfileLink');
     if (profileLink) {
         profileLink.addEventListener('click', (e) => {
             e.preventDefault();
-            const userId = getCurrentUserId();
-            if (userId) {
-                window.location.href = `/profile-view-new.html?id=${userId}`;
+            if (window.currentUserId) {
+                window.location.href = '/profile-view-new.html?id=' + window.currentUserId;
             }
         });
     }
-    
-    if (mobileProfileLink) {
-        mobileProfileLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            const userId = getCurrentUserId();
-            if (userId) {
-                window.location.href = `/profile-view-new.html?id=${userId}`;
-            }
-        });
-    }
-    
-    // Set up auth toggle button click handlers
-    const authToggle = document.getElementById('auth-toggle');
-    const mobileAuthToggle = document.getElementById('mobile-auth-toggle');
-    
-    if (authToggle) {
-        authToggle.addEventListener('click', () => {
-            if (typeof openLoginModal === 'function') {
-                openLoginModal();
-            }
-        });
-    }
-    
-    if (mobileAuthToggle) {
-        mobileAuthToggle.addEventListener('click', () => {
-            if (typeof openLoginModal === 'function') {
-                openLoginModal();
-            }
-        });
-    }
-    
-    // Set up logout button click handlers
-    const navLogoutBtn = document.getElementById('nav-logout-btn');
-    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-    
-    if (navLogoutBtn) {
-        navLogoutBtn.addEventListener('click', async () => {
+
+    // Logout
+    const logoutBtn = document.getElementById('btnLogout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
             try {
                 var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
                 var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
                 var client = window.supabase.createClient(url, key);
                 await client.auth.signOut();
                 window.location.href = '/index.html';
-            } catch (error) {
-                console.error('Error during sign out:', error);
-            }
-        });
-    }
-    
-    if (mobileLogoutBtn) {
-        mobileLogoutBtn.addEventListener('click', async () => {
-            try {
-                var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
-                var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
-                var client = window.supabase.createClient(url, key);
-                await client.auth.signOut();
-                window.location.href = '/index.html';
-            } catch (error) {
-                console.error('Error during sign out:', error);
+            } catch (err) {
+                console.error('Logout error:', err);
             }
         });
     }
 }
 
-// Check authentication state and update UI
 async function checkAuthState() {
     try {
         if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient !== 'function') {
-            setTimeout(checkAuthState, 100);
+            setTimeout(checkAuthState, 200);
             return;
         }
-        
+
         var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
         var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
         var client = window.supabase.createClient(url, key);
-        
+
         const { data: { user } } = await client.auth.getUser();
-        
-        // Set global user ID for profile links
         window.currentUserId = user ? user.id : null;
-        
-        updateAuthUI(user);
-    } catch (error) {
-        console.error('Error checking auth state:', error);
-        updateAuthUI(null);
+
+        const navUser = document.getElementById('navUser');
+        const btnLogin = document.getElementById('btnLoginNav');
+        const btnLoginMobile = document.getElementById('btnLoginNavMobile');
+
+        if (user) {
+            if (navUser) navUser.style.display = 'flex';
+            if (btnLogin) btnLogin.style.display = 'none';
+            if (btnLoginMobile) btnLoginMobile.style.display = 'none';
+        } else {
+            if (navUser) navUser.style.display = 'none';
+            if (btnLogin) btnLogin.style.display = 'flex';
+            if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
+        }
+    } catch (err) {
+        console.error('Auth check error:', err);
     }
 }
 
-// Update authentication UI based on user state
-function updateAuthUI(user) {
-    const authSection = document.getElementById('auth-section');
-    const profileSection = document.getElementById('profile-section');
-    const mobileAuthSection = document.getElementById('mobile-auth-section');
-    const mobileProfileSection = document.getElementById('mobile-profile-section');
-    
-    if (user) {
-        // User is logged in
-        if (authSection) authSection.classList.add('hidden');
-        if (profileSection) profileSection.classList.remove('hidden');
-        if (mobileAuthSection) mobileAuthSection.classList.add('hidden');
-        if (mobileProfileSection) mobileProfileSection.classList.remove('hidden');
-    } else {
-        // User is not logged in
-        if (authSection) authSection.classList.remove('hidden');
-        if (profileSection) profileSection.classList.add('hidden');
-        if (mobileAuthSection) mobileAuthSection.classList.remove('hidden');
-        if (mobileProfileSection) mobileProfileSection.classList.add('hidden');
-    }
-}
+document.addEventListener('DOMContentLoaded', loadNavigation);
 
-// Get current user ID
-function getCurrentUserId() {
-    // This will be set by the auth system
-    return window.currentUserId || null;
-}
-
-// Auto-detect current page based on URL
-function getCurrentPage() {
-    const path = window.location.pathname;
-    if (path === '/' || path === '/index.html') return 'home';
-    if (path.includes('ce-este')) return 'about';
-    if (path.includes('terenuri') || path.includes('teren-details')) return 'land';
-    if (path.includes('utilizatori')) return 'users';
-    if (path.includes('grupuri')) return 'groups';
-    if (path.includes('proiecte')) return 'projects';
-    if (path.includes('parteneri')) return 'partners';
-    if (path.includes('news')) return 'news';
-    return '';
-}
-
-// Initialize navigation when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    loadNavigation(getCurrentPage());
-});
+})();
