@@ -49,6 +49,30 @@
         .faq-item.active .faq-content { max-height: 500px; }
         .faq-item.active .faq-icon { transform: rotate(45deg); }
         .video-placeholder { background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); }
+        /* Product tour demo */
+        .tour-frame { background: #1e293b; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .tour-bar { background: #334155; padding: 6px 12px; display: flex; align-items: center; gap: 8px; }
+        .tour-dots { display: flex; gap: 5px; }
+        .tour-dots span { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .tour-dots span:nth-child(1) { background: #ef4444; }
+        .tour-dots span:nth-child(2) { background: #f59e0b; }
+        .tour-dots span:nth-child(3) { background: #22c55e; }
+        .tour-url { flex: 1; background: #1e293b; border-radius: 5px; padding: 4px 10px; color: #94a3b8; font-size: 11px; }
+        .tour-screen { position: relative; width: 100%; height: 0; padding-bottom: 47.1%; overflow: hidden; background: #f8fafc; }
+        .tour-screen img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; opacity: 0; transition: opacity 0.5s; }
+        .tour-screen img.tour-active { opacity: 1; }
+        .tour-hl { position: absolute; border: 3px solid #f97316; border-radius: 8px; pointer-events: none; opacity: 0; z-index: 10; box-shadow: 0 0 0 4px rgba(249,115,22,0.25), 0 0 20px rgba(249,115,22,0.2); transition: .5s; }
+        .tour-cur { position: absolute; z-index: 20; pointer-events: none; opacity: 0; transition: left .7s, top .7s, opacity .3s; }
+        .tour-ring { position: absolute; width: 30px; height: 30px; border: 2px solid #f97316; border-radius: 50%; pointer-events: none; opacity: 0; z-index: 15; }
+        .tour-ann { position: absolute; z-index: 12; opacity: 0; pointer-events: none; transition: .4s; }
+        .tour-ann span { background: #f97316; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgba(249,115,22,0.4); }
+        .tour-dim { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.5); z-index: 5; opacity: 0; transition: .4s; pointer-events: none; }
+        .tour-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(15,23,42,0.92)); padding: 30px 20px 12px; z-index: 25; }
+        .tour-progress { display: flex; gap: 3px; padding: 8px 12px; background: #1e293b; }
+        .tour-pseg { flex: 1; height: 3px; background: #334155; border-radius: 2px; overflow: hidden; position: relative; }
+        .tour-pfill { position: absolute; top: 0; left: 0; height: 100%; background: #f97316; width: 0%; border-radius: 2px; }
+        .tour-pseg.done .tour-pfill { width: 100%; transition: none; }
+        .tour-pseg.active .tour-pfill { width: 100%; }
         .decorative-line { width: 60px; height: 3px; background: linear-gradient(90deg, #c9a227, #e3c766); }
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
         .scroll-indicator { animation: bounce 2s infinite; }
@@ -99,11 +123,11 @@
             
             <div class="container max-w-6xl mx-auto px-6 py-8 relative z-10">
                 
-                <!-- Main content: Title left, 2 Videos right -->
-                <div class="grid lg:grid-cols-2 gap-10 items-center mb-10">
+                <!-- Main content: Title + Demo -->
+                <div class="mb-8">
                     
-                    <!-- Left: Title and subtitle -->
-                    <div class="space-y-4">
+                    <!-- Top: Title and subtitle -->
+                    <div class="max-w-2xl mb-8">
                         <div class="decorative-line"></div>
                         <h1 class="font-display text-3xl md:text-4xl font-semibold leading-tight text-brand-950">
                             Apartamen<span class="text-accent">TU</span>al
@@ -132,30 +156,34 @@
                         </div>
                     </div>
                     
-                    <!-- Right: 2 Video placeholders -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="video-placeholder aspect-[4/3] rounded-xl overflow-hidden shadow-lg relative group cursor-pointer">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                </button>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                                <p class="text-white text-sm font-medium">Ce este ApartamenTUal?</p>
-                                <p class="text-white/70 text-xs">Prezentare concept</p>
+                    <!-- Demo Tour -->
+                    <div class="tour-frame">
+                        <div class="tour-bar">
+                            <div class="tour-dots"><span></span><span></span><span></span></div>
+                            <div class="tour-url" id="tourUrl">apartamentual.onrender.com</div>
+                        </div>
+                        <div class="tour-screen" id="tourScreen">
+                            <img id="ts_homepage" src="tour-images/homepage.jpg">
+                            <img id="ts_register" src="tour-images/register.jpg">
+                            <img id="ts_profile_top" src="tour-images/profile_top.jpg">
+                            <img id="ts_profile_fav" src="tour-images/profile_fav.jpg">
+                            <img id="ts_profile_groups" src="tour-images/profile_groups.jpg">
+                            <img id="ts_terenuri" src="tour-images/terenuri.jpg">
+                            <img id="ts_teren_details" src="tour-images/teren_details.jpg">
+                            <img id="ts_grupuri" src="tour-images/grupuri.jpg">
+                            <img id="ts_grup_details" src="tour-images/grup_details.jpg">
+                            <div class="tour-dim" id="tourDim"></div>
+                            <div class="tour-hl" id="tourHl"></div>
+                            <div class="tour-cur" id="tourCur"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 3L19 12L12 13L9 20L5 3Z" fill="#fff" stroke="#1e293b" stroke-width="1.5"/></svg></div>
+                            <div class="tour-ring" id="tourRing"></div>
+                            <div class="tour-ann" id="tourAnn"><span id="tourAnnTxt"></span></div>
+                            <div class="tour-label">
+                                <div id="tourCnt" style="display:inline-block;background:#f97316;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:4px">1 / 9</div>
+                                <div id="tourTtl" style="color:#fff;font-size:15px;font-weight:700;margin-bottom:2px"></div>
+                                <div id="tourDsc" style="color:#94a3b8;font-size:11px"></div>
                             </div>
                         </div>
-                        <div class="video-placeholder aspect-[4/3] rounded-xl overflow-hidden shadow-lg relative group cursor-pointer">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                </button>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                                <p class="text-white text-sm font-medium">Cum folosești platforma</p>
-                                <p class="text-white/70 text-xs">Tutorial interactiv</p>
-                            </div>
-                        </div>
+                        <div class="tour-progress" id="tourProg"></div>
                     </div>
                 </div>
                 
@@ -723,5 +751,122 @@
             document.getElementById('newsletter-email').value = '';
         }
     </script>
+<!-- Product Tour Script -->
+<script>
+(function(){
+var TS=[
+{"s":"homepage","u":"apartamentual.onrender.com","t":"Pagina principal\u0103","d":"Totul \u00eencepe aici \u2014 creeaz\u0103-\u021bi contul","dur":5500,"a":[
+{"at":500,"y":"show"},{"at":1200,"y":"cur","x":88,"cy":5},{"at":1200,"y":"an","tx":"Creeaz\u0103 cont","x":73,"cy":-12},
+{"at":1200,"y":"hl","x":85,"cy":2,"w":5,"h":5},{"at":3000,"y":"ch"},
+{"at":3200,"y":"cur","x":25,"cy":85},{"at":3200,"y":"an","tx":"Sau apas\u0103 aici","x":17,"cy":80},
+{"at":3200,"y":"hl","x":17,"cy":83,"w":14,"h":7},{"at":4200,"y":"ck","x":25,"cy":87},{"at":4800,"y":"cl"}]},
+
+{"s":"register","u":"apartamentual.onrender.com/register.html","t":"Creeaz\u0103-\u021bi contul","d":"Alege tipul de cont \u2014 Utilizator Activ sau Agen\u021bie","dur":5500,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"dm","v":1},
+{"at":1200,"y":"an","tx":"Alege Utilizator Activ","x":22,"cy":28},{"at":1200,"y":"hl","x":15,"cy":33,"w":29,"h":52},
+{"at":1200,"y":"cur","x":34,"cy":62},{"at":3000,"y":"ck","x":34,"cy":62},{"at":4500,"y":"cl"}]},
+
+{"s":"profile_top","u":"apartamentual.onrender.com/profile-view-new.html","t":"Profilul t\u0103u","d":"Completeaz\u0103 preferin\u021bele \u2014 zone, camere, interese","dur":6500,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Profilul t\u0103u complet","x":30,"cy":15},{"at":1000,"y":"hl","x":26,"cy":18,"w":37,"h":14},
+{"at":2800,"y":"ch"},{"at":3000,"y":"an","tx":"Preferin\u021be apartament","x":26,"cy":48},{"at":3000,"y":"hl","x":15,"cy":52,"w":63,"h":23},
+{"at":4800,"y":"ch"},{"at":5000,"y":"an","tx":"Interese \u0219i preferin\u021be","x":26,"cy":76},{"at":5000,"y":"hl","x":15,"cy":80,"w":63,"h":14},{"at":5800,"y":"cl"}]},
+
+{"s":"profile_fav","u":"apartamentual.onrender.com/profile-view-new.html","t":"Exploreaz\u0103 din profil","d":"Terenuri \u0219i grupuri direct din profil","dur":6500,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Vezi grupuri sau terenuri","x":30,"cy":24},{"at":1000,"y":"hl","x":15,"cy":29,"w":63,"h":14},
+{"at":2800,"y":"ch"},{"at":3000,"y":"cur","x":63,"cy":38},{"at":3000,"y":"an","tx":"Click \u201eVezi terenuri\u201d","x":49,"cy":34},
+{"at":3500,"y":"ck","x":63,"cy":38},{"at":4200,"y":"ch"},
+{"at":4400,"y":"an","tx":"Terenuri favorite + note private","x":25,"cy":56},{"at":4400,"y":"hl","x":15,"cy":60,"w":63,"h":33},{"at":5800,"y":"cl"}]},
+
+{"s":"terenuri","u":"apartamentual.onrender.com/terenuri.html","t":"Terenuri disponibile","d":"Filtreaz\u0103 dup\u0103 ora\u0219 \u0219i zon\u0103","dur":6000,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Filtre: ora\u0219, cartier, sortare","x":29,"cy":31},{"at":1000,"y":"hl","x":11,"cy":35,"w":72,"h":9},
+{"at":2800,"y":"ch"},{"at":3000,"y":"an","tx":"Alege un teren","x":14,"cy":60},{"at":3000,"y":"hl","x":11,"cy":63,"w":25,"h":33},
+{"at":3000,"y":"cur","x":24,"cy":80},{"at":4200,"y":"ck","x":24,"cy":80},{"at":5200,"y":"cl"}]},
+
+{"s":"teren_details","u":"apartamentual.onrender.com/teren-details.html","t":"Detalii teren","d":"Adaug\u0103 la profil sau la grupul t\u0103u","dur":7000,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Adaug\u0103 la profil","x":39,"cy":71},{"at":1000,"y":"hl","x":44,"cy":75,"w":15,"h":6},
+{"at":1000,"y":"cur","x":51,"cy":78},{"at":2200,"y":"ck","x":51,"cy":78},{"at":3000,"y":"ch"},
+{"at":3200,"y":"an","tx":"Sau la grupul t\u0103u!","x":41,"cy":83},{"at":3200,"y":"hl","x":44,"cy":87,"w":36,"h":12},
+{"at":3200,"y":"cur","x":56,"cy":93},{"at":4500,"y":"ck","x":56,"cy":93},{"at":6000,"y":"cl"}]},
+
+{"s":"grupuri","u":"apartamentual.onrender.com/grupuri.html","t":"Grupuri de co-housing","d":"G\u0103se\u0219te un grup sau creeaz\u0103-\u021bi propriul","dur":6000,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Grupurile tale","x":23,"cy":46},{"at":1000,"y":"hl","x":10,"cy":50,"w":73,"h":44},
+{"at":2800,"y":"ch"},{"at":3000,"y":"cur","x":38,"cy":86},{"at":3000,"y":"an","tx":"Apas\u0103 \u201eVezi\u201d","x":29,"cy":82},
+{"at":3000,"y":"hl","x":34,"cy":84,"w":7,"h":6},{"at":4000,"y":"ck","x":38,"cy":87},{"at":5200,"y":"cl"}]},
+
+{"s":"grup_details","u":"apartamentual.onrender.com/grup-details.html","t":"Detalii grup \u2014 matching","d":"Zone \u0219i interese comune cu grupul","dur":7000,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Cere al\u0103turarea","x":25,"cy":24},{"at":1000,"y":"hl","x":14,"cy":28,"w":18,"h":7},
+{"at":1000,"y":"cur","x":23,"cy":32},{"at":2500,"y":"ch"},
+{"at":2700,"y":"an","tx":"Ai 1 zon\u0103 comun\u0103!","x":25,"cy":70},{"at":2700,"y":"hl","x":14,"cy":74,"w":63,"h":6},
+{"at":4200,"y":"ch"},{"at":4400,"y":"an","tx":"Ai 2 interese comune!","x":25,"cy":86},{"at":4400,"y":"hl","x":14,"cy":90,"w":63,"h":6},{"at":6000,"y":"cl"}]},
+
+{"s":"profile_groups","u":"apartamentual.onrender.com/profile-view-new.html","t":"Totul \u00een profilul t\u0103u","d":"Terenuri, grupuri, note \u2014 totul organizat","dur":6000,"a":[
+{"at":500,"y":"show"},{"at":1000,"y":"an","tx":"Grupurile tale","x":28,"cy":57},{"at":1000,"y":"hl","x":15,"cy":62,"w":63,"h":32},
+{"at":3500,"y":"cl"},{"at":3800,"y":"an","tx":"E\u0219ti preg\u0103tit! Creeaz\u0103-\u021bi contul","x":26,"cy":42},{"at":5200,"y":"cl"}]}
+];
+
+var ci=0,pl=true,st=null,at=[];
+var scr=document.getElementById("tourScreen");
+if(!scr)return;
+var sw,sh;
+function dims(){var r=scr.getBoundingClientRect();sw=r.width;sh=r.height;}
+dims();window.addEventListener("resize",dims);
+
+var pb=document.getElementById("tourProg");
+for(var i=0;i<TS.length;i++){var d=document.createElement("div");d.className="tour-pseg";d.id="tp"+i;d.innerHTML='<div class="tour-pfill" id="tf'+i+'"></div>';pb.appendChild(d);}
+
+function pct2px(pct,total){return pct*total/100;}
+
+function ca(){
+  document.getElementById("tourHl").style.opacity="0";
+  document.getElementById("tourCur").style.opacity="0";
+  document.getElementById("tourAnn").style.opacity="0";
+  document.getElementById("tourDim").style.opacity="0";
+  document.getElementById("tourRing").style.opacity="0";
+  at.forEach(function(t){clearTimeout(t);});at=[];
+  if(st){clearTimeout(st);st=null;}
+}
+
+function go(idx){
+  if(idx<0)idx=TS.length-1;if(idx>=TS.length)idx=0;
+  ca();ci=idx;dims();var s=TS[idx];
+  var imgs=scr.querySelectorAll("img");
+  for(var i=0;i<imgs.length;i++)imgs[i].classList.remove("tour-active");
+  var el=document.getElementById("ts_"+s.s);if(el)el.classList.add("tour-active");
+  document.getElementById("tourUrl").textContent=s.u;
+  document.getElementById("tourCnt").textContent=(idx+1)+" / "+TS.length;
+  document.getElementById("tourTtl").textContent=s.t;
+  document.getElementById("tourDsc").textContent=s.d;
+  for(var j=0;j<TS.length;j++){var f=document.getElementById("tf"+j);f.style.transition="none";f.style.width="0%";
+    if(j<idx)f.style.width="100%";
+    else if(j===idx){(function(ff,dur){setTimeout(function(){ff.style.transition="width "+dur+"ms linear";ff.style.width="100%";},20);})(f,s.dur);}
+  }
+  s.a.forEach(function(a){at.push(setTimeout(function(){da(a);},a.at));});
+  if(pl)sn();
+}
+
+function sn(){if(st)clearTimeout(st);st=setTimeout(function(){if(pl)go(ci+1);},TS[ci].dur);}
+
+function da(a){
+  dims();
+  var c=document.getElementById("tourCur"),h=document.getElementById("tourHl"),
+      n=document.getElementById("tourAnn"),t=document.getElementById("tourAnnTxt"),
+      dm=document.getElementById("tourDim"),rg=document.getElementById("tourRing");
+  if(a.y==="cur"){c.style.opacity="1";c.style.left=pct2px(a.x,sw)+"px";c.style.top=pct2px(a.cy,sh)+"px";}
+  else if(a.y==="hl"){h.style.opacity="1";h.style.left=pct2px(a.x,sw)+"px";h.style.top=pct2px(a.cy,sh)+"px";h.style.width=pct2px(a.w,sw)+"px";h.style.height=pct2px(a.h,sh)+"px";}
+  else if(a.y==="an"){n.style.opacity="1";t.textContent=a.tx;n.style.left=pct2px(a.x,sw)+"px";n.style.top=pct2px(a.cy,sh)+"px";}
+  else if(a.y==="ck"){rg.style.left=(pct2px(a.x,sw)-15)+"px";rg.style.top=(pct2px(a.cy,sh)-15)+"px";rg.style.opacity="1";rg.style.transform="scale(0)";setTimeout(function(){rg.style.transition=".6s";rg.style.transform="scale(2.5)";rg.style.opacity="0";setTimeout(function(){rg.style.transition="none";},600);},10);}
+  else if(a.y==="dm"){dm.style.opacity=a.v?"1":"0";}
+  else if(a.y==="ch"){h.style.opacity="0";n.style.opacity="0";}
+  else if(a.y==="cl"){h.style.opacity="0";c.style.opacity="0";n.style.opacity="0";dm.style.opacity="0";}
+}
+
+// Auto-start when visible
+var started=false;
+var obs=new IntersectionObserver(function(entries){
+  if(entries[0].isIntersecting&&!started){started=true;go(0);}
+},{threshold:0.3});
+obs.observe(scr);
+})();
+</script>
 </body>
 </html>
