@@ -481,6 +481,14 @@
             background: #fff7ed;
         }
         
+        /* Status colors */
+        .status-deschis { background: #dcfce7; color: #166534; }
+        .status-cu_aprobare { background: #fef9c3; color: #854d0e; }
+        /* Legacy */
+        .status-activ { background: #dcfce7; color: #166534; }
+        .status-explorare { background: #fef9c3; color: #854d0e; }
+        .status-inchis { background: #fef9c3; color: #854d0e; }
+        
         /* Loading */
         .loading-state {
             text-align: center;
@@ -698,15 +706,20 @@
             <div class="admin-section">
                 <h3>Schimbă statusul grupului</h3>
                 <div class="status-selector">
-                    <button class="status-btn" data-status="activ" onclick="changeStatus('activ')">
-                        🟢 Activ
+                    <button class="status-btn" data-status="deschis" onclick="changeStatus('deschis')">
+                        🟢 Deschis
                     </button>
-                    <button class="status-btn" data-status="explorare" onclick="changeStatus('explorare')">
-                        🟡 În explorare
+                    <button class="status-btn" data-status="cu_aprobare" onclick="changeStatus('cu_aprobare')">
+                        🟡 Cu aprobare
                     </button>
-                    <button class="status-btn" data-status="inchis" onclick="changeStatus('inchis')">
-                        🔴 Închis
-                    </button>
+                </div>
+            </div>
+            
+            <!-- Pending Join Requests (only for cu_aprobare) -->
+            <div class="admin-section" id="pendingRequestsSection" style="display: none;">
+                <h3><i class="fas fa-user-clock"></i> Cereri de alăturare</h3>
+                <div id="pendingRequestsList">
+                    <p style="color: #94a3b8; font-size: 0.875rem;">Nicio cerere în așteptare.</p>
                 </div>
             </div>
             
@@ -844,6 +857,7 @@ let currentGroup = null;
 let isMember = false;
 let isAdmin = false;
 let members = [];
+let pendingRequests = [];
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
@@ -897,6 +911,30 @@ async function loadGroupDetails() {
         console.log('Members data:', membersData, 'Error:', membersError);
         
         members = membersData || [];
+        
+        // Load pending join requests
+        const { data: pendingData } = await sb
+            .from('grup_membri')
+            .select('*')
+            .eq('grup_id', groupId)
+            .eq('status', 'pending');
+        
+        pendingRequests = pendingData || [];
+        
+        // Load profiles for pending requests
+        if (pendingRequests.length > 0) {
+            const pendingUserIds = pendingRequests.map(m => m.user_id);
+            const { data: pendingProfiles } = await sb
+                .from('profiles')
+                .select('user_id, pseudonym')
+                .in('user_id', pendingUserIds);
+            if (pendingProfiles) {
+                pendingRequests = pendingRequests.map(m => ({
+                    ...m,
+                    profile: pendingProfiles.find(p => p.user_id === m.user_id)
+                }));
+            }
+        }
         
         // Load profiles for members
         if (members.length > 0) {
@@ -999,10 +1037,12 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     // Status
     const statusEl = document.getElementById('grupStatus');
     const statusLabels = {
-        activ: '🟢 Activ',
-        explorare: '🟡 În explorare',
-        inchis: '🔴 Închis',
-        arhivat: '⚫ Arhivat'
+        deschis: '🟢 Deschis',
+        cu_aprobare: '🟡 Cu aprobare',
+        // Legacy support
+        activ: '🟢 Deschis',
+        explorare: '🟡 Cu aprobare',
+        inchis: '🟡 Cu aprobare'
     };
     statusEl.textContent = statusLabels[group.status] || group.status;
     statusEl.className = `status-badge-lg status-${group.status}`;
@@ -1105,8 +1145,17 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     // Admin section
     if (isAdmin) {
         document.getElementById('adminSection').style.display = 'block';
+        
+        // Normalize status for button highlighting
+        const normalizedStatus = normalizeStatus(group.status);
+        document.querySelector(`.status-btn[data-status="${normalizedStatus}"]`)?.classList.add('active');
+        // Also try original status
         document.querySelector(`.status-btn[data-status="${group.status}"]`)?.classList.add('active');
+        
         document.getElementById('whatsappInput').value = group.link_whatsapp || '';
+        
+        // Render pending requests
+        renderPendingRequests();
     }
 }
 
@@ -1150,17 +1199,27 @@ function renderActions(group) {
             `;
         }
     } else if (currentUser) {
+        // Check if user has a pending request
+        const hasPending = pendingRequests.some(r => r.user_id === currentUser.id);
+        
         // Can join?
-        const canJoin = (group.status === 'activ' || group.status === 'explorare') 
-                        && members.length < group.max_membri;
-        if (canJoin) {
+        const hasRoom = members.length < group.max_membri;
+        const statusNorm = normalizeStatus(group.status);
+        
+        if (hasPending) {
+            html += `<span style="color: #f59e0b; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
+        } else if (statusNorm === 'deschis' && hasRoom) {
             html += `
                 <button class="btn-action btn-primary" onclick="joinGroup()">
                     <i class="fas fa-user-plus"></i> Alătură-te grupului
                 </button>
             `;
-        } else if (group.status === 'inchis') {
-            html += `<span style="color: #94a3b8;">Grupul nu mai acceptă membri noi.</span>`;
+        } else if (statusNorm === 'cu_aprobare' && hasRoom) {
+            html += `
+                <button class="btn-action btn-primary" onclick="requestJoinGroup()">
+                    <i class="fas fa-user-plus"></i> Cere alăturarea
+                </button>
+            `;
         } else {
             html += `<span style="color: #94a3b8;">Grupul este plin.</span>`;
         }
@@ -1388,7 +1447,8 @@ window.joinGroup = async function() {
             .from('grup_membri')
             .insert({
                 grup_id: currentGroup.id,
-                user_id: currentUser.id
+                user_id: currentUser.id,
+                status: 'activ'
             });
         
         if (error) throw error;
@@ -1401,6 +1461,82 @@ window.joinGroup = async function() {
         showToast('Eroare la alăturare.', 'error');
     }
 };
+
+window.requestJoinGroup = async function() {
+    if (!currentUser || !currentGroup) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .insert({
+                grup_id: currentGroup.id,
+                user_id: currentUser.id,
+                status: 'pending'
+            });
+        
+        if (error) throw error;
+        
+        showToast('Cererea ta a fost trimisă! Adminul grupului o va analiza.', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+        
+    } catch (e) {
+        console.error('Request join error:', e);
+        showToast('Eroare la trimiterea cererii.', 'error');
+    }
+};
+
+window.approveRequest = async function(memberId, userName) {
+    if (!isAdmin) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .update({ status: 'activ' })
+            .eq('id', memberId);
+        
+        if (error) throw error;
+        
+        showToast(`${userName} a fost acceptat în grup!`, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (e) {
+        console.error('Approve error:', e);
+        showToast('Eroare la aprobare.', 'error');
+    }
+};
+
+window.rejectRequest = async function(memberId, userName) {
+    if (!isAdmin) return;
+    if (!confirm(`Respingi cererea lui ${userName}?`)) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .delete()
+            .eq('id', memberId);
+        
+        if (error) throw error;
+        
+        showToast(`Cererea lui ${userName} a fost respinsă.`, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (e) {
+        console.error('Reject error:', e);
+        showToast('Eroare la respingere.', 'error');
+    }
+};
+
+function normalizeStatus(status) {
+    // Map old statuses to new ones
+    const map = {
+        'activ': 'deschis',
+        'explorare': 'cu_aprobare',
+        'inchis': 'cu_aprobare',
+        'deschis': 'deschis',
+        'cu_aprobare': 'cu_aprobare'
+    };
+    return map[status] || 'deschis';
+}
 
 window.leaveGroup = async function() {
     if (!currentUser || !currentGroup) return;
@@ -1621,6 +1757,42 @@ window.copyInviteLink = function() {
     }
 };
 
+function renderPendingRequests() {
+    const section = document.getElementById('pendingRequestsSection');
+    const list = document.getElementById('pendingRequestsList');
+    
+    if (!pendingRequests || pendingRequests.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    
+    list.innerHTML = pendingRequests.map(r => {
+        const name = r.profile?.pseudonym || 'Utilizator';
+        const initials = name.substring(0, 2).toUpperCase();
+        const time = formatDate(r.joined_at);
+        
+        return `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; margin-bottom: 8px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #92400e; flex-shrink: 0;">${initials}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; font-size: 0.875rem; color: #1e293b;">${escapeHtml(name)}</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">Cerere din ${time}</div>
+                </div>
+                <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <button onclick="approveRequest('${r.id}', '${escapeHtml(name)}')" style="padding: 6px 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Acceptă">
+                        <i class="fas fa-check"></i> Acceptă
+                    </button>
+                    <button onclick="rejectRequest('${r.id}', '${escapeHtml(name)}')" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Respinge">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 window.changeStatus = async function(newStatus) {
     if (!isAdmin || !currentGroup) return;
     
@@ -1637,9 +1809,8 @@ window.changeStatus = async function(newStatus) {
         document.querySelector(`.status-btn[data-status="${newStatus}"]`).classList.add('active');
         
         const statusLabels = {
-            activ: '🟢 Activ',
-            explorare: '🟡 În explorare',
-            inchis: '🔴 Închis'
+            deschis: '🟢 Deschis',
+            cu_aprobare: '🟡 Cu aprobare'
         };
         document.getElementById('grupStatus').textContent = statusLabels[newStatus];
         document.getElementById('grupStatus').className = `status-badge-lg status-${newStatus}`;
