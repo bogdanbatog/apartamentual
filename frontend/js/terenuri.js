@@ -4,10 +4,12 @@
            Add to Profile, Add to Group
    ═══════════════════════════════════════════ */
 
-// ── OWN SUPABASE CLIENT (avoids conflict with app.js) ──
-const SUPABASE_URL_T = 'https://glbvbbgmcobtswwlktic.supabase.co';
-const SUPABASE_ANON_KEY_T = 'sb_publishable_I25cj3p8FZJyTAe0X2ngDA_vvz6ssWz';
-const sb = window.supabase.createClient(SUPABASE_URL_T, SUPABASE_ANON_KEY_T);
+// ── USE GLOBAL SUPABASE CLIENT from supabase-config.js ──
+// sb and supabase are already created in supabase-config.js
+// If for some reason they aren't available, create as fallback
+if (typeof sb === 'undefined' || !sb) {
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 // ── DOM REFERENCES ────────────────────────
 const DOM = {
