@@ -101,6 +101,14 @@ async function signIn() {
         return;
     }
     
+    // Show loading state
+    const loginBtn = document.getElementById('login-btn');
+    const originalText = loginBtn ? loginBtn.textContent : '';
+    if (loginBtn) {
+        loginBtn.textContent = 'Se autentifică...';
+        loginBtn.disabled = true;
+    }
+    
     try {
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
@@ -108,20 +116,35 @@ async function signIn() {
         });
         
         if (error) {
-            showMessage('Sign in failed: ' + error.message, 'error');
+            showMessage('Autentificare eșuată: ' + error.message, 'error');
+            if (loginBtn) {
+                loginBtn.textContent = originalText || 'Autentificare';
+                loginBtn.disabled = false;
+            }
         } else {
-            showMessage('Signed in successfully!', 'success');
+            showMessage('Autentificare reușită!', 'success');
             clearForm();
+            
+            // Close modal
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) authModal.classList.add('hidden');
             
             // Check for redirect URL (e.g. from invitation link)
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get('redirect');
             if (redirectUrl) {
                 window.location.href = decodeURIComponent(redirectUrl);
+            } else {
+                // Reload to update UI
+                window.location.reload();
             }
         }
     } catch (error) {
-        showMessage('Error during sign in: ' + error.message, 'error');
+        showMessage('Eroare la autentificare: ' + error.message, 'error');
+        if (loginBtn) {
+            loginBtn.textContent = originalText || 'Autentificare';
+            loginBtn.disabled = false;
+        }
     }
 }
 
@@ -240,3 +263,16 @@ function clearForm() {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initApp);
+
+// Global function for nav.js to open login modal
+function openLoginModal() {
+    const authModal = document.getElementById('auth-modal');
+    if (authModal) {
+        authModal.classList.remove('hidden');
+        // Focus email field
+        setTimeout(() => {
+            const emailField = document.getElementById('email');
+            if (emailField) emailField.focus();
+        }, 100);
+    }
+}
