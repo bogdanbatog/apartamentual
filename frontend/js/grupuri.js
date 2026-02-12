@@ -263,9 +263,9 @@ function applyFilters() {
             break;
     }
     
-    // Prioritize by status (activ > explorare > inchis)
+    // Prioritize by status (deschis > cu_aprobare)
     if (sort === 'recent' || sort === 'activitate') {
-        const statusOrder = { activ: 0, explorare: 1, inchis: 2 };
+        const statusOrder = { deschis: 0, cu_aprobare: 1, activ: 0, explorare: 1, inchis: 1 };
         filtered.sort((a, b) => {
             const orderDiff = (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
             if (orderDiff !== 0) return orderDiff;
@@ -312,9 +312,12 @@ function renderGrupuri(grupuri) {
 // ── RENDER GRUP CARD ──
 function renderGrupCard(grup, isMember) {
     const statusLabels = {
-        activ: '🟢 Activ',
-        explorare: '🟡 În explorare',
-        inchis: '🔴 Închis',
+        deschis: '🟢 Deschis',
+        cu_aprobare: '🟡 Cu aprobare',
+        // Legacy
+        activ: '🟢 Deschis',
+        explorare: '🟡 Cu aprobare',
+        inchis: '🟡 Cu aprobare',
         arhivat: '⚫ Arhivat'
     };
     
@@ -329,11 +332,13 @@ function renderGrupCard(grup, isMember) {
     const description = grup.descriere || 'Fără descriere.';
     
     // Determine if user can join
+    const statusNorm = { activ: 'deschis', explorare: 'cu_aprobare', inchis: 'cu_aprobare', deschis: 'deschis', cu_aprobare: 'cu_aprobare' }[grup.status] || 'deschis';
     const canJoin = currentUser && 
                     userAccountType === 'activ' && 
                     !isMember && 
-                    (grup.status === 'activ' || grup.status === 'explorare') &&
                     membriCount < grup.max_membri;
+    const isDeschis = statusNorm === 'deschis';
+    const isCuAprobare = statusNorm === 'cu_aprobare';
     
     return `
         <div class="grup-card" data-grup-id="${grup.id}">
@@ -365,7 +370,8 @@ function renderGrupCard(grup, isMember) {
                 </div>
                 <div class="grup-card-actions">
                     <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
-                    ${canJoin ? `<button class="btn-alatura" onclick="joinGroup('${grup.id}')">Alătură-te</button>` : ''}
+                    ${canJoin && isDeschis ? `<button class="btn-alatura" onclick="joinGroup('${grup.id}')">Alătură-te</button>` : ''}
+                    ${canJoin && isCuAprobare ? `<button class="btn-alatura" onclick="requestJoinGroup('${grup.id}')">Cere alăturarea</button>` : ''}
                 </div>
             </div>
         </div>
@@ -407,7 +413,8 @@ window.joinGroup = async function(grupId) {
             .from('grup_membri')
             .insert({
                 grup_id: grupId,
-                user_id: currentUser.id
+                user_id: currentUser.id,
+                status: 'activ'
             });
         
         if (error) throw error;
@@ -425,6 +432,38 @@ window.joinGroup = async function(grupId) {
         } else {
             showToast('Eroare la alăturare. Încearcă din nou.', 'error');
         }
+    }
+};
+
+window.requestJoinGroup = async function(grupId) {
+    if (!currentUser) {
+        showToast('Trebuie să fii conectat.', 'info');
+        setTimeout(() => window.location.href = 'register.html', 1500);
+        return;
+    }
+    
+    if (userAccountType === 'profesional') {
+        showToast('Conturile de agenție nu pot face parte din grupuri.', 'info');
+        return;
+    }
+    
+    try {
+        const { error } = await sb
+            .from('grup_membri')
+            .insert({
+                grup_id: grupId,
+                user_id: currentUser.id,
+                status: 'pending'
+            });
+        
+        if (error) throw error;
+        
+        showToast('Cererea ta a fost trimisă! Adminul grupului o va analiza.', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+        
+    } catch (e) {
+        console.error('Request join error:', e);
+        showToast('Eroare la trimiterea cererii.', 'error');
     }
 };
 
