@@ -319,12 +319,37 @@ async function renderActiveUserContent() {
             } catch(e) {}
         }
         
+        let zoneMatchCount = 0;
         zonesEl.innerHTML = profileData.zones.map(zone => {
             const isMatch = !isOwnProfile && myZoneIds.includes(zone.id);
+            if (isMatch) zoneMatchCount++;
             return isMatch
                 ? `<span class="px-3 py-1 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-full text-sm">✓ ${zone.name}</span>`
                 : `<span class="px-3 py-1 bg-gray-100 rounded-full text-sm">${zone.name}</span>`;
         }).join('');
+        
+        // Show zone matching info for other profiles
+        if (!isOwnProfile && currentUser) {
+            if (zoneMatchCount >= 4) {
+                zonesEl.insertAdjacentHTML('afterend', `
+                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                        ⭐ <strong>Compatibilitate ridicată!</strong> Ai ${zoneMatchCount} zone comune cu acest utilizator.
+                    </div>
+                `);
+            } else if (zoneMatchCount > 0) {
+                zonesEl.insertAdjacentHTML('afterend', `
+                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                        ✓ Ai ${zoneMatchCount} ${zoneMatchCount === 1 ? 'zonă comună' : 'zone comune'} cu acest utilizator.
+                    </div>
+                `);
+            } else {
+                zonesEl.insertAdjacentHTML('afterend', `
+                    <div class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500">
+                        Nu ai nicio zonă comună cu acest utilizator.
+                    </div>
+                `);
+            }
+        }
     } else {
         zonesEl.innerHTML = '<span class="text-gray-400">-</span>';
     }
@@ -354,18 +379,26 @@ async function renderActiveUserContent() {
         }).join('');
         
         // Show matching info for other profiles
-        if (!isOwnProfile && matchCount >= 4) {
-            tagsEl.insertAdjacentHTML('afterend', `
-                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                    ⭐ <strong>Compatibilitate ridicată!</strong> Ai ${matchCount} interese comune cu acest utilizator.
-                </div>
-            `);
-        } else if (!isOwnProfile && matchCount > 0) {
-            tagsEl.insertAdjacentHTML('afterend', `
-                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                    ✓ Ai ${matchCount} ${matchCount === 1 ? 'interes comun' : 'interese comune'} cu acest utilizator.
-                </div>
-            `);
+        if (!isOwnProfile && currentUser) {
+            if (matchCount >= 4) {
+                tagsEl.insertAdjacentHTML('afterend', `
+                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                        ⭐ <strong>Compatibilitate ridicată!</strong> Ai ${matchCount} interese comune cu acest utilizator.
+                    </div>
+                `);
+            } else if (matchCount > 0) {
+                tagsEl.insertAdjacentHTML('afterend', `
+                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                        ✓ Ai ${matchCount} ${matchCount === 1 ? 'interes comun' : 'interese comune'} cu acest utilizator.
+                    </div>
+                `);
+            } else {
+                tagsEl.insertAdjacentHTML('afterend', `
+                    <div class="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500">
+                        Nu ai niciun interes comun cu acest utilizator.
+                    </div>
+                `);
+            }
         }
     } else {
         tagsEl.innerHTML = '<span class="text-gray-400">Niciun tag selectat</span>';
