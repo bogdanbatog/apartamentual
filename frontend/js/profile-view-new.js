@@ -601,16 +601,22 @@ function renderUserGroups() {
             : '';
         
         const statusColors = {
+            'deschis': 'bg-green-100 text-green-800',
+            'cu_aprobare': 'bg-yellow-100 text-yellow-800',
+            // Legacy
             'activ': 'bg-green-100 text-green-800',
-            'explorare': 'bg-blue-100 text-blue-800',
-            'inchis': 'bg-gray-100 text-gray-600'
+            'explorare': 'bg-yellow-100 text-yellow-800',
+            'inchis': 'bg-yellow-100 text-yellow-800'
         };
         const statusLabel = {
-            'activ': 'Activ',
-            'explorare': 'În explorare',
-            'inchis': 'Închis'
+            'deschis': 'Deschis',
+            'cu_aprobare': 'Cu aprobare',
+            // Legacy
+            'activ': 'Deschis',
+            'explorare': 'Cu aprobare',
+            'inchis': 'Cu aprobare'
         };
-        const groupStatus = group.status || 'explorare';
+        const groupStatus = group.status || 'deschis';
         
         return `
             <a href="grup-details.html?id=${group.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
