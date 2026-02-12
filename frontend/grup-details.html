@@ -1288,10 +1288,20 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         }).join('');
         
         // Show zone matching info
-        if (currentUser && !isMember && zoneMatchCount > 0) {
+        if (currentUser && zoneMatchCount > 0) {
             const matchEl = document.createElement('div');
             matchEl.className = 'matching-info';
-            matchEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> Ai ${zoneMatchCount} ${zoneMatchCount === 1 ? 'zonă comună' : 'zone comune'} cu acest grup.`;
+            const grupText = isAdmin ? 'cu grupul pe care l-ai creat' : 'cu acest grup';
+            matchEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> Ai ${zoneMatchCount} ${zoneMatchCount === 1 ? 'zonă comună' : 'zone comune'} ${grupText}.`;
+            zoneContainer.after(matchEl);
+        } else if (currentUser && zoneMatchCount === 0) {
+            const matchEl = document.createElement('div');
+            matchEl.className = 'matching-info';
+            matchEl.style.background = '#f9fafb';
+            matchEl.style.borderColor = '#e5e7eb';
+            matchEl.style.color = '#6b7280';
+            const grupText = isAdmin ? 'cu grupul pe care l-ai creat' : 'cu acest grup';
+            matchEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> Nu ai nicio zonă comună ${grupText}.`;
             zoneContainer.after(matchEl);
         }
     }
@@ -1322,14 +1332,24 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         }).join('');
         
         // Show matching info
-        if (currentUser && !isMember && matchCount > 0) {
+        if (currentUser && matchCount > 0) {
             const matchEl = document.createElement('div');
             matchEl.className = 'matching-info';
+            const grupText = isAdmin ? 'cu grupul pe care l-ai creat' : 'cu acest grup';
             if (matchCount >= 4) {
-                matchEl.innerHTML = `<i class="fas fa-star"></i> <strong>Compatibilitate ridicată!</strong> Ai ${matchCount} interese comune cu acest grup.`;
+                matchEl.innerHTML = `<i class="fas fa-star"></i> <strong>Compatibilitate ridicată!</strong> Ai ${matchCount} interese comune ${grupText}.`;
             } else {
-                matchEl.innerHTML = `<i class="fas fa-check-circle"></i> Ai ${matchCount} ${matchCount === 1 ? 'interes comun' : 'interese comune'} cu acest grup.`;
+                matchEl.innerHTML = `<i class="fas fa-check-circle"></i> Ai ${matchCount} ${matchCount === 1 ? 'interes comun' : 'interese comune'} ${grupText}.`;
             }
+            tagContainer.after(matchEl);
+        } else if (currentUser && matchCount === 0) {
+            const matchEl = document.createElement('div');
+            matchEl.className = 'matching-info';
+            matchEl.style.background = '#f9fafb';
+            matchEl.style.borderColor = '#e5e7eb';
+            matchEl.style.color = '#6b7280';
+            const grupText = isAdmin ? 'cu grupul pe care l-ai creat' : 'cu acest grup';
+            matchEl.innerHTML = `<i class="fas fa-check-circle"></i> Nu ai niciun interes comun ${grupText}.`;
             tagContainer.after(matchEl);
         }
     }
