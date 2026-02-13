@@ -752,3 +752,23 @@ body {
         text-align: center;
     }
 }
+
+/* ── MATCHING ── */
+.user-matching {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.4rem 0;
+}
+.user-matching span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.matching-yes {
+    color: #16a34a;
+}
+.matching-no {
+    color: #9ca3af;
+}
