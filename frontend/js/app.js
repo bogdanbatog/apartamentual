@@ -1,13 +1,8 @@
 
 
-// Initialize Supabase client
-let supabase;
-
-// Initialize the app
+// Initialize the app — uses global `sb` / `supabase` from supabase-config.js
 function initApp() {
     try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
         // Check if user is already logged in
         checkAuth();
         
