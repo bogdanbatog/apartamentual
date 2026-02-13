@@ -41,6 +41,7 @@ let currentUser = null;
 let userAccountType = null;
 let allGrupuri = [];
 let myGrupuri = new Set(); // IDs of groups user is member of
+let pendingGrupuri = new Set(); // IDs of groups user has pending join request
 let filterTerenId = null;
 
 // ── INIT ──
@@ -130,14 +131,16 @@ async function loadMyGroups() {
     if (!currentUser) return;
     
     try {
+        // Load active memberships
         const { data, error } = await sb
             .from('grup_membri')
-            .select('grup_id')
+            .select('grup_id, status')
             .eq('user_id', currentUser.id)
-            .eq('status', 'activ');
+            .in('status', ['activ', 'pending']);
         
         if (!error && data) {
-            myGrupuri = new Set(data.map(d => d.grup_id));
+            myGrupuri = new Set(data.filter(d => d.status === 'activ').map(d => d.grup_id));
+            pendingGrupuri = new Set(data.filter(d => d.status === 'pending').map(d => d.grup_id));
         }
     } catch (e) {
         console.warn('Could not load user groups:', e);
@@ -352,9 +355,11 @@ function renderGrupCard(grup, isMember) {
     
     // Determine if user can join
     const statusNorm = { activ: 'deschis', explorare: 'cu_aprobare', inchis: 'cu_aprobare', deschis: 'deschis', cu_aprobare: 'cu_aprobare' }[grup.status] || 'deschis';
+    const isPending = pendingGrupuri.has(grup.id);
     const canJoin = currentUser && 
                     userAccountType === 'activ' && 
                     !isMember && 
+                    !isPending &&
                     membriCount < grup.max_membri;
     const isDeschis = statusNorm === 'deschis';
     const isCuAprobare = statusNorm === 'cu_aprobare';
@@ -407,6 +412,7 @@ function renderGrupCard(grup, isMember) {
                     <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
                     ${canJoin && isDeschis ? `<button class="btn-alatura" onclick="joinGroup('${grup.id}')">Alătură-te</button>` : ''}
                     ${canJoin && isCuAprobare ? `<button class="btn-alatura" onclick="requestJoinGroup('${grup.id}')">Cere alăturarea</button>` : ''}
+                    ${isPending ? `<span class="btn-pending">Aprobare în așteptare</span>` : ''}
                 </div>
             </div>
         </div>
