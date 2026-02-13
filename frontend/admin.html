@@ -328,9 +328,8 @@
             </nav>
             <div class="sidebar-section">Conținut</div>
             <nav class="sidebar-nav">
-                <a href="#" data-section="articles" style="opacity: 0.5; pointer-events: none;">
+                <a href="#" data-section="articles">
                     <i class="fas fa-newspaper"></i> Articole
-                    <small style="font-size:0.65rem; color:#94a3b8; margin-left:auto;">soon</small>
                 </a>
                 <a href="#" data-section="pages" style="opacity: 0.5; pointer-events: none;">
                     <i class="fas fa-file-alt"></i> Pagini
@@ -394,6 +393,90 @@
                             </thead>
                             <tbody></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Articles section -->
+            <div id="articlesSection" style="display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                    <h2 class="page-title" style="margin-bottom: 0;"><i class="fas fa-newspaper"></i> Articole</h2>
+                    <button id="btnNewArticle" onclick="showArticleEditor()" style="padding: 0.5rem 1rem; background: var(--accent); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="fas fa-plus"></i> Articol nou
+                    </button>
+                </div>
+                
+                <!-- Articles list -->
+                <div id="articlesList" class="table-card">
+                    <table class="admin-table" id="articlesTable">
+                        <thead>
+                            <tr>
+                                <th>Titlu</th>
+                                <th>Categorie</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Acțiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="articlesTableBody">
+                            <tr><td colspan="5" style="text-align:center; color: var(--brand-500); padding: 2rem;">Se încarcă...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Article editor (hidden by default) -->
+                <div id="articleEditor" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <button onclick="hideArticleEditor()" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--brand-500);">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <h3 id="editorTitle" style="font-size: 1.15rem; font-weight: 600;">Articol nou</h3>
+                    </div>
+                    <div class="table-card" style="padding: 2rem;">
+                        <input type="hidden" id="articleId">
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Titlu *</label>
+                            <input type="text" id="articleTitle" placeholder="Titlul articolului" style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                            <div>
+                                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Categorie</label>
+                                <select id="articleCategory" style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
+                                    <option value="general">General</option>
+                                    <option value="sfaturi">Sfaturi</option>
+                                    <option value="noutati">Noutăți</option>
+                                    <option value="analize">Analize piață</option>
+                                    <option value="comunitate">Comunitate</option>
+                                    <option value="legal">Legal</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Status</label>
+                                <select id="articleStatus" style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
+                                    <option value="draft">Ciornă</option>
+                                    <option value="published">Publicat</option>
+                                    <option value="archived">Arhivat</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">URL imagine (opțional)</label>
+                            <input type="text" id="articleImage" placeholder="https://..." style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
+                        </div>
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Rezumat (opțional, apare în lista de articole)</label>
+                            <textarea id="articleSummary" rows="2" placeholder="Scurtă descriere..." style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem; resize: vertical;"></textarea>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Conținut * <span style="font-weight: 400; color: #94a3b8;">(suportă HTML)</span></label>
+                            <textarea id="articleContent" rows="15" placeholder="Scrie conținutul articolului..." style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem; resize: vertical; font-family: 'Courier New', monospace;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                            <button onclick="hideArticleEditor()" style="padding: 0.6rem 1.25rem; border: 1px solid #e2e8f0; background: white; border-radius: 0.5rem; cursor: pointer; font-weight: 500;">Anulează</button>
+                            <button onclick="saveArticle()" style="padding: 0.6rem 1.25rem; background: var(--accent); color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600;">
+                                <i class="fas fa-save"></i> Salvează
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -709,6 +792,213 @@
                 </tr>
             `;
         }).join('');
+    }
+    // ── SIDEBAR NAVIGATION ──
+    document.querySelectorAll('.sidebar-nav a[data-section]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.dataset.section;
+            if (link.style.pointerEvents === 'none') return;
+            
+            // Update active state
+            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+            
+            // Show/hide sections
+            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+            document.getElementById('articlesSection').style.display = section === 'articles' ? 'block' : 'none';
+            
+            if (section === 'articles') loadArticles();
+        });
+    });
+    
+    // ── ARTICLES CRUD ──
+    let allArticles = [];
+    
+    async function loadArticles() {
+        const tbody = document.getElementById('articlesTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--brand-500); padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Se încarcă...</td></tr>';
+        
+        try {
+            const { data, error } = await sb
+                .from('articles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            allArticles = data || [];
+            renderArticlesTable();
+        } catch (e) {
+            console.error('Load articles error:', e);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--red); padding: 2rem;">Eroare la încărcare. Ai rulat migrația SQL?</td></tr>';
+        }
+    }
+    
+    function renderArticlesTable() {
+        const tbody = document.getElementById('articlesTableBody');
+        
+        if (allArticles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--brand-500); padding: 2rem;">Niciun articol încă. Creează primul!</td></tr>';
+            return;
+        }
+        
+        const statusLabels = {
+            draft: '<span style="color: #94a3b8;"><i class="fas fa-circle" style="font-size:0.5rem;vertical-align:middle;"></i> Ciornă</span>',
+            published: '<span style="color: var(--green);"><i class="fas fa-circle" style="font-size:0.5rem;vertical-align:middle;"></i> Publicat</span>',
+            archived: '<span style="color: var(--brand-500);"><i class="fas fa-circle" style="font-size:0.5rem;vertical-align:middle;"></i> Arhivat</span>'
+        };
+        
+        const categoryLabels = {
+            general: 'General',
+            sfaturi: 'Sfaturi',
+            noutati: 'Noutăți',
+            analize: 'Analize piață',
+            comunitate: 'Comunitate',
+            legal: 'Legal'
+        };
+        
+        tbody.innerHTML = allArticles.map(a => `
+            <tr>
+                <td style="font-weight: 500; max-width: 300px;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        ${a.image_url ? '<img src="' + a.image_url + '" style="width:36px;height:36px;border-radius:4px;object-fit:cover;">' : ''}
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.title)}</span>
+                    </div>
+                </td>
+                <td>${categoryLabels[a.category] || a.category}</td>
+                <td>${statusLabels[a.status] || a.status}</td>
+                <td style="font-size: 0.8rem; color: var(--brand-500);">${new Date(a.created_at).toLocaleDateString('ro-RO')}</td>
+                <td>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <button onclick="editArticle('${a.id}')" style="padding: 0.3rem 0.6rem; border: 1px solid #e2e8f0; background: white; border-radius: 0.35rem; cursor: pointer; font-size: 0.78rem;" title="Editează">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        ${a.status === 'published' ? 
+                            `<a href="news.html#${a.slug}" target="_blank" style="padding: 0.3rem 0.6rem; border: 1px solid #e2e8f0; background: white; border-radius: 0.35rem; font-size: 0.78rem; color: var(--brand-950); text-decoration: none;" title="Vezi pe site">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>` : ''}
+                        <button onclick="deleteArticle('${a.id}', '${escapeHtml(a.title)}')" style="padding: 0.3rem 0.6rem; border: 1px solid #fca5a5; background: #fef2f2; border-radius: 0.35rem; cursor: pointer; font-size: 0.78rem; color: var(--red);" title="Șterge">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function showArticleEditor(articleId) {
+        document.getElementById('articlesList').style.display = 'none';
+        document.getElementById('btnNewArticle').style.display = 'none';
+        document.getElementById('articleEditor').style.display = 'block';
+        
+        if (articleId) {
+            const article = allArticles.find(a => a.id === articleId);
+            if (article) {
+                document.getElementById('editorTitle').textContent = 'Editează articolul';
+                document.getElementById('articleId').value = article.id;
+                document.getElementById('articleTitle').value = article.title;
+                document.getElementById('articleCategory').value = article.category || 'general';
+                document.getElementById('articleStatus').value = article.status || 'draft';
+                document.getElementById('articleImage').value = article.image_url || '';
+                document.getElementById('articleSummary').value = article.summary || '';
+                document.getElementById('articleContent').value = article.content || '';
+            }
+        } else {
+            document.getElementById('editorTitle').textContent = 'Articol nou';
+            document.getElementById('articleId').value = '';
+            document.getElementById('articleTitle').value = '';
+            document.getElementById('articleCategory').value = 'general';
+            document.getElementById('articleStatus').value = 'draft';
+            document.getElementById('articleImage').value = '';
+            document.getElementById('articleSummary').value = '';
+            document.getElementById('articleContent').value = '';
+        }
+    }
+    
+    function hideArticleEditor() {
+        document.getElementById('articleEditor').style.display = 'none';
+        document.getElementById('articlesList').style.display = 'block';
+        document.getElementById('btnNewArticle').style.display = 'flex';
+    }
+    
+    function editArticle(id) {
+        showArticleEditor(id);
+    }
+    
+    function generateSlug(title) {
+        return title
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove diacritics
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 100);
+    }
+    
+    async function saveArticle() {
+        const id = document.getElementById('articleId').value;
+        const title = document.getElementById('articleTitle').value.trim();
+        const content = document.getElementById('articleContent').value.trim();
+        
+        if (!title || !content) {
+            alert('Titlul și conținutul sunt obligatorii.');
+            return;
+        }
+        
+        const articleData = {
+            title,
+            slug: generateSlug(title) + '-' + Date.now().toString(36),
+            summary: document.getElementById('articleSummary').value.trim() || null,
+            content,
+            image_url: document.getElementById('articleImage').value.trim() || null,
+            category: document.getElementById('articleCategory').value,
+            status: document.getElementById('articleStatus').value,
+            author_id: currentUser.id
+        };
+        
+        // Set published_at when publishing
+        if (articleData.status === 'published') {
+            articleData.published_at = new Date().toISOString();
+        }
+        
+        try {
+            let error;
+            if (id) {
+                // Update
+                delete articleData.slug; // don't change slug on edit
+                ({ error } = await sb.from('articles').update(articleData).eq('id', id));
+            } else {
+                // Insert
+                ({ error } = await sb.from('articles').insert(articleData));
+            }
+            
+            if (error) throw error;
+            
+            hideArticleEditor();
+            await loadArticles();
+        } catch (e) {
+            console.error('Save article error:', e);
+            alert('Eroare la salvare: ' + e.message);
+        }
+    }
+    
+    async function deleteArticle(id, title) {
+        if (!confirm(`Sigur vrei să ștergi articolul "${title}"?`)) return;
+        
+        try {
+            const { error } = await sb.from('articles').delete().eq('id', id);
+            if (error) throw error;
+            await loadArticles();
+        } catch (e) {
+            console.error('Delete article error:', e);
+            alert('Eroare la ștergere: ' + e.message);
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
     </script>
 </body>
