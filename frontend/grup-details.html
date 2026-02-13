@@ -317,6 +317,24 @@
             color: #64748b;
             margin: 2px 0 0;
         }
+        .btn-cere-analiza {
+            margin-left: auto;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #fff;
+            background: #f59e0b;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            align-self: center;
+        }
+        .btn-cere-analiza:hover {
+            background: #d97706;
+        }
         .teren-comments-area {
             padding: 12px 16px;
         }
@@ -867,7 +885,7 @@
         
         <!-- Terenuri favorite - Visible to all logged-in users -->
         <div id="terenuriSection" class="section-card">
-            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului</h2>
+            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului <span id="terenuriGrupNume"></span></h2>
             <div id="terenuriGrid" class="terenuri-grid">
                 <div class="empty-section">
                     <i class="fas fa-map"></i>
@@ -1366,6 +1384,10 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     
     // Terenuri favorite - visible to all logged-in users
     if (currentUser) {
+        const terenuriGrupNume = document.getElementById('terenuriGrupNume');
+        if (terenuriGrupNume && group.nume) {
+            terenuriGrupNume.textContent = group.nume;
+        }
         renderTerenuri(terenuri);
     }
     
@@ -1525,6 +1547,9 @@ function renderTerenuri(terenuri) {
                         <h4><a href="teren-details.html?id=${teren.id}">${escapeHtml(teren.titlu)}</a></h4>
                         <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(teren.zona || 'Zona nespecificata')}</p>
                     </div>
+                    <a href="teren-details.html?id=${teren.id}#analiza" class="btn-cere-analiza" title="Cere o analiză">
+                        <i class="fas fa-chart-bar"></i> Cere o analiză
+                    </a>
                 </div>
                 <div class="teren-comments-area">
                     <div class="teren-comments-list" id="comments-${teren.id}">
