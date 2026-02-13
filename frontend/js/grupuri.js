@@ -384,7 +384,7 @@ function renderGrupCard(grup, isMember) {
                 <div class="grup-card-header-top">
                     <h3>
                         <a href="grup-details.html?id=${grup.id}">${escapeHtml(grup.nume)}</a>
-                        ${isMember ? '<span class="member-badge">Membru</span>' : ''}
+                        ${isMember ? (currentUser && grup.admin_id === currentUser.id ? '<span class="member-badge admin-badge">Admin</span>' : '<span class="member-badge">Membru</span>') : ''}
                     </h3>
                     <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
                 </div>
