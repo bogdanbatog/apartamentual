@@ -388,16 +388,7 @@ function renderGrupCard(grup, isMember) {
                     </h3>
                     <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
                 </div>
-                <div class="grup-location">
-                    <i class="fas fa-map-marker-alt"></i>
-                    ${escapeHtml(location)}
-                </div>
-            </div>
-            <div class="grup-card-body">
-                <p class="grup-description">${escapeHtml(description)}</p>
-            </div>
-            <div class="grup-card-footer">
-                <div class="grup-stats">
+                <div class="grup-header-meta">
                     <span class="grup-stat">
                         <i class="fas fa-users"></i>
                         ${membriCount}/${grup.max_membri}
@@ -406,6 +397,11 @@ function renderGrupCard(grup, isMember) {
                         ${activityBadge.label}
                     </span>
                 </div>
+            </div>
+            <div class="grup-card-body">
+                <p class="grup-description">${escapeHtml(description)}</p>
+            </div>
+            <div class="grup-card-footer">
                 ${matchingHtml}
                 <div class="grup-card-actions">
                     <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
