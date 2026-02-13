@@ -500,6 +500,51 @@ window.requestJoinGroup = async function(grupId) {
         if (error) throw error;
         
         showToast('Cererea ta a fost trimisă! Adminul grupului o va analiza.', 'success');
+        
+        // Notify group admin via email
+        try {
+            // Get group info and admin email
+            const { data: grup } = await sb
+                .from('grupuri')
+                .select('nume, admin_id')
+                .eq('id', grupId)
+                .single();
+            
+            if (grup && grup.admin_id) {
+                const { data: adminProfile } = await sb
+                    .from('profiles')
+                    .select('email')
+                    .eq('user_id', grup.admin_id)
+                    .single();
+                
+                const { data: requesterProfile } = await sb
+                    .from('profiles')
+                    .select('pseudonym, email')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (adminProfile?.email) {
+                    await sb.functions.invoke('notify-admins', {
+                        body: {
+                            event_type: 'membership_request',
+                            data: {
+                                grup_id: grupId,
+                                grup_nume: grup.nume,
+                                user_id: currentUser.id,
+                                user_email: requesterProfile?.email || currentUser.email,
+                                user_name: requesterProfile?.pseudonym || 'Utilizator',
+                                admin_email: adminProfile.email,
+                                status: 'pending'
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (notifyErr) {
+            console.warn('Could not notify group admin:', notifyErr);
+            // Don't block the user — request was already saved
+        }
+        
         setTimeout(() => window.location.reload(), 1500);
         
     } catch (e) {
