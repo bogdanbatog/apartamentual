@@ -84,13 +84,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ── AUTH ──
+let myZones = [];
+let myTags = [];
+
 async function checkAuth() {
     try {
         const { data: { user } } = await sb.auth.getUser();
         if (user) {
             currentUser = user;
-            DOM.navUser.style.display = 'block';
-            DOM.btnLoginNav.style.display = 'none';
+            if (DOM.navUser) DOM.navUser.style.display = 'block';
+            if (DOM.btnLoginNav) DOM.btnLoginNav.style.display = 'none';
             
             // Get account type
             const { data: profile } = await sb
@@ -98,6 +101,19 @@ async function checkAuth() {
                 .select('account_type')
                 .eq('user_id', user.id)
                 .single();
+            
+            // Load current user's zones and tags for matching
+            const { data: userZones } = await sb
+                .from('user_preferred_zones')
+                .select('zone_id, zones(id, name)')
+                .eq('user_id', user.id);
+            myZones = (userZones || []).map(uz => uz.zones).filter(Boolean);
+            
+            const { data: userTags } = await sb
+                .from('user_tags')
+                .select('tag_id, tags(id, name)')
+                .eq('user_id', user.id);
+            myTags = (userTags || []).map(ut => ut.tags).filter(Boolean);
             
             return profile?.account_type || 'activ';
         }
@@ -373,6 +389,23 @@ function renderUserCard(user) {
           (tags.length > 3 ? `<span class="interest-tag more">+${tags.length - 3}</span>` : '')
         : '<span class="interest-tag" style="background: var(--slate-300);">Niciun interes</span>';
     
+    // Matching with current user
+    let matchingHtml = '';
+    if (currentUser && user.user_id !== currentUser.id) {
+        const commonZones = zones.filter(z => myZones.some(mz => mz.id === z.id));
+        const commonTags = tags.filter(t => myTags.some(mt => mt.id === t.id));
+        const hasMatch = commonZones.length > 0 || commonTags.length > 0;
+        
+        if (hasMatch) {
+            const parts = [];
+            if (commonZones.length > 0) parts.push(`<span><i class="fas fa-map-marker-alt"></i> ${commonZones.length} zone comune</span>`);
+            if (commonTags.length > 0) parts.push(`<span><i class="fas fa-tags"></i> ${commonTags.length} interese comune</span>`);
+            matchingHtml = `<div class="user-matching matching-yes">${parts.join('')}</div>`;
+        } else {
+            matchingHtml = `<div class="user-matching matching-no"><span><i class="fas fa-times-circle"></i> Fără potriviri comune</span></div>`;
+        }
+    }
+    
     return `
         <article class="user-card" onclick="viewProfile('${user.user_id}')">
             <div class="user-card-header">
@@ -396,10 +429,7 @@ function renderUserCard(user) {
                 </div>
             </div>
             <div class="user-card-footer">
-                <div class="user-stats">
-                    <span><i class="fas fa-map-marker-alt"></i> ${zones.length} zone</span>
-                    <span><i class="fas fa-tags"></i> ${tags.length} interese</span>
-                </div>
+                ${matchingHtml}
                 <span class="btn-view-profile">
                     Vezi profil <i class="fas fa-arrow-right"></i>
                 </span>
