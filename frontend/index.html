@@ -272,7 +272,8 @@
                     <line x1="395" y1="50" x2="525" y2="50" stroke="url(#og)" stroke-width="2.5" stroke-linecap="round"/>
 
                     <!-- STEP 1 -->
-                    <g transform="translate(25, 75)">
+                    <a href="register.html" class="step-link">
+                    <g transform="translate(25, 75)" style="cursor:pointer">
                         <circle cx="100" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
                         <text x="100" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
                         <rect width="200" height="230" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
@@ -297,6 +298,7 @@
                             <text x="150" y="13" text-anchor="middle" fill="#ea580c" font-size="9" font-weight="500">3 cam</text>
                         </g>
                     </g>
+                    </a>
 
                     <!-- ARROW 1→2 -->
                     <g transform="translate(230, 185)">
@@ -311,7 +313,8 @@
                     </g>
 
                     <!-- STEP 2 -->
-                    <g transform="translate(275, 75)">
+                    <a href="grupuri.html" class="step-link" data-auth-redirect="register.html">
+                    <g transform="translate(275, 75)" style="cursor:pointer">
                         <circle cx="100" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
                         <text x="100" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
                         <rect width="200" height="230" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
@@ -333,6 +336,7 @@
                             <text x="70" y="13" text-anchor="middle" fill="#16a34a" font-size="9" font-weight="500">✓ 5 zone comune</text>
                         </g>
                     </g>
+                    </a>
 
                     <!-- ARROW 2→3 -->
                     <g transform="translate(480, 185)">
@@ -347,7 +351,8 @@
                     </g>
 
                     <!-- STEP 3 -->
-                    <g transform="translate(525, 75)">
+                    <a href="terenuri.html" class="step-link">
+                    <g transform="translate(525, 75)" style="cursor:pointer">
                         <circle cx="100" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
                         <text x="100" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
                         <rect width="200" height="230" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
@@ -365,6 +370,7 @@
                             <text x="78" y="13" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="500">📍 București, Sector 2</text>
                         </g>
                     </g>
+                    </a>
 
                     <!-- ARROW 3→4 -->
                     <g transform="translate(730, 185)">
@@ -722,6 +728,26 @@
             alert('Mulțumim pentru abonare! Te vom ține la curent cu noutățile.');
             document.getElementById('newsletter-email').value = '';
         }
+        
+        // Auth-aware redirects: if not logged in, send to register for protected pages
+        document.addEventListener('DOMContentLoaded', async () => {
+            let isLoggedIn = false;
+            try {
+                const { data: { user } } = await sb.auth.getUser();
+                isLoggedIn = !!user;
+            } catch (e) {}
+            
+            if (!isLoggedIn) {
+                // Redirect grupuri links to register
+                document.querySelectorAll('a[href="grupuri.html"]').forEach(link => {
+                    link.href = 'register.html';
+                });
+                // Also redirect step links that need auth
+                document.querySelectorAll('a[data-auth-redirect]').forEach(link => {
+                    link.setAttribute('href', link.dataset.authRedirect);
+                });
+            }
+        });
     </script>
 </body>
 </html>
