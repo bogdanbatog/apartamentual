@@ -17,7 +17,7 @@ function initApp() {
 // Check authentication state
 async function checkAuth() {
     try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         updateUI(user);
     } catch (error) {
         showMessage('Error checking auth state: ' + error.message, 'error');
@@ -81,7 +81,7 @@ function setupEventListeners() {
     });
     
     // Listen for auth changes
-    supabase.auth.onAuthStateChange((event, session) => {
+    sb.auth.onAuthStateChange((event, session) => {
         updateUI(session?.user || null);
     });
 }
@@ -105,7 +105,7 @@ async function signIn() {
     }
     
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await sb.auth.signInWithPassword({
             email: email,
             password: password,
         });
@@ -159,7 +159,7 @@ async function signUp() {
     }
     
     try {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await sb.auth.signUp({
             email: email,
             password: password,
         });
@@ -178,7 +178,7 @@ async function signUp() {
 // Sign out function
 async function signOut() {
     try {
-        const { error } = await supabase.auth.signOut();
+        const { error } = await sb.auth.signOut();
         if (error) {
             showMessage('Sign out failed: ' + error.message, 'error');
         } else {
