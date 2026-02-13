@@ -1,6 +1,7 @@
 // ══════════════════════════════════════════════════════════════
 // UNIFIED NAVIGATION COMPONENT — ApartamenTUal
 // Used on ALL pages: Acasă, Ce este, Terenuri, Utilizatori, Grupuri, etc.
+// Uses global `sb` (and `supabase`) from supabase-config.js
 // ══════════════════════════════════════════════════════════════
 
 (function() {
@@ -89,7 +90,6 @@ function createNavigation() {
 }
 
 function loadNavigation() {
-    // Try #navigation container first (Acasă, Ce este pages)
     const navContainer = document.getElementById('navigation');
     if (navContainer) {
         navContainer.innerHTML = createNavigation();
@@ -97,7 +97,6 @@ function loadNavigation() {
         checkAuthState();
         return;
     }
-    // If no container, try replacing existing nav (Terenuri, Grupuri, Utilizatori)
     const existingNav = document.querySelector('nav.navbar, nav.main-nav');
     if (existingNav) {
         const wrapper = document.createElement('div');
@@ -110,7 +109,6 @@ function loadNavigation() {
 }
 
 function setupNavBehavior() {
-    // Mobile toggle
     const mobileToggle = document.getElementById('navMobileToggle');
     const mobileMenu = document.getElementById('navMobileMenu');
     if (mobileToggle && mobileMenu) {
@@ -121,7 +119,6 @@ function setupNavBehavior() {
         });
     }
 
-    // User avatar dropdown
     const avatarBtn = document.getElementById('btnUserAvatar');
     const dropdown = document.getElementById('userDropdown');
     if (avatarBtn && dropdown) {
@@ -132,7 +129,6 @@ function setupNavBehavior() {
         document.addEventListener('click', () => dropdown.classList.remove('show'));
     }
 
-    // Profile link
     const profileLink = document.getElementById('navProfileLink');
     if (profileLink) {
         profileLink.addEventListener('click', (e) => {
@@ -143,18 +139,12 @@ function setupNavBehavior() {
         });
     }
 
-    // Logout
+    // Logout — uses global `sb` from supabase-config.js
     const logoutBtn = document.getElementById('btnLogout');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
             try {
-                var client = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : window._navSupabase;
-                if (!client) {
-                    var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
-                    var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : '';
-                    client = window.supabase.createClient(url, key);
-                }
-                await client.auth.signOut();
+                await sb.auth.signOut();
                 window.location.href = '/index.html';
             } catch (err) {
                 console.error('Logout error:', err);
@@ -165,29 +155,18 @@ function setupNavBehavior() {
 
 async function checkAuthState() {
     try {
-        // Wait for global supabase client from app.js
-        if (typeof supabase === 'undefined' || !supabase) {
-            // If no global client yet, wait and retry (max ~5 seconds)
+        // Wait for global sb client from supabase-config.js
+        if (typeof sb === 'undefined' || !sb) {
             if (!checkAuthState._retries) checkAuthState._retries = 0;
             if (checkAuthState._retries < 25) {
                 checkAuthState._retries++;
                 setTimeout(checkAuthState, 200);
                 return;
             }
-            // Fallback: create client only if global never appeared
-            if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-                var url = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://glbvbbgmcobtswwlktic.supabase.co';
-                var key = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : '';
-                window._navSupabase = window.supabase.createClient(url, key);
-            } else {
-                return;
-            }
+            return;
         }
 
-        var client = (typeof supabase !== 'undefined' && supabase && supabase.auth) ? supabase : window._navSupabase;
-        if (!client) return;
-
-        const { data: { user } } = await client.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         window.currentUserId = user ? user.id : null;
 
         const navUser = document.getElementById('navUser');
