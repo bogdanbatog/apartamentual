@@ -811,3 +811,10 @@ body {
 .matching-no {
     color: #9ca3af;
 }
+
+/* ── ADMIN BADGE ── */
+.admin-badge {
+    background: #f59e0b !important;
+    color: #fff !important;
+    border-color: #f59e0b !important;
+}
