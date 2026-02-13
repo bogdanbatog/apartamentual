@@ -4,8 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 // ── SUPABASE CLIENT ──
-// SUPABASE_URL and SUPABASE_ANON_KEY are defined in supabase-config.js
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Uses global `sb` from supabase-config.js
 
 // ── STATE ──
 let currentUser = null;
