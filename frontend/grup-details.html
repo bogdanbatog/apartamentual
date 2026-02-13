@@ -865,8 +865,8 @@
             <div id="kickVotesList"></div>
         </div>
         
-        <!-- Terenuri favorite - Member only -->
-        <div id="terenuriSection" class="section-card member-only">
+        <!-- Terenuri favorite - Visible to all logged-in users -->
+        <div id="terenuriSection" class="section-card">
             <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului</h2>
             <div id="terenuriGrid" class="terenuri-grid">
                 <div class="empty-section">
@@ -1361,8 +1361,12 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     // Member-only sections
     if (isMember) {
         document.querySelectorAll('.member-only').forEach(el => el.classList.add('visible'));
-        renderTerenuri(terenuri);
         loadKickVotes();
+    }
+    
+    // Terenuri favorite - visible to all logged-in users
+    if (currentUser) {
+        renderTerenuri(terenuri);
     }
     
     // Admin section
