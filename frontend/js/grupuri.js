@@ -83,6 +83,8 @@ function initNav() {
 }
 
 // ── AUTH ──
+let myZones = [];
+
 async function checkAuth() {
     try {
         const { data: { user } } = await sb.auth.getUser();
@@ -99,6 +101,13 @@ async function checkAuth() {
                 .single();
             
             userAccountType = profile?.account_type || 'activ';
+            
+            // Load current user's preferred zones for matching
+            const { data: userZones } = await sb
+                .from('user_preferred_zones')
+                .select('zone_id, zones(id, name)')
+                .eq('user_id', user.id);
+            myZones = (userZones || []).map(uz => uz.zones).filter(Boolean);
             
             // Load user's group memberships
             await loadMyGroups();
@@ -340,6 +349,23 @@ function renderGrupCard(grup, isMember) {
     const isDeschis = statusNorm === 'deschis';
     const isCuAprobare = statusNorm === 'cu_aprobare';
     
+    // Matching with current user's preferred zones
+    let matchingHtml = '';
+    if (currentUser && !isMember && grup.zona) {
+        const commonZones = myZones.filter(mz => 
+            mz.name && grup.zona && mz.name.toLowerCase() === grup.zona.toLowerCase()
+        );
+        if (commonZones.length > 0) {
+            matchingHtml = `<div class="grup-matching matching-yes"><span><i class="fas fa-map-marker-alt"></i> Zonă comună: ${escapeHtml(grup.zona)}</span></div>`;
+        } else {
+            // Check if at least same city
+            const sameCity = myZones.some(mz => mz.name && grup.oras && mz.name.toLowerCase().includes(grup.oras.toLowerCase()));
+            if (!sameCity) {
+                matchingHtml = `<div class="grup-matching matching-no"><span><i class="fas fa-times-circle"></i> Fără zone comune</span></div>`;
+            }
+        }
+    }
+    
     return `
         <div class="grup-card" data-grup-id="${grup.id}">
             <div class="grup-card-header">
@@ -368,6 +394,7 @@ function renderGrupCard(grup, isMember) {
                         ${activityBadge.label}
                     </span>
                 </div>
+                ${matchingHtml}
                 <div class="grup-card-actions">
                     <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
                     ${canJoin && isDeschis ? `<button class="btn-alatura" onclick="joinGroup('${grup.id}')">Alătură-te</button>` : ''}
