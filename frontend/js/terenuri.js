@@ -4,12 +4,8 @@
            Add to Profile, Add to Group
    ═══════════════════════════════════════════ */
 
-// ── USE GLOBAL SUPABASE CLIENT from supabase-config.js ──
-// sb and supabase are already created in supabase-config.js
-// If for some reason they aren't available, create as fallback
-if (typeof sb === 'undefined' || !sb) {
-    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
+// ── SUPABASE CLIENT ──
+// Uses global `sb` and `supabase` from supabase-config.js
 
 // ── DOM REFERENCES ────────────────────────
 const DOM = {
