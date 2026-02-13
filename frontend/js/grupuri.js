@@ -84,6 +84,7 @@ function initNav() {
 
 // ── AUTH ──
 let myZones = [];
+let myTags = [];
 
 async function checkAuth() {
     try {
@@ -108,6 +109,13 @@ async function checkAuth() {
                 .select('zone_id, zones(id, name)')
                 .eq('user_id', user.id);
             myZones = (userZones || []).map(uz => uz.zones).filter(Boolean);
+            
+            // Load current user's tags for matching
+            const { data: userTags } = await sb
+                .from('user_tags')
+                .select('tag_id, tags(id, name)')
+                .eq('user_id', user.id);
+            myTags = (userTags || []).map(ut => ut.tags).filter(Boolean);
             
             // Load user's group memberships
             await loadMyGroups();
@@ -182,7 +190,9 @@ async function loadGrupuri() {
             .from('grupuri')
             .select(`
                 *,
-                membri:grup_membri(count)
+                membri:grup_membri(count),
+                grup_preferred_zones(zone_id, zones(id, name)),
+                grup_tags(tag_id, tags(id, name))
             `)
             .neq('status', 'arhivat');
         
@@ -349,21 +359,23 @@ function renderGrupCard(grup, isMember) {
     const isDeschis = statusNorm === 'deschis';
     const isCuAprobare = statusNorm === 'cu_aprobare';
     
-    // Matching with current user's preferred zones
+    // Matching with current user's preferred zones and tags
     let matchingHtml = '';
-    if (currentUser && !isMember && grup.zona) {
-        const commonZones = myZones.filter(mz => 
-            mz.name && grup.zona && mz.name.toLowerCase() === grup.zona.toLowerCase()
-        );
-        if (commonZones.length > 0) {
-            matchingHtml = `<div class="grup-matching matching-yes"><span><i class="fas fa-map-marker-alt"></i> Zonă comună: ${escapeHtml(grup.zona)}</span></div>`;
-        } else {
-            // Check if at least same city
-            const sameCity = myZones.some(mz => mz.name && grup.oras && mz.name.toLowerCase().includes(grup.oras.toLowerCase()));
-            if (!sameCity) {
-                matchingHtml = `<div class="grup-matching matching-no"><span><i class="fas fa-times-circle"></i> Fără zone comune</span></div>`;
-            }
-        }
+    if (currentUser && !isMember) {
+        const grupZones = (grup.grup_preferred_zones || []).map(gz => gz.zones).filter(Boolean);
+        const grupTags = (grup.grup_tags || []).map(gt => gt.tags).filter(Boolean);
+        
+        const commonZones = grupZones.filter(gz => myZones.some(mz => mz.id === gz.id));
+        const commonTags = grupTags.filter(gt => myTags.some(mt => mt.id === gt.id));
+        
+        const zoneClass = commonZones.length > 0 ? 'matching-yes' : 'matching-no';
+        const tagClass = commonTags.length > 0 ? 'matching-yes' : 'matching-no';
+        
+        matchingHtml = `
+            <div class="grup-matching-stack">
+                <span class="${zoneClass}"><i class="fas fa-map-marker-alt"></i> ${commonZones.length} zone comune</span>
+                <span class="${tagClass}"><i class="fas fa-tags"></i> ${commonTags.length} interese comune</span>
+            </div>`;
     }
     
     return `
