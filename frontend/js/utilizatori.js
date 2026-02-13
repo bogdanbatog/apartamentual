@@ -394,16 +394,15 @@ function renderUserCard(user) {
     if (currentUser && user.user_id !== currentUser.id) {
         const commonZones = zones.filter(z => myZones.some(mz => mz.id === z.id));
         const commonTags = tags.filter(t => myTags.some(mt => mt.id === t.id));
-        const hasMatch = commonZones.length > 0 || commonTags.length > 0;
         
-        if (hasMatch) {
-            const parts = [];
-            if (commonZones.length > 0) parts.push(`<span><i class="fas fa-map-marker-alt"></i> ${commonZones.length} zone comune</span>`);
-            if (commonTags.length > 0) parts.push(`<span><i class="fas fa-tags"></i> ${commonTags.length} interese comune</span>`);
-            matchingHtml = `<div class="user-matching matching-yes">${parts.join('')}</div>`;
-        } else {
-            matchingHtml = `<div class="user-matching matching-no"><span><i class="fas fa-times-circle"></i> Fără potriviri comune</span></div>`;
-        }
+        const zoneClass = commonZones.length > 0 ? 'matching-yes' : 'matching-no';
+        const tagClass = commonTags.length > 0 ? 'matching-yes' : 'matching-no';
+        
+        matchingHtml = `
+            <div class="user-matching-stack">
+                <span class="${zoneClass}"><i class="fas fa-map-marker-alt"></i> ${commonZones.length} zone comune</span>
+                <span class="${tagClass}"><i class="fas fa-tags"></i> ${commonTags.length} interese comune</span>
+            </div>`;
     }
     
     return `
