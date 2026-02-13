@@ -219,9 +219,9 @@ function renderGroupLikesSection() {
                 <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
-                Adaugă la favoritele grupului
+                Adaugă la unul din grupurile tale
             </h3>
-            <p class="text-sm text-gray-600 mb-3">Selectează grupurile care ar putea fi interesate de acest teren:</p>
+            <p class="text-sm text-gray-600 mb-3">Selectează grupurile tale care ar putea fi interesate de acest teren:</p>
             <div class="flex flex-wrap gap-2">
                 ${groupsHtml}
             </div>
@@ -454,7 +454,7 @@ async function displayTerenDetails(teren, userProfile) {
     // Adăugat de (posted_by / user_id)
     const adaugatDeRow = document.getElementById('teren-adaugat-de-row');
     const adaugatDeEl = document.getElementById('teren-adaugat-de');
-    const postedByUserId = teren.posted_by || teren.user_id;
+    const postedByUserId = teren.created_by_user_id || teren.posted_by || teren.user_id;
     if (postedByUserId && adaugatDeRow && adaugatDeEl) {
         try {
             const { data: posterProfile } = await supabase
