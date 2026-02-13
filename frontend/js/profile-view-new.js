@@ -510,6 +510,11 @@ async function renderFavoriteTerrains() {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
+                <div class="teren-fav-actions">
+                    <a href="teren-details.html?id=${terrain.id}#analiza" class="btn-cere-analiza-sm">
+                        <i class="fas fa-chart-bar"></i> Cere o analiză
+                    </a>
+                </div>
                 ${noteHtml}
             </div>
         `;
