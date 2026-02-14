@@ -548,25 +548,23 @@
         <section class="py-24 bg-white">
             <div class="container max-w-6xl mx-auto px-6">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <!-- Image -->
+                    <!-- Image (populated from article) -->
                     <div class="bg-brand-50 rounded-2xl aspect-[4/3] flex items-center justify-center overflow-hidden" id="prototip-hero-image">
                         <svg class="w-20 h-20 text-brand-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
                     </div>
-                    <!-- Text -->
+                    <!-- Text (populated from article) -->
                     <div>
                         <div class="decorative-line mb-6"></div>
                         <h2 class="font-display text-4xl md:text-5xl font-medium text-brand-950">Povestea noastră</h2>
                         <p class="text-accent font-semibold mt-4 text-lg">Prototipul Județului Housing</p>
-                        <p class="text-brand-500 mt-4 text-base leading-relaxed">
-                            Am pornit de la o întrebare simplă: de ce să construim singuri când putem construi împreună? 
-                            Inspirați de modelul german Baugruppen, am creat ApartamenTUal pentru a aduce această filosofie în România.
-                        </p>
-                        <p class="text-brand-500 mt-3 text-base leading-relaxed">
-                            Primul nostru prototip demonstrează că este posibil să reduci costurile cu 20-30% și să îți construiești 
-                            locuința exact cum îți dorești, alături de vecini care împărtășesc aceleași valori.
-                        </p>
+                        <div id="prototip-hero-summary">
+                            <p class="text-brand-500 mt-4 text-base leading-relaxed">
+                                Am pornit de la o întrebare simplă: de ce să construim singuri când putem construi împreună? 
+                                Inspirați de modelul german Baugruppen, am creat ApartamenTUal pentru a aduce această filosofie în România.
+                            </p>
+                        </div>
                         <a href="prototip.html" class="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-brand-950 text-white text-sm font-medium rounded-lg hover:bg-brand-800 transition-colors">
                             Citește povestea completă
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
@@ -753,8 +751,40 @@
             // Load hero articles from Supabase
             loadHeroArticles();
             loadPrototipUpdates();
+            loadPrototipStory();
         });
         
+        async function loadPrototipStory() {
+            try {
+                const { data, error } = await supabase
+                    .from('articles')
+                    .select('image_url, summary')
+                    .eq('slug', 'povestea-noastra')
+                    .eq('status', 'published')
+                    .single();
+                
+                if (error || !data) return; // keep defaults
+                
+                // Update hero image
+                if (data.image_url) {
+                    const imgDiv = document.getElementById('prototip-hero-image');
+                    if (imgDiv) {
+                        imgDiv.innerHTML = `<img src="${data.image_url}" alt="Prototipul Județului Housing" style="width:100%;height:100%;object-fit:cover;">`;
+                    }
+                }
+                
+                // Update summary text
+                if (data.summary) {
+                    const sumDiv = document.getElementById('prototip-hero-summary');
+                    if (sumDiv) {
+                        sumDiv.innerHTML = `<p class="text-brand-500 mt-4 text-base leading-relaxed">${data.summary}</p>`;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading prototip story:', err);
+            }
+        }
+
         async function loadPrototipUpdates() {
             const grid = document.getElementById('prototip-updates-grid');
             const empty = document.getElementById('prototip-updates-empty');
@@ -765,6 +795,7 @@
                     .from('articles')
                     .select('*')
                     .eq('category', 'prototip')
+                    .neq('slug', 'povestea-noastra')
                     .eq('status', 'published')
                     .order('published_at', { ascending: false })
                     .limit(3);
