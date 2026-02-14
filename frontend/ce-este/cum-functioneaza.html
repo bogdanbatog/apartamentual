@@ -21,6 +21,101 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/nav.css">
+    <style>
+        /* ── PROCESS DIAGRAM ── */
+        .process-diagram {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+        .phase-block {
+            flex: 1;
+            min-width: 200px;
+        }
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem 0.75rem 0 0;
+            color: white;
+        }
+        .phase-number {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .phase-header h3 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .phase-duration {
+            font-size: 0.72rem;
+            opacity: 0.85;
+        }
+        .phase-steps {
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 0.75rem 0.75rem;
+            padding: 0.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            background: white;
+        }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+            padding: 0.35rem 0.5rem;
+            border-radius: 0.35rem;
+            font-size: 0.76rem;
+            color: #334155;
+            text-decoration: none;
+            transition: background 0.15s;
+            line-height: 1.3;
+        }
+        .step-item:hover {
+            background: #f8fafc;
+        }
+        .step-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+        .phase-arrow {
+            display: flex;
+            align-items: center;
+            padding-top: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .process-diagram {
+                flex-direction: column;
+            }
+            .phase-block {
+                min-width: 100%;
+            }
+            .phase-arrow {
+                padding-top: 0;
+                justify-content: center;
+                transform: rotate(90deg);
+            }
+        }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col bg-white text-gray-900">
     <div id="navigation"></div>
@@ -44,46 +139,192 @@
                         <p class="subtitle">Pașii concreti pentru organizarea unui grup de construcție de succes</p>
                     </div>
 
-                    <!-- Timeline Overview -->
-                    <section class="card">
+                    <!-- Interactive Process Diagram -->
+                    <section class="card" style="overflow-x: auto;">
                         <h2 class="text-2xl mb-6">Cronologia unui Proiect</h2>
-                        <div class="space-y-6">
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">1</div>
-                                <div>
-                                    <h3 class="font-semibold mb-1">Formarea Grupului</h3>
-                                    <p class="text-sm subtitle">2-6 luni • Găsirea membrilor compatibili și stabilirea obiectivelor</p>
+                        <p class="text-sm text-gray-500 mb-6">Click pe orice etapă pentru a naviga direct la secțiunea relevantă</p>
+                        
+                        <div class="process-diagram">
+                            <!-- Phase 1 -->
+                            <div class="phase-block phase-1">
+                                <div class="phase-header" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">
+                                    <span class="phase-number">1</span>
+                                    <div>
+                                        <h3>Formarea Grupului</h3>
+                                        <span class="phase-duration">2–6 luni</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">2</div>
-                                <div>
-                                    <h3 class="font-semibold mb-1">Căutarea și Achiziția Terenului</h3>
-                                    <p class="text-sm subtitle">3-12 luni • Identificarea, evaluarea și cumpărarea terenului</p>
+                                <div class="phase-steps">
+                                    <a href="/grupuri.html" class="step-item">
+                                        <span class="step-dot" style="background: #2563eb;"></span>
+                                        <span>Găsirea membrilor → <b style="color:#2563eb;">Grupuri</b></span>
+                                    </a>
+                                    <a href="/grupuri.html" class="step-item">
+                                        <span class="step-dot" style="background: #2563eb;"></span>
+                                        <span>Stabilirea compatibilității — matching platformă</span>
+                                    </a>
+                                    <a href="#faza2" class="step-item">
+                                        <span class="step-dot" style="background: #2563eb;"></span>
+                                        <span>Acțiune în paralel cu căutarea terenurilor ↓</span>
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold">3</div>
-                                <div>
-                                    <h3 class="font-semibold mb-1">Proiectarea</h3>
-                                    <p class="text-sm subtitle">6-12 luni • Dezvoltarea proiectului arhitectural și obținerea autorizațiilor</p>
+                            <div class="phase-arrow">
+                                <svg width="32" height="32" viewBox="0 0 32 32"><path d="M8 16h12m0 0l-4-4m4 4l-4 4" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+
+                            <!-- Phase 2 -->
+                            <div class="phase-block phase-2">
+                                <div class="phase-header" style="background: linear-gradient(135deg, #16a34a, #22c55e);">
+                                    <span class="phase-number">2</span>
+                                    <div>
+                                        <h3>Căutarea și Achiziția Terenului</h3>
+                                        <span class="phase-duration">3–12 luni</span>
+                                    </div>
+                                </div>
+                                <div class="phase-steps">
+                                    <a href="/terenuri.html" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Căutare terenuri – filtrare pe → <b style="color:#16a34a;">Terenuri</b></span>
+                                    </a>
+                                    <a href="/terenuri.html" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Cere analiză teren pe platformă (nr. apartamente estimat)</span>
+                                    </a>
+                                    <a href="#faza2" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Verifică situație juridică – extras carte funciară online</span>
+                                    </a>
+                                    <a href="#faza2" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Vizitare teren + verificare vecini (posibil acord vecini)</span>
+                                    </a>
+                                    <a href="#faza2" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Verifică acte teren — notar</span>
+                                    </a>
+                                    <a href="#faza2" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Studiu geotehnic simplificat</span>
+                                    </a>
+                                    <a href="/terenuri.html" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Cere analiză complexă pe platformă (1-2 terenuri finale)</span>
+                                    </a>
+                                    <a href="#faza2-complex" class="step-item">
+                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span>Contract asociere + cumpărare teren (cote indivize)</span>
+                                    </a>
+                                </div>
+                            </div>
+                            </div>
+
+                            <!-- Phase 3 -->
+                            <div class="phase-block phase-3">
+                                <div class="phase-header" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                                    <span class="phase-number">3</span>
+                                    <div>
+                                        <h3>Proiectarea</h3>
+                                        <span class="phase-duration">6–12 luni</span>
+                                    </div>
+                                </div>
+                                <div class="phase-steps">
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>Selectare echipă proiectanți (arhitectură-structură-instalații)</span>
+                                    </a>
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>Concept (planuri, suprafețe, randări)</span>
+                                    </a>
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>Certificat de urbanism pt construire</span>
+                                    </a>
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>Avize</span>
+                                    </a>
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>Proiect tehnic + oferte constructori</span>
+                                    </a>
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>DTAC (autorizația de construire)</span>
+                                    </a>
+                                    <a href="#faza3" class="step-item">
+                                        <span class="step-dot" style="background: #f59e0b;"></span>
+                                        <span>Detalii de execuție</span>
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
-                                <div class="flex-shrink-0 w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold">4</div>
-                                <div>
-                                    <h3 class="font-semibold mb-1">Construcția</h3>
-                                    <p class="text-sm subtitle">12-24 luni • Execuția lucrărilor și finalizarea proiectului</p>
+                            <div class="phase-arrow">
+                                <svg width="32" height="32" viewBox="0 0 32 32"><path d="M8 16h12m0 0l-4-4m4 4l-4 4" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+
+                            <!-- Phase 4 -->
+                            <div class="phase-block phase-4">
+                                <div class="phase-header" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6);">
+                                    <span class="phase-number">4</span>
+                                    <div>
+                                        <h3>Construcția</h3>
+                                        <span class="phase-duration">12–24 luni</span>
+                                    </div>
                                 </div>
+                                <div class="phase-steps">
+                                    <a href="#faza4" class="step-item">
+                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span>Compară oferte constructori (cere consultanță)</span>
+                                    </a>
+                                    <a href="#faza4" class="step-item">
+                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span>Selectează constructor – structură, instalații, arhitectură</span>
+                                    </a>
+                                    <a href="#faza4" class="step-item">
+                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span>Centralizați-vă structurat cheltuielile</span>
+                                    </a>
+                                    <a href="#faza4" class="step-item">
+                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span>Regulament comunicare grup / decizii</span>
+                                    </a>
+                                    <a href="#faza4" class="step-item">
+                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span>Monitorizează îndeaproape execuția / eventual project manager</span>
+                                    </a>
+                                </div>
+                                <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: linear-gradient(135deg, #1e293b, #334155); border-radius: 0.5rem; text-align: center;">
+                                    <span style="color: #fbbf24; font-weight: 700; font-size: 0.85rem;">🏠 Te muți în casa ta!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total timeline bar -->
+                        <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600; font-size: 0.85rem; color: #1e293b;">Durată totală estimată:</span>
+                                <span style="font-weight: 700; font-size: 0.85rem; color: #f59e0b;">23–54 luni (2–4.5 ani)</span>
+                            </div>
+                            <div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #e2e8f0;">
+                                <div style="width: 15%; background: #2563eb;" title="Formarea Grupului"></div>
+                                <div style="width: 25%; background: #16a34a;" title="Căutarea Terenului"></div>
+                                <div style="width: 28%; background: #f59e0b;" title="Proiectarea"></div>
+                                <div style="width: 32%; background: #7c3aed;" title="Construcția"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.35rem; font-size: 0.7rem; color: #64748b;">
+                                <span>2–6 luni</span>
+                                <span>3–12 luni</span>
+                                <span>6–12 luni</span>
+                                <span>12–24 luni</span>
                             </div>
                         </div>
                     </section>
 
                     <!-- Phase 1: Group Formation -->
-                    <section class="card">
+                    <section class="card" id="faza1">
                         <h2 class="text-2xl mb-4">FAZA 1. FORMAREA GRUPULUI</h2>
                         
                         <div class="mb-6">
@@ -138,7 +379,7 @@
                     </section>
 
                     <!-- Phase 2: Land Acquisition -->
-                    <section class="card">
+                    <section class="card" id="faza2">
                         <h2 class="text-2xl mb-4">CǍUTAREA SI ACHIZIȚIA TERENULUI</h2>
                         
                         <div class="mb-6">
@@ -200,7 +441,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">Analiza complexă și achiziția</h3>
+                            <h3 class="text-lg font-semibold mb-3" id="faza2-complex">Analiza complexă și achiziția</h3>
                             
                             <div class="bg-purple-50 p-4 rounded-lg mb-4">
                                 <h4 class="font-semibold mb-2">8. Analiza complexă de la arhitect</h4>
@@ -217,7 +458,7 @@
                     </section>
 
                     <!-- Phase 3: Design -->
-                    <section class="card">
+                    <section class="card" id="faza3">
                         <h2 class="text-2xl mb-4">3. PROIECTAREA</h2>
                         
                         <div class="mb-6">
@@ -265,7 +506,7 @@
                     </section>
 
                     <!-- Phase 4: Construction -->
-                    <section class="card">
+                    <section class="card" id="faza4">
                         <h2 class="text-2xl mb-4">4. CONSTRUCTIA</h2>
                         
                         <div class="mb-6">
