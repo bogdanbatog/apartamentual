@@ -10,75 +10,153 @@
     <link rel="stylesheet" href="../styles.css">
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    maxWidth: {
-                        '6xl': '72rem',
-                    }
-                }
-            }
+            theme: { extend: { maxWidth: { '6xl': '72rem' } } }
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/nav.css">
+    <style>
+        .ce-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 3.5rem 1rem;
+            text-align: center;
+        }
+        .ce-hero h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .ce-hero p { color: #94a3b8; font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+        
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+            max-width: 900px;
+            margin: -2.5rem auto 2.5rem;
+            padding: 0 1rem;
+            position: relative; z-index: 1;
+        }
+        .nav-card {
+            background: white; border-radius: 0.75rem; padding: 1.5rem;
+            text-decoration: none; color: inherit; border: 1px solid #e2e8f0;
+            transition: all 0.2s; display: flex; align-items: flex-start; gap: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .nav-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: #f59e0b; }
+        .nav-card-icon {
+            width: 44px; height: 44px; border-radius: 0.6rem;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+        }
+        .nav-card h3 { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.3rem; }
+        .nav-card p { font-size: 0.82rem; color: #64748b; line-height: 1.4; }
+        .nav-card .arrow { margin-left: auto; color: #cbd5e1; font-size: 0.85rem; align-self: center; transition: color 0.2s; }
+        .nav-card:hover .arrow { color: #f59e0b; }
+        
+        .benefits-section { max-width: 900px; margin: 0 auto 3rem; padding: 0 1rem; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .benefit-card { text-align: center; padding: 2rem 1.25rem; background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; }
+        .benefit-icon { width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .benefit-card h3 { font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem; }
+        .benefit-card p { font-size: 0.82rem; color: #64748b; line-height: 1.5; }
+        
+        .cta-banner { max-width: 900px; margin: 0 auto 3rem; padding: 0 1rem; }
+        .cta-inner { background: linear-gradient(135deg, #1e293b, #334155); border-radius: 1rem; padding: 2.5rem; text-align: center; color: white; }
+        .cta-inner h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .cta-inner p { color: #94a3b8; margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .cta-buttons { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+        .cta-btn { padding: 0.7rem 1.5rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: all 0.15s; }
+        .cta-btn-primary { background: #f59e0b; color: white; }
+        .cta-btn-primary:hover { background: #d97706; }
+        .cta-btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .cta-btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        
+        @media (max-width: 640px) {
+            .benefits-grid { grid-template-columns: 1fr; }
+            .ce-hero { padding: 2.5rem 1rem; }
+            .ce-hero h1 { font-size: 1.7rem; }
+        }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-900">
+<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
     <div id="navigation"></div>
 
-    <main class="flex-1">
-        <div class="container py-8">
+    <div class="ce-hero">
+        <h1>Ce este ApartamenTUal</h1>
+        <p>Construiește-ți locuința visurilor tale împreună cu alții. Mai ieftin, mai bine, în comunitate.</p>
+    </div>
 
-            <div class="grid gap-8">
-                <h1 class="text-3xl">Ce este ApartamenTUal</h1>
-                <p class="subtitle">Definiții, diferențe Baugruppen vs. co-housing, ghid de funcționare, exemple din Europa, legislație în România și testimoniale.</p>
-                
-                <div class="grid-2">
-                    <a href="prezentare-generala.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Prezentare generală</h3>
-                        <p class="subtitle mt-2">Baugruppen vs. co-housing, definiții și concepte de bază</p>
-                    </a>
-                    
-                    <a href="cum-functioneaza.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Cum funcționează – ghid</h3>
-                        <p class="subtitle mt-2">Ghid pas cu pas pentru organizarea unui grup de construcție</p>
-                    </a>
-                    
-                    <a href="exemple-europa.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Exemple din Europa</h3>
-                        <p class="subtitle mt-2">Studii de caz și proiecte de succes din alte țări</p>
-                    </a>
-                    
-                    <a href="legislatia-romania.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Legislația din România</h3>
-                        <p class="subtitle mt-2">Cadrul legal și reglementări pentru grupurile de construcție</p>
-                    </a>
-                    
-                    <a href="testimoniale.html" class="card hover:shadow-soft transition">
-                        <h3 class="text-lg">Testimoniale</h3>
-                        <p class="subtitle mt-2">Experiențele oamenilor care au construit în grup</p>
-                    </a>
-                </div>
-                
-                <div class="mt-8 p-6 bg-blue-50 rounded-lg">
-                    <h2 class="text-xl mb-4">De ce să construiești în grup?</h2>
-                    <div class="grid-3">
-                        <div>
-                            <h3 class="font-semibold mb-2">🏗️ Costuri reduse</h3>
-                            <p class="text-sm">Împărțim costurile pentru teren, proiectare și construcție</p>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold mb-2">🤝 Comunitate</h3>
-                            <p class="text-sm">Construim relații și o comunitate de vecini</p>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold mb-2">🎯 Personalizare</h3>
-                            <p class="text-sm">Influențăm designul și calitatea construcției</p>
-                        </div>
-                    </div>
-                </div>
+    <div class="nav-cards">
+        <a href="prezentare-generala.html" class="nav-card">
+            <div class="nav-card-icon" style="background: #eff6ff; color: #2563eb;"><i class="fas fa-book-open"></i></div>
+            <div>
+                <h3>Prezentare generală</h3>
+                <p>Baugruppen vs. co-housing, definiții și concepte de bază</p>
+            </div>
+            <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <a href="cum-functioneaza.html" class="nav-card">
+            <div class="nav-card-icon" style="background: #f0fdf4; color: #16a34a;"><i class="fas fa-map-signs"></i></div>
+            <div>
+                <h3>Cum funcționează – ghid</h3>
+                <p>Ghid pas cu pas pentru organizarea unui grup de construcție</p>
+            </div>
+            <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <a href="exemple-europa.html" class="nav-card">
+            <div class="nav-card-icon" style="background: #fff7ed; color: #ea580c;"><i class="fas fa-globe-europe"></i></div>
+            <div>
+                <h3>Exemple din Europa</h3>
+                <p>Studii de caz și proiecte de succes din alte țări</p>
+            </div>
+            <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <a href="legislatia-romania.html" class="nav-card">
+            <div class="nav-card-icon" style="background: #faf5ff; color: #7c3aed;"><i class="fas fa-gavel"></i></div>
+            <div>
+                <h3>Legislația din România</h3>
+                <p>Cadrul legal și reglementări pentru grupurile de construcție</p>
+            </div>
+            <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+        <a href="testimoniale.html" class="nav-card">
+            <div class="nav-card-icon" style="background: #fefce8; color: #ca8a04;"><i class="fas fa-comments"></i></div>
+            <div>
+                <h3>Testimoniale</h3>
+                <p>Experiențele oamenilor care au construit în grup</p>
+            </div>
+            <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+        </a>
+    </div>
+    
+    <div class="benefits-section">
+        <h2 style="font-size: 1.4rem; font-weight: 700; text-align: center; color: #1e293b; margin-bottom: 1.5rem;">De ce să construiești în grup?</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon" style="background: #fff7ed; color: #f59e0b;"><i class="fas fa-piggy-bank"></i></div>
+                <h3>Costuri reduse</h3>
+                <p>Împărțim costurile pentru teren, proiectare și construcție — economii de 20-30%</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon" style="background: #f0fdf4; color: #16a34a;"><i class="fas fa-users"></i></div>
+                <h3>Comunitate</h3>
+                <p>Construim relații și o comunitate de vecini cu care ne înțelegem din start</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon" style="background: #eff6ff; color: #2563eb;"><i class="fas fa-pencil-ruler"></i></div>
+                <h3>Personalizare</h3>
+                <p>Influențăm designul, finisajele și calitatea construcției — e casa ta, nu a dezvoltatorului</p>
             </div>
         </div>
-    </main>
+    </div>
+    
+    <div class="cta-banner">
+        <div class="cta-inner">
+            <h2>Ești gata să începi?</h2>
+            <p>Creează-ți profilul și descoperă grupuri de construcție sau terenuri disponibile</p>
+            <div class="cta-buttons">
+                <a href="/grupuri.html" class="cta-btn cta-btn-primary"><i class="fas fa-users"></i> Vezi Grupuri</a>
+                <a href="/terenuri.html" class="cta-btn cta-btn-secondary"><i class="fas fa-map-marker-alt"></i> Vezi Terenuri</a>
+            </div>
+        </div>
+    </div>
 
     <div id="footer"></div>
 
