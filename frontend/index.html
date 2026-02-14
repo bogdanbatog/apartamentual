@@ -553,7 +553,7 @@
                         <h2 class="font-display text-4xl md:text-5xl font-medium text-white">News</h2>
                         <p class="text-brand-300 mt-4 text-lg">Articole și resurse despre Baugruppen din întreaga lume</p>
                     </div>
-                    <a href="blog.html" class="inline-flex items-center gap-2 text-accent font-medium hover:text-accent-light transition-colors mt-6 md:mt-0">
+                    <a href="news.html" class="inline-flex items-center gap-2 text-accent font-medium hover:text-accent-light transition-colors mt-6 md:mt-0">
                         Vezi toate articolele
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -561,61 +561,11 @@
                     </a>
                 </div>
                 
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <a href="https://www.archdaily.com/1022192/by-residents-for-residents-what-is-the-baugruppe-system" target="_blank" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
-                        <div class="aspect-video overflow-hidden">
-                            <img src="https://images.adsttc.com/media/images/6630/58a5/a253/6601/7fac/3e92/newsletter/by-residents-for-residents-what-is-the-baugruppe-system_1.jpg?1714497699" alt="Baugruppe System" class="article-img w-full h-full object-cover">
-                        </div>
-                        <div class="p-5">
-                            <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">ArchDaily</div>
-                            <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">By Residents, For Residents: What Is the Baugruppe System?</h3>
-                        </div>
-                    </a>
-                    <a href="https://www.shareable.net/baugruppen-germanys-sustainable-community-housing-model/" target="_blank" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
-                        <div class="aspect-video overflow-hidden bg-brand-800">
-                            <img src="https://www.shareable.net/wp-content/uploads/2020/07/spreefeld-aerial-fran-silvestre.jpeg" alt="Baugruppen Germany" class="article-img w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop'">
-                        </div>
-                        <div class="p-5">
-                            <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">Shareable</div>
-                            <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">Baugruppen: Germany's Sustainable Community Housing Model</h3>
-                        </div>
-                    </a>
-                    <a href="https://www.archdaily.com/998430/baugruppe-d2-ifub-star" target="_blank" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
-                        <div class="aspect-video overflow-hidden">
-                            <img src="https://images.adsttc.com/media/images/6332/6bc6/9d5c/d801/6c67/49de/newsletter/baugruppe-d2-ifub-star_8.jpg?1664249794" alt="Baugruppe D2" class="article-img w-full h-full object-cover">
-                        </div>
-                        <div class="p-5">
-                            <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">ArchDaily</div>
-                            <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">Baugruppe D2 / IFUB*</h3>
-                        </div>
-                    </a>
-                    <a href="https://www.larchlab.com/baugruppen/" target="_blank" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
-                        <div class="aspect-video overflow-hidden bg-brand-800">
-                            <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop" alt="Baugruppen Larch Lab" class="article-img w-full h-full object-cover">
-                        </div>
-                        <div class="p-5">
-                            <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">Larch Lab</div>
-                            <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">Baugruppen: Community-Led Housing Development</h3>
-                        </div>
-                    </a>
-                    <a href="https://dynamic-cities.squarespace.com/baugruppen" target="_blank" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
-                        <div class="aspect-video overflow-hidden bg-brand-800">
-                            <img src="https://images.unsplash.com/photo-1460317442991-0ec209397118?w=600&h=400&fit=crop" alt="Dynamic Cities Baugruppen" class="article-img w-full h-full object-cover">
-                        </div>
-                        <div class="p-5">
-                            <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">Dynamic Cities</div>
-                            <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">Baugruppen: A Model for Collaborative Urban Living</h3>
-                        </div>
-                    </a>
-                    <a href="https://lifeedited.com/baugruppen-urban-housing-for-the-people-by-the-people/" target="_blank" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
-                        <div class="aspect-video overflow-hidden bg-brand-800">
-                            <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=600&h=400&fit=crop" alt="Life Edited Baugruppen" class="article-img w-full h-full object-cover">
-                        </div>
-                        <div class="p-5">
-                            <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">Life Edited</div>
-                            <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">Baugruppen: Urban Housing For The People, By The People</h3>
-                        </div>
-                    </a>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="heroArticlesGrid">
+                    <!-- Articles loaded dynamically from Supabase -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin"></i> Se încarcă articolele...
+                    </div>
                 </div>
             </div>
         </section>
@@ -747,7 +697,64 @@
                     link.setAttribute('href', link.dataset.authRedirect);
                 });
             }
+            
+            // Load hero articles from Supabase
+            loadHeroArticles();
         });
+        
+        async function loadHeroArticles() {
+            const grid = document.getElementById('heroArticlesGrid');
+            if (!grid) return;
+            
+            try {
+                const { data, error } = await sb
+                    .from('articles')
+                    .select('id, title, slug, image_url, category, source_url, published_at')
+                    .eq('status', 'published')
+                    .order('published_at', { ascending: false })
+                    .limit(6);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #94a3b8;">Niciun articol publicat încă.</div>';
+                    return;
+                }
+                
+                const categoryLabels = {
+                    general: 'General', sfaturi: 'Sfaturi', noutati: 'Noutăți',
+                    analize: 'Analize', comunitate: 'Comunitate', legal: 'Legal'
+                };
+                
+                grid.innerHTML = data.map(a => {
+                    const catLabel = categoryLabels[a.category] || a.category || 'Articol';
+                    // If article has source_url, show domain. Otherwise show category.
+                    let sourceLabel = catLabel;
+                    if (a.source_url) {
+                        try { sourceLabel = new URL(a.source_url).hostname.replace('www.', ''); } catch(e) {}
+                    }
+                    
+                    return `
+                        <a href="news.html#${a.slug}" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
+                            <div class="aspect-video overflow-hidden bg-brand-800">
+                                <img src="${a.image_url || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop'}" 
+                                     alt="${a.title}" 
+                                     class="article-img w-full h-full object-cover"
+                                     onerror="this.src='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop'">
+                            </div>
+                            <div class="p-5">
+                                <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">${sourceLabel}</div>
+                                <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">${a.title}</h3>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+                
+            } catch (e) {
+                console.error('Load hero articles error:', e);
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #94a3b8;">Nu s-au putut încărca articolele.</div>';
+            }
+        }
     </script>
 </body>
 </html>
