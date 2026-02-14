@@ -463,10 +463,21 @@
                             <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">
                                 <i class="fas fa-image" style="color: var(--accent);"></i> Imagine principală (apare în hero + la început de articol)
                             </label>
-                            <input type="text" id="articleImage" placeholder="https://..." style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
-                            <div id="imagePreview" style="margin-top: 0.5rem; display: none;">
-                                <img id="imagePreviewImg" style="max-height: 120px; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <label style="padding: 0.5rem 1rem; background: var(--accent); color: white; border-radius: 0.4rem; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                    <i class="fas fa-upload"></i> Încarcă imagine
+                                    <input type="file" id="articleImageFile" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="uploadMainImage(this)">
+                                </label>
+                                <span id="mainImageStatus" style="font-size: 0.8rem; color: var(--brand-500);"></span>
                             </div>
+                            <input type="hidden" id="articleImage">
+                            <div id="imagePreview" style="margin-top: 0.5rem; display: none; position: relative;">
+                                <img id="imagePreviewImg" style="max-height: 150px; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                                <button type="button" onclick="removeMainImage()" style="position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: white; border: none; cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.35rem;">Recomandat: 600x400px, max 2MB, format JPG/PNG/WebP</p>
                         </div>
                         <div style="margin-bottom: 1.25rem;">
                             <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">
@@ -488,9 +499,11 @@
                                 <i class="fas fa-images" style="color: var(--green);"></i> Imagini suplimentare (apar la sfârșitul articolului)
                             </label>
                             <div id="extraImagesContainer"></div>
-                            <button type="button" onclick="addExtraImageField()" style="margin-top: 0.5rem; padding: 0.4rem 0.8rem; border: 1px dashed #cbd5e1; background: white; border-radius: 0.4rem; cursor: pointer; font-size: 0.82rem; color: var(--brand-500);">
+                            <label style="margin-top: 0.5rem; padding: 0.4rem 0.8rem; border: 1px dashed #cbd5e1; background: white; border-radius: 0.4rem; cursor: pointer; font-size: 0.82rem; color: var(--brand-500); display: inline-flex; align-items: center; gap: 0.3rem;">
                                 <i class="fas fa-plus"></i> Adaugă imagine
-                            </button>
+                                <input type="file" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="uploadExtraImage(this)">
+                            </label>
+                            <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.35rem;">Recomandat: 800x500px, max 2MB</p>
                         </div>
                         <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
                             <button onclick="hideArticleEditor()" style="padding: 0.6rem 1.25rem; border: 1px solid #e2e8f0; background: white; border-radius: 0.5rem; cursor: pointer; font-weight: 500;">Anulează</button>
@@ -928,8 +941,13 @@
                 document.getElementById('articleSummary').value = article.summary || '';
                 document.getElementById('articleContent').value = article.content || '';
                 
-                // Show image preview
-                updateImagePreview();
+                // Show image preview if exists
+                if (article.image_url) {
+                    document.getElementById('imagePreviewImg').src = article.image_url;
+                    document.getElementById('imagePreview').style.display = 'block';
+                } else {
+                    document.getElementById('imagePreview').style.display = 'none';
+                }
                 
                 // Load extra images
                 if (article.extra_images && article.extra_images.length > 0) {
@@ -1046,43 +1064,120 @@
         return div.innerHTML;
     }
     
-    // ── IMAGE PREVIEW ──
-    document.addEventListener('DOMContentLoaded', () => {
-        const imgInput = document.getElementById('articleImage');
-        if (imgInput) {
-            imgInput.addEventListener('input', updateImagePreview);
-        }
-    });
+    // ── SUPABASE STORAGE URL ──
+    const STORAGE_URL = sb.storageUrl || (sb.supabaseUrl || '').replace(/\/$/, '') + '/storage/v1';
     
-    function updateImagePreview() {
-        const url = document.getElementById('articleImage').value.trim();
-        const preview = document.getElementById('imagePreview');
-        const img = document.getElementById('imagePreviewImg');
-        if (url) {
-            img.src = url;
-            img.onerror = () => { preview.style.display = 'none'; };
-            img.onload = () => { preview.style.display = 'block'; };
-        } else {
-            preview.style.display = 'none';
-        }
+    function getPublicUrl(path) {
+        const { data } = sb.storage.from('articles').getPublicUrl(path);
+        return data?.publicUrl || '';
     }
     
-    // ── EXTRA IMAGES ──
-    let extraImageCounter = 0;
+    // ── UPLOAD MAIN IMAGE ──
+    async function uploadMainImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const status = document.getElementById('mainImageStatus');
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se încarcă...';
+        
+        try {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const fileName = `main-${Date.now()}.${ext}`;
+            
+            const { data, error } = await sb.storage
+                .from('articles')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+            
+            if (error) throw error;
+            
+            const url = getPublicUrl(fileName);
+            document.getElementById('articleImage').value = url;
+            
+            // Show preview
+            const preview = document.getElementById('imagePreview');
+            document.getElementById('imagePreviewImg').src = url;
+            preview.style.display = 'block';
+            
+            status.innerHTML = '<i class="fas fa-check" style="color: var(--green);"></i> Încărcată!';
+            setTimeout(() => { status.textContent = ''; }, 2000);
+            
+        } catch (e) {
+            console.error('Upload error:', e);
+            status.innerHTML = '<span style="color: var(--red);">Eroare: ' + e.message + '</span>';
+        }
+        
+        input.value = '';
+    }
     
-    function addExtraImageField(value) {
-        extraImageCounter++;
+    function removeMainImage() {
+        document.getElementById('articleImage').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('mainImageStatus').textContent = '';
+    }
+    
+    // ── UPLOAD EXTRA IMAGE ──
+    async function uploadExtraImage(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        // Add a loading placeholder
+        const container = document.getElementById('extraImagesContainer');
+        const loadingDiv = document.createElement('div');
+        loadingDiv.style.cssText = 'padding: 0.5rem; color: var(--brand-500); font-size: 0.82rem;';
+        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se încarcă imaginea...';
+        container.appendChild(loadingDiv);
+        
+        try {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const fileName = `extra-${Date.now()}.${ext}`;
+            
+            const { data, error } = await sb.storage
+                .from('articles')
+                .upload(fileName, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+            
+            if (error) throw error;
+            
+            const url = getPublicUrl(fileName);
+            
+            // Remove loading, add image row
+            container.removeChild(loadingDiv);
+            addExtraImageRow(url);
+            
+        } catch (e) {
+            console.error('Upload extra image error:', e);
+            loadingDiv.innerHTML = '<span style="color: var(--red);">Eroare: ' + e.message + '</span>';
+            setTimeout(() => { container.removeChild(loadingDiv); }, 3000);
+        }
+        
+        input.value = '';
+    }
+    
+    function addExtraImageRow(url) {
         const container = document.getElementById('extraImagesContainer');
         const row = document.createElement('div');
-        row.style.cssText = 'display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;';
-        row.id = 'extraImg-' + extraImageCounter;
+        row.style.cssText = 'display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; padding: 0.4rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.4rem;';
         row.innerHTML = `
-            <input type="text" class="extra-image-input" value="${value || ''}" placeholder="https://url-imagine.jpg" style="flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.4rem; font-size: 0.88rem;">
-            <button type="button" onclick="this.parentElement.remove()" style="padding: 0.4rem 0.6rem; border: 1px solid #fca5a5; background: #fef2f2; border-radius: 0.35rem; cursor: pointer; color: var(--red); font-size: 0.78rem;" title="Șterge">
+            <img src="${url}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+            <input type="hidden" class="extra-image-input" value="${url}">
+            <span style="flex: 1; font-size: 0.78rem; color: var(--brand-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${url.split('/').pop()}</span>
+            <button type="button" onclick="this.parentElement.remove()" style="padding: 0.3rem 0.5rem; border: 1px solid #fca5a5; background: #fef2f2; border-radius: 0.35rem; cursor: pointer; color: var(--red); font-size: 0.72rem;" title="Șterge">
                 <i class="fas fa-times"></i>
             </button>
         `;
         container.appendChild(row);
+    }
+    
+    // ── EXTRA IMAGE COUNTER (legacy support) ──
+    let extraImageCounter = 0;
+    
+    function addExtraImageField(value) {
+        if (value) addExtraImageRow(value);
     }
     </script>
 </body>
