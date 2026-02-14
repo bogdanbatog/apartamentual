@@ -442,12 +442,10 @@
                             <div>
                                 <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Categorie</label>
                                 <select id="articleCategory" style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
-                                    <option value="general">General</option>
-                                    <option value="sfaturi">Sfaturi</option>
-                                    <option value="noutati">Noutăți</option>
-                                    <option value="analize">Analize piață</option>
-                                    <option value="comunitate">Comunitate</option>
+                                    <option value="exemple">Exemple</option>
                                     <option value="legal">Legal</option>
+                                    <option value="analize">Analize</option>
+                                    <option value="noutati">Noutăți</option>
                                 </select>
                             </div>
                             <div>
@@ -883,12 +881,10 @@
         };
         
         const categoryLabels = {
-            general: 'General',
-            sfaturi: 'Sfaturi',
-            noutati: 'Noutăți',
-            analize: 'Analize piață',
-            comunitate: 'Comunitate',
-            legal: 'Legal'
+            exemple: 'Exemple',
+            legal: 'Legal',
+            analize: 'Analize',
+            noutati: 'Noutăți'
         };
         
         tbody.innerHTML = allArticles.map(a => `
@@ -934,7 +930,7 @@
                 document.getElementById('editorTitle').textContent = 'Editează articolul';
                 document.getElementById('articleId').value = article.id;
                 document.getElementById('articleTitle').value = article.title;
-                document.getElementById('articleCategory').value = article.category || 'general';
+                document.getElementById('articleCategory').value = article.category || 'exemple';
                 document.getElementById('articleStatus').value = article.status || 'draft';
                 document.getElementById('articleImage').value = article.image_url || '';
                 document.getElementById('articleSourceUrl').value = article.source_url || '';
@@ -958,7 +954,7 @@
             document.getElementById('editorTitle').textContent = 'Articol nou';
             document.getElementById('articleId').value = '';
             document.getElementById('articleTitle').value = '';
-            document.getElementById('articleCategory').value = 'general';
+            document.getElementById('articleCategory').value = 'exemple';
             document.getElementById('articleStatus').value = 'draft';
             document.getElementById('articleImage').value = '';
             document.getElementById('articleSourceUrl').value = '';
