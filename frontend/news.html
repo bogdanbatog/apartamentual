@@ -228,12 +228,10 @@
         <div class="news-container">
             <div class="news-filters" id="categoryFilters">
                 <button class="filter-btn active" data-cat="all">Toate</button>
-                <button class="filter-btn" data-cat="sfaturi">Sfaturi</button>
-                <button class="filter-btn" data-cat="noutati">Noutăți</button>
-                <button class="filter-btn" data-cat="analize">Analize piață</button>
-                <button class="filter-btn" data-cat="comunitate">Comunitate</button>
+                <button class="filter-btn" data-cat="exemple">Exemple</button>
                 <button class="filter-btn" data-cat="legal">Legal</button>
-                <button class="filter-btn" data-cat="general">General</button>
+                <button class="filter-btn" data-cat="analize">Analize</button>
+                <button class="filter-btn" data-cat="noutati">Noutăți</button>
             </div>
             
             <div class="news-loading" id="newsLoading">
@@ -278,12 +276,10 @@
     let currentFilter = 'all';
     
     const categoryLabels = {
-        general: 'General',
-        sfaturi: 'Sfaturi',
-        noutati: 'Noutăți',
-        analize: 'Analize piață',
-        comunitate: 'Comunitate',
-        legal: 'Legal'
+        exemple: 'Exemple',
+        legal: 'Legal',
+        analize: 'Analize',
+        noutati: 'Noutăți'
     };
     
     document.addEventListener('DOMContentLoaded', async () => {
