@@ -260,8 +260,13 @@
             <span id="articleViewCategory" class="article-category-badge"></span>
             <span id="articleViewDate"></span>
         </div>
+        <div id="articleViewSource" style="display: none; margin-bottom: 1.25rem; padding: 0.6rem 1rem; background: #f0f9ff; border-left: 3px solid #2563eb; border-radius: 0 0.35rem 0.35rem 0; font-size: 0.85rem; color: #334155;">
+            <i class="fas fa-external-link-alt" style="color: #2563eb; margin-right: 0.3rem;"></i>
+            Preluat de pe: <a id="articleViewSourceLink" href="#" target="_blank" style="color: #2563eb; font-weight: 500;"></a>
+        </div>
         <img id="articleViewImage" class="article-full-image" style="display: none;">
         <div class="article-full-content" id="articleViewContent"></div>
+        <div id="articleViewExtraImages" style="display: none; margin-top: 2rem;"></div>
     </div>
     
     <script src="js/supabase-config.js"></script>
@@ -379,6 +384,23 @@
             ? new Date(article.published_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' })
             : '';
         
+        // Source URL
+        const sourceDiv = document.getElementById('articleViewSource');
+        if (article.source_url) {
+            const sourceLink = document.getElementById('articleViewSourceLink');
+            sourceLink.href = article.source_url;
+            // Show domain name as link text
+            try {
+                sourceLink.textContent = new URL(article.source_url).hostname.replace('www.', '');
+            } catch (e) {
+                sourceLink.textContent = article.source_url;
+            }
+            sourceDiv.style.display = 'block';
+        } else {
+            sourceDiv.style.display = 'none';
+        }
+        
+        // Main image
         const img = document.getElementById('articleViewImage');
         if (article.image_url) {
             img.src = article.image_url;
@@ -387,7 +409,19 @@
             img.style.display = 'none';
         }
         
+        // Content
         document.getElementById('articleViewContent').innerHTML = article.content;
+        
+        // Extra images
+        const extraContainer = document.getElementById('articleViewExtraImages');
+        if (article.extra_images && article.extra_images.length > 0) {
+            extraContainer.innerHTML = article.extra_images.map(url => 
+                `<img src="${url}" style="width: 100%; border-radius: 0.75rem; margin-bottom: 1rem; border: 1px solid #e2e8f0;" onerror="this.style.display='none'">`
+            ).join('');
+            extraContainer.style.display = 'block';
+        } else {
+            extraContainer.style.display = 'none';
+        }
         
         // Update URL hash
         window.location.hash = article.slug;
