@@ -436,7 +436,20 @@
                         <input type="hidden" id="articleId">
                         <div style="margin-bottom: 1.25rem;">
                             <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">Titlu *</label>
-                            <input type="text" id="articleTitle" placeholder="Titlul articolului" style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;">
+                            <input type="text" id="articleTitle" placeholder="Titlul articolului" style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.95rem;" oninput="autoGenerateSlug()">
+                        </div>
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--brand-500); margin-bottom: 0.35rem;">
+                                Slug (URL) 
+                                <span style="font-weight: 400; color: #94a3b8;">— generat automat, editabil</span>
+                            </label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <input type="text" id="articleSlug" placeholder="slug-articol" style="flex: 1; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.88rem; font-family: monospace; color: #475569;">
+                                <button type="button" onclick="resetSlug()" style="padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.78rem; background: #f8fafc; cursor: pointer; white-space: nowrap;" title="Regenerează din titlu">↻ Auto</button>
+                            </div>
+                            <p style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.25rem;">
+                                Pentru povestea prototipului, folosește slug-ul: <code style="background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 0.2rem; cursor: pointer;" onclick="document.getElementById('articleSlug').value='povestea-noastra'">povestea-noastra</code>
+                            </p>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
                             <div>
@@ -938,6 +951,8 @@
                 document.getElementById('articleSourceUrl').value = article.source_url || '';
                 document.getElementById('articleSummary').value = article.summary || '';
                 document.getElementById('articleContent').value = article.content || '';
+                document.getElementById('articleSlug').value = article.slug || '';
+                slugManuallyEdited = true; // don't overwrite existing slug
                 
                 // Show image preview if exists
                 if (article.image_url) {
@@ -962,6 +977,8 @@
             document.getElementById('articleSourceUrl').value = '';
             document.getElementById('articleSummary').value = '';
             document.getElementById('articleContent').value = '';
+            document.getElementById('articleSlug').value = '';
+            slugManuallyEdited = false;
             document.getElementById('imagePreview').style.display = 'none';
         }
     }
@@ -985,6 +1002,27 @@
             .slice(0, 100);
     }
     
+    // Auto-fill slug when typing title (only if slug field is empty or was auto-generated)
+    let slugManuallyEdited = false;
+    function autoGenerateSlug() {
+        if (slugManuallyEdited) return;
+        const title = document.getElementById('articleTitle').value.trim();
+        if (title) {
+            document.getElementById('articleSlug').value = generateSlug(title);
+        }
+    }
+    // Mark slug as manually edited when user types in it
+    document.addEventListener('DOMContentLoaded', () => {
+        const slugInput = document.getElementById('articleSlug');
+        if (slugInput) {
+            slugInput.addEventListener('input', () => { slugManuallyEdited = true; });
+        }
+    });
+    function resetSlug() {
+        slugManuallyEdited = false;
+        autoGenerateSlug();
+    }
+    
     async function saveArticle() {
         const id = document.getElementById('articleId').value;
         const title = document.getElementById('articleTitle').value.trim();
@@ -1005,7 +1043,7 @@
         
         const articleData = {
             title,
-            slug: generateSlug(title) + '-' + Date.now().toString(36),
+            slug: document.getElementById('articleSlug').value.trim() || (generateSlug(title) + '-' + Date.now().toString(36)),
             summary: document.getElementById('articleSummary').value.trim() || null,
             content,
             image_url: document.getElementById('articleImage').value.trim() || null,
@@ -1024,8 +1062,11 @@
         try {
             let error;
             if (id) {
-                // Update
-                delete articleData.slug; // don't change slug on edit
+                // Update — keep slug from field (allows manual editing)
+                const currentArticle = allArticles.find(a => a.id === id);
+                if (currentArticle && articleData.slug === currentArticle.slug) {
+                    delete articleData.slug; // unchanged, don't send
+                }
                 ({ error } = await sb.from('articles').update(articleData).eq('id', id));
             } else {
                 // Insert
