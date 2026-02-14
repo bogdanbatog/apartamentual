@@ -838,7 +838,6 @@
                 <div>
                     <h1 id="grupNume">Nume Grup</h1>
                     <div class="grup-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> <span id="grupLocation">București</span></span>
                         <span><i class="fas fa-users"></i> <span id="grupMembriCount">0</span>/<span id="grupMaxMembri">20</span> membri</span>
                         <span><i class="fas fa-calendar"></i> Creat <span id="grupCreatedAt">azi</span></span>
                     </div>
@@ -1179,26 +1178,21 @@ async function loadGroupDetails() {
             isAdmin = group.admin_id === currentUser.id;
         }
         
-        // Load terenuri favorite (if member)
+        // Load terenuri favorite (visible to everyone)
         let terenuri = [];
-        if (isMember) {
-            // First get the likes
+        {
             const { data: likesData, error: likesError } = await sb
                 .from('terenuri_likes_grupuri')
                 .select('teren_id')
                 .eq('grup_id', groupId);
             
-            console.log('Likes data:', likesData, 'Error:', likesError);
-            
             if (likesData && likesData.length > 0) {
-                // Then get the terenuri details
                 const terenIds = likesData.map(l => l.teren_id);
                 const { data: terenuriData } = await sb
                     .from('terenuri')
                     .select('id, titlu, zona, image_url')
                     .in('id', terenIds);
                 
-                console.log('Terenuri data:', terenuriData);
                 terenuri = (terenuriData || []).map(t => ({ teren: t }));
             }
         }
@@ -1247,9 +1241,6 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     
     // Header info
     document.getElementById('grupNume').textContent = group.nume;
-    document.getElementById('grupLocation').textContent = group.zona 
-        ? `${group.oras}, ${group.zona}` 
-        : group.oras || 'Locație nespecificată';
     document.getElementById('grupMembriCount').textContent = members.length;
     document.getElementById('grupMaxMembri').textContent = group.max_membri;
     document.getElementById('grupCreatedAt').textContent = formatDate(group.created_at);
