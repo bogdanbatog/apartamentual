@@ -1542,6 +1542,7 @@ function renderTerenuri(terenuri) {
                         <i class="fas fa-chart-bar"></i> Cere o analiză
                     </a>
                 </div>
+                ${isMember ? `
                 <div class="teren-comments-area">
                     <div class="teren-comments-list" id="comments-${teren.id}">
                         <div class="no-comments"><i class="fas fa-spinner fa-spin"></i> Se incarca...</div>
@@ -1552,14 +1553,17 @@ function renderTerenuri(terenuri) {
                         <button onclick="addComment('${teren.id}')">Trimite</button>
                     </div>
                 </div>
+                ` : ''}
             </div>
         `;
     }).join('');
     
-    // Load comments for each teren
-    terenuri.forEach(t => {
-        if (t.teren) loadComments(t.teren.id);
-    });
+    // Load comments for each teren (only for members)
+    if (isMember) {
+        terenuri.forEach(t => {
+            if (t.teren) loadComments(t.teren.id);
+        });
+    }
 }
 
 // ── COMMENTS ──
