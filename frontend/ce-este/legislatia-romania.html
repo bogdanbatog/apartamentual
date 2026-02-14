@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="ce-este.css">
     <script>
         tailwind.config = {
             theme: {
@@ -22,29 +23,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/nav.css">
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-900">
+<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
     <div id="navigation"></div>
 
     <main class="flex-1">
-        <div class="container py-8">
+    <div class="ce-page-hero">
+        <nav class="ce-breadcrumb">
+            <a href="../index.html">Acasă</a><span class="sep">›</span>
+            <a href="index.html">Ce este</a><span class="sep">›</span>
+            Legislația din România
+        </nav>
+        <h1>Legislația din România</h1>
+        <p>Cadrul legal pentru grupurile de construcție în România</p>
+    </div>
 
-            <div class="max-w-4xl mx-auto">
-                <!-- Breadcrumb -->
-                <nav class="mb-6 text-sm">
-                    <a href="../index.html" class="text-blue-600 hover:underline">Acasă</a> 
-                    <span class="mx-2">›</span>
-                    <a href="index.html" class="text-blue-600 hover:underline">Ce este ApartamenTUal</a>
-                    <span class="mx-2">›</span>
-                    <span class="text-gray-600">Legislația din România</span>
-                </nav>
+    <div class="ce-content">
+        <div class="ce-content-inner">
 
-                <div class="grid gap-8">
-                    <div>
-                        <h1 class="text-3xl mb-4">Legislația Din România</h1>
-                        <p class="subtitle">Ghid practic pentru inițiative de tip Baugruppen și Co-housing</p>
-                    </div>
-
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Asocierea</h2>
                         <div class="space-y-6">
                             <div class="border border-gray-200 rounded-lg p-6">
@@ -67,7 +63,7 @@
                         </div>
                     </section>
 
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Pașii Juridici – Cum Funcționează Un Baugruppe În România</h2>
                         <ol class="list-decimal pl-6 space-y-3 text-sm">
                             <li><strong>Achiziția terenului</strong> – societatea civilă cumpără terenul; apare în cartea funciară reprezentată de membri.</li>
@@ -77,7 +73,7 @@
                         </ol>
                     </section>
 
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Structura Contractului De Societate Civilă (Model Recomandat)</h2>
                         <ul class="list-disc pl-6 space-y-2 text-sm">
                             <li><strong>Preambul</strong> – datele membrilor, scopul asocierii.</li>
@@ -93,7 +89,7 @@
                         </ul>
                     </section>
 
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Finanțarea – varianta de discutat cu banca</h2>
                         <div class="grid md:grid-cols-3 gap-6 mb-6">
                             <div class="bg-gray-50 p-4 rounded">
@@ -115,12 +111,12 @@
                         </div>
                     </section>
 
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Riscuri Și Protecții Juridice</h2>
                         <p class="text-sm">Contractul de societate trebuie să prevadă clar procedura de ieșire, excludere și înlocuire. Membrii neplătitori pot fi excluși, iar cotele lor redistribuite.</p>
                     </section>
 
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Procesul De Avizare Și Autorizare</h2>
                         <ul class="list-disc pl-6 space-y-2 text-sm">
                             <li><strong>Certificatul de urbanism</strong> – obținut de societate sau coproprietari.</li>
@@ -130,7 +126,7 @@
                         </ul>
                     </section>
 
-                    <section class="card">
+                    <section class="ce-section">
                         <h2 class="text-2xl mb-4">Legislație Relevantă În România</h2>
                         <ul class="list-disc pl-6 space-y-2 text-sm">
                             <li><a href="https://legislatie.just.ro/Public/DetaliiDocument/175630" class="text-blue-600 hover:underline" target="_blank" rel="noopener">Codul Civil</a> (art. 1881–1949) – contractul de societate civilă</li>
@@ -159,8 +155,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
+    </div>
     </main>
 
     <div id="footer"></div>
