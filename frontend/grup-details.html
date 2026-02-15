@@ -978,7 +978,10 @@
         <!-- Journal & Checklist - Member only (Coming soon) -->
         <div id="journalSection" class="section-card member-only">
             <h2><i class="fas fa-tasks"></i> Progresul Grupului</h2>
-            <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 1.25rem;">Urmărește și bifează pașii pe măsură ce avansați în procesul de construcție.</p>
+            <p id="checklistSubtitle" style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 1.25rem;">Urmărește și bifează pașii pe măsură ce avansați în procesul de construcție.</p>
+            <div id="checklistReadonly" style="display: none; padding: 0.6rem 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.82rem; color: #92400e;">
+                <i class="fas fa-info-circle"></i> Acest grup este deschis — doar adminul poate edita jurnalul. Contactează adminul pentru modificări.
+            </div>
             
             <!-- Progress bar -->
             <div style="margin-bottom: 1.5rem;">
@@ -1165,6 +1168,7 @@ let currentUser = null;
 let currentGroup = null;
 let isMember = false;
 let isAdmin = false;
+let canEditChecklist = false;
 let members = [];
 let pendingRequests = [];
 
@@ -1266,6 +1270,11 @@ async function loadGroupDetails() {
         if (currentUser) {
             isMember = members.some(m => m.user_id === currentUser.id);
             isAdmin = group.admin_id === currentUser.id;
+            
+            // Checklist edit permission:
+            // cu_aprobare → all members can edit
+            // deschis → only admin can edit
+            canEditChecklist = isAdmin || (isMember && group.status === 'cu_aprobare');
         }
         
         // Load terenuri favorite (visible to everyone)
@@ -1462,6 +1471,12 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         document.querySelectorAll('.member-only').forEach(el => el.classList.add('visible'));
         loadKickVotes();
         loadChecklist();
+        
+        // Show readonly notice if member can't edit
+        if (!canEditChecklist) {
+            document.getElementById('checklistReadonly').style.display = 'block';
+            document.getElementById('checklistSubtitle').textContent = 'Urmărește progresul grupului în procesul de construcție.';
+        }
     }
     
     // Terenuri favorite - visible to all logged-in users
@@ -1797,27 +1812,41 @@ function renderStep(step, phaseColor) {
     const checkedAt = data?.checked_at ? new Date(data.checked_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
     const checkedBy = data?.checked_by ? (profilesCache[data.checked_by] || '') : '';
     
+    const checkboxHtml = canEditChecklist
+        ? `<div class="cl-check ${isChecked ? 'checked' : ''}" 
+                 onclick="toggleStep('${step.key}')"
+                 style="${isChecked ? '' : 'border-color: ' + phaseColor + '40;'}"></div>`
+        : `<div class="cl-check ${isChecked ? 'checked' : ''}" 
+                 style="cursor: default; opacity: 0.7; ${isChecked ? '' : 'border-color: ' + phaseColor + '40;'}"></div>`;
+    
+    const noteBtn = canEditChecklist
+        ? `<button class="cl-note-btn" onclick="toggleNoteInput('${step.key}')">+ adaugă notă</button>`
+        : '';
+    
+    const noteInput = canEditChecklist
+        ? `<div class="cl-note-input" id="note-input-${step.key}" style="display: none;">
+                    <input type="text" id="note-val-${step.key}" placeholder="Scrie o notă..." maxlength="500"
+                        onkeydown="if(event.key==='Enter')addStepNote('${step.key}')">
+                    <button onclick="addStepNote('${step.key}')">Trimite</button>
+                </div>`
+        : '';
+    
     return `
         <div class="cl-step ${isChecked ? 'done' : ''}" id="step-${step.key}">
-            <div class="cl-check ${isChecked ? 'checked' : ''}" 
-                 onclick="toggleStep('${step.key}')"
-                 style="${isChecked ? '' : 'border-color: ' + phaseColor + '40;'}"></div>
+            ${checkboxHtml}
             <div class="cl-step-content">
                 <div class="cl-step-title">${step.title}</div>
                 <div class="cl-step-meta">
                     ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #16a34a;"></i> ${checkedAt}</span>` : ''}
                     ${isChecked && checkedBy ? `<span>de ${checkedBy}</span>` : ''}
-                    <button class="cl-note-btn" onclick="toggleNoteInput('${step.key}')">+ adaugă notă</button>
+                    ${noteBtn}
                 </div>
                 <div class="cl-step-notes" id="notes-${step.key}"></div>
-                <div class="cl-note-input" id="note-input-${step.key}" style="display: none;">
-                    <input type="text" id="note-val-${step.key}" placeholder="Scrie o notă..." maxlength="500"
-                        onkeydown="if(event.key==='Enter')addStepNote('${step.key}')">
-                    <button onclick="addStepNote('${step.key}')">Trimite</button>
-                </div>
+                ${noteInput}
             </div>
         </div>`;
 }
+
 
 function togglePhase(phaseKey) {
     const el = document.getElementById('phase-' + phaseKey);
