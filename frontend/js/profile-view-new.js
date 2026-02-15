@@ -412,6 +412,16 @@ async function renderActiveUserContent() {
         descSection.classList.remove('hidden');
     }
     
+    // Personal Notes (only visible to profile owner)
+    if (isOwnProfile && profileData.notes) {
+        const notesSection = document.getElementById('notes-section');
+        const notesEl = document.getElementById('user-notes');
+        if (notesSection && notesEl) {
+            notesEl.textContent = profileData.notes;
+            notesSection.classList.remove('hidden');
+        }
+    }
+    
     // Favorite Terrains
     await renderFavoriteTerrains();
     
