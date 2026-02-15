@@ -413,11 +413,17 @@ async function renderActiveUserContent() {
     }
     
     // Personal Notes (only visible to profile owner)
-    if (isOwnProfile && profileData.notes) {
+    if (isOwnProfile) {
         const notesSection = document.getElementById('notes-section');
         const notesEl = document.getElementById('user-notes');
         if (notesSection && notesEl) {
-            notesEl.textContent = profileData.notes;
+            if (profileData.notes) {
+                notesEl.textContent = profileData.notes;
+            } else {
+                notesEl.textContent = 'Nu ai adăugat notițe încă. Mergi la „Editează profil" pentru a adăuga.';
+                notesEl.style.color = '#9ca3af';
+                notesEl.style.fontStyle = 'italic';
+            }
             notesSection.classList.remove('hidden');
         }
     }
