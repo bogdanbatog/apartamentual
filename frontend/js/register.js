@@ -38,7 +38,7 @@ async function checkExistingSession() {
             if (redirectUrl) {
                 window.location.href = decodeURIComponent(redirectUrl);
             } else {
-                window.location.href = '/profile-view.html?id=' + user.id;
+                window.location.href = '/profile-view-new.html?id=' + user.id;
             }
         }
     } catch (error) {
