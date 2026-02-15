@@ -704,6 +704,66 @@
         .member-only.visible {
             display: block;
         }
+
+        /* ── CHECKLIST TIMELINE ── */
+        .checklist-timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+        .cl-phase {
+            border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden; background: white;
+        }
+        .cl-phase-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s;
+        }
+        .cl-phase-header:hover { background: #f8fafc; }
+        .cl-phase-number {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.8rem; color: white; flex-shrink: 0;
+        }
+        .cl-phase-title { font-weight: 700; font-size: 0.92rem; color: #1e293b; flex: 1; }
+        .cl-phase-progress { font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-right: 0.5rem; }
+        .cl-phase-chevron { color: #94a3b8; transition: transform 0.2s; font-size: 0.8rem; }
+        .cl-phase.open .cl-phase-chevron { transform: rotate(180deg); }
+        .cl-phase-body { display: none; padding: 0 1.25rem 1rem; }
+        .cl-phase.open .cl-phase-body { display: block; }
+        .cl-step {
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            padding: 0.65rem 0; border-bottom: 1px solid #f1f5f9;
+        }
+        .cl-step:last-child { border-bottom: none; }
+        .cl-check {
+            width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; background: white;
+        }
+        .cl-check:hover { border-color: #f59e0b; }
+        .cl-check.checked { background: #16a34a; border-color: #16a34a; }
+        .cl-check.checked::after { content: '✓'; color: white; font-size: 0.75rem; font-weight: 700; }
+        .cl-step-content { flex: 1; min-width: 0; }
+        .cl-step-title { font-size: 0.88rem; font-weight: 500; color: #1e293b; line-height: 1.3; }
+        .cl-step.done .cl-step-title { color: #64748b; text-decoration: line-through; text-decoration-color: #cbd5e1; }
+        .cl-step-meta {
+            display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
+            font-size: 0.72rem; color: #94a3b8; flex-wrap: wrap;
+        }
+        .cl-step-note {
+            font-size: 0.8rem; color: #64748b; margin-top: 0.3rem;
+            padding: 0.35rem 0.6rem; background: #f8fafc; border-radius: 0.35rem; border-left: 2px solid #f59e0b;
+        }
+        .cl-note-btn {
+            font-size: 0.72rem; color: #94a3b8; cursor: pointer; border: none;
+            background: none; padding: 0; text-decoration: underline;
+        }
+        .cl-note-btn:hover { color: #f59e0b; }
+        .cl-note-input { margin-top: 0.35rem; display: flex; gap: 0.35rem; }
+        .cl-note-input input {
+            flex: 1; padding: 0.35rem 0.6rem; border: 1px solid #e2e8f0;
+            border-radius: 0.35rem; font-size: 0.8rem;
+        }
+        .cl-note-input button {
+            padding: 0.35rem 0.6rem; background: #1e293b; color: white;
+            border: none; border-radius: 0.35rem; font-size: 0.75rem; cursor: pointer;
+        }
         
         /* Responsive */
         @media (max-width: 640px) {
@@ -898,11 +958,22 @@
         
         <!-- Journal & Checklist - Member only (Coming soon) -->
         <div id="journalSection" class="section-card member-only">
-            <h2><i class="fas fa-book"></i> Jurnal & Checklist</h2>
-            <div class="empty-section">
-                <i class="fas fa-tools"></i>
-                <p>Funcționalitate în dezvoltare.</p>
+            <h2><i class="fas fa-tasks"></i> Progresul Grupului</h2>
+            <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 1.25rem;">Urmărește și bifează pașii pe măsură ce avansați în procesul de construcție.</p>
+            
+            <!-- Progress bar -->
+            <div style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #1e293b;">Progres total</span>
+                    <span id="progressPercent" style="font-size: 0.82rem; font-weight: 700; color: #f59e0b;">0%</span>
+                </div>
+                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 4px; transition: width 0.5s;"></div>
+                </div>
             </div>
+            
+            <!-- Timeline phases -->
+            <div id="checklistTimeline" class="checklist-timeline"></div>
         </div>
         
         <!-- Admin Section - Admin only -->
@@ -1371,6 +1442,7 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     if (isMember) {
         document.querySelectorAll('.member-only').forEach(el => el.classList.add('visible'));
         loadKickVotes();
+        loadChecklist();
     }
     
     // Terenuri favorite - visible to all logged-in users
@@ -1563,6 +1635,248 @@ function renderTerenuri(terenuri) {
         terenuri.forEach(t => {
             if (t.teren) loadComments(t.teren.id);
         });
+    }
+}
+
+// ── CHECKLIST TIMELINE ──
+const CHECKLIST_PHASES = [
+    {
+        key: 'faza1', title: 'Formarea Grupului', color: '#2563eb',
+        steps: [
+            { key: 'f1_grup_creat', title: 'Grup creat pe platformă' },
+            { key: 'f1_membri_recrutati', title: 'Membri suficienți recrutați' },
+            { key: 'f1_regulament', title: 'Regulament de funcționare stabilit' },
+            { key: 'f1_principii', title: 'Principii și scopuri comune agreate' },
+        ]
+    },
+    {
+        key: 'faza2', title: 'Căutarea și Achiziția Terenului', color: '#16a34a',
+        steps: [
+            { key: 'f2_terenuri_favorite', title: 'Terenuri identificate și adăugate la favorite' },
+            { key: 'f2_teren_vizitat', title: 'Teren vizitat (verificare vecini)' },
+            { key: 'f2_extras_cf', title: 'Extras carte funciară obținut (ANCPI)' },
+            { key: 'f2_cert_urbanism', title: 'Certificat de urbanism informativ obținut' },
+            { key: 'f2_analiza_simpla', title: 'Analiză simplificată cerută pe platformă' },
+            { key: 'f2_istoric_notar', title: 'Istoric teren verificat la notar' },
+            { key: 'f2_studiu_geo', title: 'Studiu geotehnic preliminar realizat' },
+            { key: 'f2_analiza_complexa', title: 'Analiză complexă cerută (1-2 terenuri finale)' },
+            { key: 'f2_contract_asociere', title: 'Contract asociere / societate civilă' },
+            { key: 'f2_teren_achizitionat', title: 'Teren achiziționat' },
+        ]
+    },
+    {
+        key: 'faza3', title: 'Proiectarea', color: '#f59e0b',
+        steps: [
+            { key: 'f3_echipa', title: 'Echipă proiectanți selectată (arhitectură-structură-instalații)' },
+            { key: 'f3_concept', title: 'Concept elaborat (planuri, suprafețe, randări)' },
+            { key: 'f3_cert_construire', title: 'Certificat de urbanism pt construire obținut' },
+            { key: 'f3_avize', title: 'Avize obținute' },
+            { key: 'f3_proiect_tehnic', title: 'Proiect tehnic + oferte constructori' },
+            { key: 'f3_dtac', title: 'DTAC — autorizația de construire obținută' },
+            { key: 'f3_detalii_exec', title: 'Detalii de execuție finalizate' },
+        ]
+    },
+    {
+        key: 'faza4', title: 'Construcția', color: '#7c3aed',
+        steps: [
+            { key: 'f4_oferte_comparate', title: 'Oferte constructori comparate' },
+            { key: 'f4_constructor', title: 'Constructor selectat' },
+            { key: 'f4_structura', title: 'Execuție structură' },
+            { key: 'f4_instalatii', title: 'Instalații' },
+            { key: 'f4_finisaje', title: 'Finisaje' },
+            { key: 'f4_receptie', title: 'Recepție + întabulare + apartamentare 🏠' },
+        ]
+    }
+];
+
+let checklistData = {}; // step_key -> { checked, checked_at, checked_by, notes }
+let profilesCache = {};
+
+async function loadChecklist() {
+    const container = document.getElementById('checklistTimeline');
+    if (!container) return;
+    
+    try {
+        // Load existing checklist data for this group
+        const { data, error } = await sb
+            .from('grup_checklist')
+            .select('*')
+            .eq('grup_id', currentGroup.id);
+        
+        if (error) throw error;
+        
+        checklistData = {};
+        (data || []).forEach(row => {
+            checklistData[row.step_key] = row;
+        });
+        
+        // Load profile names for checked_by
+        const userIds = [...new Set((data || []).filter(r => r.checked_by).map(r => r.checked_by))];
+        if (userIds.length > 0) {
+            const { data: profiles } = await sb
+                .from('profiles')
+                .select('user_id, pseudonym')
+                .in('user_id', userIds);
+            (profiles || []).forEach(p => { profilesCache[p.user_id] = p.pseudonym || 'Anonim'; });
+        }
+        
+        renderChecklist();
+    } catch (err) {
+        console.error('Error loading checklist:', err);
+        container.innerHTML = '<p style="color: #ef4444; font-size: 0.85rem;">Eroare la încărcare.</p>';
+    }
+}
+
+function renderChecklist() {
+    const container = document.getElementById('checklistTimeline');
+    let totalSteps = 0;
+    let doneSteps = 0;
+    
+    container.innerHTML = CHECKLIST_PHASES.map((phase, pi) => {
+        const phaseSteps = phase.steps;
+        const phaseDone = phaseSteps.filter(s => checklistData[s.key]?.checked).length;
+        totalSteps += phaseSteps.length;
+        doneSteps += phaseDone;
+        
+        // Auto-open the first incomplete phase
+        const isOpen = phaseDone < phaseSteps.length && 
+            CHECKLIST_PHASES.slice(0, pi).every(p => 
+                p.steps.every(s => checklistData[s.key]?.checked)
+            );
+        
+        return `
+            <div class="cl-phase ${isOpen ? 'open' : ''}" id="phase-${phase.key}">
+                <div class="cl-phase-header" onclick="togglePhase('${phase.key}')">
+                    <div class="cl-phase-number" style="background: ${phase.color};">${pi + 1}</div>
+                    <span class="cl-phase-title">${phase.title}</span>
+                    <span class="cl-phase-progress">${phaseDone}/${phaseSteps.length}</span>
+                    <i class="fas fa-chevron-down cl-phase-chevron"></i>
+                </div>
+                <div class="cl-phase-body">
+                    ${phaseSteps.map(step => renderStep(step, phase.color)).join('')}
+                </div>
+            </div>`;
+    }).join('');
+    
+    // Update progress bar
+    const pct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPercent').textContent = pct + '%';
+}
+
+function renderStep(step, phaseColor) {
+    const data = checklistData[step.key];
+    const isChecked = data?.checked || false;
+    const checkedAt = data?.checked_at ? new Date(data.checked_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    const checkedBy = data?.checked_by ? (profilesCache[data.checked_by] || '') : '';
+    const notes = data?.notes || '';
+    
+    return `
+        <div class="cl-step ${isChecked ? 'done' : ''}" id="step-${step.key}">
+            <div class="cl-check ${isChecked ? 'checked' : ''}" 
+                 onclick="toggleStep('${step.key}')"
+                 style="${isChecked ? '' : 'border-color: ' + phaseColor + '40;'}"></div>
+            <div class="cl-step-content">
+                <div class="cl-step-title">${step.title}</div>
+                <div class="cl-step-meta">
+                    ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #16a34a;"></i> ${checkedAt}</span>` : ''}
+                    ${isChecked && checkedBy ? `<span>de ${checkedBy}</span>` : ''}
+                    <button class="cl-note-btn" onclick="toggleNoteInput('${step.key}')">${notes ? '✏️ editează nota' : '+ adaugă notă'}</button>
+                </div>
+                ${notes ? `<div class="cl-step-note">${escapeHtml(notes)}</div>` : ''}
+                <div class="cl-note-input" id="note-input-${step.key}" style="display: none;">
+                    <input type="text" id="note-val-${step.key}" placeholder="Notă sau comentariu..." value="${escapeHtml(notes)}" maxlength="500"
+                        onkeydown="if(event.key==='Enter')saveNote('${step.key}')">
+                    <button onclick="saveNote('${step.key}')">Salvează</button>
+                </div>
+            </div>
+        </div>`;
+}
+
+function togglePhase(phaseKey) {
+    document.getElementById('phase-' + phaseKey).classList.toggle('open');
+}
+
+function toggleNoteInput(stepKey) {
+    const el = document.getElementById('note-input-' + stepKey);
+    el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+    if (el.style.display === 'flex') {
+        el.querySelector('input').focus();
+    }
+}
+
+async function toggleStep(stepKey) {
+    const existing = checklistData[stepKey];
+    const newChecked = !(existing?.checked);
+    
+    try {
+        if (existing?.id) {
+            // Update
+            const { error } = await sb
+                .from('grup_checklist')
+                .update({
+                    checked: newChecked,
+                    checked_at: newChecked ? new Date().toISOString() : null,
+                    checked_by: newChecked ? currentUser.id : null,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existing.id);
+            if (error) throw error;
+        } else {
+            // Insert
+            const { error } = await sb
+                .from('grup_checklist')
+                .insert({
+                    grup_id: currentGroup.id,
+                    step_key: stepKey,
+                    checked: newChecked,
+                    checked_at: newChecked ? new Date().toISOString() : null,
+                    checked_by: newChecked ? currentUser.id : null
+                });
+            if (error) throw error;
+        }
+        
+        // Add current user to cache
+        if (!profilesCache[currentUser.id]) {
+            const { data: p } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+            if (p) profilesCache[currentUser.id] = p.pseudonym || 'Anonim';
+        }
+        
+        await loadChecklist();
+    } catch (err) {
+        console.error('Error toggling step:', err);
+        alert('Eroare la salvare: ' + err.message);
+    }
+}
+
+async function saveNote(stepKey) {
+    const input = document.getElementById('note-val-' + stepKey);
+    const notes = input.value.trim();
+    const existing = checklistData[stepKey];
+    
+    try {
+        if (existing?.id) {
+            const { error } = await sb
+                .from('grup_checklist')
+                .update({ notes, updated_at: new Date().toISOString() })
+                .eq('id', existing.id);
+            if (error) throw error;
+        } else {
+            const { error } = await sb
+                .from('grup_checklist')
+                .insert({
+                    grup_id: currentGroup.id,
+                    step_key: stepKey,
+                    checked: false,
+                    notes
+                });
+            if (error) throw error;
+        }
+        
+        await loadChecklist();
+    } catch (err) {
+        console.error('Error saving note:', err);
+        alert('Eroare la salvare: ' + err.message);
     }
 }
 
