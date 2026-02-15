@@ -746,10 +746,29 @@
             display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
             font-size: 0.72rem; color: #94a3b8; flex-wrap: wrap;
         }
+        .cl-step-notes { margin-top: 0.4rem; }
         .cl-step-note {
-            font-size: 0.8rem; color: #64748b; margin-top: 0.3rem;
-            padding: 0.35rem 0.6rem; background: #f8fafc; border-radius: 0.35rem; border-left: 2px solid #f59e0b;
+            font-size: 0.8rem; color: #475569; margin-top: 0.35rem;
+            padding: 0.4rem 0.6rem; background: #f8fafc; border-radius: 0.35rem; border-left: 2px solid #f59e0b;
+            display: flex; align-items: flex-start; gap: 0.5rem;
         }
+        .cl-note-avatar {
+            width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; font-weight: 700; color: #64748b; flex-shrink: 0;
+        }
+        .cl-note-body { flex: 1; min-width: 0; }
+        .cl-note-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.15rem; }
+        .cl-note-author { font-size: 0.72rem; font-weight: 600; color: #1e293b; }
+        .cl-note-time { font-size: 0.65rem; color: #94a3b8; }
+        .cl-note-text { font-size: 0.8rem; color: #475569; line-height: 1.5; }
+        .cl-note-actions { display: flex; gap: 0.5rem; margin-top: 0.2rem; }
+        .cl-note-action {
+            font-size: 0.65rem; color: #94a3b8; cursor: pointer; border: none;
+            background: none; padding: 0;
+        }
+        .cl-note-action:hover { color: #f59e0b; }
+        .cl-note-action.delete:hover { color: #ef4444; }
         .cl-note-btn {
             font-size: 0.72rem; color: #94a3b8; cursor: pointer; border: none;
             background: none; padding: 0; text-decoration: underline;
@@ -1762,6 +1781,14 @@ function renderChecklist() {
     const pct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
     document.getElementById('progressBar').style.width = pct + '%';
     document.getElementById('progressPercent').textContent = pct + '%';
+    
+    // Load notes for open phases
+    CHECKLIST_PHASES.forEach(phase => {
+        const el = document.getElementById('phase-' + phase.key);
+        if (el && el.classList.contains('open')) {
+            phase.steps.forEach(s => loadStepNotes(s.key));
+        }
+    });
 }
 
 function renderStep(step, phaseColor) {
@@ -1769,7 +1796,6 @@ function renderStep(step, phaseColor) {
     const isChecked = data?.checked || false;
     const checkedAt = data?.checked_at ? new Date(data.checked_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
     const checkedBy = data?.checked_by ? (profilesCache[data.checked_by] || '') : '';
-    const notes = data?.notes || '';
     
     return `
         <div class="cl-step ${isChecked ? 'done' : ''}" id="step-${step.key}">
@@ -1781,20 +1807,26 @@ function renderStep(step, phaseColor) {
                 <div class="cl-step-meta">
                     ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #16a34a;"></i> ${checkedAt}</span>` : ''}
                     ${isChecked && checkedBy ? `<span>de ${checkedBy}</span>` : ''}
-                    <button class="cl-note-btn" onclick="toggleNoteInput('${step.key}')">${notes ? '✏️ editează nota' : '+ adaugă notă'}</button>
+                    <button class="cl-note-btn" onclick="toggleNoteInput('${step.key}')">+ adaugă notă</button>
                 </div>
-                ${notes ? `<div class="cl-step-note">${escapeHtml(notes)}</div>` : ''}
+                <div class="cl-step-notes" id="notes-${step.key}"></div>
                 <div class="cl-note-input" id="note-input-${step.key}" style="display: none;">
-                    <input type="text" id="note-val-${step.key}" placeholder="Notă sau comentariu..." value="${escapeHtml(notes)}" maxlength="500"
-                        onkeydown="if(event.key==='Enter')saveNote('${step.key}')">
-                    <button onclick="saveNote('${step.key}')">Salvează</button>
+                    <input type="text" id="note-val-${step.key}" placeholder="Scrie o notă..." maxlength="500"
+                        onkeydown="if(event.key==='Enter')addStepNote('${step.key}')">
+                    <button onclick="addStepNote('${step.key}')">Trimite</button>
                 </div>
             </div>
         </div>`;
 }
 
 function togglePhase(phaseKey) {
-    document.getElementById('phase-' + phaseKey).classList.toggle('open');
+    const el = document.getElementById('phase-' + phaseKey);
+    el.classList.toggle('open');
+    // Load notes when opening a phase
+    if (el.classList.contains('open')) {
+        const phase = CHECKLIST_PHASES.find(p => p.key === phaseKey);
+        if (phase) phase.steps.forEach(s => loadStepNotes(s.key));
+    }
 }
 
 function toggleNoteInput(stepKey) {
@@ -1802,6 +1834,134 @@ function toggleNoteInput(stepKey) {
     el.style.display = el.style.display === 'none' ? 'flex' : 'none';
     if (el.style.display === 'flex') {
         el.querySelector('input').focus();
+    }
+}
+
+async function loadStepNotes(stepKey) {
+    const container = document.getElementById('notes-' + stepKey);
+    if (!container) return;
+    
+    try {
+        const { data, error } = await sb
+            .from('grup_checklist_notes')
+            .select('*')
+            .eq('grup_id', currentGroup.id)
+            .eq('step_key', stepKey)
+            .order('created_at', { ascending: true });
+        
+        if (error) throw error;
+        if (!data || data.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        // Cache profiles
+        const userIds = [...new Set(data.map(n => n.user_id))];
+        const missing = userIds.filter(uid => !profilesCache[uid]);
+        if (missing.length > 0) {
+            const { data: profiles } = await sb.from('profiles').select('user_id, pseudonym').in('user_id', missing);
+            (profiles || []).forEach(p => { profilesCache[p.user_id] = p.pseudonym || 'Anonim'; });
+        }
+        
+        container.innerHTML = data.map(n => {
+            const name = profilesCache[n.user_id] || 'Anonim';
+            const initials = name.substring(0, 2).toUpperCase();
+            const time = timeAgo(n.created_at);
+            const isOwn = currentUser && n.user_id === currentUser.id;
+            
+            return `
+                <div class="cl-step-note" id="note-${n.id}">
+                    <div class="cl-note-avatar">${initials}</div>
+                    <div class="cl-note-body">
+                        <div class="cl-note-header">
+                            <span class="cl-note-author">${escapeHtml(name)}</span>
+                            <span class="cl-note-time">${time}</span>
+                        </div>
+                        <div class="cl-note-text" id="note-text-${n.id}">${escapeHtml(n.content)}</div>
+                        ${isOwn ? `
+                        <div class="cl-note-actions">
+                            <button class="cl-note-action" onclick="editStepNote('${n.id}', '${stepKey}')"><i class="fas fa-pen"></i> editează</button>
+                            <button class="cl-note-action delete" onclick="deleteStepNote('${n.id}', '${stepKey}')"><i class="fas fa-trash"></i> șterge</button>
+                        </div>` : ''}
+                    </div>
+                </div>`;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading step notes:', err);
+    }
+}
+
+async function addStepNote(stepKey) {
+    const input = document.getElementById('note-val-' + stepKey);
+    const content = input.value.trim();
+    if (!content) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_checklist_notes')
+            .insert({
+                grup_id: currentGroup.id,
+                step_key: stepKey,
+                user_id: currentUser.id,
+                content
+            });
+        if (error) throw error;
+        
+        input.value = '';
+        document.getElementById('note-input-' + stepKey).style.display = 'none';
+        await loadStepNotes(stepKey);
+    } catch (err) {
+        console.error('Error adding note:', err);
+        alert('Eroare la salvare: ' + err.message);
+    }
+}
+
+async function editStepNote(noteId, stepKey) {
+    const textEl = document.getElementById('note-text-' + noteId);
+    const currentText = textEl.textContent;
+    
+    textEl.innerHTML = `
+        <div class="cl-note-input" style="display: flex; margin: 0;">
+            <input type="text" id="edit-note-${noteId}" value="${escapeHtml(currentText)}" maxlength="500"
+                onkeydown="if(event.key==='Enter')saveEditNote('${noteId}','${stepKey}');if(event.key==='Escape')loadStepNotes('${stepKey}')">
+            <button onclick="saveEditNote('${noteId}','${stepKey}')">Salvează</button>
+        </div>`;
+    document.getElementById('edit-note-' + noteId).focus();
+}
+
+async function saveEditNote(noteId, stepKey) {
+    const input = document.getElementById('edit-note-' + noteId);
+    const content = input.value.trim();
+    if (!content) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_checklist_notes')
+            .update({ content, updated_at: new Date().toISOString() })
+            .eq('id', noteId);
+        if (error) throw error;
+        
+        await loadStepNotes(stepKey);
+    } catch (err) {
+        console.error('Error editing note:', err);
+        alert('Eroare: ' + err.message);
+    }
+}
+
+async function deleteStepNote(noteId, stepKey) {
+    if (!confirm('Ștergi această notă?')) return;
+    
+    try {
+        const { error } = await sb
+            .from('grup_checklist_notes')
+            .delete()
+            .eq('id', noteId);
+        if (error) throw error;
+        
+        await loadStepNotes(stepKey);
+    } catch (err) {
+        console.error('Error deleting note:', err);
+        alert('Eroare: ' + err.message);
     }
 }
 
@@ -1845,37 +2005,6 @@ async function toggleStep(stepKey) {
         await loadChecklist();
     } catch (err) {
         console.error('Error toggling step:', err);
-        alert('Eroare la salvare: ' + err.message);
-    }
-}
-
-async function saveNote(stepKey) {
-    const input = document.getElementById('note-val-' + stepKey);
-    const notes = input.value.trim();
-    const existing = checklistData[stepKey];
-    
-    try {
-        if (existing?.id) {
-            const { error } = await sb
-                .from('grup_checklist')
-                .update({ notes, updated_at: new Date().toISOString() })
-                .eq('id', existing.id);
-            if (error) throw error;
-        } else {
-            const { error } = await sb
-                .from('grup_checklist')
-                .insert({
-                    grup_id: currentGroup.id,
-                    step_key: stepKey,
-                    checked: false,
-                    notes
-                });
-            if (error) throw error;
-        }
-        
-        await loadChecklist();
-    } catch (err) {
-        console.error('Error saving note:', err);
         alert('Eroare la salvare: ' + err.message);
     }
 }
