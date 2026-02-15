@@ -741,6 +741,7 @@
         .cl-check.checked::after { content: '✓'; color: white; font-size: 0.75rem; font-weight: 700; }
         .cl-step-content { flex: 1; min-width: 0; }
         .cl-step-title { font-size: 0.88rem; font-weight: 500; color: #1e293b; line-height: 1.3; }
+        .cl-step-subtitle { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; line-height: 1.4; }
         .cl-step.done .cl-step-title { color: #64748b; text-decoration: line-through; text-decoration-color: #cbd5e1; }
         .cl-step-meta {
             display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
@@ -1679,8 +1680,8 @@ const CHECKLIST_PHASES = [
         steps: [
             { key: 'f1_grup_creat', title: 'Grup creat pe platformă' },
             { key: 'f1_membri_recrutati', title: 'Membri suficienți recrutați' },
-            { key: 'f1_regulament', title: 'Regulament de funcționare stabilit' },
-            { key: 'f1_principii', title: 'Principii și scopuri comune agreate' },
+            { key: 'f1_regulament', title: 'Regulament de funcționare stabilit', subtitle: 'Reguli de comunicare online · Reguli de luare a deciziilor · Responsabilități și disponibilitate' },
+            { key: 'f1_principii', title: 'Principii și scopuri comune agreate', subtitle: 'Calitatea construcției · Eficiența termică și fonică · Instalații de calitate superioară · Arhitectură contemporană' },
         ]
     },
     {
@@ -1836,6 +1837,7 @@ function renderStep(step, phaseColor) {
             ${checkboxHtml}
             <div class="cl-step-content">
                 <div class="cl-step-title">${step.title}</div>
+                ${step.subtitle ? `<div class="cl-step-subtitle">${step.subtitle}</div>` : ''}
                 <div class="cl-step-meta">
                     ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #16a34a;"></i> ${checkedAt}</span>` : ''}
                     ${isChecked && checkedBy ? `<span>de ${checkedBy}</span>` : ''}
