@@ -311,7 +311,7 @@ function renderGroupDetails() {
         
         // Only make it a link if we have a valid profile (not fallback)
         if (groupOwner.email !== 'profil indisponibil') {
-            ownerLink.href = `/profile-view.html?id=${groupOwner.user_id}`;
+            ownerLink.href = `/profile-view-new.html?id=${groupOwner.user_id}`;
             ownerLink.classList.add('text-blue-600', 'hover:text-blue-800', 'hover:underline');
         } else {
             ownerLink.href = '#';
