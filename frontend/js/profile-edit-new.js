@@ -185,6 +185,9 @@ function populateActiveForm() {
     // Description
     document.getElementById('description').value = profileData.description || '';
     
+    // Notes
+    document.getElementById('notes').value = profileData.notes || '';
+    
     // Load zones if city is selected
     if (profileData.preferred_city_id) {
         loadZonesForCity(profileData.preferred_city_id);
@@ -421,7 +424,8 @@ async function handleActiveFormSubmit(event) {
             preferred_rooms: document.getElementById('preferred_rooms').value,
             preferred_area_sqm: parseInt(document.getElementById('preferred_area_sqm').value),
             preferred_city_id: parseInt(document.getElementById('preferred_city').value),
-            description: document.getElementById('description').value || null
+            description: document.getElementById('description').value || null,
+            notes: document.getElementById('notes').value || null
         };
         
         const { error: profileError } = await supabase
