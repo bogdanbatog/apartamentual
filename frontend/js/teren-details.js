@@ -229,6 +229,63 @@ function renderGroupLikesSection() {
     `;
 }
 
+// Check if teren is already liked and update button state
+async function checkTerenLikeState(terenId) {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: existing } = await supabase
+            .from('terenuri_likes')
+            .select('id')
+            .eq('teren_id', terenId)
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        const btnLike = document.getElementById('btn-like-profil');
+        if (btnLike && existing) {
+            updateLikeButton(btnLike, true);
+        }
+    } catch (e) {
+        console.warn('Could not check like state:', e);
+    }
+}
+
+// Update like button appearance
+function updateLikeButton(btn, isLiked) {
+    const svg = btn.querySelector('svg');
+    // Get or create the text node
+    const textNodes = Array.from(btn.childNodes).filter(n => n.nodeType === Node.TEXT_NODE || (n.nodeType === Node.ELEMENT_NODE && !n.matches('svg')));
+    
+    if (isLiked) {
+        svg.setAttribute('fill', 'currentColor');
+        svg.classList.remove('text-gray-500');
+        svg.classList.add('text-orange-500');
+        btn.classList.add('bg-orange-50', 'border-orange-300');
+        btn.classList.remove('border-gray-300');
+        // Update text
+        const spanText = btn.querySelector('.btn-like-text');
+        if (spanText) {
+            spanText.textContent = 'Adăugat la profil';
+        } else {
+            // Replace raw text
+            btn.innerHTML = btn.innerHTML.replace('Adaugă la profil', '<span class="btn-like-text">Adăugat la profil</span>');
+        }
+    } else {
+        svg.setAttribute('fill', 'none');
+        svg.classList.remove('text-orange-500');
+        svg.classList.add('text-gray-500');
+        btn.classList.remove('bg-orange-50', 'border-orange-300');
+        btn.classList.add('border-gray-300');
+        const spanText = btn.querySelector('.btn-like-text');
+        if (spanText) {
+            spanText.textContent = 'Adaugă la profil';
+        } else {
+            btn.innerHTML = btn.innerHTML.replace('Adăugat la profil', '<span class="btn-like-text">Adaugă la profil</span>');
+        }
+    }
+}
+
 // Toggle personal teren like (add to profile favorites)
 async function toggleTerenLike(terenId) {
     try {
@@ -256,10 +313,7 @@ async function toggleTerenLike(terenId) {
                 .eq('teren_id', terenId)
                 .eq('user_id', user.id);
             
-            if (btnLike) {
-                btnLike.querySelector('svg').setAttribute('fill', 'none');
-                btnLike.classList.remove('bg-orange-50', 'border-orange-300');
-            }
+            if (btnLike) updateLikeButton(btnLike, false);
             showToast('Terenul a fost eliminat din favorite.', 'success');
         } else {
             // Add like
@@ -267,10 +321,7 @@ async function toggleTerenLike(terenId) {
                 .from('terenuri_likes')
                 .insert({ teren_id: terenId, user_id: user.id });
             
-            if (btnLike) {
-                btnLike.querySelector('svg').setAttribute('fill', 'currentColor');
-                btnLike.classList.add('bg-orange-50', 'border-orange-300');
-            }
+            if (btnLike) updateLikeButton(btnLike, true);
             showToast('Terenul a fost adăugat la favorite!', 'success');
         }
     } catch (error) {
@@ -468,15 +519,7 @@ async function displayTerenDetails(teren, userProfile) {
                     ? (posterProfile.agency_name || 'Agenție') 
                     : (posterProfile.pseudonym || 'Utilizator');
                 adaugatDeEl.textContent = posterName;
-                // Only link to profile if user is logged in
-                if (userProfile) {
-                    adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
-                } else {
-                    adaugatDeEl.removeAttribute('href');
-                    adaugatDeEl.style.color = 'inherit';
-                    adaugatDeEl.style.textDecoration = 'none';
-                    adaugatDeEl.style.cursor = 'default';
-                }
+                adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
                 adaugatDeRow.classList.remove('hidden');
             }
         } catch (e) {
@@ -493,6 +536,8 @@ async function displayTerenDetails(teren, userProfile) {
         const btnLikeProfil = document.getElementById('btn-like-profil');
         if (btnLikeProfil) {
             btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
+            // Check initial like state
+            checkTerenLikeState(teren.id);
         }
         
         // Like to group - toggle group likes section visibility
