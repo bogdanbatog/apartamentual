@@ -42,16 +42,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const accountType = await checkAuth();
     
-    if (!currentUser) {
-        // Show auth overlay for non-logged users
-        DOM.authOverlay.style.display = 'flex';
-        DOM.mainContent.style.filter = 'blur(8px)';
-        DOM.mainContent.style.pointerEvents = 'none';
-        return;
-    }
-    
     // Block access for professional accounts (agencies)
-    if (accountType === 'profesional') {
+    if (currentUser && accountType === 'profesional') {
         DOM.authOverlay.style.display = 'flex';
         DOM.mainContent.style.filter = 'blur(8px)';
         DOM.mainContent.style.pointerEvents = 'none';
@@ -71,6 +63,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return;
     }
+    
+    // Hide auth overlay for both logged and anonymous users
+    if (DOM.authOverlay) DOM.authOverlay.style.display = 'none';
     
     populateFilters();
     bindEvents();
@@ -389,6 +384,39 @@ function renderUserCard(user) {
           (tags.length > 3 ? `<span class="interest-tag more">+${tags.length - 3}</span>` : '')
         : '<span class="interest-tag" style="background: var(--slate-300);">Niciun interes</span>';
     
+    // Anonymous visitor: simplified card without profile link
+    if (!currentUser) {
+        return `
+            <article class="user-card">
+                <div class="user-card-header">
+                    <div class="user-avatar">${initials}</div>
+                    <div class="user-basic-info">
+                        <h3 class="user-name">${escapeHtml(name)}</h3>
+                        <div class="user-meta">
+                            ${profession ? `<span><i class="fas fa-briefcase"></i> ${escapeHtml(profession)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card-body">
+                    <div class="user-section">
+                        <div class="user-section-label">Zone preferate</div>
+                        <div class="user-zones">${zonesHtml}</div>
+                    </div>
+                    <div class="user-section">
+                        <div class="user-section-label">Interese</div>
+                        <div class="user-interests">${tagsHtml}</div>
+                    </div>
+                </div>
+                <div class="user-card-footer">
+                    <a href="register.html" class="btn-view-profile">
+                        Creează cont pentru detalii <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+        `;
+    }
+    
+    // Logged in: full card with matching and profile link
     // Matching with current user
     let matchingHtml = '';
     if (currentUser && user.user_id !== currentUser.id) {
