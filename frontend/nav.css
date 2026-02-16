@@ -29,16 +29,10 @@
 /* ── Logo ── */
 .unified-nav-logo {
     text-decoration: none;
-    flex-shrink: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    white-space: nowrap;
-}
-.unified-nav-logo .logo-main {
     font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.02em;
+    flex-shrink: 0;
     white-space: nowrap;
 }
 .unified-nav-logo .logo-a {
@@ -51,16 +45,11 @@
     color: #0f172a;
 }
 .unified-nav-logo .logo-by {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 400;
     color: #94a3b8;
     letter-spacing: 0.02em;
-    white-space: nowrap;
-}
-.unified-nav-logo .logo-by strong {
-    font-weight: 600;
-    color: #64748b;
-    letter-spacing: 0.08em;
+    margin-left: 6px;
 }
 .unified-nav-logo .logo-by-link {
     text-decoration: none;
@@ -73,7 +62,6 @@
 .unified-nav-logo .logo-by-link strong {
     font-weight: 600;
     color: #64748b;
-    letter-spacing: 0.08em;
 }
 .unified-nav-logo .logo-by-link:hover strong {
     color: #1e293b;
