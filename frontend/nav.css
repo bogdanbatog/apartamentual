@@ -1,192 +1,262 @@
-// ══════════════════════════════════════════════════════════════
-// UNIFIED NAVIGATION COMPONENT — ApartamenTUal
-// Used on ALL pages: Acasă, Ce este, Terenuri, Utilizatori, Grupuri, etc.
-// Uses global `sb` (and `supabase`) from supabase-config.js
-// ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
+   UNIFIED NAVBAR STYLES — ApartamenTUal
+   Include this on ALL pages for consistent navigation
+   ══════════════════════════════════════════════════════════════ */
 
-(function() {
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
-function getPageConfig() {
-    const path = window.location.pathname;
-    
-    let currentPage = '';
-    let ctaButton = null;
-    
-    if (path === '/' || (path.endsWith('/index.html') && !path.includes('ce-este'))) {
-        currentPage = 'home';
-    } else if (path.includes('ce-este')) {
-        currentPage = 'about';
-    } else if (path.includes('teren')) {
-        currentPage = 'land';
-        ctaButton = { href: '/terenuri-propune.html', icon: 'fa-plus', label: 'Propune teren' };
-    } else if (path.includes('utilizatori')) {
-        currentPage = 'users';
-    } else if (path.includes('grup')) {
-        currentPage = 'groups';
-        ctaButton = { href: '/grup-nou.html', icon: 'fa-plus', label: 'Creează grup' };
-    } else if (path.includes('register')) {
-        currentPage = 'register';
-    }
-    
-    return { currentPage, ctaButton };
+.unified-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e2e8f0;
+    font-family: 'DM Sans', sans-serif;
 }
 
-function createNavigation() {
-    const { currentPage, ctaButton } = getPageConfig();
-    
-    const navItems = [
-        { href: '/index.html', label: 'Acasă', id: 'home' },
-        { href: '/ce-este/', label: 'Ce este', id: 'about' },
-        { href: '/terenuri.html', label: 'Terenuri', id: 'land' },
-        { href: '/utilizatori.html', label: 'Utilizatori', id: 'users' },
-        { href: '/grupuri.html', label: 'Grupuri', id: 'groups' },
-    ];
-
-    const navLinksHTML = navItems.map(item => {
-        const isActive = currentPage === item.id;
-        return `<a href="${item.href}" class="unified-nav-link ${isActive ? 'active' : ''}">${item.label}</a>`;
-    }).join('');
-
-    const ctaHTML = ctaButton 
-        ? `<a href="${ctaButton.href}" class="unified-btn-cta"><i class="fas ${ctaButton.icon}"></i> ${ctaButton.label}</a>` 
-        : '';
-
-    return `
-    <nav class="unified-nav">
-        <div class="unified-nav-inner">
-            <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span><span class="logo-by">by <strong>LTFB</strong> studio</span>
-            </a>
-            <div class="unified-nav-links">
-                ${navLinksHTML}
-            </div>
-            <div class="unified-nav-actions">
-                ${ctaHTML}
-                <div class="unified-nav-user" id="navUser" style="display:none;">
-                    <button class="unified-btn-avatar" id="btnUserAvatar">
-                        <i class="fas fa-user-circle"></i>
-                    </button>
-                    <div class="unified-user-dropdown" id="userDropdown">
-                        <a href="#" id="navProfileLink"><i class="fas fa-user"></i> Profilul meu</a>
-                        <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
-                    </div>
-                </div>
-                <a href="#" class="unified-btn-login" id="btnLoginNav" onclick="event.preventDefault(); if(typeof openLoginModal==='function') openLoginModal();">
-                    <i class="fas fa-sign-in-alt"></i> Intră în cont
-                </a>
-            </div>
-            <button class="unified-nav-burger" id="navMobileToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-        <div class="unified-nav-mobile" id="navMobileMenu" style="display:none;">
-            ${navLinksHTML}
-            ${ctaHTML}
-            <a href="#" class="unified-btn-login" id="btnLoginNavMobile" onclick="event.preventDefault(); if(typeof openLoginModal==='function') openLoginModal();">
-                <i class="fas fa-sign-in-alt"></i> Intră în cont
-            </a>
-        </div>
-    </nav>`;
+.unified-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
 }
 
-function loadNavigation() {
-    const navContainer = document.getElementById('navigation');
-    if (navContainer) {
-        navContainer.innerHTML = createNavigation();
-        setupNavBehavior();
-        checkAuthState();
-        return;
-    }
-    const existingNav = document.querySelector('nav.navbar, nav.main-nav');
-    if (existingNav) {
-        const wrapper = document.createElement('div');
-        wrapper.id = 'navigation';
-        wrapper.innerHTML = createNavigation();
-        existingNav.parentNode.replaceChild(wrapper, existingNav);
-        setupNavBehavior();
-        checkAuthState();
-    }
+/* ── Logo ── */
+.unified-nav-logo {
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.unified-nav-logo .logo-a {
+    color: #0f172a;
+}
+.unified-nav-logo .logo-tu {
+    color: #f97316;
+}
+.unified-nav-logo .logo-al {
+    color: #0f172a;
+}
+.unified-nav-logo .logo-by {
+    font-size: 10px;
+    font-weight: 400;
+    color: #94a3b8;
+    letter-spacing: 0.02em;
+    margin-left: 4px;
+}
+.unified-nav-logo .logo-by strong {
+    font-weight: 600;
+    color: #64748b;
 }
 
-function setupNavBehavior() {
-    const mobileToggle = document.getElementById('navMobileToggle');
-    const mobileMenu = document.getElementById('navMobileMenu');
-    if (mobileToggle && mobileMenu) {
-        mobileToggle.addEventListener('click', () => {
-            const isOpen = mobileMenu.style.display !== 'none';
-            mobileMenu.style.display = isOpen ? 'none' : 'flex';
-            mobileToggle.querySelector('i').className = isOpen ? 'fas fa-bars' : 'fas fa-times';
-        });
-    }
-
-    const avatarBtn = document.getElementById('btnUserAvatar');
-    const dropdown = document.getElementById('userDropdown');
-    if (avatarBtn && dropdown) {
-        avatarBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-        });
-        document.addEventListener('click', () => dropdown.classList.remove('show'));
-    }
-
-    const profileLink = document.getElementById('navProfileLink');
-    if (profileLink) {
-        profileLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (window.currentUserId) {
-                window.location.href = '/profile-view-new.html?id=' + window.currentUserId;
-            }
-        });
-    }
-
-    // Logout — uses global `sb` from supabase-config.js
-    const logoutBtn = document.getElementById('btnLogout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await sb.auth.signOut();
-                window.location.href = '/index.html';
-            } catch (err) {
-                console.error('Logout error:', err);
-            }
-        });
-    }
+/* ── Nav Links ── */
+.unified-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-async function checkAuthState() {
-    try {
-        // Wait for global sb client from supabase-config.js
-        if (typeof sb === 'undefined' || !sb) {
-            if (!checkAuthState._retries) checkAuthState._retries = 0;
-            if (checkAuthState._retries < 25) {
-                checkAuthState._retries++;
-                setTimeout(checkAuthState, 200);
-                return;
-            }
-            return;
-        }
-
-        const { data: { user } } = await sb.auth.getUser();
-        window.currentUserId = user ? user.id : null;
-
-        const navUser = document.getElementById('navUser');
-        const btnLogin = document.getElementById('btnLoginNav');
-        const btnLoginMobile = document.getElementById('btnLoginNavMobile');
-
-        if (user) {
-            if (navUser) navUser.style.display = 'flex';
-            if (btnLogin) btnLogin.style.display = 'none';
-            if (btnLoginMobile) btnLoginMobile.style.display = 'none';
-        } else {
-            if (navUser) navUser.style.display = 'none';
-            if (btnLogin) btnLogin.style.display = 'flex';
-            if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
-        }
-    } catch (err) {
-        console.error('Auth check error:', err);
-    }
+.unified-nav-link {
+    text-decoration: none;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.unified-nav-link:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+.unified-nav-link.active {
+    color: #f97316;
+    font-weight: 600;
+    border-bottom: 2px solid #f97316;
+    border-radius: 0;
+    padding-bottom: 4px;
 }
 
-document.addEventListener('DOMContentLoaded', loadNavigation);
+/* ── Actions (right side) ── */
+.unified-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-})();
+/* CTA button (Propune teren / Creează grup) */
+.unified-btn-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f97316;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 24px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.unified-btn-cta:hover {
+    background: #ea580c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(249,115,22,0.3);
+}
+.unified-btn-cta i {
+    font-size: 11px;
+}
+
+/* Login button */
+.unified-btn-login {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.unified-btn-login:hover {
+    color: #f97316;
+    background: #fff7ed;
+}
+
+/* User avatar */
+.unified-nav-user {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.unified-btn-avatar {
+    background: none;
+    border: 2px solid #f97316;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #f97316;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+.unified-btn-avatar:hover {
+    background: #fff7ed;
+}
+
+/* User dropdown */
+.unified-user-dropdown {
+    display: none;
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    min-width: 180px;
+    padding: 6px;
+    z-index: 100;
+}
+.unified-user-dropdown.show {
+    display: block;
+}
+.unified-user-dropdown a,
+.unified-user-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #334155;
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    text-align: left;
+}
+.unified-user-dropdown a:hover,
+.unified-user-dropdown button:hover {
+    background: #f8fafc;
+    color: #f97316;
+}
+.unified-user-dropdown i {
+    width: 16px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+/* ── Mobile ── */
+.unified-nav-burger {
+    display: none;
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #334155;
+    font-size: 16px;
+}
+
+.unified-nav-mobile {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 24px 16px;
+    border-top: 1px solid #e2e8f0;
+    background: white;
+}
+.unified-nav-mobile .unified-nav-link {
+    padding: 10px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+}
+.unified-nav-mobile .unified-nav-link.active {
+    border-bottom: none;
+    background: #fff7ed;
+    border-radius: 8px;
+}
+.unified-nav-mobile .unified-btn-cta {
+    margin-top: 8px;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 12px;
+}
+.unified-nav-mobile .unified-btn-login {
+    justify-content: center;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .unified-nav-links {
+        display: none;
+    }
+    .unified-nav-actions {
+        display: none;
+    }
+    .unified-nav-burger {
+        display: flex;
+    }
+}
