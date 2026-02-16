@@ -49,12 +49,13 @@
     font-weight: 400;
     color: #94a3b8;
     letter-spacing: 0.02em;
-    margin-left: 6px;
+    margin-left: 4px;
 }
 .unified-nav-logo .logo-by-link {
     text-decoration: none;
     color: inherit;
     transition: color 0.2s;
+    margin-left: 2px;
 }
 .unified-nav-logo .logo-by-link:hover {
     color: #475569;
