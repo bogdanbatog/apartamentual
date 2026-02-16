@@ -811,6 +811,10 @@ body {
 .matching-no {
     color: #9ca3af;
 }
+.matching-info {
+    color: #475569;
+    font-size: 0.75rem;
+}
 
 /* ── ADMIN BADGE ── */
 .admin-badge {
