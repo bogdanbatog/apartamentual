@@ -816,3 +816,73 @@ function showError(message) {
     document.getElementById('error-state').classList.remove('hidden');
     document.getElementById('error-message').textContent = message;
 }
+
+// =====================================================
+// INLINE NOTES EDITING
+// =====================================================
+
+function toggleNotesEdit() {
+    const viewMode = document.getElementById('notes-view-mode');
+    const editMode = document.getElementById('notes-edit-mode');
+    const editBtn = document.getElementById('notes-edit-btn');
+    const textarea = document.getElementById('notes-textarea');
+    
+    viewMode.classList.add('hidden');
+    editMode.classList.remove('hidden');
+    editBtn.classList.add('hidden');
+    
+    // Populate textarea with current notes
+    textarea.value = profileData.notes || '';
+    textarea.focus();
+}
+
+function cancelNotesEdit() {
+    const viewMode = document.getElementById('notes-view-mode');
+    const editMode = document.getElementById('notes-edit-mode');
+    const editBtn = document.getElementById('notes-edit-btn');
+    
+    editMode.classList.add('hidden');
+    viewMode.classList.remove('hidden');
+    editBtn.classList.remove('hidden');
+}
+
+async function saveNotes() {
+    const textarea = document.getElementById('notes-textarea');
+    const newNotes = textarea.value.trim() || null;
+    const statusEl = document.getElementById('notes-save-status');
+    
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .update({ notes: newNotes })
+            .eq('user_id', currentUser.id);
+        
+        if (error) throw error;
+        
+        // Update local data
+        profileData.notes = newNotes;
+        
+        // Update view
+        const notesEl = document.getElementById('user-notes');
+        if (newNotes) {
+            notesEl.textContent = newNotes;
+            notesEl.style.color = '';
+            notesEl.style.fontStyle = '';
+        } else {
+            notesEl.textContent = 'Nu ai adăugat notițe încă.';
+            notesEl.style.color = '#9ca3af';
+            notesEl.style.fontStyle = 'italic';
+        }
+        
+        // Switch back to view mode
+        cancelNotesEdit();
+        
+        // Show save confirmation
+        statusEl.classList.remove('hidden');
+        setTimeout(() => statusEl.classList.add('hidden'), 2000);
+        
+    } catch (e) {
+        console.error('Error saving notes:', e);
+        alert('Eroare la salvarea notițelor: ' + e.message);
+    }
+}
