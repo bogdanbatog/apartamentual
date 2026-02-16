@@ -35,6 +35,9 @@
     flex-shrink: 0;
     white-space: nowrap;
 }
+.unified-nav-logo:hover {
+    text-decoration: none;
+}
 .unified-nav-logo .logo-a {
     color: #0f172a;
 }
