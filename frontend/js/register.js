@@ -38,7 +38,7 @@ async function checkExistingSession() {
             if (redirectUrl) {
                 window.location.href = decodeURIComponent(redirectUrl);
             } else {
-                window.location.href = '/profile-view-new.html?id=' + user.id;
+                window.location.href = '/profile-view.html?id=' + user.id;
             }
         }
     } catch (error) {
@@ -425,6 +425,13 @@ async function handleAuthSubmit(event) {
     // Validate password length
     if (password.length < 6) {
         showError(errorDiv, 'Parola trebuie să aibă minim 6 caractere');
+        return;
+    }
+    
+    // Validate terms acceptance
+    const termsCheckbox = document.getElementById('accept-terms');
+    if (termsCheckbox && !termsCheckbox.checked) {
+        showError(errorDiv, 'Trebuie să accepți Termenii și condițiile și Politica de confidențialitate.');
         return;
     }
     
