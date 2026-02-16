@@ -132,11 +132,16 @@
                     </button>
                 </form>
 
-                <div class="mt-4 text-center text-sm text-gray-500">
-                    Prin crearea contului, ești de acord cu 
-                    <a href="termeni.html" class="text-blue-600 hover:underline">Termenii și condițiile</a> și 
-                    <a href="gdpr.html" class="text-blue-600 hover:underline">Politica GDPR</a>.
-                </div>
+                    <div class="mt-4 flex items-start gap-2">
+                        <input type="checkbox" id="accept-terms" required
+                            class="mt-1 rounded border-gray-300 text-gray-900 focus:ring-gray-900">
+                        <label for="accept-terms" class="text-sm text-gray-600">
+                            Am citit și sunt de acord cu 
+                            <a href="termeni.html" target="_blank" class="text-blue-600 hover:underline">Termenii și condițiile</a> și 
+                            <a href="gdpr.html" target="_blank" class="text-blue-600 hover:underline">Politica de confidențialitate (GDPR)</a>.
+                            <span class="text-red-500">*</span>
+                        </label>
+                    </div>
             </div>
 
             <!-- Step 3: Profile Information -->
