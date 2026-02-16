@@ -31,8 +31,8 @@
     text-decoration: none;
     flex-shrink: 0;
     display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: baseline;
+    gap: 6px;
 }
 .unified-nav-logo .logo-main {
     font-size: 22px;
@@ -51,14 +51,10 @@
     color: #0f172a;
 }
 .unified-nav-logo .logo-by {
-    display: block;
-    text-align: right;
-    width: 100%;
     font-size: 9px;
     font-weight: 400;
     color: #94a3b8;
     letter-spacing: 0.03em;
-    margin-top: 2px;
     line-height: 1;
     white-space: nowrap;
 }
