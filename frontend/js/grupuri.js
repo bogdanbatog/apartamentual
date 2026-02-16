@@ -353,6 +353,52 @@ function renderGrupCard(grup, isMember) {
     
     const description = grup.descriere || 'Fără descriere.';
     
+    // Zones and tags for public display
+    const grupZones = (grup.grup_preferred_zones || []).map(gz => gz.zones).filter(Boolean);
+    const grupTags = (grup.grup_tags || []).map(gt => gt.tags).filter(Boolean);
+    
+    // Public info: zones and tags
+    let publicInfoHtml = '';
+    if (grupZones.length > 0 || grupTags.length > 0) {
+        const zonesHtml = grupZones.length > 0 
+            ? `<span class="matching-info"><i class="fas fa-map-marker-alt"></i> ${grupZones.map(z => escapeHtml(z.name)).join(', ')}</span>` 
+            : '';
+        const tagsHtml = grupTags.length > 0 
+            ? `<span class="matching-info"><i class="fas fa-tags"></i> ${grupTags.map(t => escapeHtml(t.name)).join(', ')}</span>` 
+            : '';
+        publicInfoHtml = `<div class="grup-matching-stack">${zonesHtml}${tagsHtml}</div>`;
+    }
+    
+    // If not logged in, show simplified card
+    if (!currentUser) {
+        return `
+            <div class="grup-card" data-grup-id="${grup.id}">
+                <div class="grup-card-header">
+                    <div class="grup-card-header-top">
+                        <h3>${escapeHtml(grup.nume)}</h3>
+                        <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
+                    </div>
+                    <div class="grup-header-meta">
+                        <span class="grup-stat">
+                            <i class="fas fa-users"></i>
+                            ${membriCount}/${grup.max_membri}
+                        </span>
+                    </div>
+                </div>
+                <div class="grup-card-body">
+                    <p class="grup-description">${escapeHtml(description)}</p>
+                </div>
+                <div class="grup-card-footer">
+                    ${publicInfoHtml}
+                    <div class="grup-card-actions">
+                        <a href="register.html" class="btn-alatura">Creează cont pentru detalii</a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Logged in: full card with join/matching
     // Determine if user can join
     const statusNorm = { activ: 'deschis', explorare: 'cu_aprobare', inchis: 'cu_aprobare', deschis: 'deschis', cu_aprobare: 'cu_aprobare' }[grup.status] || 'deschis';
     const isPending = pendingGrupuri.has(grup.id);
@@ -366,10 +412,7 @@ function renderGrupCard(grup, isMember) {
     
     // Matching with current user's preferred zones and tags
     let matchingHtml = '';
-    if (currentUser && !isMember) {
-        const grupZones = (grup.grup_preferred_zones || []).map(gz => gz.zones).filter(Boolean);
-        const grupTags = (grup.grup_tags || []).map(gt => gt.tags).filter(Boolean);
-        
+    if (!isMember) {
         const commonZones = grupZones.filter(gz => myZones.some(mz => mz.id === gz.id));
         const commonTags = grupTags.filter(gt => myTags.some(mt => mt.id === gt.id));
         
