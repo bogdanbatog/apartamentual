@@ -51,21 +51,9 @@
     letter-spacing: 0.02em;
     margin-left: 4px;
 }
-.unified-nav-logo .logo-by-link {
-    text-decoration: none;
-    color: inherit;
-    transition: color 0.2s;
-    margin-left: 2px;
-}
-.unified-nav-logo .logo-by-link:hover {
-    color: #475569;
-}
-.unified-nav-logo .logo-by-link strong {
+.unified-nav-logo .logo-by strong {
     font-weight: 600;
     color: #64748b;
-}
-.unified-nav-logo .logo-by-link:hover strong {
-    color: #1e293b;
 }
 
 /* ── Nav Links ── */
