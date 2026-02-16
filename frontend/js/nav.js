@@ -55,8 +55,7 @@ function createNavigation() {
     <nav class="unified-nav">
         <div class="unified-nav-inner">
             <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
-                <span class="logo-by">by <a href="https://www.ltfbstudio.ro" target="_blank" class="logo-by-link"><strong>LTFB</strong> studio</a></span>
+                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span><span class="logo-by">by <a href="https://www.ltfbstudio.ro" target="_blank" class="logo-by-link"><strong>LTFB</strong> studio</a></span>
             </a>
             <div class="unified-nav-links">
                 ${navLinksHTML}
