@@ -468,7 +468,15 @@ async function displayTerenDetails(teren, userProfile) {
                     ? (posterProfile.agency_name || 'Agenție') 
                     : (posterProfile.pseudonym || 'Utilizator');
                 adaugatDeEl.textContent = posterName;
-                adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
+                // Only link to profile if user is logged in
+                if (userProfile) {
+                    adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
+                } else {
+                    adaugatDeEl.removeAttribute('href');
+                    adaugatDeEl.style.color = 'inherit';
+                    adaugatDeEl.style.textDecoration = 'none';
+                    adaugatDeEl.style.cursor = 'default';
+                }
                 adaugatDeRow.classList.remove('hidden');
             }
         } catch (e) {
