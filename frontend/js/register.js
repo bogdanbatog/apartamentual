@@ -35,7 +35,7 @@ async function checkExistingSession() {
             // Check for redirect URL (e.g. from invitation link)
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get('redirect');
-            if (redirectUrl) {
+            if (redirectUrl && !redirectUrl.includes('://')) {
                 window.location.href = decodeURIComponent(redirectUrl);
             } else {
                 window.location.href = '/profile-view.html?id=' + user.id;
@@ -441,8 +441,9 @@ async function handleAuthSubmit(event) {
         const redirectUrl = urlParams.get('redirect');
         
         // Build email redirect - if coming from invitation, redirect confirmation to invite link
-        const emailRedirectTo = redirectUrl 
-            ? decodeURIComponent(redirectUrl)
+        const safeRedirect = redirectUrl && !redirectUrl.includes('://') ? decodeURIComponent(redirectUrl) : null;
+        const emailRedirectTo = safeRedirect 
+            ? window.location.origin + (safeRedirect.startsWith('/') ? '' : '/') + safeRedirect
             : window.location.origin;
         
         // Create account
@@ -641,7 +642,7 @@ function showSuccess(accountType) {
     
     if (accountType === 'activ') {
         titleEl.textContent = 'Bine ai venit!';
-        if (redirectUrl) {
+        if (redirectUrl && !redirectUrl.includes('://')) {
             const decodedUrl = decodeURIComponent(redirectUrl);
             textEl.innerHTML = 'Contul tău a fost creat cu succes!<br><br>📧 <strong>Verifică-ți emailul</strong> pentru a confirma contul.<br>După confirmare, apasă butonul de mai jos.';
             // Update the success link to point to redirect
