@@ -16,8 +16,8 @@ function renderMarkdown(text) {
         .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
         // Inline code
         .replace(/`([^`]+)`/g, '<code>$1</code>')
-        // Links
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        // Links - only allow http/https URLs (blocks javascript: XSS)
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
         // Line breaks
         .replace(/\n/g, '<br>');
 }
@@ -37,8 +37,8 @@ function renderMarkdownSnippet(text) {
         .replace(/\*([^*]+)\*/g, '<em>$1</em>')
         // Inline code
         .replace(/`([^`]+)`/g, '<code>$1</code>')
-        // Links
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        // Links - only allow http/https URLs (blocks javascript: XSS)
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
         // Code blocks (convert to inline code for snippets)
         .replace(/```([\s\S]*?)```/g, '<code>$1</code>')
         // Replace line breaks with spaces for compact display
