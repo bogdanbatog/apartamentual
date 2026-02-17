@@ -265,10 +265,14 @@ function applyFilters() {
         filtered = filtered.filter(g => g.oras === oras);
     }
     
-    // Filter by status
+    // Filter by status (normalize legacy values)
     const status = DOM.filterStatus?.value;
     if (status) {
-        filtered = filtered.filter(g => g.status === status);
+        const statusMap = { activ: 'deschis', explorare: 'cu_aprobare', inchis: 'cu_aprobare' };
+        filtered = filtered.filter(g => {
+            const normalized = statusMap[g.status] || g.status;
+            return normalized === status;
+        });
     }
     
     // Sort
