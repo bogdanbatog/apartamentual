@@ -127,7 +127,7 @@ async function signIn() {
             // Check for redirect URL (e.g. from invitation link)
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get('redirect');
-            if (redirectUrl) {
+            if (redirectUrl && !redirectUrl.includes('://')) {
                 window.location.href = decodeURIComponent(redirectUrl);
             } else {
                 // Reload to update UI
