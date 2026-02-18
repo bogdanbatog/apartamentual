@@ -29,6 +29,29 @@
     }
 })();
 
+// Deobfuscate emails rendered via JS (bypass Cloudflare email protection)
+(function() {
+    function renderEmails() {
+        document.querySelectorAll('.js-email').forEach(function(el) {
+            var u = el.getAttribute('data-u');
+            var d = el.getAttribute('data-d');
+            if (u && d) {
+                var addr = u + '@' + d;
+                var a = document.createElement('a');
+                a.href = 'mai' + 'lto:' + addr;
+                a.className = 'text-blue-600';
+                a.textContent = addr;
+                el.replaceWith(a);
+            }
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderEmails);
+    } else {
+        renderEmails();
+    }
+})();
+
 (function() {
 
 function getPageConfig() {
