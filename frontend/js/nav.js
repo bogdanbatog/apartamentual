@@ -5,9 +5,13 @@
 
 // Auto-load floating consultation button
 (function() {
-    var basePath = document.querySelector('link[href*="nav.css"]')?.href?.replace(/nav\.css.*/, '') || '/';
-    var isSubfolder = basePath.includes('/ce-este/');
-    var prefix = isSubfolder ? '../' : '';
+    // Determine base path from nav.css link
+    var navLink = document.querySelector('link[href*="nav.css"]');
+    var prefix = '';
+    if (navLink) {
+        var href = navLink.getAttribute('href');
+        prefix = href.replace('nav.css', '');
+    }
 
     var css = document.createElement('link');
     css.rel = 'stylesheet';
@@ -16,7 +20,13 @@
 
     var js = document.createElement('script');
     js.src = prefix + 'js/fab-consultanta.js';
-    document.body ? document.body.appendChild(js) : document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(js); });
+    if (document.body) {
+        document.body.appendChild(js);
+    } else {
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.appendChild(js);
+        });
+    }
 })();
 
 (function() {
@@ -70,7 +80,7 @@ function createNavigation() {
     <nav class="unified-nav">
         <div class="unified-nav-inner">
             <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span> <span class="logo-by">by <strong>LTFB</strong> studio</span>
             </a>
             <div class="unified-nav-links">
                 ${navLinksHTML}
