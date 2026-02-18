@@ -4,13 +4,13 @@ function createFooter() {
     
     const footerHTML = `
         <footer class="border-t py-8 text-sm">
-            <div class="container flex flex-wrap items-center justify-between gap-4">
-                <p>© ${currentYear} ApartamenTUal</p>
-                <div class="flex gap-4">
+            <div class="container text-center">
+                <div class="flex justify-center gap-6 mb-3">
                     <a href="/termeni.html">Termeni</a>
                     <a href="/gdpr.html">GDPR</a>
                     <a href="/contact.html">Contact</a>
                 </div>
+                <p class="text-gray-500">© ${currentYear} ApartamenTUal</p>
             </div>
         </footer>
     `;
