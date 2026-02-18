@@ -39,7 +39,12 @@
                     <div class="card">
                         <h3 class="text-lg mb-3">📧 Email</h3>
                         <p class="text-sm subtitle mb-2">Pentru întrebări generale:</p>
-                        <span id="contact-email" class="text-blue-600 cursor-pointer underline"></span>
+                        <div class="flex items-center gap-2">
+                            <span id="contact-email-text" class="text-blue-600 font-medium"></span>
+                            <button id="copy-email-btn" class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition" title="Copiază email">
+                                📋 Copiază
+                            </button>
+                        </div>
                     </div>
 
                     <div class="card">
@@ -84,11 +89,20 @@
     <script>
     // Render email via JS to bypass Cloudflare email obfuscation
     document.addEventListener('DOMContentLoaded', function() {
-        var el = document.getElementById('contact-email');
-        if (el) {
-            var u = 'office'; var d = 'ltfbstudio.ro';
-            var addr = u + '@' + d;
-            el.innerHTML = '<a href="mai' + 'lto:' + addr + '" style="color: inherit;">' + addr + '</a>';
+        var u = 'office'; var d = 'ltfbstudio.ro';
+        var addr = u + '@' + d;
+        
+        var textEl = document.getElementById('contact-email-text');
+        if (textEl) textEl.textContent = addr;
+        
+        var copyBtn = document.getElementById('copy-email-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(addr).then(function() {
+                    copyBtn.textContent = '✓ Copiat!';
+                    setTimeout(function() { copyBtn.textContent = '📋 Copiază'; }, 2000);
+                });
+            });
         }
     });
     </script>
