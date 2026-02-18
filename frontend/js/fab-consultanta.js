@@ -14,28 +14,41 @@
                          '<span class="fab-consultanta-text">Cere consultanță</span>';
         document.body.appendChild(btn);
 
-        // Hide button when footer is visible
+        // Hide button completely when footer is visible
+        // Look for the actual <footer> element (created by footer.js) or the container
         var footer = document.querySelector('footer') || document.getElementById('footer');
         if (footer) {
             var observer = new IntersectionObserver(function(entries) {
                 entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        btn.style.opacity = '0';
-                        btn.style.pointerEvents = 'none';
-                    } else {
-                        btn.style.opacity = '1';
-                        btn.style.pointerEvents = 'auto';
-                    }
+                    btn.style.display = entry.isIntersecting ? 'none' : 'flex';
                 });
-            }, { threshold: 0.1 });
-            observer.observe(footer);
+            }, { threshold: 0.01 });
+
+            // If footer.js hasn't rendered yet, wait for it
+            if (footer.querySelector('footer')) {
+                observer.observe(footer.querySelector('footer'));
+            } else {
+                // Observe the container, and also watch for the inner footer to appear
+                observer.observe(footer);
+                var checkFooter = setInterval(function() {
+                    var innerFooter = footer.querySelector('footer');
+                    if (innerFooter) {
+                        observer.disconnect();
+                        observer.observe(innerFooter);
+                        clearInterval(checkFooter);
+                    }
+                }, 200);
+                // Stop checking after 5 seconds
+                setTimeout(function() { clearInterval(checkFooter); }, 5000);
+            }
         }
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createButton);
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(createButton, 150);
+        });
     } else {
-        // Small delay to ensure footer.js has run
-        setTimeout(createButton, 100);
+        setTimeout(createButton, 150);
     }
 })();
