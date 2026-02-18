@@ -14,40 +14,29 @@
                          '<span class="fab-consultanta-text">Cere consultanță</span>';
         document.body.appendChild(btn);
 
-        // Hide button completely when footer is visible
-        // Look for the actual <footer> element (created by footer.js) or the container
-        var footer = document.querySelector('footer') || document.getElementById('footer');
-        if (footer) {
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    btn.style.display = entry.isIntersecting ? 'none' : 'flex';
-                });
-            }, { threshold: 0.01 });
+        function observeFooter(el) {
+            new IntersectionObserver(function(entries) {
+                btn.style.display = entries[0].isIntersecting ? 'none' : 'flex';
+            }, { rootMargin: '80px' }).observe(el);
+        }
 
-            // If footer.js hasn't rendered yet, wait for it
-            if (footer.querySelector('footer')) {
-                observer.observe(footer.querySelector('footer'));
+        var container = document.getElementById('footer');
+        if (container) {
+            var inner = container.querySelector('footer');
+            if (inner) {
+                observeFooter(inner);
             } else {
-                // Observe the container, and also watch for the inner footer to appear
-                observer.observe(footer);
-                var checkFooter = setInterval(function() {
-                    var innerFooter = footer.querySelector('footer');
-                    if (innerFooter) {
-                        observer.disconnect();
-                        observer.observe(innerFooter);
-                        clearInterval(checkFooter);
-                    }
+                var check = setInterval(function() {
+                    var f = container.querySelector('footer');
+                    if (f) { observeFooter(f); clearInterval(check); }
                 }, 200);
-                // Stop checking after 5 seconds
-                setTimeout(function() { clearInterval(checkFooter); }, 5000);
+                setTimeout(function() { clearInterval(check); }, 5000);
             }
         }
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(createButton, 150);
-        });
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(createButton, 150); });
     } else {
         setTimeout(createButton, 150);
     }
