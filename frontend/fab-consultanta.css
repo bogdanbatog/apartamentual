@@ -3,15 +3,16 @@
 /* ══════════════════════════════════════════════ */
 
 .fab-consultanta {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 9990;
-    display: flex;
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    display: flex !important;
     align-items: center;
     gap: 0;
     background: #1e293b;
-    color: #fff;
+    color: #fff !important;
     border: none;
     border-radius: 50px;
     padding: 0 8px 0 0;
@@ -19,7 +20,7 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     transition: all 0.3s ease;
     font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
+    text-decoration: none !important;
     overflow: hidden;
     height: 52px;
 }
@@ -28,8 +29,8 @@
     background: #0f172a;
     box-shadow: 0 6px 28px rgba(0, 0, 0, 0.35);
     transform: translateY(-2px);
-    text-decoration: none;
-    color: #fff;
+    text-decoration: none !important;
+    color: #fff !important;
 }
 
 .fab-consultanta-icon {
@@ -60,11 +61,11 @@
     50% { transform: scale(1.1); }
 }
 
-/* Mobile: show only icon, expand on tap */
+/* Mobile: show only icon */
 @media (max-width: 640px) {
     .fab-consultanta {
-        bottom: 16px;
-        right: 16px;
+        bottom: 16px !important;
+        right: 16px !important;
         padding: 0;
         border-radius: 50%;
         width: 52px;
@@ -73,9 +74,4 @@
     .fab-consultanta-text {
         display: none;
     }
-}
-
-/* Tooltip for mobile (icon-only state) */
-.fab-consultanta[title] {
-    position: fixed; /* ensure tooltip doesn't interfere */
 }
