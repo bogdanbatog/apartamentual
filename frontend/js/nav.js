@@ -1,8 +1,23 @@
 // ══════════════════════════════════════════════════════════════
 // UNIFIED NAVIGATION COMPONENT — ApartamenTUal
-// Used on ALL pages: Acasă, Ce este, Terenuri, Utilizatori, Grupuri, etc.
 // Uses global `sb` (and `supabase`) from supabase-config.js
 // ══════════════════════════════════════════════════════════════
+
+// Auto-load floating consultation button
+(function() {
+    var basePath = document.querySelector('link[href*="nav.css"]')?.href?.replace(/nav\.css.*/, '') || '/';
+    var isSubfolder = basePath.includes('/ce-este/');
+    var prefix = isSubfolder ? '../' : '';
+
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = prefix + 'fab-consultanta.css';
+    document.head.appendChild(css);
+
+    var js = document.createElement('script');
+    js.src = prefix + 'js/fab-consultanta.js';
+    document.body ? document.body.appendChild(js) : document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(js); });
+})();
 
 (function() {
 
@@ -55,7 +70,7 @@ function createNavigation() {
     <nav class="unified-nav">
         <div class="unified-nav-inner">
             <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span> <span class="logo-by">by <strong>LTFB</strong> studio</span>
+                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
             </a>
             <div class="unified-nav-links">
                 ${navLinksHTML}
