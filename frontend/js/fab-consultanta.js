@@ -13,14 +13,6 @@
         btn.innerHTML = '<span class="fab-consultanta-icon"><i class="fas fa-comments"></i></span>' +
                          '<span class="fab-consultanta-text">Cere consultanță</span>';
         document.body.appendChild(btn);
-
-        // Hide when near bottom of page (where footer links are)
-        window.addEventListener('scroll', function() {
-            var scrollBottom = window.innerHeight + window.scrollY;
-            var pageHeight = document.body.offsetHeight;
-            // Hide when within 100px of page bottom
-            btn.style.display = (pageHeight - scrollBottom < 100) ? 'none' : 'flex';
-        });
     }
 
     if (document.readyState === 'loading') {
