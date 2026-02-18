@@ -18,11 +18,12 @@
     padding: 0 8px 0 0;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, opacity 0.3s ease;
     font-family: 'DM Sans', sans-serif;
     text-decoration: none !important;
     overflow: hidden;
     height: 52px;
+    opacity: 1;
 }
 
 .fab-consultanta:hover {
@@ -51,7 +52,6 @@
     letter-spacing: 0.01em;
 }
 
-/* Pulse animation on icon */
 .fab-consultanta-icon i {
     animation: fab-pulse 3s ease-in-out infinite;
 }
@@ -61,7 +61,6 @@
     50% { transform: scale(1.1); }
 }
 
-/* Mobile: show only icon */
 @media (max-width: 640px) {
     .fab-consultanta {
         bottom: 16px !important;
