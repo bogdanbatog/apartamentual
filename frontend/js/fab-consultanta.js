@@ -7,12 +7,20 @@
         // Avoid duplicates
         if (document.querySelector('.fab-consultanta')) return;
 
-        var btn = document.createElement('a');
-        btn.href = 'mailto:office@ltfbstudio.ro?subject=Cerere%20consultan%C8%9B%C4%83%20ApartamenTUal';
+        var btn = document.createElement('div');
         btn.className = 'fab-consultanta';
         btn.title = 'Cere consultanță';
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('tabindex', '0');
         btn.innerHTML = '<span class="fab-consultanta-icon"><i class="fas fa-comments"></i></span>' +
                          '<span class="fab-consultanta-text">Cere consultanță</span>';
+        
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = 'mailto:office@ltfbstudio.ro?subject=Cerere%20consultan%C8%9B%C4%83%20ApartamenTUal';
+        });
+
         document.body.appendChild(btn);
     }
 
