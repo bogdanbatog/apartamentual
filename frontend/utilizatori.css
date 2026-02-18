@@ -682,41 +682,7 @@ body {
 /* ══════════════════════════════════════════
    FOOTER
    ══════════════════════════════════════════ */
-.footer {
-    background: var(--white);
-    border-top: 1px solid var(--slate-200);
-    padding: 1.5rem;
-    margin-top: auto;
-}
-
-.footer-content {
-    max-width: 1280px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.footer-content p {
-    color: var(--slate-500);
-    font-size: 0.9rem;
-}
-
-.footer-links {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.footer-links a {
-    color: var(--slate-500);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.2s;
-}
-
-.footer-links a:hover {
-    color: var(--slate-700);
-}
+/* Footer styles removed - using global footer.js component */
 
 /* ══════════════════════════════════════════
    RESPONSIVE
@@ -744,12 +710,6 @@ body {
 
     .users-grid {
         grid-template-columns: 1fr;
-    }
-
-    .footer-content {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
     }
 }
 
