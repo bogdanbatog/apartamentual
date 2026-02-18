@@ -3,14 +3,14 @@ function createFooter() {
     const currentYear = new Date().getFullYear();
     
     const footerHTML = `
-        <footer class="border-t py-8 text-sm">
-            <div class="container text-center">
-                <div class="flex justify-center gap-6 mb-3">
-                    <a href="/termeni.html">Termeni</a>
-                    <a href="/gdpr.html">GDPR</a>
-                    <a href="/contact.html">Contact</a>
+        <footer style="border-top: 1px solid #e2e8f0; padding: 2rem 1rem; font-size: 0.875rem;">
+            <div style="max-width: 1280px; margin: 0 auto; text-align: center;">
+                <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.75rem;">
+                    <a href="/termeni.html" style="color: #64748b; text-decoration: none;">Termeni</a>
+                    <a href="/gdpr.html" style="color: #64748b; text-decoration: none;">GDPR</a>
+                    <a href="/contact.html" style="color: #64748b; text-decoration: none;">Contact</a>
                 </div>
-                <p class="text-gray-500">© ${currentYear} ApartamenTUal</p>
+                <p style="color: #94a3b8; margin: 0;">© ${currentYear} ApartamenTUal</p>
             </div>
         </footer>
     `;
