@@ -39,7 +39,7 @@
                     <div class="card">
                         <h3 class="text-lg mb-3">📧 Email</h3>
                         <p class="text-sm subtitle mb-2">Pentru întrebări generale:</p>
-                        <a href="/cdn-cgi/l/email-protection#6b040d0d02080e2b071f0d09181f1e0f0204451904" class="text-blue-600"><span class="__cf_email__" data-cfemail="91fef7f7f8f2f4d1fde5f7f3e2e5e4f5f8febfe3fe">[email&#160;protected]</span></a>
+                        <span id="contact-email" class="text-blue-600 cursor-pointer underline"></span>
                     </div>
 
                     <div class="card">
@@ -81,5 +81,16 @@
     <script src="js/faq.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
+    <script>
+    // Render email via JS to bypass Cloudflare email obfuscation
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.getElementById('contact-email');
+        if (el) {
+            var u = 'office'; var d = 'ltfbstudio.ro';
+            var addr = u + '@' + d;
+            el.innerHTML = '<a href="mai' + 'lto:' + addr + '" style="color: inherit;">' + addr + '</a>';
+        }
+    });
+    </script>
 </body>
 </html>
