@@ -1,13 +1,13 @@
 // Floating Consultation Button - auto-inject on every page
 (function() {
     if (window.location.pathname.includes('admin')) return;
-    if (window.location.pathname.includes('contact')) return;
+    if (window.location.pathname.includes('consultanta')) return;
 
     function createButton() {
         if (document.querySelector('.fab-consultanta')) return;
 
         var btn = document.createElement('a');
-        btn.href = '/contact.html';
+        btn.href = '/consultanta.html';
         btn.className = 'fab-consultanta';
         btn.title = 'Cere consultanță';
         btn.innerHTML = '<span class="fab-consultanta-icon"><i class="fas fa-comments"></i></span>' +
