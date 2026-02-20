@@ -35,10 +35,10 @@ async function checkExistingSession() {
             // Check for redirect URL (e.g. from invitation link)
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get('redirect');
-            if (redirectUrl && !redirectUrl.includes('://')) {
+            if (redirectUrl) {
                 window.location.href = decodeURIComponent(redirectUrl);
             } else {
-                window.location.href = '/profile-view.html?id=' + user.id;
+                window.location.href = '/profile-view-new.html?id=' + user.id;
             }
         }
     } catch (error) {
@@ -428,22 +428,14 @@ async function handleAuthSubmit(event) {
         return;
     }
     
-    // Validate terms acceptance
-    const termsCheckbox = document.getElementById('accept-terms');
-    if (termsCheckbox && !termsCheckbox.checked) {
-        showError(errorDiv, 'Trebuie să accepți Termenii și condițiile și Politica de confidențialitate.');
-        return;
-    }
-    
     try {
         // Check if there's a redirect URL (e.g. from invitation)
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect');
         
         // Build email redirect - if coming from invitation, redirect confirmation to invite link
-        const safeRedirect = redirectUrl && !redirectUrl.includes('://') ? decodeURIComponent(redirectUrl) : null;
-        const emailRedirectTo = safeRedirect 
-            ? window.location.origin + (safeRedirect.startsWith('/') ? '' : '/') + safeRedirect
+        const emailRedirectTo = redirectUrl 
+            ? decodeURIComponent(redirectUrl)
             : window.location.origin;
         
         // Create account
@@ -642,7 +634,7 @@ function showSuccess(accountType) {
     
     if (accountType === 'activ') {
         titleEl.textContent = 'Bine ai venit!';
-        if (redirectUrl && !redirectUrl.includes('://')) {
+        if (redirectUrl) {
             const decodedUrl = decodeURIComponent(redirectUrl);
             textEl.innerHTML = 'Contul tău a fost creat cu succes!<br><br>📧 <strong>Verifică-ți emailul</strong> pentru a confirma contul.<br>După confirmare, apasă butonul de mai jos.';
             // Update the success link to point to redirect
