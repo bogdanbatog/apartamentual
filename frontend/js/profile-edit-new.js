@@ -185,9 +185,6 @@ function populateActiveForm() {
     // Description
     document.getElementById('description').value = profileData.description || '';
     
-    // Notes
-    document.getElementById('notes').value = profileData.notes || '';
-    
     // Load zones if city is selected
     if (profileData.preferred_city_id) {
         loadZonesForCity(profileData.preferred_city_id);
@@ -232,36 +229,21 @@ function renderTags() {
     const container = document.getElementById('tags-container');
     if (!container) return;
     
-    const groupedTags = tags.reduce((acc, tag) => {
-        if (!acc[tag.category]) acc[tag.category] = [];
-        acc[tag.category].push(tag);
-        return acc;
-    }, {});
-    
-    const categoryNames = {
-        'apartament': 'Despre Apartament',
-        'imobil': 'Despre Imobil',
-        'comunitate': 'Despre Comunitate'
-    };
-    
-    container.innerHTML = Object.entries(groupedTags).map(([category, categoryTags]) => `
-        <div>
-            <p class="text-sm font-medium text-gray-600 mb-2">${categoryNames[category] || category}</p>
-            <div class="flex flex-wrap gap-2">
-                ${categoryTags.map(tag => `
-                    <button type="button"
-                            class="tag-button px-3 py-1.5 rounded-full text-sm border transition
-                                   ${selectedTags.includes(tag.id) 
-                                       ? 'bg-gray-900 text-white border-gray-900' 
-                                       : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'}"
-                            data-tag-id="${tag.id}"
-                            onclick="toggleTag(${tag.id})">
-                        ${tag.name}
-                    </button>
-                `).join('')}
-            </div>
+    container.innerHTML = `
+        <div class="flex flex-wrap gap-2">
+            ${tags.map(tag => `
+                <button type="button"
+                        class="tag-button px-3 py-1.5 rounded-full text-sm border transition
+                               ${selectedTags.includes(tag.id) 
+                                   ? 'bg-gray-900 text-white border-gray-900' 
+                                   : 'bg-white text-gray-700 border-gray-300 hover:border-gray-500'}"
+                        data-tag-id="${tag.id}"
+                        onclick="toggleTag(${tag.id})">
+                    ${tag.name}
+                </button>
+            `).join('')}
         </div>
-    `).join('');
+    `;
     
     updateTagsCounter();
 }
@@ -269,8 +251,8 @@ function renderTags() {
 function updateTagsCounter() {
     const counter = document.getElementById('tags-counter');
     if (counter) {
-        counter.textContent = `${selectedTags.length} din 7 selectate`;
-        counter.className = selectedTags.length >= 7 ? 'text-sm text-orange-600 font-medium mt-3' : 'text-sm text-gray-500 mt-3';
+        counter.textContent = `${selectedTags.length} din 15 selectate`;
+        counter.className = selectedTags.length >= 15 ? 'text-sm text-orange-600 font-medium mt-3' : 'text-sm text-gray-500 mt-3';
     }
 }
 
@@ -368,8 +350,8 @@ function toggleTag(tagId) {
     if (index > -1) {
         selectedTags.splice(index, 1);
     } else {
-        if (selectedTags.length >= 7) {
-            alert('Poți selecta maxim 7 tag-uri');
+        if (selectedTags.length >= 15) {
+            alert('Poți selecta maxim 15 tag-uri');
             return;
         }
         selectedTags.push(tagId);
@@ -424,8 +406,7 @@ async function handleActiveFormSubmit(event) {
             preferred_rooms: document.getElementById('preferred_rooms').value,
             preferred_area_sqm: parseInt(document.getElementById('preferred_area_sqm').value),
             preferred_city_id: parseInt(document.getElementById('preferred_city').value),
-            description: document.getElementById('description').value || null,
-            notes: document.getElementById('notes').value || null
+            description: document.getElementById('description').value || null
         };
         
         const { error: profileError } = await supabase
