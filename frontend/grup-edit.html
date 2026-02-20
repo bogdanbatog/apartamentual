@@ -615,26 +615,21 @@ async function loadTags() {
 function renderTags() {
     const container = document.getElementById('tags-container');
     if (!container || !allTags.length) return;
-    const grouped = allTags.reduce((acc, t) => { (acc[t.category] = acc[t.category] || []).push(t); return acc; }, {});
-    const names = { 'apartament': 'Despre Apartament', 'imobil': 'Despre Imobil', 'comunitate': 'Despre Comunitate' };
-    container.innerHTML = Object.entries(grouped).map(([cat, tags]) => `
-        <div><p class="tag-category-title">${names[cat] || cat}</p>
-        <div class="tag-buttons">${tags.map(t => `<button type="button" class="tag-btn" data-tag-id="${t.id}" onclick="toggleTag(${t.id})">${t.name}</button>`).join('')}</div></div>
-    `).join('');
+    container.innerHTML = `<div class="tag-buttons">${allTags.map(t => `<button type="button" class="tag-btn" data-tag-id="${t.id}" onclick="toggleTag(${t.id})">${t.name}</button>`).join('')}</div>`;
     updateTagsCounter();
 }
 
 function toggleTag(id) {
     const idx = selectedTags.indexOf(id);
     if (idx > -1) selectedTags.splice(idx, 1);
-    else { if (selectedTags.length >= 7) { showToast('Max 7 tag-uri.', 'error'); return; } selectedTags.push(id); }
+    else { if (selectedTags.length >= 15) { showToast('Max 15 tag-uri.', 'error'); return; } selectedTags.push(id); }
     document.querySelectorAll('.tag-btn').forEach(b => b.classList.toggle('selected', selectedTags.includes(parseInt(b.dataset.tagId))));
     updateTagsCounter();
 }
 
 function updateTagsCounter() {
     const c = document.getElementById('tags-counter');
-    if (c) { c.textContent = `${selectedTags.length} din 7 selectate`; c.style.color = selectedTags.length >= 7 ? '#ea580c' : '#64748b'; }
+    if (c) { c.textContent = `${selectedTags.length} din 15 selectate`; c.style.color = selectedTags.length >= 15 ? '#ea580c' : '#64748b'; }
 }
 
 // ── CITIES & ZONES FROM SUPABASE ──
