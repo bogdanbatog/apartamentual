@@ -374,6 +374,21 @@
     <script src="js/bucuresti-map.js"></script>
     <script src="js/register.js"></script>
     <script>
+        // Fix login button on register page
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var btn = document.getElementById('btnLoginNav');
+                var btnM = document.getElementById('btnLoginNavMobile');
+                function goLogin(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = '/index.html?login=1';
+                }
+                if (btn) { btn.removeAttribute('onclick'); btn.addEventListener('click', goLogin); }
+                if (btnM) { btnM.removeAttribute('onclick'); btnM.addEventListener('click', goLogin); }
+            }, 500);
+        });
+
         // Handle redirect parameter for invitations
         (function() {
             const urlParams = new URLSearchParams(window.location.search);
