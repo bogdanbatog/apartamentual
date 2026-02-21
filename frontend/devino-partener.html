@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devino partener - ApartamenTUal</title>
+    <meta name="description" content="Alătură-te rețelei de profesioniști ApartamenTUal. Completează formularul de cerere parteneriat.">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/nav.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f8fafc; color: #1e293b; }
+
+        .form-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 3rem 1.5rem;
+            text-align: center;
+        }
+        .form-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .form-hero p { opacity: 0.8; max-width: 520px; margin: 0 auto; font-size: 0.95rem; }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 2rem;
+            max-width: 600px;
+            margin: -1.5rem auto 2rem;
+            position: relative;
+        }
+
+        .form-info {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #92400e;
+        }
+
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.375rem;
+        }
+        .form-group label .req { color: #dc2626; }
+        .form-group .hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Logo upload area */
+        .logo-upload {
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .logo-upload:hover { border-color: #d97706; background: #fffbeb; }
+        .logo-upload input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .logo-upload .upload-icon { font-size: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        .logo-upload .upload-text { font-size: 0.8rem; color: #64748b; }
+        .logo-upload .upload-text strong { color: #d97706; }
+        .logo-preview {
+            display: none;
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin: 0 auto 8px;
+        }
+
+        /* Preview card */
+        .preview-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .preview-section h3 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        .preview-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+        .preview-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .preview-logo {
+            width: 48px; height: 48px; border-radius: 8px;
+            background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; overflow: hidden;
+        }
+        .preview-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .preview-logo i { color: #94a3b8; font-size: 1.2rem; }
+        .preview-name { font-weight: 600; font-size: 0.95rem; color: #1e293b; }
+        .preview-cat { font-size: 0.75rem; color: #64748b; }
+        .preview-desc { font-size: 0.8rem; color: #475569; line-height: 1.5; margin-bottom: 8px; }
+        .preview-link { font-size: 0.75rem; color: #d97706; text-decoration: none; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem;
+            background: #1e293b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover { background: #0f172a; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .success-state { text-align: center; padding: 2rem 1rem; display: none; }
+        .success-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .success-state h2 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #1e293b; }
+        .success-state p { color: #64748b; font-size: 0.9rem; line-height: 1.6; }
+
+        @media (max-width: 640px) {
+            .form-row { grid-template-columns: 1fr; }
+            .form-card { margin: -1rem 0.75rem 2rem; padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation"></div>
+
+    <div class="form-hero">
+        <h1>Devino partener ApartamenTUal</h1>
+        <p>Completează formularul și echipa noastră te va contacta pentru a discuta detaliile parteneriatului.</p>
+    </div>
+
+    <div class="form-card">
+        <div class="form-info">
+            <i class="fas fa-info-circle"></i> Cererea ta va fi analizată de echipa ApartamenTUal. După aprobare, compania ta va apărea în secțiunea <strong>Parteneri</strong> a platformei, vizibilă tuturor utilizatorilor și grupurilor.
+        </div>
+
+        <form id="partnerForm">
+            <!-- Name -->
+            <div class="form-group">
+                <label>Numele companiei <span class="req">*</span></label>
+                <input type="text" id="fName" placeholder="ex: Studio Arhitectură SRL" required>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+                <label>Categorie <span class="req">*</span></label>
+                <select id="fCategory" required>
+                    <option value="">— Selectează categoria —</option>
+                    <option value="arhitectura">🏛️ Arhitectură / Urbanism</option>
+                    <option value="design_interior">🎨 Design interior</option>
+                    <option value="constructii">🔨 Construcții</option>
+                    <option value="furnizori">🏠 Furnizori produse & finisaje</option>
+                    <option value="juridic">⚖️ Avocatură / Consultanță juridică imobiliară</option>
+                    <option value="financiar">💰 Consultanță financiară / Brokeri credite</option>
+                    <option value="agentii_imobiliare">🏢 Agenții imobiliare</option>
+                </select>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label>Descriere scurtă <span class="req">*</span></label>
+                <textarea id="fDescription" placeholder="Descrie pe scurt activitatea companiei și de ce ar fi un partener bun pentru grupurile de construcție colaborativă..." required></textarea>
+                <div class="hint">Această descriere va apărea pe cardul companiei din pagina Parteneri.</div>
+            </div>
+
+            <!-- Website -->
+            <div class="form-group">
+                <label>Website</label>
+                <input type="url" id="fWebsite" placeholder="https://exemplu.ro">
+            </div>
+
+            <!-- Contact row -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email contact <span class="req">*</span></label>
+                    <input type="email" id="fEmail" placeholder="contact@firma.ro" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefon</label>
+                    <input type="tel" id="fPhone" placeholder="07xx xxx xxx">
+                </div>
+            </div>
+
+            <!-- City -->
+            <div class="form-group">
+                <label>Oraș</label>
+                <input type="text" id="fCity" placeholder="ex: București">
+            </div>
+
+            <!-- Logo -->
+            <div class="form-group">
+                <label>Logo companie</label>
+                <div class="logo-upload" id="logoUploadArea">
+                    <img class="logo-preview" id="logoPreviewImg">
+                    <div id="logoPlaceholder">
+                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="upload-text">Click sau drag & drop — <strong>PNG, JPG</strong> (max 2MB)</div>
+                    </div>
+                    <input type="file" id="fLogo" accept="image/png,image/jpeg,image/webp">
+                </div>
+            </div>
+
+            <!-- Live preview -->
+            <div class="preview-section">
+                <h3>Previzualizare card</h3>
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-logo" id="prevLogo"><i class="fas fa-building"></i></div>
+                        <div>
+                            <div class="preview-name" id="prevName">Numele companiei</div>
+                            <div class="preview-cat" id="prevCat">Categorie</div>
+                        </div>
+                    </div>
+                    <div class="preview-desc" id="prevDesc">Descrierea companiei va apărea aici...</div>
+                    <a class="preview-link" id="prevWeb" style="display:none;"><i class="fas fa-globe"></i> <span></span></a>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="btnSubmit">
+                <i class="fas fa-paper-plane"></i> Trimite cererea de parteneriat
+            </button>
+        </form>
+
+        <div class="success-state" id="successState">
+            <div class="icon">✅</div>
+            <h2>Cerere trimisă!</h2>
+            <p>Mulțumim pentru interes. Echipa ApartamenTUal va analiza cererea și te va contacta pe email în cel mai scurt timp.</p>
+            <a href="/parteneri.html" style="display: inline-block; margin-top: 1.5rem; color: #d97706; text-decoration: none; font-weight: 600;">← Înapoi la Parteneri</a>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('partnerForm');
+        var catLabels = {
+            'arhitectura': '🏛️ Arhitectură / Urbanism',
+            'design_interior': '🎨 Design interior',
+            'constructii': '🔨 Construcții',
+            'furnizori': '🏠 Furnizori & Finisaje',
+            'juridic': '⚖️ Juridic',
+            'financiar': '💰 Financiar',
+            'agentii_imobiliare': '🏢 Agenții imobiliare'
+        };
+        var logoFile = null;
+
+        // Live preview updates
+        document.getElementById('fName').addEventListener('input', function() {
+            document.getElementById('prevName').textContent = this.value || 'Numele companiei';
+        });
+        document.getElementById('fCategory').addEventListener('change', function() {
+            document.getElementById('prevCat').textContent = catLabels[this.value] || 'Categorie';
+        });
+        document.getElementById('fDescription').addEventListener('input', function() {
+            document.getElementById('prevDesc').textContent = this.value || 'Descrierea companiei va apărea aici...';
+        });
+        document.getElementById('fWebsite').addEventListener('input', function() {
+            var link = document.getElementById('prevWeb');
+            if (this.value) {
+                link.style.display = 'inline';
+                link.querySelector('span').textContent = this.value.replace('https://', '').replace('http://', '');
+            } else {
+                link.style.display = 'none';
+            }
+        });
+
+        // Logo preview
+        document.getElementById('fLogo').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) { alert('Logo-ul trebuie să fie maxim 2MB.'); return; }
+            logoFile = file;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var img = document.getElementById('logoPreviewImg');
+                img.src = ev.target.result;
+                img.style.display = 'block';
+                document.getElementById('logoPlaceholder').style.display = 'none';
+                // Update preview card
+                document.getElementById('prevLogo').innerHTML = '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Submit
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se trimite...';
+
+            try {
+                var logoUrl = null;
+
+                // Upload logo if present
+                if (logoFile) {
+                    var ext = logoFile.name.split('.').pop();
+                    var fileName = 'partner-logos/' + Date.now() + '.' + ext;
+                    var { data: uploadData, error: uploadErr } = await sb.storage.from('public-assets').upload(fileName, logoFile);
+                    if (uploadErr) console.warn('Logo upload failed:', uploadErr);
+                    else {
+                        var { data: urlData } = sb.storage.from('public-assets').getPublicUrl(fileName);
+                        logoUrl = urlData.publicUrl;
+                    }
+                }
+
+                // Insert partner request (is_active = false, needs admin approval)
+                var payload = {
+                    name: document.getElementById('fName').value.trim(),
+                    category: document.getElementById('fCategory').value,
+                    description: document.getElementById('fDescription').value.trim(),
+                    website: document.getElementById('fWebsite').value.trim() || null,
+                    email: document.getElementById('fEmail').value.trim(),
+                    phone: document.getElementById('fPhone').value.trim() || null,
+                    city: document.getElementById('fCity').value.trim() || null,
+                    logo_url: logoUrl,
+                    is_active: false,
+                    is_verified: false,
+                    is_featured: false
+                };
+
+                var { error } = await sb.from('partners').insert(payload);
+                if (error) throw error;
+
+                form.style.display = 'none';
+                document.querySelector('.form-info').style.display = 'none';
+                document.getElementById('successState').style.display = 'block';
+
+            } catch (err) {
+                console.error('Submit error:', err);
+                alert('Eroare la trimitere. Încercați din nou.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Trimite cererea de parteneriat';
+            }
+        });
+    });
+    </script>
+</body>
+</html>
