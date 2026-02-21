@@ -1,55 +1,8 @@
 // ══════════════════════════════════════════════════════════════
 // UNIFIED NAVIGATION COMPONENT — ApartamenTUal
+// Used on ALL pages: Acasă, Ce este, Terenuri, Utilizatori, Grupuri, etc.
 // Uses global `sb` (and `supabase`) from supabase-config.js
 // ══════════════════════════════════════════════════════════════
-
-// Auto-load floating consultation button
-(function() {
-    // Determine base path from nav.css link
-    var navLink = document.querySelector('link[href*="nav.css"]');
-    var prefix = '';
-    if (navLink) {
-        var href = navLink.getAttribute('href');
-        prefix = href.replace('nav.css', '');
-    }
-
-    var css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = prefix + 'fab-consultanta.css';
-    document.head.appendChild(css);
-
-    var js = document.createElement('script');
-    js.src = prefix + 'js/fab-consultanta.js';
-    if (document.body) {
-        document.body.appendChild(js);
-    } else {
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.appendChild(js);
-        });
-    }
-})();
-
-// Deobfuscate emails rendered via JS (bypass Cloudflare email protection)
-(function() {
-    function renderEmails() {
-        document.querySelectorAll('.js-email').forEach(function(el) {
-            var u = el.getAttribute('data-u');
-            var d = el.getAttribute('data-d');
-            if (u && d) {
-                var addr = u + '@' + d;
-                var span = document.createElement('span');
-                span.className = 'text-blue-600';
-                span.textContent = addr;
-                el.replaceWith(span);
-            }
-        });
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderEmails);
-    } else {
-        renderEmails();
-    }
-})();
 
 (function() {
 
@@ -71,6 +24,8 @@ function getPageConfig() {
     } else if (path.includes('grup')) {
         currentPage = 'groups';
         ctaButton = { href: '/grup-nou.html', icon: 'fa-plus', label: 'Creează grup' };
+    } else if (path.includes('parteneri')) {
+        currentPage = 'partners';
     } else if (path.includes('register')) {
         currentPage = 'register';
     }
@@ -87,6 +42,7 @@ function createNavigation() {
         { href: '/terenuri.html', label: 'Terenuri', id: 'land' },
         { href: '/utilizatori.html', label: 'Utilizatori', id: 'users' },
         { href: '/grupuri.html', label: 'Grupuri', id: 'groups' },
+        { href: '/parteneri.html', label: 'Parteneri', id: 'partners' },
     ];
 
     const navLinksHTML = navItems.map(item => {
@@ -102,7 +58,7 @@ function createNavigation() {
     <nav class="unified-nav">
         <div class="unified-nav-inner">
             <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span> <span class="logo-by">by <strong>LTFB</strong> studio</span>
+                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
             </a>
             <div class="unified-nav-links">
                 ${navLinksHTML}
