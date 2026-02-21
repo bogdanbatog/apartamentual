@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Parteneri - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'DM Sans', system-ui, sans-serif; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .modal-card { background: white; border-radius: 12px; padding: 2rem; max-width: 560px; width: 95%; max-height: 90vh; overflow-y: auto; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-gray-900">Admin — Parteneri</h1>
+            <p class="text-sm text-gray-500">Gestionează partenerii platformei ApartamenTUal</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
+            <button onclick="openModal()" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800">
+                <i class="fas fa-plus"></i> Adaugă partener
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="px-6 py-4 flex gap-2 flex-wrap">
+        <button onclick="filterAdmin('all')" class="admin-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-cat="all">Toți</button>
+        <button onclick="filterAdmin('arhitectura')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="arhitectura">Arhitectură</button>
+        <button onclick="filterAdmin('design_interior')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="design_interior">Design interior</button>
+        <button onclick="filterAdmin('constructii')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="constructii">Construcții</button>
+        <button onclick="filterAdmin('furnizori')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="furnizori">Furnizori</button>
+        <button onclick="filterAdmin('juridic')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="juridic">Juridic</button>
+        <button onclick="filterAdmin('financiar')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="financiar">Financiar</button>
+        <button onclick="filterAdmin('agentii_imobiliare')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="agentii_imobiliare">Agenții imobiliare</button>
+    </div>
+
+    <!-- Table -->
+    <div class="px-6">
+        <div class="bg-white rounded-xl border overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Partener</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Categorie</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Oraș</th>
+                        <th class="text-center px-4 py-3 font-medium text-gray-600">Status</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-600">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody id="partnersBody">
+                    <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal (hidden) -->
+    <div id="partnerModal" style="display:none;"></div>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+    var allPartners = [];
+    var currentFilter = 'all';
+    var catLabels = {
+        'arhitectura': 'Arhitectură / Urbanism',
+        'design_interior': 'Design interior',
+        'constructii': 'Construcții',
+        'furnizori': 'Furnizori & Finisaje',
+        'juridic': 'Juridic',
+        'financiar': 'Financiar',
+        'agentii_imobiliare': 'Agenții imobiliare'
+    };
+
+    async function checkAdmin() {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '/index.html'; return; }
+        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
+        loadPartners();
+    }
+
+    async function loadPartners() {
+        var { data } = await sb.from('partners').select('*').order('is_featured', { ascending: false }).order('sort_order').order('name');
+        allPartners = data || [];
+        renderTable();
+    }
+
+    function renderTable() {
+        var filtered = currentFilter === 'all' ? allPartners : allPartners.filter(function(p) { return p.category === currentFilter; });
+        var body = document.getElementById('partnersBody');
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Niciun partener.</td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(function(p) {
+            var badges = '';
+            if (p.is_featured) badges += '<span class="inline-block bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded ml-1">★</span>';
+            if (p.is_verified) badges += '<span class="inline-block bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded ml-1">✓</span>';
+            var statusColor = p.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+            var statusText = p.is_active ? 'Activ' : 'Inactiv';
+            return '<tr class="border-t hover:bg-gray-50">' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + p.name + badges + '</div>' +
+                (p.website ? '<div class="text-xs text-gray-400">' + p.website.replace('https://', '').replace('http://', '') + '</div>' : '') + '</td>' +
+                '<td class="px-4 py-3 text-gray-600">' + (catLabels[p.category] || p.category) + '</td>' +
+                '<td class="px-4 py-3 text-gray-500">' + (p.city || '-') + '</td>' +
+                '<td class="px-4 py-3 text-center"><span class="text-xs px-2 py-1 rounded-full ' + statusColor + '">' + statusText + '</span></td>' +
+                '<td class="px-4 py-3 text-right">' +
+                '<button onclick="editPartner(\'' + p.id + '\')" class="text-gray-400 hover:text-gray-700 mx-1" title="Editează"><i class="fas fa-edit"></i></button>' +
+                '<button onclick="deletePartner(\'' + p.id + '\', \'' + p.name.replace(/'/g, "\\'") + '\')" class="text-gray-400 hover:text-red-600 mx-1" title="Șterge"><i class="fas fa-trash"></i></button>' +
+                '</td></tr>';
+        }).join('');
+    }
+
+    window.filterAdmin = function(cat) {
+        currentFilter = cat;
+        document.querySelectorAll('.admin-filter').forEach(function(b) {
+            if (b.dataset.cat === cat) {
+                b.className = 'admin-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white';
+            } else {
+                b.className = 'admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
+            }
+        });
+        renderTable();
+    };
+
+    function getModalHTML(partner) {
+        var p = partner || {};
+        var isEdit = !!p.id;
+        return '<div class="modal-overlay" onclick="if(event.target===this)closeModal()">' +
+            '<div class="modal-card">' +
+            '<h2 class="text-lg font-bold mb-4">' + (isEdit ? 'Editează partener' : 'Adaugă partener') + '</h2>' +
+            '<form onsubmit="savePartner(event, ' + (isEdit ? "'" + p.id + "'" : 'null') + ')">' +
+            '<div class="space-y-3">' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Nume *</label><input id="mName" value="' + (p.name || '') + '" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Categorie *</label><select id="mCat" required class="w-full px-3 py-2 border rounded-lg text-sm">' +
+            Object.keys(catLabels).map(function(k) { return '<option value="' + k + '"' + (p.category === k ? ' selected' : '') + '>' + catLabels[k] + '</option>'; }).join('') +
+            '</select></div>' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Descriere</label><textarea id="mDesc" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm">' + (p.description || '') + '</textarea></div>' +
+            '<div class="grid grid-cols-2 gap-3">' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Website</label><input id="mWeb" value="' + (p.website || '') + '" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm"></div>' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input id="mEmail" value="' + (p.email || '') + '" type="email" class="w-full px-3 py-2 border rounded-lg text-sm"></div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-3">' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Oraș</label><input id="mCity" value="' + (p.city || '') + '" class="w-full px-3 py-2 border rounded-lg text-sm"></div>' +
+            '<div><label class="block text-sm font-medium text-gray-700 mb-1">Logo URL</label><input id="mLogo" value="' + (p.logo_url || '') + '" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm"></div>' +
+            '</div>' +
+            '<div class="flex gap-4">' +
+            '<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="mFeatured"' + (p.is_featured ? ' checked' : '') + '> Recomandat</label>' +
+            '<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="mVerified"' + (p.is_verified ? ' checked' : '') + '> Verificat</label>' +
+            '<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="mActive"' + (p.is_active !== false ? ' checked' : '') + '> Activ</label>' +
+            '</div>' +
+            '</div>' +
+            '<div class="flex gap-3 mt-5">' +
+            '<button type="submit" class="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800">' + (isEdit ? 'Salvează' : 'Adaugă') + '</button>' +
+            '<button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50">Anulează</button>' +
+            '</div></form></div></div>';
+    }
+
+    window.openModal = function(partner) {
+        document.getElementById('partnerModal').innerHTML = getModalHTML(partner);
+        document.getElementById('partnerModal').style.display = 'block';
+    };
+
+    window.closeModal = function() {
+        document.getElementById('partnerModal').style.display = 'none';
+        document.getElementById('partnerModal').innerHTML = '';
+    };
+
+    window.editPartner = function(id) {
+        var p = allPartners.find(function(x) { return x.id === id; });
+        if (p) openModal(p);
+    };
+
+    window.savePartner = async function(e, id) {
+        e.preventDefault();
+        var payload = {
+            name: document.getElementById('mName').value.trim(),
+            category: document.getElementById('mCat').value,
+            description: document.getElementById('mDesc').value.trim() || null,
+            website: document.getElementById('mWeb').value.trim() || null,
+            email: document.getElementById('mEmail').value.trim() || null,
+            city: document.getElementById('mCity').value.trim() || null,
+            logo_url: document.getElementById('mLogo').value.trim() || null,
+            is_featured: document.getElementById('mFeatured').checked,
+            is_verified: document.getElementById('mVerified').checked,
+            is_active: document.getElementById('mActive').checked,
+            updated_at: new Date().toISOString()
+        };
+        try {
+            if (id) {
+                await sb.from('partners').update(payload).eq('id', id);
+            } else {
+                await sb.from('partners').insert(payload);
+            }
+            closeModal();
+            loadPartners();
+        } catch (err) {
+            alert('Eroare: ' + err.message);
+        }
+    };
+
+    window.deletePartner = async function(id, name) {
+        if (!confirm('Ștergi partenerul „' + name + '"?')) return;
+        await sb.from('partners').delete().eq('id', id);
+        loadPartners();
+    };
+
+    document.addEventListener('DOMContentLoaded', checkAdmin);
+    </script>
+</body>
+</html>
