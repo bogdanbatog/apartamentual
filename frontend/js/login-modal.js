@@ -138,8 +138,12 @@
     
     // Init on DOM ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createLoginModal);
+        document.addEventListener('DOMContentLoaded', function() {
+            createLoginModal();
+            if (new URLSearchParams(window.location.search).get('login') === '1') openLoginModal();
+        });
     } else {
         createLoginModal();
+        if (new URLSearchParams(window.location.search).get('login') === '1') openLoginModal();
     }
 })();
