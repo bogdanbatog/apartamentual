@@ -59,6 +59,7 @@ function createNavigation() {
         <div class="unified-nav-inner">
             <a href="/index.html" class="unified-nav-logo">
                 <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span>
+                <span class="logo-by">by LTFB studio</span>
             </a>
             <div class="unified-nav-links">
                 ${navLinksHTML}
