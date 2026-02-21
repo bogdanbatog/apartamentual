@@ -28,6 +28,8 @@ function getPageConfig() {
         currentPage = 'partners';
     } else if (path.includes('register')) {
         currentPage = 'register';
+        // Flag to use direct link for login instead of modal
+        window._registerPage = true;
     }
     
     return { currentPage, ctaButton };
@@ -74,7 +76,7 @@ function createNavigation() {
                         <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                     </div>
                 </div>
-                <a href="#" class="unified-btn-login" id="btnLoginNav" onclick="event.preventDefault(); if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
+                <a href="#" class="unified-btn-login" id="btnLoginNav" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
                     <i class="fas fa-sign-in-alt"></i> Intră în cont
                 </a>
             </div>
@@ -85,7 +87,7 @@ function createNavigation() {
         <div class="unified-nav-mobile" id="navMobileMenu" style="display:none;">
             ${navLinksHTML}
             ${ctaHTML}
-            <a href="#" class="unified-btn-login" id="btnLoginNavMobile" onclick="event.preventDefault(); if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
+            <a href="#" class="unified-btn-login" id="btnLoginNavMobile" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
                 <i class="fas fa-sign-in-alt"></i> Intră în cont
             </a>
         </div>
