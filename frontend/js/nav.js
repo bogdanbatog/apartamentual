@@ -192,6 +192,23 @@ async function checkAuthState() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadNavigation);
+document.addEventListener('DOMContentLoaded', function() {
+    loadNavigation();
+
+    // Scroll-to-top button
+    var btn = document.createElement('button');
+    btn.id = 'scrollToTop';
+    btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    btn.setAttribute('aria-label', 'Înapoi sus');
+    btn.style.cssText = 'position:fixed; bottom:24px; left:24px; width:42px; height:42px; border-radius:50%; background:#1e293b; color:white; border:none; cursor:pointer; font-size:16px; display:none; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,0.15); transition:all 0.3s; z-index:90;';
+    btn.onmouseover = function() { this.style.background = '#f97316'; };
+    btn.onmouseout = function() { this.style.background = '#1e293b'; };
+    btn.onclick = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', function() {
+        btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+    });
+});
 
 })();
