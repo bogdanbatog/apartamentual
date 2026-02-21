@@ -132,16 +132,16 @@
                     </button>
                 </form>
 
-                    <div class="mt-4 flex items-start gap-2">
-                        <input type="checkbox" id="accept-terms" required
-                            class="mt-1 rounded border-gray-300 text-gray-900 focus:ring-gray-900">
-                        <label for="accept-terms" class="text-sm text-gray-600">
-                            Am citit și sunt de acord cu 
+                <div class="mt-4 text-sm text-gray-500">
+                    <label class="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" id="acceptTerms" class="rounded border-gray-300 mt-0.5" style="accent-color: #f97316;">
+                        <span>Sunt de acord cu 
                             <a href="termeni.html" target="_blank" class="text-blue-600 hover:underline">Termenii și condițiile</a> și 
-                            <a href="gdpr.html" target="_blank" class="text-blue-600 hover:underline">Politica de confidențialitate (GDPR)</a>.
-                            <span class="text-red-500">*</span>
-                        </label>
-                    </div>
+                            <a href="gdpr.html" target="_blank" class="text-blue-600 hover:underline">Politica GDPR</a>.
+                        </span>
+                    </label>
+                    <p id="termsError" class="text-red-500 text-xs mt-1 hidden" style="margin-left: 1.5rem;">Trebuie să accepți termenii și condițiile.</p>
+                </div>
             </div>
 
             <!-- Step 3: Profile Information -->
