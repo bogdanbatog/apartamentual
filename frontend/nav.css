@@ -33,10 +33,6 @@
     font-weight: 700;
     letter-spacing: -0.02em;
     flex-shrink: 0;
-    white-space: nowrap;
-}
-.unified-nav-logo:hover {
-    text-decoration: none;
 }
 .unified-nav-logo .logo-a {
     color: #0f172a;
@@ -48,15 +44,12 @@
     color: #0f172a;
 }
 .unified-nav-logo .logo-by {
+    display: block;
     font-size: 10px;
     font-weight: 400;
     color: #94a3b8;
     letter-spacing: 0.02em;
-    margin-left: 4px;
-}
-.unified-nav-logo .logo-by strong {
-    font-weight: 600;
-    color: #64748b;
+    margin-top: -2px;
 }
 
 /* ── Nav Links ── */
