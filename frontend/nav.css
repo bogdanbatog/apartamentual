@@ -34,6 +34,9 @@
     letter-spacing: -0.02em;
     flex-shrink: 0;
 }
+.unified-nav-logo:hover {
+    text-decoration: none;
+}
 .unified-nav-logo .logo-a {
     color: #0f172a;
 }
@@ -44,12 +47,11 @@
     color: #0f172a;
 }
 .unified-nav-logo .logo-by {
-    display: block;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 400;
     color: #94a3b8;
-    letter-spacing: 0.02em;
-    margin-top: -2px;
+    letter-spacing: 0.01em;
+    margin-left: 6px;
 }
 
 /* ── Nav Links ── */
