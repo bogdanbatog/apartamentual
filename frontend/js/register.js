@@ -428,6 +428,16 @@ async function handleAuthSubmit(event) {
         return;
     }
     
+    // Validate terms acceptance
+    const termsCheckbox = document.getElementById('acceptTerms');
+    const termsError = document.getElementById('termsError');
+    if (termsCheckbox && !termsCheckbox.checked) {
+        if (termsError) termsError.classList.remove('hidden');
+        termsCheckbox.focus();
+        return;
+    }
+    if (termsError) termsError.classList.add('hidden');
+    
     try {
         // Check if there's a redirect URL (e.g. from invitation)
         const urlParams = new URLSearchParams(window.location.search);
