@@ -414,9 +414,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Notify admins about new terrain
                 if (typeof notifyAdmins === 'function') {
                     notifyAdmins('terrain_proposed', {
-                        address: terenData.address || terenData.title || 'N/A',
-                        zone: terenData.zone_name || 'N/A',
-                        proposed_by: terenData.proposed_by_email || 'N/A'
+                        address: terenData.titlu || 'N/A',
+                        zone: terenData.zona || 'N/A',
+                        proposed_by: user.email || 'N/A'
                     });
                 }
             }
