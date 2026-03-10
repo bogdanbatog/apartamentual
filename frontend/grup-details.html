@@ -1271,7 +1271,7 @@ async function loadGroupDetails() {
             const pendingUserIds = pendingRequests.map(m => m.user_id);
             const { data: pendingProfiles } = await sb
                 .from('profiles')
-                .select('user_id, pseudonym')
+                .select('user_id, pseudonym, email')
                 .in('user_id', pendingUserIds);
             if (pendingProfiles) {
                 pendingRequests = pendingRequests.map(m => ({
@@ -2264,6 +2264,30 @@ window.requestJoinGroup = async function() {
         
         if (error) throw error;
         
+        // Notify admin of the group + Slack
+        if (typeof notifyAdmins === 'function') {
+            notifyAdmins('join_request', {
+                group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                user_email: currentUser.email,
+                group_id: currentGroup.id
+            });
+        }
+        // Send email to group admin
+        try {
+            var { data: adminProfile } = await sb.from('profiles').select('email').eq('user_id', currentGroup.admin_id).single();
+            if (adminProfile && adminProfile.email && typeof notifyAdmins === 'function') {
+                sb.functions.invoke('notify-admins', {
+                    body: {
+                        event_type: 'join_request_admin_email',
+                        admin_email: adminProfile.email,
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        user_email: currentUser.email,
+                        group_id: currentGroup.id
+                    }
+                });
+            }
+        } catch(e) { console.warn('Admin email notify failed:', e); }
+        
         showToast('Cererea ta a fost trimisă! Adminul grupului o va analiza.', 'success');
         setTimeout(() => window.location.reload(), 1500);
         
@@ -2273,7 +2297,7 @@ window.requestJoinGroup = async function() {
     }
 };
 
-window.approveRequest = async function(memberId, userName) {
+window.approveRequest = async function(memberId, userName, userEmail) {
     if (!isAdmin) return;
     
     try {
@@ -2284,6 +2308,14 @@ window.approveRequest = async function(memberId, userName) {
         
         if (error) throw error;
         
+        // Notify: Slack + email to approved user
+        if (typeof notifyAdmins === 'function') {
+            notifyAdmins('member_approved', {
+                group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                user_email: userEmail || userName
+            });
+        }
+        
         showToast(`${userName} a fost acceptat în grup!`, 'success');
         setTimeout(() => window.location.reload(), 1000);
         
@@ -2293,7 +2325,7 @@ window.approveRequest = async function(memberId, userName) {
     }
 };
 
-window.rejectRequest = async function(memberId, userName) {
+window.rejectRequest = async function(memberId, userName, userEmail) {
     if (!isAdmin) return;
     if (!confirm(`Respingi cererea lui ${userName}?`)) return;
     
@@ -2304,6 +2336,14 @@ window.rejectRequest = async function(memberId, userName) {
             .eq('id', memberId);
         
         if (error) throw error;
+        
+        // Notify rejected user
+        if (userEmail && typeof notifyAdmins === 'function') {
+            notifyAdmins('member_rejected', {
+                group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                user_email: userEmail
+            });
+        }
         
         showToast(`Cererea lui ${userName} a fost respinsă.`, 'success');
         setTimeout(() => window.location.reload(), 1000);
@@ -2561,6 +2601,7 @@ function renderPendingRequests() {
         const initials = name.substring(0, 2).toUpperCase();
         const time = formatDate(r.joined_at);
         
+        const email = r.profile?.email || '';
         return `
             <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; margin-bottom: 8px;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #92400e; flex-shrink: 0;">${initials}</div>
@@ -2569,10 +2610,10 @@ function renderPendingRequests() {
                     <div style="font-size: 0.75rem; color: #94a3b8;">Cerere din ${time}</div>
                 </div>
                 <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button onclick="approveRequest('${r.id}', '${escapeHtml(name)}')" style="padding: 6px 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Acceptă">
+                    <button onclick="approveRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 6px 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Acceptă">
                         <i class="fas fa-check"></i> Acceptă
                     </button>
-                    <button onclick="rejectRequest('${r.id}', '${escapeHtml(name)}')" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Respinge">
+                    <button onclick="rejectRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Respinge">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
