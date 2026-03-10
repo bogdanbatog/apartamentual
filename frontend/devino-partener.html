@@ -380,6 +380,14 @@
                 var { error } = await sb.from('partners').insert(payload);
                 if (error) throw error;
 
+                // Notify admins
+                notifyAdmins('partner_application', {
+                    name: payload.name,
+                    category: payload.category,
+                    email: payload.email,
+                    website: payload.website
+                });
+
                 form.style.display = 'none';
                 document.querySelector('.form-info').style.display = 'none';
                 document.getElementById('successState').style.display = 'block';
