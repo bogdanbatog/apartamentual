@@ -535,8 +535,8 @@ async function displayTerenDetails(teren, userProfile) {
         // Like to profile
         const btnLikeProfil = document.getElementById('btn-like-profil');
         if (btnLikeProfil) {
-            // Hide button if agency account AND they proposed this terrain
-            if (userProfile.account_type === 'profesional' && teren.created_by_user_id === userProfile.user_id) {
+            // Hide button for agency accounts (they have posted terrains on profile, not favorites)
+            if (userProfile.account_type === 'profesional') {
                 btnLikeProfil.style.display = 'none';
             } else {
                 btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
