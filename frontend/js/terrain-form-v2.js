@@ -419,6 +419,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         proposed_by: user.email || 'N/A'
                     });
                 }
+                // Auto-add terrain to profile for agency accounts
+                try {
+                    var newTerenId = result.data && result.data[0] ? result.data[0].id : null;
+                    if (newTerenId) {
+                        var { data: prof } = await supabase.from('profiles').select('account_type').eq('user_id', user.id).single();
+                        if (prof && prof.account_type === 'profesional') {
+                            await supabase.from('terenuri_likes').insert({ teren_id: newTerenId, user_id: user.id });
+                        }
+                    }
+                } catch (autoLikeErr) {
+                    console.warn('Auto-like failed:', autoLikeErr);
+                }
             }
             showSuccess();
 
