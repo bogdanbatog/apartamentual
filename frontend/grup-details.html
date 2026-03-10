@@ -1196,6 +1196,7 @@ let currentUserProfile = null;
 let currentGroup = null;
 let isMember = false;
 let isAdmin = false;
+let isSuperAdmin = false;
 let canEditChecklist = false;
 let members = [];
 let pendingRequests = [];
@@ -1211,7 +1212,7 @@ function checkAuth() {
         if (res.data && res.data.user) {
             currentUser = res.data.user;
             try {
-                var { data: prof } = await sb.from('profiles').select('account_type, user_id').eq('user_id', currentUser.id).single();
+                var { data: prof } = await sb.from('profiles').select('account_type, user_id, is_super_admin').eq('user_id', currentUser.id).single();
                 currentUserProfile = prof;
             } catch(e) {}
         }
@@ -1302,6 +1303,7 @@ async function loadGroupDetails() {
         if (currentUser) {
             isMember = members.some(m => m.user_id === currentUser.id);
             isAdmin = group.admin_id === currentUser.id;
+            isSuperAdmin = currentUserProfile && currentUserProfile.is_super_admin === true;
             
             // Checklist edit permission:
             // cu_aprobare → all members can edit
@@ -1521,7 +1523,7 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     }
     
     // Admin section
-    if (isAdmin) {
+    if (isAdmin || isSuperAdmin) {
         document.getElementById('adminSection').style.display = 'block';
         
         // Normalize status for button highlighting
@@ -2298,7 +2300,7 @@ window.requestJoinGroup = async function() {
 };
 
 window.approveRequest = async function(memberId, userName, userEmail) {
-    if (!isAdmin) return;
+    if (!isAdmin && !isSuperAdmin) return;
     
     try {
         const { error } = await sb
@@ -2326,7 +2328,7 @@ window.approveRequest = async function(memberId, userName, userEmail) {
 };
 
 window.rejectRequest = async function(memberId, userName, userEmail) {
-    if (!isAdmin) return;
+    if (!isAdmin && !isSuperAdmin) return;
     if (!confirm(`Respingi cererea lui ${userName}?`)) return;
     
     try {
