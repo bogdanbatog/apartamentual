@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Grupuri - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'DM Sans', system-ui, sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-gray-900">Admin — Grupuri</h1>
+            <p class="text-sm text-gray-500">Gestionează grupurile de pe platformă</p>
+        </div>
+        <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
+    </div>
+
+    <div class="px-6 py-4 flex gap-2 flex-wrap items-center">
+        <button onclick="filterGroups('all')" class="g-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toate</button>
+        <button onclick="filterGroups('pending')" class="g-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="pending">📩 Cu cereri în așteptare</button>
+        <div class="ml-auto text-sm text-gray-400" id="groupCount"></div>
+    </div>
+
+    <div class="px-6">
+        <div class="bg-white rounded-xl border overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Grup</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Zonă</th>
+                        <th class="text-center px-4 py-3 font-medium text-gray-600">Membri</th>
+                        <th class="text-center px-4 py-3 font-medium text-gray-600">Cereri</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Creat</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-600">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody id="groupsBody">
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+    var allGroups = [];
+    var membersMap = {};
+    var pendingMap = {};
+    var currentFilter = 'all';
+
+    async function checkAdmin() {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '/index.html'; return; }
+        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
+        loadGroups();
+    }
+
+    async function loadGroups() {
+        var [groupsRes, membersRes] = await Promise.all([
+            sb.from('grupuri').select('*').order('created_at', { ascending: false }),
+            sb.from('grup_membership').select('grup_id, status')
+        ]);
+
+        allGroups = groupsRes.data || [];
+        var members = membersRes.data || [];
+
+        // Count members and pending per group
+        members.forEach(function(m) {
+            if (m.status === 'approved') {
+                membersMap[m.grup_id] = (membersMap[m.grup_id] || 0) + 1;
+            } else if (m.status === 'pending') {
+                pendingMap[m.grup_id] = (pendingMap[m.grup_id] || 0) + 1;
+            }
+        });
+
+        renderTable();
+    }
+
+    function renderTable() {
+        var filtered = currentFilter === 'all' ? allGroups : allGroups.filter(function(g) {
+            return pendingMap[g.id] > 0;
+        });
+        document.getElementById('groupCount').textContent = filtered.length + ' grupuri';
+        var body = document.getElementById('groupsBody');
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Niciun grup.</td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(function(g) {
+            var memberCount = membersMap[g.id] || 0;
+            var pendingCount = pendingMap[g.id] || 0;
+            var statusNorm = (g.status || '').toLowerCase().replace(/[^a-z]/g, '');
+            var statusLabel = statusNorm.includes('deschis') ? 'Deschis' : 'Cu aprobare';
+            var statusColor = statusNorm.includes('deschis') ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700';
+            var pendingBadge = pendingCount > 0 ? '<span class="inline-block bg-yellow-100 text-yellow-700 text-[10px] px-1.5 py-0.5 rounded-full font-medium">' + pendingCount + '</span>' : '<span class="text-gray-300">0</span>';
+            var date = g.created_at ? new Date(g.created_at).toLocaleDateString('ro-RO') : '-';
+            var zona = g.zona || g.zone_name || '-';
+
+            return '<tr class="border-t hover:bg-gray-50">' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + (g.name || g.nume || 'Fără nume') + '</div>' +
+                '<div class="text-xs text-gray-400">' + memberCount + '/' + (g.max_membri || '?') + ' membri</div></td>' +
+                '<td class="px-4 py-3 text-gray-600 text-xs">' + zona + '</td>' +
+                '<td class="px-4 py-3 text-center">' + memberCount + '</td>' +
+                '<td class="px-4 py-3 text-center">' + pendingBadge + '</td>' +
+                '<td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full ' + statusColor + '">' + statusLabel + '</span></td>' +
+                '<td class="px-4 py-3 text-gray-500 text-xs">' + date + '</td>' +
+                '<td class="px-4 py-3 text-right">' +
+                '<a href="/grup-details.html?id=' + g.id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi grup"><i class="fas fa-eye"></i></a>' +
+                '<a href="/grup-edit.html?id=' + g.id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Editează"><i class="fas fa-edit"></i></a>' +
+                '<button onclick="deleteGroup(\'' + g.id + '\', \'' + (g.name || g.nume || '').replace(/'/g, "\\'") + '\')" class="text-gray-400 hover:text-red-600 mx-1" title="Șterge"><i class="fas fa-trash"></i></button>' +
+                '</td></tr>';
+        }).join('');
+    }
+
+    window.filterGroups = function(st) {
+        currentFilter = st;
+        document.querySelectorAll('.g-filter').forEach(function(b) {
+            if (b.dataset.st === st) {
+                b.className = 'g-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white';
+            } else {
+                b.className = 'g-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
+            }
+        });
+        renderTable();
+    };
+
+    window.deleteGroup = async function(id, name) {
+        if (!confirm('Sigur vrei să ștergi grupul „' + name + '"? Acțiunea este ireversibilă.')) return;
+        // Delete memberships first, then group
+        await sb.from('grup_membership').delete().eq('grup_id', id);
+        await sb.from('grupuri').delete().eq('id', id);
+        allGroups = allGroups.filter(function(g) { return g.id !== id; });
+        renderTable();
+    };
+
+    document.addEventListener('DOMContentLoaded', checkAdmin);
+    </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Utilizatori - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'DM Sans', system-ui, sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-gray-900">Admin — Utilizatori</h1>
+            <p class="text-sm text-gray-500">Gestionează conturile de pe platformă</p>
+        </div>
+        <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
+    </div>
+
+    <div class="px-6 py-4 flex gap-2 flex-wrap items-center">
+        <button onclick="filterUsers('all')" class="u-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toți</button>
+        <button onclick="filterUsers('activ')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="activ">👤 Activi</button>
+        <button onclick="filterUsers('profesional')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="profesional">🏢 Agenții</button>
+        <div class="ml-auto text-sm text-gray-400" id="userCount"></div>
+    </div>
+
+    <div class="px-6">
+        <div class="bg-white rounded-xl border overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Utilizator</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Email</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Tip cont</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Oraș</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Înregistrat</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-600">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+    var allUsers = [];
+    var currentFilter = 'all';
+
+    async function checkAdmin() {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '/index.html'; return; }
+        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
+        loadUsers();
+    }
+
+    async function loadUsers() {
+        var { data } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+        allUsers = data || [];
+        renderTable();
+    }
+
+    function renderTable() {
+        var filtered = currentFilter === 'all' ? allUsers : allUsers.filter(function(u) { return u.account_type === currentFilter; });
+        document.getElementById('userCount').textContent = filtered.length + ' utilizatori';
+        var body = document.getElementById('usersBody');
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Niciun utilizator.</td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(function(u) {
+            var name = u.pseudonim || u.pseudonym || u.agency_name || 'Fără nume';
+            var typeLabel = u.account_type === 'profesional' ? '🏢 Agenție' : '👤 Activ';
+            var typeColor = u.account_type === 'profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
+            var adminBadge = u.is_super_admin ? ' <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 ml-1">Admin</span>' : '';
+            var date = u.created_at ? new Date(u.created_at).toLocaleDateString('ro-RO') : '-';
+            return '<tr class="border-t hover:bg-gray-50">' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + name + adminBadge + '</div></td>' +
+                '<td class="px-4 py-3 text-gray-500 text-xs">' + (u.email || '-') + '</td>' +
+                '<td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full ' + typeColor + '">' + typeLabel + '</span></td>' +
+                '<td class="px-4 py-3 text-gray-600">' + (u.oras || '-') + '</td>' +
+                '<td class="px-4 py-3 text-gray-500 text-xs">' + date + '</td>' +
+                '<td class="px-4 py-3 text-right">' +
+                '<a href="/profile-view-new.html?id=' + u.user_id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi profil"><i class="fas fa-eye"></i></a>' +
+                '</td></tr>';
+        }).join('');
+    }
+
+    window.filterUsers = function(st) {
+        currentFilter = st;
+        document.querySelectorAll('.u-filter').forEach(function(b) {
+            if (b.dataset.st === st) {
+                b.className = 'u-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white';
+            } else {
+                b.className = 'u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
+            }
+        });
+        renderTable();
+    };
+
+    document.addEventListener('DOMContentLoaded', checkAdmin);
+    </script>
+</body>
+</html>
