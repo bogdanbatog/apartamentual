@@ -4,6 +4,18 @@
 // Uses global `sb` (and `supabase`) from supabase-config.js
 // ══════════════════════════════════════════════════════════════
 
+// Global notify helper - available on all pages
+window.notifyAdmins = async function(eventType, data) {
+    try {
+        if (typeof sb === 'undefined' || !sb) return;
+        await sb.functions.invoke('notify-admins', {
+            body: { event_type: eventType, ...data }
+        });
+    } catch (err) {
+        console.warn('Notify failed:', err);
+    }
+};
+
 (function() {
 
 function getPageConfig() {
