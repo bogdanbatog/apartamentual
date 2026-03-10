@@ -411,6 +411,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 successMessage.textContent = 'Terenul a fost actualizat cu succes!';
             } else {
                 successMessage.textContent = 'Terenul a fost trimis cu succes! Va fi vizibil după aprobare de către un administrator.';
+                // Notify admins about new terrain
+                if (typeof notifyAdmins === 'function') {
+                    notifyAdmins('terrain_proposed', {
+                        address: terenData.address || terenData.title || 'N/A',
+                        zone: terenData.zone_name || 'N/A',
+                        proposed_by: terenData.proposed_by_email || 'N/A'
+                    });
+                }
             }
             showSuccess();
 
