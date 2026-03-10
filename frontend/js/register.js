@@ -176,8 +176,8 @@ function renderTags() {
 function updateTagsCounter() {
     const counter = document.getElementById('tags-counter');
     if (counter) {
-        counter.textContent = `${selectedTags.length} din 7 selectate`;
-        counter.className = selectedTags.length >= 7 ? 'text-sm text-orange-600 font-medium' : 'text-sm text-gray-500';
+        counter.textContent = `${selectedTags.length} din 15 selectate`;
+        counter.className = selectedTags.length >= 15 ? 'text-sm text-orange-600 font-medium' : 'text-sm text-gray-500';
     }
 }
 
@@ -357,8 +357,8 @@ function toggleTag(tagId) {
         selectedTags.splice(index, 1);
     } else {
         // Add tag (if under limit)
-        if (selectedTags.length >= 7) {
-            alert('Poți selecta maxim 7 tag-uri');
+        if (selectedTags.length >= 15) {
+            alert('Poți selecta maxim 15 tag-uri');
             return;
         }
         selectedTags.push(tagId);
