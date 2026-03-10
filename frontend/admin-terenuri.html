@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Terenuri - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'DM Sans', system-ui, sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-gray-900">Admin — Terenuri</h1>
+            <p class="text-sm text-gray-500">Aprobă sau respinge propunerile de terenuri</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="px-6 py-4 flex gap-2 flex-wrap">
+        <button onclick="filterTeren('all')" class="t-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toate</button>
+        <button onclick="filterTeren('pending')" class="t-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="pending">⏳ În așteptare</button>
+        <button onclick="filterTeren('approved')" class="t-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="approved">✅ Aprobate</button>
+        <button onclick="filterTeren('rejected')" class="t-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="rejected">❌ Respinse</button>
+    </div>
+
+    <!-- Table -->
+    <div class="px-6">
+        <div class="bg-white rounded-xl border overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Teren</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Zonă</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Suprafață</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Preț</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Propus de</th>
+                        <th class="text-center px-4 py-3 font-medium text-gray-600">Status</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-600">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody id="terenuriBody">
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+    var allTerenuri = [];
+    var currentFilter = 'all';
+    var usersMap = {};
+
+    async function checkAdmin() {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '/index.html'; return; }
+        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
+        loadTerenuri();
+    }
+
+    async function loadTerenuri() {
+        var { data } = await sb.from('terenuri').select('*').order('created_at', { ascending: false });
+        allTerenuri = data || [];
+
+        // Get user emails for proposed_by
+        var userIds = [...new Set(allTerenuri.map(t => t.created_by_user_id).filter(Boolean))];
+        if (userIds.length > 0) {
+            var { data: profiles } = await sb.from('profiles').select('user_id, email, pseudonim').in('user_id', userIds);
+            if (profiles) {
+                profiles.forEach(function(p) { usersMap[p.user_id] = p.email || p.pseudonim || 'N/A'; });
+            }
+        }
+        renderTable();
+    }
+
+    function renderTable() {
+        var filtered = currentFilter === 'all' ? allTerenuri : allTerenuri.filter(function(t) { return t.status === currentFilter; });
+        var body = document.getElementById('terenuriBody');
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Niciun teren.</td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(function(t) {
+            var statusColors = {
+                'pending': 'bg-yellow-100 text-yellow-700',
+                'approved': 'bg-green-100 text-green-700',
+                'rejected': 'bg-red-100 text-red-700'
+            };
+            var statusLabels = { 'pending': 'În așteptare', 'approved': 'Aprobat', 'rejected': 'Respins' };
+            var sc = statusColors[t.status] || 'bg-gray-100 text-gray-700';
+            var sl = statusLabels[t.status] || t.status;
+            var proposedBy = usersMap[t.created_by_user_id] || 'N/A';
+            var pret = t.pret_total ? t.pret_total.toLocaleString() + ' €' : '-';
+
+            return '<tr class="border-t hover:bg-gray-50">' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + (t.titlu || 'Fără titlu') + '</div>' +
+                '<div class="text-xs text-gray-400">' + new Date(t.created_at).toLocaleDateString('ro-RO') + '</div></td>' +
+                '<td class="px-4 py-3 text-gray-600">' + (t.zona || '-') + '</td>' +
+                '<td class="px-4 py-3 text-gray-600">' + (t.suprafata ? t.suprafata + ' mp' : '-') + '</td>' +
+                '<td class="px-4 py-3 text-gray-600">' + pret + '</td>' +
+                '<td class="px-4 py-3 text-gray-500 text-xs">' + proposedBy + '</td>' +
+                '<td class="px-4 py-3 text-center"><span class="text-xs px-2 py-1 rounded-full ' + sc + '">' + sl + '</span></td>' +
+                '<td class="px-4 py-3 text-right">' +
+                (t.status === 'pending' ?
+                    '<button onclick="updateStatus(\'' + t.id + '\', \'approved\')" class="text-green-600 hover:text-green-800 mx-1 text-xs font-medium" title="Aprobă"><i class="fas fa-check"></i> Aprobă</button>' +
+                    '<button onclick="updateStatus(\'' + t.id + '\', \'rejected\')" class="text-red-400 hover:text-red-600 mx-1 text-xs" title="Respinge"><i class="fas fa-times"></i></button>'
+                    :
+                    '<button onclick="updateStatus(\'' + t.id + '\', \'pending\')" class="text-gray-400 hover:text-gray-600 mx-1 text-xs" title="Resetează"><i class="fas fa-undo"></i></button>'
+                ) +
+                '<a href="/terenuri-propune.html?edit=' + t.id + '" class="text-gray-400 hover:text-gray-700 mx-1" title="Editează"><i class="fas fa-edit"></i></a>' +
+                '<button onclick="deleteTeren(\'' + t.id + '\')" class="text-gray-400 hover:text-red-600 mx-1" title="Șterge"><i class="fas fa-trash"></i></button>' +
+                '</td></tr>';
+        }).join('');
+    }
+
+    window.filterTeren = function(st) {
+        currentFilter = st;
+        document.querySelectorAll('.t-filter').forEach(function(b) {
+            if (b.dataset.st === st) {
+                b.className = 't-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white';
+            } else {
+                b.className = 't-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
+            }
+        });
+        renderTable();
+    };
+
+    window.updateStatus = async function(id, status) {
+        var { error } = await sb.from('terenuri').update({ status: status }).eq('id', id);
+        if (error) { alert('Eroare: ' + error.message); return; }
+        var t = allTerenuri.find(function(x) { return x.id === id; });
+        if (t) t.status = status;
+        renderTable();
+    };
+
+    window.deleteTeren = async function(id) {
+        if (!confirm('Sigur vrei să ștergi acest teren?')) return;
+        await sb.from('terenuri').delete().eq('id', id);
+        allTerenuri = allTerenuri.filter(function(x) { return x.id !== id; });
+        renderTable();
+    };
+
+    document.addEventListener('DOMContentLoaded', checkAdmin);
+    </script>
+</body>
+</html>
