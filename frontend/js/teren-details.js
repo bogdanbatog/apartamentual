@@ -535,9 +535,14 @@ async function displayTerenDetails(teren, userProfile) {
         // Like to profile
         const btnLikeProfil = document.getElementById('btn-like-profil');
         if (btnLikeProfil) {
-            btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
-            // Check initial like state
-            checkTerenLikeState(teren.id);
+            // Hide button if agency account AND they proposed this terrain
+            if (userProfile.account_type === 'profesional' && teren.created_by_user_id === userProfile.user_id) {
+                btnLikeProfil.style.display = 'none';
+            } else {
+                btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
+                // Check initial like state
+                checkTerenLikeState(teren.id);
+            }
         }
         
         // Like to group - toggle group likes section visibility
