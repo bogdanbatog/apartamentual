@@ -1192,6 +1192,7 @@
 
 // ── STATE ──
 let currentUser = null;
+let currentUserProfile = null;
 let currentGroup = null;
 let isMember = false;
 let isAdmin = false;
@@ -1206,9 +1207,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function checkAuth() {
-    return sb.auth.getUser().then(function(res) {
+    return sb.auth.getUser().then(async function(res) {
         if (res.data && res.data.user) {
             currentUser = res.data.user;
+            try {
+                var { data: prof } = await sb.from('profiles').select('account_type, user_id').eq('user_id', currentUser.id).single();
+                currentUserProfile = prof;
+            } catch(e) {}
         }
     }).catch(function(e) {
         console.warn('Auth check failed:', e);
@@ -1579,7 +1584,12 @@ function renderActions(group) {
         const hasRoom = members.length < group.max_membri;
         const statusNorm = normalizeStatus(group.status);
         
-        if (hasPending) {
+        // Agency accounts cannot join groups
+        const isAgency = currentUserProfile && currentUserProfile.account_type === 'profesional';
+        
+        if (isAgency) {
+            html += `<span style="color: #94a3b8; font-size: 0.875rem;"><i class="fas fa-info-circle"></i> Conturile de agenție nu pot intra în grupuri.</span>`;
+        } else if (hasPending) {
             html += `<span style="color: #f59e0b; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
         } else if (statusNorm === 'deschis' && hasRoom) {
             html += `
@@ -1623,16 +1633,19 @@ function renderMembers(members, adminId) {
         return;
     }
     
+    const isAgencyUser = currentUserProfile && currentUserProfile.account_type === 'profesional';
     grid.innerHTML = members.map(m => {
         const name = m.profile?.pseudonym || 'Utilizator';
         const initial = name.charAt(0).toUpperCase();
         const isAdminMember = m.user_id === adminId;
         const isMe = currentUser && m.user_id === currentUser.id;
         const canKick = isMember && !isMe && members.length >= 3;
+        const profileHref = isAgencyUser ? '#' : `profile-view-new.html?id=${m.user_id}`;
+        const linkExtra = isAgencyUser ? 'pointer-events:none; cursor:default;' : '';
         
         return `
             <div class="member-card" style="display: flex; align-items: center; gap: 0;">
-                <a href="profile-view-new.html?id=${m.user_id}" style="display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; color: inherit; padding: 12px;">
+                <a href="${profileHref}" style="display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; color: inherit; padding: 12px; ${linkExtra}">
                     <div class="member-avatar">${initial}</div>
                     <div class="member-info">
                         <div class="member-name">${escapeHtml(name)}</div>
