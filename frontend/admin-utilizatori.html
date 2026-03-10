@@ -22,6 +22,8 @@
         <button onclick="filterUsers('all')" class="u-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toți</button>
         <button onclick="filterUsers('activ')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="activ">👤 Activi</button>
         <button onclick="filterUsers('profesional')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="profesional">🏢 Agenții</button>
+        <button onclick="filterUsers('suspended')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="suspended">⚠️ Suspendați</button>
+        <button onclick="filterUsers('deleted')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="deleted">🗑️ Șterși</button>
         <div class="ml-auto text-sm text-gray-400" id="userCount"></div>
     </div>
 
@@ -65,11 +67,14 @@
     }
 
     function renderTable() {
-        var filtered = currentFilter === 'all' ? allUsers : allUsers.filter(function(u) { return u.account_type === currentFilter; });
+        var filtered = currentFilter === 'all' ? allUsers : 
+            currentFilter === 'suspended' ? allUsers.filter(function(u) { return u.suspended_until && new Date(u.suspended_until) > new Date(); }) :
+            currentFilter === 'deleted' ? allUsers.filter(function(u) { return u.account_status === 'deleted'; }) :
+            allUsers.filter(function(u) { return u.account_type === currentFilter; });
         document.getElementById('userCount').textContent = filtered.length + ' utilizatori';
         var body = document.getElementById('usersBody');
         if (filtered.length === 0) {
-            body.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Niciun utilizator.</td></tr>';
+            body.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Niciun utilizator.</td></tr>';
             return;
         }
         body.innerHTML = filtered.map(function(u) {
@@ -78,15 +83,36 @@
             var typeColor = u.account_type === 'profesional' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
             var adminBadge = u.is_super_admin ? ' <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 ml-1">Admin</span>' : '';
             var date = u.created_at ? new Date(u.created_at).toLocaleDateString('ro-RO') : '-';
-            return '<tr class="border-t hover:bg-gray-50">' +
-                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + name + adminBadge + '</div></td>' +
+            
+            // Status
+            var isSuspended = u.suspended_until && new Date(u.suspended_until) > new Date();
+            var isDeleted = u.account_status === 'deleted';
+            var statusBadge = '';
+            if (isDeleted) {
+                statusBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 ml-1">Șters</span>';
+            } else if (isSuspended) {
+                var days = Math.ceil((new Date(u.suspended_until) - new Date()) / 86400000);
+                statusBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 ml-1">Suspendat ' + days + 'z</span>';
+            }
+            
+            // Actions
+            var actions = '<a href="/profile-view-new.html?id=' + u.user_id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi profil"><i class="fas fa-eye"></i></a>';
+            if (!u.is_super_admin && !isDeleted) {
+                if (isSuspended) {
+                    actions += '<button onclick="unsuspendUser(\'' + u.user_id + '\')" class="text-green-500 hover:text-green-700 mx-1" title="Reactivează"><i class="fas fa-unlock"></i></button>';
+                } else {
+                    actions += '<button onclick="suspendUser(\'' + u.user_id + '\', \'' + name.replace(/'/g, "\\'") + '\')" class="text-yellow-500 hover:text-yellow-700 mx-1" title="Suspendă 30 zile"><i class="fas fa-ban"></i></button>';
+                }
+                actions += '<button onclick="deleteUser(\'' + u.user_id + '\', \'' + name.replace(/'/g, "\\'") + '\')" class="text-gray-400 hover:text-red-600 mx-1" title="Șterge cont"><i class="fas fa-trash"></i></button>';
+            }
+            
+            return '<tr class="border-t hover:bg-gray-50' + (isDeleted ? ' opacity-50' : '') + '">' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + name + adminBadge + statusBadge + '</div></td>' +
                 '<td class="px-4 py-3 text-gray-500 text-xs">' + (u.email || '-') + '</td>' +
                 '<td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full ' + typeColor + '">' + typeLabel + '</span></td>' +
                 '<td class="px-4 py-3 text-gray-600">' + (u.oras || '-') + '</td>' +
                 '<td class="px-4 py-3 text-gray-500 text-xs">' + date + '</td>' +
-                '<td class="px-4 py-3 text-right">' +
-                '<a href="/profile-view-new.html?id=' + u.user_id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi profil"><i class="fas fa-eye"></i></a>' +
-                '</td></tr>';
+                '<td class="px-4 py-3 text-right">' + actions + '</td></tr>';
         }).join('');
     }
 
@@ -99,6 +125,42 @@
                 b.className = 'u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
             }
         });
+        renderTable();
+    };
+
+    window.suspendUser = async function(userId, name) {
+        if (!confirm('Suspendă contul „' + name + '" pentru 30 de zile?')) return;
+        var suspendDate = new Date();
+        suspendDate.setDate(suspendDate.getDate() + 30);
+        var { error } = await sb.from('profiles').update({
+            suspended_until: suspendDate.toISOString(),
+            account_status: 'suspended'
+        }).eq('user_id', userId);
+        if (error) { alert('Eroare: ' + error.message); return; }
+        var u = allUsers.find(function(x) { return x.user_id === userId; });
+        if (u) { u.suspended_until = suspendDate.toISOString(); u.account_status = 'suspended'; }
+        renderTable();
+    };
+
+    window.unsuspendUser = async function(userId) {
+        var { error } = await sb.from('profiles').update({
+            suspended_until: null,
+            account_status: 'active'
+        }).eq('user_id', userId);
+        if (error) { alert('Eroare: ' + error.message); return; }
+        var u = allUsers.find(function(x) { return x.user_id === userId; });
+        if (u) { u.suspended_until = null; u.account_status = 'active'; }
+        renderTable();
+    };
+
+    window.deleteUser = async function(userId, name) {
+        if (!confirm('Sigur vrei să ștergi contul „' + name + '"? Utilizatorul nu va mai putea accesa platforma.')) return;
+        var { error } = await sb.from('profiles').update({
+            account_status: 'deleted'
+        }).eq('user_id', userId);
+        if (error) { alert('Eroare: ' + error.message); return; }
+        var u = allUsers.find(function(x) { return x.user_id === userId; });
+        if (u) u.account_status = 'deleted';
         renderTable();
     };
 
