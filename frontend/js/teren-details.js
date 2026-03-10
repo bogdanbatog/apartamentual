@@ -519,7 +519,14 @@ async function displayTerenDetails(teren, userProfile) {
                     ? (posterProfile.agency_name || 'Agenție') 
                     : (posterProfile.pseudonym || 'Utilizator');
                 adaugatDeEl.textContent = posterName;
-                adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
+                // Agency accounts cannot view user profiles
+                if (userProfile && userProfile.account_type === 'profesional') {
+                    adaugatDeEl.removeAttribute('href');
+                    adaugatDeEl.style.pointerEvents = 'none';
+                    adaugatDeEl.style.color = '#64748b';
+                } else {
+                    adaugatDeEl.href = `profile-view-new.html?id=${posterProfile.user_id}`;
+                }
                 adaugatDeRow.classList.remove('hidden');
             }
         } catch (e) {
