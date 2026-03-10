@@ -189,8 +189,8 @@ async function loadProfessionalUserData(profileId) {
     try {
         const { data: terrains } = await supabase
             .from('terenuri')
-            .select('id, titlu, oras, zona, suprafata_mp, pret_total, status')
-            .eq('posted_by', profileId)
+            .select('id, titlu, oras, cartier, zona, suprafata, pret_total, image_url, status')
+            .eq('created_by_user_id', profileId)
             .order('created_at', { ascending: false });
         
         profileData.postedTerrains = terrains || [];
@@ -716,19 +716,30 @@ function renderProfessionalContent() {
         return;
     }
     
-    terrainsContainer.innerHTML = profileData.postedTerrains.map(terrain => `
+    terrainsContainer.innerHTML = profileData.postedTerrains.map(terrain => {
+        const statusColors = {
+            'approved': 'bg-green-100 text-green-800',
+            'pending': 'bg-yellow-100 text-yellow-800',
+            'rejected': 'bg-red-100 text-red-800'
+        };
+        const statusLabels = {
+            'approved': 'Aprobat',
+            'pending': 'În așteptare',
+            'rejected': 'Respins'
+        };
+        const sc = statusColors[terrain.status] || 'bg-gray-100 text-gray-600';
+        const sl = statusLabels[terrain.status] || terrain.status;
+        return `
         <a href="teren-details.html?id=${terrain.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="font-medium">${terrain.titlu}</p>
-                    <p class="text-sm text-gray-500">${terrain.oras || '-'} • ${terrain.suprafata_mp || '-'} mp</p>
+                    <p class="text-sm text-gray-500">${terrain.oras || '-'}${terrain.cartier ? ', ' + terrain.cartier : ''} • ${terrain.suprafata || '-'} mp</p>
                 </div>
-                <span class="px-2 py-0.5 ${terrain.status === 'activ' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'} rounded text-xs">
-                    ${terrain.status === 'activ' ? 'Activ' : 'Inactiv'}
-                </span>
+                <span class="px-2 py-0.5 ${sc} rounded text-xs">${sl}</span>
             </div>
         </a>
-    `).join('');
+    `}).join('');
 }
 
 function renderProgressBar() {
