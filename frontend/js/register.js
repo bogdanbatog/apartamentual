@@ -487,6 +487,9 @@ async function handleAuthSubmit(event) {
             
             // Move to step 3
             goToStep(3);
+            
+            // Notify admins (non-blocking)
+            notifyAdmins('new_user', { email: email, user_id: data.user.id });
         }
         
     } catch (error) {
