@@ -247,12 +247,7 @@
 
                 // Try to notify admin (non-blocking)
                 try {
-                    await sb.functions.invoke('notify-admins', {
-                        body: {
-                            event_type: 'consultation_request',
-                            data: payload
-                        }
-                    });
+                    notifyAdmins('consultation_request', payload);
                 } catch (notifyErr) {
                     console.warn('Notification failed:', notifyErr);
                 }
