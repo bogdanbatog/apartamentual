@@ -350,6 +350,9 @@
                 <a href="/admin-grupuri.html">
                     <i class="fas fa-people-group"></i> Grupuri
                 </a>
+                <a href="/admin-notificari.html">
+                    <i class="fas fa-bell"></i> Notificări
+                </a>
             </nav>
         </aside>
         
@@ -584,7 +587,7 @@
     async function loadDashboard() {
         try {
             // Parallel data loading
-            const [
+            let [
                 usersRes,
                 grupuriRes,
                 terenuriRes,
@@ -625,6 +628,8 @@
                 grupuri: activeGrupuri.length,
                 terenuri: terenuri.length,
                 terenuriApproved: terenuri.filter(t => t.status === 'approved').length,
+                terenuriPending: terenuri.filter(t => t.status === 'pending').length,
+                terenuriRejected: terenuri.filter(t => t.status === 'rejected').length,
                 totalLikes: terenuriLikes.length + grupLikes.length,
                 pendingRequests: pendingRequests.length
             });
@@ -657,7 +662,7 @@
         const cards = [
             { label: 'Utilizatori', value: s.users, sub: `${s.activeUsers} activi, ${s.proUsers} agenții`, icon: 'fas fa-users', color: '#2563eb' },
             { label: 'Grupuri active', value: s.grupuri, sub: `${s.pendingRequests} cereri în așteptare`, icon: 'fas fa-layer-group', color: '#16a34a' },
-            { label: 'Terenuri', value: s.terenuri, sub: `${s.terenuriApproved} aprobate`, icon: 'fas fa-map', color: '#f59e0b' },
+            { label: 'Terenuri', value: s.terenuri, sub: `${s.terenuriApproved} aprobate · ${s.terenuriPending} pending`, icon: 'fas fa-map', color: '#f59e0b' },
             { label: 'Total like-uri', value: s.totalLikes, sub: 'profil + grup', icon: 'fas fa-heart', color: '#dc2626' }
         ];
         
