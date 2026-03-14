@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Notificări - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'DM Sans', system-ui, sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-gray-900">Admin — Notificări</h1>
+            <p class="text-sm text-gray-500">Istoric email-uri și mesaje Slack trimise de platformă</p>
+        </div>
+        <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
+    </div>
+
+    <div class="px-6 py-4 flex gap-2 flex-wrap items-center">
+        <button onclick="filterLog('all')" class="n-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-ch="all">Toate</button>
+        <button onclick="filterLog('email')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-ch="email">📧 Email</button>
+        <button onclick="filterLog('slack')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-ch="slack">💬 Slack</button>
+        <div class="ml-auto text-sm text-gray-400" id="logCount"></div>
+    </div>
+
+    <div class="px-6">
+        <div class="bg-white rounded-xl border overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Data</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Eveniment</th>
+                        <th class="text-center px-4 py-3 font-medium text-gray-600">Canal</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Destinatar</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Subiect</th>
+                        <th class="text-center px-4 py-3 font-medium text-gray-600">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="logBody">
+                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+    var allLogs = [];
+    var currentChannel = 'all';
+
+    var eventLabels = {
+        'new_user': '👤 Utilizator nou',
+        'profile_updated': '🔄 Profil actualizat',
+        'terrain_proposed': '🏗️ Teren propus',
+        'group_created': '👥 Grup creat',
+        'join_request': '📩 Cerere alăturare',
+        'join_request_admin_email': '📩 Email admin grup',
+        'member_approved': '✅ Membru aprobat',
+        'member_rejected': '🚫 Cerere respinsă',
+        'member_removed': '❌ Membru eliminat',
+        'consultation_request': '💬 Consultanță',
+        'partner_application': '🤝 Parteneriat'
+    };
+
+    async function checkAdmin() {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '/index.html'; return; }
+        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
+        loadLog();
+    }
+
+    async function loadLog() {
+        var { data } = await sb.from('notification_log').select('*').order('created_at', { ascending: false }).limit(200);
+        allLogs = data || [];
+        renderTable();
+    }
+
+    function renderTable() {
+        var filtered = currentChannel === 'all' ? allLogs : allLogs.filter(function(l) { return l.channel === currentChannel; });
+        document.getElementById('logCount').textContent = filtered.length + ' notificări';
+        var body = document.getElementById('logBody');
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Nicio notificare încă.</td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(function(l) {
+            var date = l.created_at ? new Date(l.created_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '-';
+            var eventLabel = eventLabels[l.event_type] || l.event_type;
+            var channelBadge = l.channel === 'email'
+                ? '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">📧 Email</span>'
+                : '<span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">💬 Slack</span>';
+            var statusBadge = l.status === 'sent'
+                ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Trimis</span>'
+                : '<span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Eroare</span>';
+            var subject = (l.subject || '').substring(0, 60) + ((l.subject || '').length > 60 ? '...' : '');
+
+            return '<tr class="border-t hover:bg-gray-50">' +
+                '<td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">' + date + '</td>' +
+                '<td class="px-4 py-3 text-xs">' + eventLabel + '</td>' +
+                '<td class="px-4 py-3 text-center">' + channelBadge + '</td>' +
+                '<td class="px-4 py-3 text-gray-600 text-xs">' + (l.recipient || '-') + '</td>' +
+                '<td class="px-4 py-3 text-gray-600 text-xs">' + subject + '</td>' +
+                '<td class="px-4 py-3 text-center">' + statusBadge + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    window.filterLog = function(ch) {
+        currentChannel = ch;
+        document.querySelectorAll('.n-filter').forEach(function(b) {
+            b.className = b.dataset.ch === ch
+                ? 'n-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white'
+                : 'n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
+        });
+        renderTable();
+    };
+
+    document.addEventListener('DOMContentLoaded', checkAdmin);
+    </script>
+</body>
+</html>
