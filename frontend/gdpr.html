@@ -31,7 +31,7 @@
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
                     <h1 class="text-3xl mb-4">Politica de Confidențialitate și Protecția Datelor (GDPR)</h1>
-                    <p class="subtitle">Actualizat pentru ultima dată: 3 septembrie 2024</p>
+                    <p class="subtitle">Actualizat pentru ultima dată: 14 martie 2026</p>
                 </div>
 
                 <div class="prose max-w-none space-y-8">
@@ -62,29 +62,40 @@
                         <h2 class="text-xl mb-4">3. Datele Personale Colectate</h2>
                         <h3 class="text-lg mb-3">3.1 Date de Identificare</h3>
                         <ul class="list-disc pl-6 space-y-1 mb-4">
-                            <li>Nume și prenume</li>
+                            <li>Pseudonim sau nume de afișare</li>
                             <li>Adresa de email</li>
-                            <li>Numărul de telefon</li>
-                            <li>Adresa poștală</li>
-                            <li>Data nașterii (pentru verificarea vârstei)</li>
+                            <li>Orașul de reședință</li>
                         </ul>
 
                         <h3 class="text-lg mb-3">3.2 Date de Profil</h3>
                         <ul class="list-disc pl-6 space-y-1 mb-4">
-                            <li>Preferințe de locuire</li>
-                            <li>Informații despre situația financiară</li>
-                            <li>Locația preferată</li>
-                            <li>Experiența în proiecte de construcție</li>
-                            <li>Mesaje și comunicări pe platformă</li>
+                            <li>Preferințe de locuire (număr camere, suprafață dorită)</li>
+                            <li>Zone preferate (cartiere selectate)</li>
+                            <li>Interese și preferințe (tag-uri selectate din lista platformei)</li>
+                            <li>Descriere personală (text liber, opțional)</li>
+                            <li>Profesie (opțional)</li>
+                            <li>Terenuri adăugate la profil (favorite)</li>
+                            <li>Apartenența la grupuri</li>
                         </ul>
 
-                        <h3 class="text-lg mb-3">3.3 Date Tehnice</h3>
+                        <h3 class="text-lg mb-3">3.3 Date de la Conturi de Agenție</h3>
+                        <ul class="list-disc pl-6 space-y-1 mb-4">
+                            <li>Numele agenției / firmei</li>
+                            <li>Email de contact</li>
+                            <li>Terenuri propuse pe platformă</li>
+                        </ul>
+
+                        <h3 class="text-lg mb-3">3.4 Date din Formulare</h3>
+                        <ul class="list-disc pl-6 space-y-1 mb-4">
+                            <li>Cereri de consultanță (nume, email, categorie, mesaj)</li>
+                            <li>Cereri de parteneriat (nume firmă, categorie, descriere, website)</li>
+                        </ul>
+
+                        <h3 class="text-lg mb-3">3.5 Date Tehnice</h3>
                         <ul class="list-disc pl-6 space-y-1">
                             <li>Adresa IP</li>
                             <li>Tipul de browser și versiunea</li>
-                            <li>Sistemul de operare</li>
-                            <li>Cookie-uri și tehnologii similare</li>
-                            <li>Datele de utilizare ale platformei</li>
+                            <li>Datele de autentificare (gestionate de Supabase Auth)</li>
                         </ul>
                     </section>
 
@@ -98,7 +109,7 @@
 
                             <div class="border-l-4 border-green-500 pl-4">
                                 <h4 class="font-semibold mb-2">Consimțământul (Art. 6(1)(a) GDPR)</h4>
-                                <p class="text-sm">Marketing direct, comunicări promoționale, cookie-uri non-esențiale.</p>
+                                <p class="text-sm">Trimiterea de notificări prin email legate de activitatea pe platformă (cereri de alăturare la grupuri, aprobări, consultanțe).</p>
                             </div>
 
                             <div class="border-l-4 border-orange-500 pl-4">
@@ -122,10 +133,10 @@
 
                         <h3 class="text-lg mb-3">5.2 Cu prestatori de servicii</h3>
                         <ul class="list-disc pl-6 space-y-1 mb-4">
-                            <li>Furnizori de hosting și servicii cloud (Supabase)</li>
-                            <li>Servicii de email marketing</li>
-                            <li>Procesatori de plăți</li>
-                            <li>Servicii de analiză și monitorizare</li>
+                            <li><strong>Supabase</strong> (bază de date, autentificare, stocare) — date stocate în EU (eu-west-1, Irlanda)</li>
+                            <li><strong>Render</strong> (hosting aplicație web) — servere în EU</li>
+                            <li><strong>Resend</strong> (trimitere email-uri tranzacționale) — date procesate în EU (eu-west-1, Irlanda)</li>
+                            <li><strong>Slack</strong> (notificări interne către echipa de administrare) — nu conține date personale ale utilizatorilor, doar notificări de activitate</li>
                         </ul>
 
                         <h3 class="text-lg mb-3">5.3 Din motive legale</h3>
@@ -151,13 +162,10 @@
                                 <strong>Conturi active:</strong> Pe toată durata utilizării serviciului
                             </div>
                             <div class="bg-gray-50 p-3 rounded">
-                                <strong>Conturi inactive:</strong> 3 ani de la ultima activitate
+                                <strong>Conturi inactive:</strong> 3 ani de la ultima activitate, după care datele sunt șterse automat
                             </div>
                             <div class="bg-gray-50 p-3 rounded">
-                                <strong>Date financiare:</strong> 7 ani (conform legislației fiscale)
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded">
-                                <strong>Date de marketing:</strong> Până la retragerea consimțământului
+                                <strong>Conturi șterse la cerere:</strong> Datele sunt șterse în maximum 30 de zile de la solicitare
                             </div>
                             <div class="bg-gray-50 p-3 rounded">
                                 <strong>Date tehnice/log-uri:</strong> 12 luni
@@ -243,21 +251,16 @@
                         <h3 class="text-lg mb-3">10.1 Tipuri de Cookie-uri</h3>
                         <div class="space-y-3 mb-4">
                             <div class="bg-green-50 p-3 rounded">
-                                <strong>Cookie-uri esențiale:</strong> Necesare pentru funcționarea de bază a platformei
-                            </div>
-                            <div class="bg-blue-50 p-3 rounded">
-                                <strong>Cookie-uri de analiză:</strong> Google Analytics pentru îmbunătățirea serviciului
-                            </div>
-                            <div class="bg-purple-50 p-3 rounded">
-                                <strong>Cookie-uri de marketing:</strong> Pentru personalizarea conținutului și reclamelor
+                                <strong>Cookie-uri esențiale:</strong> Necesare pentru funcționarea platformei — autentificarea utilizatorului (sesiune Supabase Auth). Nu pot fi dezactivate.
                             </div>
                         </div>
+                        <p class="mb-4">
+                            Platforma ApartamenTUal <strong>nu folosește</strong> cookie-uri de analiză (Google Analytics), cookie-uri de marketing sau cookie-uri de urmărire de la terți.
+                        </p>
 
                         <h3 class="text-lg mb-3">10.2 Gestionarea Cookie-urilor</h3>
-                        <p class="mb-2">Puteți controla cookie-urile prin:</p>
-                        <ul class="list-disc pl-6 space-y-1">
-                            <li>Setările browser-ului dumneavoastră</li>
-                            <li>Panoul de consimțământ la prima vizită</li>
+                        <p class="mb-2">Puteți controla cookie-urile prin setările browser-ului dumneavoastră. Dezactivarea cookie-urilor esențiale poate afecta funcționarea platformei (autentificare, sesiune).</p>
+                    </section>
                             <li>Contactarea echipei noastre pentru dezactivare</li>
                         </ul>
                     </section>
