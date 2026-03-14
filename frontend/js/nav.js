@@ -191,6 +191,36 @@ async function checkAuthState() {
         const btnLoginMobile = document.getElementById('btnLoginNavMobile');
 
         if (user) {
+            // Check if account is suspended or deleted (skip on admin pages)
+            var isAdminPage = window.location.pathname.includes('admin');
+            if (!isAdminPage) {
+            try {
+                var { data: prof } = await sb.from('profiles').select('suspended_until, account_status').eq('user_id', user.id).single();
+                if (prof) {
+                    var isSuspended = prof.suspended_until && new Date(prof.suspended_until) > new Date();
+                    var isDeleted = prof.account_status === 'deleted';
+                    if (isSuspended || isDeleted) {
+                        // Sign out
+                        await sb.auth.signOut();
+                        window.currentUserId = null;
+                        // Show suspension overlay
+                        var overlay = document.createElement('div');
+                        overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center;';
+                        var msg = isDeleted
+                            ? '<h2 style="margin-bottom:8px;">Cont dezactivat</h2><p>Acest cont a fost dezactivat de administratorul platformei.</p>'
+                            : '<h2 style="margin-bottom:8px;">Cont suspendat</h2><p>Contul tău este suspendat până la <strong>' + new Date(prof.suspended_until).toLocaleDateString('ro-RO') + '</strong>.</p><p style="margin-top:8px; font-size:13px; opacity:0.7;">Dacă ai întrebări, contactează echipa ApartamenTUal.</p>';
+                        overlay.innerHTML = '<div style="background:white; border-radius:12px; padding:2.5rem; max-width:440px; width:90%; text-align:center; font-family:DM Sans,sans-serif;">' + msg + '<a href="/index.html" style="display:inline-block; margin-top:20px; padding:10px 24px; background:#1e293b; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">Înapoi la pagina principală</a></div>';
+                        document.body.appendChild(overlay);
+                        // Hide nav elements
+                        if (navUser) navUser.style.display = 'none';
+                        if (btnLogin) btnLogin.style.display = 'flex';
+                        if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
+                        return;
+                    }
+                }
+            } catch(e) { console.warn('Suspension check failed:', e); }
+            } // end !isAdminPage
+
             if (navUser) navUser.style.display = 'flex';
             if (btnLogin) btnLogin.style.display = 'none';
             if (btnLoginMobile) btnLoginMobile.style.display = 'none';
