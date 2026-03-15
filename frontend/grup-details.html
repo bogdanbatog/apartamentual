@@ -2371,6 +2371,52 @@ function normalizeStatus(status) {
 window.leaveGroup = async function() {
     if (!currentUser || !currentGroup) return;
     
+    // If user is admin, handle admin transfer
+    if (isAdmin) {
+        var otherMembers = members.filter(m => m.user_id !== currentUser.id);
+        
+        if (otherMembers.length === 0) {
+            // Last member - ask to delete group
+            if (!confirm('Ești singurul membru. Dacă părăsești grupul, acesta va fi șters. Continuă?')) return;
+            try {
+                await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id);
+                await sb.from('grupuri').delete().eq('id', currentGroup.id);
+                showToast('Grupul a fost șters.', 'success');
+                setTimeout(() => window.location.href = 'grupuri.html', 1000);
+            } catch (e) {
+                console.error('Delete group error:', e);
+                showToast('Eroare la ștergerea grupului.', 'error');
+            }
+            return;
+        }
+        
+        // Build member selection for transfer
+        var options = otherMembers.map(m => {
+            var name = m.profile?.pseudonym || 'Utilizator';
+            return '<option value="' + m.user_id + '">' + name + '</option>';
+        }).join('');
+        
+        // Show transfer modal
+        var overlay = document.createElement('div');
+        overlay.id = 'transferAdminModal';
+        overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center;';
+        overlay.innerHTML = '<div style="background:white; border-radius:12px; padding:2rem; max-width:420px; width:90%; font-family:DM Sans,sans-serif;">' +
+            '<h3 style="font-size:1.1rem; font-weight:600; margin-bottom:0.5rem;">Transferă rolul de admin</h3>' +
+            '<p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Ești adminul grupului. Înainte de a pleca, alege cine preia administrarea sau lasă sistemul să aleagă automat.</p>' +
+            '<select id="newAdminSelect" style="width:100%; padding:0.5rem 0.75rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.9rem; margin-bottom:1rem;">' +
+            '<option value="auto">🔄 Automat (cel mai vechi membru)</option>' +
+            options +
+            '</select>' +
+            '<div style="display:flex; gap:8px;">' +
+            '<button onclick="confirmLeaveAsAdmin()" style="flex:1; padding:0.6rem; background:#dc2626; color:white; border:none; border-radius:8px; font-weight:600; font-size:0.85rem; cursor:pointer;">Transferă și părăsește</button>' +
+            '<button onclick="document.getElementById(\'transferAdminModal\').remove()" style="padding:0.6rem 1rem; border:1px solid #d1d5db; border-radius:8px; background:white; font-size:0.85rem; cursor:pointer;">Anulează</button>' +
+            '</div></div>';
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
+        return;
+    }
+    
+    // Normal member leave
     if (!confirm('Sigur vrei să părăsești grupul?')) return;
     
     try {
@@ -2388,6 +2434,52 @@ window.leaveGroup = async function() {
     } catch (e) {
         console.error('Leave error:', e);
         showToast('Eroare la părăsire.', 'error');
+    }
+};
+
+window.confirmLeaveAsAdmin = async function() {
+    var select = document.getElementById('newAdminSelect');
+    var newAdminId = select.value;
+    
+    try {
+        // If auto, pick oldest member
+        if (newAdminId === 'auto') {
+            var otherMembers = members.filter(m => m.user_id !== currentUser.id);
+            otherMembers.sort(function(a, b) { return new Date(a.joined_at) - new Date(b.joined_at); });
+            newAdminId = otherMembers[0].user_id;
+        }
+        
+        // Transfer admin
+        await sb.from('grupuri').update({ admin_id: newAdminId }).eq('id', currentGroup.id);
+        
+        // Remove current user from group
+        await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id).eq('user_id', currentUser.id);
+        
+        // Notify new admin
+        try {
+            var { data: newAdminProfile } = await sb.from('profiles').select('email').eq('user_id', newAdminId).single();
+            if (newAdminProfile && newAdminProfile.email && typeof notifyAdmins === 'function') {
+                sb.functions.invoke('notify-admins', {
+                    body: {
+                        event_type: 'admin_transferred',
+                        admin_email: newAdminProfile.email,
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id
+                    }
+                });
+            }
+        } catch(e) { console.warn('New admin notify failed:', e); }
+        
+        // Remove modal
+        var modal = document.getElementById('transferAdminModal');
+        if (modal) modal.remove();
+        
+        showToast('Admin transferat. Ai părăsit grupul.', 'success');
+        setTimeout(() => window.location.href = 'grupuri.html', 1000);
+        
+    } catch (e) {
+        console.error('Transfer admin error:', e);
+        showToast('Eroare la transferul adminului.', 'error');
     }
 };
 
