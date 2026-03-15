@@ -171,7 +171,8 @@ async function loadUsers() {
                 user_preferred_zones(zone_id, zones(id, name))
             `)
             .eq('account_type', 'activ')
-            .not('pseudonym', 'is', null);
+            .not('pseudonym', 'is', null)
+            .or('account_status.is.null,account_status.eq.active');
         
         // If filtering by teren likes
         if (filterTerenId) {
