@@ -2452,14 +2452,11 @@ window.confirmLeaveAsAdmin = async function() {
         // Transfer admin
         await sb.from('grupuri').update({ admin_id: newAdminId }).eq('id', currentGroup.id);
         
-        // Remove current user from group
-        await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id).eq('user_id', currentUser.id);
-        
-        // Notify new admin
+        // Notify new admin BEFORE leaving (so auth is still valid)
         try {
             var { data: newAdminProfile } = await sb.from('profiles').select('email').eq('user_id', newAdminId).single();
-            if (newAdminProfile && newAdminProfile.email && typeof notifyAdmins === 'function') {
-                sb.functions.invoke('notify-admins', {
+            if (newAdminProfile && newAdminProfile.email) {
+                await sb.functions.invoke('notify-admins', {
                     body: {
                         event_type: 'admin_transferred',
                         admin_email: newAdminProfile.email,
@@ -2469,6 +2466,9 @@ window.confirmLeaveAsAdmin = async function() {
                 });
             }
         } catch(e) { console.warn('New admin notify failed:', e); }
+        
+        // Remove current user from group
+        await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id).eq('user_id', currentUser.id);
         
         // Remove modal
         var modal = document.getElementById('transferAdminModal');
