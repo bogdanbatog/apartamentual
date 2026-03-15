@@ -67,10 +67,21 @@
     }
 
     function renderTable() {
-        var filtered = currentFilter === 'all' ? allUsers : 
-            currentFilter === 'suspended' ? allUsers.filter(function(u) { return u.suspended_until && new Date(u.suspended_until) > new Date(); }) :
-            currentFilter === 'deleted' ? allUsers.filter(function(u) { return u.account_status === 'deleted'; }) :
-            allUsers.filter(function(u) { return u.account_type === currentFilter; });
+        var filtered;
+        if (currentFilter === 'all') {
+            filtered = allUsers;
+        } else if (currentFilter === 'suspended') {
+            filtered = allUsers.filter(function(u) { return u.suspended_until && new Date(u.suspended_until) > new Date(); });
+        } else if (currentFilter === 'deleted') {
+            filtered = allUsers.filter(function(u) { return u.account_status === 'deleted'; });
+        } else {
+            // activ or profesional - exclude deleted AND suspended
+            filtered = allUsers.filter(function(u) { 
+                return u.account_type === currentFilter 
+                    && u.account_status !== 'deleted' 
+                    && !(u.suspended_until && new Date(u.suspended_until) > new Date()); 
+            });
+        }
         document.getElementById('userCount').textContent = filtered.length + ' utilizatori';
         var body = document.getElementById('usersBody');
         if (filtered.length === 0) {
