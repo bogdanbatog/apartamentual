@@ -1,28 +1,28 @@
 // Orașe și cartiere/zone disponibile pe platformă
-// Folosit pentru dropdown-uri pe formulare (terenuri, grupuri, profil)
+// Numele trebuie să fie IDENTICE cu cele din tabelul `zones` din Supabase
+// București: 61 cartiere PUG (zone IDs 101-161)
+// Cluj-Napoca: 20 zone (IDs 201-220)
+// Timișoara: 18 zone (IDs 301-318)
+// Iași: 18 zone (IDs 401-418)
+// Brașov: 19 zone (IDs 501-519)
 
 const ORASE_CARTIERE = {
     "București": [
         "Pădurea Băneasa / Jandarmerie", "Băneasa", "Străulești", "București Noi",
-        "Dămăroaia", "Pajura", "Aviatorilor / Aviației", "Primăverii / Dorobanți Nord",
-        "Floreasca", "Herăstrău / Nordului", "Pipera", "Voluntari / Ștefăneștii de Jos",
-        "Aviatiei Est / Barbu Văcărescu Nord", "Tei / Plumbuita", "Colentina Nord",
-        "Fundeni / Dobroești", "Pantelimon", "Baicului / Bucur Obor", "Obor / Ferdinand",
-        "Moșilor / Carol", "Dacia / Eminescu / Universitate", "Cotroceni / Politehnica",
-        "Drumul Taberei", "Militari", "Crângași / Giulești", "Grozăvești / Regie",
-        "Ghencea", "Rahova", "Ferentari / Giurgiului", "Berceni",
-        "Titan / Ozana / Nicolae Grigorescu", "Dristor / Mihai Bravu", "Vitan / Dudești",
-        "Unirii / Piața Unirii", "Tineretului / Văcărești", "Timpuri Noi / Splaiul Unirii",
-        "Dorobanți Sud / Piața Romană", "Calea Victoriei / Centru Vechi",
-        "Cișmigiu / Izvor", "13 Septembrie / Panduri", "Apărătorii Patriei / Olteniței",
-        "Prelungirea Ghencea", "Bragadiru / Cornetu", "Popești-Leordeni",
-        "Chiajna / Roșu / Militari Residence", "Mogoșoaia / Otopeni",
-        "Tunari / Dimieni", "Chitila / Rudeni", "1 Decembrie / Măgurele",
-        "Iancului / Muncii", "Griviței / Basarab", "Domenii / Casin",
-        "Kiseleff / Arcul de Triumf", "Victoriei / Guvern",
-        "Ștefan cel Mare / Lizeanu", "Mihai Bravu / Dristor Sud",
-        "Trapezului / Brâncoveanu", "Nerva Traian / Văcărești Sud",
-        "Titan Sud / Technopolis", "Pallady / Saligny", "Metalurgiei / Nitu Vasile"
+        "Dămăroaia", "Pajura", "Dămăroaia / Petrom", "Chitila", "Chitila - Triaj",
+        "Giulești Sârbi", "Giulești", "Crângași", "1 Mai", "Romexpo",
+        "Domenii", "Kiseleff", "Griviţa", "Primăverii / Dorobanți",
+        "Cartierul Francez", "Aviației", "Henri Coandă", "Pipera",
+        "Floreasca", "Tei", "Ion Creangă / Andronache", "Fundeni",
+        "Colentina", "Baicului", "Obor", "Iancului",
+        "Vatra Luminoasă", "Pantelimon", "23 August", "Malaxa (1918)",
+        "Policolor", "Balta Albă / Titan", "Sălăjan / Trapezului", "Dristor",
+        "Vitan", "Unirii / Alba Iulia", "Centrul Vechi", "Zona Centru Nord",
+        "Plevnei / Gara de Nord", "Politehnica", "Militari", "Drumul Taberei",
+        "Valea Cascadelor", "Ghencea", "Rahova", "Ferentari",
+        "Uranus", "Cotroceni", "13 Septembrie / Trafic Greu", "Carol",
+        "Tineretului", "Văcărești", "Giurgiului", "Berceni",
+        "Progresul", "Apărătorii Patriei", "IMGB"
     ],
     "Cluj-Napoca": [
         "Centru", "Mărăști", "Gheorgheni", "Mănăștur", "Zorilor", "Grigorescu",
@@ -76,7 +76,6 @@ function populateCartierSelect(selectElement, oras, placeholder = "Alege zona / 
     selectElement.innerHTML = `<option value="">${placeholder}</option>`;
     if (!oras) return;
     
-    // Sortare alfabetică a cartierelor
     const cartiereSortate = getCartiere(oras).slice().sort((a, b) => 
         a.localeCompare(b, 'ro', { sensitivity: 'base' })
     );
