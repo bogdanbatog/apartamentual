@@ -97,36 +97,34 @@
                                 Editează profil
                             </a>
                         </div>
-                    </div>
 
-                    <!-- Invite buttons (stacked, below header row) -->
-                    <div id="invite-to-group-container" class="hidden" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start;">
-                        <button id="invite-to-group-btn" onclick="handleInviteToGroup()" 
-                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium"
-                                style="background: #f97316; color: white; border: none; cursor: pointer;">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            <span>Creează un grup și invită</span>
-                        </button>
-
-                        <div id="invite-existing-group-container" class="hidden" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-                            <button onclick="toggleExistingGroupDropdown()" 
+                        <!-- Invite buttons (right side, stacked) -->
+                        <div id="invite-to-group-container" class="hidden" style="margin-left: auto; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                            <button id="invite-to-group-btn" onclick="handleInviteToGroup()" 
                                     class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium"
-                                    style="background: white; color: #1e293b; border: 1px solid #e2e8f0; cursor: pointer;">
+                                    style="background: #f97316; color: white; border: none; cursor: pointer; white-space: nowrap;">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                 </svg>
-                                <span>Invită pe unul din grupurile tale</span>
+                                <span>Creează un grup și invită</span>
                             </button>
 
-                            <!-- Group selection dropdown -->
-                            <div id="group-select-dropdown" class="hidden" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                                <p style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.5rem;">Alege grupul:</p>
-                                <div id="group-select-list"></div>
+                            <div id="invite-existing-group-container" class="hidden" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                                <button onclick="toggleExistingGroupDropdown()" 
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium"
+                                        style="background: white; color: #1e293b; border: 1px solid #e2e8f0; cursor: pointer; white-space: nowrap;">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                    </svg>
+                                    <span>Invită pe unul din grupurile tale</span>
+                                </button>
+
+                                <div id="group-select-dropdown" class="hidden" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 200px;">
+                                    <p style="font-size: 0.8125rem; color: #64748b; margin-bottom: 0.5rem;">Alege grupul:</p>
+                                    <div id="group-select-list"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     </div>
 
                     <!-- Progress Bar (only for own profile) -->
