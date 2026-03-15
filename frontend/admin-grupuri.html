@@ -63,7 +63,7 @@
     async function loadGroups() {
         var [groupsRes, membersRes] = await Promise.all([
             sb.from('grupuri').select('*').order('created_at', { ascending: false }),
-            sb.from('grup_membership').select('grup_id, status')
+            sb.from('grup_membri').select('grup_id, status')
         ]);
 
         allGroups = groupsRes.data || [];
@@ -71,7 +71,7 @@
 
         // Count members and pending per group
         members.forEach(function(m) {
-            if (m.status === 'approved') {
+            if (m.status === 'activ') {
                 membersMap[m.grup_id] = (membersMap[m.grup_id] || 0) + 1;
             } else if (m.status === 'pending') {
                 pendingMap[m.grup_id] = (pendingMap[m.grup_id] || 0) + 1;
@@ -132,7 +132,7 @@
     window.deleteGroup = async function(id, name) {
         if (!confirm('Sigur vrei să ștergi grupul „' + name + '"? Acțiunea este ireversibilă.')) return;
         // Delete memberships first, then group
-        await sb.from('grup_membership').delete().eq('grup_id', id);
+        await sb.from('grup_membri').delete().eq('grup_id', id);
         await sb.from('grupuri').delete().eq('id', id);
         allGroups = allGroups.filter(function(g) { return g.id !== id; });
         renderTable();
