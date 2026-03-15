@@ -289,7 +289,6 @@ function initBucurestiMap() {
     
     // Create new map instance
     bucurestiMapInstance = new BucurestiMap('bucuresti-map', {
-        maxSelections: 10,
         onSelectionChange: (selected) => {
             // Update selectedZones with the IDs from the map
             selectedZones = selected.map(n => n.id);
