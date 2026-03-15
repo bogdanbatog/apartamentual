@@ -940,14 +940,18 @@ async function loadMyGroupsForInvite() {
             myGroupsForInvite = [];
         }
         
-        // Always show the "Creează un grup" button
+        // Always show the invite buttons container
         const container = document.getElementById('invite-to-group-container');
-        if (container) container.classList.remove('hidden');
+        if (container) {
+            container.classList.remove('hidden');
+            container.style.display = 'flex';
+        }
         
         // Show "Invită pe grupurile tale" button only if user has groups
         const existingContainer = document.getElementById('invite-existing-group-container');
         if (existingContainer && myGroupsForInvite.length > 0) {
             existingContainer.classList.remove('hidden');
+            existingContainer.style.display = 'flex';
         }
     } catch (e) {
         console.error('Error loading groups for invite:', e);
