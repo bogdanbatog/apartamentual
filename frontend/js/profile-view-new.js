@@ -224,6 +224,11 @@ async function renderProfile() {
         document.getElementById('progress-section').classList.remove('hidden');
         renderProgressBar();
     }
+    
+    // Show invite button when viewing another active user's profile (and I'm logged in and active)
+    if (!isOwnProfile && currentUser && profileData.account_type === 'activ') {
+        loadMyGroupsForInvite();
+    }
 }
 
 function renderBasicInfo() {
@@ -897,3 +902,214 @@ async function saveNotes() {
         alert('Eroare la salvarea notițelor: ' + e.message);
     }
 }
+
+// =====================================================
+// INVITE TO GROUP (from profile page)
+// =====================================================
+
+let myGroupsForInvite = [];
+
+async function loadMyGroupsForInvite() {
+    try {
+        // Check my own account type first
+        const { data: myProfile } = await supabase
+            .from('profiles')
+            .select('account_type')
+            .eq('user_id', currentUser.id)
+            .single();
+        
+        if (!myProfile || myProfile.account_type !== 'activ') return;
+        
+        // Get groups where I'm admin
+        const { data: memberships } = await supabase
+            .from('grup_membri')
+            .select('grup_id, rol')
+            .eq('user_id', currentUser.id)
+            .eq('status', 'activ')
+            .eq('rol', 'admin');
+        
+        if (memberships && memberships.length > 0) {
+            const groupIds = memberships.map(m => m.grup_id);
+            const { data: groups } = await supabase
+                .from('grupuri')
+                .select('id, nume')
+                .in('id', groupIds)
+                .neq('status', 'arhivat');
+            
+            myGroupsForInvite = groups || [];
+        } else {
+            myGroupsForInvite = [];
+        }
+        
+        // Show the button
+        const container = document.getElementById('invite-to-group-container');
+        const textEl = document.getElementById('invite-to-group-text');
+        if (container) {
+            container.classList.remove('hidden');
+            if (myGroupsForInvite.length === 0) {
+                textEl.textContent = 'Creează un grup și invită-l';
+            } else if (myGroupsForInvite.length === 1) {
+                textEl.textContent = `Invită pe „${myGroupsForInvite[0].nume}"`;
+            } else {
+                textEl.textContent = 'Invită pe grupul tău';
+            }
+        }
+    } catch (e) {
+        console.error('Error loading groups for invite:', e);
+    }
+}
+
+async function handleInviteToGroup() {
+    if (myGroupsForInvite.length === 0) {
+        // No groups - redirect to create group
+        window.location.href = 'grup-nou.html';
+        return;
+    }
+    
+    if (myGroupsForInvite.length === 1) {
+        // Only one group - invite directly
+        await sendProfileInvite(myGroupsForInvite[0].id, myGroupsForInvite[0].nume);
+        return;
+    }
+    
+    // Multiple groups - show dropdown
+    const dropdown = document.getElementById('group-select-dropdown');
+    const list = document.getElementById('group-select-list');
+    
+    if (!dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+    
+    list.innerHTML = myGroupsForInvite.map(g => `
+        <button onclick="sendProfileInvite('${g.id}', '${g.nume.replace(/'/g, "\\'")}')" 
+                style="display: block; width: 100%; text-align: left; padding: 0.5rem 0.75rem; 
+                       border: none; background: none; border-radius: 6px; cursor: pointer; 
+                       font-size: 0.875rem; color: #1e293b; transition: background 0.15s;"
+                onmouseover="this.style.background='#f1f5f9'" 
+                onmouseout="this.style.background='none'">
+            ${g.nume}
+        </button>
+    `).join('');
+    
+    dropdown.classList.remove('hidden');
+}
+
+async function sendProfileInvite(groupId, groupName) {
+    const targetUserId = profileData.user_id;
+    const targetName = profileData.pseudonym || 'Utilizator';
+    
+    try {
+        // Check if already a member
+        const { data: existingMember } = await supabase
+            .from('grup_membri')
+            .select('id')
+            .eq('grup_id', groupId)
+            .eq('user_id', targetUserId)
+            .maybeSingle();
+        
+        if (existingMember) {
+            showToast(`${targetName} este deja în grupul „${groupName}".`, 'error');
+            return;
+        }
+        
+        // Check if already invited via email
+        if (profileData.email) {
+            const { data: existingInvite } = await supabase
+                .from('grup_invitations')
+                .select('id, status')
+                .eq('grup_id', groupId)
+                .eq('invited_email', profileData.email.toLowerCase())
+                .in('status', ['pending', 'accepted'])
+                .maybeSingle();
+            
+            if (existingInvite) {
+                showToast(existingInvite.status === 'accepted' 
+                    ? `${targetName} a acceptat deja invitația.` 
+                    : `${targetName} a fost deja invitat pe „${groupName}".`, 'error');
+                return;
+            }
+        }
+        
+        if (profileData.email) {
+            // Has email — create invitation via grup_invitations
+            const { data: newInvite, error: insertError } = await supabase
+                .from('grup_invitations')
+                .insert({
+                    grup_id: groupId,
+                    invited_email: profileData.email.toLowerCase(),
+                    invited_by: currentUser.id
+                })
+                .select('token')
+                .single();
+            
+            if (insertError) throw insertError;
+            
+            // Notify
+            if (typeof notifyAdmins === 'function') {
+                try {
+                    await notifyAdmins('join_request_admin_email', {
+                        user_name: targetName,
+                        user_email: profileData.email,
+                        group_name: groupName,
+                        group_id: groupId,
+                        invite_token: newInvite.token
+                    });
+                } catch (e) { console.warn('Notification failed:', e); }
+            }
+        } else {
+            // No email — insert as pending member directly
+            const { error: joinError } = await supabase
+                .from('grup_membri')
+                .insert({
+                    grup_id: groupId,
+                    user_id: targetUserId,
+                    status: 'pending',
+                    rol: 'membru'
+                });
+            
+            if (joinError) {
+                if (joinError.code === '23505') {
+                    showToast(`${targetName} are deja o cerere pentru „${groupName}".`, 'error');
+                } else {
+                    throw joinError;
+                }
+                return;
+            }
+        }
+        
+        showToast(`Invitație trimisă lui ${targetName} pe „${groupName}".`, 'success');
+        
+        // Hide dropdown
+        const dropdown = document.getElementById('group-select-dropdown');
+        if (dropdown) dropdown.classList.add('hidden');
+        
+        // Update button
+        const btn = document.getElementById('invite-to-group-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.style.background = '#e2e8f0';
+            btn.style.color = '#94a3b8';
+            btn.style.cursor = 'default';
+            document.getElementById('invite-to-group-text').textContent = 'Invitație trimisă';
+        }
+        
+    } catch (e) {
+        console.error('Error sending invite from profile:', e);
+        showToast('Eroare la trimiterea invitației.', 'error');
+    }
+}
+
+function showToast(msg, type) {
+    // Check if showToast already exists globally (from nav.js)
+    if (window._originalShowToast) { window._originalShowToast(msg, type); return; }
+    
+    const toast = document.createElement('div');
+    toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.75rem 1.5rem;border-radius:8px;color:white;font-size:0.875rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);`;
+    toast.style.background = type === 'error' ? '#dc2626' : '#059669';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+// Preserve original if exists
+if (typeof window.showToast === 'function') window._originalShowToast = window.showToast;
