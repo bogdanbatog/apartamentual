@@ -920,13 +920,12 @@ async function loadMyGroupsForInvite() {
         
         if (!myProfile || myProfile.account_type !== 'activ') return;
         
-        // Get groups where I'm admin
+        // Get ALL groups where I'm an active member (not just admin)
         const { data: memberships } = await supabase
             .from('grup_membri')
-            .select('grup_id, rol')
+            .select('grup_id')
             .eq('user_id', currentUser.id)
-            .eq('status', 'activ')
-            .eq('rol', 'admin');
+            .eq('status', 'activ');
         
         if (memberships && memberships.length > 0) {
             const groupIds = memberships.map(m => m.grup_id);
@@ -941,18 +940,14 @@ async function loadMyGroupsForInvite() {
             myGroupsForInvite = [];
         }
         
-        // Show the button
+        // Always show the "Creează un grup" button
         const container = document.getElementById('invite-to-group-container');
-        const textEl = document.getElementById('invite-to-group-text');
-        if (container) {
-            container.classList.remove('hidden');
-            if (myGroupsForInvite.length === 0) {
-                textEl.textContent = 'Creează un grup și invită-l';
-            } else if (myGroupsForInvite.length === 1) {
-                textEl.textContent = `Invită pe „${myGroupsForInvite[0].nume}"`;
-            } else {
-                textEl.textContent = 'Invită pe grupul tău';
-            }
+        if (container) container.classList.remove('hidden');
+        
+        // Show "Invită pe grupurile tale" button only if user has groups
+        const existingContainer = document.getElementById('invite-existing-group-container');
+        if (existingContainer && myGroupsForInvite.length > 0) {
+            existingContainer.classList.remove('hidden');
         }
     } catch (e) {
         console.error('Error loading groups for invite:', e);
@@ -960,19 +955,11 @@ async function loadMyGroupsForInvite() {
 }
 
 async function handleInviteToGroup() {
-    if (myGroupsForInvite.length === 0) {
-        // No groups - redirect to create group
-        window.location.href = 'grup-nou.html';
-        return;
-    }
-    
-    if (myGroupsForInvite.length === 1) {
-        // Only one group - invite directly
-        await sendProfileInvite(myGroupsForInvite[0].id, myGroupsForInvite[0].nume);
-        return;
-    }
-    
-    // Multiple groups - show dropdown
+    // "Creează un grup și invită" always goes to create
+    window.location.href = 'grup-nou.html';
+}
+
+function toggleExistingGroupDropdown() {
     const dropdown = document.getElementById('group-select-dropdown');
     const list = document.getElementById('group-select-list');
     
