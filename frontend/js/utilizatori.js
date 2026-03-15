@@ -203,6 +203,11 @@ async function loadUsers() {
             zones: user.user_preferred_zones?.map(uz => uz.zones).filter(Boolean) || []
         }));
         
+        // Exclude current user from the list
+        if (currentUser) {
+            allUsers = allUsers.filter(u => u.user_id !== currentUser.id);
+        }
+        
         applyFilters();
         
     } catch (e) {
