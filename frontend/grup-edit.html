@@ -448,7 +448,7 @@
             
             <!-- Zone preferate (multi-select) -->
             <div class="form-group" id="zone-group" style="display: none;">
-                <label>Zone preferate <span class="hint-inline">(max 10)</span></label>
+                <label>Zone preferate</label>
                 <div id="selected-zones-display" class="selected-zones-display" style="display: none;">
                     <p class="hint" style="margin-bottom: 0.25rem; font-weight: 500; color: #475569;">Selectate (<span id="zone-count">0</span>):</p>
                     <div id="selected-zones-chips"></div>
@@ -664,7 +664,7 @@ async function populateZoneCheckboxes(orasName) {
 function toggleZone(el) {
     const zId = parseInt(el.dataset.zoneId), idx = selectedZones.indexOf(zId);
     if (idx > -1) { selectedZones.splice(idx, 1); el.classList.remove('selected'); }
-    else { if (selectedZones.length >= 10) { showToast('Max 10 zone.', 'error'); return; } selectedZones.push(zId); el.classList.add('selected'); }
+    else { selectedZones.push(zId); el.classList.add('selected'); }
     updateSelectedZonesDisplay();
 }
 
