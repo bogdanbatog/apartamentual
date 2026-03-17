@@ -838,6 +838,17 @@ async function handleSubmit(e) {
         
         showToast('Grupul a fost creat cu succes!', 'success');
         
+        // Notify admins
+        if (typeof notifyAdmins === 'function') {
+            notifyAdmins('group_created', {
+                group_name: nume,
+                group_id: data.id,
+                created_by: currentUser.email || currentUser.id,
+                oras: oras,
+                max_membri: max_membri
+            });
+        }
+        
         // Redirect to group page
         setTimeout(() => {
             window.location.href = `grup-details.html?id=${data.id}`;
