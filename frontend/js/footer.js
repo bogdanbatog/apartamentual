@@ -8,6 +8,7 @@ function createFooter() {
                 <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 0.75rem;">
                     <a href="/termeni.html" style="color: #64748b; text-decoration: none;">Termeni</a>
                     <a href="/gdpr.html" style="color: #64748b; text-decoration: none;">GDPR</a>
+                    <a href="/contact.html#faq-container" style="color: #64748b; text-decoration: none;">FAQ</a>
                     <a href="/contact.html" style="color: #64748b; text-decoration: none;">Contact</a>
                 </div>
                 <p style="color: #94a3b8; margin: 0;">© ${currentYear} ApartamenTUal</p>
