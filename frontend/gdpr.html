@@ -314,5 +314,16 @@
     <script src="js/login-modal.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
+    <script>
+        // Render obfuscated emails
+        document.querySelectorAll('.js-email').forEach(el => {
+            const u = el.dataset.u;
+            const d = el.dataset.d;
+            if (u && d) {
+                const addr = u + '@' + d;
+                el.innerHTML = '<a href="mailto:' + addr + '" class="text-blue-600 hover:underline">' + addr + '</a>';
+            }
+        });
+    </script>
 </body>
 </html>
