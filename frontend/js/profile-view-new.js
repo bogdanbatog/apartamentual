@@ -302,6 +302,21 @@ function renderBasicInfo() {
 }
 
 async function renderActiveUserContent() {
+    // Dynamic section titles based on own vs other profile
+    const firstName = (profileData.pseudonym || 'Utilizator').split(' ')[0];
+    
+    const terrainsTitle = document.getElementById('terrains-section-title');
+    const terrainsEmpty = document.getElementById('terrains-empty-text');
+    const groupsTitle = document.getElementById('groups-section-title');
+    const groupsEmpty = document.getElementById('groups-empty-text');
+    
+    if (!isOwnProfile) {
+        if (terrainsTitle) terrainsTitle.textContent = `Terenurile preferate ale lui ${firstName}`;
+        if (terrainsEmpty) terrainsEmpty.textContent = `${firstName} nu are terenuri favorite încă.`;
+        if (groupsTitle) groupsTitle.textContent = `Grupurile lui ${firstName}`;
+        if (groupsEmpty) groupsEmpty.textContent = `${firstName} nu face parte din niciun grup încă.`;
+    }
+    
     // Apartment preferences
     const roomsEl = document.getElementById('pref-rooms');
     roomsEl.textContent = profileData.preferred_rooms ? profileData.preferred_rooms + ' camere' : '-';
