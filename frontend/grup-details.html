@@ -956,6 +956,20 @@
             </div>
         </div>
         
+        <!-- Pending requests banner (shown to admin, right below header) -->
+        <div id="pendingBanner" style="display: none; margin-bottom: 1rem;">
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 1rem 1.25rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.25rem;">🔔</span>
+                        <span style="font-weight: 600; color: #92400e; font-size: 0.9375rem;">Cereri de alăturare</span>
+                        <span id="pendingBannerCount" style="background: #f97316; color: white; font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 10px;">0</span>
+                    </div>
+                </div>
+                <div id="pendingBannerList"></div>
+            </div>
+        </div>
+        
         <!-- Description -->
         <div class="section-card">
             <h2><i class="fas fa-info-circle"></i> Descriere</h2>
@@ -2686,13 +2700,47 @@ window.copyInviteLink = function() {
 function renderPendingRequests() {
     const section = document.getElementById('pendingRequestsSection');
     const list = document.getElementById('pendingRequestsList');
+    const banner = document.getElementById('pendingBanner');
+    const bannerList = document.getElementById('pendingBannerList');
+    const bannerCount = document.getElementById('pendingBannerCount');
     
     if (!pendingRequests || pendingRequests.length === 0) {
         section.style.display = 'none';
+        if (banner) banner.style.display = 'none';
         return;
     }
     
     section.style.display = 'block';
+    
+    // Also show the top banner for admin
+    if (banner && (isAdmin || isSuperAdmin)) {
+        banner.style.display = 'block';
+        bannerCount.textContent = pendingRequests.length;
+        
+        bannerList.innerHTML = pendingRequests.map(r => {
+            const name = r.profile?.pseudonym || 'Utilizator';
+            const initials = name.substring(0, 2).toUpperCase();
+            const time = formatDate(r.joined_at);
+            const email = r.profile?.email || '';
+            return `
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: white; border-radius: 8px; margin-bottom: 6px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: #92400e; flex-shrink: 0;">${initials}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <span style="font-weight: 600; font-size: 0.8125rem; color: #1e293b;">${escapeHtml(name)}</span>
+                        <span style="font-size: 0.75rem; color: #94a3b8; margin-left: 0.5rem;">Cerere din ${time}</span>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        <button onclick="approveRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 5px 10px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-check"></i> Acceptă
+                        </button>
+                        <button onclick="rejectRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
     
     list.innerHTML = pendingRequests.map(r => {
         const name = r.profile?.pseudonym || 'Utilizator';
