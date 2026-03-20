@@ -2438,6 +2438,10 @@ window.leaveGroup = async function() {
     if (!confirm('Sigur vrei să părăsești grupul?')) return;
     
     try {
+        // Get current user name before leaving
+        const { data: myProfile } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+        const myName = myProfile?.pseudonym || 'Un membru';
+        
         const { error } = await sb
             .from('grup_membri')
             .delete()
@@ -2445,6 +2449,29 @@ window.leaveGroup = async function() {
             .eq('user_id', currentUser.id);
         
         if (error) throw error;
+        
+        // Notify all remaining members + superadmin
+        try {
+            const remainingIds = members.map(m => m.user_id).filter(id => id !== currentUser.id);
+            if (remainingIds.length > 0) {
+                const { data: profs } = await sb.from('profiles').select('email').in('user_id', remainingIds);
+                const emails = (profs || []).map(p => p.email).filter(Boolean);
+                for (const email of emails) {
+                    notifyAdmins('member_left', {
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id,
+                        user_name: myName,
+                        admin_email: email
+                    });
+                }
+            }
+            // Superadmin
+            notifyAdmins('member_left', {
+                group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                group_id: currentGroup.id,
+                user_name: myName
+            });
+        } catch(e) { console.warn('Leave notify failed:', e); }
         
         showToast('Ai părăsit grupul.', 'success');
         setTimeout(() => window.location.href = 'grupuri.html', 1000);
@@ -2487,6 +2514,30 @@ window.confirmLeaveAsAdmin = async function() {
         
         // Remove current user from group
         await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id).eq('user_id', currentUser.id);
+        
+        // Notify all remaining members + superadmin that admin left
+        try {
+            var { data: myProf } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+            var myLeaveName = myProf?.pseudonym || 'Adminul';
+            var remainingIds = members.map(m => m.user_id).filter(id => id !== currentUser.id);
+            if (remainingIds.length > 0) {
+                var { data: profs } = await sb.from('profiles').select('email').in('user_id', remainingIds);
+                var emails = (profs || []).map(p => p.email).filter(Boolean);
+                for (var em of emails) {
+                    notifyAdmins('member_left', {
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id,
+                        user_name: myLeaveName,
+                        admin_email: em
+                    });
+                }
+            }
+            notifyAdmins('member_left', {
+                group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                group_id: currentGroup.id,
+                user_name: myLeaveName
+            });
+        } catch(e) { console.warn('Leave notify failed:', e); }
         
         // Remove modal
         var modal = document.getElementById('transferAdminModal');
