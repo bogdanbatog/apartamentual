@@ -735,6 +735,36 @@ async function handleSubmit(e) {
         if (selectedTags.length) await sb.from('grup_tags').insert(selectedTags.map(t => ({ grup_id: groupId, tag_id: t })));
         
         showToast('Grupul a fost actualizat!', 'success');
+        
+        // Notify all group members about the edit
+        try {
+            const { data: membersList } = await sb
+                .from('grup_membri')
+                .select('user_id')
+                .eq('grup_id', groupId)
+                .eq('status', 'activ');
+            
+            if (membersList && membersList.length > 0) {
+                const memberIds = membersList.map(m => m.user_id).filter(id => id !== currentUser.id);
+                if (memberIds.length > 0) {
+                    const { data: memberProfiles } = await sb
+                        .from('profiles')
+                        .select('email')
+                        .in('user_id', memberIds);
+                    
+                    const emails = (memberProfiles || []).map(p => p.email).filter(Boolean);
+                    for (const email of emails) {
+                        notifyAdmins('group_updated', {
+                            group_name: nume,
+                            group_id: groupId,
+                            updated_by: currentUser.email || 'admin',
+                            admin_email: email
+                        });
+                    }
+                }
+            }
+        } catch (notifyErr) { console.warn('Member notify failed:', notifyErr); }
+        
         setTimeout(() => { window.location.href = `grup-details.html?id=${groupId}`; }, 1000);
     } catch (e) {
         showToast('Eroare: ' + e.message, 'error');
