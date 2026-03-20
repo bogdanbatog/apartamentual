@@ -405,6 +405,7 @@ async function fetchTerenDetails() {
 
         await displayTerenDetails(terenData, userProfile);
         renderGroupLikesSection();
+        loadInterestCounts(terenId);
         hideLoading();
         
     } catch (error) {
@@ -816,3 +817,66 @@ document.addEventListener('keydown', function(e) {
         closeAnalysisModal();
     }
 });
+
+// =====================================================
+// INTEREST COUNTS & NAVIGATION
+// =====================================================
+
+async function loadInterestCounts(terenId) {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return; // Only show for logged-in users
+        
+        // Check account type
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('account_type')
+            .eq('user_id', user.id)
+            .single();
+        
+        if (profile && profile.account_type === 'profesional') return; // Hide for agencies
+        
+        // Fetch user likes count
+        const { count: userLikesCount } = await supabase
+            .from('terenuri_likes')
+            .select('id', { count: 'exact', head: true })
+            .eq('teren_id', terenId);
+        
+        // Fetch group likes count
+        const { count: groupLikesCount } = await supabase
+            .from('terenuri_likes_grupuri')
+            .select('id', { count: 'exact', head: true })
+            .eq('teren_id', terenId);
+        
+        // Update UI
+        const container = document.getElementById('interest-buttons');
+        const usersCountEl = document.getElementById('interested-users-count');
+        const groupsCountEl = document.getElementById('interested-groups-count');
+        
+        if (container) {
+            container.style.display = 'block';
+            container.classList.remove('hidden');
+        }
+        if (usersCountEl) usersCountEl.textContent = userLikesCount || 0;
+        if (groupsCountEl) groupsCountEl.textContent = groupLikesCount || 0;
+        
+    } catch (e) {
+        console.warn('Could not load interest counts:', e);
+    }
+}
+
+window.viewInterestedUsersFromDetail = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const terenId = urlParams.get('id');
+    if (terenId) {
+        window.location.href = `utilizatori.html?teren=${terenId}`;
+    }
+};
+
+window.viewInterestedGroupsFromDetail = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const terenId = urlParams.get('id');
+    if (terenId) {
+        window.location.href = `grupuri.html?teren=${terenId}`;
+    }
+};
