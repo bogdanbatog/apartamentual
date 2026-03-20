@@ -179,6 +179,32 @@
                         <!-- Group Likes Section (populated by JS if user has groups) -->
                         <div id="group-likes-section" class="hidden mb-6"></div>
 
+                        <!-- Interest buttons: see who's interested -->
+                        <div id="interest-buttons" class="hidden mb-6" style="display: none;">
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <button id="btn-view-interested-users" onclick="viewInterestedUsersFromDetail()"
+                                        style="display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #334155; transition: all 0.15s;"
+                                        onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316'"
+                                        onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#334155'">
+                                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    <span>Vezi utilizatorii interesați</span>
+                                    <span id="interested-users-count" style="background: #f97316; color: white; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 10px; min-width: 20px; text-align: center;">0</span>
+                                </button>
+                                <button id="btn-view-interested-groups" onclick="viewInterestedGroupsFromDetail()"
+                                        style="display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #334155; transition: all 0.15s;"
+                                        onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316'"
+                                        onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#334155'">
+                                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    <span>Vezi grupurile interesate</span>
+                                    <span id="interested-groups-count" style="background: #f97316; color: white; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 10px; min-width: 20px; text-align: center;">0</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div id="action-buttons" class="flex gap-3 hidden">
                         </div>
