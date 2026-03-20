@@ -2624,6 +2624,19 @@ async function sendInvitation() {
         const grupName = currentGroup.nume || 'un grup';
         const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}&grup=${encodeURIComponent(grupName)}`;
         
+        // Send email automatically to the invited person
+        try {
+            if (typeof notifyAdmins === 'function') {
+                notifyAdmins('invitation_sent', {
+                    group_name: grupName,
+                    group_id: currentGroup.id,
+                    invite_link: inviteLink,
+                    invited_by: currentUser.email || 'un membru',
+                    admin_email: email
+                });
+            }
+        } catch (notifyErr) { console.warn('Invite email failed:', notifyErr); }
+        
         // Show success with link to copy
         closeInviteModal();
         showInviteLinkModal(inviteLink, email, grupName);
@@ -3073,6 +3086,36 @@ window.confirmKickVote = async function() {
         
         if (error) throw error;
         
+        // Notify all group members about the vote + superadmin
+        try {
+            const targetName = document.getElementById('kickTargetName').textContent;
+            const memberIds = members.map(m => m.user_id);
+            if (memberIds.length > 0) {
+                const { data: memberProfiles } = await sb
+                    .from('profiles')
+                    .select('user_id, email')
+                    .in('user_id', memberIds);
+                
+                const emails = (memberProfiles || []).map(p => p.email).filter(Boolean);
+                for (const email of emails) {
+                    notifyAdmins('kick_vote_initiated', {
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id,
+                        target_name: targetName,
+                        reason: reason || 'Nespecificat',
+                        admin_email: email
+                    });
+                }
+            }
+            // Also notify superadmin
+            notifyAdmins('kick_vote_initiated', {
+                group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                group_id: currentGroup.id,
+                target_name: targetName,
+                reason: reason || 'Nespecificat'
+            });
+        } catch (notifyErr) { console.warn('Kick vote notify failed:', notifyErr); }
+        
         showToast('Votul de excludere a fost inițiat!', 'success');
         closeKickModal();
         setTimeout(() => window.location.reload(), 1000);
@@ -3157,6 +3200,41 @@ async function checkAndResolveVote(voteId) {
                     .update({ status: 'passed', resolved_at: new Date().toISOString() })
                     .eq('id', voteId);
                 
+                // Notify all members + excluded user + superadmin about the result
+                try {
+                    const { data: targetProfile } = await sb.from('profiles').select('email, pseudonym').eq('user_id', voteData.target_user_id).single();
+                    const targetName = targetProfile?.pseudonym || 'Membru';
+                    const allMemberIds = members.map(m => m.user_id);
+                    const { data: allProfiles } = await sb.from('profiles').select('email').in('user_id', allMemberIds);
+                    const allEmails = (allProfiles || []).map(p => p.email).filter(Boolean);
+                    
+                    // Notify members
+                    for (const email of allEmails) {
+                        notifyAdmins('kick_vote_result', {
+                            group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                            group_id: currentGroup.id,
+                            target_name: targetName,
+                            result: 'exclus',
+                            admin_email: email
+                        });
+                    }
+                    // Notify excluded user
+                    if (targetProfile?.email) {
+                        notifyAdmins('member_removed', {
+                            group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                            group_id: currentGroup.id,
+                            admin_email: targetProfile.email
+                        });
+                    }
+                    // Notify superadmin
+                    notifyAdmins('kick_vote_result', {
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id,
+                        target_name: targetName,
+                        result: 'exclus'
+                    });
+                } catch (notifyErr) { console.warn('Vote result notify failed:', notifyErr); }
+                
                 showToast('Votul a trecut. Membrul a fost exclus.', 'success');
             }
         }
@@ -3170,6 +3248,33 @@ async function checkAndResolveVote(voteId) {
                 .from('grup_kick_votes')
                 .update({ status: 'failed', resolved_at: new Date().toISOString() })
                 .eq('id', voteId);
+            
+            // Notify all members about vote result (member stays)
+            try {
+                const { data: voteInfo } = await sb.from('grup_kick_votes').select('target_user_id').eq('id', voteId).single();
+                const { data: targetProfile } = await sb.from('profiles').select('pseudonym').eq('user_id', voteInfo?.target_user_id).single();
+                const targetName = targetProfile?.pseudonym || 'Membru';
+                const allMemberIds = members.map(m => m.user_id);
+                const { data: allProfiles } = await sb.from('profiles').select('email').in('user_id', allMemberIds);
+                const allEmails = (allProfiles || []).map(p => p.email).filter(Boolean);
+                
+                for (const email of allEmails) {
+                    notifyAdmins('kick_vote_result', {
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id,
+                        target_name: targetName,
+                        result: 'rămâne în grup',
+                        admin_email: email
+                    });
+                }
+                // Notify superadmin
+                notifyAdmins('kick_vote_result', {
+                    group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                    group_id: currentGroup.id,
+                    target_name: targetName,
+                    result: 'rămâne în grup'
+                });
+            } catch (notifyErr) { console.warn('Vote result notify failed:', notifyErr); }
         }
         
     } catch (e) {
