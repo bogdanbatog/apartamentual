@@ -1078,56 +1078,32 @@
 
 <!-- ═══════════════ INVITE MODAL ═══════════════ -->
 <div id="inviteModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 540px;">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h2><i class="fas fa-user-plus"></i> Invită în grup</h2>
             <button class="modal-close" onclick="closeInviteModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <!-- Tab switcher -->
-            <div class="invite-tabs">
-                <button class="invite-tab active" onclick="switchInviteTab('platform')" id="tabPlatform">
-                    <i class="fas fa-users"></i> Utilizatori platformă
-                </button>
-                <button class="invite-tab" onclick="switchInviteTab('email')" id="tabEmail">
-                    <i class="fas fa-envelope"></i> Invită prin email
-                </button>
-            </div>
-
-            <!-- Tab: Platform users -->
-            <div id="inviteTabPlatform" class="invite-tab-content">
-                <div style="margin-bottom: 0.75rem;">
-                    <input type="text" id="userSearchInput" placeholder="Caută după pseudonim..." 
-                           oninput="searchPlatformUsers()"
-                           style="width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; box-sizing: border-box;">
-                </div>
-                <div id="platformUsersList" style="max-height: 280px; overflow-y: auto;">
-                    <p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;">Scrie cel puțin 2 caractere pentru a căuta...</p>
-                </div>
-            </div>
-
-            <!-- Tab: Email invite -->
-            <div id="inviteTabEmail" class="invite-tab-content" style="display: none;">
-                <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.875rem;">Trimite o invitație prin email unei persoane care nu e încă pe platformă.</p>
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #1e293b;">Email</label>
-                    <input type="email" id="inviteEmail" placeholder="exemplu@email.com" 
-                           style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9375rem; box-sizing: border-box;">
-                    <p id="inviteError" style="color: #dc2626; font-size: 0.8125rem; margin-top: 0.25rem; display: none;"></p>
-                </div>
-                <button class="btn-action btn-primary" style="width: 100%;" onclick="sendInvitation()">
-                    <i class="fas fa-paper-plane"></i> Trimite invitația
-                </button>
+            <p style="color: #64748b; margin-bottom: 1rem;">Introdu adresa de email a persoanei pe care vrei s-o inviți. Se va deschide clientul tău de email cu un link de invitație pre-completat.</p>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #1e293b;">Email</label>
+                <input type="email" id="inviteEmail" placeholder="exemplu@email.com" 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9375rem; box-sizing: border-box;">
+                <p id="inviteError" style="color: #dc2626; font-size: 0.8125rem; margin-top: 0.25rem; display: none;"></p>
             </div>
 
             <!-- Pending invitations list -->
-            <div id="pendingInvites" style="display: none; margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem;">
+            <div id="pendingInvites" style="display: none; margin-bottom: 1rem;">
                 <h4 style="font-size: 0.8125rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Invitații trimise</h4>
                 <div id="pendingInvitesList"></div>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn-action btn-secondary" onclick="closeInviteModal()">Închide</button>
+            <button class="btn-action btn-secondary" onclick="closeInviteModal()">Anulează</button>
+            <button class="btn-action btn-primary" id="btnSendInvite" onclick="sendInvitation()">
+                <i class="fas fa-paper-plane"></i> Trimite invitația
+            </button>
         </div>
     </div>
 </div>
@@ -1200,83 +1176,6 @@
     }
     .invite-pending { background: #fef3c7; color: #92400e; }
     .invite-accepted { background: #d1fae5; color: #065f46; }
-
-    /* Invite tabs */
-    .invite-tabs {
-        display: flex;
-        gap: 0.25rem;
-        margin-bottom: 1rem;
-        background: #f1f5f9;
-        border-radius: 8px;
-        padding: 0.25rem;
-    }
-    .invite-tab {
-        flex: 1;
-        padding: 0.5rem 0.75rem;
-        border: none;
-        background: transparent;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.8125rem;
-        font-weight: 500;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.375rem;
-        transition: all 0.2s;
-    }
-    .invite-tab:hover { color: #334155; }
-    .invite-tab.active {
-        background: white;
-        color: #1e293b;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    /* Platform user list item */
-    .platform-user-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.625rem 0.75rem;
-        border-radius: 8px;
-        transition: background 0.15s;
-        cursor: default;
-    }
-    .platform-user-item:hover { background: #f8fafc; }
-    .platform-user-avatar {
-        width: 36px; height: 36px;
-        border-radius: 50%;
-        background: #e0e7ff;
-        color: #4f46e5;
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 600; font-size: 0.875rem;
-        flex-shrink: 0;
-    }
-    .platform-user-info { flex: 1; min-width: 0; }
-    .platform-user-name {
-        font-weight: 500; font-size: 0.875rem; color: #1e293b;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .platform-user-meta {
-        font-size: 0.75rem; color: #94a3b8;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .platform-user-match {
-        font-size: 0.6875rem; color: #059669; font-weight: 500;
-    }
-    .btn-invite-user {
-        padding: 0.375rem 0.75rem;
-        background: #f97316; color: white;
-        border: none; border-radius: 6px;
-        font-size: 0.8125rem; font-weight: 500;
-        cursor: pointer; white-space: nowrap;
-        transition: background 0.15s;
-    }
-    .btn-invite-user:hover { background: #ea580c; }
-    .btn-invite-user:disabled {
-        background: #e2e8f0; color: #94a3b8; cursor: default;
-    }
 </style>
 
 <!-- ═══════════════ TOAST ═══════════════ -->
@@ -2415,7 +2314,9 @@ window.approveRequest = async function(memberId, userName, userEmail) {
         if (typeof notifyAdmins === 'function') {
             notifyAdmins('member_approved', {
                 group_name: currentGroup.name || currentGroup.nume || 'Grup',
-                user_email: userEmail || userName
+                group_id: currentGroup.id,
+                user_email: userEmail || userName,
+                admin_email: userEmail
             });
         }
         
@@ -2444,7 +2345,9 @@ window.rejectRequest = async function(memberId, userName, userEmail) {
         if (userEmail && typeof notifyAdmins === 'function') {
             notifyAdmins('member_rejected', {
                 group_name: currentGroup.name || currentGroup.nume || 'Grup',
-                user_email: userEmail
+                group_id: currentGroup.id,
+                user_email: userEmail,
+                admin_email: userEmail
             });
         }
         
@@ -2588,220 +2491,8 @@ window.inviteMember = function() {
     document.getElementById('inviteModal').style.display = 'flex';
     document.getElementById('inviteEmail').value = '';
     document.getElementById('inviteError').style.display = 'none';
-    document.getElementById('userSearchInput').value = '';
-    document.getElementById('platformUsersList').innerHTML = '<p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;">Scrie cel puțin 2 caractere pentru a căuta...</p>';
-    switchInviteTab('platform');
     loadPendingInvites();
 };
-
-function switchInviteTab(tab) {
-    document.getElementById('inviteTabPlatform').style.display = tab === 'platform' ? 'block' : 'none';
-    document.getElementById('inviteTabEmail').style.display = tab === 'email' ? 'block' : 'none';
-    document.getElementById('tabPlatform').classList.toggle('active', tab === 'platform');
-    document.getElementById('tabEmail').classList.toggle('active', tab === 'email');
-    if (tab === 'platform') document.getElementById('userSearchInput').focus();
-    if (tab === 'email') document.getElementById('inviteEmail').focus();
-}
-
-let searchTimeout = null;
-async function searchPlatformUsers() {
-    const query = document.getElementById('userSearchInput').value.trim();
-    const container = document.getElementById('platformUsersList');
-    
-    if (query.length < 2) {
-        container.innerHTML = '<p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;">Scrie cel puțin 2 caractere pentru a căuta...</p>';
-        return;
-    }
-    
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(async () => {
-        container.innerHTML = '<p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;"><i class="fas fa-spinner fa-spin"></i> Se caută...</p>';
-        
-        try {
-            // Get current group members to exclude them
-            const { data: members } = await sb
-                .from('grup_membri')
-                .select('user_id')
-                .eq('grup_id', currentGroup.id)
-                .eq('status', 'activ');
-            const memberIds = (members || []).map(m => m.user_id);
-            
-            // Get pending invitations to mark them
-            const { data: pendingInvs } = await sb
-                .from('grup_invitations')
-                .select('invited_email')
-                .eq('grup_id', currentGroup.id)
-                .eq('status', 'pending');
-            const pendingEmails = (pendingInvs || []).map(i => i.invited_email);
-            
-            // Search active users by pseudonym
-            const { data: users, error } = await sb
-                .from('profiles')
-                .select('user_id, pseudonym, profession, email, account_type, preferred_city_id')
-                .eq('account_type', 'activ')
-                .eq('account_status', 'active')
-                .ilike('pseudonym', `%${query}%`)
-                .limit(20);
-            
-            if (error) throw error;
-            
-            // Filter out current group members and self
-            const filtered = (users || []).filter(u => 
-                u.user_id !== currentUser.id && !memberIds.includes(u.user_id)
-            );
-            
-            if (filtered.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun utilizator găsit.</p>';
-                return;
-            }
-            
-            // Load zones for matching
-            const { data: groupZones } = await sb
-                .from('grup_preferred_zones')
-                .select('zone_id')
-                .eq('grup_id', currentGroup.id);
-            const groupZoneIds = (groupZones || []).map(z => z.zone_id);
-            
-            const { data: groupTags } = await sb
-                .from('grup_tags')
-                .select('tag_id')
-                .eq('grup_id', currentGroup.id);
-            const groupTagIds = (groupTags || []).map(t => t.tag_id);
-            
-            // For each user, get zones + tags for matching
-            const userIds = filtered.map(u => u.user_id);
-            const { data: userZones } = await sb
-                .from('user_preferred_zones')
-                .select('user_id, zone_id')
-                .in('user_id', userIds);
-            const { data: userTags } = await sb
-                .from('user_tags')
-                .select('user_id, tag_id')
-                .in('user_id', userIds);
-            
-            container.innerHTML = filtered.map(user => {
-                const uZones = (userZones || []).filter(z => z.user_id === user.user_id).map(z => z.zone_id);
-                const uTags = (userTags || []).filter(t => t.user_id === user.user_id).map(t => t.tag_id);
-                const commonZones = uZones.filter(z => groupZoneIds.includes(z)).length;
-                const commonTags = uTags.filter(t => groupTagIds.includes(t)).length;
-                const isPending = user.email && pendingEmails.includes(user.email.toLowerCase());
-                
-                const name = user.pseudonym || 'Utilizator';
-                const initial = name.charAt(0).toUpperCase();
-                const profession = user.profession ? user.profession : '';
-                
-                let matchText = '';
-                if (commonZones > 0 || commonTags > 0) {
-                    const parts = [];
-                    if (commonZones > 0) parts.push(`${commonZones} zone`);
-                    if (commonTags > 0) parts.push(`${commonTags} interese`);
-                    matchText = `<div class="platform-user-match">✓ ${parts.join(', ')} comune</div>`;
-                }
-                
-                const btnHtml = isPending
-                    ? `<button class="btn-invite-user" disabled>Invitat</button>`
-                    : `<button class="btn-invite-user" onclick="invitePlatformUser('${user.user_id}', '${escapeHtml(name)}')">Invită</button>`;
-                
-                return `
-                    <div class="platform-user-item">
-                        <div class="platform-user-avatar">${initial}</div>
-                        <div class="platform-user-info">
-                            <div class="platform-user-name">${escapeHtml(name)}</div>
-                            ${profession ? `<div class="platform-user-meta">${escapeHtml(profession)}</div>` : ''}
-                            ${matchText}
-                        </div>
-                        ${btnHtml}
-                    </div>
-                `;
-            }).join('');
-            
-        } catch (e) {
-            console.error('Error searching users:', e);
-            container.innerHTML = '<p style="color: #dc2626; font-size: 0.875rem; text-align: center; padding: 1rem;">Eroare la căutare.</p>';
-        }
-    }, 300);
-}
-
-async function invitePlatformUser(userId, userName) {
-    try {
-        // Get user email
-        const { data: profile } = await sb
-            .from('profiles')
-            .select('email')
-            .eq('user_id', userId)
-            .single();
-        
-        if (!profile || !profile.email) {
-            // User has no email - create a direct join request instead
-            const { error: joinError } = await sb
-                .from('grup_membri')
-                .insert({
-                    grup_id: currentGroup.id,
-                    user_id: userId,
-                    status: 'pending',
-                    rol: 'membru'
-                });
-            
-            if (joinError) {
-                if (joinError.code === '23505') {
-                    showToast('Această persoană are deja o cerere pentru acest grup.', 'error');
-                } else {
-                    throw joinError;
-                }
-                return;
-            }
-            showToast(`Invitație trimisă lui ${userName}.`, 'success');
-            // Refresh the search results
-            searchPlatformUsers();
-            return;
-        }
-        
-        // Has email - create invitation via grup_invitations
-        const { data: existing } = await sb
-            .from('grup_invitations')
-            .select('id, status')
-            .eq('grup_id', currentGroup.id)
-            .eq('invited_email', profile.email.toLowerCase())
-            .in('status', ['pending', 'accepted'])
-            .maybeSingle();
-        
-        if (existing) {
-            showToast(existing.status === 'accepted' ? 'Persoana a acceptat deja invitația.' : 'Invitația a fost deja trimisă.', 'error');
-            return;
-        }
-        
-        const { data: newInvite, error: insertError } = await sb
-            .from('grup_invitations')
-            .insert({
-                grup_id: currentGroup.id,
-                invited_email: profile.email.toLowerCase(),
-                invited_by: currentUser.id
-            })
-            .select('token')
-            .single();
-        
-        if (insertError) throw insertError;
-        
-        // Notify via edge function
-        try {
-            await notifyAdmins('join_request_admin_email', {
-                user_name: userName,
-                user_email: profile.email,
-                group_name: currentGroup.nume,
-                group_id: currentGroup.id,
-                invite_token: newInvite.token
-            });
-        } catch (e) { console.warn('Notification failed:', e); }
-        
-        showToast(`Invitație trimisă lui ${userName}.`, 'success');
-        searchPlatformUsers();
-        loadPendingInvites();
-        
-    } catch (e) {
-        console.error('Error inviting user:', e);
-        showToast('Eroare la trimiterea invitației.', 'error');
-    }
-}
 
 function closeInviteModal() {
     document.getElementById('inviteModal').style.display = 'none';
