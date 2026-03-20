@@ -48,6 +48,7 @@
     </div>
 
     <script src="js/supabase-config.js"></script>
+    <script src="js/nav.js"></script>
     <script>
     var allUsers = [];
     var currentFilter = 'all';
@@ -150,6 +151,19 @@
         if (error) { alert('Eroare: ' + error.message); return; }
         var u = allUsers.find(function(x) { return x.user_id === userId; });
         if (u) { u.suspended_until = suspendDate.toISOString(); u.account_status = 'suspended'; }
+        
+        // Notify user by email
+        try {
+            var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
+            if (prof && prof.email && typeof notifyAdmins === 'function') {
+                notifyAdmins('account_suspended', {
+                    user_name: name,
+                    suspended_until: suspendDate.toLocaleDateString('ro-RO'),
+                    admin_email: prof.email
+                });
+            }
+        } catch(e) { console.warn('Suspend notify failed:', e); }
+        
         renderTable();
     };
 
@@ -161,17 +175,48 @@
         if (error) { alert('Eroare: ' + error.message); return; }
         var u = allUsers.find(function(x) { return x.user_id === userId; });
         if (u) { u.suspended_until = null; u.account_status = 'active'; }
+        
+        // Notify user by email
+        try {
+            var { data: prof } = await sb.from('profiles').select('email, pseudonym').eq('user_id', userId).single();
+            if (prof && prof.email && typeof notifyAdmins === 'function') {
+                notifyAdmins('account_reactivated', {
+                    user_name: prof.pseudonym || 'Utilizator',
+                    admin_email: prof.email
+                });
+            }
+        } catch(e) { console.warn('Unsuspend notify failed:', e); }
+        
         renderTable();
     };
 
     window.deleteUser = async function(userId, name) {
         if (!confirm('Sigur vrei să ștergi contul „' + name + '"? Utilizatorul nu va mai putea accesa platforma.')) return;
+        
+        // Get email BEFORE marking as deleted
+        var userEmail = null;
+        try {
+            var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
+            userEmail = prof?.email;
+        } catch(e) {}
+        
         var { error } = await sb.from('profiles').update({
             account_status: 'deleted'
         }).eq('user_id', userId);
         if (error) { alert('Eroare: ' + error.message); return; }
         var u = allUsers.find(function(x) { return x.user_id === userId; });
         if (u) u.account_status = 'deleted';
+        
+        // Notify user by email
+        if (userEmail && typeof notifyAdmins === 'function') {
+            try {
+                notifyAdmins('account_deleted', {
+                    user_name: name,
+                    admin_email: userEmail
+                });
+            } catch(e) { console.warn('Delete notify failed:', e); }
+        }
+        
         renderTable();
     };
 
