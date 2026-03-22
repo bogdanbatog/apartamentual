@@ -1141,12 +1141,6 @@ async function sendProfileInvite(groupId, groupName) {
         showToast('Eroare la trimiterea invitației.', 'error');
     }
 }
-        
-    } catch (e) {
-        console.error('Error sending invite from profile:', e);
-        showToast('Eroare la trimiterea invitației.', 'error');
-    }
-}
 
 function showToast(msg, type) {
     // Check if showToast already exists globally (from nav.js)
