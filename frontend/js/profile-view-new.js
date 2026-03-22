@@ -987,16 +987,25 @@ function toggleExistingGroupDropdown() {
         return;
     }
     
-    list.innerHTML = myGroupsForInvite.map(g => `
-        <button onclick="sendProfileInvite('${g.id}', '${g.nume.replace(/'/g, "\\'")}')" 
+    list.innerHTML = myGroupsForInvite.map((g, i) => `
+        <button class="group-invite-btn" data-index="${i}"
                 style="display: block; width: 100%; text-align: left; padding: 0.5rem 0.75rem; 
                        border: none; background: none; border-radius: 6px; cursor: pointer; 
                        font-size: 0.875rem; color: #1e293b; transition: background 0.15s;"
                 onmouseover="this.style.background='#f1f5f9'" 
                 onmouseout="this.style.background='none'">
-            ${g.nume}
+            ${escapeHtml(g.nume)}
         </button>
     `).join('');
+    
+    // Attach click handlers
+    list.querySelectorAll('.group-invite-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.index);
+            const g = myGroupsForInvite[idx];
+            if (g) sendProfileInvite(g.id, g.nume);
+        });
+    });
     
     dropdown.classList.remove('hidden');
 }
@@ -1004,6 +1013,7 @@ function toggleExistingGroupDropdown() {
 async function sendProfileInvite(groupId, groupName) {
     const targetUserId = profileData.user_id;
     const targetName = profileData.pseudonym || 'Utilizator';
+    const targetEmail = profileData.email;
     
     try {
         // Check if already a member
@@ -1019,31 +1029,31 @@ async function sendProfileInvite(groupId, groupName) {
             return;
         }
         
-        // Check if already invited via email
-        if (profileData.email) {
+        // Check if already invited
+        if (targetEmail) {
             const { data: existingInvite } = await supabase
                 .from('grup_invitations')
                 .select('id, status')
                 .eq('grup_id', groupId)
-                .eq('invited_email', profileData.email.toLowerCase())
+                .eq('invited_email', targetEmail.toLowerCase())
                 .in('status', ['pending', 'accepted'])
                 .maybeSingle();
             
             if (existingInvite) {
                 showToast(existingInvite.status === 'accepted' 
                     ? `${targetName} a acceptat deja invitația.` 
-                    : `${targetName} a fost deja invitat pe „${groupName}".`, 'error');
+                    : `${targetName} a fost deja invitat.`, 'error');
                 return;
             }
         }
         
-        if (profileData.email) {
-            // Has email — create invitation via grup_invitations
+        if (targetEmail) {
+            // Create invitation with token
             const { data: newInvite, error: insertError } = await supabase
                 .from('grup_invitations')
                 .insert({
                     grup_id: groupId,
-                    invited_email: profileData.email.toLowerCase(),
+                    invited_email: targetEmail.toLowerCase(),
                     invited_by: currentUser.id
                 })
                 .select('token')
@@ -1051,20 +1061,40 @@ async function sendProfileInvite(groupId, groupName) {
             
             if (insertError) throw insertError;
             
-            // Notify
+            // Build invite link
+            const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}&grup=${encodeURIComponent(groupName)}`;
+            
+            // Get inviter name
+            const { data: myProf } = await supabase.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+            const myName = myProf?.pseudonym || 'Un membru';
+            
+            // 1. Send email to the invited person
             if (typeof notifyAdmins === 'function') {
-                try {
-                    await notifyAdmins('join_request_admin_email', {
-                        user_name: targetName,
-                        user_email: profileData.email,
+                notifyAdmins('invitation_sent', {
+                    group_name: groupName,
+                    group_id: groupId,
+                    invite_link: inviteLink,
+                    invited_by: myName,
+                    admin_email: targetEmail
+                });
+            }
+            
+            // 2. Notify group admin that a member invited someone
+            const { data: groupData } = await supabase.from('grupuri').select('admin_id').eq('id', groupId).single();
+            if (groupData && groupData.admin_id) {
+                const { data: adminProf } = await supabase.from('profiles').select('email').eq('user_id', groupData.admin_id).single();
+                if (adminProf && adminProf.email && typeof notifyAdmins === 'function') {
+                    notifyAdmins('member_invited_someone', {
                         group_name: groupName,
                         group_id: groupId,
-                        invite_token: newInvite.token
+                        invited_name: targetName,
+                        invited_by: myName,
+                        admin_email: adminProf.email
                     });
-                } catch (e) { console.warn('Notification failed:', e); }
+                }
             }
         } else {
-            // No email — insert as pending member directly
+            // No email — create pending member, notify admin
             const { error: joinError } = await supabase
                 .from('grup_membri')
                 .insert({
@@ -1082,6 +1112,22 @@ async function sendProfileInvite(groupId, groupName) {
                 }
                 return;
             }
+            
+            // Notify group admin
+            const { data: groupData } = await supabase.from('grupuri').select('admin_id').eq('id', groupId).single();
+            if (groupData && groupData.admin_id) {
+                const { data: adminProf } = await supabase.from('profiles').select('email').eq('user_id', groupData.admin_id).single();
+                const { data: myProf } = await supabase.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+                if (adminProf && adminProf.email && typeof notifyAdmins === 'function') {
+                    notifyAdmins('member_invited_someone', {
+                        group_name: groupName,
+                        group_id: groupId,
+                        invited_name: targetName,
+                        invited_by: myProf?.pseudonym || 'Un membru',
+                        admin_email: adminProf.email
+                    });
+                }
+            }
         }
         
         showToast(`Invitație trimisă lui ${targetName} pe „${groupName}".`, 'success');
@@ -1090,15 +1136,11 @@ async function sendProfileInvite(groupId, groupName) {
         const dropdown = document.getElementById('group-select-dropdown');
         if (dropdown) dropdown.classList.add('hidden');
         
-        // Update button
-        const btn = document.getElementById('invite-to-group-btn');
-        if (btn) {
-            btn.disabled = true;
-            btn.style.background = '#e2e8f0';
-            btn.style.color = '#94a3b8';
-            btn.style.cursor = 'default';
-            document.getElementById('invite-to-group-text').textContent = 'Invitație trimisă';
-        }
+    } catch (e) {
+        console.error('Error sending invite from profile:', e);
+        showToast('Eroare la trimiterea invitației.', 'error');
+    }
+}
         
     } catch (e) {
         console.error('Error sending invite from profile:', e);
