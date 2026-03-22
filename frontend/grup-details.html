@@ -2759,19 +2759,16 @@ window.copyInviteLink = function() {
 };
 
 function renderPendingRequests() {
-    const section = document.getElementById('pendingRequestsSection');
-    const list = document.getElementById('pendingRequestsList');
     const banner = document.getElementById('pendingBanner');
     const bannerList = document.getElementById('pendingBannerList');
     const bannerCount = document.getElementById('pendingBannerCount');
     
     if (!pendingRequests || pendingRequests.length === 0) {
-        section.style.display = 'none';
         if (banner) banner.style.display = 'none';
         return;
     }
     
-    section.style.display = 'block';
+    // Only show the top banner, not the bottom admin section
     
     // Also show the top banner for admin
     if (banner && (isAdmin || isSuperAdmin)) {
@@ -2802,31 +2799,6 @@ function renderPendingRequests() {
             `;
         }).join('');
     }
-    
-    list.innerHTML = pendingRequests.map(r => {
-        const name = r.profile?.pseudonym || 'Utilizator';
-        const initials = name.substring(0, 2).toUpperCase();
-        const time = formatDate(r.joined_at);
-        
-        const email = r.profile?.email || '';
-        return `
-            <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; margin-bottom: 8px;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #92400e; flex-shrink: 0;">${initials}</div>
-                <div style="flex: 1; min-width: 0;">
-                    <div style="font-weight: 600; font-size: 0.875rem; color: #1e293b;">${escapeHtml(name)}</div>
-                    <div style="font-size: 0.75rem; color: #94a3b8;">Cerere din ${time}</div>
-                </div>
-                <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button onclick="approveRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 6px 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Acceptă">
-                        <i class="fas fa-check"></i> Acceptă
-                    </button>
-                    <button onclick="rejectRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="Respinge">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 window.changeStatus = async function(newStatus) {
