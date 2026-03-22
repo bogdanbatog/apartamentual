@@ -1014,6 +1014,7 @@ window.toggleExistingGroupDropdown = function() {
 }
 
 window.sendProfileInvite = async function(groupId, groupName) {
+    console.log('sendProfileInvite called:', groupId, groupName);
     const targetUserId = profileData.user_id;
     const targetName = profileData.pseudonym || 'Utilizator';
     const targetEmail = profileData.email;
@@ -1146,9 +1147,6 @@ window.sendProfileInvite = async function(groupId, groupName) {
 }
 
 function showToast(msg, type) {
-    // Check if showToast already exists globally (from nav.js)
-    if (window._originalShowToast) { window._originalShowToast(msg, type); return; }
-    
     const toast = document.createElement('div');
     toast.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.75rem 1.5rem;border-radius:8px;color:white;font-size:0.875rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);`;
     toast.style.background = type === 'error' ? '#dc2626' : '#059669';
@@ -1156,5 +1154,3 @@ function showToast(msg, type) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
 }
-// Preserve original if exists
-if (typeof window.showToast === 'function') window._originalShowToast = window.showToast;
