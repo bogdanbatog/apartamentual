@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghid de utilizare - ApartamenTUal</title>
+    <meta name="description" content="Ghid complet de utilizare a platformei ApartamenTUal. Funcționalități, reguli și instrucțiuni pentru terenuri, grupuri și utilizatori.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.7; }
+        
+        .guide-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 5rem 1.5rem 3rem;
+            text-align: center;
+            color: white;
+        }
+        .guide-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .guide-hero h1 span { color: #f97316; }
+        .guide-hero p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .guide-container {
+            max-width: 960px;
+            margin: -2rem auto 3rem;
+            padding: 0 1.5rem;
+        }
+
+        /* Navigation pills */
+        .guide-nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 70px;
+            z-index: 10;
+            background: #f1f5f9;
+            padding: 1rem 0;
+        }
+        .guide-nav a {
+            padding: 0.5rem 1.25rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .guide-nav a:hover, .guide-nav a.active {
+            background: #f97316;
+            color: white;
+            border-color: #f97316;
+        }
+        .guide-nav a i { margin-right: 0.375rem; }
+
+        /* Sections */
+        .guide-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .guide-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .guide-section h2 .section-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .guide-section h2 .section-icon.blue { background: #dbeafe; color: #2563eb; }
+        .guide-section h2 .section-icon.green { background: #dcfce7; color: #16a34a; }
+        .guide-section h2 .section-icon.orange { background: #ffedd5; color: #ea580c; }
+        .guide-section h2 .section-icon.purple { background: #ede9fe; color: #7c3aed; }
+        .guide-section h2 .section-icon.slate { background: #e2e8f0; color: #475569; }
+
+        .section-intro {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            font-size: 0.9375rem;
+        }
+
+        .guide-section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.75rem 0 0.75rem;
+            color: #334155;
+            padding-bottom: 0.375rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 0.625rem 0;
+            padding-left: 1.75rem;
+            position: relative;
+            font-size: 0.9375rem;
+            color: #334155;
+        }
+        .feature-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 1rem;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #f97316;
+        }
+        .feature-list li strong { color: #1e293b; }
+
+        .rule-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+        .rule-box i { margin-right: 0.375rem; }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+        .info-box i { margin-right: 0.375rem; }
+
+        .checklist-phase {
+            margin: 0.75rem 0;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .checklist-phase h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+        .checklist-phase p {
+            font-size: 0.8125rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .guide-hero h1 { font-size: 1.75rem; }
+            .guide-section { padding: 1.5rem; }
+            .guide-nav { top: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="nav"></div>
+
+    <div class="guide-hero">
+        <h1>Ghid de utilizare <span>ApartamenTUal</span></h1>
+        <p>Tot ce trebuie să știi despre funcționalitățile platformei, reguli și pași de urmat.</p>
+    </div>
+
+    <div class="guide-container">
+        <nav class="guide-nav">
+            <a href="#cont"><i class="fas fa-user"></i> Cont & Profil</a>
+            <a href="#terenuri"><i class="fas fa-map"></i> Terenuri</a>
+            <a href="#grupuri"><i class="fas fa-users"></i> Grupuri</a>
+            <a href="#matching"><i class="fas fa-handshake"></i> Matching</a>
+            <a href="#checklist"><i class="fas fa-tasks"></i> Etape proiect</a>
+            <a href="#notificari"><i class="fas fa-bell"></i> Notificări</a>
+            <a href="#reguli"><i class="fas fa-shield-alt"></i> Reguli</a>
+        </nav>
+
+        <!-- CONT & PROFIL -->
+        <div class="guide-section" id="cont">
+            <h2>
+                <span class="section-icon blue"><i class="fas fa-user"></i></span>
+                Cont și Profil
+            </h2>
+            <p class="section-intro">Platforma are două tipuri de conturi, fiecare cu funcționalități diferite.</p>
+
+            <h3>Tipuri de conturi</h3>
+            <ul class="feature-list">
+                <li><strong>Utilizator activ</strong> — persoana care caută să construiască un apartament împreună cu un grup. Poate crea și se poate alătura grupurilor, propune terenuri, și interacționa cu alți utilizatori.</li>
+                <li><strong>Agenție imobiliară (cont profesional)</strong> — poate propune terenuri pe platformă, dar nu poate se alătura grupurilor și nu poate vizualiza profilurile detaliate ale utilizatorilor. Necesită aprobare de la administrator.</li>
+            </ul>
+
+            <h3>Crearea contului</h3>
+            <ul class="feature-list">
+                <li>Alegi tipul de cont (activ sau agenție)</li>
+                <li>Completezi pseudonimul, profesia, orașul preferat</li>
+                <li>Selectezi zonele preferate din oraș (pentru București: hartă interactivă cu 61 de cartiere)</li>
+                <li>Alegi interesele și preferințele din lista de tag-uri (max. 15)</li>
+                <li>Setezi preferințe de apartament: număr de camere și suprafață dorită</li>
+            </ul>
+
+            <h3>Profilul tău</h3>
+            <ul class="feature-list">
+                <li><strong>Bară de completare</strong> — profilul tău arată un procent de completare. Un profil 100% complet atrage mai multă atenție.</li>
+                <li><strong>Descriere liberă</strong> — poți adăuga un text care te descrie și ce cauți.</li>
+                <li><strong>Vizibilitate</strong> — pseudonimul, profesia, zonele și interesele sunt vizibile celorlalți utilizatori. Email-ul e vizibil doar dacă alegi să îl faci public.</li>
+                <li><strong>Editare</strong> — poți modifica oricând profilul din pagina ta de profil.</li>
+            </ul>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Când vizitezi profilul altui utilizator, vezi automat câte zone și interese aveți în comun — un indicator de compatibilitate.
+            </div>
+        </div>
+
+        <!-- TERENURI -->
+        <div class="guide-section" id="terenuri">
+            <h2>
+                <span class="section-icon green"><i class="fas fa-map"></i></span>
+                Terenuri
+            </h2>
+            <p class="section-intro">Terenurile sunt propuse de utilizatori sau agenții, apoi votate și analizate de comunitate.</p>
+
+            <h3>Propunerea unui teren</h3>
+            <ul class="feature-list">
+                <li>Orice utilizator logat poate propune un teren din pagina <strong>Terenuri → Propune teren</strong></li>
+                <li>Completezi: titlu, descriere, oraș, cartier, suprafață, preț total, link sursă (opțional) și o imagine obligatorie</li>
+                <li>Terenul propus intră în starea <strong>„Pending"</strong> și devine vizibil pe platformă doar după aprobarea administratorului</li>
+                <li>Prețul pe metru pătrat se calculează automat din suprafață și preț total</li>
+            </ul>
+
+            <h3>Interacțiunea cu terenurile</h3>
+            <ul class="feature-list">
+                <li><strong>Adaugă la profil</strong> — marchează un teren ca favorit pe profilul tău. Alți utilizatori pot vedea de ce terenuri ești interesat.</li>
+                <li><strong>Adaugă la grup</strong> — dacă faci parte dintr-un grup, poți adăuga terenul la lista de terenuri ale grupului.</li>
+                <li><strong>Trimite unui prieten</strong> — distribuie terenul prin link.</li>
+                <li><strong>Cere o analiză</strong> — solicită o analiză profesională a terenului (generală sau complexă).</li>
+                <li><strong>Vezi utilizatorii interesați</strong> — vezi câți și care utilizatori au adăugat terenul la profil.</li>
+                <li><strong>Vezi grupurile interesate</strong> — vezi care grupuri sunt interesate de acest teren.</li>
+            </ul>
+
+            <h3>Filtrare și sortare</h3>
+            <ul class="feature-list">
+                <li>Filtrezi terenurile după <strong>oraș</strong> și <strong>cartier/zonă</strong></li>
+                <li>Sortezi după <strong>cele mai populare</strong> (cu cele mai multe like-uri), <strong>cele mai noi</strong>, <strong>preț crescător/descrescător</strong></li>
+            </ul>
+
+            <div class="rule-box">
+                <i class="fas fa-exclamation-triangle"></i> Terenurile propuse de agenții imobiliare sunt adăugate automat la profilul agenției. Agențiile nu pot se alătura grupurilor.
+            </div>
+        </div>
+
+        <!-- GRUPURI -->
+        <div class="guide-section" id="grupuri">
+            <h2>
+                <span class="section-icon orange"><i class="fas fa-users"></i></span>
+                Grupuri
+            </h2>
+            <p class="section-intro">Grupurile sunt esența platformei — aici se formează echipele care vor construi împreună.</p>
+
+            <h3>Crearea unui grup</h3>
+            <ul class="feature-list">
+                <li>Orice utilizator activ poate crea un grup din <strong>Grupuri → Creează grup</strong></li>
+                <li>Completezi: nume, descriere, oraș, zone preferate, interese/tag-uri, nr. maxim de membri, status</li>
+                <li>Creatorul devine automat <strong>admin</strong> al grupului</li>
+            </ul>
+
+            <h3>Statusuri de grup</h3>
+            <ul class="feature-list">
+                <li><strong>Deschis</strong> — oricine se poate alătura direct, fără aprobare</li>
+                <li><strong>Cu aprobare</strong> — cererile de alăturare sunt trimise adminului, care le aprobă sau respinge</li>
+            </ul>
+
+            <h3>Alăturarea la un grup</h3>
+            <ul class="feature-list">
+                <li>Dacă grupul e <strong>deschis</strong>: click pe „Alătură-te" și ești membru imediat</li>
+                <li>Dacă grupul e <strong>cu aprobare</strong>: trimiți o cerere, adminul primește notificare pe email, și decide</li>
+                <li>Adminul vede cererile de alăturare în partea de sus a paginii grupului, cu butoane de Acceptă / Respinge</li>
+                <li>Utilizatorul aprobat sau respins primește notificare pe email</li>
+            </ul>
+
+            <h3>Invitarea membrilor</h3>
+            <ul class="feature-list">
+                <li>Adminul grupului poate invita persoane din butonul <strong>„Invită"</strong> de pe pagina grupului</li>
+                <li>Se introduce adresa de email — persoana primește automat un email cu link de invitație</li>
+                <li>De pe profilul unui utilizator, poți apăsa <strong>„Invită pe unul din grupurile tale"</strong> pentru a-l invita direct</li>
+            </ul>
+
+            <h3>Administrarea grupului</h3>
+            <ul class="feature-list">
+                <li><strong>Editare</strong> — adminul poate modifica numele, descrierea, zonele, interesele, statusul, nr. max de membri</li>
+                <li><strong>Checklist</strong> — fiecare grup are un checklist cu etapele proiectului de construcție (vezi secțiunea Etape)</li>
+                <li><strong>Terenuri ale grupului</strong> — adminul poate gestiona lista de terenuri asociate grupului</li>
+                <li><strong>Link WhatsApp</strong> — adminul poate adăuga un link către grupul WhatsApp al echipei</li>
+            </ul>
+
+            <h3>Părăsirea grupului</h3>
+            <ul class="feature-list">
+                <li>Orice membru poate părăsi grupul oricând din butonul „Părăsește"</li>
+                <li>Dacă adminul părăsește, trebuie să transfere rolul de admin altui membru (manual sau automat — cel mai vechi)</li>
+                <li>Toți membrii și superadminul primesc notificare când cineva părăsește grupul</li>
+            </ul>
+
+            <h3>Excluderea unui membru (vot)</h3>
+            <ul class="feature-list">
+                <li>Adminul grupului poate iniția un <strong>vot de excludere</strong> pentru un membru</li>
+                <li>Se specifică un motiv — toți membrii grupului primesc notificare pe email</li>
+                <li>Fiecare membru votează DA sau NU</li>
+                <li>Pragul de excludere este <strong>60% voturi DA</strong> din totalul membrilor</li>
+                <li>Dacă votul trece, membrul este exclus automat și notificat pe email</li>
+                <li>Dacă votul nu trece, membrul rămâne — toți sunt notificați cu rezultatul</li>
+            </ul>
+
+            <div class="rule-box">
+                <i class="fas fa-exclamation-triangle"></i> Agențiile imobiliare nu pot crea sau se alătura grupurilor — doar utilizatorii activi au acces la funcționalitățile de grup.
+            </div>
+        </div>
+
+        <!-- MATCHING -->
+        <div class="guide-section" id="matching">
+            <h2>
+                <span class="section-icon purple"><i class="fas fa-handshake"></i></span>
+                Sistem de matching
+            </h2>
+            <p class="section-intro">Platforma calculează automat compatibilitatea între utilizatori și grupuri pe baza zonelor și intereselor comune.</p>
+
+            <h3>Cum funcționează</h3>
+            <ul class="feature-list">
+                <li>Când vizitezi <strong>lista de utilizatori</strong>, fiecare card arată câte zone și interese ai în comun cu acea persoană</li>
+                <li>Pe <strong>profilul unui utilizator</strong>, zonele și interesele comune sunt marcate vizual cu verde</li>
+                <li>Pe <strong>pagina unui grup</strong>, vezi câte zone și interese ai în comun cu grupul</li>
+                <li>Un mesaj de <strong>„Compatibilitate ridicată!"</strong> apare când ai 4+ zone sau interese comune</li>
+            </ul>
+
+            <h3>Filtrare</h3>
+            <ul class="feature-list">
+                <li>Pe pagina <strong>Utilizatori</strong> poți filtra după oraș, zonă și interes specific</li>
+                <li>Pe pagina <strong>Grupuri</strong> poți filtra similar</li>
+                <li>De pe un teren, poți vedea direct utilizatorii și grupurile interesate de acel teren</li>
+            </ul>
+
+            <div class="info-box">
+                <i class="fas fa-lightbulb"></i> Cu cât profilul tău e mai complet (zone, interese, descriere), cu atât matching-ul e mai precis și atragi oameni cu aceleași priorități.
+            </div>
+        </div>
+
+        <!-- CHECKLIST / ETAPE -->
+        <div class="guide-section" id="checklist">
+            <h2>
+                <span class="section-icon slate"><i class="fas fa-tasks"></i></span>
+                Etapele proiectului de construcție
+            </h2>
+            <p class="section-intro">Fiecare grup are un checklist integrat cu cele 4 faze ale unui proiect Baugruppen. Adminul grupului bifează pașii pe măsură ce avansați.</p>
+
+            <div class="checklist-phase" style="border-color: #2563eb;">
+                <h4 style="color: #2563eb;">1. Formarea Grupului</h4>
+                <p>Grup în formare → Regulament de funcționare (reguli de comunicare, decizii, responsabilități) → Principii și scopuri comune agreate → Grup format</p>
+            </div>
+
+            <div class="checklist-phase" style="border-color: #16a34a;">
+                <h4 style="color: #16a34a;">2. Căutarea și Achiziția Terenului</h4>
+                <p>Identificare terenuri → Vizite → Extras carte funciară → Certificat de urbanism informativ → Analiză generală pe platformă → Istoric teren verificat la notar → Studiu geotehnic preliminar → Analiză complexă → Contract asociere între membri → Achiziționare teren</p>
+            </div>
+
+            <div class="checklist-phase" style="border-color: #f59e0b;">
+                <h4 style="color: #f59e0b;">3. Proiectarea</h4>
+                <p>Echipă proiectanți selectată → Certificat de urbanism pentru construire → Faza concept (planuri, suprafețe, randări) → Obținere avize → Proiect tehnic PTh → DTAC → Detalii de execuție</p>
+            </div>
+
+            <div class="checklist-phase" style="border-color: #7c3aed;">
+                <h4 style="color: #7c3aed;">4. Construcția</h4>
+                <p>Oferte execuție → Constructor selectat → Execuție structură → Execuție instalații → Execuție finisaje → Recepție 🏠</p>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Doar adminul grupului poate bifa pașii din checklist. Ceilalți membri pot vizualiza progresul. La fiecare pas se pot adăuga note explicative.
+            </div>
+        </div>
+
+        <!-- NOTIFICARI -->
+        <div class="guide-section" id="notificari">
+            <h2>
+                <span class="section-icon blue"><i class="fas fa-bell"></i></span>
+                Notificări
+            </h2>
+            <p class="section-intro">Platforma trimite notificări pe email pentru evenimentele importante.</p>
+
+            <h3>Notificări pe care le primești</h3>
+            <ul class="feature-list">
+                <li><strong>Cerere de alăturare aprobată</strong> — când adminul unui grup te acceptă</li>
+                <li><strong>Cerere de alăturare respinsă</strong> — când adminul respinge cererea ta</li>
+                <li><strong>Invitație în grup</strong> — când cineva te invită într-un grup (cu link de acceptare)</li>
+                <li><strong>Grup actualizat</strong> — când adminul modifică detaliile grupului tău</li>
+                <li><strong>Vot de excludere inițiat</strong> — când se inițiază un vot de excludere în grupul tău</li>
+                <li><strong>Rezultat vot excludere</strong> — când votul se finalizează</li>
+                <li><strong>Membru a părăsit grupul</strong> — când un coleg pleacă din grup</li>
+                <li><strong>Cont suspendat/reactivat</strong> — dacă administratorul platformei îți suspendă sau reactivează contul</li>
+            </ul>
+
+            <h3>Notificări primite de adminul grupului</h3>
+            <ul class="feature-list">
+                <li><strong>Cerere de alăturare</strong> — când cineva vrea să se alăture grupului tău</li>
+                <li><strong>Transfer rol admin</strong> — când devii noul admin al grupului</li>
+            </ul>
+        </div>
+
+        <!-- REGULI -->
+        <div class="guide-section" id="reguli">
+            <h2>
+                <span class="section-icon orange"><i class="fas fa-shield-alt"></i></span>
+                Reguli și bune practici
+            </h2>
+            <p class="section-intro">Câteva reguli importante pentru o experiență bună pe platformă.</p>
+
+            <h3>Conturi și profiluri</h3>
+            <ul class="feature-list">
+                <li>Un utilizator poate avea <strong>un singur cont</strong></li>
+                <li>Pseudonimul trebuie să fie real sau realist — fără conturi fictive</li>
+                <li>Contul poate fi <strong>suspendat 30 de zile</strong> sau <strong>dezactivat permanent</strong> de administrator pentru încălcări</li>
+                <li>Poți șterge contul oricând — datele sunt anonimizate conform GDPR</li>
+            </ul>
+
+            <h3>Grupuri</h3>
+            <ul class="feature-list">
+                <li>Fiecare grup are un <strong>singur admin</strong> care gestionează membrii, setările și checklistul</li>
+                <li>Deciziile importante (excludere) se iau prin <strong>vot democratic</strong> (prag 60%)</li>
+                <li>Adminul poate fi transferat — dacă adminul pleacă, rolul se transferă</li>
+                <li>Un grup nu poate depăși numărul maxim de membri stabilit la creare</li>
+            </ul>
+
+            <h3>Terenuri</h3>
+            <ul class="feature-list">
+                <li>Toate terenurile propuse sunt <strong>verificate și aprobate</strong> de administrator înainte de publicare</li>
+                <li>Imaginea terenului este <strong>obligatorie</strong></li>
+                <li>Informațiile trebuie să fie <strong>reale și verificabile</strong> — linkul sursă ajută la verificare</li>
+            </ul>
+
+            <h3>Confidențialitate</h3>
+            <ul class="feature-list">
+                <li>Vizitatorii nelogați văd informații limitate: pseudonim, profesie, zone și interese — fără email sau detalii de contact</li>
+                <li>Email-ul tău e vizibil altor utilizatori <strong>doar dacă alegi să îl faci public</strong> din setările profilului</li>
+                <li>Datele sunt stocate conform <strong>GDPR</strong> — poți solicita acces, modificare sau ștergere oricând</li>
+                <li>Detaliile complete sunt în pagina <a href="gdpr.html" style="color: #f97316;">GDPR</a></li>
+            </ul>
+
+            <div class="info-box">
+                <i class="fas fa-question-circle"></i> Ai întrebări? Vizitează secțiunea <a href="contact.html#faq-container" style="color: #2563eb;">FAQ</a> sau <a href="consultanta.html" style="color: #2563eb;">cere o consultanță</a>.
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script>
+        // Highlight active nav pill on scroll
+        const sections = document.querySelectorAll('.guide-section');
+        const navLinks = document.querySelectorAll('.guide-nav a');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 150;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
