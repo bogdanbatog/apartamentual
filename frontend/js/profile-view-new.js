@@ -973,12 +973,12 @@ async function loadMyGroupsForInvite() {
     }
 }
 
-async function handleInviteToGroup() {
+window.handleInviteToGroup = async function() {
     // "Creează un grup și invită" always goes to create
     window.location.href = 'grup-nou.html';
 }
 
-function toggleExistingGroupDropdown() {
+window.toggleExistingGroupDropdown = function() {
     const dropdown = document.getElementById('group-select-dropdown');
     const list = document.getElementById('group-select-list');
     
@@ -1010,7 +1010,7 @@ function toggleExistingGroupDropdown() {
     dropdown.classList.remove('hidden');
 }
 
-async function sendProfileInvite(groupId, groupName) {
+window.sendProfileInvite = async function(groupId, groupName) {
     const targetUserId = profileData.user_id;
     const targetName = profileData.pseudonym || 'Utilizator';
     const targetEmail = profileData.email;
