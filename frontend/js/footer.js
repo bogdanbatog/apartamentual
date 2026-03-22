@@ -91,6 +91,7 @@ function createFooter() {
                     <a href="/termeni.html">Termeni și condiții</a>
                     <a href="/gdpr.html">GDPR</a>
                     <a href="/contact.html#faq-container">FAQ</a>
+                    <a href="/ghid.html">Ghid platformă</a>
                     <a href="/contact.html">Contact</a>
                 </div>
             </div>
