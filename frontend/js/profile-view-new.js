@@ -987,23 +987,26 @@ window.toggleExistingGroupDropdown = function() {
         return;
     }
     
-    list.innerHTML = myGroupsForInvite.map((g, i) => `
-        <button class="group-invite-btn" data-index="${i}"
-                style="display: block; width: 100%; text-align: left; padding: 0.5rem 0.75rem; 
-                       border: none; background: none; border-radius: 6px; cursor: pointer; 
-                       font-size: 0.875rem; color: #1e293b; transition: background 0.15s;"
-                onmouseover="this.style.background='#f1f5f9'" 
-                onmouseout="this.style.background='none'">
-            ${escapeHtml(g.nume)}
-        </button>
-    `).join('');
+    list.innerHTML = myGroupsForInvite.map((g, i) => {
+        const safeName = (g.nume || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return `
+            <button class="group-invite-btn" data-index="${i}"
+                    style="display: block; width: 100%; text-align: left; padding: 0.5rem 0.75rem; 
+                           border: none; background: none; border-radius: 6px; cursor: pointer; 
+                           font-size: 0.875rem; color: #1e293b; transition: background 0.15s;"
+                    onmouseover="this.style.background='#f1f5f9'" 
+                    onmouseout="this.style.background='none'">
+                ${safeName}
+            </button>
+        `;
+    }).join('');
     
     // Attach click handlers
     list.querySelectorAll('.group-invite-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const idx = parseInt(btn.dataset.index);
             const g = myGroupsForInvite[idx];
-            if (g) sendProfileInvite(g.id, g.nume);
+            if (g) window.sendProfileInvite(g.id, g.nume);
         });
     });
     
