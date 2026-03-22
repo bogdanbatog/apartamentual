@@ -218,7 +218,7 @@ async function processInvitation() {
         // 1. Look up the invitation
         const { data: invitation, error: invError } = await sb
             .from('grup_invitations')
-            .select('id, grup_id, invited_email, status, expires_at')
+            .select('id, grup_id, invited_email, invited_by, status, expires_at')
             .eq('token', token)
             .maybeSingle();
         
@@ -278,7 +278,7 @@ async function processInvitation() {
         // 3. Get group info (now we're authenticated, RLS allows it)
         const { data: group } = await sb
             .from('grupuri')
-            .select('id, nume, max_membri')
+            .select('id, nume, max_membri, status, admin_id')
             .eq('id', invitation.grup_id)
             .single();
         
@@ -341,11 +341,17 @@ async function processInvitation() {
         }
         
         // 6. Add user to group
+        // Determine if the inviter is the group admin
+        const invitedByAdmin = invitation.invited_by === group.admin_id;
+        // If inviter is admin → join as active directly
+        // If inviter is a regular member → join as pending, admin must approve
+        const joinStatus = invitedByAdmin ? 'activ' : 'pending';
+        
         if (existingMember) {
-            // Reactivate
+            // Reactivate with appropriate status
             await sb
                 .from('grup_membri')
-                .update({ status: 'activ', joined_at: new Date().toISOString() })
+                .update({ status: joinStatus, joined_at: new Date().toISOString() })
                 .eq('id', existingMember.id);
         } else {
             const { error: joinError } = await sb
@@ -353,7 +359,7 @@ async function processInvitation() {
                 .insert({
                     grup_id: group.id,
                     user_id: user.id,
-                    status: 'activ'
+                    status: joinStatus
                 });
             
             if (joinError) throw joinError;
@@ -365,10 +371,40 @@ async function processInvitation() {
             .update({ status: 'accepted' })
             .eq('id', invitation.id);
         
-        // 8. Show success
-        document.getElementById('grupNameSuccess').textContent = group.nume;
-        document.getElementById('btnGoToGroup').href = `grup-details.html?id=${group.id}`;
-        showState('stateSuccess');
+        // 8. If pending, notify admin to approve
+        if (joinStatus === 'pending') {
+            try {
+                const { data: adminProf } = await sb.from('profiles').select('email').eq('user_id', group.admin_id).single();
+                const { data: userProf } = await sb.from('profiles').select('pseudonym').eq('user_id', user.id).single();
+                if (adminProf && adminProf.email) {
+                    await sb.functions.invoke('notify-admins', {
+                        body: {
+                            event_type: 'join_request_admin_email',
+                            admin_email: adminProf.email,
+                            group_name: group.nume,
+                            user_email: user.email,
+                            user_name: userProf?.pseudonym || user.email,
+                            group_id: group.id
+                        }
+                    });
+                }
+            } catch(e) { console.warn('Admin notify failed:', e); }
+            
+            // Show pending state instead of success
+            document.getElementById('grupNameSuccess').textContent = group.nume;
+            const successMsg = document.querySelector('#stateSuccess p');
+            if (successMsg) {
+                successMsg.textContent = 'Invitația a fost acceptată! Cererea ta de alăturare a fost trimisă adminului grupului pentru aprobare.';
+            }
+            const goBtn = document.getElementById('btnGoToGroup');
+            if (goBtn) goBtn.href = `grup-details.html?id=${group.id}`;
+            showState('stateSuccess');
+        } else {
+            // Direct join - show success
+            document.getElementById('grupNameSuccess').textContent = group.nume;
+            document.getElementById('btnGoToGroup').href = `grup-details.html?id=${group.id}`;
+            showState('stateSuccess');
+        }
         
     } catch (e) {
         console.error('Error processing invitation:', e);
