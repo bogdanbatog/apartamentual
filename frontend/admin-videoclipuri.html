@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Videoclipuri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: 'DM Sans', system-ui, sans-serif; background: #f1f5f9; }
+        .video-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; transition: box-shadow 0.2s; }
+        .video-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .video-preview { aspect-ratio: 16/9; background: #0f172a; }
+        .btn-primary { background: #f97316; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.875rem; }
+        .btn-primary:hover { background: #ea580c; }
+        .btn-danger { background: #fee2e2; color: #dc2626; border: none; padding: 0.375rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.8125rem; }
+        .btn-danger:hover { background: #fecaca; }
+        .input { width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; }
+        .input:focus { outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    </style>
+</head>
+<body>
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Videoclipuri explicative</h1>
+                <p class="text-sm text-gray-500 mt-1">Gestionează videoclipurile afișate pe homepage</p>
+            </div>
+            <a href="admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Înapoi la admin</a>
+        </div>
+
+        <!-- Add new video form -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+            <h2 class="font-semibold text-gray-800 mb-4"><i class="fas fa-plus-circle text-orange-500 mr-2"></i>Adaugă videoclip nou</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">YouTube ID sau URL</label>
+                    <input type="text" id="newYoutubeId" class="input" placeholder="ex: 64z6hMkW7do sau https://youtu.be/...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Titlu</label>
+                    <input type="text" id="newTitle" class="input" placeholder="ex: Cum creezi un grup">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Descriere</label>
+                    <input type="text" id="newDescription" class="input" placeholder="Descriere scurtă">
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="addVideo()" class="btn-primary"><i class="fas fa-plus mr-1"></i> Adaugă</button>
+                <div id="previewThumb" style="display:none;" class="flex items-center gap-2">
+                    <img id="thumbImg" src="" class="w-16 h-10 object-cover rounded" alt="">
+                    <span id="thumbTitle" class="text-sm text-gray-500"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos list -->
+        <div id="videosList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="text-gray-400 text-sm col-span-2 text-center py-8">Se încarcă...</p>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/nav.js"></script>
+    <script>
+    let allVideos = [];
+
+    async function checkAdmin() {
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = 'register.html'; return; }
+        const { data: prof } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!prof || !prof.is_super_admin) { window.location.href = 'index.html'; return; }
+        loadVideos();
+    }
+
+    async function loadVideos() {
+        const { data, error } = await sb
+            .from('videos')
+            .select('*')
+            .order('display_order', { ascending: true });
+        
+        if (error) { console.error(error); return; }
+        allVideos = data || [];
+        renderVideos();
+    }
+
+    function renderVideos() {
+        const container = document.getElementById('videosList');
+        if (allVideos.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-sm col-span-2 text-center py-8">Niciun videoclip adăugat.</p>';
+            return;
+        }
+
+        container.innerHTML = allVideos.map((v, i) => `
+            <div class="video-card" data-id="${v.id}">
+                <div class="video-preview">
+                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${v.youtube_id}" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 text-sm">${v.title}</h3>
+                            <p class="text-xs text-gray-500">${v.description || ''}</p>
+                        </div>
+                        <span class="text-xs text-gray-400 whitespace-nowrap">#${v.display_order}</span>
+                    </div>
+                    <div class="flex items-center gap-2 mt-3">
+                        <button onclick="moveVideo('${v.id}', -1)" class="text-gray-400 hover:text-gray-600 text-sm" title="Mută sus">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button onclick="moveVideo('${v.id}', 1)" class="text-gray-400 hover:text-gray-600 text-sm" title="Mută jos">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                        <span class="flex-1"></span>
+                        <label class="flex items-center gap-1 text-xs cursor-pointer ${v.is_active ? 'text-green-600' : 'text-gray-400'}">
+                            <input type="checkbox" ${v.is_active ? 'checked' : ''} onchange="toggleActive('${v.id}', this.checked)">
+                            ${v.is_active ? 'Activ' : 'Ascuns'}
+                        </label>
+                        <button onclick="deleteVideo('${v.id}', '${v.title.replace(/'/g, "\\'")}')" class="btn-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function extractYouTubeId(input) {
+        input = input.trim();
+        // Already an ID (no slashes, no dots)
+        if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+        // youtu.be/ID
+        let match = input.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
+        // youtube.com/watch?v=ID
+        match = input.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
+        // youtube.com/embed/ID
+        match = input.match(/embed\/([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
+        return null;
+    }
+
+    async function addVideo() {
+        const rawId = document.getElementById('newYoutubeId').value;
+        const title = document.getElementById('newTitle').value.trim();
+        const description = document.getElementById('newDescription').value.trim();
+
+        const youtubeId = extractYouTubeId(rawId);
+        if (!youtubeId) { alert('YouTube ID sau URL invalid.'); return; }
+        if (!title) { alert('Titlul este obligatoriu.'); return; }
+
+        const maxOrder = allVideos.length > 0 ? Math.max(...allVideos.map(v => v.display_order || 0)) : 0;
+
+        const { error } = await sb.from('videos').insert({
+            youtube_id: youtubeId,
+            title: title,
+            description: description || null,
+            display_order: maxOrder + 1
+        });
+
+        if (error) { alert('Eroare: ' + error.message); return; }
+
+        document.getElementById('newYoutubeId').value = '';
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newDescription').value = '';
+        loadVideos();
+    }
+
+    async function deleteVideo(id, title) {
+        if (!confirm('Ștergi videoclipul „' + title + '"?')) return;
+        await sb.from('videos').delete().eq('id', id);
+        loadVideos();
+    }
+
+    async function toggleActive(id, active) {
+        await sb.from('videos').update({ is_active: active }).eq('id', id);
+        loadVideos();
+    }
+
+    async function moveVideo(id, direction) {
+        const idx = allVideos.findIndex(v => v.id === id);
+        if (idx < 0) return;
+        const newIdx = idx + direction;
+        if (newIdx < 0 || newIdx >= allVideos.length) return;
+
+        const currentOrder = allVideos[idx].display_order;
+        const swapOrder = allVideos[newIdx].display_order;
+
+        await sb.from('videos').update({ display_order: swapOrder }).eq('id', allVideos[idx].id);
+        await sb.from('videos').update({ display_order: currentOrder }).eq('id', allVideos[newIdx].id);
+        loadVideos();
+    }
+
+    // Preview thumbnail on input
+    document.getElementById('newYoutubeId').addEventListener('input', function() {
+        const ytId = extractYouTubeId(this.value);
+        const preview = document.getElementById('previewThumb');
+        if (ytId) {
+            document.getElementById('thumbImg').src = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+            document.getElementById('thumbTitle').textContent = ytId;
+            preview.style.display = 'flex';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', checkAdmin);
+    </script>
+</body>
+</html>
