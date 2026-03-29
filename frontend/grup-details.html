@@ -1017,7 +1017,7 @@
         </div>
         
         <!-- Anunțuri generale grup - Member only -->
-        <div id="anunturiSection" class="section-card member-only" style="display: none;">
+        <div id="anunturiSection" class="section-card member-only">
             <h2><i class="fas fa-bullhorn"></i> Anunțuri generale grup</h2>
             
             <!-- Post new announcement -->
@@ -3521,7 +3521,6 @@ async function loadAnunturi() {
     
     const section = document.getElementById('anunturiSection');
     if (!section) return;
-    section.style.display = 'block';
     
     try {
         const { data, error } = await sb
