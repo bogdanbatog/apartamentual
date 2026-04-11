@@ -1533,7 +1533,7 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     renderMembers(members, group.admin_id);
     
     // Member-only sections
-    if (isMember) {
+    if (isMember || isSuperAdmin) {
         document.querySelectorAll('.member-only').forEach(el => el.classList.add('visible'));
         loadKickVotes();
         loadChecklist();
@@ -1577,7 +1577,7 @@ function renderActions(group) {
     const actionsEl = document.getElementById('headerActions');
     let html = '';
     
-    if (isMember) {
+    if (isMember || isSuperAdmin) {
         // WhatsApp link
         if (group.link_whatsapp) {
             html += `
@@ -1740,7 +1740,7 @@ function renderTerenuri(terenuri) {
     }).join('');
     
     // Load comments for each teren (only for members)
-    if (isMember) {
+    if (isMember || isSuperAdmin) {
         terenuri.forEach(t => {
             if (t.teren) loadComments(t.teren.id);
         });
@@ -2925,7 +2925,7 @@ let activeKickVotes = [];
 
 // Load kick votes when page loads (called from renderGroupDetails)
 async function loadKickVotes() {
-    if (!isMember || !currentGroup) return;
+    if ((!isMember && !isSuperAdmin) || !currentGroup) return;
     
     try {
         const { data, error } = await sb
