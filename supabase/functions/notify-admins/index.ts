@@ -49,6 +49,17 @@ serve(async (req) => {
       payload = rawPayload as NotificationPayload
     }
     
+    // Normalize payload: if data fields are at root level (flat payload from nav.js),
+    // wrap them inside data object
+    if (payload.event_type && !payload.data) {
+      const { event_type, timestamp, ...rest } = payload as any;
+      payload = {
+        event_type: event_type,
+        data: rest,
+        timestamp: timestamp
+      };
+    }
+    
     // Validate payload
     if (!payload.event_type || !payload.data) {
       throw new Error('Missing required fields: event_type and data')
