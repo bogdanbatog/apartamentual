@@ -168,7 +168,7 @@
             if (prof && prof.email && typeof notifyAdmins === 'function') {
                 notifyAdmins('account_reactivated', {
                     user_name: name,
-                    admin_email: prof.email
+                    recipient_email: prof.email
                 });
             }
         } catch(e) { console.warn('Approve notify failed:', e); }
