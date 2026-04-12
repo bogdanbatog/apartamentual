@@ -500,8 +500,8 @@ async function handleAuthSubmit(event) {
             // Store email for resend
             window._pendingConfirmEmail = email;
             
-            // Notify admins (non-blocking)
-            notifyAdmins('new_user', { email: email, user_id: data.user.id });
+            // NOTE: notifyAdmins('new_user', ...) was moved to profile-edit-new.html
+            // and triggers only AFTER the user confirms their email and lands on welcome page
         }
         
     } catch (error) {
