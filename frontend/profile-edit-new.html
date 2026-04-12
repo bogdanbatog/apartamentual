@@ -369,12 +369,6 @@
                             }
                         }
                         sessionStorage.setItem('_welcomeNotifSent', '1');
-                        
-                        // Reload to refresh form display with correct account type
-                        if (metaAccountType === 'profesional') {
-                            // Wait a bit so the update is applied, then reload
-                            setTimeout(() => window.location.reload(), 500);
-                        }
                     } catch(e) { console.warn('Welcome sync failed:', e); }
                 }, 1500);
             }
