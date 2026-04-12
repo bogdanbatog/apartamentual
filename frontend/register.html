@@ -145,6 +145,32 @@
             </div>
 
             <!-- Step 3: Profile Information -->
+            <!-- Step Verify Email -->
+            <div id="step-verify" class="card hidden">
+                <div class="text-center py-8">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="40" height="40" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3">Verifică-ți emailul</h2>
+                    <p class="text-gray-600 mb-2">Ți-am trimis un link de confirmare la:</p>
+                    <p class="text-gray-900 font-semibold mb-6" id="verify-email-display">email@exemplu.ro</p>
+                    <p class="text-sm text-gray-500 mb-6" style="max-width: 420px; margin-left: auto; margin-right: auto;">
+                        Click pe linkul din email pentru a-ți confirma adresa și a continua cu completarea profilului. Dacă nu vezi emailul, verifică folderul de spam.
+                    </p>
+                    <div class="flex flex-col gap-2 items-center">
+                        <button onclick="resendConfirmEmail()" class="text-sm text-orange-600 hover:text-orange-700 underline">
+                            Retrimite emailul de confirmare
+                        </button>
+                        <button onclick="goToStep(2)" class="text-sm text-gray-500 hover:text-gray-700 mt-2">
+                            ← Folosesc altă adresă
+                        </button>
+                    </div>
+                    <div id="verify-toast" class="hidden mt-4 px-4 py-2 bg-green-50 text-green-700 text-sm rounded-lg inline-block"></div>
+                </div>
+            </div>
+
             <div id="step3" class="card hidden">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold">Completează-ți profilul</h2>
