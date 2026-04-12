@@ -450,9 +450,10 @@ async function handleActiveFormSubmit(event) {
         successDiv.classList.remove('hidden');
         successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // Redirect after delay
+        // Redirect after delay - check welcome flow
         setTimeout(() => {
-            window.location.href = '/profile-view-new.html?id=' + currentUser.id;
+            const isWelcome = new URLSearchParams(window.location.search).get('welcome') === '1';
+            window.location.href = isWelcome ? '/index.html' : '/profile-view-new.html?id=' + currentUser.id;
         }, 1500);
         
     } catch (error) {
@@ -491,9 +492,10 @@ async function handleProfessionalFormSubmit(event) {
         successDiv.classList.remove('hidden');
         successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // Redirect
+        // Redirect - check welcome flow
         setTimeout(() => {
-            window.location.href = '/profile-view-new.html?id=' + currentUser.id;
+            const isWelcome = new URLSearchParams(window.location.search).get('welcome') === '1';
+            window.location.href = isWelcome ? '/index.html' : '/profile-view-new.html?id=' + currentUser.id;
         }, 1500);
         
     } catch (error) {
