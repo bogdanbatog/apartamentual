@@ -17,6 +17,21 @@
     <main class="flex-1 py-8">
         <div class="container max-w-2xl mx-auto px-4">
             
+            <!-- Welcome banner (shown when ?welcome=1) -->
+            <div id="welcome-banner" class="hidden mb-6 p-5 bg-orange-50 border border-orange-200 rounded-xl">
+                <div class="flex items-start gap-4">
+                    <div style="width: 48px; height: 48px; background: #f97316; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="24" height="24" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">Bun venit pe ApartamenTUal! 🎉</h3>
+                        <p class="text-sm text-gray-700">Emailul tău a fost confirmat cu succes. Hai să-ți completăm profilul ca să te poată găsi viitorii vecini și grupuri compatibile cu tine.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Header -->
             <div class="flex items-center justify-between mb-6">
                 <div>
@@ -291,6 +306,26 @@
             alert('Eroare la ștergerea contului. Te rugăm contactează-ne la office@ltfbstudio.ro.');
         }
     };
+    
+    // Welcome flow: detect ?welcome=1 and adapt UI
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('welcome') === '1') {
+            // Show welcome banner
+            const banner = document.getElementById('welcome-banner');
+            if (banner) banner.classList.remove('hidden');
+            
+            // Hide back link
+            const backLink = document.getElementById('back-link');
+            if (backLink) backLink.style.display = 'none';
+            
+            // Hide cancel buttons
+            const cancelBtn = document.getElementById('cancel-btn');
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            const cancelBtnPro = document.getElementById('cancel-btn-pro');
+            if (cancelBtnPro) cancelBtnPro.style.display = 'none';
+        }
+    })();
     </script>
 </body>
 </html>
