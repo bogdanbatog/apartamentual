@@ -32,9 +32,10 @@ async function initEditPage() {
         // Get profile ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const profileId = urlParams.get('id');
+        const isWelcome = urlParams.get('welcome') === '1';
         
-        // Verify user is editing their own profile
-        if (profileId !== user.id) {
+        // Verify user is editing their own profile (skip in welcome flow)
+        if (!isWelcome && profileId && profileId !== user.id) {
             window.location.href = '/profile-view-new.html?id=' + user.id;
             return;
         }
