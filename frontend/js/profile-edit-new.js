@@ -149,7 +149,15 @@ async function loadProfile(userId) {
         // Hide loading, show form
         document.getElementById('loading-state').classList.add('hidden');
         
-        if (profile.account_type === 'activ') {
+        // Welcome flow: trust user metadata for account_type to avoid showing wrong form
+        const isWelcomeFlow = new URLSearchParams(window.location.search).get('welcome') === '1';
+        let effectiveType = profile.account_type;
+        if (isWelcomeFlow) {
+            const metaType = currentUser.user_metadata?.account_type;
+            if (metaType) effectiveType = metaType;
+        }
+        
+        if (effectiveType === 'activ') {
             document.getElementById('edit-form-activ').classList.remove('hidden');
             populateActiveForm();
         } else {
