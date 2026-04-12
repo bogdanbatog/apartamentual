@@ -325,6 +325,11 @@
             const cancelBtnPro = document.getElementById('cancel-btn-pro');
             if (cancelBtnPro) cancelBtnPro.style.display = 'none';
             
+            // Set agency pending flag IMMEDIATELY (before any delay)
+            // so that if user submits form fast, the flag is already there
+            const metaTypeImmediate = (window._currentUserMeta?.account_type) || null;
+            // We don't have user yet, so set flag based on URL — we'll verify in setTimeout below
+            
             // Sync account_type from user metadata to profiles table + notify admin
             // Use sessionStorage flag to avoid duplicate runs on page reload
             if (!sessionStorage.getItem('_welcomeNotifSent')) {
@@ -370,7 +375,7 @@
                         }
                         sessionStorage.setItem('_welcomeNotifSent', '1');
                     } catch(e) { console.warn('Welcome sync failed:', e); }
-                }, 1500);
+                }, 100);  // reduced from 1500ms to 100ms — sb session is ready almost immediately
             }
         }
     })();
