@@ -22,6 +22,7 @@
         <button onclick="filterUsers('all')" class="u-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toți</button>
         <button onclick="filterUsers('activ')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="activ">👤 Activi</button>
         <button onclick="filterUsers('profesional')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="profesional">🏢 Agenții</button>
+        <button onclick="filterUsers('pending')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100" data-st="pending">⏳ Pending aprobare</button>
         <button onclick="filterUsers('suspended')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="suspended">⚠️ Suspendați</button>
         <button onclick="filterUsers('deleted')" class="u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="deleted">🗑️ Șterși</button>
         <div class="ml-auto text-sm text-gray-400" id="userCount"></div>
@@ -75,6 +76,12 @@
             filtered = allUsers.filter(function(u) { return u.suspended_until && new Date(u.suspended_until) > new Date(); });
         } else if (currentFilter === 'deleted') {
             filtered = allUsers.filter(function(u) { return u.account_status === 'deleted'; });
+        } else if (currentFilter === 'pending') {
+            // Agencies awaiting approval
+            filtered = allUsers.filter(function(u) { 
+                return u.account_type === 'profesional' 
+                    && u.account_status === 'pending'; 
+            });
         } else {
             // activ or profesional - exclude deleted AND suspended
             filtered = allUsers.filter(function(u) { 
@@ -99,16 +106,22 @@
             // Status
             var isSuspended = u.suspended_until && new Date(u.suspended_until) > new Date();
             var isDeleted = u.account_status === 'deleted';
+            var isPending = u.account_type === 'profesional' && u.account_status === 'pending';
             var statusBadge = '';
             if (isDeleted) {
                 statusBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 ml-1">Șters</span>';
             } else if (isSuspended) {
                 var days = Math.ceil((new Date(u.suspended_until) - new Date()) / 86400000);
                 statusBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 ml-1">Suspendat ' + days + 'z</span>';
+            } else if (isPending) {
+                statusBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 ml-1">⏳ Pending</span>';
             }
             
             // Actions
             var actions = '<a href="/profile-view-new.html?id=' + u.user_id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi profil"><i class="fas fa-eye"></i></a>';
+            if (isPending) {
+                actions += '<button onclick="approveAgency(\'' + u.user_id + '\', \'' + name.replace(/'/g, "\\'") + '\')" class="text-green-600 hover:text-green-800 mx-1" title="Aprobă agenția"><i class="fas fa-check-circle"></i></button>';
+            }
             if (!u.is_super_admin && !isDeleted) {
                 if (isSuspended) {
                     actions += '<button onclick="unsuspendUser(\'' + u.user_id + '\')" class="text-green-500 hover:text-green-700 mx-1" title="Reactivează"><i class="fas fa-unlock"></i></button>';
@@ -137,6 +150,29 @@
                 b.className = 'u-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400';
             }
         });
+        renderTable();
+    };
+
+    window.approveAgency = async function(userId, name) {
+        if (!confirm('Aprobă agenția „' + name + '"? Va putea publica terenuri pe platformă.')) return;
+        var { error } = await sb.from('profiles').update({
+            account_status: 'active'
+        }).eq('user_id', userId);
+        if (error) { alert('Eroare: ' + error.message); return; }
+        var u = allUsers.find(function(x) { return x.user_id === userId; });
+        if (u) u.account_status = 'active';
+        
+        // Notify the agency that they've been approved
+        try {
+            var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
+            if (prof && prof.email && typeof notifyAdmins === 'function') {
+                notifyAdmins('account_reactivated', {
+                    user_name: name,
+                    admin_email: prof.email
+                });
+            }
+        } catch(e) { console.warn('Approve notify failed:', e); }
+        
         renderTable();
     };
 
