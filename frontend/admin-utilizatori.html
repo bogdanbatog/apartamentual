@@ -164,14 +164,34 @@
         
         // Notify the agency that they've been approved
         try {
-            var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
-            if (prof && prof.email && typeof notifyAdmins === 'function') {
-                notifyAdmins('account_reactivated', {
+            // Get email from profiles table (denormalized from auth.users)
+            var { data: prof, error: profErr } = await sb.from('profiles')
+                .select('email')
+                .eq('user_id', userId)
+                .single();
+            
+            console.log('approveAgency: profile fetch result', { prof, profErr });
+            
+            // Also try to get email from current allUsers cache as fallback
+            var emailToNotify = (prof && prof.email) || (u && u.email) || null;
+            console.log('approveAgency: email to notify', emailToNotify);
+            
+            if (emailToNotify && typeof notifyAdmins === 'function') {
+                console.log('approveAgency: sending notification to', emailToNotify);
+                var notifyResult = await notifyAdmins('account_reactivated', {
                     user_name: name,
-                    recipient_email: prof.email
+                    recipient_email: emailToNotify
                 });
+                console.log('approveAgency: notification result', notifyResult);
+                alert('Agenția a fost aprobată! Email trimis la: ' + emailToNotify);
+            } else {
+                console.warn('approveAgency: no email found, notification not sent');
+                alert('Agenția a fost aprobată, dar nu am putut trimite email (lipsește adresa).');
             }
-        } catch(e) { console.warn('Approve notify failed:', e); }
+        } catch(e) { 
+            console.error('Approve notify failed:', e); 
+            alert('Agenția a fost aprobată, dar a apărut o eroare la trimiterea emailului: ' + e.message);
+        }
         
         renderTable();
     };
