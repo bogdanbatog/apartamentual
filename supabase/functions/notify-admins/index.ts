@@ -124,7 +124,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             from: 'notifications@apartamentual.ro',
-            to: [adminEmail],
+            to: [payload.data.recipient_email || adminEmail],
             subject: message.title,
             html: `
               <h2>${message.title}</h2>
@@ -197,6 +197,16 @@ function formatNotificationMessage(payload: NotificationPayload): { title: strin
               `Vezi profilul: https://apartamentual.onrender.com/profile-view-new.html?id=${data.user_id || ''}`
       }
     }
+    case 'account_reactivated':
+      return {
+        title: '✅ Contul tău a fost aprobat!',
+        body: `Salut${data.user_name ? ' ' + data.user_name : ''}!\n\n` +
+              `Avem o veste bună: contul tău de pe ApartamenTUal a fost aprobat de un administrator.\n\n` +
+              `Acum poți să publici terenuri și să folosești toate funcționalitățile platformei pentru agenții imobiliare.\n\n` +
+              `🔗 Intră în cont: https://apartamentual.onrender.com\n\n` +
+              `Mulțumim că ești parte din comunitatea noastră!\n\n` +
+              `— Echipa ApartamenTUal`
+      }
     case 'user_signup':
       return {
         title: '🎉 New User Signup',
