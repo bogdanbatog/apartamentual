@@ -438,14 +438,14 @@ async function handleAuthSubmit(event) {
     if (termsError) termsError.classList.add('hidden');
     
     try {
-        // Check if there's a redirect URL (e.g. from invitation)
+        // Build email redirect - confirmation link goes to profile completion page
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect');
         
-        // Build email redirect - if coming from invitation, redirect confirmation to invite link
+        // If coming from invitation, redirect to invite link; otherwise to profile-edit with welcome flag
         const emailRedirectTo = redirectUrl 
             ? decodeURIComponent(redirectUrl)
-            : window.location.origin;
+            : `${window.location.origin}/profile-edit-new.html?welcome=1`;
         
         // Create account
         const { data, error } = await supabase.auth.signUp({
@@ -484,8 +484,15 @@ async function handleAuthSubmit(event) {
                 console.error('Error updating profile:', updateError);
             }
             
-            // Move to step 3
-            goToStep(3);
+            // Show verify email step instead of profile form
+            document.getElementById('verify-email-display').textContent = email;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step-verify').classList.remove('hidden');
+            
+            // Store email for resend
+            window._pendingConfirmEmail = email;
             
             // Notify admins (non-blocking)
             notifyAdmins('new_user', { email: email, user_id: data.user.id });
@@ -494,6 +501,33 @@ async function handleAuthSubmit(event) {
     } catch (error) {
         showError(errorDiv, 'A apărut o eroare. Te rugăm să încerci din nou.');
         console.error('Auth error:', error);
+    }
+}
+
+// Resend confirmation email
+window.resendConfirmEmail = async function() {
+    const email = window._pendingConfirmEmail;
+    if (!email) return;
+    
+    try {
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email: email,
+            options: {
+                emailRedirectTo: `${window.location.origin}/profile-edit-new.html?welcome=1`
+            }
+        });
+        
+        const toast = document.getElementById('verify-toast');
+        if (error) {
+            toast.textContent = 'Eroare la retrimitere. Încearcă din nou în câteva minute.';
+            toast.className = 'mt-4 px-4 py-2 bg-red-50 text-red-700 text-sm rounded-lg inline-block';
+        } else {
+            toast.textContent = '✓ Email retrimis! Verifică inbox-ul.';
+            toast.className = 'mt-4 px-4 py-2 bg-green-50 text-green-700 text-sm rounded-lg inline-block';
+        }
+    } catch (e) {
+        console.error('Resend error:', e);
     }
 }
 
