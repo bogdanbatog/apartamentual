@@ -489,6 +489,23 @@ async function handleProfessionalFormSubmit(event) {
         profileData = { ...profileData, ...formData };
         updateProgressBadge();
         
+        // If this is a pending agency from welcome flow, notify superadmin now
+        // (we waited until they completed the form so admin has data to review)
+        if (sessionStorage.getItem('_welcomePendingAgency') === '1') {
+            try {
+                if (typeof notifyAdmins === 'function') {
+                    notifyAdmins('new_user', {
+                        email: currentUser.email,
+                        user_id: currentUser.id,
+                        account_type: 'profesional',
+                        agency_name: formData.agency_name,
+                        agency_website: formData.agency_website
+                    });
+                }
+                sessionStorage.removeItem('_welcomePendingAgency');
+            } catch(e) { console.warn('Agency notify failed:', e); }
+        }
+        
         // Show success
         successDiv.classList.remove('hidden');
         successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
