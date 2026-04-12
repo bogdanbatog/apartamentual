@@ -123,7 +123,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'notifications@apartamentual.ro',
+            from: 'apartamentual@ltfbstudio.ro',
             to: [payload.data.recipient_email || adminEmail],
             subject: message.title,
             html: `
