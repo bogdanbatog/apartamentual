@@ -307,7 +307,7 @@
         }
     };
     
-    // Welcome flow: detect ?welcome=1 and adapt UI
+    // Welcome flow: detect ?welcome=1 and adapt UI + notify admin (only on first arrival after email confirmation)
     (function() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('welcome') === '1') {
@@ -324,6 +324,23 @@
             if (cancelBtn) cancelBtn.style.display = 'none';
             const cancelBtnPro = document.getElementById('cancel-btn-pro');
             if (cancelBtnPro) cancelBtnPro.style.display = 'none';
+            
+            // Notify superadmin that a new user just confirmed email
+            // Use sessionStorage flag to avoid duplicate notifications on page reload
+            if (!sessionStorage.getItem('_welcomeNotifSent')) {
+                setTimeout(async () => {
+                    try {
+                        const { data: { user } } = await sb.auth.getUser();
+                        if (user && typeof notifyAdmins === 'function') {
+                            notifyAdmins('new_user', { 
+                                email: user.email, 
+                                user_id: user.id 
+                            });
+                            sessionStorage.setItem('_welcomeNotifSent', '1');
+                        }
+                    } catch(e) { console.warn('Welcome notify failed:', e); }
+                }, 1500);
+            }
         }
     })();
     </script>
