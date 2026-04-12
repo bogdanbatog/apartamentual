@@ -106,6 +106,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // E autentificat - verifică dacă e agenție pending
+            try {
+                const { data: profCheck } = await supabase
+                    .from('profiles')
+                    .select('account_type, account_status')
+                    .eq('user_id', user.id)
+                    .single();
+                
+                if (profCheck && profCheck.account_type === 'profesional' && profCheck.account_status === 'pending') {
+                    // Agenție pending - blochează propunerea
+                    formContainer.classList.add('hidden');
+                    authRequired.classList.add('hidden');
+                    
+                    // Afișează mesaj de blocare
+                    const main = document.querySelector('main') || document.body;
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = 'card text-center py-12';
+                    blockDiv.innerHTML = `
+                        <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <svg width="40" height="40" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold mb-3">Cont în așteptare aprobare</h2>
+                        <p class="text-gray-600 mb-2" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+                            Contul tău de agenție este în curs de verificare de către un administrator. 
+                            Vei putea propune terenuri imediat ce contul va fi aprobat.
+                        </p>
+                        <p class="text-sm text-gray-500 mt-4">
+                            Vei primi un email de confirmare când contul tău va fi activat.
+                        </p>
+                        <a href="/index.html" class="mt-6 inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                            ← Înapoi la pagina principală
+                        </a>
+                    `;
+                    main.appendChild(blockDiv);
+                    return;
+                }
+            } catch(e) { console.warn('Status check failed:', e); }
+            
             // E autentificat - arată formularul
             formContainer.classList.remove('hidden');
             authRequired.classList.add('hidden');
