@@ -51,6 +51,7 @@ async function checkExistingSession() {
 // =====================================================
 
 async function loadCities() {
+    if (!document.getElementById('preferred_city')) return;
     try {
         const { data, error } = await supabase
             .from('cities')
@@ -94,6 +95,7 @@ async function loadZonesForCity(cityId) {
 }
 
 async function loadTags() {
+    if (!document.getElementById('tags-container')) return;
     try {
         const { data, error } = await supabase
             .from('tags')
@@ -203,7 +205,7 @@ function goToStep(step) {
     // Hide all steps
     document.getElementById('step1').classList.add('hidden');
     document.getElementById('step2').classList.add('hidden');
-    document.getElementById('step3').classList.add('hidden');
+    const _s3 = document.getElementById('step3'); if (_s3) _s3.classList.add('hidden');
     
     // Show requested step
     document.getElementById('step' + step).classList.remove('hidden');
@@ -228,11 +230,15 @@ function goToStep(step) {
     // Show appropriate profile form
     if (step === 3) {
         if (selectedAccountType === 'activ') {
-            document.getElementById('profile-form-activ').classList.remove('hidden');
-            document.getElementById('profile-form-profesional').classList.add('hidden');
+            const _pa = document.getElementById('profile-form-activ');
+            const _pp = document.getElementById('profile-form-profesional');
+            if (_pa) _pa.classList.remove('hidden');
+            if (_pp) _pp.classList.add('hidden');
         } else {
-            document.getElementById('profile-form-activ').classList.add('hidden');
-            document.getElementById('profile-form-profesional').classList.remove('hidden');
+            const _pa2 = document.getElementById('profile-form-activ');
+            const _pp2 = document.getElementById('profile-form-profesional');
+            if (_pa2) _pa2.classList.add('hidden');
+            if (_pp2) _pp2.classList.remove('hidden');
         }
     }
     
@@ -488,7 +494,7 @@ async function handleAuthSubmit(event) {
             document.getElementById('verify-email-display').textContent = email;
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.add('hidden');
-            document.getElementById('step3').classList.add('hidden');
+            const _s3 = document.getElementById('step3'); if (_s3) _s3.classList.add('hidden');
             document.getElementById('step-verify').classList.remove('hidden');
             
             // Store email for resend
@@ -667,7 +673,7 @@ function showError(element, message) {
 
 function showSuccess(accountType) {
     // Hide step 3
-    document.getElementById('step3').classList.add('hidden');
+    const _s3 = document.getElementById('step3'); if (_s3) _s3.classList.add('hidden');
     
     // Check for redirect URL (e.g. from invitation link)
     const urlParams = new URLSearchParams(window.location.search);
