@@ -10,7 +10,7 @@ const corsHeaders = {
 }
 
 interface NotificationPayload {
-  event_type: 'user_signup' | 'grup_created' | 'grup_updated' | 'teren_created' | 'teren_updated' | 'membership_request' | 'membership_approved' | 'profile_updated'
+  event_type: 'user_signup' | 'new_user' | 'grup_created' | 'grup_updated' | 'teren_created' | 'teren_updated' | 'membership_request' | 'membership_approved' | 'profile_updated' | string
   data: Record<string, any>
   timestamp?: string
 }
@@ -174,6 +174,29 @@ function formatNotificationMessage(payload: NotificationPayload): { title: strin
   const { event_type, data } = payload
   
   switch (event_type) {
+    case 'new_user': {
+      const isAgency = data.account_type === 'profesional';
+      if (isAgency) {
+        return {
+          title: '🏢 Cerere nouă de agenție - necesită aprobare',
+          body: `O nouă agenție imobiliară s-a înregistrat și așteaptă aprobare!\n\n` +
+                `📧 Email: ${data.email || 'N/A'}\n` +
+                `🏢 Nume agenție: ${data.agency_name || 'N/A'}\n` +
+                `🌐 Website: ${data.agency_website || 'N/A'}\n` +
+                `🆔 User ID: ${data.user_id || 'N/A'}\n\n` +
+                `⚠️ ACȚIUNE NECESARĂ: Intră în panoul de admin → Utilizatori → filtrul "Pending aprobare" pentru a aproba sau respinge această agenție.\n\n` +
+                `Link rapid: https://apartamentual.onrender.com/admin-utilizatori.html`
+        }
+      }
+      return {
+        title: '🎉 Utilizator nou înregistrat',
+        body: `Un nou utilizator s-a înregistrat și și-a confirmat emailul!\n\n` +
+              `📧 Email: ${data.email || 'N/A'}\n` +
+              `🆔 User ID: ${data.user_id || 'N/A'}\n` +
+              `Tip cont: Utilizator activ\n\n` +
+              `Vezi profilul: https://apartamentual.onrender.com/profile-view-new.html?id=${data.user_id || ''}`
+      }
+    }
     case 'user_signup':
       return {
         title: '🎉 New User Signup',
