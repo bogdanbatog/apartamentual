@@ -325,20 +325,57 @@
             const cancelBtnPro = document.getElementById('cancel-btn-pro');
             if (cancelBtnPro) cancelBtnPro.style.display = 'none';
             
-            // Notify superadmin that a new user just confirmed email
-            // Use sessionStorage flag to avoid duplicate notifications on page reload
+            // Sync account_type from user metadata to profiles table + notify admin
+            // Use sessionStorage flag to avoid duplicate runs on page reload
             if (!sessionStorage.getItem('_welcomeNotifSent')) {
                 setTimeout(async () => {
                     try {
                         const { data: { user } } = await sb.auth.getUser();
-                        if (user && typeof notifyAdmins === 'function') {
-                            notifyAdmins('new_user', { 
-                                email: user.email, 
-                                user_id: user.id 
-                            });
-                            sessionStorage.setItem('_welcomeNotifSent', '1');
+                        if (!user) return;
+                        
+                        // Read account_type from user metadata (set during signUp)
+                        const metaAccountType = user.user_metadata?.account_type || 'activ';
+                        const newStatus = metaAccountType === 'profesional' ? 'pending' : 'active';
+                        
+                        // Update profile with correct account_type
+                        await sb.from('profiles').update({
+                            account_type: metaAccountType,
+                            account_status: newStatus
+                        }).eq('user_id', user.id);
+                        
+                        // For agencies: show special banner explaining approval process
+                        if (metaAccountType === 'profesional') {
+                            const wb = document.getElementById('welcome-banner');
+                            if (wb) {
+                                const h3 = wb.querySelector('h3');
+                                const p = wb.querySelector('p');
+                                if (h3) h3.textContent = 'Bun venit pe ApartamenTUal! 🤝';
+                                if (p) p.innerHTML = 'Emailul tău a fost confirmat. Completează datele agenției tale mai jos. <strong>Contul tău va fi activat după aprobarea de către un administrator.</strong>';
+                            }
                         }
-                    } catch(e) { console.warn('Welcome notify failed:', e); }
+                        
+                        // For agencies: don't notify yet — wait until they save the form
+                        // For active users: notify immediately
+                        if (metaAccountType === 'profesional') {
+                            sessionStorage.setItem('_welcomePendingAgency', '1');
+                        } else {
+                            // Notify superadmin immediately for active users
+                            if (typeof notifyAdmins === 'function') {
+                                notifyAdmins('new_user', { 
+                                    email: user.email, 
+                                    user_id: user.id,
+                                    account_type: metaAccountType
+                                });
+                            }
+                        }
+                        sessionStorage.setItem('_welcomeNotifSent', '1');
+                        
+                        // Reload to refresh form display with correct account type
+                        if (metaAccountType === 'profesional') {
+                            // Wait a bit so the update is applied, then reload
+                            setTimeout(() => window.location.reload(), 500);
+                        }
+                    } catch(e) { console.warn('Welcome sync failed:', e); }
                 }, 1500);
             }
         }
