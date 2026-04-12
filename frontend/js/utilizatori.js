@@ -203,6 +203,21 @@ async function loadUsers() {
             zones: user.user_preferred_zones?.map(uz => uz.zones).filter(Boolean) || []
         }));
         
+        // Calculate completeness score and sort by it (most complete first)
+        allUsers.forEach(u => {
+            let score = 0;
+            if (u.pseudonym) score += 1;
+            if (u.profesie) score += 2;
+            if (u.descriere && u.descriere.length > 20) score += 3;
+            if (u.zones && u.zones.length > 0) score += 3;
+            if (u.tags && u.tags.length > 0) score += 3;
+            if (u.preferred_city) score += 1;
+            if (u.preferred_rooms) score += 1;
+            if (u.preferred_surface) score += 1;
+            u._completeness = score;
+        });
+        allUsers.sort((a, b) => b._completeness - a._completeness);
+        
         // Exclude current user from the list
         if (currentUser) {
             allUsers = allUsers.filter(u => u.user_id !== currentUser.id);
