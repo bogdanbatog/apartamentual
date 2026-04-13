@@ -134,19 +134,34 @@
                     
                     <!-- Right: 2 Video placeholders -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="video-placeholder aspect-[4/3] rounded-xl overflow-hidden shadow-lg relative group cursor-pointer">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <button class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                </button>
-                            </div>
-                            <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                                <p class="text-white text-sm font-medium">Ce este ApartamenTUal?</p>
-                                <p class="text-white/70 text-xs">Prezentare concept</p>
-                            </div>
-                        </div>
+                        <!-- LEFT card: Despre concept -->
                         <div class="flex flex-col gap-3">
-                            <div class="aspect-[4/3] rounded-xl overflow-hidden shadow-lg flex-1">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden shadow-lg flex-1" id="conceptVideoContainer">
+                                <!-- populated by JS: either an iframe for the first 'concept' video, or a fallback placeholder -->
+                                <div class="video-placeholder w-full h-full relative" id="conceptVideoPlaceholder">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
+                                        <p class="text-white text-sm font-medium">Ce este ApartamenTUal?</p>
+                                        <p class="text-white/70 text-xs">Prezentare concept</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="openVideoGallery('concept')" 
+                                    class="flex items-center justify-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-brand-200/50 rounded-lg text-sm font-medium text-brand-800 hover:bg-white hover:border-accent/50 transition-all">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Mai multe videoclipuri
+                            </button>
+                        </div>
+                        <!-- RIGHT card: Despre platformă -->
+                        <div class="flex flex-col gap-3">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden shadow-lg flex-1" id="platformaVideoContainer">
                                 <iframe 
                                     width="100%" height="100%" 
                                     src="https://www.youtube.com/embed/64z6hMkW7do" 
@@ -157,7 +172,7 @@
                                     style="border-radius: 12px;">
                                 </iframe>
                             </div>
-                            <button onclick="openVideoGallery()" 
+                            <button onclick="openVideoGallery('platforma')" 
                                     class="flex items-center justify-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-brand-200/50 rounded-lg text-sm font-medium text-brand-800 hover:bg-white hover:border-accent/50 transition-all">
                                 <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
@@ -899,7 +914,7 @@
     <div style="max-width:900px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
             <h2 style="color:white; font-size:1.5rem; font-weight:700; font-family:'DM Sans',sans-serif;">
-                <span style="color:#f97316;">▶</span> Videoclipuri explicative
+                <span style="color:#f97316;">▶</span> <span id="videoGalleryTitle">Videoclipuri explicative</span>
             </h2>
             <button onclick="closeVideoGallery()" style="background:none; border:none; color:white; font-size:2rem; cursor:pointer; padding:0.5rem;">&times;</button>
         </div>
@@ -912,10 +927,17 @@
 </div>
 
 <script>
-// Video gallery - loads from Supabase 'videos' table
-async function openVideoGallery() {
+// Video gallery - loads from Supabase 'videos' table, filtered by category
+async function openVideoGallery(category) {
+    // Default to 'platforma' if not specified (backwards compat)
+    category = category || 'platforma';
+    
     const grid = document.getElementById('videoGalleryGrid');
+    const titleEl = document.getElementById('videoGalleryTitle');
     grid.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:2rem; grid-column:1/-1;">Se încarcă...</p>';
+    if (titleEl) {
+        titleEl.textContent = category === 'concept' ? 'Videoclipuri despre concept' : 'Videoclipuri despre platformă';
+    }
     document.getElementById('videoGalleryModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
     
@@ -924,6 +946,7 @@ async function openVideoGallery() {
             .from('videos')
             .select('youtube_id, title, description')
             .eq('is_active', true)
+            .eq('category', category)
             .order('display_order');
         
         if (error) throw error;
@@ -953,6 +976,55 @@ async function openVideoGallery() {
         grid.innerHTML = '<p style="color:#ef4444; text-align:center; padding:2rem; grid-column:1/-1;">Eroare la încărcarea videoclipurilor.</p>';
     }
 }
+
+// Load the first active 'concept' video into the left card on page load.
+// If none exists yet, leaves the static placeholder in place.
+async function loadConceptPreview() {
+    try {
+        const { data: videos, error } = await sb
+            .from('videos')
+            .select('youtube_id, title')
+            .eq('is_active', true)
+            .eq('category', 'concept')
+            .order('display_order')
+            .limit(1);
+        
+        if (error) throw error;
+        if (!videos || videos.length === 0) return; // keep the placeholder
+        
+        const v = videos[0];
+        const container = document.getElementById('conceptVideoContainer');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <iframe 
+                width="100%" height="100%" 
+                src="https://www.youtube.com/embed/${v.youtube_id}" 
+                title="${(v.title || '').replace(/"/g, '&quot;')}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen
+                style="border-radius: 12px;">
+            </iframe>
+        `;
+    } catch (e) {
+        console.warn('Concept preview load failed:', e);
+        // keep placeholder
+    }
+}
+
+// Trigger concept preview load once Supabase client is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait briefly for sb to initialize from supabase-config.js
+    const tryLoad = (retries) => {
+        if (typeof sb !== 'undefined' && sb) {
+            loadConceptPreview();
+        } else if (retries > 0) {
+            setTimeout(() => tryLoad(retries - 1), 200);
+        }
+    };
+    tryLoad(10);
+});
 
 function closeVideoGallery() {
     document.getElementById('videoGalleryModal').style.display = 'none';
