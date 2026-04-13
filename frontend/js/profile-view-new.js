@@ -1079,7 +1079,7 @@ window.sendProfileInvite = async function(groupId, groupName) {
                     group_id: groupId,
                     invite_link: inviteLink,
                     invited_by: myName,
-                    admin_email: targetEmail
+                    recipient_email: targetEmail
                 });
             }
             
