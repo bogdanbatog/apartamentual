@@ -360,18 +360,13 @@
                         }
                         
                         // For agencies: don't notify yet — wait until they save the form
-                        // For active users: notify immediately
+                        // For active users: same — wait until save so we only notify
+                        // once the profile is actually filled in (not the moment they
+                        // land on the edit page after email confirmation).
                         if (metaAccountType === 'profesional') {
                             sessionStorage.setItem('_welcomePendingAgency', '1');
                         } else {
-                            // Notify superadmin immediately for active users
-                            if (typeof notifyAdmins === 'function') {
-                                notifyAdmins('new_user', { 
-                                    email: user.email, 
-                                    user_id: user.id,
-                                    account_type: metaAccountType
-                                });
-                            }
+                            sessionStorage.setItem('_welcomePendingActive', '1');
                         }
                         sessionStorage.setItem('_welcomeNotifSent', '1');
                     } catch(e) { console.warn('Welcome sync failed:', e); }
