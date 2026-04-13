@@ -69,9 +69,16 @@
         .cta-btn-secondary:hover { background: rgba(255,255,255,0.2); }
         
         @media (max-width: 640px) {
+            /* Forțează o singură coloană pentru cardurile de navigație.
+               Pe ecranele mici `minmax(260px, 1fr)` cu auto-fit poate calcula
+               greșit și încerca 2 coloane care nu intră → overflow orizontal. */
+            .nav-cards { grid-template-columns: 1fr; }
             .benefits-grid { grid-template-columns: 1fr; }
             .ce-hero { padding: 2.5rem 1rem; }
             .ce-hero h1 { font-size: 1.7rem; }
+            
+            /* Safety net: previne orice scroll orizontal accidental pe pagină */
+            html, body { overflow-x: hidden; }
         }
     </style>
 </head>
