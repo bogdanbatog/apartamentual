@@ -102,6 +102,10 @@ function createNavigation() {
             <a href="#" class="unified-btn-login" id="btnLoginNavMobile" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
                 <i class="fas fa-sign-in-alt"></i> Intră în cont
             </a>
+            <div class="unified-nav-mobile-user" id="navMobileUser" style="display:none;">
+                <a href="#" class="unified-nav-link" id="btnProfileMobile"><i class="fas fa-user"></i> Profilul meu</a>
+                <button class="unified-nav-link" id="btnLogoutMobile" style="text-align:left; background:none; border:none; cursor:pointer; font-family:inherit; width:100%;"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
+            </div>
         </div>
     </nav>`;
 }
@@ -168,6 +172,30 @@ function setupNavBehavior() {
             }
         });
     }
+
+    // Mobile profile link
+    const profileLinkMobile = document.getElementById('btnProfileMobile');
+    if (profileLinkMobile) {
+        profileLinkMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.currentUserId) {
+                window.location.href = '/profile-view-new.html?id=' + window.currentUserId;
+            }
+        });
+    }
+
+    // Mobile logout
+    const logoutBtnMobile = document.getElementById('btnLogoutMobile');
+    if (logoutBtnMobile) {
+        logoutBtnMobile.addEventListener('click', async () => {
+            try {
+                await sb.auth.signOut();
+                window.location.href = '/index.html';
+            } catch (err) {
+                console.error('Logout error:', err);
+            }
+        });
+    }
 }
 
 async function checkAuthState() {
@@ -187,6 +215,7 @@ async function checkAuthState() {
         window.currentUserId = user ? user.id : null;
 
         const navUser = document.getElementById('navUser');
+        const navMobileUser = document.getElementById('navMobileUser');
         const btnLogin = document.getElementById('btnLoginNav');
         const btnLoginMobile = document.getElementById('btnLoginNavMobile');
 
@@ -213,6 +242,7 @@ async function checkAuthState() {
                         document.body.appendChild(overlay);
                         // Hide nav elements
                         if (navUser) navUser.style.display = 'none';
+                        if (navMobileUser) navMobileUser.style.display = 'none';
                         if (btnLogin) btnLogin.style.display = 'flex';
                         if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
                         return;
@@ -222,10 +252,12 @@ async function checkAuthState() {
             } // end !isAdminPage
 
             if (navUser) navUser.style.display = 'flex';
+            if (navMobileUser) navMobileUser.style.display = 'flex';
             if (btnLogin) btnLogin.style.display = 'none';
             if (btnLoginMobile) btnLoginMobile.style.display = 'none';
         } else {
             if (navUser) navUser.style.display = 'none';
+            if (navMobileUser) navMobileUser.style.display = 'none';
             if (btnLogin) btnLogin.style.display = 'flex';
             if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
         }
