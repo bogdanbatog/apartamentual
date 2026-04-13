@@ -247,6 +247,38 @@
     padding: 10px;
 }
 
+/* Mobile user section (Profilul meu / Deconectare) */
+.unified-nav-mobile-user {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+}
+.unified-nav-mobile-user .unified-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #334155;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+.unified-nav-mobile-user .unified-nav-link:hover,
+.unified-nav-mobile-user .unified-nav-link:active {
+    background: #fff7ed;
+    color: #f97316;
+}
+.unified-nav-mobile-user .unified-nav-link i {
+    width: 18px;
+    text-align: center;
+    color: #f97316;
+}
+
 @media (max-width: 768px) {
     .unified-nav-links {
         display: none;
