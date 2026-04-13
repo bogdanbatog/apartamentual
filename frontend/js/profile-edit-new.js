@@ -455,6 +455,25 @@ async function handleActiveFormSubmit(event) {
         profileData = { ...profileData, ...formData };
         updateProgressBadge();
         
+        // If this save happened as part of the welcome flow (first profile
+        // completion right after email confirmation), notify the superadmin.
+        // We detect it from the URL `?welcome=1` parameter which the register
+        // flow includes in the email confirmation link. It stays in the URL
+        // throughout the edit session, so checking it here is reliable —
+        // no timing dependencies, no sessionStorage flags to get out of sync.
+        const isWelcomeSave = new URLSearchParams(window.location.search).get('welcome') === '1';
+        if (isWelcomeSave) {
+            try {
+                if (typeof notifyAdmins === 'function') {
+                    notifyAdmins('new_user', {
+                        email: currentUser.email,
+                        user_id: currentUser.id,
+                        account_type: 'activ'
+                    });
+                }
+            } catch(e) { console.warn('Active user notify failed:', e); }
+        }
+        
         // Show success
         successDiv.classList.remove('hidden');
         successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -497,9 +516,12 @@ async function handleProfessionalFormSubmit(event) {
         profileData = { ...profileData, ...formData };
         updateProgressBadge();
         
-        // If this is a pending agency from welcome flow, notify superadmin now
-        // (we waited until they completed the form so admin has data to review)
-        if (sessionStorage.getItem('_welcomePendingAgency') === '1') {
+        // If this save happened as part of the welcome flow (first profile
+        // completion for an agency), notify the superadmin so they can review
+        // and approve the agency. See the active-user branch above for the
+        // rationale behind using the URL parameter instead of sessionStorage.
+        const isWelcomeSaveAgency = new URLSearchParams(window.location.search).get('welcome') === '1';
+        if (isWelcomeSaveAgency) {
             try {
                 if (typeof notifyAdmins === 'function') {
                     notifyAdmins('new_user', {
@@ -510,25 +532,7 @@ async function handleProfessionalFormSubmit(event) {
                         agency_website: formData.agency_website
                     });
                 }
-                sessionStorage.removeItem('_welcomePendingAgency');
             } catch(e) { console.warn('Agency notify failed:', e); }
-        }
-        
-        // If this is a pending active user from welcome flow, notify superadmin now.
-        // We wait until the profile form is actually saved, not when the user lands
-        // on the edit page right after email confirmation — otherwise we notify
-        // for users who might never complete their profile.
-        if (sessionStorage.getItem('_welcomePendingActive') === '1') {
-            try {
-                if (typeof notifyAdmins === 'function') {
-                    notifyAdmins('new_user', {
-                        email: currentUser.email,
-                        user_id: currentUser.id,
-                        account_type: 'activ'
-                    });
-                }
-                sessionStorage.removeItem('_welcomePendingActive');
-            } catch(e) { console.warn('Active user notify failed:', e); }
         }
         
         // Show success
