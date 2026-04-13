@@ -860,18 +860,6 @@
                 align-self: flex-start;
             }
             
-            /* DEBUG TEMPORAR: face input-row de comentariu vizibil cu border roșu
-               ca să vedem dacă există în DOM și unde e poziționat. Scoate după test. */
-            .comment-input-row {
-                border: 2px solid red !important;
-                background: yellow !important;
-                min-height: 50px;
-                padding: 8px;
-            }
-            .comment-input-row input {
-                background: white !important;
-            }
-            
             /* Spațiu de jos pe body ca butonul "Cere consultanță" flotant
                să nu acopere conținutul de jos pe mobil */
             body {
@@ -1771,7 +1759,6 @@ function renderTerenuri(terenuri) {
                         <i class="fas fa-chart-bar"></i> Cere o analiză
                     </a>
                 </div>
-                ${(isMember || isAdmin || isSuperAdmin) ? `
                 <div class="teren-comments-area">
                     <div class="teren-comments-list" id="comments-${teren.id}">
                         <div class="no-comments"><i class="fas fa-spinner fa-spin"></i> Se incarca...</div>
@@ -1782,17 +1769,14 @@ function renderTerenuri(terenuri) {
                         <button onclick="addComment('${teren.id}')">Trimite</button>
                     </div>
                 </div>
-                ` : ''}
             </div>
         `;
     }).join('');
     
-    // Load comments for each teren (only for members/admin/superadmin)
-    if (isMember || isAdmin || isSuperAdmin) {
-        terenuri.forEach(t => {
-            if (t.teren) loadComments(t.teren.id);
-        });
-    }
+    // Load comments for each teren
+    terenuri.forEach(t => {
+        if (t.teren) loadComments(t.teren.id);
+    });
 }
 
 // ── CHECKLIST TIMELINE ──
