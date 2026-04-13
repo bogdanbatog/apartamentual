@@ -1106,11 +1106,35 @@ img { max-width: 100%; display: block; }
     .hero-content h1 { font-size: 1.7rem; }
     .hero-content p { font-size: 0.95rem; }
 
-    .filters-section { top: 64px; }
-    .filters-row { flex-direction: column; gap: 10px; }
+    /* Filtre compacte pe mobil — nu mai stau sticky ca să nu ocupe ecranul,
+       padding redus, label-uri mai mici, gap mai mic între ele */
+    .filters-section {
+        position: static;
+        top: auto;
+    }
+    .filters-container {
+        padding: 12px 16px;
+    }
+    .filters-row { flex-direction: column; gap: 8px; }
     .filter-group { min-width: 100%; }
+    .filter-group label {
+        font-size: 0.7rem;
+        margin-bottom: 3px;
+    }
+    .filter-select {
+        padding: 8px 32px 8px 12px;
+        font-size: 0.875rem;
+    }
     .filter-group-actions { min-width: 100%; }
-    .btn-filter-reset { width: 100%; justify-content: center; }
+    .btn-filter-reset {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 14px;
+    }
+    .results-info {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
 
     .terenuri-grid {
         grid-template-columns: 1fr;
