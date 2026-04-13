@@ -832,6 +832,33 @@
             .members-grid {
                 grid-template-columns: 1fr;
             }
+            
+            /* Fix: section-card h2 nu mai e flex pe mobil
+               (altfel text + <span> se rup în coloane verticale ciudate) */
+            .section-card h2 {
+                display: block;
+            }
+            .section-card h2 i {
+                margin-right: 0.5rem;
+            }
+            
+            /* Fix: cardul terenului din "Terenuri favorite ale grupului"
+               devine vertical pe mobil — imagine sus, titlu+descriere mijloc,
+               buton jos. Altfel titlul se rupea cuvânt cu cuvânt vertical
+               și împingea secțiunea de comentarii mult sub fold. */
+            .teren-with-comments .teren-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .teren-with-comments .teren-header img {
+                width: 100%;
+                height: 140px;
+            }
+            .btn-cere-analiza {
+                margin-left: 0;
+                align-self: flex-start;
+            }
         }
     .tags-display {
         display: flex;
@@ -1336,8 +1363,8 @@ async function loadGroupDetails() {
         
         // Check if current user is member/admin
         if (currentUser) {
-            isMember = members.some(m => m.user_id === currentUser.id);
             isAdmin = group.admin_id === currentUser.id;
+            isMember = members.some(m => m.user_id === currentUser.id) || isAdmin;
             isSuperAdmin = currentUserProfile && currentUserProfile.is_super_admin === true;
             
             // Checklist edit permission:
@@ -1726,7 +1753,7 @@ function renderTerenuri(terenuri) {
                         <i class="fas fa-chart-bar"></i> Cere o analiză
                     </a>
                 </div>
-                ${isMember ? `
+                ${(isMember || isAdmin || isSuperAdmin) ? `
                 <div class="teren-comments-area">
                     <div class="teren-comments-list" id="comments-${teren.id}">
                         <div class="no-comments"><i class="fas fa-spinner fa-spin"></i> Se incarca...</div>
@@ -1742,8 +1769,8 @@ function renderTerenuri(terenuri) {
         `;
     }).join('');
     
-    // Load comments for each teren (only for members)
-    if (isMember || isSuperAdmin) {
+    // Load comments for each teren (only for members/admin/superadmin)
+    if (isMember || isAdmin || isSuperAdmin) {
         terenuri.forEach(t => {
             if (t.teren) loadComments(t.teren.id);
         });
