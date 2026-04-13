@@ -992,6 +992,27 @@
             </div>
         </div>
         
+        <!-- Invitation banner (shown if current user has a pending invitation to this group) -->
+        <div id="invitationBanner" style="display: none; margin-bottom: 1rem;">
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fef08a 100%); border: 1px solid #fcd34d; border-radius: 12px; padding: 1.25rem 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <span style="font-size: 1.5rem;">🎉</span>
+                    <h3 style="margin: 0; font-size: 1.0625rem; color: #78350f; font-weight: 700;">Ai primit o invitație!</h3>
+                </div>
+                <p id="invitationBannerText" style="margin: 0 0 1rem; color: #78350f; font-size: 0.9375rem; line-height: 1.55;">
+                    <!-- populated by JS -->
+                </p>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button id="btnAcceptInvitation" onclick="acceptInvitationBanner()" class="btn-action" style="background: #059669; color: white; border: none;">
+                        <i class="fas fa-check"></i> <span id="btnAcceptInvitationLabel">Acceptă invitația</span>
+                    </button>
+                    <button id="btnRejectInvitation" onclick="rejectInvitationBanner()" class="btn-action" style="background: white; color: #78350f; border: 1px solid #fcd34d;">
+                        <i class="fas fa-times"></i> Respinge
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <!-- Pending requests banner (shown to admin, right below header) -->
         <div id="pendingBanner" style="display: none; margin-bottom: 1rem;">
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 1rem 1.25rem;">
@@ -1606,6 +1627,9 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         // Render pending requests
         renderPendingRequests();
     }
+    
+    // Check for pending invitation (from URL token or existing DB entry)
+    await checkPendingInvitation();
 }
 
 // ── RENDER ACTIONS ──
@@ -2726,18 +2750,9 @@ async function sendInvitation() {
         const grupName = currentGroup.nume || 'un grup';
         const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}&grup=${encodeURIComponent(grupName)}`;
         
-        // Send email automatically to the invited person
-        try {
-            if (typeof notifyAdmins === 'function') {
-                notifyAdmins('invitation_sent', {
-                    group_name: grupName,
-                    group_id: currentGroup.id,
-                    invite_link: inviteLink,
-                    invited_by: currentUser.email || 'un membru',
-                    admin_email: email
-                });
-            }
-        } catch (notifyErr) { console.warn('Invite email failed:', notifyErr); }
+        // NOTE: nu mai trimitem email automat aici. Utilizatorul alege din modal
+        // cum vrea să trimită invitația: email (prin Resend), WhatsApp, sau copy link.
+        // Asta îi dă control și previne dubluri dacă apasă și butonul din modal.
         
         // Show success with link to copy
         closeInviteModal();
@@ -2780,10 +2795,10 @@ function showInviteLinkModal(link, email, grupName) {
                 
                 <p style="font-size: 0.8125rem; color: #94a3b8; margin-bottom: 1rem;">Sau trimite direct prin:</p>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                    <a href="mailto:${email}?subject=${encodeURIComponent(`Invitație în grupul "${grupName}" pe ApartamenTUal`)}&body=${encodeURIComponent(`Salut!\n\nTe invit în grupul "${grupName}" pe ApartamenTUal.\n\nAcceptă invitația aici:\n${link}\n\nNe vedem în grup!`)}" 
-                       class="btn-action btn-secondary" target="_blank">
-                        <i class="fas fa-envelope"></i> Email
-                    </a>
+                    <button onclick="sendInviteEmail('${email.replace(/'/g, "\\'")}', '${grupName.replace(/'/g, "\\'").replace(/"/g, '\\"')}', '${link}')" 
+                            class="btn-action btn-secondary" id="btnSendInviteEmail">
+                        <i class="fas fa-envelope"></i> <span id="sendEmailLabel">Trimite email</span>
+                    </button>
                     <a href="https://wa.me/?text=${encodeURIComponent(`Te invit în grupul "${grupName}" pe ApartamenTUal! Acceptă invitația: ${link}`)}" 
                        class="btn-action btn-whatsapp" target="_blank">
                         <i class="fab fa-whatsapp"></i> WhatsApp
@@ -2809,6 +2824,62 @@ window.copyInviteLink = function() {
             document.execCommand('copy');
             showToast('Link copiat!', 'success');
         });
+    }
+};
+
+window.sendInviteEmail = async function(email, grupName, link) {
+    const btn = document.getElementById('btnSendInviteEmail');
+    const label = document.getElementById('sendEmailLabel');
+    if (!btn || !label) return;
+    
+    // Disable and show loading
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+    label.textContent = 'Se trimite...';
+    
+    try {
+        // Get inviter name for the email
+        let inviterName = 'Un membru';
+        if (currentUser) {
+            try {
+                const { data: prof } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+                if (prof && prof.pseudonym) inviterName = prof.pseudonym;
+            } catch(e) {}
+        }
+        
+        const { error } = await sb.functions.invoke('notify-admins', {
+            body: {
+                event_type: 'invitation_sent',
+                group_name: grupName,
+                invite_link: link,
+                invited_by: inviterName,
+                recipient_email: email
+            }
+        });
+        
+        if (error) throw error;
+        
+        // Success feedback
+        label.textContent = 'Email trimis!';
+        btn.style.background = '#dcfce7';
+        btn.style.color = '#166534';
+        btn.style.borderColor = '#86efac';
+        showToast(`Email trimis către ${email}`, 'success');
+    } catch (e) {
+        console.error('Send invite email failed:', e);
+        label.textContent = 'Eroare la trimitere';
+        btn.style.background = '#fee2e2';
+        btn.style.color = '#991b1b';
+        showToast('Nu am putut trimite emailul. Copiază link-ul și trimite-l manual.', 'error');
+        // Re-enable after 3 seconds so user can retry
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+            label.textContent = 'Trimite email';
+        }, 3000);
     }
 };
 
@@ -2854,6 +2925,272 @@ function renderPendingRequests() {
         }).join('');
     }
 }
+
+// ── INVITATION BANNER ──
+// Holds the pending invitation found for the current user (if any), so the
+// accept/reject handlers know which row to update without refetching.
+let pendingInvitation = null;
+
+async function checkPendingInvitation() {
+    // Must be logged in and have a group loaded
+    if (!currentUser || !currentGroup) return;
+    
+    // If user is already an active member, never show the banner — they've
+    // clearly accepted before (or joined through another path).
+    if (isMember && !isAdmin) {
+        // isMember includes the admin via our earlier fix; the extra !isAdmin
+        // check is defensive — admins shouldn't receive invitations to their
+        // own group, but if somehow one exists in DB we'd rather not surface it.
+        const activeMembership = members.find(m => m.user_id === currentUser.id && m.status === 'activ');
+        if (activeMembership) return;
+    }
+    
+    try {
+        // First try the URL param — came directly from accept-invite.html redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('invite');
+        
+        let invitation = null;
+        
+        if (urlToken) {
+            const { data } = await sb
+                .from('grup_invitations')
+                .select('id, grup_id, invited_email, invited_by, status, expires_at, token')
+                .eq('token', urlToken)
+                .eq('grup_id', currentGroup.id)
+                .maybeSingle();
+            invitation = data;
+        }
+        
+        // Fallback: check for any pending invitation for this user's email in this group.
+        // This runs on every visit, so the banner re-appears until they decide.
+        if (!invitation && currentUser.email) {
+            const { data } = await sb
+                .from('grup_invitations')
+                .select('id, grup_id, invited_email, invited_by, status, expires_at, token')
+                .eq('grup_id', currentGroup.id)
+                .eq('invited_email', currentUser.email.toLowerCase())
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            invitation = data;
+        }
+        
+        if (!invitation) return;
+        
+        // Validate invitation state
+        if (invitation.status !== 'pending') return; // already accepted/rejected/etc.
+        if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
+            // Mark expired and skip
+            try {
+                await sb.from('grup_invitations').update({ status: 'expired' }).eq('id', invitation.id);
+            } catch(e) {}
+            return;
+        }
+        
+        // Verify email match (the invitation may belong to a different account)
+        if (currentUser.email && invitation.invited_email &&
+            currentUser.email.toLowerCase() !== invitation.invited_email.toLowerCase()) {
+            return; // not our invitation
+        }
+        
+        // Look up the inviter's name (pseudonym)
+        let inviterName = 'Un membru al grupului';
+        try {
+            const { data: inviterProf } = await sb
+                .from('profiles')
+                .select('pseudonym')
+                .eq('user_id', invitation.invited_by)
+                .maybeSingle();
+            if (inviterProf && inviterProf.pseudonym) inviterName = inviterProf.pseudonym;
+        } catch(e) {}
+        
+        // Determine if the inviter is the group admin — affects button label
+        // and what happens on accept (direct activ vs pending approval).
+        const invitedByAdmin = invitation.invited_by === currentGroup.admin_id;
+        
+        // Store for the accept/reject handlers
+        pendingInvitation = {
+            id: invitation.id,
+            invitedByAdmin: invitedByAdmin,
+            inviterName: inviterName,
+            groupName: currentGroup.nume
+        };
+        
+        // Populate banner text
+        const bannerText = document.getElementById('invitationBannerText');
+        const acceptLabel = document.getElementById('btnAcceptInvitationLabel');
+        
+        if (bannerText) {
+            const actionHint = invitedByAdmin
+                ? 'Dacă accepți, vei deveni imediat membru al grupului.'
+                : 'Dacă accepți, cererea ta va fi trimisă adminului grupului pentru aprobare.';
+            bannerText.innerHTML =
+                `<strong>${escapeHtml(inviterName)}</strong> te-a invitat să te alături grupului ` +
+                `<strong>„${escapeHtml(currentGroup.nume)}"</strong>. Poți vedea detaliile grupului mai jos ` +
+                `(descriere, membri, zone, terenuri favorite) înainte să decizi. ${actionHint}`;
+        }
+        
+        if (acceptLabel) {
+            acceptLabel.textContent = invitedByAdmin ? 'Acceptă și intră în grup' : 'Acceptă invitația';
+        }
+        
+        // Show banner
+        document.getElementById('invitationBanner').style.display = 'block';
+        
+    } catch (e) {
+        console.warn('checkPendingInvitation failed:', e);
+    }
+}
+
+window.acceptInvitationBanner = async function() {
+    if (!pendingInvitation || !currentUser || !currentGroup) return;
+    
+    const btnAccept = document.getElementById('btnAcceptInvitation');
+    const btnReject = document.getElementById('btnRejectInvitation');
+    const label = document.getElementById('btnAcceptInvitationLabel');
+    
+    // Disable buttons during processing
+    if (btnAccept) btnAccept.disabled = true;
+    if (btnReject) btnReject.disabled = true;
+    const originalLabel = label ? label.textContent : '';
+    if (label) label.textContent = 'Se procesează...';
+    
+    try {
+        // Check group capacity before joining
+        const { count } = await sb
+            .from('grup_membri')
+            .select('id', { count: 'exact', head: true })
+            .eq('grup_id', currentGroup.id)
+            .eq('status', 'activ');
+        
+        if (count >= currentGroup.max_membri) {
+            showToast('Grupul a atins numărul maxim de membri. Contactează adminul grupului.', 'error');
+            if (btnAccept) btnAccept.disabled = false;
+            if (btnReject) btnReject.disabled = false;
+            if (label) label.textContent = originalLabel;
+            return;
+        }
+        
+        // Admin inviter → activ, regular member inviter → pending
+        const joinStatus = pendingInvitation.invitedByAdmin ? 'activ' : 'pending';
+        
+        // Check if there's a pre-existing membership row (could be from previous leave/kick)
+        const { data: existingMember } = await sb
+            .from('grup_membri')
+            .select('id, status')
+            .eq('grup_id', currentGroup.id)
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+        
+        if (existingMember) {
+            await sb
+                .from('grup_membri')
+                .update({ status: joinStatus, joined_at: new Date().toISOString() })
+                .eq('id', existingMember.id);
+        } else {
+            const { error: joinError } = await sb
+                .from('grup_membri')
+                .insert({
+                    grup_id: currentGroup.id,
+                    user_id: currentUser.id,
+                    status: joinStatus
+                });
+            if (joinError) throw joinError;
+        }
+        
+        // Mark invitation as accepted
+        await sb
+            .from('grup_invitations')
+            .update({ status: 'accepted' })
+            .eq('id', pendingInvitation.id);
+        
+        // If pending, notify admin to approve
+        if (joinStatus === 'pending') {
+            try {
+                const { data: adminProf } = await sb.from('profiles').select('email').eq('user_id', currentGroup.admin_id).single();
+                const { data: userProf } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+                if (adminProf && adminProf.email) {
+                    await sb.functions.invoke('notify-admins', {
+                        body: {
+                            event_type: 'join_request_admin_email',
+                            admin_email: adminProf.email,
+                            group_name: currentGroup.nume,
+                            user_email: currentUser.email,
+                            user_name: userProf?.pseudonym || currentUser.email,
+                            group_id: currentGroup.id
+                        }
+                    });
+                }
+            } catch(e) { console.warn('Admin notify failed:', e); }
+            
+            showToast('Invitație acceptată! Cererea ta a fost trimisă adminului pentru aprobare.', 'success');
+        } else {
+            showToast('Bine ai venit în grup!', 'success');
+        }
+        
+        // Hide banner
+        document.getElementById('invitationBanner').style.display = 'none';
+        pendingInvitation = null;
+        
+        // Clean URL (remove ?invite=TOKEN) so a page reload doesn't re-trigger
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('invite');
+            window.history.replaceState({}, '', url.toString());
+        } catch(e) {}
+        
+        // Reload after a brief delay to refresh membership state, actions, etc.
+        setTimeout(() => window.location.reload(), 1200);
+        
+    } catch (e) {
+        console.error('Accept invitation failed:', e);
+        showToast('Eroare la acceptarea invitației. Încearcă din nou.', 'error');
+        if (btnAccept) btnAccept.disabled = false;
+        if (btnReject) btnReject.disabled = false;
+        if (label) label.textContent = originalLabel;
+    }
+};
+
+window.rejectInvitationBanner = async function() {
+    if (!pendingInvitation) return;
+    
+    if (!confirm('Sigur vrei să respingi această invitație? Nu vei mai putea să o accepți ulterior.')) {
+        return;
+    }
+    
+    const btnAccept = document.getElementById('btnAcceptInvitation');
+    const btnReject = document.getElementById('btnRejectInvitation');
+    if (btnAccept) btnAccept.disabled = true;
+    if (btnReject) btnReject.disabled = true;
+    
+    try {
+        await sb
+            .from('grup_invitations')
+            .update({ status: 'rejected' })
+            .eq('id', pendingInvitation.id);
+        
+        // Hide banner
+        document.getElementById('invitationBanner').style.display = 'none';
+        pendingInvitation = null;
+        
+        // Clean URL
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('invite');
+            window.history.replaceState({}, '', url.toString());
+        } catch(e) {}
+        
+        showToast('Invitație respinsă.', 'success');
+        
+    } catch (e) {
+        console.error('Reject invitation failed:', e);
+        showToast('Eroare la respingerea invitației.', 'error');
+        if (btnAccept) btnAccept.disabled = false;
+        if (btnReject) btnReject.disabled = false;
+    }
+};
 
 window.changeStatus = async function(newStatus) {
     if (!isAdmin || !currentGroup) return;
