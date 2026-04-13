@@ -322,89 +322,16 @@ async function processInvitation() {
         if (existingMember && existingMember.status === 'activ') {
             document.getElementById('grupNameAlready').textContent = group.nume;
             document.getElementById('btnGoToGroupAlready').href = `grup-details.html?id=${group.id}`;
-            // Still mark invitation as accepted
+            // Still mark invitation as accepted (user is already in group)
             await sb.from('grup_invitations').update({ status: 'accepted' }).eq('id', invitation.id);
             showState('stateAlready');
             return;
         }
         
-        // 5. Check group capacity
-        const { count } = await sb
-            .from('grup_membri')
-            .select('id', { count: 'exact', head: true })
-            .eq('grup_id', group.id)
-            .eq('status', 'activ');
-        
-        if (count >= group.max_membri) {
-            showError('Grup plin', 'Grupul a atins numărul maxim de membri. Contactează adminul grupului.');
-            return;
-        }
-        
-        // 6. Add user to group
-        // Determine if the inviter is the group admin
-        const invitedByAdmin = invitation.invited_by === group.admin_id;
-        // If inviter is admin → join as active directly
-        // If inviter is a regular member → join as pending, admin must approve
-        const joinStatus = invitedByAdmin ? 'activ' : 'pending';
-        
-        if (existingMember) {
-            // Reactivate with appropriate status
-            await sb
-                .from('grup_membri')
-                .update({ status: joinStatus, joined_at: new Date().toISOString() })
-                .eq('id', existingMember.id);
-        } else {
-            const { error: joinError } = await sb
-                .from('grup_membri')
-                .insert({
-                    grup_id: group.id,
-                    user_id: user.id,
-                    status: joinStatus
-                });
-            
-            if (joinError) throw joinError;
-        }
-        
-        // 7. Mark invitation as accepted
-        await sb
-            .from('grup_invitations')
-            .update({ status: 'accepted' })
-            .eq('id', invitation.id);
-        
-        // 8. If pending, notify admin to approve
-        if (joinStatus === 'pending') {
-            try {
-                const { data: adminProf } = await sb.from('profiles').select('email').eq('user_id', group.admin_id).single();
-                const { data: userProf } = await sb.from('profiles').select('pseudonym').eq('user_id', user.id).single();
-                if (adminProf && adminProf.email) {
-                    await sb.functions.invoke('notify-admins', {
-                        body: {
-                            event_type: 'join_request_admin_email',
-                            admin_email: adminProf.email,
-                            group_name: group.nume,
-                            user_email: user.email,
-                            user_name: userProf?.pseudonym || user.email,
-                            group_id: group.id
-                        }
-                    });
-                }
-            } catch(e) { console.warn('Admin notify failed:', e); }
-            
-            // Show pending state instead of success
-            document.getElementById('grupNameSuccess').textContent = group.nume;
-            const successMsg = document.querySelector('#stateSuccess p');
-            if (successMsg) {
-                successMsg.textContent = 'Invitația a fost acceptată! Cererea ta de alăturare a fost trimisă adminului grupului pentru aprobare.';
-            }
-            const goBtn = document.getElementById('btnGoToGroup');
-            if (goBtn) goBtn.href = `grup-details.html?id=${group.id}`;
-            showState('stateSuccess');
-        } else {
-            // Direct join - show success
-            document.getElementById('grupNameSuccess').textContent = group.nume;
-            document.getElementById('btnGoToGroup').href = `grup-details.html?id=${group.id}`;
-            showState('stateSuccess');
-        }
+        // 5. Redirect to group details page with invite token — user will see a
+        //    confirmation banner there with Accept / Reject buttons. We no longer
+        //    auto-join: the user should see the group content first and decide.
+        window.location.href = `grup-details.html?id=${group.id}&invite=${encodeURIComponent(token)}`;
         
     } catch (e) {
         console.error('Error processing invitation:', e);
