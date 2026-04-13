@@ -359,15 +359,10 @@
                             }
                         }
                         
-                        // For agencies: don't notify yet — wait until they save the form
-                        // For active users: same — wait until save so we only notify
-                        // once the profile is actually filled in (not the moment they
-                        // land on the edit page after email confirmation).
-                        if (metaAccountType === 'profesional') {
-                            sessionStorage.setItem('_welcomePendingAgency', '1');
-                        } else {
-                            sessionStorage.setItem('_welcomePendingActive', '1');
-                        }
+                        // Notify superadmin about the new user at profile save time,
+                        // not here. See js/profile-edit-new.js handleFormSubmit /
+                        // handleProfessionalFormSubmit — they check the `?welcome=1`
+                        // URL parameter to decide when to fire the notification.
                         sessionStorage.setItem('_welcomeNotifSent', '1');
                     } catch(e) { console.warn('Welcome sync failed:', e); }
                 }, 100);  // reduced from 1500ms to 100ms — sb session is ready almost immediately
