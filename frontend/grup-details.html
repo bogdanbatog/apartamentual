@@ -3127,6 +3127,45 @@ window.acceptInvitationBanner = async function() {
             
             showToast('Invitație acceptată! Cererea ta a fost trimisă adminului pentru aprobare.', 'success');
         } else {
+            // Active join (admin-sent invitation) → notify all existing members
+            // + superadmin (via dedicated call to avoid N+1 duplication).
+            // Pattern matches member_left broadcast flow.
+            try {
+                const { data: userProf } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+                const joinedName = userProf?.pseudonym || currentUser.email;
+                
+                // Get all existing active members (excluding the new joiner)
+                const { data: existingMembers } = await sb
+                    .from('grup_membri')
+                    .select('user_id')
+                    .eq('grup_id', currentGroup.id)
+                    .eq('status', 'activ')
+                    .neq('user_id', currentUser.id);
+                
+                const memberIds = (existingMembers || []).map(m => m.user_id);
+                if (memberIds.length > 0) {
+                    const { data: profs } = await sb.from('profiles').select('email').in('user_id', memberIds);
+                    const emails = (profs || []).map(p => p.email).filter(Boolean);
+                    // Per-member broadcast — admin_email set, no superadmin CC
+                    for (const email of emails) {
+                        notifyAdmins('member_joined', {
+                            group_name: currentGroup.nume,
+                            group_id: currentGroup.id,
+                            user_name: joinedName,
+                            user_email: currentUser.email,
+                            admin_email: email
+                        });
+                    }
+                }
+                // Dedicated superadmin call — no admin_email, CC'd once via env fallback
+                notifyAdmins('member_joined', {
+                    group_name: currentGroup.nume,
+                    group_id: currentGroup.id,
+                    user_name: joinedName,
+                    user_email: currentUser.email
+                });
+            } catch(e) { console.warn('Member joined notify failed:', e); }
+            
             showToast('Bine ai venit în grup!', 'success');
         }
         
