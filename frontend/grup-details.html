@@ -1027,6 +1027,24 @@
             </div>
         </div>
         
+        <!-- Complete profile banner (shown to members with incomplete profile — pseudonym is null) -->
+        <div id="completeProfileBanner" style="display: none; margin-bottom: 1rem;">
+            <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #93c5fd; border-radius: 12px; padding: 1rem 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.875rem; flex-wrap: wrap;">
+                    <span style="font-size: 1.5rem; flex-shrink: 0;">👋</span>
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="font-weight: 700; color: #1e3a8a; font-size: 0.9375rem; margin-bottom: 0.125rem;">Bun venit în grup!</div>
+                        <div style="color: #1e40af; font-size: 0.8125rem; line-height: 1.5;">
+                            Completează-ți profilul ca ceilalți membri să te poată cunoaște (nume, descriere, interese).
+                        </div>
+                    </div>
+                    <a href="/profile-edit-new.html" class="btn-action" style="background: #2563eb; color: white; border: none; text-decoration: none; flex-shrink: 0;">
+                        <i class="fas fa-user-edit"></i> Completează profilul
+                    </a>
+                </div>
+            </div>
+        </div>
+        
         <!-- Description -->
         <div class="section-card">
             <h2><i class="fas fa-info-circle"></i> Descriere</h2>
@@ -1301,7 +1319,7 @@ function checkAuth() {
         if (res.data && res.data.user) {
             currentUser = res.data.user;
             try {
-                var { data: prof } = await sb.from('profiles').select('account_type, user_id, is_super_admin').eq('user_id', currentUser.id).single();
+                var { data: prof } = await sb.from('profiles').select('account_type, user_id, is_super_admin, pseudonym').eq('user_id', currentUser.id).single();
                 currentUserProfile = prof;
             } catch(e) {}
         }
@@ -1376,7 +1394,7 @@ async function loadGroupDetails() {
             const userIds = members.map(m => m.user_id);
             const { data: profilesData } = await sb
                 .from('profiles')
-                .select('user_id, pseudonym')
+                .select('user_id, pseudonym, email')
                 .in('user_id', userIds);
             
             // Attach profile to each member
@@ -1398,6 +1416,12 @@ async function loadGroupDetails() {
             // cu_aprobare → all members can edit
             // deschis → only admin can edit
             canEditChecklist = isAdmin || (isMember && group.status === 'cu_aprobare');
+            
+            // Show "complete your profile" banner if user is an active member
+            // of this group but hasn't completed their profile (pseudonym still null).
+            // Typical case: user joined via invitation from an admin and clicked
+            // Accept without going through the profile edit flow first.
+            updateCompleteProfileBanner();
         }
         
         // Load terenuri favorite (visible to everyone)
@@ -1730,7 +1754,7 @@ function renderMembers(members, adminId) {
     
     const isAgencyUser = currentUserProfile && currentUserProfile.account_type === 'profesional';
     grid.innerHTML = members.map(m => {
-        const name = m.profile?.pseudonym || 'Utilizator';
+        const name = displayName(m.profile);
         const initial = name.charAt(0).toUpperCase();
         const isAdminMember = m.user_id === adminId;
         const isMe = currentUser && m.user_id === currentUser.id;
@@ -2485,7 +2509,7 @@ window.leaveGroup = async function() {
         
         // Build member selection for transfer
         var options = otherMembers.map(m => {
-            var name = m.profile?.pseudonym || 'Utilizator';
+            var name = displayName(m.profile);
             return '<option value="' + m.user_id + '">' + name + '</option>';
         }).join('');
         
@@ -2901,7 +2925,7 @@ function renderPendingRequests() {
         bannerCount.textContent = pendingRequests.length;
         
         bannerList.innerHTML = pendingRequests.map(r => {
-            const name = r.profile?.pseudonym || 'Utilizator';
+            const name = displayName(r.profile);
             const initials = name.substring(0, 2).toUpperCase();
             const time = formatDate(r.joined_at);
             const email = r.profile?.email || '';
@@ -3308,6 +3332,35 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Returns a user-friendly display name for a profile record.
+// Priority: pseudonym → email local-part → 'Utilizator'
+// Used to avoid showing a bare "Utilizator" for members who joined via
+// invitation but haven't completed their profile yet.
+function displayName(profile) {
+    if (!profile) return 'Utilizator';
+    if (profile.pseudonym && profile.pseudonym.trim()) return profile.pseudonym;
+    if (profile.email) {
+        const localPart = profile.email.split('@')[0];
+        if (localPart) return localPart;
+    }
+    return 'Utilizator';
+}
+
+// Show the "complete your profile" banner if the current user is logged in,
+// is a member of this group, and hasn't filled in their pseudonym yet.
+// Clicking the CTA takes them to the profile edit page; when they return,
+// the banner will auto-hide (pseudonym will no longer be null).
+function updateCompleteProfileBanner() {
+    const banner = document.getElementById('completeProfileBanner');
+    if (!banner) return;
+    
+    const shouldShow = isMember 
+        && currentUserProfile 
+        && (!currentUserProfile.pseudonym || !currentUserProfile.pseudonym.trim());
+    
+    banner.style.display = shouldShow ? 'block' : 'none';
 }
 
 function showToast(message, type = 'info') {
