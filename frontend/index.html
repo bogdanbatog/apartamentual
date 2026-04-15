@@ -1,1 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApartamenTUal - Construim împreună, împărțim costurile, câștigăm comunitatea</title>
+    <meta name="description" content="Platformă pentru grupuri de construcție în România - construim împreună.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['DM Sans', 'sans-serif'],
+                        'body': ['DM Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand': {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+                            400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+                            800: '#1e293b', 900: '#0f172a', 950: '#020617',
+                        },
+                        'accent': { DEFAULT: '#f97316', light: '#fb923c', dark: '#ea580c' }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { font-family: 'DM Sans', sans-serif; }
+        .font-display { font-family: 'DM Sans', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, rgba(31,33,26,0.03) 0%, rgba(201,162,39,0.05) 100%); }
+        html { scroll-behavior: smooth; }
+        .card-hover { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1); }
+        .article-img { transition: transform 0.6s cubic-bezier(0.4,0,0.2,1); }
+        .article-card:hover .article-img { transform: scale(1.05); }
+        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .faq-item.active .faq-content { max-height: 500px; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); }
+        .video-placeholder { background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); }
+        .decorative-line { width: 60px; height: 3px; background: linear-gradient(90deg, #c9a227, #e3c766); }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+        .scroll-indicator { animation: bounce 2s infinite; }
+        
+        /* Marquee animation */
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+            display: flex;
+            animation: marquee 30s linear infinite;
+            width: max-content;
+        }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+        .marquee-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 24px;
+            white-space: nowrap;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .marquee-item .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #f97316;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-900">
+    <div id="navigation"></div>
 
+    <main class="flex-1">
+        
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 1. HERO SECTION                                            -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section class="relative min-h-[calc(100vh-80px)] flex flex-col justify-center hero-gradient overflow-hidden">
+            <div class="absolute top-20 right-10 w-72 h-72 bg-accent/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 left-10 w-96 h-96 bg-brand-200/30 rounded-full blur-3xl"></div>
+            
+            <div class="container max-w-6xl mx-auto px-6 py-8 relative z-10">
+                
+                <!-- Main content: Title left, 2 Videos right -->
+                <div class="grid lg:grid-cols-2 gap-10 items-center mb-10">
+                    
+                    <!-- Left: Title and subtitle -->
+                    <div class="space-y-4">
+                        <div class="decorative-line"></div>
+                        <h1 class="font-display text-3xl md:text-4xl font-semibold leading-tight text-brand-950">
+                            Apartamen<span class="text-accent">TU</span>al
+                        </h1>
+                        <div class="space-y-1 text-lg md:text-xl text-brand-700 font-light">
+                            <p>Construim <span class="text-accent font-medium">împreună</span>.</p>
+                            <p>Împărțim <span class="text-accent font-medium">costurile</span>.</p>
+                            <p>Câștigăm <span class="text-accent font-medium">o comunitate</span>.</p>
+                        </div>
+                        <p class="text-sm text-brand-600 pt-2 leading-relaxed">
+                            ApartamenTUal este o platformă pentru oameni care vor să își construiască propriul bloc sau propriile apartamente, împreună cu alți viitori vecini. Platforma facilitează formarea de grupuri, găsirea de terenuri și accesul la informații utile pentru proiecte de locuire în care viitorii proprietari își pot personaliza locuințele și își controlează costurile.
+                        </p>
+                        <div class="flex items-center gap-4 mt-4">
+                            <a href="register.html" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-950 text-white text-xs font-medium rounded-lg hover:bg-brand-800 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Creează cont
+                            </a>
+                            <button onclick="shareWebsite()" class="inline-flex items-center gap-1.5 text-brand-400 hover:text-accent text-xs transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Distribuie
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: 2 Video placeholders -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- LEFT card: Despre concept -->
+                        <div class="flex flex-col gap-3">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden shadow-lg flex-1" id="conceptVideoContainer">
+                                <!-- populated by JS: either an iframe for the first 'concept' video, or a fallback placeholder -->
+                                <div class="video-placeholder w-full h-full relative" id="conceptVideoPlaceholder">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
+                                        <p class="text-white text-sm font-medium">Ce este ApartamenTUal?</p>
+                                        <p class="text-white/70 text-xs">Prezentare concept</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="openVideoGallery('concept')" 
+                                    class="flex items-center justify-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-brand-200/50 rounded-lg text-sm font-medium text-brand-800 hover:bg-white hover:border-accent/50 transition-all">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Mai multe videoclipuri
+                            </button>
+                        </div>
+                        <!-- RIGHT card: Despre platformă -->
+                        <div class="flex flex-col gap-3">
+                            <div class="aspect-[4/3] rounded-xl overflow-hidden shadow-lg flex-1" id="platformaVideoContainer">
+                                <iframe 
+                                    width="100%" height="100%" 
+                                    src="https://www.youtube.com/embed/64z6hMkW7do" 
+                                    title="Cum folosești platforma ApartamenTUal" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allowfullscreen
+                                    style="border-radius: 12px;">
+                                </iframe>
+                            </div>
+                            <button onclick="openVideoGallery('platforma')" 
+                                    class="flex items-center justify-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-brand-200/50 rounded-lg text-sm font-medium text-brand-800 hover:bg-white hover:border-accent/50 transition-all">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Mai multe videoclipuri
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 2. TAB CARDS: Ce este / Terenuri / Grupuri -->
+                <div class="grid md:grid-cols-3 gap-4 pt-4 border-t border-brand-200/50">
+                    <a href="ce-este/" class="card-hover bg-white/70 backdrop-blur-sm rounded-lg p-5 flex items-center gap-4 border border-brand-100/50 hover:border-accent/30">
+                        <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-base font-medium text-brand-950">Ce este ApartamenTUal</h3>
+                            <p class="text-brand-500 text-sm mt-0.5">Ghiduri, exemple, legislație</p>
+                        </div>
+                    </a>
+                    <a href="terenuri.html" class="card-hover bg-white/70 backdrop-blur-sm rounded-lg p-5 flex items-center gap-4 border border-brand-100/50 hover:border-accent/30">
+                        <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-base font-medium text-brand-950">Terenuri</h3>
+                            <p class="text-brand-500 text-sm mt-0.5">Propune sau descoperă terenuri</p>
+                        </div>
+                    </a>
+                    <a href="grupuri.html" class="card-hover bg-white/70 backdrop-blur-sm rounded-lg p-5 flex items-center gap-4 border border-brand-100/50 hover:border-accent/30">
+                        <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-base font-medium text-brand-950">Grupuri</h3>
+                            <p class="text-brand-500 text-sm mt-0.5">Formează sau alătură-te unui grup</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Consultanță gratuită CTA -->
+                <a href="consultanta.html" class="card-hover mt-3 bg-gradient-to-r from-accent/5 to-accent/10 backdrop-blur-sm rounded-lg p-5 flex items-center gap-4 border border-accent/20 hover:border-accent/50 transition-all">
+                    <div class="w-12 h-12 bg-accent/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display text-base font-medium text-brand-950">Vrei să discutăm despre proiectul tău?</h3>
+                        <p class="text-brand-600 text-sm mt-0.5">Programează o consultanță gratuită cu echipa LTFB Studio — fără obligații.</p>
+                    </div>
+                    <span class="hidden md:inline-flex items-center gap-1 text-sm text-accent font-medium flex-shrink-0">
+                        Programează acum
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </span>
+                </a>
+                
+            </div>
+            
+            <!-- Scroll indicator -->
+            <div class="absolute bottom-6 left-1/2 -translate-x-1/2">
+                <a href="#baugruppen-bar" class="scroll-indicator flex flex-col items-center text-brand-400 hover:text-accent transition-colors">
+                    <span class="text-xs font-medium mb-1">Descoperă mai mult</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 3. BAUGRUPPEN SLOGANS MARQUEE BAR                         -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section id="baugruppen-bar" class="py-4 bg-brand-50 border-y border-brand-200/50 overflow-hidden">
+            <div class="marquee-track">
+                <!-- First set -->
+                <div class="marquee-item"><span class="dot"></span>Îți alegi terenul</div>
+                <div class="marquee-item"><span class="dot"></span>Îți alegi vecinii</div>
+                <div class="marquee-item"><span class="dot"></span>Îți personalizezi apartamentul</div>
+                <div class="marquee-item"><span class="dot"></span>Locuiești într-o mică comunitate</div>
+                <div class="marquee-item"><span class="dot"></span>Transparența costurilor reale</div>
+                <div class="marquee-item"><span class="dot"></span>Decizi calitatea materialelor</div>
+                <div class="marquee-item"><span class="dot"></span>Arhitect ales de grup</div>
+                <div class="marquee-item"><span class="dot"></span>Spații comune gândite de voi</div>
+                <!-- Duplicate for seamless loop -->
+                <div class="marquee-item"><span class="dot"></span>Îți alegi terenul</div>
+                <div class="marquee-item"><span class="dot"></span>Îți alegi vecinii</div>
+                <div class="marquee-item"><span class="dot"></span>Îți personalizezi apartamentul</div>
+                <div class="marquee-item"><span class="dot"></span>Locuiești într-o mică comunitate</div>
+                <div class="marquee-item"><span class="dot"></span>Transparența costurilor reale</div>
+                <div class="marquee-item"><span class="dot"></span>Decizi calitatea materialelor</div>
+                <div class="marquee-item"><span class="dot"></span>Arhitect ales de grup</div>
+                <div class="marquee-item"><span class="dot"></span>Spații comune gândite de voi</div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 4. CUM FUNCȚIONEAZĂ — SVG INFOGRAPHIC                     -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section id="cum-functioneaza" class="py-20 bg-white">
+            <div class="container max-w-6xl mx-auto px-6">
+                
+                <!-- Embedded SVG -->
+                <svg viewBox="0 0 920 880" xmlns="http://www.w3.org/2000/svg" font-family="'DM Sans', sans-serif" class="w-full h-auto">
+                    <defs>
+                        <linearGradient id="og" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f97316"/><stop offset="100%" style="stop-color:#ea580c"/>
+                        </linearGradient>
+                        <linearGradient id="dk" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1e293b"/><stop offset="100%" style="stop-color:#0f172a"/>
+                        </linearGradient>
+                        <filter id="sh" x="-4%" y="-3%" width="108%" height="114%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.1"/>
+                        </filter>
+                        <filter id="glow" x="-12%" y="-12%" width="124%" height="124%">
+                            <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#f97316" flood-opacity="0.35"/>
+                        </filter>
+                        <filter id="benefitSh" x="-3%" y="-3%" width="106%" height="112%">
+                            <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.06"/>
+                        </filter>
+                        <marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                            <polygon points="0 0, 10 4, 0 8" fill="#f97316"/>
+                        </marker>
+                    </defs>
+
+                    <rect width="920" height="880" rx="20" fill="#fafbfc"/>
+
+                    <text x="460" y="40" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="700">Cum funcționează</text>
+                    <line x1="395" y1="50" x2="525" y2="50" stroke="url(#og)" stroke-width="2.5" stroke-linecap="round"/>
+
+                    <!-- STEP 1 -->
+                    <a href="register.html" class="step-link">
+                    <g transform="translate(25, 75)" style="cursor:pointer">
+                        <circle cx="100" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
+                        <text x="100" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">1</text>
+                        <rect width="200" height="230" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
+                        <g transform="translate(100, 58)">
+                            <circle cx="0" cy="0" r="24" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
+                            <circle cx="0" cy="-5" r="8" fill="none" stroke="#f97316" stroke-width="1.8"/>
+                            <path d="M-12,8 Q-12,16 0,18 Q12,16 12,8" fill="none" stroke="#f97316" stroke-width="1.8"/>
+                            <circle cx="16" cy="-14" r="7" fill="#f97316"/>
+                            <line x1="16" y1="-18" x2="16" y2="-10" stroke="white" stroke-width="1.8"/>
+                            <line x1="12" y1="-14" x2="20" y2="-14" stroke="white" stroke-width="1.8"/>
+                        </g>
+                        <text x="100" y="110" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="700">Creezi profil</text>
+                        <text x="100" y="132" text-anchor="middle" fill="#64748b" font-size="11">Alegi orașul,</text>
+                        <text x="100" y="148" text-anchor="middle" fill="#64748b" font-size="11">zonele preferate</text>
+                        <text x="100" y="164" text-anchor="middle" fill="#64748b" font-size="11">și interesele tale</text>
+                        <g transform="translate(18, 182)">
+                            <rect width="52" height="18" rx="9" fill="#fff7ed" stroke="#fdba74" stroke-width="0.8"/>
+                            <text x="26" y="13" text-anchor="middle" fill="#ea580c" font-size="9" font-weight="500">eco</text>
+                            <rect x="58" width="65" height="18" rx="9" fill="#fff7ed" stroke="#fdba74" stroke-width="0.8"/>
+                            <text x="90" y="13" text-anchor="middle" fill="#ea580c" font-size="9" font-weight="500">grădină</text>
+                            <rect x="129" width="42" height="18" rx="9" fill="#fff7ed" stroke="#fdba74" stroke-width="0.8"/>
+                            <text x="150" y="13" text-anchor="middle" fill="#ea580c" font-size="9" font-weight="500">3 cam</text>
+                        </g>
+                    </g>
+                    </a>
+
+                    <!-- ARROW 1→2 -->
+                    <g transform="translate(230, 185)">
+                        <line x1="0" y1="0" x2="40" y2="0" stroke="#f97316" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arr)" opacity="0.6">
+                            <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.5s" repeatCount="indefinite"/>
+                        </line>
+                    </g>
+                    <g transform="translate(228, 140)">
+                        <rect width="50" height="30" rx="8" fill="white" stroke="#fdba74" stroke-width="0.8" filter="url(#benefitSh)"/>
+                        <text x="25" y="15" text-anchor="middle" fill="#f97316" font-size="11">🎯</text>
+                        <text x="25" y="26" text-anchor="middle" fill="#f97316" font-size="7" font-weight="600">match</text>
+                    </g>
+
+                    <!-- STEP 2 -->
+                    <a href="grupuri.html" class="step-link" data-auth-redirect="register.html">
+                    <g transform="translate(275, 75)" style="cursor:pointer">
+                        <circle cx="100" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
+                        <text x="100" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">2</text>
+                        <rect width="200" height="230" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
+                        <g transform="translate(100, 58)">
+                            <circle cx="0" cy="0" r="24" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
+                            <circle cx="0" cy="-4" r="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+                            <path d="M-9,7 Q-9,13 0,14 Q9,13 9,7" fill="none" stroke="#f97316" stroke-width="1.5"/>
+                            <circle cx="-16" cy="-2" r="4.5" fill="none" stroke="#fb923c" stroke-width="1.2"/>
+                            <path d="M-22,7 Q-22,11 -16,12 Q-10,11 -10,7" fill="none" stroke="#fb923c" stroke-width="1.2"/>
+                            <circle cx="16" cy="-2" r="4.5" fill="none" stroke="#fb923c" stroke-width="1.2"/>
+                            <path d="M10,7 Q10,11 16,12 Q22,11 22,7" fill="none" stroke="#fb923c" stroke-width="1.2"/>
+                        </g>
+                        <text x="100" y="110" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="700">Găsești grup</text>
+                        <text x="100" y="132" text-anchor="middle" fill="#64748b" font-size="11">Te alături unui grup</text>
+                        <text x="100" y="148" text-anchor="middle" fill="#64748b" font-size="11">compatibil sau</text>
+                        <text x="100" y="164" text-anchor="middle" fill="#64748b" font-size="11">creezi propriul grup</text>
+                        <g transform="translate(30, 182)">
+                            <rect width="140" height="18" rx="9" fill="#f0fdf4" stroke="#86efac" stroke-width="0.8"/>
+                            <text x="70" y="13" text-anchor="middle" fill="#16a34a" font-size="9" font-weight="500">✓ 5 zone comune</text>
+                        </g>
+                    </g>
+                    </a>
+
+                    <!-- ARROW 2→3 -->
+                    <g transform="translate(480, 185)">
+                        <line x1="0" y1="0" x2="40" y2="0" stroke="#f97316" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arr)" opacity="0.6">
+                            <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.5s" repeatCount="indefinite"/>
+                        </line>
+                    </g>
+                    <g transform="translate(473, 140)">
+                        <rect width="60" height="30" rx="8" fill="white" stroke="#fdba74" stroke-width="0.8" filter="url(#benefitSh)"/>
+                        <text x="30" y="15" text-anchor="middle" fill="#f97316" font-size="11">🗺️</text>
+                        <text x="30" y="26" text-anchor="middle" fill="#f97316" font-size="7" font-weight="600">explorați</text>
+                    </g>
+
+                    <!-- STEP 3 -->
+                    <a href="terenuri.html" class="step-link">
+                    <g transform="translate(525, 75)" style="cursor:pointer">
+                        <circle cx="100" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
+                        <text x="100" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">3</text>
+                        <rect width="200" height="230" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
+                        <g transform="translate(100, 58)">
+                            <circle cx="0" cy="0" r="24" fill="#fff7ed" stroke="#f97316" stroke-width="1.5"/>
+                            <path d="M0,-14 C-8,-14 -12,-9 -12,-4 C-12,5 0,16 0,16 C0,16 12,5 12,-4 C12,-9 8,-14 0,-14Z" fill="none" stroke="#f97316" stroke-width="1.8"/>
+                            <circle cx="0" cy="-4" r="4" fill="#f97316"/>
+                        </g>
+                        <text x="100" y="110" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="700">Alegeți teren</text>
+                        <text x="100" y="132" text-anchor="middle" fill="#64748b" font-size="11">Descoperiți terenuri</text>
+                        <text x="100" y="148" text-anchor="middle" fill="#64748b" font-size="11">propuse sau</text>
+                        <text x="100" y="164" text-anchor="middle" fill="#64748b" font-size="11">propuneți altele noi</text>
+                        <g transform="translate(22, 182)">
+                            <rect width="156" height="18" rx="9" fill="#eff6ff" stroke="#93c5fd" stroke-width="0.8"/>
+                            <text x="78" y="13" text-anchor="middle" fill="#2563eb" font-size="9" font-weight="500">📍 București, Sector 2</text>
+                        </g>
+                    </g>
+                    </a>
+
+                    <!-- ARROW 3→4 -->
+                    <g transform="translate(730, 185)">
+                        <line x1="0" y1="0" x2="40" y2="0" stroke="#f97316" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arr)" opacity="0.6">
+                            <animate attributeName="stroke-dashoffset" from="18" to="0" dur="1.5s" repeatCount="indefinite"/>
+                        </line>
+                    </g>
+                    <g transform="translate(726, 140)">
+                        <rect width="54" height="30" rx="8" fill="white" stroke="#fdba74" stroke-width="0.8" filter="url(#benefitSh)"/>
+                        <text x="27" y="15" text-anchor="middle" fill="#f97316" font-size="11">🏗️</text>
+                        <text x="27" y="26" text-anchor="middle" fill="#f97316" font-size="7" font-weight="600">porniți</text>
+                    </g>
+
+                    <!-- STEP 4 -->
+                    <g transform="translate(775, 75)">
+                        <circle cx="60" cy="-4" r="16" fill="url(#og)" filter="url(#glow)"/>
+                        <text x="60" y="1" text-anchor="middle" fill="white" font-size="12" font-weight="700">4</text>
+                        <rect width="120" height="230" rx="12" fill="url(#dk)" filter="url(#sh)"/>
+                        <rect width="120" height="230" rx="12" fill="none" stroke="#f97316" stroke-width="1.5"/>
+                        <g transform="translate(60, 58)">
+                            <circle cx="0" cy="0" r="24" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1.5"/>
+                            <rect x="-12" y="-12" width="24" height="26" rx="2" fill="none" stroke="#f97316" stroke-width="1.8"/>
+                            <rect x="-7" y="-7" width="6" height="5" rx="1" fill="#f97316" opacity="0.5"/>
+                            <rect x="1" y="-7" width="6" height="5" rx="1" fill="#f97316" opacity="0.5"/>
+                            <rect x="-7" y="2" width="6" height="5" rx="1" fill="#f97316" opacity="0.5"/>
+                            <rect x="1" y="2" width="6" height="5" rx="1" fill="#f97316" opacity="0.5"/>
+                            <rect x="-3" y="8" width="6" height="6" rx="1" fill="#f97316"/>
+                        </g>
+                        <text x="60" y="110" text-anchor="middle" fill="white" font-size="15" font-weight="700">Con-</text>
+                        <text x="60" y="130" text-anchor="middle" fill="white" font-size="15" font-weight="700">struiți!</text>
+                        <text x="60" y="175" text-anchor="middle" font-size="30">🏗️</text>
+                        <text x="60" y="210" text-anchor="middle" fill="#94a3b8" font-size="8">La cost real</text>
+                    </g>
+
+                    <!-- 3 FEATURE CARDS -->
+                    <g transform="translate(25, 340)">
+                        <!-- Card 1: Matching (sub Creezi profil + Găsești grup) -->
+                        <rect width="280" height="65" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="5" height="65" rx="2.5" fill="url(#og)"/>
+                        <text x="28" y="28" fill="#f97316" font-size="18">🎯</text>
+                        <text x="50" y="28" fill="#0f172a" font-size="12" font-weight="700">Matching automat</text>
+                        <text x="50" y="46" fill="#64748b" font-size="9.5">Platforma conectează utilizatori și</text>
+                        <text x="50" y="58" fill="#64748b" font-size="9.5">grupuri pe baza zonelor și intereselor.</text>
+                    </g>
+                    <g transform="translate(320, 340)">
+                        <!-- Card 2: Analize teren (sub Alegeți teren) -->
+                        <rect width="280" height="65" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="5" height="65" rx="2.5" fill="url(#og)"/>
+                        <text x="28" y="28" fill="#f97316" font-size="18">📐</text>
+                        <text x="50" y="28" fill="#0f172a" font-size="12" font-weight="700">Analize de teren</text>
+                        <text x="50" y="46" fill="#64748b" font-size="9.5">Poți solicita analize de la arhitecți</text>
+                        <text x="50" y="58" fill="#64748b" font-size="9.5">pentru a vedea câte apartamente se pot construi.</text>
+                    </g>
+                    <g transform="translate(615, 340)">
+                        <!-- Card 3: Consultanță arhitecți (sub Construiți) -->
+                        <rect width="280" height="65" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="5" height="65" rx="2.5" fill="url(#og)"/>
+                        <text x="28" y="28" fill="#f97316" font-size="18">🏛️</text>
+                        <text x="50" y="28" fill="#0f172a" font-size="12" font-weight="700">Consultanță arhitecți</text>
+                        <text x="50" y="46" fill="#64748b" font-size="9.5">Acces la consultanță de specialitate</text>
+                        <text x="50" y="58" fill="#64748b" font-size="9.5">pe tot parcursul procesului.</text>
+                    </g>
+
+                    <!-- DE CE APARTAMENTUAL -->
+                    <text x="460" y="445" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="700">De ce ApartamenTUal?</text>
+                    <line x1="390" y1="455" x2="530" y2="455" stroke="url(#og)" stroke-width="2.5" stroke-linecap="round"/>
+
+                    <!-- Row 1 -->
+                    <g transform="translate(25, 475)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">👥</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Nu mai pornești de la zero</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Platforma adună într-un loc oameni,</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">terenuri și informații. Fără ea, ai</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">petrece luni căutând pe cont propriu.</text>
+                    </g>
+                    <g transform="translate(318, 475)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">🎯</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Oameni compatibili, nu doar oameni</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Matching-ul pe zone și interese</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">filtrează din start. Nu intri într-un</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">grup care vrea altceva decât tine.</text>
+                    </g>
+                    <g transform="translate(611, 475)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">📋</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Reduce riscul de eșec</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Structura (etape, roluri, statusuri)</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">face ca grupul să nu se dizolve</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">după 2 întâlniri. Proiect, nu chat.</text>
+                    </g>
+
+                    <!-- Row 2 -->
+                    <g transform="translate(25, 595)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">💰</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Control total asupra costurilor</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Tu decizi materialele, calitatea</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">și finisajele. Costuri reale, vizibile,</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">pe care le cunoști de la început.</text>
+                    </g>
+                    <g transform="translate(318, 595)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">🔍</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Transparență prin design</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Procesul e vizibil pentru toți membrii.</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">Știi exact pe ce se cheltuie fiecare</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">leu. Decizii luate democratic în grup.</text>
+                    </g>
+                    <g transform="translate(611, 595)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">🌍</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Model dovedit în Europa</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Baugruppen funcționează de 30 de</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">ani în Germania. ApartamenTUal</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">aduce conceptul în România.</text>
+                    </g>
+
+                    <!-- Row 3 -->
+                    <g transform="translate(25, 715)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">🏡</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Comunitate înainte de mutare</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Viitorii vecini se cunosc și decid</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">împreună — nu se întâlnesc</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">prima dată la predarea cheilor.</text>
+                    </g>
+                    <g transform="translate(318, 715)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">⭐</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Calitate la alegerea ta</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Alegi materialele, izolația, finisajele.</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">Posibil la preț similar cu un</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">dezvoltator, dar cu mult mai multă valoare.</text>
+                    </g>
+                    <g transform="translate(611, 715)">
+                        <rect width="283" height="105" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#benefitSh)"/>
+                        <rect width="4" height="105" rx="2" fill="url(#og)"/>
+                        <circle cx="38" cy="38" r="20" fill="#fff7ed"/>
+                        <text x="38" y="44" text-anchor="middle" font-size="18">📈</text>
+                        <text x="70" y="30" fill="#0f172a" font-size="12" font-weight="700">Efect de rețea</text>
+                        <text x="70" y="48" fill="#64748b" font-size="10">Cu cât sunt mai mulți utilizatori,</text>
+                        <text x="70" y="62" fill="#64748b" font-size="10">cu atât matching-ul e mai bun și</text>
+                        <text x="70" y="76" fill="#64748b" font-size="10">grupurile se formează mai repede.</text>
+                    </g>
+
+                    <rect x="230" y="845" width="460" height="26" rx="13" fill="url(#dk)"/>
+                    <text x="460" y="863" text-anchor="middle" fill="white" font-size="10" font-weight="500" letter-spacing="0.04em">APARTAMENTUAL — TU DECIZI CUM CONSTRUIEȘTI</text>
+                </svg>
+                
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 4b. POVESTEA NOASTRĂ — PROTOTIPUL                         -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section class="py-24 bg-white">
+            <div class="container max-w-6xl mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <!-- Image (populated from article) -->
+                    <div class="bg-brand-50 rounded-2xl aspect-[4/3] flex items-center justify-center overflow-hidden" id="prototip-hero-image">
+                        <svg class="w-20 h-20 text-brand-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <!-- Text (populated from article) -->
+                    <div>
+                        <div class="decorative-line mb-6"></div>
+                        <h2 class="font-display text-4xl md:text-5xl font-medium text-brand-950">Povestea noastră</h2>
+                        <p class="text-accent font-semibold mt-4 text-lg">Prototipul Județului Housing</p>
+                        <div id="prototip-hero-summary">
+                            <p class="text-brand-500 mt-4 text-base leading-relaxed">
+                                Am pornit de la o întrebare simplă: de ce să construim singuri când putem construi împreună? 
+                                Inspirați de modelul german Baugruppen, am creat ApartamenTUal pentru a aduce această filosofie în România.
+                            </p>
+                        </div>
+                        <a href="prototip.html" class="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-brand-950 text-white text-sm font-medium rounded-lg hover:bg-brand-800 transition-colors">
+                            Citește povestea completă
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Latest prototype updates -->
+                <div class="mt-16" id="prototip-updates">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="font-display text-2xl font-medium text-brand-950">Ultimele noutăți</h3>
+                        <a href="prototip.html#noutati" class="inline-flex items-center gap-1 text-accent font-medium text-sm hover:text-accent-dark transition-colors">
+                            Toate noutățile
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-6" id="prototip-updates-grid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                    <div id="prototip-updates-empty" class="hidden text-center py-8">
+                        <p class="text-brand-400 text-sm">Noutăți în curând...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 4.5. POVESTEA NOASTRĂ — pre-News showcase                 -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section class="py-20 bg-gradient-to-b from-brand-50 to-white">
+            <div class="container max-w-6xl mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <!-- Image side -->
+                    <a href="povestea-noastra.html" class="block relative rounded-2xl overflow-hidden shadow-xl group">
+                        <img src="povestea_noastra/images/randare-curte.jpg" 
+                             alt="Curtea comună a primului proiect ApartamenTUal" 
+                             class="w-full h-[380px] object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-950/70 via-brand-950/20 to-transparent"></div>
+                        <div class="absolute bottom-5 left-5 right-5">
+                            <span class="inline-block bg-accent text-white text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
+                                Studiu de caz
+                            </span>
+                            <p class="text-white text-sm">Strada Județului · București · 5 familii</p>
+                        </div>
+                    </a>
+                    <!-- Text side -->
+                    <div>
+                        <div class="decorative-line mb-5"></div>
+                        <h2 class="font-display text-3xl md:text-4xl font-medium text-brand-950 mb-4 leading-tight">
+                            Primul prototip<br>
+                            <span class="text-accent">ApartamenTUal</span> e deja în construcție
+                        </h2>
+                        <p class="text-brand-600 text-base mb-4 leading-relaxed">
+                            Cinci familii s-au asociat lângă Parcul Circului ca să-și construiască împreună un mic bloc cu apartamente personalizate. 
+                            E povestea care a stat la baza acestei platforme.
+                        </p>
+                        <p class="text-brand-500 text-sm mb-6 italic">
+                            „Pentru fiecare dintre noi, acest proiect a devenit un fel de lifetime project."
+                        </p>
+                        <a href="povestea-noastra.html" 
+                           class="inline-flex items-center gap-2 bg-brand-950 text-white px-6 py-3 rounded-lg font-medium text-sm hover:bg-accent transition-colors">
+                            <i class="fas fa-book-open"></i>
+                            Citește povestea
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 5. NEWS (fost "Lectură recomandată")                       -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section class="py-24 bg-brand-950">
+            <div class="container max-w-6xl mx-auto px-6">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
+                    <div>
+                        <div class="decorative-line mb-6"></div>
+                        <h2 class="font-display text-4xl md:text-5xl font-medium text-white">News</h2>
+                        <p class="text-brand-300 mt-4 text-lg">Articole și resurse despre Baugruppen din întreaga lume</p>
+                    </div>
+                    <a href="news.html" class="inline-flex items-center gap-2 text-accent font-medium hover:text-accent-light transition-colors mt-6 md:mt-0">
+                        Vezi toate articolele
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="heroArticlesGrid">
+                    <!-- Articles loaded dynamically from Supabase -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin"></i> Se încarcă articolele...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 6. FAQ                                                     -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section class="py-24 bg-white">
+            <div class="container max-w-4xl mx-auto px-6">
+                <div class="text-center mb-16">
+                    <div class="decorative-line mx-auto mb-6"></div>
+                    <h2 class="font-display text-4xl md:text-5xl font-medium text-brand-950">Întrebări frecvente</h2>
+                </div>
+                
+                
+                <div class="space-y-4" id="faq-container">
+                    <!-- Populated by faq.js -->
+                </div>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <a href="ce-este/cum-functioneaza.html" class="inline-flex items-center gap-2 text-accent font-medium hover:text-accent-dark transition-colors">
+                        Vezi toate întrebările
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 7. CTA + NEWSLETTER                                       -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <section class="py-24 bg-brand-50">
+            <div class="container max-w-4xl mx-auto px-6 text-center">
+                <div class="decorative-line mx-auto mb-6"></div>
+                <h2 class="font-display text-4xl md:text-5xl font-medium text-brand-950 mb-6">
+                    Gata să construiești<br>viitorul?
+                </h2>
+                <p class="text-brand-600 text-xl mb-10 max-w-2xl mx-auto">
+                    Alătură-te comunității ApartamenTUal și fă primul pas spre locuința ta ideală.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    <a href="register.html" class="inline-flex items-center gap-2 px-8 py-4 bg-accent text-white font-medium rounded-lg hover:bg-accent-dark transition-colors shadow-lg shadow-accent/25">
+                        Creează cont gratuit
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+                    <a href="ce-este/" class="inline-flex items-center gap-2 px-8 py-4 border-2 border-brand-300 text-brand-700 font-medium rounded-lg hover:border-brand-950 hover:text-brand-950 transition-colors">
+                        Află mai multe
+                    </a>
+                </div>
+                
+                <div class="border-t border-brand-200 pt-10">
+                    <p class="text-brand-500 text-sm mb-4">Nu ești pregătit încă? Abonează-te la newsletter pentru noutăți:</p>
+                    <div class="flex gap-2 max-w-md mx-auto">
+                        <input type="email" id="newsletter-email" placeholder="adresa@email.com" 
+                            class="flex-1 px-4 py-3 text-sm border border-brand-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none">
+                        <button onclick="subscribeNewsletter()" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-950 text-white text-sm font-medium rounded-lg hover:bg-brand-800 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Abonează-te
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/faq.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/login-modal.js"></script>
+    
+    <script>
+        
+        async function shareWebsite() {
+            const shareData = {
+                title: 'ApartamenTUal',
+                text: 'Construim împreună, împărțim costurile, câștigăm comunitatea.',
+                url: window.location.href
+            };
+            if (navigator.share) {
+                try { await navigator.share(shareData); } catch (err) {}
+            } else {
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert('Link copiat în clipboard!');
+                } catch (err) {
+                    prompt('Copiază acest link:', window.location.href);
+                }
+            }
+        }
+        
+        function subscribeNewsletter() {
+            const email = document.getElementById('newsletter-email').value;
+            if (!email || !email.includes('@')) {
+                alert('Te rugăm să introduci o adresă de email validă.');
+                return;
+            }
+            alert('Mulțumim pentru abonare! Te vom ține la curent cu noutățile.');
+            document.getElementById('newsletter-email').value = '';
+        }
+        
+        // Auth-aware redirects: if not logged in, send to register for protected pages
+        document.addEventListener('DOMContentLoaded', async () => {
+            let isLoggedIn = false;
+            try {
+                const { data: { user } } = await sb.auth.getUser();
+                isLoggedIn = !!user;
+            } catch (e) {}
+            
+            if (!isLoggedIn) {
+                // Redirect grupuri links to register
+                document.querySelectorAll('a[href="grupuri.html"]').forEach(link => {
+                    link.href = 'register.html';
+                });
+                // Also redirect step links that need auth
+                document.querySelectorAll('a[data-auth-redirect]').forEach(link => {
+                    link.setAttribute('href', link.dataset.authRedirect);
+                });
+            }
+            
+            // Load hero articles from Supabase
+            loadHeroArticles();
+            loadPrototipUpdates();
+            loadPrototipStory();
+        });
+        
+        async function loadPrototipStory() {
+            try {
+                const { data, error } = await supabase
+                    .from('articles')
+                    .select('image_url, summary')
+                    .eq('slug', 'povestea-noastra')
+                    .eq('status', 'published')
+                    .single();
+                
+                if (error || !data) return; // keep defaults
+                
+                // Update hero image
+                if (data.image_url) {
+                    const imgDiv = document.getElementById('prototip-hero-image');
+                    if (imgDiv) {
+                        imgDiv.innerHTML = `<img src="${data.image_url}" alt="Prototipul Județului Housing" style="width:100%;height:100%;object-fit:cover;">`;
+                    }
+                }
+                
+                // Update summary text
+                if (data.summary) {
+                    const sumDiv = document.getElementById('prototip-hero-summary');
+                    if (sumDiv) {
+                        sumDiv.innerHTML = `<p class="text-brand-500 mt-4 text-base leading-relaxed">${data.summary}</p>`;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading prototip story:', err);
+            }
+        }
+
+        async function loadPrototipUpdates() {
+            const grid = document.getElementById('prototip-updates-grid');
+            const empty = document.getElementById('prototip-updates-empty');
+            if (!grid) return;
+            
+            try {
+                const { data: updates, error } = await supabase
+                    .from('articles')
+                    .select('*')
+                    .eq('category', 'prototip')
+                    .neq('slug', 'povestea-noastra')
+                    .eq('status', 'published')
+                    .order('published_at', { ascending: false })
+                    .limit(3);
+                
+                if (error) throw error;
+                
+                if (!updates || updates.length === 0) {
+                    empty.classList.remove('hidden');
+                    return;
+                }
+                
+                grid.innerHTML = updates.map(u => {
+                    const date = new Date(u.published_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' });
+                    const img = u.image_url 
+                        ? `<img src="${u.image_url}" alt="${u.title}" class="w-full h-40 object-cover">`
+                        : `<div class="w-full h-40 bg-brand-100 flex items-center justify-center"><svg class="w-10 h-10 text-brand-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></div>`;
+                    return `
+                        <a href="news.html#${u.slug}" class="bg-white rounded-xl overflow-hidden border border-brand-100 hover:shadow-lg transition-all hover:-translate-y-1">
+                            ${img}
+                            <div class="p-4">
+                                <span class="text-xs text-brand-400">${date}</span>
+                                <h4 class="font-semibold text-brand-950 mt-1 text-sm leading-snug">${u.title}</h4>
+                                ${u.summary ? `<p class="text-xs text-brand-500 mt-2 line-clamp-2">${u.summary}</p>` : ''}
+                            </div>
+                        </a>`;
+                }).join('');
+                
+            } catch (err) {
+                console.error('Error loading prototype updates:', err);
+                empty.classList.remove('hidden');
+            }
+        }
+
+        async function loadHeroArticles() {
+            const grid = document.getElementById('heroArticlesGrid');
+            if (!grid) return;
+            
+            try {
+                const { data, error } = await sb
+                    .from('articles')
+                    .select('id, title, slug, image_url, category, source_url, published_at')
+                    .eq('status', 'published')
+                    .order('published_at', { ascending: false })
+                    .limit(6);
+                
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #94a3b8;">Niciun articol publicat încă.</div>';
+                    return;
+                }
+                
+                const categoryLabels = {
+                    exemple: 'Exemple', legal: 'Legal',
+                    analize: 'Analize', noutati: 'Noutăți',
+                    prototip: 'Prototip'
+                };
+                
+                grid.innerHTML = data.map(a => {
+                    const catLabel = categoryLabels[a.category] || a.category || 'Articol';
+                    // If article has source_url, show domain. Otherwise show category.
+                    let sourceLabel = catLabel;
+                    if (a.source_url) {
+                        try { sourceLabel = new URL(a.source_url).hostname.replace('www.', ''); } catch(e) {}
+                    }
+                    
+                    return `
+                        <a href="news.html#${a.slug}" class="article-card group bg-brand-900 rounded-xl overflow-hidden card-hover">
+                            <div class="aspect-video overflow-hidden bg-brand-800">
+                                <img src="${a.image_url || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop'}" 
+                                     alt="${a.title}" 
+                                     class="article-img w-full h-full object-cover"
+                                     onerror="this.src='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop'">
+                            </div>
+                            <div class="p-5">
+                                <div class="text-accent text-xs font-medium uppercase tracking-wider mb-2">${sourceLabel}</div>
+                                <h3 class="font-display text-lg text-white group-hover:text-accent transition-colors">${a.title}</h3>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+                
+            } catch (e) {
+                console.error('Load hero articles error:', e);
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #94a3b8;">Nu s-au putut încărca articolele.</div>';
+            }
+        }
+    </script>
+<!-- Video Gallery Modal -->
+<div id="videoGalleryModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; overflow-y:auto; padding:2rem 1rem;">
+    <div style="max-width:900px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h2 style="color:white; font-size:1.5rem; font-weight:700; font-family:'DM Sans',sans-serif;">
+                <span style="color:#f97316;">▶</span> <span id="videoGalleryTitle">Videoclipuri explicative</span>
+            </h2>
+            <button onclick="closeVideoGallery()" style="background:none; border:none; color:white; font-size:2rem; cursor:pointer; padding:0.5rem;">&times;</button>
+        </div>
+        <div id="videoGalleryGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:1.5rem;">
+        </div>
+        <p style="color:#94a3b8; text-align:center; margin-top:2rem; font-size:0.875rem; font-family:'DM Sans',sans-serif;">
+            Mai multe videoclipuri vor fi adăugate în curând.
+        </p>
+    </div>
+</div>
+
+<script>
+// Video gallery - loads from Supabase 'videos' table, filtered by category
+async function openVideoGallery(category) {
+    // Default to 'platforma' if not specified (backwards compat)
+    category = category || 'platforma';
+    
+    const grid = document.getElementById('videoGalleryGrid');
+    const titleEl = document.getElementById('videoGalleryTitle');
+    grid.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:2rem; grid-column:1/-1;">Se încarcă...</p>';
+    if (titleEl) {
+        titleEl.textContent = category === 'concept' ? 'Videoclipuri despre concept' : 'Videoclipuri despre platformă';
+    }
+    document.getElementById('videoGalleryModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    try {
+        const { data: videos, error } = await sb
+            .from('videos')
+            .select('youtube_id, title, description')
+            .eq('is_active', true)
+            .eq('category', category)
+            .order('display_order');
+        
+        if (error) throw error;
+        
+        if (!videos || videos.length === 0) {
+            grid.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:2rem; grid-column:1/-1;">Niciun videoclip disponibil momentan.</p>';
+            return;
+        }
+        
+        grid.innerHTML = videos.map(v => `
+            <div style="background:#1e293b; border-radius:12px; overflow:hidden;">
+                <div style="aspect-ratio:16/9;">
+                    <iframe width="100%" height="100%" 
+                        src="https://www.youtube.com/embed/${v.youtube_id}" 
+                        title="${(v.title || '').replace(/"/g, '&quot;')}" frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen></iframe>
+                </div>
+                <div style="padding:0.75rem 1rem;">
+                    <p style="color:white; font-weight:600; font-size:0.9375rem; font-family:'DM Sans',sans-serif; margin:0 0 0.25rem;">${v.title || ''}</p>
+                    <p style="color:#94a3b8; font-size:0.8125rem; font-family:'DM Sans',sans-serif; margin:0;">${v.description || ''}</p>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error('Error loading videos:', e);
+        grid.innerHTML = '<p style="color:#ef4444; text-align:center; padding:2rem; grid-column:1/-1;">Eroare la încărcarea videoclipurilor.</p>';
+    }
+}
+
+// Load the first active 'concept' video into the left card on page load.
+// If none exists yet, leaves the static placeholder in place.
+async function loadConceptPreview() {
+    try {
+        const { data: videos, error } = await sb
+            .from('videos')
+            .select('youtube_id, title')
+            .eq('is_active', true)
+            .eq('category', 'concept')
+            .order('display_order')
+            .limit(1);
+        
+        if (error) throw error;
+        if (!videos || videos.length === 0) return; // keep the placeholder
+        
+        const v = videos[0];
+        const container = document.getElementById('conceptVideoContainer');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <iframe 
+                width="100%" height="100%" 
+                src="https://www.youtube.com/embed/${v.youtube_id}" 
+                title="${(v.title || '').replace(/"/g, '&quot;')}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen
+                style="border-radius: 12px;">
+            </iframe>
+        `;
+    } catch (e) {
+        console.warn('Concept preview load failed:', e);
+        // keep placeholder
+    }
+}
+
+// Trigger concept preview load once Supabase client is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait briefly for sb to initialize from supabase-config.js
+    const tryLoad = (retries) => {
+        if (typeof sb !== 'undefined' && sb) {
+            loadConceptPreview();
+        } else if (retries > 0) {
+            setTimeout(() => tryLoad(retries - 1), 200);
+        }
+    };
+    tryLoad(10);
+});
+
+function closeVideoGallery() {
+    document.getElementById('videoGalleryModal').style.display = 'none';
+    document.body.style.overflow = '';
+    document.getElementById('videoGalleryGrid').innerHTML = '';
+}
+
+document.getElementById('videoGalleryModal').addEventListener('click', function(e) {
+    if (e.target === this) closeVideoGallery();
+});
+</script>
+
+</body>
+</html>
