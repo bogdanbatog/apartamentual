@@ -215,9 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!p.includes('admin') && !p.includes('consultanta')) {
         var fab = document.createElement('a');
         fab.href = '/consultanta.html';
-        fab.title = 'Consultanță gratuită';
+        fab.title = 'Cere consultanță gratuită';
         fab.style.cssText = 'position:fixed; bottom:24px; right:24px; display:flex; align-items:center; gap:8px; background:#1e293b; color:white; text-decoration:none; padding:12px 20px; border-radius:50px; font-size:14px; font-weight:500; font-family:DM Sans,sans-serif; box-shadow:0 4px 16px rgba(0,0,0,0.2); transition:all 0.3s; z-index:90;';
-        fab.innerHTML = '<i class="fas fa-comments"></i> <span>Consultanță gratuită</span>';
+        fab.innerHTML = '<i class="fas fa-comments"></i> <span>Cere consultanță gratuită</span>';
         fab.onmouseover = function() { this.style.background = '#f97316'; };
         fab.onmouseout = function() { this.style.background = '#1e293b'; };
         document.body.appendChild(fab);
