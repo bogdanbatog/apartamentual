@@ -266,17 +266,25 @@
             color: #f97316;
         }
         
-        /* ─── Author block ─── */
-        .author-block {
+        /* ─── Authors block ─── */
+        .authors-block {
             margin-top: 3rem;
             padding-top: 2rem;
             border-top: 1px solid #e2e8f0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 560px) {
+            .authors-block { grid-template-columns: 1fr; }
+        }
+        .author-card {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.875rem;
         }
         .author-avatar {
-            width: 56px; height: 56px;
+            width: 52px; height: 52px;
             border-radius: 50%;
             background: linear-gradient(135deg, #f97316, #ea580c);
             display: flex;
@@ -284,10 +292,10 @@
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             flex-shrink: 0;
         }
-        .author-info { flex: 1; }
+        .author-info { flex: 1; min-width: 0; }
         .author-info .author-name {
             font-weight: 700;
             color: #0f172a;
@@ -297,6 +305,7 @@
             color: #64748b;
             font-size: 0.8125rem;
             margin-top: 0.125rem;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -446,7 +455,7 @@
             </p>
             <p>
                 După multe întâlniri, ședințe, call-uri, am decis în cele din urmă pentru
-                <strong>Mozaic</strong> — o firmă tânără, cu doi ingineri constructori
+                <strong>Mozaic Engineering</strong> — o firmă tânără, cu doi ingineri constructori
                 experimentați și dedicați, care au gestionat echipe profesioniste.
             </p>
         </section>
@@ -549,12 +558,21 @@
             </div>
         </div>
 
-        <!-- ─── Author ─── -->
-        <div class="author-block">
-            <div class="author-avatar">LL</div>
-            <div class="author-info">
-                <div class="author-name">Lucian Luţă</div>
-                <div class="author-role">Arhitect, co-fondator LTFB Studio &amp; ApartamenTUal</div>
+        <!-- ─── Authors ─── -->
+        <div class="authors-block">
+            <div class="author-card">
+                <div class="author-avatar">LL</div>
+                <div class="author-info">
+                    <div class="author-name">arh. Lucian Luţă</div>
+                    <div class="author-role">co-fondator LTFB Studio &amp; ApartamenTUal</div>
+                </div>
+            </div>
+            <div class="author-card">
+                <div class="author-avatar">LF</div>
+                <div class="author-info">
+                    <div class="author-name">arh. Liviu Fabian</div>
+                    <div class="author-role">co-fondator LTFB Studio &amp; ApartamenTUal</div>
+                </div>
             </div>
         </div>
 
