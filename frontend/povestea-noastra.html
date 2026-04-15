@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Povestea noastră — ApartamenTUal</title>
+    <meta name="description" content="Povestea primului proiect ApartamenTUal de pe strada Județului — un mic bloc cu 5 apartamente pentru 5 familii, lângă Parcul Circului din București. Spusă de Lucian Luţă, arhitect și co-fondator LTFB Studio.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="nav.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.75;
+        }
+        
+        /* ─── HERO with looping video background ─── */
+        .story-hero {
+            position: relative;
+            height: 70vh;
+            min-height: 460px;
+            max-height: 720px;
+            overflow: hidden;
+            background: #0f172a;
+        }
+        .story-hero video {
+            position: absolute;
+            top: 50%; left: 50%;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            opacity: 0.55;
+        }
+        .story-hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.7) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+        .story-hero-eyebrow {
+            color: #fbbf24;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+        .story-hero h1 {
+            color: white;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            max-width: 800px;
+        }
+        .story-hero h1 span { color: #f97316; }
+        .story-hero-tagline {
+            color: #cbd5e1;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            max-width: 640px;
+            line-height: 1.6;
+        }
+        .story-hero-meta {
+            margin-top: 2rem;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .story-hero-meta span { display: inline-flex; align-items: center; gap: 0.4rem; }
+        
+        /* ─── Article container ─── */
+        .article-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem 5rem;
+        }
+        .article-intro {
+            font-size: 1.18rem;
+            color: #334155;
+            line-height: 1.75;
+            border-left: 4px solid #f97316;
+            padding-left: 1.5rem;
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+        .article-intro strong { color: #0f172a; }
+        
+        .article-section { margin-bottom: 3rem; }
+        .article-section h2 {
+            font-size: 1.625rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.25rem;
+            line-height: 1.3;
+            display: flex;
+            align-items: baseline;
+            gap: 0.75rem;
+        }
+        .article-section h2::before {
+            content: '';
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #f97316;
+            flex-shrink: 0;
+            transform: translateY(-4px);
+        }
+        .article-section p {
+            font-size: 1.0625rem;
+            color: #334155;
+            margin-bottom: 1.25rem;
+        }
+        .article-section p strong { color: #0f172a; font-weight: 600; }
+        .article-section p em { font-style: italic; color: #475569; }
+        
+        /* ─── Figures ─── */
+        figure {
+            margin: 2.5rem 0;
+        }
+        figure img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+        }
+        figcaption {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+            font-style: italic;
+            margin-top: 0.875rem;
+            padding: 0 1rem;
+        }
+        
+        /* Wide figure breaks out beyond text width */
+        .figure-wide {
+            margin-left: -3rem;
+            margin-right: -3rem;
+        }
+        @media (max-width: 880px) {
+            .figure-wide { margin-left: 0; margin-right: 0; }
+        }
+        
+        /* Side-by-side figures */
+        .figure-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2.5rem 0;
+        }
+        .figure-row figure { margin: 0; }
+        @media (max-width: 640px) {
+            .figure-row { grid-template-columns: 1fr; }
+        }
+        
+        /* Vertical video block */
+        .vertical-video-block {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            align-items: center;
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        }
+        .vertical-video-block video {
+            width: 100%;
+            border-radius: 10px;
+            display: block;
+        }
+        .vertical-video-block .vv-text h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        .vertical-video-block .vv-text p {
+            color: #475569;
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.65;
+        }
+        @media (max-width: 640px) {
+            .vertical-video-block {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.25rem;
+            }
+        }
+        
+        /* ─── Closing block ─── */
+        .article-closing {
+            margin-top: 4rem;
+            padding: 2.5rem;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border-radius: 16px;
+            border: 1px solid #fed7aa;
+            text-align: center;
+        }
+        .article-closing h3 {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+        }
+        .article-closing p {
+            color: #475569;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 540px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .article-closing .closing-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .closing-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .closing-btn-primary {
+            background: #f97316;
+            color: white;
+        }
+        .closing-btn-primary:hover {
+            background: #ea580c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+        .closing-btn-secondary {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        .closing-btn-secondary:hover {
+            border-color: #f97316;
+            color: #f97316;
+        }
+        
+        /* ─── Author block ─── */
+        .author-block {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .author-avatar {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .author-info { flex: 1; }
+        .author-info .author-name {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 0.9375rem;
+        }
+        .author-info .author-role {
+            color: #64748b;
+            font-size: 0.8125rem;
+            margin-top: 0.125rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation"></div>
+
+    <!-- ═══════════════════ HERO ═══════════════════ -->
+    <section class="story-hero">
+        <video autoplay muted loop playsinline poster="povestea_noastra/images/randare-fata.jpg">
+            <source src="povestea_noastra/videos/timelapse-santier.mp4" type="video/mp4">
+        </video>
+        <div class="story-hero-overlay">
+            <div class="story-hero-eyebrow">Povestea noastră</div>
+            <h1>Primul prototip <span>ApartamenTUal</span><br>de pe strada Județului</h1>
+            <p class="story-hero-tagline">
+                Cinci familii. Un mic bloc lângă Parcul Circului. O comunitate care s-a format pe drum.
+            </p>
+            <div class="story-hero-meta">
+                <span><i class="fas fa-map-marker-alt"></i> București, Str. Județului</span>
+                <span><i class="fas fa-home"></i> 5 apartamente</span>
+                <span><i class="fas fa-users"></i> 5 familii</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ ARTICLE ═══════════════════ -->
+    <article class="article-wrapper">
+        
+        <p class="article-intro">
+            Mă numesc <strong>Lucian Luţă</strong>, sunt arhitect și co-fondator LTFB Studio.
+            Aceasta este povestea primului proiect ApartamenTUal — un mic bloc cu 5 apartamente
+            pentru 5 familii, cu un spațiu comun, o curte comună, o terasă comună și poate o
+            viitoare comunitate, lângă un parc.
+        </p>
+
+        <!-- ─── Începutul ─── -->
+        <section class="article-section">
+            <h2>De unde a pornit ideea</h2>
+            <p>
+                Totul a început înainte de pandemie, când am realizat, împreună cu
+                <strong>Liviu Fabian</strong>, asociatul meu, că oferta de apartamente din piața
+                imobiliară era de o calitate destul de slabă pentru prețurile cerute. Iar dacă
+                găseai o calitate mai bună, prețurile creșteau considerabil — mai ales într-o zonă
+                semicentrală. Cam același lucru îl putem spune, de fapt, și acum.
+            </p>
+            <p>
+                Am început prin a discuta cu diverși prieteni și le-am propus să ne construim
+                propriul nostru bloc, cu apartamente personalizate în funcție de nevoile fiecăruia.
+                Am fi creat și o comunitate de vecini în același timp. Am fi fost puțini vecini, cu
+                siguranță ar fi fost mai ieftin pentru calitatea pe care ne-o doream, calitatea
+                locuirii ar fi fost clar mai bună față de ce ne oferea piața. Iar noi, ca arhitecți,
+                am fi putut controla profesionist tot procesul.
+            </p>
+            <p>
+                După mai multe discuții, interesul pentru această abordare era mare, dar nu toți
+                prietenii noștri voiau să se mute. Fiecare avea diverse planuri financiare — credite
+                deja luate, alte investiții planificate — așa că am renunțat.
+            </p>
+        </section>
+
+        <!-- ─── Conceptul ─── -->
+        <section class="article-section">
+            <h2>Co-housing și Baugruppen — descoperirea conceptului</h2>
+            <p>
+                Am început apoi o documentare și am descoperit ceea ce în alte țări se numește
+                <strong>co-housing</strong> și <strong>Baugruppen</strong>: în esență, un grup de
+                oameni care se asociază și pornesc împreună un proces prin care își construiesc
+                propriile apartamente, așa cum și le doresc.
+            </p>
+            <p>
+                Co-housing-ul pornește, în principiu, de la o comunitate deja închegată — locuirea
+                împreună devine o necesitate firească, iar spațiile comune de interacțiune sunt
+                ample. În schimb, <strong>Baugruppen</strong> (modelul german) este mai pragmatic:
+                nu pornește neapărat de la o comunitate și nu are acest scop, însă o poate forma
+                după finalizarea apartamentelor. Prioritatea Baugruppen este eficiența construirii
+                unor apartamente în funcție de nevoile membrilor.
+            </p>
+            <p>
+                Am creat inițial pagina de Facebook și landing page-ul ApartamenTUal pentru a
+                promova aceste alternative de construire și locuire. Pe pagina de Facebook postam
+                diverse terenuri de vânzare și arătam ce se poate construi pe ele — câte apartamente
+                ar intra, o mică volumetrie schematică. Interesul a fost destul de mare la început
+                și am organizat câteva întâlniri pe tema asta.
+            </p>
+        </section>
+
+        <!-- ─── Grupul ─── -->
+        <section class="article-section">
+            <h2>Grupul s-a format. Apoi am găsit terenul</h2>
+            <p>
+                S-a format un grup mai mare — 15-20 de familii — în căutare de terenuri prin
+                București. La un moment dat am găsit un teren foarte bun lângă <strong>Parcul
+                Circului</strong>, iar câțiva din grup au fost foarte hotărâți pe el. Am stabilit
+                numărul de apartamente, suprafețele aproximative, am demarat negocierile cu
+                proprietarul, câteva studii de teren. Între timp m-am alăturat și eu acestui grup.
+            </p>
+            
+            <figure class="figure-wide">
+                <img src="povestea_noastra/images/harta-parc-circului.jpg" alt="Locația terenului pe strada Județului, lângă Parcul Circului">
+                <figcaption>Terenul ales — la doi pași de Parcul Circului, într-o zonă semicentrală a Bucureștiului.</figcaption>
+            </figure>
+            
+            <p>
+                Înainte de cumpărarea terenului am semnat un <strong>contract de asociere
+                legalizat la notar</strong>, prin care descriam întregul proces viitor de
+                construire: ce apartamente vor rezulta, cui îi vor reveni, ce cotă indiviză îi
+                revine fiecăruia. Pentru ca totul să fie clar de la început.
+            </p>
+            <p>
+                Am cumpărat terenul și am început procesul de proiectare și autorizare. LTFB Studio
+                a realizat proiectul și s-a ocupat de toată partea de avize și autorizație.
+            </p>
+        </section>
+
+        <!-- ─── Proiectul ─── -->
+        <section class="article-section">
+            <h2>Proiectul — fiecare și-a desenat apartamentul</h2>
+            <p>
+                A fost interesant cum fiecare a reușit să-și personalizeze compartimentările
+                interioare în funcție de nevoi. LTFB Studio, ca proiectant, a trebuit să mențină un
+                echilibru între necesitățile legate mai mult de interior — suprafețe, fluxuri — și
+                exteriorul care se raportează la vecinătăți, la oraș.
+            </p>
+            <p>
+                Experiența de mic dezvoltator a fost provocatoare pentru fiecare dintre noi.
+            </p>
+
+            <figure class="figure-wide">
+                <img src="povestea_noastra/images/randare-fata.jpg" alt="Randare exterior — fațada principală spre stradă">
+                <figcaption>Fațada principală — un volum simplu, alb, integrat în țesutul construit existent.</figcaption>
+            </figure>
+
+            <figure class="figure-wide">
+                <img src="povestea_noastra/images/randare-curte.jpg" alt="Randare curte interioară — copii care se joacă, leagăne, terase">
+                <figcaption>Curtea comună din spate — leagănele, terasa pentru mâncat, copiii care se joacă. Asta a fost ideea de la început.</figcaption>
+            </figure>
+        </section>
+
+        <!-- ─── Constructorul ─── -->
+        <section class="article-section">
+            <h2>Alegerea constructorului</h2>
+            <p>
+                După încheierea fazei de proiectare și obținerea autorizației de construire, am
+                căutat destul de mult timp un constructor și am cerut multe oferte. Ne-a ajutat
+                consultanța oferită de LTFB Studio pentru compararea ofertelor și alegerea unui
+                constructor de calitate, dar nu exagerat de scump.
+            </p>
+            <p>
+                După multe întâlniri, ședințe, call-uri, am decis în cele din urmă pentru
+                <strong>Mozaic</strong> — o firmă tânără, cu doi ingineri constructori
+                experimentați și dedicați, care au gestionat echipe profesioniste.
+            </p>
+        </section>
+
+        <!-- ─── Momentele dificile ─── -->
+        <section class="article-section">
+            <h2>Au existat și momente dificile</h2>
+            <p>
+                Unul dintre cele mai grele momente a fost când unul din membrii grupului a decis să
+                iasă din proces și să-și vândă partea. Am început să căutăm cu toții alt asociat
+                interesat de preluarea cotei indivize și continuarea procesului pentru construirea
+                unui apartament.
+            </p>
+            <p>
+                După aproximativ două luni de promovare printre prieteni, cu diverse prezentări
+                realizate de LTFB Studio — apartamente în diverse configurații — ni s-a alăturat o
+                altă familie cu care am semnat contractul de asociere.
+            </p>
+        </section>
+
+        <!-- ─── Construcția ─── -->
+        <section class="article-section">
+            <h2>Construcția a început</h2>
+            <p>
+                Am demarat construcția și de atunci totul a mers cursiv. Am avut o colaborare bună
+                cu constructorul și toți din grup urmăreau și vizitau șantierul — fiecare și-a
+                văzut propriul apartament în toate stadiile de construcție.
+            </p>
+
+            <div class="figure-row">
+                <figure>
+                    <img src="povestea_noastra/images/santier-sapatura.jpg" alt="Începutul săpăturii — excavator pe șantier">
+                </figure>
+                <figure>
+                    <img src="povestea_noastra/images/santier-vedere-aeriana.jpg" alt="Vedere de sus a șantierului în construcție">
+                </figure>
+            </div>
+            <p style="text-align: center; font-size: 0.875rem; color: #64748b; font-style: italic; margin-top: -1.5rem; margin-bottom: 2.5rem;">
+                Decembrie 2024 — primele zile de șantier. Săpătura începe, vecinii își văd noul vecin care apare.
+            </p>
+
+            <p>
+                Tot grupul s-a organizat pe diverse task-uri: cereri de oferte, branșamente,
+                diverse avize. Au existat, în mod evident, tensiuni — dar le-am depășit, pentru că
+                în cele din urmă fiecare avea același scop comun: să realizăm această construcție și
+                să putem locui în apartamentele visate, copiii să se joace în curte, să reușim să
+                avem confortul pe care ni l-am dorit.
+            </p>
+
+            <div class="vertical-video-block">
+                <video autoplay muted loop playsinline>
+                    <source src="povestea_noastra/videos/tur-interior.mp4" type="video/mp4">
+                </video>
+                <div class="vv-text">
+                    <h3>Apartamentele prind contur</h3>
+                    <p>
+                        Un tur scurt prin interior: instalațiile, holurile, încăperile care încep
+                        să arate a apartamente. Fiecare cu propria lui istorie, fiecare gândit
+                        împreună cu viitorul proprietar.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── Final ─── -->
+        <section class="article-section">
+            <h2>Un fel de lifetime project</h2>
+            <p>
+                Pentru fiecare dintre noi, acest proiect a devenit un fel de <em>lifetime
+                project</em>. Și chiar dacă nu ne cunoșteam bine înainte de a începe, am început
+                încet-încet să formăm un fel de comunitate.
+            </p>
+            <p>
+                Asta e povestea primului prototip ApartamenTUal. E încă în construcție, e încă în
+                desfășurare. Dar ne-a învățat un lucru clar: <strong>se poate</strong>. Se poate să
+                construiești împreună, se poate să economisești bani, se poate să ai exact
+                apartamentul pe care îl vrei, și se poate să câștigi vecini cu care chiar te
+                înțelegi.
+            </p>
+            <p>
+                Iar acum, cu platforma ApartamenTUal, vrem ca același lucru să fie posibil pentru
+                cât mai multe alte grupuri.
+            </p>
+        </section>
+
+        <!-- ─── Closing CTA ─── -->
+        <div class="article-closing">
+            <h3>Vrei să faci parte dintr-un grup similar?</h3>
+            <p>
+                Platforma ApartamenTUal te ajută să găsești oameni cu interese asemănătoare,
+                să identifici terenuri potrivite și să pornești propriul tău proiect.
+            </p>
+            <div class="closing-actions">
+                <a href="grupuri.html" class="closing-btn closing-btn-primary">
+                    <i class="fas fa-users"></i> Vezi grupurile active
+                </a>
+                <a href="consultanta.html" class="closing-btn closing-btn-secondary">
+                    <i class="fas fa-comments"></i> Consultanță gratuită
+                </a>
+            </div>
+        </div>
+
+        <!-- ─── Author ─── -->
+        <div class="author-block">
+            <div class="author-avatar">LL</div>
+            <div class="author-info">
+                <div class="author-name">Lucian Luţă</div>
+                <div class="author-role">Arhitect, co-fondator LTFB Studio &amp; ApartamenTUal</div>
+            </div>
+        </div>
+
+    </article>
+
+    <div id="footer"></div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/fab-consultanta.js"></script>
+</body>
+</html>
