@@ -622,10 +622,14 @@ async function handleProfessionalProfileSubmit(event) {
     const errorDiv = document.getElementById('profile-error-pro');
     
     try {
+        let websiteValue = document.getElementById('agency_website').value.trim();
+        if (websiteValue && !/^https?:\/\//i.test(websiteValue)) {
+            websiteValue = 'https://' + websiteValue;
+        }
         // Get form data
         const formData = {
             agency_name: document.getElementById('agency_name').value,
-            agency_website: document.getElementById('agency_website').value,
+            agency_website: websiteValue,
             agency_description: document.getElementById('agency_description').value || null,
             account_status: 'pending'
         };
