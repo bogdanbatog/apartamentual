@@ -593,10 +593,11 @@ async function displayTerenDetails(teren, userProfile) {
         userProfile.is_super_admin
     );
     const canToggleStatus = userProfile && userProfile.is_super_admin;
+    const canApprove = userProfile && userProfile.is_super_admin && teren.status === 'pending';
     
-    if (hasPendingAnalysis || canModify || canToggleStatus) {
+    if (hasPendingAnalysis || canModify || canToggleStatus || canApprove) {
         actionButtons.classList.remove('hidden');
-        updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren);
+        updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, canApprove, teren);
     } else {
         actionButtons.classList.add('hidden');
     }
@@ -630,9 +631,25 @@ async function displayTerenDetails(teren, userProfile) {
 }
 
 // Update action buttons
-function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren) {
+function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, canApprove, teren) {
     const actionButtons = document.getElementById('action-buttons');
     actionButtons.innerHTML = '';
+    
+    // Add "Aprobă" / "Respinge" buttons if terrain is pending and user is super admin.
+    // Shown prominently because the typical entry point is the admin notification email.
+    if (canApprove) {
+        const approveBtn = document.createElement('button');
+        approveBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
+        approveBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Aprobă';
+        approveBtn.onclick = () => setTerenApprovalStatus(teren.id, 'approved');
+        actionButtons.appendChild(approveBtn);
+        
+        const rejectBtn = document.createElement('button');
+        rejectBtn.className = 'bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
+        rejectBtn.innerHTML = '<i class="fas fa-times mr-1"></i> Respinge';
+        rejectBtn.onclick = () => setTerenApprovalStatus(teren.id, 'rejected');
+        actionButtons.appendChild(rejectBtn);
+    }
     
     // Add "Modifica" button if user can modify
     if (canModify) {
@@ -653,6 +670,35 @@ function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, ter
         toggleBtn.textContent = isDeleted ? 'Activează' : 'Dezactivează';
         toggleBtn.onclick = () => toggleTerenStatus(teren.id, isDeleted);
         actionButtons.appendChild(toggleBtn);
+    }
+}
+
+// Approve or reject a pending terrain (super admin only).
+async function setTerenApprovalStatus(terenId, newStatus) {
+    const actionLabel = newStatus === 'approved' ? 'aprobi' : 'respingi';
+    if (!confirm(`Sigur vrei să ${actionLabel} acest teren?`)) return;
+    
+    try {
+        const userProfile = await fetchUserProfile();
+        if (!userProfile?.is_super_admin) {
+            throw new Error('Nu aveți permisiuni de administrator pentru această operație');
+        }
+        
+        const { error } = await supabase
+            .from('terenuri')
+            .update({ status: newStatus })
+            .eq('id', terenId);
+        
+        if (error) throw error;
+        
+        const message = newStatus === 'approved' 
+            ? 'Terenul a fost aprobat cu succes!' 
+            : 'Terenul a fost respins.';
+        alert(message);
+        window.location.reload();
+    } catch (error) {
+        console.error('Error updating teren approval status:', error);
+        alert('A apărut o eroare la actualizarea statusului terenului: ' + error.message);
     }
 }
 
