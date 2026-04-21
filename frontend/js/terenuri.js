@@ -383,9 +383,12 @@ function createTerenCard(teren, index) {
         ? new Date(teren.created_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' })
         : '';
 
-    // Image
-    const imageHtml = teren.image_url
-        ? `<img src="${escapeHtml(teren.image_url)}" alt="${escapeHtml(teren.titlu)}" loading="lazy">`
+    // Image — prefer image_urls[0] (new), fall back to image_url (legacy)
+    const primaryImage = (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0)
+        ? teren.image_urls[0]
+        : teren.image_url;
+    const imageHtml = primaryImage
+        ? `<img src="${escapeHtml(primaryImage)}" alt="${escapeHtml(teren.titlu)}" loading="lazy">`
         : `<div class="image-placeholder"><i class="fas fa-mountain-sun"></i></div>`;
 
     // Location string
