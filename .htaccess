@@ -5,7 +5,25 @@ DirectoryIndex index.html index.htm index.php
     DirectoryIndex index.html
 </IfModule>
 
-# Optional: Redirect root to index.html if needed
+# Force HTTPS — redirect any HTTP request to HTTPS with same path
 RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Optional: Redirect root to index.html if needed
 RewriteCond %{REQUEST_URI} ^/$
 RewriteRule ^(.*)$ /index.html [L]
+
+# Cache headers — keep JS/CSS/HTML fresh (5 min max), allow images/fonts long cache.
+# After a deploy, browsers see new code within 5 minutes automatically,
+# without users needing to hard-refresh.
+<IfModule mod_headers.c>
+    # Short cache for code/markup: revalidate with server every 5 minutes
+    <FilesMatch "\.(js|css|html)$">
+        Header set Cache-Control "max-age=300, must-revalidate"
+    </FilesMatch>
+    # Long cache for static assets that rarely change
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2|ttf|eot)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+</IfModule>
