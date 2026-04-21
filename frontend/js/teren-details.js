@@ -42,19 +42,79 @@ function formatDate(dateString) {
     });
 }
 
-// Image modal functions
+// Image gallery state — populated when a terrain loads with image_urls.
+let galleryImages = [];
+let galleryIndex = 0;
+
+// Open modal at the currently-displayed main image
 function openImageModal() {
-    const imageSrc = document.getElementById('teren-image').src;
-    if (imageSrc) {
-        document.getElementById('modal-image').src = imageSrc;
-        document.getElementById('image-modal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
+    if (galleryImages.length === 0) return;
+    showModalImage(galleryIndex);
+    document.getElementById('image-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeImageModal() {
     document.getElementById('image-modal').classList.add('hidden');
     document.body.style.overflow = 'auto';
+}
+
+function showModalImage(idx) {
+    if (galleryImages.length === 0) return;
+    // wrap-around navigation
+    if (idx < 0) idx = galleryImages.length - 1;
+    if (idx >= galleryImages.length) idx = 0;
+    galleryIndex = idx;
+    
+    document.getElementById('modal-image').src = galleryImages[idx];
+    
+    // Show/hide nav controls based on whether we have multiple images
+    const multipleImages = galleryImages.length > 1;
+    const prevBtn = document.getElementById('modal-prev');
+    const nextBtn = document.getElementById('modal-next');
+    const counter = document.getElementById('modal-counter');
+    
+    if (prevBtn) prevBtn.classList.toggle('hidden', !multipleImages);
+    if (nextBtn) nextBtn.classList.toggle('hidden', !multipleImages);
+    if (counter) {
+        if (multipleImages) {
+            counter.textContent = `${idx + 1} / ${galleryImages.length}`;
+            counter.classList.remove('hidden');
+        } else {
+            counter.classList.add('hidden');
+        }
+    }
+}
+
+function modalPrev(e) {
+    if (e) e.stopPropagation();
+    showModalImage(galleryIndex - 1);
+}
+
+function modalNext(e) {
+    if (e) e.stopPropagation();
+    showModalImage(galleryIndex + 1);
+}
+
+// Expose for inline onclick handlers
+window.openImageModal = openImageModal;
+window.closeImageModal = closeImageModal;
+window.modalPrev = modalPrev;
+window.modalNext = modalNext;
+
+// Select a thumbnail → update the main image and sync the modal state
+function selectGalleryImage(idx) {
+    if (idx < 0 || idx >= galleryImages.length) return;
+    galleryIndex = idx;
+    const mainImg = document.getElementById('teren-image');
+    if (mainImg) mainImg.src = galleryImages[idx];
+    // Highlight the active thumbnail
+    const thumbs = document.querySelectorAll('#teren-thumbnails [data-thumb-index]');
+    thumbs.forEach(t => {
+        const i = parseInt(t.getAttribute('data-thumb-index'), 10);
+        t.classList.toggle('ring-2', i === idx);
+        t.classList.toggle('ring-orange-500', i === idx);
+    });
 }
 
 // Fetch user profile data
@@ -631,15 +691,24 @@ async function displayTerenDetails(teren, userProfile) {
         actionButtons.classList.add('hidden');
     }
     
-    // Image handling
+    // Image handling — build gallery from image_urls (new) or image_url (legacy)
     const imageContainer = document.getElementById('teren-image-container');
     const noImageDiv = document.getElementById('no-image');
     const imageEl = document.getElementById('teren-image');
+    const thumbnailsEl = document.getElementById('teren-thumbnails');
     
-    const imageUrl = getImageUrl(teren);
+    // Build the gallery array — prefer multi-image, fall back to scalar
+    if (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0) {
+        galleryImages = teren.image_urls.filter(Boolean);
+    } else if (teren.image_url) {
+        galleryImages = [teren.image_url];
+    } else {
+        galleryImages = [];
+    }
+    galleryIndex = 0;
     
-    if (imageUrl) {
-        imageEl.src = imageUrl;
+    if (galleryImages.length > 0) {
+        imageEl.src = galleryImages[0];
         imageEl.alt = `Imagine teren - ${teren.titlu}`;
         
         if (isDisabled) {
@@ -650,9 +719,35 @@ async function displayTerenDetails(teren, userProfile) {
         
         imageContainer.classList.remove('hidden');
         noImageDiv.classList.add('hidden');
+        
+        // Render thumbnails only when there are 2+ images
+        if (thumbnailsEl) {
+            if (galleryImages.length > 1) {
+                thumbnailsEl.innerHTML = galleryImages.map((url, idx) => `
+                    <img src="${url}" alt="Miniatură ${idx + 1}"
+                         data-thumb-index="${idx}"
+                         class="w-full h-16 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition ${idx === 0 ? 'ring-2 ring-orange-500' : ''}">
+                `).join('');
+                thumbnailsEl.classList.remove('hidden');
+                // Attach click handlers
+                thumbnailsEl.querySelectorAll('[data-thumb-index]').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const idx = parseInt(this.getAttribute('data-thumb-index'), 10);
+                        selectGalleryImage(idx);
+                    });
+                });
+            } else {
+                thumbnailsEl.innerHTML = '';
+                thumbnailsEl.classList.add('hidden');
+            }
+        }
     } else {
         imageContainer.classList.add('hidden');
         noImageDiv.classList.remove('hidden');
+        if (thumbnailsEl) {
+            thumbnailsEl.innerHTML = '';
+            thumbnailsEl.classList.add('hidden');
+        }
     }
     
     // Show teren details section
@@ -885,11 +980,21 @@ Mulțumesc,
     closeAnalysisModal();
 }
 
-// Close modals with Escape key
+// Keyboard shortcuts: Escape to close modals, arrows to navigate gallery in modal
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeImageModal();
         closeAnalysisModal();
+        return;
+    }
+    // Arrow keys only navigate when the image modal is open
+    const imageModal = document.getElementById('image-modal');
+    if (imageModal && !imageModal.classList.contains('hidden') && galleryImages.length > 1) {
+        if (e.key === 'ArrowLeft') {
+            modalPrev();
+        } else if (e.key === 'ArrowRight') {
+            modalNext();
+        }
     }
 });
 
