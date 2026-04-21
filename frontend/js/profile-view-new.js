@@ -172,7 +172,7 @@ async function loadActiveUserData(profileId) {
         // Load favorite terrains (from terenuri_likes)
         const { data: likes } = await supabase
             .from('terenuri_likes')
-            .select('teren_id, terenuri(id, titlu, oras, cartier, suprafata, pret_total, image_url, status)')
+            .select('teren_id, terenuri(id, titlu, oras, cartier, suprafata, pret_total, image_url, image_urls, status)')
             .eq('user_id', profileId);
         
         // Filter only approved terrains
@@ -189,7 +189,7 @@ async function loadProfessionalUserData(profileId) {
     try {
         const { data: terrains } = await supabase
             .from('terenuri')
-            .select('id, titlu, oras, cartier, zona, suprafata, pret_total, image_url, status')
+            .select('id, titlu, oras, cartier, zona, suprafata, pret_total, image_url, image_urls, status')
             .eq('created_by_user_id', profileId)
             .order('created_at', { ascending: false });
         
@@ -524,12 +524,16 @@ async function renderFavoriteTerrains() {
             `;
         }
 
+        const primaryImage = (terrain.image_urls && Array.isArray(terrain.image_urls) && terrain.image_urls.length > 0)
+            ? terrain.image_urls[0]
+            : terrain.image_url;
+
         return `
             <div class="teren-fav-card">
                 <a href="teren-details.html?id=${terrain.id}" class="flex items-center gap-4 p-4 border rounded-lg hover:border-gray-400 hover:shadow-sm transition" style="border-bottom-left-radius:${isOwnProfile ? '0' : ''};border-bottom-right-radius:${isOwnProfile ? '0' : ''}">
                     <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                        ${terrain.image_url 
-                            ? `<img src="${terrain.image_url}" alt="${terrain.titlu}" class="w-full h-full object-cover">`
+                        ${primaryImage 
+                            ? `<img src="${primaryImage}" alt="${terrain.titlu}" class="w-full h-full object-cover">`
                             : `<div class="w-full h-full flex items-center justify-center text-gray-400">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
