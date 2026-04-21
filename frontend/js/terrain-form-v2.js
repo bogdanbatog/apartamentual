@@ -64,23 +64,96 @@ document.addEventListener('DOMContentLoaded', function() {
     if (suprafataInput) suprafataInput.addEventListener('input', calculeazaPretMp);
     if (pretTotalInput) pretTotalInput.addEventListener('input', calculeazaPretMp);
 
-    // === PREVIEW IMAGINE ===
+    // === GESTIONARE IMAGINI (multi-photo) ===
+    // Array-ul imageItems conține obiecte de 2 tipuri:
+    //   { kind: 'existing', url: 'https://...' }  → imagine deja salvată în DB
+    //   { kind: 'new', file: File, previewUrl: 'blob:...' }  → fișier nou selectat
+    // Ordinea în array = ordinea care se va salva în image_urls.
+    const MAX_IMAGES = 6;
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    let imageItems = [];
+    
     const pozaInput = document.getElementById('poza');
-    const imagePreview = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
+    const previewsContainer = document.getElementById('image-previews');
+    const counterEl = document.getElementById('image-counter');
+
+    function renderImagePreviews() {
+        if (!previewsContainer) return;
+        previewsContainer.innerHTML = '';
+        
+        if (imageItems.length === 0) {
+            previewsContainer.classList.add('hidden');
+            if (counterEl) counterEl.classList.add('hidden');
+            return;
+        }
+        
+        previewsContainer.classList.remove('hidden');
+        
+        imageItems.forEach((item, index) => {
+            const src = item.kind === 'existing' ? item.url : item.previewUrl;
+            const card = document.createElement('div');
+            card.className = 'relative group';
+            card.innerHTML = `
+                <img src="${src}" alt="Imagine ${index + 1}" class="w-full h-32 object-cover rounded-md border">
+                ${index === 0 ? '<span class="absolute top-1 left-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">Principală</span>' : ''}
+                <button type="button" data-index="${index}" class="remove-image-btn absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold shadow-md" title="Șterge">×</button>
+            `;
+            previewsContainer.appendChild(card);
+        });
+        
+        // Attach remove handlers
+        previewsContainer.querySelectorAll('.remove-image-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-index'), 10);
+                const removed = imageItems[idx];
+                if (removed && removed.kind === 'new' && removed.previewUrl) {
+                    URL.revokeObjectURL(removed.previewUrl);
+                }
+                imageItems.splice(idx, 1);
+                renderImagePreviews();
+            });
+        });
+        
+        if (counterEl) {
+            counterEl.textContent = `${imageItems.length} / ${MAX_IMAGES} imagini`;
+            counterEl.classList.remove('hidden');
+        }
+    }
+
+    function addFilesToBasket(fileList) {
+        const errors = [];
+        for (const file of fileList) {
+            if (imageItems.length >= MAX_IMAGES) {
+                errors.push(`Maxim ${MAX_IMAGES} imagini permise. "${file.name}" nu a fost adăugat.`);
+                break;
+            }
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                errors.push(`"${file.name}" are un format neacceptat.`);
+                continue;
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                errors.push(`"${file.name}" depășește 5MB.`);
+                continue;
+            }
+            imageItems.push({
+                kind: 'new',
+                file: file,
+                previewUrl: URL.createObjectURL(file)
+            });
+        }
+        renderImagePreviews();
+        if (errors.length > 0) {
+            alert(errors.join('\n'));
+        }
+    }
 
     if (pozaInput) {
         pozaInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.classList.add('hidden');
+            if (this.files && this.files.length > 0) {
+                addFilesToBasket(this.files);
+                // Reset input so selecting the same file again still fires change
+                this.value = '';
             }
         });
     }
@@ -250,10 +323,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculează preț/mp
         calculeazaPretMp();
 
-        // Imagine curentă
-        if (teren.image_url) {
-            showCurrentImage(teren.image_url);
+        // Imagini existente (la edit) — populate basket. Prefer image_urls (new),
+        // fall back to image_url (legacy single photo).
+        if (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0) {
+            imageItems = teren.image_urls.map(url => ({ kind: 'existing', url: url }));
+        } else if (teren.image_url) {
+            imageItems = [{ kind: 'existing', url: teren.image_url }];
+        } else {
+            imageItems = [];
         }
+        renderImagePreviews();
 
         // Analiza (admin)
         if (isSuperAdmin) {
@@ -262,24 +341,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (genStatus) genStatus.value = teren.analiza_generala_status || 'pending';
             if (specStatus) specStatus.value = teren.analiza_specifica_status || 'pending';
-        }
-    }
-
-    function showCurrentImage(imageUrl) {
-        const pozaField = document.getElementById('poza');
-        if (pozaField && pozaField.parentNode) {
-            const existingPreview = document.getElementById('current-image-display');
-            if (existingPreview) existingPreview.remove();
-
-            const currentImageDiv = document.createElement('div');
-            currentImageDiv.id = 'current-image-display';
-            currentImageDiv.className = 'mt-2 p-3 bg-gray-50 rounded-md border';
-            currentImageDiv.innerHTML = `
-                <p class="text-sm font-medium text-gray-700 mb-2">Imagine actuală:</p>
-                <img src="${imageUrl}" alt="Imagine curentă" class="w-32 h-32 object-cover rounded-md" onerror="this.parentElement.style.display='none';">
-                <p class="text-xs text-gray-500 mt-1">Încarcă o imagine nouă pentru a o înlocui, sau lasă câmpul gol pentru a păstra imaginea actuală.</p>
-            `;
-            pozaField.parentNode.appendChild(currentImageDiv);
         }
     }
 
@@ -309,24 +370,13 @@ document.addEventListener('DOMContentLoaded', function() {
             errors.push('Suprafața trebuie să fie mai mare decât 0');
         }
 
-        // Poza obligatorie la creare (nu la editare)
-        if (!isEditMode) {
-            const pozaFile = formData.get('poza');
-            if (!pozaFile || pozaFile.size === 0) {
-                errors.push('Imaginea terenului este obligatorie');
-            }
+        // La creare e obligatoriu cel puțin o imagine. La edit e OK dacă păstrezi
+        // cel puțin o imagine existentă sau adaugi una nouă.
+        if (imageItems.length === 0) {
+            errors.push('Adaugă cel puțin o imagine');
         }
-
-        // Validare poză dimensiune
-        const pozaFile = formData.get('poza');
-        if (pozaFile && pozaFile.size > 0) {
-            if (pozaFile.size > 5 * 1024 * 1024) {
-                errors.push('Imaginea nu poate depăși 5MB');
-            }
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!allowedTypes.includes(pozaFile.type)) {
-                errors.push('Formatul imaginii nu este acceptat (JPG, PNG, GIF, WebP)');
-            }
+        if (imageItems.length > MAX_IMAGES) {
+            errors.push(`Maxim ${MAX_IMAGES} imagini permise`);
         }
 
         return errors;
@@ -375,12 +425,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(validationErrors.join('\n'));
             }
 
-            // Upload imagine
-            let imageUrl = isEditMode && currentTerrain ? currentTerrain.image_url : null;
-            const pozaFile = formData.get('poza');
-            if (pozaFile && pozaFile.size > 0) {
-                imageUrl = await uploadImageToStorage(pozaFile, user.id);
-            }
+            // Upload imagini noi în paralel. Pentru fiecare item din basket:
+            //   - 'existing' → păstrăm URL-ul deja salvat
+            //   - 'new' → upload file, înlocuim cu URL-ul public
+            // Rezultatul final respectă ordinea din basket (prima imagine = principala).
+            const uploadedUrls = await Promise.all(imageItems.map(async (item) => {
+                if (item.kind === 'existing') {
+                    return item.url;
+                }
+                return await uploadImageToStorage(item.file, user.id);
+            }));
 
             // Calcul preț/mp
             const suprafata = parseInt(formData.get('suprafata'));
@@ -398,7 +452,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 suprafata: suprafata,
                 pret_total: pretTotal,
                 pret_pe_mp: pretPeMp,
-                image_url: imageUrl
+                image_urls: uploadedUrls,
+                // Keep legacy scalar in sync with the primary image (first in array).
+                // Old code paths that still read image_url will work during rollout.
+                image_url: uploadedUrls[0] || null
             };
 
             // Câmpuri specifice la creare
@@ -467,7 +524,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!isEditMode) {
                 form.reset();
-                imagePreview?.classList.add('hidden');
+                // Clear image basket and previews
+                imageItems.forEach(item => {
+                    if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+                });
+                imageItems = [];
+                renderImagePreviews();
                 pretMpDisplay?.classList.add('hidden');
                 cartierSelect.disabled = true;
                 cartierSelect.innerHTML = '<option value="">Alege mai întâi orașul</option>';
