@@ -373,6 +373,29 @@ async function fetchTerenDetails() {
         return;
     }
 
+    // Terenurile în status "pending" sunt vizibile doar pentru superadmin și
+    // proprietar (via RLS). Dacă userul nu e logat, query-ul cu .single()
+    // întoarce 0 rânduri și Supabase aruncă "Cannot coerce the result to a
+    // single JSON object" — o eroare tehnică lipsită de sens pentru user.
+    // Interceptăm aici: dacă nu e logat, arătăm modalul de login cu un mesaj
+    // clar. După login, login-modal.js face window.location.reload(), deci
+    // userul rămâne pe aceeași pagină și vede terenul dacă are drept.
+    try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) {
+            hideLoading();
+            if (typeof openAuthModalWithMessage === 'function') {
+                openAuthModalWithMessage('Te rugăm să te autentifici pentru a vedea detaliile terenului.');
+            } else {
+                // Fallback dacă auth-modal.js nu s-a încărcat încă
+                window.location.href = '/index.html?login=1';
+            }
+            return;
+        }
+    } catch (e) {
+        console.warn('Auth check failed, continuing:', e);
+    }
+
     try {
         showLoading();
         
@@ -405,7 +428,7 @@ async function fetchTerenDetails() {
 
         await displayTerenDetails(terenData, userProfile);
         renderGroupLikesSection();
-        loadInterestCounts(terenId);
+        loadInterestCounts(terenId, terenData);
         hideLoading();
         
     } catch (error) {
@@ -868,7 +891,7 @@ document.addEventListener('keydown', function(e) {
 // INTEREST COUNTS & NAVIGATION
 // =====================================================
 
-async function loadInterestCounts(terenId) {
+async function loadInterestCounts(terenId, teren) {
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return; // Only show for logged-in users
@@ -882,11 +905,19 @@ async function loadInterestCounts(terenId) {
         
         if (profile && profile.account_type === 'profesional') return; // Hide for agencies
         
-        // Fetch user likes count
-        const { count: userLikesCount } = await supabase
+        // Identify the terrain owner. Agency accounts get an auto-like on their
+        // own listing (so the terrain shows up in their profile), but that
+        // self-like should not count as "interes" from another user. Exclude
+        // the owner from both the count and the list shown to the user.
+        const ownerId = teren && (teren.created_by_user_id || teren.posted_by || teren.user_id);
+        
+        // Fetch user likes count, excluding the owner
+        let userLikesQuery = supabase
             .from('terenuri_likes')
             .select('id', { count: 'exact', head: true })
             .eq('teren_id', terenId);
+        if (ownerId) userLikesQuery = userLikesQuery.neq('user_id', ownerId);
+        const { count: userLikesCount } = await userLikesQuery;
         
         // Fetch group likes count
         const { count: groupLikesCount } = await supabase
