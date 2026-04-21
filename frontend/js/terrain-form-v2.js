@@ -163,11 +163,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isSuperAdmin) {
                 const analysisSection = document.getElementById('analysis-section');
                 if (analysisSection) analysisSection.classList.remove('hidden');
-                
-                if (isEditMode) {
-                    const adminStatusSection = document.getElementById('admin-status-section');
-                    if (adminStatusSection) adminStatusSection.classList.remove('hidden');
-                }
             }
 
             // Dacă e edit mode, încarcă datele
@@ -264,11 +259,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isSuperAdmin) {
             const genStatus = document.getElementById('analiza_generala_status');
             const specStatus = document.getElementById('analiza_specifica_status');
-            const adminStatus = document.getElementById('admin-status');
             
             if (genStatus) genStatus.value = teren.analiza_generala_status || 'pending';
             if (specStatus) specStatus.value = teren.analiza_specifica_status || 'pending';
-            if (adminStatus) adminStatus.value = teren.status || 'pending';
         }
     }
 
@@ -420,11 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isSuperAdmin) {
                 terenData.analiza_generala_status = formData.get('analiza_generala_status') || 'pending';
                 terenData.analiza_specifica_status = formData.get('analiza_specifica_status') || 'pending';
-                
-                if (isEditMode) {
-                    const adminStatus = formData.get('admin_status');
-                    if (adminStatus) terenData.status = adminStatus;
-                }
             }
 
             // Save
