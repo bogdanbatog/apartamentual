@@ -275,14 +275,24 @@ async function loadTerenuri() {
 
 async function loadLikesCounts() {
     try {
+        // Build a map of teren_id → owner user_id, so we can exclude self-likes.
+        // Agencies get an auto-like on their own listing (to show it in their
+        // profile), but that self-like should not count as an external interest.
+        const ownerByTeren = {};
+        for (const t of allTerenuri) {
+            const ownerId = t.created_by_user_id || t.posted_by || t.user_id;
+            if (ownerId) ownerByTeren[t.id] = ownerId;
+        }
+        
         // Get counts grouped by teren_id
         const { data, error } = await sb
             .from('terenuri_likes')
-            .select('teren_id');
+            .select('teren_id, user_id');
 
         if (!error && data) {
             likesCountMap = {};
             data.forEach(row => {
+                if (ownerByTeren[row.teren_id] && ownerByTeren[row.teren_id] === row.user_id) return;
                 likesCountMap[row.teren_id] = (likesCountMap[row.teren_id] || 0) + 1;
             });
         }
