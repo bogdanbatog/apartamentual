@@ -187,12 +187,31 @@ async function loadActiveUserData(profileId) {
 
 async function loadProfessionalUserData(profileId) {
     try {
-        const { data: terrains } = await supabase
+        // The agency owner needs to see their own pending/rejected terrains
+        // (so they know where each listing is in the approval flow). Everyone
+        // else — including logged-out users and other active users — should
+        // only see terrains that have actually been approved and published.
+        let isSuperAdmin = false;
+        if (currentUser) {
+            const { data: viewerProfile } = await supabase
+                .from('profiles')
+                .select('is_super_admin')
+                .eq('user_id', currentUser.id)
+                .maybeSingle();
+            isSuperAdmin = viewerProfile?.is_super_admin === true;
+        }
+        
+        let query = supabase
             .from('terenuri')
             .select('id, titlu, oras, cartier, zona, suprafata, pret_total, image_url, image_urls, status')
             .eq('created_by_user_id', profileId)
             .order('created_at', { ascending: false });
         
+        if (!isOwnProfile && !isSuperAdmin) {
+            query = query.eq('status', 'approved');
+        }
+        
+        const { data: terrains } = await query;
         profileData.postedTerrains = terrains || [];
         
     } catch (error) {
