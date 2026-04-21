@@ -200,7 +200,7 @@ function bindFilterEvents() {
         DOM.filterOras.value = '';
         DOM.filterCartier.innerHTML = '<option value="">Alege mai întâi orașul</option>';
         DOM.filterCartier.disabled = true;
-        DOM.filterSort.value = 'likes_desc';
+        DOM.filterSort.value = 'newest';
         applyFilters();
     });
 }
