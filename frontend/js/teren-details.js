@@ -18,8 +18,13 @@ function getTerenIdFromUrl() {
     return urlParams.get('id');
 }
 
-// Get image URL from storage
+// Get image URL from storage. Prefers the new image_urls array (first element
+// = primary image). Falls back to the legacy image_url scalar so both old and
+// new data render correctly during the rollout.
 function getImageUrl(teren) {
+    if (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0) {
+        return teren.image_urls[0];
+    }
     if (teren.image_url) {
         return teren.image_url;
     }
