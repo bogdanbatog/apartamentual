@@ -138,23 +138,21 @@
                             </div>
                         </div>
 
-                        <!-- Poză -->
+                        <!-- Poze teren -->
                         <div>
-                            <h2 class="text-xl mb-4">Imagine teren</h2>
+                            <h2 class="text-xl mb-4">Imagini teren</h2>
                             <div>
                                 <label for="poza" class="block text-sm font-medium text-gray-700 mb-1">
-                                    Poză teren *
+                                    Poze teren *
                                 </label>
                                 <p class="text-xs text-gray-500 mb-2">
-                                    Obligatorie. Dacă ai adăugat un link sursă mai sus, poți salva imaginea de acolo și o încarci aici.
+                                    Prima imagine va fi cea afișată în listă. Poți adăuga până la 6 imagini, max 5MB fiecare. Formate: JPG, PNG, GIF, WebP.
                                 </p>
-                                <input type="file" id="poza" name="poza" accept="image/*"
+                                <input type="file" id="poza" name="poza" accept="image/*" multiple
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <p class="text-xs text-gray-500 mt-1">Formate acceptate: JPG, PNG, GIF (max 5MB)</p>
-                                <!-- Image preview -->
-                                <div id="image-preview" class="hidden mt-3">
-                                    <img id="preview-img" src="" alt="Preview" class="w-48 h-32 object-cover rounded-md border">
-                                </div>
+                                <!-- Preview grid with thumbnails + remove buttons -->
+                                <div id="image-previews" class="hidden mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                                <p id="image-counter" class="hidden text-xs text-gray-500 mt-2"></p>
                             </div>
                         </div>
 
