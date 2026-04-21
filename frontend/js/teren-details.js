@@ -616,8 +616,9 @@ async function displayTerenDetails(teren, userProfile) {
     // Action buttons
     const actionButtons = document.getElementById('action-buttons');
     const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';
+    const ownerId = teren.created_by_user_id || teren.posted_by || teren.user_id;
     const canModify = userProfile && (
-        (userProfile.user_id === teren.user_id && !teren.deleted_at) || 
+        (userProfile.user_id === ownerId && !teren.deleted_at) || 
         userProfile.is_super_admin
     );
     const canToggleStatus = userProfile && userProfile.is_super_admin;
