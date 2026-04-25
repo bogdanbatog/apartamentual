@@ -33,6 +33,17 @@
             max-width: 700px;
             margin: 0 auto;
         }
+        .analize-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+            transition: color 0.2s;
+        }
+        .analize-back-link:hover { color: white; }
 
         /* Cards container */
         .analize-container {
@@ -376,9 +387,10 @@
     </style>
 </head>
 <body>
-    <div id="nav"></div>
+    <div id="navigation"></div>
 
     <div class="analize-hero">
+        <a href="index.html" class="analize-back-link"><i class="fas fa-home"></i> Acasă</a>
         <h1>Analize <span>teren</span></h1>
         <p>Înainte să te angajezi într-un proiect, cea mai sigură abordare este o analiză profesionistă, elaborată de un birou de arhitectură. Vezi exact ce se poate construi pe teren, cu calcule conforme reglementărilor în vigoare.</p>
     </div>
@@ -500,6 +512,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
     <script>
