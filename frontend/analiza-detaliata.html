@@ -293,6 +293,66 @@
             margin-bottom: 1rem;
         }
         .cmd-modal-box p strong { color: #0f172a; }
+        .cmd-modal-emails {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            margin-top: 0.5rem;
+        }
+        .cmd-modal-emails-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+        .cmd-modal-emails-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .cmd-modal-emails-list span {
+            font-size: 0.95rem;
+            color: #0f172a;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            user-select: all;
+        }
+        .cmd-modal-tos {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.625rem;
+            margin-top: 1rem;
+            padding: 0.75rem 0.875rem;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #334155;
+        }
+        .cmd-modal-tos input[type="checkbox"] {
+            flex-shrink: 0;
+            margin-top: 0.2rem;
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+            accent-color: #f97316;
+        }
+        .cmd-modal-tos a {
+            color: #c2410c;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        .cmd-modal-tos a:hover { color: #9a3412; }
+        .cmd-modal-btn.cmd-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
         .cmd-modal-actions {
             display: flex;
             gap: 0.75rem;
@@ -436,12 +496,23 @@
             <h3>Trimite-ne cererea pe email</h3>
             <p>Pentru analiza detaliată, prețul se stabilește după o discuție între tine sau grupul tău și biroul de arhitectură. Trimite-ne pe email detaliile despre teren și cerințele grupului — îți răspundem în maxim 24 de ore.</p>
             <p>Trimite-ne <strong>detalii despre teren și cerințele grupului</strong> (număr de membri, tipuri de apartamente dorite, etc.).</p>
+            <div class="cmd-modal-emails">
+                <div class="cmd-modal-emails-label">Trimite la:</div>
+                <div class="cmd-modal-emails-list">
+                    <span>apartamentual@ltfbstudio.ro</span>
+                    <span>office@ltfbstudio.ro</span>
+                </div>
+            </div>
+            <label class="cmd-modal-tos">
+                <input type="checkbox" id="cmdTosCheckbox" onchange="updateComandaButtons()">
+                <span>Sunt de acord cu <a href="termeni-analize.html" target="_blank" rel="noopener">termenii de utilizare a analizelor</a> — uz personal/de grup, fără republicare comercială.</span>
+            </label>
             <div class="cmd-modal-actions">
-                <a id="cmdMailtoBtn" href="#" class="cmd-modal-btn cmd-modal-btn-primary">
+                <a id="cmdMailtoBtn" href="#" class="cmd-modal-btn cmd-modal-btn-primary cmd-disabled" aria-disabled="true">
                     <i class="fas fa-envelope"></i> Deschide email
                 </a>
-                <button type="button" class="cmd-modal-btn cmd-modal-btn-secondary" onclick="closeComandaModal()">
-                    Închide
+                <button type="button" id="cmdCopyBtn" class="cmd-modal-btn cmd-modal-btn-secondary cmd-disabled" disabled onclick="copyEmails(this)">
+                    <i class="fas fa-copy"></i> <span>Copiază</span>
                 </button>
             </div>
         </div>
@@ -461,6 +532,7 @@
         }
 
         // Order modal — placeholder until Netopia is set up
+        // Buttons are disabled until the user explicitly accepts the TOS.
         function openComandaModal(tip) {
             const params = new URLSearchParams(window.location.search);
             const terenTitlu = params.get('teren_titlu');
@@ -485,20 +557,71 @@
             lines.push('');
             lines.push('Mulțumesc,');
             lines.push('[Numele dumneavoastră]');
+            lines.push('');
+            lines.push('---');
+            lines.push('Prin trimiterea acestei cereri confirm că am citit și sunt de acord cu termenii de utilizare a analizelor publicați la ' + window.location.origin + '/termeni-analize.html');
 
             const body = lines.join('\n');
             const to = 'apartamentual@ltfbstudio.ro,office@ltfbstudio.ro';
             const mailto = 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 
             document.getElementById('cmdMailtoBtn').setAttribute('href', mailto);
+
+            const tosCheckbox = document.getElementById('cmdTosCheckbox');
+            if (tosCheckbox) tosCheckbox.checked = false;
+            updateComandaButtons();
+
             document.getElementById('cmdModal').classList.add('open');
             document.body.style.overflow = 'hidden';
+        }
+
+        function updateComandaButtons() {
+            const checkbox = document.getElementById('cmdTosCheckbox');
+            const accepted = checkbox && checkbox.checked;
+            const mailBtn = document.getElementById('cmdMailtoBtn');
+            const copyBtn = document.getElementById('cmdCopyBtn');
+            if (mailBtn) {
+                mailBtn.classList.toggle('cmd-disabled', !accepted);
+                mailBtn.setAttribute('aria-disabled', accepted ? 'false' : 'true');
+            }
+            if (copyBtn) {
+                copyBtn.classList.toggle('cmd-disabled', !accepted);
+                copyBtn.disabled = !accepted;
+            }
         }
 
         function closeComandaModal(e) {
             if (e && e.target && e.target.id !== 'cmdModal' && e.type === 'click') return;
             document.getElementById('cmdModal').classList.remove('open');
             document.body.style.overflow = '';
+        }
+
+        // Fallback for users with no default mail handler — copies emails to clipboard
+        function copyEmails(btn) {
+            const emails = 'apartamentual@ltfbstudio.ro, office@ltfbstudio.ro';
+            const label = btn.querySelector('span');
+            const originalText = label ? label.textContent : '';
+            const finalize = (ok) => {
+                if (label) label.textContent = ok ? 'Copiat!' : 'Eroare';
+                btn.disabled = true;
+                setTimeout(() => {
+                    if (label) label.textContent = originalText;
+                    btn.disabled = false;
+                }, 1800);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(emails).then(() => finalize(true)).catch(() => finalize(false));
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = emails;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); finalize(true); }
+                catch (err) { finalize(false); }
+                document.body.removeChild(ta);
+            }
         }
 
         document.addEventListener('keydown', function(e) {
@@ -508,6 +631,7 @@
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
