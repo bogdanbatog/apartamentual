@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analiză detaliată - Exemplu - ApartamenTUal</title>
+    <meta name="description" content="Vezi un exemplu real de analiză detaliată cu randări, planimetrie și bilanț pentru un imobil de locuințe colective.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+
+        .ex-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 4rem 1.5rem 2.5rem;
+            text-align: center;
+            color: white;
+        }
+        .ex-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .ex-back-link:hover { color: white; }
+        .ex-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .ex-hero h1 span { color: #f97316; }
+        .ex-hero p {
+            font-size: 1rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+        }
+        .ex-hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .ex-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .ex-btn-primary { background: #f97316; color: white; }
+        .ex-btn-primary:hover { background: #ea580c; }
+        .ex-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .ex-btn-secondary:hover { background: rgba(255, 255, 255, 0.18); }
+
+        .ex-container {
+            max-width: 1100px;
+            margin: -1.5rem auto 3rem;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .ex-meta {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+        }
+        .ex-meta-info {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .ex-meta-item .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+        }
+        .ex-meta-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .ex-meta-item .value.price {
+            color: #f97316;
+        }
+
+        .ex-pdf-pages {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .ex-pdf-page {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .ex-pdf-page:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+        }
+        .ex-pdf-page img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .ex-pdf-page-label {
+            padding: 0.875rem 1.5rem;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ex-pdf-page-label i {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .ex-cta {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            border: 1px solid #fed7aa;
+        }
+        .ex-cta h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.625rem;
+        }
+        .ex-cta p {
+            color: #475569;
+            margin-bottom: 1.5rem;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .ex-cta-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .ex-btn-cta-primary {
+            background: #f97316;
+            color: white;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+        }
+        .ex-btn-cta-primary:hover { background: #ea580c; }
+        .ex-btn-cta-secondary {
+            background: white;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+        }
+        .ex-btn-cta-secondary:hover { background: #f8fafc; }
+
+        .ex-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .ex-modal.open { display: flex; }
+        .ex-modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .ex-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ex-modal-close:hover { background: rgba(255, 255, 255, 0.25); }
+
+        @media (max-width: 768px) {
+            .ex-hero h1 { font-size: 1.5rem; }
+            .ex-meta { flex-direction: column; align-items: flex-start; }
+            .ex-meta-info { gap: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="nav"></div>
+
+    <div class="ex-hero">
+        <a href="analize.html" class="ex-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
+        <h1>Exemplu — Analiză <span>detaliată</span></h1>
+        <p>Aceasta este o fișă de concept reală — așa cum o primești după ce grupul stabilește tema de proiectare cu biroul de arhitectură. Cele 5 pagini acoperă concept, planimetrie și bilanț.</p>
+        <div class="ex-hero-actions">
+            <a href="comanda-analiza.html?tip=detaliata" class="ex-btn ex-btn-primary">
+                <i class="fas fa-paper-plane"></i> Solicită ofertă pentru terenul tău
+            </a>
+        </div>
+    </div>
+
+    <div class="ex-container">
+
+        <div class="ex-meta">
+            <div class="ex-meta-info">
+                <div class="ex-meta-item">
+                    <div class="label">Tip</div>
+                    <div class="value">Analiză detaliată</div>
+                </div>
+                <div class="ex-meta-item">
+                    <div class="label">Format livrare</div>
+                    <div class="value">PDF — 5 pagini</div>
+                </div>
+                <div class="ex-meta-item">
+                    <div class="label">Conținut</div>
+                    <div class="value">Concept, planimetrie, bilanț</div>
+                </div>
+                <div class="ex-meta-item">
+                    <div class="label">Preț</div>
+                    <div class="value price">Stabilit la cerere</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ex-pdf-pages">
+            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/detaliata-1.jpg')">
+                <img src="assets/analize-exemple/detaliata-1.jpg" alt="Analiză detaliată — pagina 1">
+                <div class="ex-pdf-page-label">
+                    <span>Pagina 1 — Copertă și prezentare proiect</span>
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            </div>
+            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/detaliata-2.jpg')">
+                <img src="assets/analize-exemple/detaliata-2.jpg" alt="Analiză detaliată — pagina 2">
+                <div class="ex-pdf-page-label">
+                    <span>Pagina 2 — Concept &amp; amplasament cu randări</span>
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            </div>
+            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/detaliata-3.jpg')">
+                <img src="assets/analize-exemple/detaliata-3.jpg" alt="Analiză detaliată — pagina 3">
+                <div class="ex-pdf-page-label">
+                    <span>Pagina 3 — Planimetrie parter și etajul 1</span>
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            </div>
+            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/detaliata-4.jpg')">
+                <img src="assets/analize-exemple/detaliata-4.jpg" alt="Analiză detaliată — pagina 4">
+                <div class="ex-pdf-page-label">
+                    <span>Pagina 4 — Planimetrie etajul 2 și etajul 3 retras</span>
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            </div>
+            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/detaliata-5.jpg')">
+                <img src="assets/analize-exemple/detaliata-5.jpg" alt="Analiză detaliată — pagina 5">
+                <div class="ex-pdf-page-label">
+                    <span>Pagina 5 — Bilanț suprafețe și unități locative</span>
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="ex-cta">
+            <h2>Pregătit să comanzi analiza pentru proiectul tău?</h2>
+            <p>Analiza detaliată se face în urma unei discuții între grup și biroul de arhitectură ales. Trimite-ne datele despre teren și cerințele grupului — primești o ofertă personalizată.</p>
+            <div class="ex-cta-actions">
+                <a href="comanda-analiza.html?tip=detaliata" class="ex-btn ex-btn-cta-primary">
+                    <i class="fas fa-paper-plane"></i> Solicită ofertă
+                </a>
+                <a href="analize.html" class="ex-btn ex-btn-cta-secondary">
+                    <i class="fas fa-arrow-left"></i> Toate analizele
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="ex-modal" id="exModal" onclick="closeModal()">
+        <button class="ex-modal-close" onclick="closeModal()" type="button">&times;</button>
+        <img id="exModalImg" src="" alt="Pagină analiză">
+    </div>
+
+    <div id="footer"></div>
+
+    <script>
+        function openModal(src) {
+            document.getElementById('exModalImg').src = src;
+            document.getElementById('exModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('exModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+</body>
+</html>

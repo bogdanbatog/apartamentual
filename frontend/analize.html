@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analize teren - ApartamenTUal</title>
+    <meta name="description" content="Analize de urbanism și concept arhitectural pentru terenurile de pe ApartamenTUal. Analiză simplificată sau detaliată, în funcție de stadiul proiectului.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.7; }
+
+        /* Hero */
+        .analize-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 5rem 1.5rem 3rem;
+            text-align: center;
+            color: white;
+        }
+        .analize-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .analize-hero h1 span { color: #f97316; }
+        .analize-hero p {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Cards container */
+        .analize-container {
+            max-width: 1200px;
+            margin: -2rem auto 3rem;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .analize-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Individual card */
+        .analize-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+        .analize-card-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .analize-card-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.75rem;
+        }
+        .analize-card-tag.simpla {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .analize-card-tag.detaliata {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .analize-card-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        .analize-card-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f97316;
+        }
+        .analize-card-price.cerere {
+            font-size: 1.125rem;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        /* Card body */
+        .analize-card-body {
+            flex: 1;
+            font-size: 0.9375rem;
+            color: #334155;
+        }
+        .analize-card-body p {
+            margin-bottom: 1rem;
+        }
+        .analize-card-body h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 1.25rem 0 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .analize-card-body ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 0.75rem;
+        }
+        .analize-card-body ul li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .analize-card-body ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.6rem;
+            width: 6px;
+            height: 6px;
+            background: #f97316;
+            border-radius: 50%;
+        }
+
+        /* Card actions */
+        .analize-card-actions {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.75rem;
+        }
+        .btn-card {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-card-primary {
+            background: #f97316;
+            color: white;
+        }
+        .btn-card-primary:hover {
+            background: #ea580c;
+        }
+        .btn-card-secondary {
+            background: white;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-card-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        /* Info section below cards */
+        .analize-info {
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            padding: 0 1.5rem;
+        }
+        .analize-info-box {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border-left: 4px solid #f97316;
+        }
+        .analize-info-box i {
+            font-size: 1.5rem;
+            color: #f97316;
+            flex-shrink: 0;
+        }
+        .analize-info-box p {
+            font-size: 0.9375rem;
+            color: #475569;
+        }
+
+        @media (max-width: 768px) {
+            .analize-hero h1 { font-size: 1.75rem; }
+            .analize-cards { grid-template-columns: 1fr; }
+            .analize-card { padding: 1.5rem; }
+            .analize-card-title { font-size: 1.375rem; }
+            .analize-card-actions { flex-direction: column; }
+            .analize-info-box { flex-direction: column; text-align: center; padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="nav"></div>
+
+    <div class="analize-hero">
+        <h1>Analize <span>teren</span></h1>
+        <p>Înainte să te angajezi într-un proiect, vezi exact ce se poate construi pe teren. Două tipuri de analize, în funcție de stadiul în care ești.</p>
+    </div>
+
+    <div class="analize-container">
+        <div class="analize-cards">
+
+            <!-- Card 1: Analiza simplificată -->
+            <div class="analize-card">
+                <div class="analize-card-header">
+                    <span class="analize-card-tag simpla">Pentru evaluare rapidă</span>
+                    <h2 class="analize-card-title">Analiză simplificată</h2>
+                    <div class="analize-card-price">50 RON</div>
+                </div>
+                <div class="analize-card-body">
+                    <p>O abordare profesionistă pentru a analiza rapid un teren și a căuta un grup cu care să construiești pe el. Primești un plan de situație cu terenul, amprenta posibilă a construcției, și informațiile esențiale despre ce se poate ridica acolo.</p>
+
+                    <h3>Ce vei primi</h3>
+                    <ul>
+                        <li>Câte apartamente se pot construi și intervalul de suprafață pentru fiecare tip, conform legii</li>
+                        <li>Un preț estimat pe metru pătrat construit și util, calibrat realist din experiența prototipului „Județului"</li>
+                        <li>Numărul de parcări necesare (în funcție de numărul și suprafețele apartamentelor) și suprafața de carosabil necesară</li>
+                        <li>Retragerile minime obligatorii față de limitele de proprietate și eventualele alipiri la calcanele vecinilor</li>
+                        <li>Regimul de înălțime permis — număr de niveluri, înălțime maximă</li>
+                        <li>Suprafața minimă de spațiu verde acceptată</li>
+                        <li>Suprafețe maxime construite și utile, pe nivel și totale</li>
+                        <li>Regulamentele de urbanism în care se încadrează terenul (PUG, PUZ sector)</li>
+                    </ul>
+
+                    <h3>Ce avem nevoie de la tine</h3>
+                    <ul>
+                        <li>Numărul cadastral al terenului sau adresa exactă</li>
+                    </ul>
+                </div>
+                <div class="analize-card-actions">
+                    <a href="analiza-simplificata.html" class="btn-card btn-card-secondary">
+                        <i class="fas fa-eye"></i> Vezi exemplu
+                    </a>
+                    <a href="comanda-analiza.html?tip=simpla" class="btn-card btn-card-primary">
+                        <i class="fas fa-shopping-cart"></i> Comandă
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2: Analiza detaliată -->
+            <div class="analize-card">
+                <div class="analize-card-header">
+                    <span class="analize-card-tag detaliata">Pentru grupuri decise</span>
+                    <h2 class="analize-card-title">Analiză detaliată</h2>
+                    <div class="analize-card-price cerere">Preț stabilit la cerere</div>
+                </div>
+                <div class="analize-card-body">
+                    <p>O analiză mult mai amănunțită, recomandată atunci când grupul este deja decis pe 1-2 terenuri și vrea să vadă exact planurile cu apartamentele, suprafețele exacte, volumetria și randările.</p>
+
+                    <p>Pe baza acestei analize se poate stabili cine ce apartament va deține și cotele fiecărui membru de investiție, care conduc automat la cotele indivize pentru cumpărarea terenului. Documentul poate fi anexat contractului de asociere între membri sau actului constitutiv al societății, dacă alegeți să înființați un SRL.</p>
+
+                    <p><em>Notă: aceasta nu este un proiect care implică specialități tehnice (structură de rezistență, instalații), ci un concept detaliat de arhitectură.</em></p>
+
+                    <p>Analiza se elaborează în urma discuțiilor dintre grup și biroul de arhitectură ales, pe baza unei teme de proiectare stabilite de comun acord.</p>
+
+                    <h3>Ce vei primi</h3>
+                    <ul>
+                        <li>Planuri detaliate pentru fiecare nivel, cu apartamentele și spațiile comune, suprafețe și cote</li>
+                        <li>Randări și scheme volumetrice la alegerea proiectantului, pentru clarificarea imaginii construcției</li>
+                    </ul>
+                </div>
+                <div class="analize-card-actions">
+                    <a href="analiza-detaliata.html" class="btn-card btn-card-secondary">
+                        <i class="fas fa-eye"></i> Vezi exemplu
+                    </a>
+                    <a href="comanda-analiza.html?tip=detaliata" class="btn-card btn-card-primary">
+                        <i class="fas fa-paper-plane"></i> Solicită ofertă
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="analize-info">
+        <div class="analize-info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>Analiza simplificată este suficientă pentru o evaluare rapidă a potențialului unui teren. Dacă te-ai decis deja asupra unui teren și formezi un grup serios, analiza detaliată îți oferă baza tehnică pentru contractul de asociere.</p>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+</body>
+</html>
