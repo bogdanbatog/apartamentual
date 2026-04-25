@@ -31,6 +31,16 @@
             transition: color 0.2s;
         }
         .tos-back-link:hover { color: white; }
+        .tos-back-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .tos-back-links .tos-back-link { margin-bottom: 0; }
+        .tos-back-sep { color: #475569; font-size: 0.9rem; }
         .tos-hero h1 {
             font-size: 2rem;
             font-weight: 700;
@@ -146,10 +156,14 @@
     </style>
 </head>
 <body>
-    <div id="nav"></div>
+    <div id="navigation"></div>
 
     <div class="tos-hero">
-        <a href="analize.html" class="tos-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
+        <div class="tos-back-links">
+            <a href="index.html" class="tos-back-link"><i class="fas fa-home"></i> Acasă</a>
+            <span class="tos-back-sep">·</span>
+            <a href="analize.html" class="tos-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
+        </div>
         <h1>Termeni de utilizare a <span>analizelor</span></h1>
         <p>Reguli clare privind drepturile și restricțiile la utilizarea analizelor urbanistice livrate prin ApartamenTUal.</p>
     </div>
@@ -249,6 +263,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
 </body>
