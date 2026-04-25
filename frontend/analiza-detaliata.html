@@ -31,6 +31,16 @@
             transition: color 0.2s;
         }
         .ex-back-link:hover { color: white; }
+        .ex-back-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .ex-back-links .ex-back-link { margin-bottom: 0; }
+        .ex-back-sep { color: #475569; font-size: 0.9rem; }
         .ex-hero h1 {
             font-size: 2rem;
             font-weight: 700;
@@ -392,10 +402,14 @@
     </style>
 </head>
 <body>
-    <div id="nav"></div>
+    <div id="navigation"></div>
 
     <div class="ex-hero">
-        <a href="analize.html" class="ex-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
+        <div class="ex-back-links">
+            <a href="index.html" class="ex-back-link"><i class="fas fa-home"></i> Acasă</a>
+            <span class="ex-back-sep">·</span>
+            <a href="analize.html" class="ex-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
+        </div>
         <h1>Exemplu — Analiză <span>detaliată</span></h1>
         <p>Aceasta este o fișă de concept reală — așa cum o primești după ce grupul stabilește tema de proiectare cu biroul de arhitectură. Cele 5 pagini acoperă concept, planimetrie și bilanț.</p>
         <div class="ex-hero-actions">
@@ -633,6 +647,7 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
 </body>
