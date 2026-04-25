@@ -235,6 +235,106 @@
             .ex-meta { flex-direction: column; align-items: flex-start; }
             .ex-meta-info { gap: 1.25rem; }
         }
+
+        /* Coming soon modal */
+        .cmd-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .cmd-modal.open { display: flex; }
+        .cmd-modal-box {
+            background: white;
+            border-radius: 16px;
+            max-width: 540px;
+            width: 100%;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+        }
+        .cmd-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .cmd-modal-close:hover { background: #f1f5f9; color: #334155; }
+        .cmd-modal-icon {
+            width: 56px;
+            height: 56px;
+            background: #fff7ed;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .cmd-modal-icon i { font-size: 1.5rem; color: #f97316; }
+        .cmd-modal-box h3 {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.625rem;
+        }
+        .cmd-modal-box p {
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .cmd-modal-box p strong { color: #0f172a; }
+        .cmd-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .cmd-modal-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+        .cmd-modal-btn-primary {
+            background: #f97316;
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+        .cmd-modal-btn-primary:hover { background: #ea580c; }
+        .cmd-modal-btn-secondary {
+            background: white;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        .cmd-modal-btn-secondary:hover { background: #f8fafc; }
+        @media (max-width: 480px) {
+            .cmd-modal-actions { flex-direction: column; }
+            .cmd-modal-btn-secondary { width: 100%; justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -245,9 +345,9 @@
         <h1>Exemplu — Analiză <span>simplificată</span></h1>
         <p>Acesta este un document real, exact așa cum îl vei primi pe email după comandă. Pagina de mai jos conține cele 2 pagini ale documentului original.</p>
         <div class="ex-hero-actions">
-            <a href="comanda-analiza.html?tip=simpla" class="ex-btn ex-btn-primary">
+            <button type="button" class="ex-btn ex-btn-primary" onclick="openComandaModal('simpla')">
                 <i class="fas fa-shopping-cart"></i> Comandă această analiză — 50 RON
-            </a>
+            </button>
         </div>
     </div>
 
@@ -295,9 +395,9 @@
             <h2>Comandă acum analiza pentru terenul tău</h2>
             <p>Trimite-ne numărul cadastral sau adresa exactă a terenului. În 2-3 zile lucrătoare primești pe email un document PDF similar cu cel de mai sus, calibrat exact pentru terenul tău.</p>
             <div class="ex-cta-actions">
-                <a href="comanda-analiza.html?tip=simpla" class="ex-btn ex-btn-cta-primary">
+                <button type="button" class="ex-btn ex-btn-cta-primary" onclick="openComandaModal('simpla')">
                     <i class="fas fa-shopping-cart"></i> Comandă — 50 RON
-                </a>
+                </button>
                 <a href="analize.html" class="ex-btn ex-btn-cta-secondary">
                     <i class="fas fa-arrow-left"></i> Toate analizele
                 </a>
@@ -312,6 +412,27 @@
         <img id="exModalImg" src="" alt="Pagină analiză">
     </div>
 
+    <!-- Coming soon order modal -->
+    <div class="cmd-modal" id="cmdModal" onclick="closeComandaModal(event)">
+        <div class="cmd-modal-box" onclick="event.stopPropagation()">
+            <button type="button" class="cmd-modal-close" onclick="closeComandaModal()">&times;</button>
+            <div class="cmd-modal-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h3>Comenzile online vor fi disponibile în curând</h3>
+            <p>Lucrăm la integrarea plăților online. Până atunci, scrie-ne direct pe email cu detaliile terenului — îți răspundem în maxim 24 de ore cu pașii de urmat și detaliile pentru factură.</p>
+            <p>Trimite-ne <strong>numărul cadastral sau adresa exactă a terenului</strong>.</p>
+            <div class="cmd-modal-actions">
+                <a id="cmdMailtoBtn" href="#" class="cmd-modal-btn cmd-modal-btn-primary">
+                    <i class="fas fa-envelope"></i> Deschide email
+                </a>
+                <button type="button" class="cmd-modal-btn cmd-modal-btn-secondary" onclick="closeComandaModal()">
+                    Închide
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="footer"></div>
 
     <script>
@@ -324,8 +445,53 @@
             document.getElementById('exModal').classList.remove('open');
             document.body.style.overflow = '';
         }
+
+        // Order modal — placeholder until Netopia is set up
+        function openComandaModal(tip) {
+            const params = new URLSearchParams(window.location.search);
+            const terenTitlu = params.get('teren_titlu');
+            const terenId = params.get('teren_id');
+
+            const subject = 'Solicitare analiză simplificată — 50 RON';
+            const lines = [
+                'Bună ziua,',
+                '',
+                'Doresc să comand o analiză simplificată (50 RON) pentru următorul teren:',
+                ''
+            ];
+            if (terenTitlu) {
+                lines.push('Teren: ' + terenTitlu);
+                if (terenId) {
+                    lines.push('Link: ' + window.location.origin + '/teren-details.html?id=' + terenId);
+                }
+                lines.push('');
+            }
+            lines.push('Date teren (număr cadastral / adresă):');
+            lines.push('[completează aici]');
+            lines.push('');
+            lines.push('Mulțumesc,');
+            lines.push('[Numele dumneavoastră]');
+
+            const body = lines.join('\n');
+            const to = 'apartamentual@ltfbstudio.ro,office@ltfbstudio.ro';
+            const mailto = 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+
+            document.getElementById('cmdMailtoBtn').setAttribute('href', mailto);
+            document.getElementById('cmdModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeComandaModal(e) {
+            if (e && e.target && e.target.id !== 'cmdModal' && e.type === 'click') return;
+            document.getElementById('cmdModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Escape') {
+                closeModal();
+                closeComandaModal();
+            }
         });
     </script>
     <script src="js/supabase-config.js"></script>
