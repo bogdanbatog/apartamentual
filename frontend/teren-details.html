@@ -94,8 +94,6 @@
                         <div id="teren-image-container" class="mb-4">
                             <img id="teren-image" src="" alt="Imagine teren" class="w-full h-64 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity teren-image-container" onclick="openImageModal()">
                         </div>
-                        <!-- Thumbnails row (shown only when terrain has 2+ images) -->
-                        <div id="teren-thumbnails" class="hidden grid grid-cols-5 gap-2 mb-4"></div>
                         <div id="no-image" class="hidden bg-gray-100 rounded-lg h-64 flex items-center justify-center">
                             <div class="text-center text-gray-500">
                                 <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,115 +218,9 @@
 
     <!-- Image Modal -->
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden image-modal" onclick="closeImageModal()">
-        <div class="max-w-4xl max-h-full p-4 relative" onclick="event.stopPropagation()">
-            <button id="close-modal" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10 bg-black bg-opacity-40 rounded-full w-10 h-10 flex items-center justify-center" onclick="closeImageModal()" title="Închide">&times;</button>
-            <button id="modal-prev" class="hidden absolute left-4 top-1/2 -translate-y-1/2 text-white text-3xl hover:text-gray-300 z-10 bg-black bg-opacity-40 rounded-full w-12 h-12 flex items-center justify-center" onclick="modalPrev(event)" title="Imaginea anterioară">&#8249;</button>
-            <button id="modal-next" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl hover:text-gray-300 z-10 bg-black bg-opacity-40 rounded-full w-12 h-12 flex items-center justify-center" onclick="modalNext(event)" title="Imaginea următoare">&#8250;</button>
-            <img id="modal-image" src="" alt="Imagine teren" class="max-w-full max-h-[85vh] object-contain rounded-lg">
-            <div id="modal-counter" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm bg-black bg-opacity-60 px-3 py-1 rounded-full"></div>
-        </div>
-    </div>
-
-    <!-- Analysis Request Modal -->
-    <div id="analysis-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden" onclick="closeAnalysisModal()">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="p-6">
-                <!-- Modal Header -->
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Cere o Analiză</h2>
-                    <button id="close-analysis-modal" class="text-gray-400 hover:text-gray-600 text-2xl" onclick="closeAnalysisModal()">&times;</button>
-                </div>
-
-                <!-- Modal Content -->
-                <div class="space-y-6">
-                    <!-- Analysis Types -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-3">Tipuri de analize disponibile</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <h4 class="font-semibold text-blue-800 mb-2">Analiză Generală</h4>
-                                <p class="text-sm text-gray-600 mb-3">Analiză de fezabilitate generală a terenului pentru construcție de apartamente</p>
-                                <div class="text-lg font-bold text-blue-600">100 EUR</div>
-                            </div>
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <h4 class="font-semibold text-green-800 mb-2">Analiză Specifică</h4>
-                                <p class="text-sm text-gray-600 mb-3">Analiză detaliată cu proiecte specifice și calcule precise</p>
-                                <div class="text-lg font-bold text-green-600">500 EUR</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Process Steps -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-3">Procesul de solicitare</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold mr-3">1</div>
-                                <div>
-                                    <p class="font-medium text-gray-900">Trimite email cu solicitarea</p>
-                                    <p class="text-sm text-gray-600">Completează și trimite emailul pre-completat către administrator</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold mr-3">2</div>
-                                <div>
-                                    <p class="font-medium text-gray-900">Efectuează plata</p>
-                                    <p class="text-sm text-gray-600">Transfer bancar sau prin Revolut (detaliile vor fi trimise prin email)</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold mr-3">3</div>
-                                <div>
-                                    <p class="font-medium text-gray-900">Primește analiza</p>
-                                    <p class="text-sm text-gray-600">Analiza completă va fi trimisă prin email în 5-7 zile lucrătoare</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Email Preview -->
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-3">Email de solicitare</h3>
-                        <div class="bg-gray-50 rounded-lg p-4 border">
-                            <div class="text-sm text-gray-600 mb-2">
-                                <strong>Pentru:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dabbbeb7b3b49abbaabba8aebbb7bfb4aeafbbb6f4a8b5">[email&#160;protected]</a><br>
-                                <strong>Subiect:</strong> <span id="email-subject">Solicitare analiză teren</span>
-                            </div>
-                            <div class="text-sm text-gray-800 whitespace-pre-line" id="email-content">
-                                Bună ziua,
-
-Solicit o analiză pentru următorul teren:
-
-Titlu: [Titlul terenului]
-URL: [URL-ul terenului]
-Suprafață: [Suprafața] mp
-Zonă: [Zona]
-Preț pe mp: [Prețul] EUR/mp
-
-Tipul de analiză solicitat: [Analiză Generală / Analiză Specifică]
-
-Vă rog să îmi trimiteți detaliile pentru plata de [100/500] EUR.
-
-Mulțumesc,
-[Numele dumneavoastră]
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex gap-3 pt-4 border-t">
-                        <button id="send-email-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            Deschide email client
-                        </button>
-                        <button onclick="closeAnalysisModal()" class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors">
-                            Anulează
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="max-w-4xl max-h-full p-4" onclick="event.stopPropagation()">
+            <button id="close-modal" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-10" onclick="closeImageModal()">&times;</button>
+            <img id="modal-image" src="" alt="Imagine teren" class="max-w-full max-h-full object-contain rounded-lg">
         </div>
     </div>
 
