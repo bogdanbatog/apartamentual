@@ -18,13 +18,8 @@ function getTerenIdFromUrl() {
     return urlParams.get('id');
 }
 
-// Get image URL from storage. Prefers the new image_urls array (first element
-// = primary image). Falls back to the legacy image_url scalar so both old and
-// new data render correctly during the rollout.
+// Get image URL from storage
 function getImageUrl(teren) {
-    if (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0) {
-        return teren.image_urls[0];
-    }
     if (teren.image_url) {
         return teren.image_url;
     }
@@ -42,79 +37,19 @@ function formatDate(dateString) {
     });
 }
 
-// Image gallery state — populated when a terrain loads with image_urls.
-let galleryImages = [];
-let galleryIndex = 0;
-
-// Open modal at the currently-displayed main image
+// Image modal functions
 function openImageModal() {
-    if (galleryImages.length === 0) return;
-    showModalImage(galleryIndex);
-    document.getElementById('image-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    const imageSrc = document.getElementById('teren-image').src;
+    if (imageSrc) {
+        document.getElementById('modal-image').src = imageSrc;
+        document.getElementById('image-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeImageModal() {
     document.getElementById('image-modal').classList.add('hidden');
     document.body.style.overflow = 'auto';
-}
-
-function showModalImage(idx) {
-    if (galleryImages.length === 0) return;
-    // wrap-around navigation
-    if (idx < 0) idx = galleryImages.length - 1;
-    if (idx >= galleryImages.length) idx = 0;
-    galleryIndex = idx;
-    
-    document.getElementById('modal-image').src = galleryImages[idx];
-    
-    // Show/hide nav controls based on whether we have multiple images
-    const multipleImages = galleryImages.length > 1;
-    const prevBtn = document.getElementById('modal-prev');
-    const nextBtn = document.getElementById('modal-next');
-    const counter = document.getElementById('modal-counter');
-    
-    if (prevBtn) prevBtn.classList.toggle('hidden', !multipleImages);
-    if (nextBtn) nextBtn.classList.toggle('hidden', !multipleImages);
-    if (counter) {
-        if (multipleImages) {
-            counter.textContent = `${idx + 1} / ${galleryImages.length}`;
-            counter.classList.remove('hidden');
-        } else {
-            counter.classList.add('hidden');
-        }
-    }
-}
-
-function modalPrev(e) {
-    if (e) e.stopPropagation();
-    showModalImage(galleryIndex - 1);
-}
-
-function modalNext(e) {
-    if (e) e.stopPropagation();
-    showModalImage(galleryIndex + 1);
-}
-
-// Expose for inline onclick handlers
-window.openImageModal = openImageModal;
-window.closeImageModal = closeImageModal;
-window.modalPrev = modalPrev;
-window.modalNext = modalNext;
-
-// Select a thumbnail → update the main image and sync the modal state
-function selectGalleryImage(idx) {
-    if (idx < 0 || idx >= galleryImages.length) return;
-    galleryIndex = idx;
-    const mainImg = document.getElementById('teren-image');
-    if (mainImg) mainImg.src = galleryImages[idx];
-    // Highlight the active thumbnail
-    const thumbs = document.querySelectorAll('#teren-thumbnails [data-thumb-index]');
-    thumbs.forEach(t => {
-        const i = parseInt(t.getAttribute('data-thumb-index'), 10);
-        t.classList.toggle('ring-2', i === idx);
-        t.classList.toggle('ring-orange-500', i === idx);
-    });
 }
 
 // Fetch user profile data
@@ -438,29 +373,6 @@ async function fetchTerenDetails() {
         return;
     }
 
-    // Terenurile în status "pending" sunt vizibile doar pentru superadmin și
-    // proprietar (via RLS). Dacă userul nu e logat, query-ul cu .single()
-    // întoarce 0 rânduri și Supabase aruncă "Cannot coerce the result to a
-    // single JSON object" — o eroare tehnică lipsită de sens pentru user.
-    // Interceptăm aici: dacă nu e logat, arătăm modalul de login cu un mesaj
-    // clar. După login, login-modal.js face window.location.reload(), deci
-    // userul rămâne pe aceeași pagină și vede terenul dacă are drept.
-    try {
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        if (!currentUser) {
-            hideLoading();
-            if (typeof openAuthModalWithMessage === 'function') {
-                openAuthModalWithMessage('Te rugăm să te autentifici pentru a vedea detaliile terenului.');
-            } else {
-                // Fallback dacă auth-modal.js nu s-a încărcat încă
-                window.location.href = '/index.html?login=1';
-            }
-            return;
-        }
-    } catch (e) {
-        console.warn('Auth check failed, continuing:', e);
-    }
-
     try {
         showLoading();
         
@@ -493,7 +405,7 @@ async function fetchTerenDetails() {
 
         await displayTerenDetails(terenData, userProfile);
         renderGroupLikesSection();
-        loadInterestCounts(terenId, terenData);
+        loadInterestCounts(terenId);
         hideLoading();
         
     } catch (error) {
@@ -576,7 +488,7 @@ async function displayTerenDetails(teren, userProfile) {
         if (apartLink) {
             apartLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                openAnalysisModal(teren);
+                redirectToAnalize(teren);
             });
         }
     }
@@ -667,48 +579,37 @@ async function displayTerenDetails(teren, userProfile) {
         }
     }
     
-    // Cere o analiză button
+    // Cere o analiză button — redirect to /analize.html with teren context
     const btnCereAnaliza = document.getElementById('btn-cere-analiza');
     if (btnCereAnaliza) {
-        btnCereAnaliza.addEventListener('click', () => openAnalysisModal(teren));
+        btnCereAnaliza.addEventListener('click', () => redirectToAnalize(teren));
     }
     
     // Action buttons
     const actionButtons = document.getElementById('action-buttons');
     const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';
-    const ownerId = teren.created_by_user_id || teren.posted_by || teren.user_id;
     const canModify = userProfile && (
-        (userProfile.user_id === ownerId && !teren.deleted_at) || 
+        (userProfile.user_id === teren.user_id && !teren.deleted_at) || 
         userProfile.is_super_admin
     );
     const canToggleStatus = userProfile && userProfile.is_super_admin;
-    const canApprove = userProfile && userProfile.is_super_admin && teren.status === 'pending';
     
-    if (hasPendingAnalysis || canModify || canToggleStatus || canApprove) {
+    if (hasPendingAnalysis || canModify || canToggleStatus) {
         actionButtons.classList.remove('hidden');
-        updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, canApprove, teren);
+        updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren);
     } else {
         actionButtons.classList.add('hidden');
     }
     
-    // Image handling — build gallery from image_urls (new) or image_url (legacy)
+    // Image handling
     const imageContainer = document.getElementById('teren-image-container');
     const noImageDiv = document.getElementById('no-image');
     const imageEl = document.getElementById('teren-image');
-    const thumbnailsEl = document.getElementById('teren-thumbnails');
     
-    // Build the gallery array — prefer multi-image, fall back to scalar
-    if (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0) {
-        galleryImages = teren.image_urls.filter(Boolean);
-    } else if (teren.image_url) {
-        galleryImages = [teren.image_url];
-    } else {
-        galleryImages = [];
-    }
-    galleryIndex = 0;
+    const imageUrl = getImageUrl(teren);
     
-    if (galleryImages.length > 0) {
-        imageEl.src = galleryImages[0];
+    if (imageUrl) {
+        imageEl.src = imageUrl;
         imageEl.alt = `Imagine teren - ${teren.titlu}`;
         
         if (isDisabled) {
@@ -719,35 +620,9 @@ async function displayTerenDetails(teren, userProfile) {
         
         imageContainer.classList.remove('hidden');
         noImageDiv.classList.add('hidden');
-        
-        // Render thumbnails only when there are 2+ images
-        if (thumbnailsEl) {
-            if (galleryImages.length > 1) {
-                thumbnailsEl.innerHTML = galleryImages.map((url, idx) => `
-                    <img src="${url}" alt="Miniatură ${idx + 1}"
-                         data-thumb-index="${idx}"
-                         class="w-full h-16 object-cover rounded border border-gray-200 cursor-pointer hover:opacity-80 transition ${idx === 0 ? 'ring-2 ring-orange-500' : ''}">
-                `).join('');
-                thumbnailsEl.classList.remove('hidden');
-                // Attach click handlers
-                thumbnailsEl.querySelectorAll('[data-thumb-index]').forEach(el => {
-                    el.addEventListener('click', function() {
-                        const idx = parseInt(this.getAttribute('data-thumb-index'), 10);
-                        selectGalleryImage(idx);
-                    });
-                });
-            } else {
-                thumbnailsEl.innerHTML = '';
-                thumbnailsEl.classList.add('hidden');
-            }
-        }
     } else {
         imageContainer.classList.add('hidden');
         noImageDiv.classList.remove('hidden');
-        if (thumbnailsEl) {
-            thumbnailsEl.innerHTML = '';
-            thumbnailsEl.classList.add('hidden');
-        }
     }
     
     // Show teren details section
@@ -755,25 +630,9 @@ async function displayTerenDetails(teren, userProfile) {
 }
 
 // Update action buttons
-function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, canApprove, teren) {
+function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren) {
     const actionButtons = document.getElementById('action-buttons');
     actionButtons.innerHTML = '';
-    
-    // Add "Aprobă" / "Respinge" buttons if terrain is pending and user is super admin.
-    // Shown prominently because the typical entry point is the admin notification email.
-    if (canApprove) {
-        const approveBtn = document.createElement('button');
-        approveBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
-        approveBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Aprobă';
-        approveBtn.onclick = () => setTerenApprovalStatus(teren.id, 'approved');
-        actionButtons.appendChild(approveBtn);
-        
-        const rejectBtn = document.createElement('button');
-        rejectBtn.className = 'bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
-        rejectBtn.innerHTML = '<i class="fas fa-times mr-1"></i> Respinge';
-        rejectBtn.onclick = () => setTerenApprovalStatus(teren.id, 'rejected');
-        actionButtons.appendChild(rejectBtn);
-    }
     
     // Add "Modifica" button if user can modify
     if (canModify) {
@@ -794,35 +653,6 @@ function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, can
         toggleBtn.textContent = isDeleted ? 'Activează' : 'Dezactivează';
         toggleBtn.onclick = () => toggleTerenStatus(teren.id, isDeleted);
         actionButtons.appendChild(toggleBtn);
-    }
-}
-
-// Approve or reject a pending terrain (super admin only).
-async function setTerenApprovalStatus(terenId, newStatus) {
-    const actionLabel = newStatus === 'approved' ? 'aprobi' : 'respingi';
-    if (!confirm(`Sigur vrei să ${actionLabel} acest teren?`)) return;
-    
-    try {
-        const userProfile = await fetchUserProfile();
-        if (!userProfile?.is_super_admin) {
-            throw new Error('Nu aveți permisiuni de administrator pentru această operație');
-        }
-        
-        const { error } = await supabase
-            .from('terenuri')
-            .update({ status: newStatus })
-            .eq('id', terenId);
-        
-        if (error) throw error;
-        
-        const message = newStatus === 'approved' 
-            ? 'Terenul a fost aprobat cu succes!' 
-            : 'Terenul a fost respins.';
-        alert(message);
-        window.location.reload();
-    } catch (error) {
-        console.error('Error updating teren approval status:', error);
-        alert('A apărut o eroare la actualizarea statusului terenului: ' + error.message);
     }
 }
 
@@ -894,22 +724,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (retryBtn) {
         retryBtn.addEventListener("click", fetchTerenDetails);
     }
-    
-    const sendEmailBtn = document.getElementById("send-email-btn");
-    if (sendEmailBtn) {
-        sendEmailBtn.addEventListener("click", function() {
-            const terenId = getTerenIdFromUrl();
-            if (terenId) {
-                const teren = {
-                    titlu: document.getElementById('teren-title')?.textContent || 'Teren fără titlu',
-                    suprafata: document.getElementById('teren-suprafata')?.textContent?.replace(' mp', '') || 'N/A',
-                    zona: document.getElementById('teren-zona')?.textContent || 'N/A',
-                    pret_pe_mp: document.getElementById('teren-pret')?.textContent?.replace(' €/mp', '') || 'N/A'
-                };
-                sendAnalysisEmail(teren);
-            }
-        });
-    }
 
     // Wait for Supabase to be initialized
     if (typeof supabase !== 'undefined') {
@@ -919,82 +733,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Analysis Modal Functions
-function openAnalysisModal(teren) {
-    const terenUrl = window.location.href;
-    const emailSubject = `Solicitare analiză teren - ${teren.titlu || 'Teren fără titlu'}`;
-    
-    const emailContent = `Bună ziua,
-
-Solicit o analiză pentru următorul teren:
-
-Titlu: ${teren.titlu || 'N/A'}
-URL: ${terenUrl}
-Suprafață: ${teren.suprafata ? teren.suprafata + ' mp' : 'N/A'}
-Zonă: ${teren.zona || 'N/A'}
-Preț pe mp: ${teren.pret_pe_mp ? teren.pret_pe_mp + ' EUR/mp' : 'N/A'}
-
-Tipul de analiză solicitat: [Vă rog să specificați: Analiză Generală (100 EUR) sau Analiză Specifică (500 EUR)]
-
-Vă rog să îmi trimiteți detaliile pentru plata corespunzătoare.
-
-Mulțumesc,
-[Numele dumneavoastră]`;
-
-    document.getElementById('email-subject').textContent = emailSubject;
-    document.getElementById('email-content').textContent = emailContent;
-    
-    document.getElementById('analysis-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+// Redirect to /analize.html, passing the current teren ID and slug as context
+// so the analysis order form can pre-fill the terrain reference.
+function redirectToAnalize(teren) {
+    const params = new URLSearchParams();
+    if (teren && teren.id) {
+        params.set('teren_id', teren.id);
+    }
+    if (teren && teren.titlu) {
+        params.set('teren_titlu', teren.titlu);
+    }
+    const qs = params.toString();
+    window.location.href = qs ? `analize.html?${qs}` : 'analize.html';
 }
 
-function closeAnalysisModal() {
-    document.getElementById('analysis-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-function sendAnalysisEmail(teren) {
-    const terenUrl = window.location.href;
-    const emailSubject = `Solicitare analiză teren - ${teren.titlu || 'Teren fără titlu'}`;
-    
-    const emailContent = `Bună ziua,
-
-Solicit o analiză pentru următorul teren:
-
-Titlu: ${teren.titlu || 'N/A'}
-URL: ${terenUrl}
-Suprafață: ${teren.suprafata ? teren.suprafata + ' mp' : 'N/A'}
-Zonă: ${teren.zona || 'N/A'}
-Preț pe mp: ${teren.pret_pe_mp ? teren.pret_pe_mp + ' EUR/mp' : 'N/A'}
-
-Tipul de analiză solicitat: [Vă rog să specificați: Analiză Generală (100 EUR) sau Analiză Specifică (500 EUR)]
-
-Vă rog să îmi trimiteți detaliile pentru plata corespunzătoare.
-
-Mulțumesc,
-[Numele dumneavoastră]`;
-
-    const mailtoLink = `mailto:office@ltfbstudio.ro?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailContent)}`;
-    
-    window.location.href = mailtoLink;
-    closeAnalysisModal();
-}
-
-// Keyboard shortcuts: Escape to close modals, arrows to navigate gallery in modal
+// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeImageModal();
-        closeAnalysisModal();
-        return;
-    }
-    // Arrow keys only navigate when the image modal is open
-    const imageModal = document.getElementById('image-modal');
-    if (imageModal && !imageModal.classList.contains('hidden') && galleryImages.length > 1) {
-        if (e.key === 'ArrowLeft') {
-            modalPrev();
-        } else if (e.key === 'ArrowRight') {
-            modalNext();
-        }
     }
 });
 
@@ -1002,7 +758,7 @@ document.addEventListener('keydown', function(e) {
 // INTEREST COUNTS & NAVIGATION
 // =====================================================
 
-async function loadInterestCounts(terenId, teren) {
+async function loadInterestCounts(terenId) {
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return; // Only show for logged-in users
@@ -1016,19 +772,11 @@ async function loadInterestCounts(terenId, teren) {
         
         if (profile && profile.account_type === 'profesional') return; // Hide for agencies
         
-        // Identify the terrain owner. Agency accounts get an auto-like on their
-        // own listing (so the terrain shows up in their profile), but that
-        // self-like should not count as "interes" from another user. Exclude
-        // the owner from both the count and the list shown to the user.
-        const ownerId = teren && (teren.created_by_user_id || teren.posted_by || teren.user_id);
-        
-        // Fetch user likes count, excluding the owner
-        let userLikesQuery = supabase
+        // Fetch user likes count
+        const { count: userLikesCount } = await supabase
             .from('terenuri_likes')
             .select('id', { count: 'exact', head: true })
             .eq('teren_id', terenId);
-        if (ownerId) userLikesQuery = userLikesQuery.neq('user_id', ownerId);
-        const { count: userLikesCount } = await userLikesQuery;
         
         // Fetch group likes count
         const { count: groupLikesCount } = await supabase
