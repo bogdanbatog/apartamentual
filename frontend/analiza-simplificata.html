@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analiză simplificată - Exemplu - ApartamenTUal</title>
-    <meta name="description" content="Vezi un exemplu real de analiză urbanistică simplificată — așa cum o vei primi pe email după comandă.">
+    <title>Analiză preliminară - Exemplu - ApartamenTUal</title>
+    <meta name="description" content="Vezi un exemplu real de analiză urbanistică preliminară — așa cum o vei primi pe email după comandă.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
@@ -412,7 +412,7 @@
 
     <div class="ex-hero">
         <a href="analize.html" class="ex-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
-        <h1>Exemplu — Analiză <span>simplificată</span></h1>
+        <h1>Exemplu — Analiză <span>preliminară</span></h1>
         <p>Acesta este un document real, exact așa cum îl vei primi pe email după comandă. Pagina de mai jos conține cele 2 pagini ale documentului original.</p>
         <div class="ex-hero-actions">
             <button type="button" class="ex-btn ex-btn-primary" onclick="openComandaModal('simpla')">
@@ -427,7 +427,7 @@
             <div class="ex-meta-info">
                 <div class="ex-meta-item">
                     <div class="label">Tip</div>
-                    <div class="value">Analiză simplificată</div>
+                    <div class="value">Analiză preliminară</div>
                 </div>
                 <div class="ex-meta-item">
                     <div class="label">Format livrare</div>
@@ -446,14 +446,14 @@
 
         <div class="ex-pdf-pages">
             <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/simpla-1.jpg')">
-                <img src="assets/analize-exemple/simpla-1.jpg" alt="Analiză simplificată — pagina 1">
+                <img src="assets/analize-exemple/simpla-1.jpg" alt="Analiză preliminară — pagina 1">
                 <div class="ex-pdf-page-label">
                     <span>Pagina 1 — Plan de situație și rezultate analiză</span>
                     <i class="fas fa-search-plus"></i>
                 </div>
             </div>
             <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/simpla-2.jpg')">
-                <img src="assets/analize-exemple/simpla-2.jpg" alt="Analiză simplificată — pagina 2">
+                <img src="assets/analize-exemple/simpla-2.jpg" alt="Analiză preliminară — pagina 2">
                 <div class="ex-pdf-page-label">
                     <span>Pagina 2 — Bilanț și estimare cost investiție</span>
                     <i class="fas fa-search-plus"></i>
@@ -534,11 +534,11 @@
             const terenTitlu = params.get('teren_titlu');
             const terenId = params.get('teren_id');
 
-            const subject = 'Solicitare analiză simplificată — 149 RON';
+            const subject = 'Solicitare analiză preliminară — 149 RON';
             const lines = [
                 'Bună ziua,',
                 '',
-                'Doresc să comand o analiză simplificată (149 RON) pentru următorul teren:',
+                'Doresc să comand o analiză preliminară (149 RON) pentru următorul teren:',
                 ''
             ];
             if (terenTitlu) {
