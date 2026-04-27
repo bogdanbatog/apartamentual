@@ -193,7 +193,6 @@ async function loadGrupuri() {
             .from('grupuri')
             .select(`
                 *,
-                membri:grup_membri(count),
                 grup_preferred_zones(zone_id, zones(id, name)),
                 grup_tags(tag_id, tags(id, name))
             `)
@@ -225,7 +224,36 @@ async function loadGrupuri() {
         
         if (error) throw error;
         
-        allGrupuri = data || [];
+        // Compute the real "active member" count for each group, excluding
+        // members whose profile has account_status = 'deleted'. The previous
+        // implementation used grup_membri(count) inside the select, which
+        // counted every row regardless of profile status, leading to inflated
+        // counts on cards (e.g. "3/20" when only 1 real user remained).
+        const grupuri = data || [];
+        if (grupuri.length > 0) {
+            const grupIds = grupuri.map(g => g.id);
+            
+            const { data: membriRows } = await sb
+                .from('grup_membri')
+                .select('grup_id, profiles!inner(account_status)')
+                .in('grup_id', grupIds)
+                .eq('status', 'activ');
+            
+            const countByGrup = {};
+            (membriRows || []).forEach(row => {
+                const status = row.profiles?.account_status;
+                if (status && status !== 'deleted') {
+                    countByGrup[row.grup_id] = (countByGrup[row.grup_id] || 0) + 1;
+                }
+            });
+            
+            grupuri.forEach(g => {
+                // Mimic the old shape (membri[0].count) so render code works unchanged.
+                g.membri = [{ count: countByGrup[g.id] || 0 }];
+            });
+        }
+        
+        allGrupuri = grupuri;
         applyFilters();
         
     } catch (e) {
