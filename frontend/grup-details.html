@@ -2415,21 +2415,118 @@ window.requestJoinGroup = async function() {
 window.approveRequest = async function(memberId, userName, userEmail) {
     if (!isAdmin && !isSuperAdmin) return;
     
+    // Optimistic UI: remove the request from the local list and re-render
+    // immediately so the banner can't be clicked again while the network
+    // round-trip is in flight. If the DB call fails we restore the entry.
+    const requestIndex = (pendingRequests || []).findIndex(r => r.id === memberId);
+    const originalRequest = requestIndex >= 0 ? pendingRequests[requestIndex] : null;
+    if (originalRequest) {
+        pendingRequests = pendingRequests.filter(r => r.id !== memberId);
+        renderPendingRequests();
+    }
+    
     try {
-        const { error } = await sb
+        // Look up the approved user's user_id BEFORE updating, so we can
+        // exclude them from the broadcast list later.
+        const { data: approvedRow } = await sb
+            .from('grup_membri')
+            .select('user_id, status')
+            .eq('id', memberId)
+            .single();
+        const approvedUserId = approvedRow?.user_id;
+        
+        // Idempotency guard: if the row is no longer pending (already
+        // approved by someone else, or in a different state), do NOT update
+        // and do NOT send notifications. This prevents duplicate emails when
+        // an admin and a superadmin both click "Approve" before the page
+        // refreshes.
+        if (!approvedRow || approvedRow.status !== 'pending') {
+            showToast('Cererea a fost deja procesată.', 'info');
+            // Already removed from UI optimistically — just trigger a reload
+            // so the page reflects whatever the real state is.
+            setTimeout(() => window.location.reload(), 800);
+            return;
+        }
+        
+        // Update the row only when it is still pending. The .eq('status', 'pending')
+        // filter makes the update conditional at the database level.
+        const { data: updatedRows, error } = await sb
             .from('grup_membri')
             .update({ status: 'activ' })
-            .eq('id', memberId);
+            .eq('id', memberId)
+            .eq('status', 'pending')
+            .select();
         
         if (error) throw error;
         
-        // Notify: Slack + email to approved user
+        // If no rows were updated, another admin won the race. Skip notifications.
+        if (!updatedRows || updatedRows.length === 0) {
+            showToast('Cererea a fost deja procesată între timp.', 'info');
+            setTimeout(() => window.location.reload(), 800);
+            return;
+        }
+        
+        // Notification flow for member_approved:
+        //   1. Confirmation email TO the approved user (member_approved event).
+        //   2. "X joined the group" broadcast TO every other active group member
+        //      (member_joined event, one per member, with admin_email set).
+        //   3. Dedicated superadmin call for both events (no admin_email so the
+        //      edge function CCs the env-configured superadmin address).
         if (typeof notifyAdmins === 'function') {
+            // 1. Confirmation to the approved user.
+            //    `recipient_email` is the modern field; we use it (not admin_email)
+            //    so the routing in the edge function works correctly.
+            if (userEmail) {
+                notifyAdmins('member_approved', {
+                    group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                    group_id: currentGroup.id,
+                    user_name: userName,
+                    user_email: userEmail,
+                    recipient_email: userEmail
+                });
+            }
+            
+            // 2. Broadcast to all other active members of the group.
+            try {
+                const { data: existingMembers } = await sb
+                    .from('grup_membri')
+                    .select('user_id')
+                    .eq('grup_id', currentGroup.id)
+                    .eq('status', 'activ')
+                    .neq('user_id', approvedUserId);
+                
+                const memberIds = (existingMembers || []).map(m => m.user_id);
+                if (memberIds.length > 0) {
+                    const { data: profs } = await sb
+                        .from('profiles')
+                        .select('email')
+                        .in('user_id', memberIds);
+                    const emails = (profs || []).map(p => p.email).filter(Boolean);
+                    for (const email of emails) {
+                        notifyAdmins('member_joined', {
+                            group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                            group_id: currentGroup.id,
+                            user_name: userName,
+                            user_email: userEmail,
+                            admin_email: email
+                        });
+                    }
+                }
+                // 3a. Dedicated superadmin call for member_joined.
+                notifyAdmins('member_joined', {
+                    group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                    group_id: currentGroup.id,
+                    user_name: userName,
+                    user_email: userEmail
+                });
+            } catch (e) { console.warn('Member joined broadcast failed:', e); }
+            
+            // 3b. Dedicated superadmin call for member_approved (no recipient).
             notifyAdmins('member_approved', {
                 group_name: currentGroup.name || currentGroup.nume || 'Grup',
                 group_id: currentGroup.id,
-                user_email: userEmail || userName,
-                admin_email: userEmail
+                user_name: userName,
+                user_email: userEmail
             });
         }
         
@@ -2438,6 +2535,11 @@ window.approveRequest = async function(memberId, userName, userEmail) {
         
     } catch (e) {
         console.error('Approve error:', e);
+        // Restore the request in the UI so the admin can try again.
+        if (originalRequest) {
+            pendingRequests.splice(requestIndex, 0, originalRequest);
+            renderPendingRequests();
+        }
         showToast('Eroare la aprobare.', 'error');
     }
 };
@@ -2446,21 +2548,53 @@ window.rejectRequest = async function(memberId, userName, userEmail) {
     if (!isAdmin && !isSuperAdmin) return;
     if (!confirm(`Respingi cererea lui ${userName}?`)) return;
     
+    // Optimistic UI: hide the request from the banner immediately so a
+    // second click can't fire while the network call is in flight.
+    const requestIndex = (pendingRequests || []).findIndex(r => r.id === memberId);
+    const originalRequest = requestIndex >= 0 ? pendingRequests[requestIndex] : null;
+    if (originalRequest) {
+        pendingRequests = pendingRequests.filter(r => r.id !== memberId);
+        renderPendingRequests();
+    }
+    
     try {
-        const { error } = await sb
+        // Idempotency: only delete the row if it is still pending.
+        // If another admin already approved/rejected it, we return 0 rows
+        // and skip the notifications.
+        const { data: deletedRows, error } = await sb
             .from('grup_membri')
             .delete()
-            .eq('id', memberId);
+            .eq('id', memberId)
+            .eq('status', 'pending')
+            .select();
         
         if (error) throw error;
         
-        // Notify rejected user
-        if (userEmail && typeof notifyAdmins === 'function') {
+        if (!deletedRows || deletedRows.length === 0) {
+            showToast('Cererea a fost deja procesată.', 'info');
+            setTimeout(() => window.location.reload(), 800);
+            return;
+        }
+        
+        // Notify rejected user + superadmin via dedicated call.
+        if (typeof notifyAdmins === 'function') {
+            // 1. Notification to the rejected user (recipient_email is the
+            //    modern field that the edge function reads correctly).
+            if (userEmail) {
+                notifyAdmins('member_rejected', {
+                    group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                    group_id: currentGroup.id,
+                    user_name: userName,
+                    user_email: userEmail,
+                    recipient_email: userEmail
+                });
+            }
+            // 2. Dedicated superadmin call (no recipient — edge function CCs env admin).
             notifyAdmins('member_rejected', {
                 group_name: currentGroup.name || currentGroup.nume || 'Grup',
                 group_id: currentGroup.id,
-                user_email: userEmail,
-                admin_email: userEmail
+                user_name: userName,
+                user_email: userEmail
             });
         }
         
@@ -2469,6 +2603,11 @@ window.rejectRequest = async function(memberId, userName, userEmail) {
         
     } catch (e) {
         console.error('Reject error:', e);
+        // Restore the request in the UI on error.
+        if (originalRequest) {
+            pendingRequests.splice(requestIndex, 0, originalRequest);
+            renderPendingRequests();
+        }
         showToast('Eroare la respingere.', 'error');
     }
 };
