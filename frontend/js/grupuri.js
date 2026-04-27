@@ -229,20 +229,38 @@ async function loadGrupuri() {
         // implementation used grup_membri(count) inside the select, which
         // counted every row regardless of profile status, leading to inflated
         // counts on cards (e.g. "3/20" when only 1 real user remained).
+        // 
+        // We do this in two separate queries (rather than an embedded join)
+        // because RLS on `profiles` may restrict which profiles a non-admin
+        // user can read, and an inner join would silently drop rows that
+        // hide behind RLS.
         const grupuri = data || [];
         if (grupuri.length > 0) {
             const grupIds = grupuri.map(g => g.id);
             
+            // 1. Get all active membership rows for these groups.
             const { data: membriRows } = await sb
                 .from('grup_membri')
-                .select('grup_id, profiles!inner(account_status)')
+                .select('grup_id, user_id')
                 .in('grup_id', grupIds)
                 .eq('status', 'activ');
             
+            // 2. Get account_status for all the user_ids we found.
+            const allUserIds = [...new Set((membriRows || []).map(r => r.user_id))];
+            let deletedUserIds = new Set();
+            if (allUserIds.length > 0) {
+                const { data: profs } = await sb
+                    .from('profiles')
+                    .select('user_id, account_status')
+                    .in('user_id', allUserIds)
+                    .eq('account_status', 'deleted');
+                deletedUserIds = new Set((profs || []).map(p => p.user_id));
+            }
+            
+            // 3. Count members per group, skipping the soft-deleted ones.
             const countByGrup = {};
             (membriRows || []).forEach(row => {
-                const status = row.profiles?.account_status;
-                if (status && status !== 'deleted') {
+                if (!deletedUserIds.has(row.user_id)) {
                     countByGrup[row.grup_id] = (countByGrup[row.grup_id] || 0) + 1;
                 }
             });
