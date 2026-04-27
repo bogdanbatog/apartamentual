@@ -208,14 +208,24 @@
         var u = allUsers.find(function(x) { return x.user_id === userId; });
         if (u) { u.suspended_until = suspendDate.toISOString(); u.account_status = 'suspended'; }
         
-        // Notify user by email
+        // Notify user by email + dedicated superadmin call (account_suspended
+        // is in CC_IF_NO_RECIPIENT, so we need a separate no-recipient call).
         try {
             var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
-            if (prof && prof.email && typeof notifyAdmins === 'function') {
+            if (typeof notifyAdmins === 'function') {
+                if (prof && prof.email) {
+                    notifyAdmins('account_suspended', {
+                        user_name: name,
+                        user_email: prof.email,
+                        suspended_until: suspendDate.toLocaleDateString('ro-RO'),
+                        recipient_email: prof.email
+                    });
+                }
+                // Dedicated superadmin call — no recipient.
                 notifyAdmins('account_suspended', {
                     user_name: name,
-                    suspended_until: suspendDate.toLocaleDateString('ro-RO'),
-                    admin_email: prof.email
+                    user_email: prof?.email,
+                    suspended_until: suspendDate.toLocaleDateString('ro-RO')
                 });
             }
         } catch(e) { console.warn('Suspend notify failed:', e); }
@@ -232,13 +242,15 @@
         var u = allUsers.find(function(x) { return x.user_id === userId; });
         if (u) { u.suspended_until = null; u.account_status = 'active'; }
         
-        // Notify user by email
+        // Notify user by email. account_reactivated is in SUPERADMIN_CC_ALWAYS,
+        // so the superadmin always gets a copy — no second call needed.
         try {
             var { data: prof } = await sb.from('profiles').select('email, pseudonym').eq('user_id', userId).single();
             if (prof && prof.email && typeof notifyAdmins === 'function') {
                 notifyAdmins('account_reactivated', {
                     user_name: prof.pseudonym || 'Utilizator',
-                    admin_email: prof.email
+                    user_email: prof.email,
+                    recipient_email: prof.email
                 });
             }
         } catch(e) { console.warn('Unsuspend notify failed:', e); }
@@ -263,12 +275,25 @@
         var u = allUsers.find(function(x) { return x.user_id === userId; });
         if (u) u.account_status = 'deleted';
         
-        // Notify user by email
-        if (userEmail && typeof notifyAdmins === 'function') {
+        // Notify user by email + dedicated superadmin call.
+        // The frontend used to send `admin_email: userEmail`, which the edge
+        // function interprets as "explicit recipient" and therefore SKIPS the
+        // superadmin CC. We split into two calls:
+        //   1. recipient_email = the deleted user (gets the notification)
+        //   2. no recipient = the superadmin gets the env-fallback CC
+        if (typeof notifyAdmins === 'function') {
             try {
+                if (userEmail) {
+                    notifyAdmins('account_deleted', {
+                        user_name: name,
+                        user_email: userEmail,
+                        recipient_email: userEmail
+                    });
+                }
+                // Dedicated superadmin call — no recipient set.
                 notifyAdmins('account_deleted', {
                     user_name: name,
-                    admin_email: userEmail
+                    user_email: userEmail
                 });
             } catch(e) { console.warn('Delete notify failed:', e); }
         }
