@@ -1379,7 +1379,7 @@ async function loadGroupDetails() {
             const pendingUserIds = pendingRequests.map(m => m.user_id);
             const { data: pendingProfiles } = await sb
                 .from('profiles')
-                .select('user_id, pseudonym, email')
+                .select('user_id, pseudonym, email, account_status')
                 .in('user_id', pendingUserIds);
             if (pendingProfiles) {
                 pendingRequests = pendingRequests.map(m => ({
@@ -1387,14 +1387,20 @@ async function loadGroupDetails() {
                     profile: pendingProfiles.find(p => p.user_id === m.user_id)
                 }));
             }
+            // Hide pending requests from soft-deleted users.
+            pendingRequests = pendingRequests.filter(
+                r => r.profile && r.profile.account_status !== 'deleted'
+            );
         }
         
         // Load profiles for members
+        // Load profiles for members (include account_status so we can
+        // filter out soft-deleted accounts).
         if (members.length > 0) {
             const userIds = members.map(m => m.user_id);
             const { data: profilesData } = await sb
                 .from('profiles')
-                .select('user_id, pseudonym, email')
+                .select('user_id, pseudonym, email, account_status')
                 .in('user_id', userIds);
             
             // Attach profile to each member
@@ -1404,6 +1410,12 @@ async function loadGroupDetails() {
                     profile: profilesData.find(p => p.user_id === m.user_id)
                 }));
             }
+            
+            // Hide members whose profile is soft-deleted. The row stays in
+            // grup_membri (audit / FK reasons), but the UI should not list
+            // them as if they were active members. Members without a profile
+            // at all (orphaned rows) are also hidden.
+            members = members.filter(m => m.profile && m.profile.account_status !== 'deleted');
         }
         
         // Check if current user is member/admin
