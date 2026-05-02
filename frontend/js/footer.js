@@ -51,6 +51,65 @@ function createFooter() {
                 transition: color 0.15s;
             }
             .site-footer-col a:hover { color: #f97316; }
+
+            /* Company identification band — required by Netopia/ANPC */
+            .site-footer-company {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 24px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px 24px;
+                font-size: 0.82rem;
+                color: #94a3b8;
+                line-height: 1.6;
+            }
+            .site-footer-company strong { color: #cbd5e1; font-weight: 600; }
+            .site-footer-company a { color: #94a3b8; text-decoration: none; }
+            .site-footer-company a:hover { color: #f97316; }
+
+            /* Payment logos + ANPC band */
+            .site-footer-payments {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px 0;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+            .site-footer-payments-logos {
+                display: flex;
+                align-items: center;
+                gap: 18px;
+                flex-wrap: wrap;
+            }
+            .site-footer-payments-logos img {
+                height: 24px;
+                width: auto;
+                opacity: 0.85;
+                filter: brightness(0) invert(1);
+                transition: opacity 0.15s;
+            }
+            .site-footer-payments-logos a:hover img { opacity: 1; }
+            .site-footer-payments-logos .logo-netopia { height: 28px; filter: none; }
+            .site-footer-payments-anpc {
+                display: flex;
+                gap: 14px;
+                font-size: 0.78rem;
+                color: #94a3b8;
+                flex-wrap: wrap;
+            }
+            .site-footer-payments-anpc a {
+                color: #94a3b8;
+                text-decoration: underline;
+                text-decoration-color: rgba(148, 163, 184, 0.3);
+            }
+            .site-footer-payments-anpc a:hover { color: #f97316; }
+
             .site-footer-bottom {
                 max-width: 1200px;
                 margin: 0 auto;
@@ -66,6 +125,10 @@ function createFooter() {
                 .site-footer-container {
                     grid-template-columns: 1fr;
                     gap: 24px;
+                }
+                .site-footer-payments {
+                    flex-direction: column;
+                    align-items: flex-start;
                 }
             }
         </style>
@@ -97,6 +160,32 @@ function createFooter() {
                     <a href="/contact.html">Contact</a>
                 </div>
             </div>
+
+            <!-- Company identification (Netopia + ANPC requirement) -->
+            <div class="site-footer-company">
+                <span><strong>SC LTFB Studio SRL</strong></span>
+                <span>CUI: <strong>RO22004992</strong></span>
+                <span>Reg. Com.: <strong>J40/12417/2007</strong></span>
+                <span>Sediu: Str. Popa Petre 23, Sector 2, București</span>
+                <span>Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></span>
+            </div>
+
+            <!-- Payment logos + ANPC SOL/SAL links (Netopia approval requirement) -->
+            <div class="site-footer-payments">
+                <div class="site-footer-payments-logos">
+                    <img src="/assets/payment-logos/visa.svg" alt="Visa" loading="lazy">
+                    <img src="/assets/payment-logos/mastercard.svg" alt="Mastercard" loading="lazy">
+                    <a href="https://netopia-payments.com" target="_blank" rel="noopener" title="Plăți procesate de NETOPIA Payments">
+                        <img class="logo-netopia" src="/assets/payment-logos/netopia.svg" alt="NETOPIA Payments" loading="lazy">
+                    </a>
+                </div>
+                <div class="site-footer-payments-anpc">
+                    <a href="https://anpc.ro" target="_blank" rel="noopener">ANPC</a>
+                    <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener">SAL</a>
+                    <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">SOL (UE)</a>
+                </div>
+            </div>
+
             <div class="site-footer-bottom">
                 <p>&copy; ${currentYear} ApartamenTUal. Toate drepturile rezervate.</p>
             </div>
