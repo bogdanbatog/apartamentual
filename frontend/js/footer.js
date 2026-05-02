@@ -181,8 +181,8 @@ function createFooter() {
                 </div>
                 <div class="site-footer-payments-anpc">
                     <a href="https://anpc.ro" target="_blank" rel="noopener">ANPC</a>
-                    <a href="https://anpc.ro/ce-este-sal/" target="_blank" rel="noopener">SAL</a>
-                    <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">SOL (UE)</a>
+                    <a href="https://anpc.ro/sal/" target="_blank" rel="noopener">SAL</a>
+                    <a href="https://reclamatiisal.anpc.ro" target="_blank" rel="noopener">Platforma SAL</a>
                 </div>
             </div>
 
