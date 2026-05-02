@@ -337,11 +337,15 @@ async function createOblioProforma(
 
   if (input.tip_persoana === 'PF') {
     client.cif = input.cnp || ''
-    client.name = `${input.prenume} ${input.nume}`
+    // Includem order_id în nume pentru a forța Oblio să creeze un client nou
+    // la fiecare comandă (altfel clientul e identificat după nume + reutilizat,
+    // ceea ce poate cauza ca emailul să nu fie trimis la comenzi ulterioare).
+    client.name = `${input.prenume} ${input.nume} (${orderId})`
     client.vatPayer = 0
   } else {
     client.cif = input.cui || ''
-    client.name = input.denumire_firma || ''
+    // Acelaşi raţionament ca la PF — adăugăm order_id pentru unicitate
+    client.name = `${input.denumire_firma || ''} (${orderId})`
     client.rc = input.reg_com || ''
     client.vatPayer = 1  // assumption — we don't know if client is VAT-payer; safe default
   }
