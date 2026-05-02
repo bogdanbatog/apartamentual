@@ -31,7 +31,7 @@
             <div class="max-w-4xl mx-auto">
                 <div class="mb-8">
                     <h1 class="text-3xl mb-4">Politica de Confidențialitate și Protecția Datelor (GDPR)</h1>
-                    <p class="subtitle">Actualizat pentru ultima dată: 14 martie 2026</p>
+                    <p class="subtitle">Actualizat pentru ultima dată: 2 mai 2026</p>
                 </div>
 
                 <div class="prose max-w-none space-y-8">
@@ -91,7 +91,19 @@
                             <li>Cereri de parteneriat (nume firmă, categorie, descriere, website)</li>
                         </ul>
 
-                        <h3 class="text-lg mb-3">3.5 Date Tehnice</h3>
+                        <h3 class="text-lg mb-3">3.5 Date din Comenzile de Analize</h3>
+                        <p class="text-sm text-gray-700 mb-2">Când plasați o comandă pentru o analiză urbanistică (preliminară sau detaliată), colectăm următoarele date strict pentru emiterea facturii și livrarea analizei:</p>
+                        <ul class="list-disc pl-6 space-y-1 mb-3">
+                            <li><strong>Persoană fizică (PF):</strong> nume, prenume, CNP, adresă (stradă, oraș, județ, cod poștal), telefon, email</li>
+                            <li><strong>Persoană juridică (PJ):</strong> denumire firmă, CUI, număr Reg. Comerțului, adresă sediu, telefon, email</li>
+                            <li><strong>Date despre teren:</strong> descriere/număr cadastral/adresă, eventual link către anunțul terenului</li>
+                            <li><strong>Date plată:</strong> sumă, monedă, status plată (procesate de Netopia Payments — vezi secțiunea 5.2)</li>
+                        </ul>
+                        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded mb-4 text-sm">
+                            <strong>Notă privind CNP-ul</strong> (numai pentru persoane fizice): CNP-ul este colectat exclusiv pentru emiterea facturii fiscale, conform obligației legale impuse de Codul fiscal (Legea 227/2015) și Legea contabilității 82/1991. Temeiul juridic este art. 6(1)(c) GDPR coroborat cu art. 4 alin. (1) din Legea 190/2018 privind măsurile de punere în aplicare a Regulamentului (UE) 2016/679. CNP-ul nu este afișat public și nu este partajat cu alți utilizatori ai platformei.
+                        </div>
+
+                        <h3 class="text-lg mb-3">3.6 Date Tehnice</h3>
                         <ul class="list-disc pl-6 space-y-1">
                             <li>Adresa IP</li>
                             <li>Tipul de browser și versiunea</li>
@@ -132,11 +144,14 @@
                         <p class="mb-4">Informațiile de profil publice (nume, preferințe de locuire) sunt vizibile altor membri ai grupurilor pentru facilitarea comunicării.</p>
 
                         <h3 class="text-lg mb-3">5.2 Cu prestatori de servicii</h3>
+                        <p class="text-sm text-gray-700 mb-2">Toți prestatorii de mai jos acționează ca persoane împuternicite (procesatori) în baza unor contracte ce respectă art. 28 GDPR:</p>
                         <ul class="list-disc pl-6 space-y-1 mb-4">
                             <li><strong>Supabase</strong> (bază de date, autentificare, stocare) — date stocate în EU (eu-west-1, Irlanda)</li>
                             <li><strong>Render</strong> (hosting aplicație web) — servere în EU</li>
                             <li><strong>Resend</strong> (trimitere email-uri tranzacționale) — date procesate în EU (eu-west-1, Irlanda)</li>
                             <li><strong>Slack</strong> (notificări interne către echipa de administrare) — nu conține date personale ale utilizatorilor, doar notificări de activitate</li>
+                            <li><strong>Netopia Payments (NETOPIA Financial Services SA)</strong> — procesator de plăți cu cardul, certificat PCI-DSS. Datele cardului bancar nu trec prin serverele noastre, sunt introduse direct pe pagina securizată Netopia. Date partajate: numele plătitorului, suma, identificatorul comenzii, status plată. Mai multe informații: <a href="https://netopia-payments.com/politica-de-confidentialitate/" target="_blank" rel="noopener" class="text-blue-600 hover:underline">politica de confidențialitate Netopia</a>.</li>
+                            <li><strong>Oblio</strong> (emitere facturi fiscale și proforme) — operator de e-Factura, integrat cu ANAF. Date partajate: datele de facturare ale clientului (PF: nume, prenume, CNP, adresă; PJ: denumire firmă, CUI, J, adresă), produsul facturat, suma, statusul plății.</li>
                         </ul>
 
                         <h3 class="text-lg mb-3">5.3 Din motive legale</h3>
@@ -170,6 +185,12 @@
                             <div class="bg-gray-50 p-3 rounded">
                                 <strong>Date tehnice/log-uri:</strong> 12 luni
                             </div>
+                            <div class="bg-amber-50 border border-amber-200 p-3 rounded">
+                                <strong>Documente fiscale (facturi, proforme, dovezi de plată):</strong> 10 ani de la sfârșitul exercițiului financiar în care au fost emise, conform art. 25 alin. (1) din Legea contabilității nr. 82/1991 și prevederilor Codului fiscal (Legea 227/2015). Această perioadă este o <strong>obligație legală</strong> și se aplică inclusiv după ștergerea contului (CNP, nume, adresă rămân pe factura emisă, dar nu sunt utilizate în niciun alt scop).
+                            </div>
+                            <div class="bg-amber-50 border border-amber-200 p-3 rounded">
+                                <strong>Log-uri ale tranzacțiilor de plată:</strong> 5 ani, conform art. 92 din Legea 129/2019 privind prevenirea spălării banilor.
+                            </div>
                         </div>
                     </section>
 
@@ -188,7 +209,7 @@
 
                             <div class="border rounded p-4">
                                 <h4 class="font-semibold mb-2">🗑️ Dreptul la ștergere</h4>
-                                <p class="text-sm">Puteți solicita ștergerea datelor în anumite circumstanțe.</p>
+                                <p class="text-sm">Puteți solicita ștergerea datelor în anumite circumstanțe. <span class="text-gray-600">Excepție: datele care fac obiectul unei obligații legale (ex. documente fiscale — vezi Secțiunea 7) nu pot fi șterse înainte de expirarea termenului legal.</span></p>
                             </div>
 
                             <div class="border rounded p-4">
@@ -204,6 +225,11 @@
                             <div class="border rounded p-4">
                                 <h4 class="font-semibold mb-2">🚫 Dreptul de opoziție</h4>
                                 <p class="text-sm">Vă puteți opune prelucrărilor bazate pe interesul nostru legitim (ex. analize de utilizare, notificări informative). În urma opoziției, vom înceta prelucrarea respectivă, cu excepția cazului în care aceasta este esențială pentru funcționarea serviciului.</p>
+                            </div>
+
+                            <div class="border rounded p-4">
+                                <h4 class="font-semibold mb-2">⚖️ Dreptul de a depune plângere</h4>
+                                <p class="text-sm">Aveți dreptul de a depune o plângere la <strong>Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP)</strong> — vezi Secțiunea 13 pentru date de contact — sau de a vă adresa instanțelor judecătorești competente.</p>
                             </div>
                         </div>
 
@@ -251,18 +277,15 @@
                         <h3 class="text-lg mb-3">10.1 Tipuri de Cookie-uri</h3>
                         <div class="space-y-3 mb-4">
                             <div class="bg-green-50 p-3 rounded">
-                                <strong>Cookie-uri esențiale:</strong> Necesare pentru funcționarea platformei — autentificarea utilizatorului (sesiune Supabase Auth). Nu pot fi dezactivate.
+                                <strong>Cookie-uri esențiale (Supabase Auth):</strong> Necesare pentru funcționarea platformei — păstrează sesiunea de autentificare a utilizatorului. Sunt setate exclusiv de Supabase Auth (prestatorul nostru de autentificare) și sunt strict necesare pentru ca platforma să funcționeze. Nu pot fi dezactivate fără a împiedica accesul la cont.
                             </div>
                         </div>
                         <p class="mb-4">
-                            Platforma ApartamenTUal <strong>nu folosește</strong> cookie-uri de analiză (Google Analytics), cookie-uri de marketing sau cookie-uri de urmărire de la terți.
+                            Platforma ApartamenTUal <strong>nu folosește</strong> cookie-uri de analiză (de ex. Google Analytics), cookie-uri de marketing, cookie-uri de urmărire de la terți sau pixeli de tracking. Tocmai din acest motiv, nu este afișat un banner de consimțământ pentru cookie-uri — nu sunt utilizate cookie-uri pentru care GDPR sau Directiva ePrivacy să impună obținerea consimțământului.
                         </p>
 
                         <h3 class="text-lg mb-3">10.2 Gestionarea Cookie-urilor</h3>
-                        <p class="mb-2">Puteți controla cookie-urile prin setările browser-ului dumneavoastră. Dezactivarea cookie-urilor esențiale poate afecta funcționarea platformei (autentificare, sesiune).</p>
-                    </section>
-                            <li>Contactarea echipei noastre pentru dezactivare</li>
-                        </ul>
+                        <p class="mb-2">Puteți controla cookie-urile prin setările browser-ului dumneavoastră. Dezactivarea cookie-urilor esențiale (Supabase Auth) va împiedica autentificarea pe platformă.</p>
                     </section>
 
                     <section class="card">
@@ -276,7 +299,27 @@
                     </section>
 
                     <section class="card">
-                        <h2 class="text-xl mb-4">12. Modificări ale Politicii</h2>
+                        <h2 class="text-xl mb-4">12. Responsabilul cu Protecția Datelor (DPO) și Decizii Automate</h2>
+
+                        <h3 class="text-lg mb-3">12.1 Responsabilul cu Protecția Datelor (DPO)</h3>
+                        <p class="mb-4">
+                            SC LTFB Studio SRL <strong>nu a desemnat un Responsabil cu Protecția Datelor (DPO)</strong>, deoarece nu se încadrează în niciuna dintre situațiile de obligativitate prevăzute la art. 37 alin. (1) din GDPR — nu este autoritate publică, nu desfășoară monitorizare sistematică pe scară largă a persoanelor și nu prelucrează pe scară largă categorii speciale de date.
+                        </p>
+                        <p class="mb-4">
+                            Pentru orice cerere referitoare la protecția datelor personale, punctul de contact este <span class="js-email" data-u="office" data-d="ltfbstudio.ro"></span>.
+                        </p>
+
+                        <h3 class="text-lg mb-3">12.2 Decizii Automate și Profilare</h3>
+                        <p class="mb-2">
+                            Platforma ApartamenTUal <strong>nu utilizează decizii automate</strong> care produc efecte juridice sau care vă afectează în mod similar într-o măsură semnificativă, în sensul art. 22 GDPR.
+                        </p>
+                        <p>
+                            Sugestiile de potrivire (de ex. afișarea unor utilizatori sau grupuri compatibile pe baza preferințelor de locuire) sunt simple recomandări informative, nu decizii automate în sensul GDPR — orice acțiune (cerere de alăturare, invitație etc.) presupune intervenția dumneavoastră explicită.
+                        </p>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="text-xl mb-4">13. Modificări ale Politicii</h2>
                         <p class="mb-4">
                             Ne rezervăm dreptul de a actualiza această Politică de Confidențialitate. Modificările semnificative vor fi comunicate prin email sau notificare pe platformă.
                         </p>
@@ -286,15 +329,15 @@
                     </section>
 
                     <section class="card">
-                        <h2 class="text-xl mb-4">13. Contact și Reclamații</h2>
-                        <h3 class="text-lg mb-3">13.1 Persoana de contact pentru protecția datelor</h3>
+                        <h2 class="text-xl mb-4">14. Contact și Reclamații</h2>
+                        <h3 class="text-lg mb-3">14.1 Persoana de contact pentru protecția datelor</h3>
                         <div class="bg-gray-50 p-4 rounded mb-4">
                             <p><strong>SC LTFB Studio SRL</strong></p>
                             <p>Email: <span class="js-email" data-u="office" data-d="ltfbstudio.ro"></span></p>
                             <p class="text-sm text-gray-600 mt-2">Pentru toate întrebările legate de protecția datelor personale. Vom răspunde în termen de maximum 30 de zile.</p>
                         </div>
 
-                        <h3 class="text-lg mb-3">13.2 Autoritatea de Supraveghere</h3>
+                        <h3 class="text-lg mb-3">14.2 Autoritatea de Supraveghere</h3>
                         <p class="mb-3 text-sm">Dacă considerați că prelucrarea datelor dumneavoastră personale încalcă GDPR, aveți dreptul de a depune o plângere la:</p>
                         <div class="bg-blue-50 p-4 rounded">
                             <p><strong>Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP)</strong></p>
