@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comandă analiză preliminară — ApartamenTUal</title>
+    <meta name="description" content="Comandă analiza preliminară pentru terenul tău. Primești în 3-5 zile lucrătoare un raport tehnic cu fezabilitatea construcției.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="nav.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+
+        /* Hero */
+        .ord-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 3rem 1.5rem 2rem;
+            text-align: center;
+            color: white;
+        }
+        .ord-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .ord-back-link:hover { color: white; }
+        .ord-hero h1 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .ord-hero h1 span { color: #f97316; }
+        .ord-hero p {
+            font-size: 1rem;
+            color: #cbd5e1;
+            max-width: 640px;
+            margin: 0 auto 1.5rem;
+        }
+        .ord-price-row {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.75rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+        }
+        .ord-price-old {
+            font-size: 1.05rem;
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        .ord-price-new {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f97316;
+        }
+        .ord-price-tva {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+        }
+        .ord-promo-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            background: #f97316;
+            color: white;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .ord-container {
+            max-width: 720px;
+            margin: -1.5rem auto 3rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Form sections */
+        .ord-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.25rem;
+        }
+        .ord-section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #0f172a;
+        }
+        .ord-section-hint {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Toggle PF/PJ */
+        .ord-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 0.35rem;
+        }
+        .ord-toggle input { display: none; }
+        .ord-toggle label {
+            text-align: center;
+            padding: 0.65rem 0.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .ord-toggle input:checked + label {
+            background: white;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            font-weight: 600;
+        }
+
+        /* Form fields */
+        .ord-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .ord-row.single { grid-template-columns: 1fr; }
+        .ord-field { position: relative; }
+        .ord-field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.35rem;
+        }
+        .ord-field label .req { color: #dc2626; }
+        .ord-field input,
+        .ord-field textarea,
+        .ord-field select {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: white;
+            color: #0f172a;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .ord-field input:focus,
+        .ord-field textarea:focus,
+        .ord-field select:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+        }
+        .ord-field textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+        .ord-field-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        /* Acceptance checkboxes */
+        .ord-tos {
+            display: flex;
+            gap: 0.65rem;
+            align-items: flex-start;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.65rem;
+        }
+        .ord-tos input[type="checkbox"] {
+            margin-top: 0.2rem;
+            width: 1.05rem;
+            height: 1.05rem;
+            accent-color: #f97316;
+            flex-shrink: 0;
+        }
+        .ord-tos span {
+            font-size: 0.875rem;
+            color: #7c2d12;
+            line-height: 1.45;
+        }
+        .ord-tos a {
+            color: #c2410c;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .ord-tos a:hover { color: #9a3412; }
+
+        /* Submit */
+        .ord-submit {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .ord-submit:hover:not(:disabled) {
+            background: #ea580c;
+        }
+        .ord-submit:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+        .ord-submit:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Status messages */
+        .ord-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .ord-error.show { display: block; }
+
+        /* Success state (after submit) */
+        .ord-success {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem 1.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        .ord-success-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: #16a34a;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.85rem;
+            margin-bottom: 1rem;
+        }
+        .ord-success h2 {
+            color: #0f172a;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        .ord-success p {
+            color: #475569;
+            margin-bottom: 1rem;
+        }
+        .ord-success-order {
+            background: #f8fafc;
+            border-left: 4px solid #f97316;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            margin: 1.25rem 0;
+            text-align: left;
+        }
+        .ord-success-order .label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .ord-success-order .val {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .ord-success-actions {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1.25rem;
+        }
+        .ord-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .ord-btn-primary {
+            background: #f97316;
+            color: white;
+        }
+        .ord-btn-primary:hover { background: #ea580c; }
+        .ord-btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .ord-btn-secondary:hover { background: #e2e8f0; }
+
+        /* Loading spinner inside submit */
+        .spin {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Conditional show/hide */
+        .pf-only, .pj-only { display: none; }
+        .show-pf .pf-only { display: block; }
+        .show-pj .pj-only { display: block; }
+        .show-pf .pf-only.ord-row,
+        .show-pj .pj-only.ord-row { display: grid; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .ord-row { grid-template-columns: 1fr; }
+            .ord-hero h1 { font-size: 1.5rem; }
+            .ord-section { padding: 1.25rem 1rem; }
+            .ord-container { padding: 0 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation"></div>
+
+    <!-- HERO -->
+    <div class="ord-hero">
+        <a href="analiza-simplificata.html" class="ord-back-link">
+            <i class="fas fa-arrow-left"></i> Înapoi la analize
+        </a>
+        <h1>Comandă analiza <span>preliminară</span></h1>
+        <p>Primești în maxim 3-5 zile lucrătoare un raport tehnic PDF cu fezabilitatea construcției pe terenul ales.</p>
+        <div class="ord-price-row">
+            <span class="ord-price-old">149 RON</span>
+            <span class="ord-price-new">99 RON</span>
+            <span class="ord-price-tva">TVA inclus</span>
+        </div>
+        <div><span class="ord-promo-badge">PROMOȚIE PRIMA LUNĂ</span></div>
+    </div>
+
+    <!-- FORMULAR -->
+    <div class="ord-container">
+        <div id="ord-error" class="ord-error"></div>
+
+        <!-- View 1: Form -->
+        <div id="ord-form-view">
+            <form id="ord-form" autocomplete="on" novalidate>
+
+                <!-- Sectiunea 1: Tip facturare + date -->
+                <section class="ord-section">
+                    <h2>1. Date de facturare</h2>
+                    <p class="ord-section-hint">Pentru factura fiscală pe care o primești după plată.</p>
+
+                    <div class="ord-toggle">
+                        <input type="radio" id="tip-pf" name="tip_persoana" value="PF" checked>
+                        <label for="tip-pf">Persoană fizică</label>
+                        <input type="radio" id="tip-pj" name="tip_persoana" value="PJ">
+                        <label for="tip-pj">Firmă (PJ)</label>
+                    </div>
+
+                    <!-- PF only -->
+                    <div class="ord-row pf-only">
+                        <div class="ord-field">
+                            <label for="prenume">Prenume <span class="req">*</span></label>
+                            <input type="text" id="prenume" name="prenume" autocomplete="given-name">
+                        </div>
+                        <div class="ord-field">
+                            <label for="nume">Nume <span class="req">*</span></label>
+                            <input type="text" id="nume" name="nume" autocomplete="family-name">
+                        </div>
+                    </div>
+                    <div class="ord-row single pf-only">
+                        <div class="ord-field">
+                            <label for="cnp">CNP <em style="color:#94a3b8;font-style:normal;font-size:0.8rem;">(opțional, dacă vrei pe factură)</em></label>
+                            <input type="text" id="cnp" name="cnp" inputmode="numeric" maxlength="13">
+                        </div>
+                    </div>
+
+                    <!-- PJ only -->
+                    <div class="ord-row single pj-only">
+                        <div class="ord-field">
+                            <label for="denumire_firma">Denumire firmă <span class="req">*</span></label>
+                            <input type="text" id="denumire_firma" name="denumire_firma" autocomplete="organization">
+                        </div>
+                    </div>
+                    <div class="ord-row pj-only">
+                        <div class="ord-field">
+                            <label for="cui">CUI <span class="req">*</span></label>
+                            <input type="text" id="cui" name="cui" placeholder="ex: RO22004992">
+                        </div>
+                        <div class="ord-field">
+                            <label for="reg_com">Reg. Comerțului <span class="req">*</span></label>
+                            <input type="text" id="reg_com" name="reg_com" placeholder="ex: J40/12417/2007">
+                        </div>
+                    </div>
+
+                    <!-- Date contact (comune) -->
+                    <div class="ord-row">
+                        <div class="ord-field">
+                            <label for="email">Email <span class="req">*</span></label>
+                            <input type="email" id="email" name="email" autocomplete="email" required>
+                        </div>
+                        <div class="ord-field">
+                            <label for="telefon">Telefon</label>
+                            <input type="tel" id="telefon" name="telefon" autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <!-- Adresa (comuna) -->
+                    <div class="ord-row single">
+                        <div class="ord-field">
+                            <label for="adresa">Adresa <span class="req">*</span></label>
+                            <input type="text" id="adresa" name="adresa" autocomplete="street-address" placeholder="Strada, număr, etaj, apartament">
+                        </div>
+                    </div>
+                    <div class="ord-row">
+                        <div class="ord-field">
+                            <label for="oras">Oraș <span class="req">*</span></label>
+                            <input type="text" id="oras" name="oras" autocomplete="address-level2">
+                        </div>
+                        <div class="ord-field">
+                            <label for="judet">Județ <span class="req">*</span></label>
+                            <input type="text" id="judet" name="judet" autocomplete="address-level1">
+                        </div>
+                    </div>
+                    <div class="ord-row single">
+                        <div class="ord-field">
+                            <label for="cod_postal">Cod poștal</label>
+                            <input type="text" id="cod_postal" name="cod_postal" autocomplete="postal-code">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sectiunea 2: Date teren -->
+                <section class="ord-section">
+                    <h2>2. Detalii despre teren</h2>
+                    <p class="ord-section-hint">Pe baza acestor date construim analiza. Cu cât sunt mai precise, cu atât raportul e mai exact.</p>
+
+                    <div class="ord-row single">
+                        <div class="ord-field">
+                            <label for="descriere_teren">Descriere teren <span class="req">*</span></label>
+                            <textarea id="descriere_teren" name="descriere_teren" placeholder="Număr cadastral, adresă exactă, suprafață, deschidere stradală, observații..." required></textarea>
+                            <div class="ord-field-hint">Minim 10 caractere. Cel mai util: număr cadastral sau adresă exactă.</div>
+                        </div>
+                    </div>
+                    <div class="ord-row single">
+                        <div class="ord-field">
+                            <label for="link_teren">Link anunț (opțional)</label>
+                            <input type="url" id="link_teren" name="link_teren" placeholder="https://www.olx.ro/... sau https://www.storia.ro/...">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sectiunea 3: Termeni -->
+                <section class="ord-section">
+                    <h2>3. Acceptare termeni</h2>
+                    <p class="ord-section-hint">Înainte de a continua la plată, te rugăm să confirmi următoarele:</p>
+
+                    <label class="ord-tos">
+                        <input type="checkbox" id="accept_termeni" name="accept_termeni">
+                        <span>Sunt de acord cu <a href="termeni-analize.html" target="_blank" rel="noopener">termenii de utilizare a analizelor</a> — uz personal/de grup, fără republicare comercială.</span>
+                    </label>
+                    <label class="ord-tos">
+                        <input type="checkbox" id="accept_gdpr" name="accept_gdpr">
+                        <span>Am citit <a href="gdpr.html" target="_blank" rel="noopener">politica de confidențialitate (GDPR)</a> și sunt de acord cu prelucrarea datelor mele.</span>
+                    </label>
+                    <label class="ord-tos">
+                        <input type="checkbox" id="accept_retur" name="accept_retur">
+                        <span>Înțeleg că analiza este un serviciu personalizat și nu poate fi returnată după ce a fost livrată. <a href="termeni.html" target="_blank" rel="noopener">Detalii politică retur</a>.</span>
+                    </label>
+                </section>
+
+                <!-- Submit -->
+                <button type="submit" id="ord-submit" class="ord-submit">
+                    <i class="fas fa-credit-card"></i>
+                    <span id="ord-submit-text">Continuă la plată — 99 RON</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- View 2: Success (hidden initially) -->
+        <div id="ord-success-view" class="ord-success" style="display:none;">
+            <div class="ord-success-icon"><i class="fas fa-check"></i></div>
+            <h2>Comanda ta a fost creată!</h2>
+            <p>Am trimis pe emailul tău <strong id="ord-success-email"></strong> proforma cu butonul <strong>"Plătește cu cardul"</strong>. Verifică inboxul (și folder-ul Spam, în caz că nu apare imediat).</p>
+            <div class="ord-success-order">
+                <div class="label">Număr comandă</div>
+                <div class="val" id="ord-success-orderid"></div>
+            </div>
+            <p style="font-size: 0.9rem; color: #64748b;">După plată, primești automat factura fiscală + confirmarea comenzii. Analiza va fi livrată în maxim <strong>3-5 zile lucrătoare</strong>.</p>
+            <div class="ord-success-actions">
+                <a id="ord-success-pay" href="#" class="ord-btn ord-btn-primary" target="_blank" rel="noopener">
+                    <i class="fas fa-credit-card"></i> Plătește acum
+                </a>
+                <a href="index.html" class="ord-btn ord-btn-secondary">
+                    <i class="fas fa-home"></i> Pagina principală
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+    <script src="js/comanda-analiza.js"></script>
+</body>
+</html>
