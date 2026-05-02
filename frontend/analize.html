@@ -402,7 +402,7 @@
                 <div class="analize-card-header">
                     <span class="analize-card-tag simpla">Pentru evaluare rapidă</span>
                     <h2 class="analize-card-title">Analiză preliminară</h2>
-                    <div class="analize-card-price">149 RON</div>
+                    <div class="analize-card-price"><s style="opacity:0.55;font-weight:400;">149</s> 99 RON</div>
                 </div>
                 <div class="analize-card-body">
                     <p>O abordare profesionistă pentru a analiza rapid un teren și a căuta un grup cu care să construiești pe el. Primești un plan de situație cu terenul, amprenta posibilă a construcției, și informațiile esențiale despre ce se poate ridica acolo.</p>
@@ -427,9 +427,9 @@
                     <a href="analiza-simplificata.html" class="btn-card btn-card-secondary">
                         <i class="fas fa-eye"></i> Vezi exemplu
                     </a>
-                    <button type="button" class="btn-card btn-card-primary" onclick="openComandaModal('simpla')">
+                    <a id="cmdSimplaBtn" href="comanda-analiza.html" class="btn-card btn-card-primary">
                         <i class="fas fa-shopping-cart"></i> Comandă
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -475,16 +475,16 @@
         </div>
     </div>
 
-    <!-- Coming soon modal — orders not yet available, link to email -->
+    <!-- Modal pentru solicitare ofertă analiză detaliată (preț la cerere) -->
     <div class="cmd-modal" id="cmdModal" onclick="closeComandaModal(event)">
         <div class="cmd-modal-box" onclick="event.stopPropagation()">
             <button type="button" class="cmd-modal-close" onclick="closeComandaModal()">&times;</button>
             <div class="cmd-modal-icon">
                 <i class="fas fa-clock"></i>
             </div>
-            <h3>Comenzile online vor fi disponibile în curând</h3>
-            <p>Lucrăm la integrarea plăților online. Până atunci, scrie-ne direct pe email cu detaliile terenului — îți răspundem în maxim 24 de ore cu pașii de urmat și detaliile pentru factură.</p>
-            <p>Trimite-ne <strong id="cmdInfoNeeded">numărul cadastral sau adresa exactă a terenului</strong>.</p>
+            <h3>Trimite-ne cererea pe email</h3>
+            <p>Pentru analiza detaliată, prețul se stabilește după o discuție între tine sau grupul tău și biroul de arhitectură. Trimite-ne pe email detaliile despre teren și cerințele grupului — îți răspundem în maxim 24 de ore.</p>
+            <p>Trimite-ne <strong>detalii despre teren și cerințele grupului</strong> (număr de membri, tipuri de apartamente dorite, etc.).</p>
             <div class="cmd-modal-emails">
                 <div class="cmd-modal-emails-label">Trimite la:</div>
                 <div class="cmd-modal-emails-list">
@@ -515,31 +515,37 @@
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
     <script>
-        // The modal exists because online payments aren't live yet.
-        // It composes a mailto: link with subject + body pre-filled,
+        // Propagă teren_titlu / teren_id din URL în href-ul butonului "Comandă" preliminar,
+        // ca formularul de pe comanda-analiza.html să se pre-completeze cu terenul.
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const terenTitlu = params.get('teren_titlu');
+            const terenId = params.get('teren_id');
+            if (!terenTitlu && !terenId) return;
+
+            const orderParams = new URLSearchParams();
+            if (terenTitlu) orderParams.set('teren_titlu', terenTitlu);
+            if (terenId) orderParams.set('teren_id', terenId);
+
+            const a = document.getElementById('cmdSimplaBtn');
+            if (a) a.setAttribute('href', 'comanda-analiza.html?' + orderParams.toString());
+        })();
+
+        // The modal composes a mailto: link with subject + body pre-filled
+        // for analiza detaliată (price set per request, no online payment),
         // including any teren context passed via the URL (?teren_id=&teren_titlu=).
-        // The buttons are disabled until the user explicitly accepts the TOS.
+        // Buttons are disabled until the user explicitly accepts the TOS.
         function openComandaModal(tip) {
             const params = new URLSearchParams(window.location.search);
             const terenTitlu = params.get('teren_titlu');
             const terenId = params.get('teren_id');
 
-            const isSimpla = tip === 'simpla';
-            const subject = isSimpla
-                ? 'Solicitare analiză preliminară — 149 RON'
-                : 'Solicitare analiză detaliată — ofertă';
-
-            const infoLine = isSimpla
-                ? 'numărul cadastral sau adresa exactă a terenului'
-                : 'detalii despre teren și cerințele grupului (număr de membri, tipuri de apartamente dorite, etc.)';
-            document.getElementById('cmdInfoNeeded').textContent = infoLine;
+            const subject = 'Solicitare analiză detaliată — ofertă';
 
             const lines = [
                 'Bună ziua,',
                 '',
-                isSimpla
-                    ? 'Doresc să comand o analiză preliminară (149 RON) pentru următorul teren:'
-                    : 'Doresc să primesc o ofertă pentru o analiză detaliată pentru următorul teren:',
+                'Doresc să primesc o ofertă pentru o analiză detaliată pentru următorul teren:',
                 ''
             ];
 
@@ -551,9 +557,7 @@
                 lines.push('');
             }
 
-            lines.push(isSimpla
-                ? 'Date teren (număr cadastral / adresă):'
-                : 'Detalii teren și cerințe grup:');
+            lines.push('Detalii teren și cerințe grup:');
             lines.push('[completează aici]');
             lines.push('');
             lines.push('Mulțumesc,');
