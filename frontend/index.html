@@ -939,7 +939,7 @@ async function openVideoGallery(category) {
     try {
         const { data: videos, error } = await sb
             .from('videos')
-            .select('youtube_id, title, description')
+            .select('youtube_id, title, description, is_vertical')
             .eq('is_active', true)
             .eq('category', category)
             .order('display_order');
@@ -952,8 +952,8 @@ async function openVideoGallery(category) {
         }
         
         grid.innerHTML = videos.map(v => `
-            <div style="background:#1e293b; border-radius:12px; overflow:hidden;">
-                <div style="aspect-ratio:16/9;">
+            <div style="background:#1e293b; border-radius:12px; overflow:hidden;${v.is_vertical ? ' max-width:340px; margin:0 auto;' : ''}">
+                <div style="aspect-ratio:${v.is_vertical ? '9/16' : '16/9'};">
                     <iframe width="100%" height="100%" 
                         src="https://www.youtube.com/embed/${v.youtube_id}" 
                         title="${(v.title || '').replace(/"/g, '&quot;')}" frameborder="0" 
@@ -978,7 +978,7 @@ async function loadConceptPreview() {
     try {
         const { data: videos, error } = await sb
             .from('videos')
-            .select('youtube_id, title')
+            .select('youtube_id, title, is_vertical')
             .eq('is_active', true)
             .eq('category', 'concept')
             .order('display_order')
@@ -990,6 +990,12 @@ async function loadConceptPreview() {
         const v = videos[0];
         const container = document.getElementById('conceptVideoContainer');
         if (!container) return;
+        
+        // Pentru video vertical: schimb aspect ratio container-ului
+        if (v.is_vertical) {
+            container.classList.remove('aspect-[4/3]');
+            container.classList.add('aspect-[9/16]');
+        }
         
         container.innerHTML = `
             <iframe 
