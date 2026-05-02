@@ -62,8 +62,12 @@
                     <input type="text" id="newDescription_platforma" class="input" placeholder="Descriere scurtă">
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="addVideo('platforma')" class="btn-primary"><i class="fas fa-plus mr-1"></i> Adaugă</button>
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                    <input type="checkbox" id="newIsVertical_platforma" class="w-4 h-4">
+                    <span>Format vertical 9:16 <span class="text-xs text-gray-400">(YouTube Shorts)</span></span>
+                </label>
                 <div id="previewThumb_platforma" style="display:none;" class="flex items-center gap-2">
                     <img id="thumbImg_platforma" src="" class="w-16 h-10 object-cover rounded" alt="">
                     <span id="thumbTitle_platforma" class="text-sm text-gray-500"></span>
@@ -98,8 +102,12 @@
                     <input type="text" id="newDescription_concept" class="input" placeholder="Descriere scurtă">
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="addVideo('concept')" class="btn-primary"><i class="fas fa-plus mr-1"></i> Adaugă</button>
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                    <input type="checkbox" id="newIsVertical_concept" class="w-4 h-4">
+                    <span>Format vertical 9:16 <span class="text-xs text-gray-400">(YouTube Shorts)</span></span>
+                </label>
                 <div id="previewThumb_concept" style="display:none;" class="flex items-center gap-2">
                     <img id="thumbImg_concept" src="" class="w-16 h-10 object-cover rounded" alt="">
                     <span id="thumbTitle_concept" class="text-sm text-gray-500"></span>
@@ -136,6 +144,8 @@
         match = input.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
         if (match) return match[1];
         match = input.match(/embed\/([a-zA-Z0-9_-]{11})/);
+        if (match) return match[1];
+        match = input.match(/shorts\/([a-zA-Z0-9_-]{11})/);
         if (match) return match[1];
         return null;
     }
@@ -175,7 +185,7 @@
 
         container.innerHTML = filtered.map(v => `
             <div class="video-card" data-id="${v.id}">
-                <div class="video-preview">
+                <div class="video-preview" style="${v.is_vertical ? 'aspect-ratio: 9/16; max-width: 280px; margin: 0 auto;' : ''}">
                     <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${v.youtube_id}" frameborder="0" allowfullscreen></iframe>
                 </div>
                 <div class="p-4">
@@ -183,7 +193,7 @@
                     <div id="display-${v.id}">
                         <div class="flex items-start justify-between gap-2 mb-2">
                             <div class="min-w-0 flex-1">
-                                <h3 class="font-semibold text-gray-900 text-sm">${escapeHtml(v.title)}</h3>
+                                <h3 class="font-semibold text-gray-900 text-sm">${escapeHtml(v.title)}${v.is_vertical ? ' <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded ml-1">vertical 9:16</span>' : ''}</h3>
                                 <p class="text-xs text-gray-500 mt-1">${escapeHtml(v.description || '')}</p>
                             </div>
                             <span class="text-xs text-gray-400 whitespace-nowrap">#${v.display_order}</span>
@@ -219,6 +229,10 @@
                             <option value="platforma" ${(v.category || 'platforma') === 'platforma' ? 'selected' : ''}>Despre platformă</option>
                             <option value="concept" ${v.category === 'concept' ? 'selected' : ''}>Despre concept</option>
                         </select>
+                        <label class="flex items-center gap-2 text-sm text-gray-600 mb-3 cursor-pointer select-none">
+                            <input type="checkbox" id="editIsVertical-${v.id}" class="w-4 h-4" ${v.is_vertical ? 'checked' : ''}>
+                            <span>Format vertical 9:16 <span class="text-xs text-gray-400">(YouTube Shorts)</span></span>
+                        </label>
                         <div class="flex gap-2">
                             <button onclick="saveEdit('${v.id}')" class="btn-success"><i class="fas fa-check mr-1"></i> Salvează</button>
                             <button onclick="cancelEdit('${v.id}')" class="btn-secondary">Anulează</button>
@@ -235,6 +249,7 @@
         const rawId = document.getElementById('newYoutubeId_' + category).value;
         const title = document.getElementById('newTitle_' + category).value.trim();
         const description = document.getElementById('newDescription_' + category).value.trim();
+        const isVertical = document.getElementById('newIsVertical_' + category).checked;
 
         const youtubeId = extractYouTubeId(rawId);
         if (!youtubeId) { alert('YouTube ID sau URL invalid.'); return; }
@@ -247,7 +262,8 @@
             title: title,
             description: description || null,
             display_order: maxOrder + 1,
-            category: category
+            category: category,
+            is_vertical: isVertical
         });
 
         if (error) { alert('Eroare: ' + error.message); return; }
@@ -255,6 +271,7 @@
         document.getElementById('newYoutubeId_' + category).value = '';
         document.getElementById('newTitle_' + category).value = '';
         document.getElementById('newDescription_' + category).value = '';
+        document.getElementById('newIsVertical_' + category).checked = false;
         document.getElementById('previewThumb_' + category).style.display = 'none';
         loadVideos();
     }
@@ -306,13 +323,15 @@
         const title = document.getElementById('editTitle-' + id).value.trim();
         const description = document.getElementById('editDescription-' + id).value.trim();
         const category = document.getElementById('editCategory-' + id).value;
+        const isVertical = document.getElementById('editIsVertical-' + id).checked;
 
         if (!title) { alert('Titlul este obligatoriu.'); return; }
 
         const { error } = await sb.from('videos').update({
             title: title,
             description: description || null,
-            category: category
+            category: category,
+            is_vertical: isVertical
         }).eq('id', id);
 
         if (error) { alert('Eroare: ' + error.message); return; }
