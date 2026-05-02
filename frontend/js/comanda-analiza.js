@@ -127,8 +127,10 @@
 
         try {
             // Pass auth token if user is logged in (so backend can link comanda to user_id)
+            // NOTE: NU seta manual 'Content-Type' — invoke() face automat JSON.stringify
+            // și setează headerul corect. Dacă-l setezi manual, body-ul ajunge corupt.
             const session = (await supabase.auth.getSession()).data.session;
-            const headers = { 'Content-Type': 'application/json' };
+            const headers = {};
             if (session?.access_token) {
                 headers['Authorization'] = 'Bearer ' + session.access_token;
             }
