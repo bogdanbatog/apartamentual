@@ -51,7 +51,7 @@
                             <p><strong>SC LTFB Studio SRL</strong></p>
                             <p>CUI: RO22004992 | Nr. Reg. Com.: J40/12417/2007</p>
                             <p>Adresă: Str. Popa Petre 23, Sector 2, București, România</p>
-                            <p>Email: <span class="js-email" data-u="office" data-d="ltfbstudio.ro"></span></p>
+                            <p>Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></p>
                         </div>
                         <p class="mt-4 text-sm text-gray-600">
                             Pentru orice solicitări legate de protecția datelor personale, ne puteți contacta la adresa de email de mai sus. Vom răspunde în termen de maximum 30 de zile de la primirea cererii.
@@ -236,7 +236,7 @@
                         <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded">
                             <h4 class="font-semibold mb-2">Cum să vă exercitați drepturile</h4>
                             <p class="text-sm mb-2">Pentru a vă exercita oricare dintre aceste drepturi, trimiteți un email la:</p>
-                            <p class="text-sm mb-3"><strong>Email:</strong> <span class="js-email" data-u="office" data-d="ltfbstudio.ro"></span></p>
+                            <p class="text-sm mb-3"><strong>Email:</strong> <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></p>
                             <p class="text-sm mb-2">Vă rugăm să includeți în cerere:</p>
                             <ul class="text-sm space-y-1 pl-4 mb-3">
                                 <li>• Numele complet și adresa de email asociată contului</li>
@@ -306,7 +306,7 @@
                             SC LTFB Studio SRL <strong>nu a desemnat un Responsabil cu Protecția Datelor (DPO)</strong>, deoarece nu se încadrează în niciuna dintre situațiile de obligativitate prevăzute la art. 37 alin. (1) din GDPR — nu este autoritate publică, nu desfășoară monitorizare sistematică pe scară largă a persoanelor și nu prelucrează pe scară largă categorii speciale de date.
                         </p>
                         <p class="mb-4">
-                            Pentru orice cerere referitoare la protecția datelor personale, punctul de contact este <span class="js-email" data-u="office" data-d="ltfbstudio.ro"></span>.
+                            Pentru orice cerere referitoare la protecția datelor personale, punctul de contact este <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a>.
                         </p>
 
                         <h3 class="text-lg mb-3">12.2 Decizii Automate și Profilare</h3>
@@ -333,7 +333,7 @@
                         <h3 class="text-lg mb-3">14.1 Persoana de contact pentru protecția datelor</h3>
                         <div class="bg-gray-50 p-4 rounded mb-4">
                             <p><strong>SC LTFB Studio SRL</strong></p>
-                            <p>Email: <span class="js-email" data-u="office" data-d="ltfbstudio.ro"></span></p>
+                            <p>Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></p>
                             <p class="text-sm text-gray-600 mt-2">Pentru toate întrebările legate de protecția datelor personale. Vom răspunde în termen de maximum 30 de zile.</p>
                         </div>
 
@@ -342,7 +342,7 @@
                         <div class="bg-blue-50 p-4 rounded">
                             <p><strong>Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP)</strong></p>
                             <p>B-dul G-ral Gheorghe Magheru 28-30, Sector 1, București</p>
-                            <p>Email: <span class="js-email" data-u="anspdcp" data-d="dataprotection.ro"></span></p>
+                            <p>Email: <a href="mailto:anspdcp@dataprotection.ro">anspdcp@dataprotection.ro</a></p>
                             <p>Website: <a href="https://www.dataprotection.ro" class="text-blue-600">www.dataprotection.ro</a></p>
                         </div>
                     </section>
@@ -357,16 +357,5 @@
     <script src="js/login-modal.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
-    <script>
-        // Render obfuscated emails
-        document.querySelectorAll('.js-email').forEach(el => {
-            const u = el.dataset.u;
-            const d = el.dataset.d;
-            if (u && d) {
-                const addr = u + '@' + d;
-                el.innerHTML = '<a href="mailto:' + addr + '" class="text-blue-600 hover:underline">' + addr + '</a>';
-            }
-        });
-    </script>
 </body>
 </html>
