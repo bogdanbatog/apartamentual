@@ -167,6 +167,7 @@ function createFooter() {
                 <span>CUI: <strong>RO22004992</strong></span>
                 <span>Reg. Com.: <strong>J40/12417/2007</strong></span>
                 <span>Sediu: Str. Popa Petre 23, Sector 2, București</span>
+                <span>Telefon: <a href="tel:+40723870834">+40 723 870 834</a></span>
                 <span>Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></span>
             </div>
 
