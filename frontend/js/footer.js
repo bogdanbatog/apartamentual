@@ -86,13 +86,14 @@ function createFooter() {
                 align-items: center;
                 gap: 18px;
                 flex-wrap: wrap;
-                min-height: 32px; /* rezervă spațiu cât se încarcă scriptul Netopia */
             }
-            .site-footer-payments-logos img,
-            .site-footer-payments-logos svg {
-                max-height: 32px;
+            .site-footer-payments-logos .netopia-logo {
+                height: 32px;
                 width: auto;
+                opacity: 0.9;
+                transition: opacity 0.15s;
             }
+            .site-footer-payments-logos a:hover .netopia-logo { opacity: 1; }
             .site-footer-payments-anpc {
                 display: flex;
                 gap: 14px;
@@ -168,10 +169,12 @@ function createFooter() {
                 <span>Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></span>
             </div>
 
-            <!-- Payment logos (NETOPIA official component) + ANPC SOL/SAL links -->
+            <!-- Payment logos (NETOPIA official combined logo: NETOPIA + Mastercard + Visa) -->
             <div class="site-footer-payments">
-                <div class="site-footer-payments-logos" id="netopia-logo-container">
-                    <!-- Logo NETOPIA + Visa + Mastercard injectat dinamic prin scriptul oficial -->
+                <div class="site-footer-payments-logos">
+                    <a href="https://netopia-payments.com" target="_blank" rel="noopener" title="Plăți procesate de NETOPIA Payments">
+                        <img src="https://mny.ro/np-white-0.svg" alt="NETOPIA Payments — Visa, Mastercard" loading="lazy" class="netopia-logo">
+                    </a>
                 </div>
                 <div class="site-footer-payments-anpc">
                     <a href="https://anpc.ro" target="_blank" rel="noopener">ANPC</a>
@@ -191,26 +194,7 @@ function loadFooter() {
     const footerContainer = document.getElementById('footer');
     if (footerContainer) {
         footerContainer.innerHTML = createFooter();
-        loadNetopiaLogo();
     }
-}
-
-// Logo-ul NETOPIA Payments (inclusiv siglele Visa/Mastercard) e generat dinamic
-// printr-un script oficial Netopia, conform cerințelor lor de aprobare.
-// innerHTML NU execută <script>, deci trebuie creat manual cu createElement.
-function loadNetopiaLogo() {
-    const container = document.getElementById('netopia-logo-container');
-    if (!container) return;
-    // Evită încărcarea dublă dacă funcția e apelată de mai multe ori
-    if (container.dataset.netopiaLoaded === '1') return;
-    container.dataset.netopiaLoaded = '1';
-
-    const script = document.createElement('script');
-    script.src = 'https://mny.ro/npId.js?p=164327';
-    script.type = 'text/javascript';
-    script.setAttribute('data-version', 'orizontal');
-    script.setAttribute('data-contrast-color', '#0f172a');
-    container.appendChild(script);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
