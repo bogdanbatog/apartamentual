@@ -1,8 +1,20 @@
 // Edge Function to notify admins of various site events
-// Can send notifications via Slack, Email, or other services
+// Sends notifications via Slack (informational) and Resend (email).
+//
+// Routing strategy:
+//   - Each event type has a formatter that returns a nicely formatted email.
+//   - The primary recipient is determined by the event (recipient_email /
+//     admin_email / ADMIN_EMAIL env fallback).
+//   - Events in SUPERADMIN_CC_ALWAYS always CC the superadmin, even when
+//     there's an explicit recipient (use for one-shot events where both the
+//     recipient and the superadmin should know).
+//   - Events in SUPERADMIN_CC_IF_NO_RECIPIENT only CC the superadmin when the
+//     frontend did NOT specify an explicit recipient. Use for broadcast events
+//     where the frontend makes N calls (one per member) plus a separate
+//     no-recipient call dedicated to the superadmin.
+//   - Slack is sent in parallel regardless of event type.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +22,7 @@ const corsHeaders = {
 }
 
 interface NotificationPayload {
-  event_type: 'user_signup' | 'new_user' | 'grup_created' | 'grup_updated' | 'teren_created' | 'teren_updated' | 'membership_request' | 'membership_approved' | 'profile_updated' | string
+  event_type: string
   data: Record<string, any>
   timestamp?: string
 }
@@ -20,8 +32,744 @@ interface SlackMessage {
   blocks?: any[]
 }
 
+interface FormattedMessage {
+  title: string
+  body: string
+  html?: string
+}
+
+// Events that CC the superadmin every time, even when there is already an
+// explicit primary recipient. Use for "one-shot" events where the superadmin
+// wants visibility on top of notifying the original person (e.g. invitation
+// sent to an outsider — the superadmin wants to know it happened).
+const SUPERADMIN_CC_ALWAYS = new Set<string>([
+  // Invitations — one email per event, primary recipient is the invited person
+  // or the group admin. Superadmin wants to know every invite/join action.
+  'invitation_sent',
+  'member_invited_someone',
+  'join_request_admin_email',
+  // Platform-wide events that may have a recipient (e.g. the new user themselves)
+  // but still need superadmin visibility.
+  'new_user',
+  'account_reactivated',
+])
+
+// Events that CC the superadmin ONLY if the frontend did not specify a recipient.
+// These are "broadcast" events where the frontend makes N calls (one per member)
+// plus a separate no-recipient call intended for the superadmin. Without this
+// split, the superadmin would get N+1 copies of the same event.
+const SUPERADMIN_CC_IF_NO_RECIPIENT = new Set<string>([
+  'member_left',
+  'member_removed',
+  'member_joined',
+  'admin_transferred',
+  'kick_vote_initiated',
+  'kick_vote_result',
+  'member_approved',
+  'member_rejected',
+  'group_created',
+  'group_updated',
+  'join_request',
+  'account_suspended',
+  'account_deleted',
+  'partner_application',
+  'consultation_request',
+  'terrain_proposed',
+  // Comenzi de analiză (plată Oblio + Netopia) — fără primary recipient,
+  // notificarea merge doar către superadmin pe Slack + email.
+  'comanda_creata',
+  'comanda_platita',
+])
+
+const PLATFORM_URL = 'https://apartamentual.ro'
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HTML email template helper
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface EmailTemplateOptions {
+  headerEmoji?: string        // e.g. "🎉", "🔔"
+  headerTitle: string          // main heading inside the body
+  intro?: string               // short intro paragraph (HTML allowed)
+  bodyParagraphs?: string[]    // additional paragraphs (HTML allowed)
+  detailsList?: Array<{ label: string; value: string }>  // key-value rows
+  ctaLink?: string             // optional CTA button URL
+  ctaLabel?: string            // CTA button label
+  footerNote?: string          // small print below CTA
+}
+
+function buildEmailHtml(opts: EmailTemplateOptions): string {
+  const {
+    headerEmoji = '🔔',
+    headerTitle,
+    intro = '',
+    bodyParagraphs = [],
+    detailsList = [],
+    ctaLink,
+    ctaLabel,
+    footerNote,
+  } = opts
+
+  const paragraphsHtml = bodyParagraphs
+    .map(p => `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6;">${p}</p>`)
+    .join('')
+
+  const detailsHtml = detailsList.length > 0
+    ? `<table style="width: 100%; border-collapse: collapse; margin: 16px 0 24px; background: #f8fafc; border-radius: 8px; overflow: hidden;">
+         ${detailsList.map(d => `
+           <tr>
+             <td style="padding: 10px 14px; font-size: 13px; color: #64748b; border-bottom: 1px solid #e2e8f0; font-weight: 500;">${d.label}</td>
+             <td style="padding: 10px 14px; font-size: 13px; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${d.value}</td>
+           </tr>
+         `).join('')}
+       </table>`
+    : ''
+
+  const ctaHtml = (ctaLink && ctaLabel)
+    ? `<div style="text-align: center; margin: 28px 0;">
+         <a href="${ctaLink}" style="display: inline-block; background: #f97316; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
+           ${ctaLabel}
+         </a>
+       </div>`
+    : ''
+
+  const footerHtml = footerNote
+    ? `<p style="margin: 20px 0 0; font-size: 13px; line-height: 1.6; color: #94a3b8;">${footerNote}</p>`
+    : ''
+
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px; color: #334155;">
+      <div style="text-align: center; padding: 24px 0; border-bottom: 1px solid #e2e8f0;">
+        <h1 style="margin: 0; font-size: 22px; color: #0f172a;">
+          Apartamen<span style="color: #f97316;">TU</span>al
+        </h1>
+        <p style="margin: 4px 0 0; font-size: 12px; color: #94a3b8;">by LTFB studio</p>
+      </div>
+      <div style="padding: 32px 8px;">
+        <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a; line-height: 1.3;">
+          ${headerEmoji} ${headerTitle}
+        </h2>
+        ${intro ? `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6;">${intro}</p>` : ''}
+        ${paragraphsHtml}
+        ${detailsHtml}
+        ${ctaHtml}
+        ${footerHtml}
+      </div>
+      <div style="border-top: 1px solid #e2e8f0; padding: 20px 8px 0; text-align: center;">
+        <p style="margin: 0; font-size: 13px; color: #94a3b8;">
+          — Echipa ApartamenTUal<br>
+          <a href="${PLATFORM_URL}" style="color: #f97316; text-decoration: none;">apartamentual.ro</a>
+        </p>
+      </div>
+    </div>
+  `
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Event formatters
+// ═══════════════════════════════════════════════════════════════════════════
+
+function formatNotificationMessage(payload: NotificationPayload): FormattedMessage {
+  const { event_type, data } = payload
+  const groupLink = data.group_id ? `${PLATFORM_URL}/grup-details.html?id=${data.group_id}` : PLATFORM_URL
+  const profileLink = data.user_id ? `${PLATFORM_URL}/profile-view-new.html?id=${data.user_id}` : PLATFORM_URL
+
+  switch (event_type) {
+    
+    // ─── Invitations ───────────────────────────────────────────────────────
+    
+    case 'invitation_sent': {
+      const groupName = data.group_name || 'un grup'
+      const inviterName = data.invited_by || 'Un membru'
+      const inviteLink = data.invite_link || PLATFORM_URL
+      
+      const title = `Ai fost invitat/ă în grupul „${groupName}" pe ApartamenTUal`
+      const body = `${inviterName} te-a invitat să te alături grupului „${groupName}" pe ApartamenTUal. Deschide linkul pentru a vedea detaliile: ${inviteLink}`
+      const html = buildEmailHtml({
+        headerEmoji: '🎉',
+        headerTitle: 'Ai primit o invitație!',
+        intro: 'Salut!',
+        bodyParagraphs: [
+          `<strong>${inviterName}</strong> te-a invitat să te alături grupului <strong style="color: #f97316;">„${groupName}"</strong> pe ApartamenTUal — platforma unde oameni construiesc împreună blocuri și apartamente, împărțind costurile.`,
+          'Apasă butonul de mai jos ca să vezi detaliile grupului și să decizi dacă vrei să te alături:',
+        ],
+        ctaLink: inviteLink,
+        ctaLabel: 'Vezi grupul și răspunde',
+        footerNote: `Pe pagina grupului vei putea vedea descrierea, membrii, zonele de interes, și vei avea opțiunea să accepți sau să respingi invitația. Dacă nu ai cont încă pe ApartamenTUal, vei fi invitat/ă să-ți creezi unul înainte să poți răspunde invitației.<br><br>Dacă butonul nu funcționează, copiază acest link în browser:<br><a href="${inviteLink}" style="color: #f97316; word-break: break-all;">${inviteLink}</a>`,
+      })
+      return { title, body, html }
+    }
+
+    case 'member_invited_someone': {
+      const groupName = data.group_name || 'grupul tău'
+      const inviterName = data.invited_by || 'Un membru'
+      const invitedName = data.invited_name || 'cineva'
+      const title = `${inviterName} a invitat pe cineva în „${groupName}"`
+      const body = `${inviterName} a trimis o invitație către ${invitedName} pentru grupul „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '📨',
+        headerTitle: 'O nouă invitație a fost trimisă în grupul tău',
+        bodyParagraphs: [
+          `<strong>${inviterName}</strong> (membru în grupul tău) a trimis o invitație către <strong>${invitedName}</strong> pentru grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          'Invitația a fost creată și invitatul a primit un email cu link de acceptare. Când va accepta, cererea lui va apărea automat pe pagina grupului pentru aprobare din partea ta (pentru că invitația vine de la un membru obișnuit, nu direct de la admin).',
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'join_request_admin_email': {
+      const groupName = data.group_name || 'grupul tău'
+      const userName = data.user_name || data.user_email || 'Un utilizator'
+      const userEmail = data.user_email || ''
+      const title = `Cerere de alăturare în „${groupName}" — ${userName}`
+      const body = `${userName} (${userEmail}) a acceptat o invitație și așteaptă aprobarea ta pentru a intra în grupul „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '👋',
+        headerTitle: 'O nouă cerere de alăturare',
+        bodyParagraphs: [
+          `<strong>${userName}</strong> a acceptat o invitație și așteaptă aprobarea ta pentru a intra în grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          'Pentru că invitația a fost trimisă de un membru obișnuit (nu direct de tine), cererea trebuie aprobată de tine ca admin înainte ca persoana să devină membru activ.',
+        ],
+        detailsList: [
+          { label: 'Utilizator', value: userName },
+          { label: 'Email', value: userEmail || 'N/A' },
+          { label: 'Grup', value: groupName },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi cererea în grup',
+        footerNote: 'Pe pagina grupului vei vedea cererea în banner-ul de sus, unde poți să o aprobi sau să o respingi cu un click.',
+      })
+      return { title, body, html }
+    }
+
+    // ─── Group lifecycle ───────────────────────────────────────────────────
+
+    case 'group_created':
+    case 'grup_created': {
+      const groupName = data.nume || data.group_name || 'un grup nou'
+      const ownerEmail = data.owner_email || data.creator_email || 'N/A'
+      const zona = data.zona || 'N/A'
+      const maxMembers = data.max_members || data.max_membri || 'N/A'
+      const title = `✨ Grup nou creat: „${groupName}"`
+      const body = `Un nou grup a fost creat pe platformă: ${groupName} (zona ${zona}, max ${maxMembers} membri). Creator: ${ownerEmail}`
+      const html = buildEmailHtml({
+        headerEmoji: '✨',
+        headerTitle: 'Grup nou pe platformă',
+        bodyParagraphs: [
+          `Un nou grup a fost creat: <strong style="color: #f97316;">„${groupName}"</strong>`,
+        ],
+        detailsList: [
+          { label: 'Nume grup', value: groupName },
+          { label: 'Zona', value: zona },
+          { label: 'Max membri', value: String(maxMembers) },
+          { label: 'Creator', value: ownerEmail },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'group_updated':
+    case 'grup_updated': {
+      const groupName = data.nume || data.group_name || 'un grup'
+      const ownerEmail = data.owner_email || 'N/A'
+      const title = `📝 Grup actualizat: „${groupName}"`
+      const body = `Grupul „${groupName}" a fost actualizat de ${ownerEmail}.`
+      const html = buildEmailHtml({
+        headerEmoji: '📝',
+        headerTitle: 'Un grup a fost actualizat',
+        bodyParagraphs: [
+          `Grupul <strong style="color: #f97316;">„${groupName}"</strong> a fost modificat (nume, descriere sau status).`,
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: 'Modificat de', value: ownerEmail },
+          { label: 'Status curent', value: data.status || 'N/A' },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'join_request': {
+      const groupName = data.group_name || data.grup_nume || 'un grup'
+      const userName = data.user_name || data.user_email || 'un utilizator'
+      const title = `👋 Cerere de alăturare în „${groupName}"`
+      const body = `${userName} a cerut să se alăture grupului „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '👋',
+        headerTitle: 'Cerere nouă de alăturare',
+        bodyParagraphs: [
+          `<strong>${userName}</strong> a cerut să se alăture grupului <strong style="color: #f97316;">„${groupName}"</strong>.`,
+        ],
+        detailsList: [
+          { label: 'Utilizator', value: userName },
+          { label: 'Email', value: data.user_email || 'N/A' },
+          { label: 'Grup', value: groupName },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi cererea în grup',
+      })
+      return { title, body, html }
+    }
+
+    case 'member_approved': {
+      const groupName = data.group_name || data.grup_nume || 'un grup'
+      const userName = data.user_name || data.user_email || 'un utilizator'
+      const title = `✅ Membru aprobat în „${groupName}"`
+      const body = `${userName} a fost aprobat ca membru în „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '✅',
+        headerTitle: 'Membru aprobat în grup',
+        bodyParagraphs: [
+          `<strong>${userName}</strong> a fost aprobat ca membru în grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+        ],
+        detailsList: [
+          { label: 'Utilizator', value: userName },
+          { label: 'Grup', value: groupName },
+          { label: 'Aprobat de', value: data.approved_by_email || 'admin' },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'member_joined': {
+      const groupName = data.group_name || 'un grup'
+      const userName = data.user_name || data.user_email || 'Un nou membru'
+      const title = `🎉 ${userName} s-a alăturat grupului „${groupName}"`
+      const body = `${userName} a acceptat invitația și s-a alăturat grupului „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '🎉',
+        headerTitle: 'Un nou membru s-a alăturat grupului',
+        bodyParagraphs: [
+          `<strong>${userName}</strong> a acceptat o invitație și s-a alăturat grupului <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          'Îl/o poți saluta în grupul de WhatsApp sau pe pagina grupului.',
+        ],
+        detailsList: [
+          { label: 'Nou membru', value: userName },
+          { label: 'Email', value: data.user_email || 'N/A' },
+          { label: 'Grup', value: groupName },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'member_rejected': {
+      const groupName = data.group_name || data.grup_nume || 'un grup'
+      const userName = data.user_name || data.user_email || 'un utilizator'
+      const title = `❌ Cerere respinsă în „${groupName}"`
+      const body = `Cererea lui ${userName} pentru „${groupName}" a fost respinsă.`
+      const html = buildEmailHtml({
+        headerEmoji: '❌',
+        headerTitle: 'Cerere de alăturare respinsă',
+        bodyParagraphs: [
+          `Cererea lui <strong>${userName}</strong> de a se alătura grupului <strong style="color: #f97316;">„${groupName}"</strong> a fost respinsă de admin.`,
+        ],
+        detailsList: [
+          { label: 'Utilizator', value: userName },
+          { label: 'Grup', value: groupName },
+        ],
+      })
+      return { title, body, html }
+    }
+
+    case 'member_left': {
+      const groupName = data.group_name || 'un grup'
+      const userName = data.user_name || data.user_email || 'Un membru'
+      const title = `👋 ${userName} a părăsit grupul „${groupName}"`
+      const body = `${userName} a părăsit voluntar grupul „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '👋',
+        headerTitle: 'Un membru a părăsit grupul',
+        bodyParagraphs: [
+          `<strong>${userName}</strong> a părăsit voluntar grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+        ],
+        detailsList: [
+          { label: 'Membru', value: userName },
+          { label: 'Email', value: data.user_email || 'N/A' },
+          { label: 'Grup', value: groupName },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'member_removed': {
+      const groupName = data.group_name || 'un grup'
+      const userName = data.user_name || data.user_email || 'Un membru'
+      const reason = data.reason || 'vot de excludere'
+      const title = `🚫 ${userName} a fost eliminat din „${groupName}"`
+      const body = `${userName} a fost eliminat din grupul „${groupName}" (${reason}).`
+      const html = buildEmailHtml({
+        headerEmoji: '🚫',
+        headerTitle: 'Un membru a fost eliminat',
+        bodyParagraphs: [
+          `<strong>${userName}</strong> a fost eliminat din grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+        ],
+        detailsList: [
+          { label: 'Membru eliminat', value: userName },
+          { label: 'Grup', value: groupName },
+          { label: 'Motiv', value: reason },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'admin_transferred': {
+      const groupName = data.group_name || 'un grup'
+      const oldAdmin = data.old_admin_name || data.old_admin_email || 'adminul precedent'
+      const newAdmin = data.new_admin_name || data.new_admin_email || 'noul admin'
+      const title = `🔄 Admin schimbat în „${groupName}"`
+      const body = `Rolul de admin al grupului „${groupName}" a fost transferat de la ${oldAdmin} la ${newAdmin}.`
+      const html = buildEmailHtml({
+        headerEmoji: '🔄',
+        headerTitle: 'Admin transferat',
+        bodyParagraphs: [
+          `Rolul de administrator al grupului <strong style="color: #f97316;">„${groupName}"</strong> a fost transferat.`,
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: 'Admin precedent', value: oldAdmin },
+          { label: 'Admin nou', value: newAdmin },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    // ─── Kick votes ────────────────────────────────────────────────────────
+
+    case 'kick_vote_initiated': {
+      const groupName = data.group_name || 'un grup'
+      const targetName = data.target_name || data.target_email || 'un membru'
+      const initiatorName = data.initiator_name || 'un membru'
+      const title = `⚖️ Vot de excludere inițiat în „${groupName}"`
+      const body = `${initiatorName} a inițiat un vot pentru excluderea lui ${targetName} din „${groupName}".`
+      const html = buildEmailHtml({
+        headerEmoji: '⚖️',
+        headerTitle: 'Vot de excludere inițiat',
+        bodyParagraphs: [
+          `<strong>${initiatorName}</strong> a inițiat un vot pentru excluderea lui <strong>${targetName}</strong> din grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          data.reason ? `<em>Motiv: ${data.reason}</em>` : 'Ceilalți membri ai grupului vor vota dacă excluderea se aprobă sau nu.',
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: 'Membru vizat', value: targetName },
+          { label: 'Inițiator', value: initiatorName },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'kick_vote_result': {
+      const groupName = data.group_name || 'un grup'
+      const targetName = data.target_name || data.target_email || 'un membru'
+      const result = data.result || 'decis' // 'kicked' or 'survived'
+      const resultText = result === 'kicked' ? 'a fost eliminat' : 'rămâne în grup'
+      const emoji = result === 'kicked' ? '🚫' : '✅'
+      const title = `${emoji} Rezultat vot de excludere în „${groupName}"`
+      const body = `Votul de excludere pentru ${targetName} în „${groupName}" s-a încheiat: ${targetName} ${resultText}.`
+      const html = buildEmailHtml({
+        headerEmoji: emoji,
+        headerTitle: 'Vot de excludere încheiat',
+        bodyParagraphs: [
+          `Votul de excludere pentru <strong>${targetName}</strong> în grupul <strong style="color: #f97316;">„${groupName}"</strong> s-a încheiat.`,
+          `<strong>${targetName} ${resultText}.</strong>`,
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: 'Membru vizat', value: targetName },
+          { label: 'Rezultat', value: result === 'kicked' ? 'Eliminat' : 'Rămâne în grup' },
+          { label: 'Voturi pentru', value: String(data.votes_for || 'N/A') },
+          { label: 'Voturi împotrivă', value: String(data.votes_against || 'N/A') },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    // ─── Account lifecycle ────────────────────────────────────────────────
+
+    case 'new_user': {
+      const isAgency = data.account_type === 'profesional'
+      if (isAgency) {
+        const title = '🏢 Cerere nouă de agenție - necesită aprobare'
+        const body = `O nouă agenție imobiliară s-a înregistrat și așteaptă aprobare. Email: ${data.email}, Nume: ${data.agency_name}`
+        const html = buildEmailHtml({
+          headerEmoji: '🏢',
+          headerTitle: 'Cerere nouă de agenție',
+          intro: 'O nouă agenție imobiliară s-a înregistrat pe platformă și așteaptă aprobarea ta.',
+          detailsList: [
+            { label: 'Email', value: data.email || 'N/A' },
+            { label: 'Nume agenție', value: data.agency_name || 'N/A' },
+            { label: 'Website', value: data.agency_website || 'N/A' },
+            { label: 'User ID', value: data.user_id || 'N/A' },
+          ],
+          ctaLink: `${PLATFORM_URL}/admin-utilizatori.html`,
+          ctaLabel: 'Aprobă din admin panel',
+          footerNote: 'Agenția nu va putea publica terenuri până când nu o aprobi din panoul de admin (filtrul „Pending aprobare").',
+        })
+        return { title, body, html }
+      }
+      const title = '🎉 Utilizator nou înregistrat'
+      const body = `Un nou utilizator s-a înregistrat: ${data.email}`
+      const html = buildEmailHtml({
+        headerEmoji: '🎉',
+        headerTitle: 'Utilizator nou înregistrat',
+        intro: 'Un nou utilizator s-a înregistrat și și-a confirmat emailul.',
+        detailsList: [
+          { label: 'Email', value: data.email || 'N/A' },
+          { label: 'User ID', value: data.user_id || 'N/A' },
+          { label: 'Tip cont', value: 'Utilizator activ' },
+        ],
+        ctaLink: profileLink,
+        ctaLabel: 'Vezi profilul',
+      })
+      return { title, body, html }
+    }
+
+    case 'account_suspended': {
+      const userName = data.user_name || data.email || 'Un utilizator'
+      const title = `⏸️ Cont suspendat: ${userName}`
+      const body = `Contul ${userName} a fost suspendat.`
+      const html = buildEmailHtml({
+        headerEmoji: '⏸️',
+        headerTitle: 'Cont suspendat',
+        bodyParagraphs: [
+          `Contul <strong>${userName}</strong> a fost suspendat.`,
+        ],
+        detailsList: [
+          { label: 'Utilizator', value: userName },
+          { label: 'Email', value: data.email || 'N/A' },
+          { label: 'Suspendat până la', value: data.suspended_until || 'N/A' },
+          { label: 'Motiv', value: data.reason || 'N/A' },
+        ],
+        ctaLink: `${PLATFORM_URL}/admin-utilizatori.html`,
+        ctaLabel: 'Vezi utilizatorii',
+      })
+      return { title, body, html }
+    }
+
+    case 'account_reactivated': {
+      const userName = data.user_name || data.email || 'Un utilizator'
+      // This one is dual-purpose: if sent to the user themselves, it's a welcome message.
+      // If sent to the superadmin as a cc, it's informational.
+      const title = `✅ Contul tău a fost aprobat!`
+      const body = `Salut${userName ? ' ' + userName : ''}! Contul tău pe ApartamenTUal a fost aprobat de un administrator.`
+      const html = buildEmailHtml({
+        headerEmoji: '✅',
+        headerTitle: 'Contul tău a fost aprobat!',
+        intro: `Salut${userName ? ' ' + userName : ''}!`,
+        bodyParagraphs: [
+          'Avem o veste bună: contul tău pe ApartamenTUal a fost aprobat de un administrator.',
+          'Acum poți să publici terenuri și să folosești toate funcționalitățile platformei pentru agenții imobiliare.',
+        ],
+        ctaLink: PLATFORM_URL,
+        ctaLabel: 'Intră în cont',
+        footerNote: 'Mulțumim că ești parte din comunitatea noastră!',
+      })
+      return { title, body, html }
+    }
+
+    case 'account_deleted': {
+      const userName = data.user_name || data.email || 'Un utilizator'
+      const title = `🗑️ Cont șters: ${userName}`
+      const body = `Contul ${userName} a fost șters.`
+      const html = buildEmailHtml({
+        headerEmoji: '🗑️',
+        headerTitle: 'Cont șters de pe platformă',
+        bodyParagraphs: [
+          `Contul <strong>${userName}</strong> a fost șters.`,
+        ],
+        detailsList: [
+          { label: 'Utilizator', value: userName },
+          { label: 'Email', value: data.email || 'N/A' },
+          { label: 'Șters de', value: data.deleted_by || 'self' },
+        ],
+      })
+      return { title, body, html }
+    }
+
+    // ─── Content events ──────────────────────────────────────────────────
+
+    case 'terrain_proposed':
+    case 'teren_created': {
+      const title = `🏞️ Teren nou propus: ${data.titlu || 'fără titlu'}`
+      const body = `Un nou teren a fost propus: ${data.titlu}, zona ${data.zona}, suprafață ${data.suprafata} mp. Propus de ${data.creator_email || 'N/A'}`
+      const html = buildEmailHtml({
+        headerEmoji: '🏞️',
+        headerTitle: 'Teren nou propus',
+        intro: 'Un nou teren a fost adăugat pe platformă.',
+        detailsList: [
+          { label: 'Titlu', value: data.titlu || 'N/A' },
+          { label: 'Zonă', value: data.zona || 'N/A' },
+          { label: 'Suprafață', value: data.suprafata ? `${data.suprafata} m²` : 'N/A' },
+          { label: 'Propus de', value: data.creator_email || 'N/A' },
+        ],
+        ctaLink: data.id ? `${PLATFORM_URL}/teren-details.html?id=${data.id}` : `${PLATFORM_URL}/terenuri.html`,
+        ctaLabel: 'Vezi terenul',
+      })
+      return { title, body, html }
+    }
+
+    case 'partner_application': {
+      const title = `🤝 Cerere nouă de parteneriat`
+      const body = `O nouă cerere de parteneriat: ${data.company_name || data.name || 'N/A'}`
+      const html = buildEmailHtml({
+        headerEmoji: '🤝',
+        headerTitle: 'Cerere nouă de parteneriat',
+        intro: 'Cineva a aplicat pentru a deveni partener al platformei.',
+        detailsList: [
+          { label: 'Nume/Companie', value: data.company_name || data.name || 'N/A' },
+          { label: 'Email', value: data.email || 'N/A' },
+          { label: 'Domeniu', value: data.domain || data.category || 'N/A' },
+          { label: 'Mesaj', value: data.message || 'N/A' },
+        ],
+        ctaLink: `${PLATFORM_URL}/admin-parteneri.html`,
+        ctaLabel: 'Vezi cererile din admin',
+      })
+      return { title, body, html }
+    }
+
+    case 'consultation_request': {
+      const title = `💬 Cerere nouă de consultanță`
+      const body = `O nouă cerere de consultanță de la ${data.name || data.email || 'un vizitator'}`
+      const html = buildEmailHtml({
+        headerEmoji: '💬',
+        headerTitle: 'Cerere nouă de consultanță',
+        intro: 'Un vizitator a solicitat consultanță prin formularul de pe platformă.',
+        detailsList: [
+          { label: 'Nume', value: data.name || 'N/A' },
+          { label: 'Email', value: data.email || 'N/A' },
+          { label: 'Telefon', value: data.phone || 'N/A' },
+          { label: 'Subiect', value: data.subject || 'N/A' },
+          { label: 'Mesaj', value: data.message || 'N/A' },
+        ],
+      })
+      return { title, body, html }
+    }
+
+    // ─── Comenzi de analiză (plată via Oblio + Netopia) ───────────────────
+
+    case 'comanda_creata': {
+      const orderId = data.order_id || 'N/A'
+      const numeClient = data.nume_client || 'N/A'
+      const tipPersoana = data.tip_persoana === 'PJ' ? 'persoană juridică' : 'persoană fizică'
+      const pret = data.pret ? `${data.pret} RON` : 'N/A'
+      const proforma = data.proforma || 'N/A'
+      const proformaUrl = data.proforma_url || ''
+      const descriereTeren = (data.descriere_teren || '').toString().substring(0, 250)
+
+      const title = `🛒 Comandă nouă — ${orderId} (așteaptă plată)`
+      const body = `O comandă nouă a fost creată și așteaptă plata clientului. Comandă: ${orderId} | Client: ${numeClient} | Sumă: ${pret}`
+      const html = buildEmailHtml({
+        headerEmoji: '🛒',
+        headerTitle: 'Comandă nouă — așteaptă plată',
+        intro: 'O comandă pentru analiză preliminară a fost creată. Clientul a primit emailul cu proforma și butonul "Plătește cu cardul". Vei fi notificat din nou când plata e confirmată.',
+        detailsList: [
+          { label: 'Comandă', value: orderId },
+          { label: 'Client', value: `${numeClient} (${tipPersoana})` },
+          { label: 'Email client', value: data.email || 'N/A' },
+          { label: 'Sumă (TVA inclus)', value: pret },
+          { label: 'Proformă Oblio', value: proforma },
+          { label: 'Descriere teren', value: descriereTeren ? descriereTeren + (descriereTeren.length === 250 ? '…' : '') : 'N/A' },
+        ],
+        ctaLink: proformaUrl,
+        ctaLabel: proformaUrl ? 'Vezi proforma' : undefined,
+        footerNote: 'Status comandă: <strong>pending_payment</strong>. Vei primi un nou email când plata e confirmată automat de Oblio (după ce clientul plătește pe Netopia, factura fiscală este generată automat).',
+      })
+      return { title, body, html }
+    }
+
+    case 'comanda_platita': {
+      const orderId = data.order_id || 'N/A'
+      const numeClient = data.nume_client || 'N/A'
+      const tipPersoana = data.tip_persoana === 'PJ' ? 'persoană juridică' : 'persoană fizică'
+      const pret = data.pret ? `${data.pret} RON` : 'N/A'
+      const factura = data.factura || 'În curs de generare'
+
+      const title = `✅ Plată confirmată — ${orderId} | începe analiza`
+      const body = `Plată confirmată pentru ${orderId}. Client: ${numeClient}. Sumă: ${pret}. Factură: ${factura}.`
+      const html = buildEmailHtml({
+        headerEmoji: '✅',
+        headerTitle: 'Plată confirmată — începe analiza!',
+        intro: 'O comandă a fost plătită cu succes pe Netopia. Oblio a generat automat factura fiscală și a trimis-o clientului. <strong>Acum e momentul să începi analiza preliminară.</strong>',
+        detailsList: [
+          { label: 'Comandă', value: orderId },
+          { label: 'Client', value: `${numeClient} (${tipPersoana})` },
+          { label: 'Email client', value: data.email || 'N/A' },
+          { label: 'Sumă încasată', value: pret },
+          { label: 'Factură fiscală', value: factura },
+        ],
+        bodyParagraphs: [
+          '⏰ <strong>Termen livrare</strong>: 3-5 zile lucrătoare de la confirmarea plății.',
+          'Verifică în Supabase tabelul <code>comenzi_analize</code> pentru detalii complete (descriere teren, link anunț, date facturare).',
+        ],
+        footerNote: 'Status comandă: <strong>paid</strong>. După ce livrezi PDF-ul cu analiza, marchezi manual <code>status = \'completed\'</code>.',
+      })
+      return { title, body, html }
+    }
+
+    // ─── Legacy/unchanged events preserved for backwards compat ───────────
+
+    case 'user_signup':
+      return {
+        title: '🎉 New User Signup',
+        body: `A new user has signed up!\n\nEmail: ${data.email || 'N/A'}\nUser ID: ${data.user_id || 'N/A'}\nCreated at: ${data.created_at || new Date().toISOString()}`
+      }
+
+    case 'teren_updated':
+      return {
+        title: '🔄 Teren Updated',
+        body: `A teren (land) has been updated!\n\nTitle: ${data.titlu || 'N/A'}\nTeren ID: ${data.id || 'N/A'}\nUpdated by: ${data.updated_by || data.created_by_user_id || 'N/A'}\nStatus: ${data.status || 'N/A'}`
+      }
+
+    case 'membership_request':
+      return {
+        title: '👋 New Membership Request',
+        body: `A user has requested to join a group!\n\nGroup: ${data.grup_nume || data.grup_id || 'N/A'}\nUser: ${data.user_email || data.user_id || 'N/A'}\nStatus: ${data.status || 'pending'}\nGroup ID: ${data.grup_id || 'N/A'}`
+      }
+
+    case 'membership_approved':
+      return {
+        title: '✅ Membership Approved',
+        body: `A membership request has been approved!\n\nGroup: ${data.grup_nume || data.grup_id || 'N/A'}\nUser: ${data.user_email || data.user_id || 'N/A'}\nApproved by: ${data.approved_by_email || data.approved_by_user_id || 'N/A'}\nGroup ID: ${data.grup_id || 'N/A'}`
+      }
+
+    case 'profile_updated':
+      return {
+        title: '👤 Profile Updated',
+        body: `A user profile has been updated!\n\nUser: ${data.email || data.user_id || 'N/A'}\nUser ID: ${data.user_id || 'N/A'}\nUpdated fields: ${data.updated_fields ? data.updated_fields.join(', ') : 'N/A'}`
+      }
+
+    default:
+      return {
+        title: `🔔 Site Event: ${event_type}`,
+        body: `Event: ${event_type}\n\nData: ${JSON.stringify(data, null, 2)}`
+      }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Main handler
+// ═══════════════════════════════════════════════════════════════════════════
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -33,7 +781,6 @@ serve(async (req) => {
     let payload: NotificationPayload
     
     if (rawPayload.type === 'user.created' || rawPayload.type === 'user') {
-      // This is an Auth webhook
       const user = rawPayload.record || rawPayload.event?.data?.record || rawPayload
       payload = {
         event_type: 'user_signup',
@@ -45,35 +792,30 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       }
     } else {
-      // This is a database trigger payload
       payload = rawPayload as NotificationPayload
     }
     
-    // Normalize payload: if data fields are at root level (flat payload from nav.js),
-    // wrap them inside data object
+    // Normalize flat payloads — wrap root-level data fields inside data object
     if (payload.event_type && !payload.data) {
-      const { event_type, timestamp, ...rest } = payload as any;
+      const { event_type, timestamp, ...rest } = payload as any
       payload = {
         event_type: event_type,
         data: rest,
         timestamp: timestamp
-      };
+      }
     }
-    
-    // Validate payload
+
     if (!payload.event_type || !payload.data) {
       throw new Error('Missing required fields: event_type and data')
     }
 
-    // Format notification message based on event type
     const message = formatNotificationMessage(payload)
     
-    // Get admin notification preferences from environment
     const slackWebhookUrl = Deno.env.get('SLACK_WEBHOOK_URL')
     const emailApiKey = Deno.env.get('RESEND_API_KEY')
     const adminEmail = Deno.env.get('ADMIN_EMAIL')
     
-    const results: { slack?: boolean; email?: boolean; error?: string } = {}
+    const results: { slack?: boolean; email?: boolean; recipients?: string[]; error?: string } = {}
     
     // Send to Slack if configured
     if (slackWebhookUrl) {
@@ -81,30 +823,9 @@ serve(async (req) => {
         const slackMessage: SlackMessage = {
           text: message.title,
           blocks: [
-            {
-              type: 'header',
-              text: {
-                type: 'plain_text',
-                text: message.title,
-                emoji: true
-              }
-            },
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: message.body
-              }
-            },
-            {
-              type: 'context',
-              elements: [
-                {
-                  type: 'mrkdwn',
-                  text: `Event: ${payload.event_type} | Time: ${new Date().toISOString()}`
-                }
-              ]
-            }
+            { type: 'header', text: { type: 'plain_text', text: message.title, emoji: true } },
+            { type: 'section', text: { type: 'mrkdwn', text: message.body } },
+            { type: 'context', elements: [{ type: 'mrkdwn', text: `Event: ${payload.event_type} | Time: ${new Date().toISOString()}` }] }
           ]
         }
         
@@ -125,46 +846,83 @@ serve(async (req) => {
     }
     
     // Send email if configured
-    if (emailApiKey && adminEmail) {
+    if (emailApiKey) {
       try {
-        const emailResponse = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${emailApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'apartamentual@ltfbstudio.ro',
-            to: [payload.data.recipient_email || adminEmail],
-            subject: message.title,
-            html: `
-              <h2>${message.title}</h2>
-              <div style="white-space: pre-wrap; font-family: monospace;">${message.body}</div>
-              <hr>
-              <p><small>Event Type: ${payload.event_type}</small></p>
-              <p><small>Time: ${new Date().toISOString()}</small></p>
-            `
-          })
-        })
+        // Determine whether the caller specified an explicit recipient.
+        // The field `recipient_email` is the modern name; `admin_email` is the
+        // legacy name used by many frontend call sites. Either one indicates
+        // that the frontend intentionally targeted someone specific.
+        const hasExplicitRecipient = !!(payload.data.recipient_email || payload.data.admin_email)
+        const primaryRecipient = payload.data.recipient_email || payload.data.admin_email || adminEmail
         
-        if (emailResponse.ok) {
-          results.email = true
+        // Build recipients list, deduplicated.
+        const recipients: string[] = []
+        if (primaryRecipient) recipients.push(primaryRecipient)
+        
+        // Superadmin CC logic:
+        //   - SUPERADMIN_CC_ALWAYS events: always add the superadmin, even when
+        //     there's an explicit recipient (e.g. invitation sent to an outsider).
+        //   - SUPERADMIN_CC_IF_NO_RECIPIENT events: only add the superadmin if
+        //     NO explicit recipient was specified. This is for "broadcast" events
+        //     where the frontend makes N calls (one per member, each with
+        //     admin_email set) plus a separate dedicated call for the superadmin
+        //     (no admin_email). Without this split, the superadmin would receive
+        //     N+1 copies of the same event.
+        const shouldCcSuperadmin =
+          SUPERADMIN_CC_ALWAYS.has(payload.event_type) ||
+          (SUPERADMIN_CC_IF_NO_RECIPIENT.has(payload.event_type) && !hasExplicitRecipient)
+        
+        if (shouldCcSuperadmin && adminEmail && !recipients.includes(adminEmail)) {
+          recipients.push(adminEmail)
+        }
+        
+        if (recipients.length === 0) {
+          // No one to send to — log and skip
+          console.log('No email recipients for event', payload.event_type)
         } else {
-          results.error = results.error ? `${results.error}; Email error: ${await emailResponse.text()}` : `Email error: ${await emailResponse.text()}`
+          // Use custom HTML from formatter if provided, else fall back to the
+          // generic monospace dump (only used for legacy/unformatted events).
+          const emailHtml = message.html || `
+                <h2>${message.title}</h2>
+                <div style="white-space: pre-wrap; font-family: monospace;">${message.body}</div>
+                <hr>
+                <p><small>Event Type: ${payload.event_type}</small></p>
+                <p><small>Time: ${new Date().toISOString()}</small></p>
+              `
+          
+          const emailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${emailApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'apartamentual@ltfbstudio.ro',
+              to: recipients,
+              subject: message.title,
+              html: emailHtml
+            })
+          })
+          
+          if (emailResponse.ok) {
+            results.email = true
+            results.recipients = recipients
+          } else {
+            const errText = await emailResponse.text()
+            results.error = results.error ? `${results.error}; Email error: ${errText}` : `Email error: ${errText}`
+          }
         }
       } catch (error) {
         results.error = results.error ? `${results.error}; Email error: ${error.message}` : `Email error: ${error.message}`
       }
     }
     
-    // Return success if at least one notification method worked
     if (results.slack || results.email) {
       return new Response(
         JSON.stringify({ success: true, results }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       )
     } else {
-      // If no notification methods are configured, log and return success anyway
       console.log('No notification methods configured. Notification:', message)
       return new Response(
         JSON.stringify({ success: true, message: 'No notification methods configured', logged: true }),
@@ -180,96 +938,3 @@ serve(async (req) => {
     )
   }
 })
-
-function formatNotificationMessage(payload: NotificationPayload): { title: string; body: string } {
-  const { event_type, data } = payload
-  
-  switch (event_type) {
-    case 'new_user': {
-      const isAgency = data.account_type === 'profesional';
-      if (isAgency) {
-        return {
-          title: '🏢 Cerere nouă de agenție - necesită aprobare',
-          body: `O nouă agenție imobiliară s-a înregistrat și așteaptă aprobare!\n\n` +
-                `📧 Email: ${data.email || 'N/A'}\n` +
-                `🏢 Nume agenție: ${data.agency_name || 'N/A'}\n` +
-                `🌐 Website: ${data.agency_website || 'N/A'}\n` +
-                `🆔 User ID: ${data.user_id || 'N/A'}\n\n` +
-                `⚠️ ACȚIUNE NECESARĂ: Intră în panoul de admin → Utilizatori → filtrul "Pending aprobare" pentru a aproba sau respinge această agenție.\n\n` +
-                `Link rapid: https://apartamentual.onrender.com/admin-utilizatori.html`
-        }
-      }
-      return {
-        title: '🎉 Utilizator nou înregistrat',
-        body: `Un nou utilizator s-a înregistrat și și-a confirmat emailul!\n\n` +
-              `📧 Email: ${data.email || 'N/A'}\n` +
-              `🆔 User ID: ${data.user_id || 'N/A'}\n` +
-              `Tip cont: Utilizator activ\n\n` +
-              `Vezi profilul: https://apartamentual.onrender.com/profile-view-new.html?id=${data.user_id || ''}`
-      }
-    }
-    case 'account_reactivated':
-      return {
-        title: '✅ Contul tău a fost aprobat!',
-        body: `Salut${data.user_name ? ' ' + data.user_name : ''}!\n\n` +
-              `Avem o veste bună: contul tău de pe ApartamenTUal a fost aprobat de un administrator.\n\n` +
-              `Acum poți să publici terenuri și să folosești toate funcționalitățile platformei pentru agenții imobiliare.\n\n` +
-              `🔗 Intră în cont: https://apartamentual.onrender.com\n\n` +
-              `Mulțumim că ești parte din comunitatea noastră!\n\n` +
-              `— Echipa ApartamenTUal`
-      }
-    case 'user_signup':
-      return {
-        title: '🎉 New User Signup',
-        body: `A new user has signed up!\n\nEmail: ${data.email || 'N/A'}\nUser ID: ${data.user_id || 'N/A'}\nCreated at: ${data.created_at || new Date().toISOString()}`
-      }
-    
-    case 'grup_created':
-      return {
-        title: '✨ New Group Created',
-        body: `A new group has been created!\n\nGroup Name: ${data.nume || 'N/A'}\nGroup ID: ${data.id || 'N/A'}\nOwner: ${data.owner_email || data.owner_user_id || 'N/A'}\nZona: ${data.zona || 'N/A'}\nMax Members: ${data.max_members || 'N/A'}`
-      }
-    
-    case 'grup_updated':
-      return {
-        title: '📝 Group Updated',
-        body: `A group has been updated!\n\nGroup Name: ${data.nume || 'N/A'}\nGroup ID: ${data.id || 'N/A'}\nOwner: ${data.owner_email || data.owner_user_id || 'N/A'}\nStatus: ${data.status || 'N/A'}`
-      }
-    
-    case 'teren_created':
-      return {
-        title: '🏞️ New Teren Added',
-        body: `A new teren (land) has been added!\n\nTitle: ${data.titlu || 'N/A'}\nTeren ID: ${data.id || 'N/A'}\nCreated by: ${data.creator_email || data.created_by_user_id || 'N/A'}\nZona: ${data.zona || 'N/A'}\nSuprafata: ${data.suprafata || 'N/A'} m²`
-      }
-    
-    case 'teren_updated':
-      return {
-        title: '🔄 Teren Updated',
-        body: `A teren (land) has been updated!\n\nTitle: ${data.titlu || 'N/A'}\nTeren ID: ${data.id || 'N/A'}\nUpdated by: ${data.updated_by || data.created_by_user_id || 'N/A'}\nStatus: ${data.status || 'N/A'}`
-      }
-    
-    case 'membership_request':
-      return {
-        title: '👋 New Membership Request',
-        body: `A user has requested to join a group!\n\nGroup: ${data.grup_nume || data.grup_id || 'N/A'}\nUser: ${data.user_email || data.user_id || 'N/A'}\nStatus: ${data.status || 'pending'}\nGroup ID: ${data.grup_id || 'N/A'}`
-      }
-    
-    case 'membership_approved':
-      return {
-        title: '✅ Membership Approved',
-        body: `A membership request has been approved!\n\nGroup: ${data.grup_nume || data.grup_id || 'N/A'}\nUser: ${data.user_email || data.user_id || 'N/A'}\nApproved by: ${data.approved_by_email || data.approved_by_user_id || 'N/A'}\nGroup ID: ${data.grup_id || 'N/A'}`
-      }
-    
-    case 'profile_updated':
-      return {
-        title: '👤 Profile Updated',
-        body: `A user profile has been updated!\n\nUser: ${data.email || data.user_id || 'N/A'}\nUser ID: ${data.user_id || 'N/A'}\nUpdated fields: ${data.updated_fields ? data.updated_fields.join(', ') : 'N/A'}`
-      }
-    
-    default:
-      return {
-        title: '🔔 Site Event',
-        body: `Event: ${event_type}\n\nData: ${JSON.stringify(data, null, 2)}`
-      }
-  }
-}
