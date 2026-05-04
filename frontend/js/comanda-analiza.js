@@ -222,7 +222,7 @@
         }
 
         if (!p.descriere_teren || p.descriere_teren.length < 10) {
-            return 'Te rugăm să descrii terenul (minim 10 caractere — adresă, suprafață, etc.).';
+            return 'Te rugăm să ne spui pe scurt ce ai vrea să construiești pe teren (minim 10 caractere).';
         }
 
         if (!p.accept_cadastral) return 'Trebuie să confirmi că deții numărul cadastral al terenului.';
