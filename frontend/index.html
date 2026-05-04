@@ -135,8 +135,8 @@
                     <!-- Right: 2 Video placeholders -->
                     <div class="grid grid-cols-2 gap-4 items-start" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start;">
                         <!-- LEFT card: Despre concept -->
-                        <div class="flex flex-col gap-3">
-                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px; aspect-ratio: 9/16; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); border-radius: 12px;" id="conceptVideoContainer">
+                        <div class="flex flex-col gap-3" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg" style="aspect-ratio: 9/16; max-height: 380px; width:100%; max-width: calc(380px * 9 / 16); margin: 0 auto; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); border-radius: 12px; position: relative;" id="conceptVideoContainer">
                                 <!-- populated by JS: either an iframe for the first 'concept' video, or a fallback placeholder -->
                                 <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;" id="conceptVideoPlaceholder">
                                     <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:50%; display:flex; align-items:center; justify-content:center;">
@@ -154,8 +154,8 @@
                             </button>
                         </div>
                         <!-- RIGHT card: Despre platformă -->
-                        <div class="flex flex-col gap-3">
-                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px; aspect-ratio: 9/16; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); border-radius: 12px;" id="platformaVideoContainer">
+                        <div class="flex flex-col gap-3" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg" style="aspect-ratio: 9/16; max-height: 380px; width:100%; max-width: calc(380px * 9 / 16); margin: 0 auto; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); border-radius: 12px; position: relative;" id="platformaVideoContainer">
                                 <!-- populated by JS: hero pick din DB pentru categoria 'platforma', cu thumbnail click-to-play -->
                                 <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;" id="platformaVideoPlaceholder">
                                     <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:50%; display:flex; align-items:center; justify-content:center;">
