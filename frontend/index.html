@@ -1017,6 +1017,8 @@ async function loadHeroVideo(category, containerId) {
         
         // Thumbnail + play button styled (fără logo Shorts roșu)
         // Background gradient vizibil INSTANT (nu trebuie să aștepte încărcarea imaginii)
+        // + fade negru sus (acoperă zona galbenă deranjantă) și jos (pentru titlu)
+        // = matching look-ul iframe YouTube embed
         container.innerHTML = `
             <div class="hero-video-thumb" data-youtube-id="${v.youtube_id}" data-title="${safeTitle}" 
                  style="position:relative; width:100%; height:100%; cursor:pointer; overflow:hidden; border-radius: 12px; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%);">
@@ -1024,14 +1026,18 @@ async function loadHeroVideo(category, containerId) {
                      onerror="this.style.display='none';" 
                      alt="${safeTitle}" 
                      style="width:100%; height:100%; object-fit:cover; display:block;">
-                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 100%); transition: background 0.2s;">
+                <!-- Fade negru SUS — acoperă zona galbenă/strălucitoare a thumbnail-ului -->
+                <div style="position:absolute; top:0; left:0; right:0; height:40%; background:linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%); pointer-events:none;"></div>
+                <!-- Buton play centrat -->
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
                     <div style="width:64px; height:64px; background:rgba(0,0,0,0.7); border-radius:50%; display:flex; align-items:center; justify-content:center; transition: transform 0.2s, background 0.2s;" class="hero-play-btn">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-left: 3px;">
                             <path d="M8 5v14l11-7z"></path>
                         </svg>
                     </div>
                 </div>
-                <div style="position:absolute; bottom:0; left:0; right:0; padding:0.75rem; background:linear-gradient(to top, rgba(0,0,0,0.7), transparent); pointer-events:none;">
+                <!-- Fade negru JOS cu titlu -->
+                <div style="position:absolute; bottom:0; left:0; right:0; padding:0.75rem; background:linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%); pointer-events:none;">
                     <p style="color:white; font-size:0.875rem; font-weight:500; margin:0; font-family:'DM Sans', sans-serif;">${safeTitle}</p>
                 </div>
             </div>
