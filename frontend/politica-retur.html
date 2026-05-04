@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="nav.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.7; }
@@ -259,8 +261,9 @@
         <section class="pr-section">
             <h2><span class="pr-num">5.</span> Când nu putem identifica terenul</h2>
             <p>
-                Pentru a livra o analiză corectă avem nevoie de date suficient de precise despre teren (adresă exactă,
-                număr cadastral, link funcțional la anunț etc.). Dacă, după plata comenzii, datele furnizate nu ne permit
+                Pentru a livra o analiză corectă avem nevoie de date suficient de precise despre teren
+                (număr cadastral obligatoriu, adresă exactă, certificate de urbanism in caz ca exista,
+                link funcțional la anunț etc.). Dacă, după plata comenzii, datele furnizate nu ne permit
                 identificarea fără echivoc a terenului, procedăm astfel:
             </p>
 
@@ -283,6 +286,12 @@
                 terenul, comanda este marcată ca <strong>neidentificabilă</strong> și se acordă un <strong>refund parțial de 50%</strong>
                 din suma plătită (49,50 RON din 99 RON).
             </p>
+            <p>
+                Dacă răspunzi explicit la email-ul de clarificare refuzând să furnizezi datele suplimentare cerute
+                (ex: "nu vreau să dau numărul cadastral, vreau analiza oricum"), comanda este considerată
+                <strong>refuzată din partea ta</strong> și se acordă un <strong>refund parțial de 50%</strong>
+                din suma plătită (49,50 RON din 99 RON).
+            </p>
             <div class="pr-callout">
                 <p>
                     <strong>De ce 50%?</strong> Echipa noastră a alocat deja resurse reale pentru tentativa de identificare a terenului
@@ -291,14 +300,6 @@
                     final nu a putut fi livrat. 50% este compromisul echitabil pentru ambele părți.
                 </p>
             </div>
-
-            <h3>5.4. Excepție, refuz expres de a furniza date</h3>
-            <p>
-                Dacă răspunzi explicit la email-ul de clarificare refuzând să furnizezi datele suplimentare cerute (ex: "nu vreau să dau
-                numărul cadastral, vreau analiza oricum"), comanda este considerată refuzată din partea ta și
-                <strong>nu se acordă refund</strong>, întrucât resursele alocate au fost consumate fără posibilitatea finalizării
-                serviciului din motive imputabile exclusiv ție.
-            </p>
         </section>
 
         <!-- 6. Situații excepționale când se acordă refund -->
@@ -374,7 +375,9 @@
     <!-- Footer -->
     <div id="footer"></div>
 
-    <script src="js/navigation.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
+    <script src="js/nav.js"></script>
     <script src="js/footer.js"></script>
 </body>
 </html>
