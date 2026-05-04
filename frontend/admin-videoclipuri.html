@@ -28,13 +28,6 @@
         .badge-platforma { background: #fef3c7; color: #92400e; }
         .badge-concept { background: #dbeafe; color: #1e40af; }
     </style>
-    <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
 </head>
 <body>
     <div class="max-w-4xl mx-auto p-6">
@@ -75,6 +68,10 @@
                     <input type="checkbox" id="newIsVertical_platforma" class="w-4 h-4">
                     <span>Format vertical 9:16 <span class="text-xs text-gray-400">(YouTube Shorts)</span></span>
                 </label>
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                    <input type="checkbox" id="newIsHeroPick_platforma" class="w-4 h-4">
+                    <span>🌟 Afișat în hero <span class="text-xs text-gray-400">(homepage)</span></span>
+                </label>
                 <div id="previewThumb_platforma" style="display:none;" class="flex items-center gap-2">
                     <img id="thumbImg_platforma" src="" class="w-16 h-10 object-cover rounded" alt="">
                     <span id="thumbTitle_platforma" class="text-sm text-gray-500"></span>
@@ -114,6 +111,10 @@
                 <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
                     <input type="checkbox" id="newIsVertical_concept" class="w-4 h-4">
                     <span>Format vertical 9:16 <span class="text-xs text-gray-400">(YouTube Shorts)</span></span>
+                </label>
+                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+                    <input type="checkbox" id="newIsHeroPick_concept" class="w-4 h-4">
+                    <span>🌟 Afișat în hero <span class="text-xs text-gray-400">(homepage)</span></span>
                 </label>
                 <div id="previewThumb_concept" style="display:none;" class="flex items-center gap-2">
                     <img id="thumbImg_concept" src="" class="w-16 h-10 object-cover rounded" alt="">
@@ -200,7 +201,7 @@
                     <div id="display-${v.id}">
                         <div class="flex items-start justify-between gap-2 mb-2">
                             <div class="min-w-0 flex-1">
-                                <h3 class="font-semibold text-gray-900 text-sm">${escapeHtml(v.title)}${v.is_vertical ? ' <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded ml-1">vertical 9:16</span>' : ''}</h3>
+                                <h3 class="font-semibold text-gray-900 text-sm">${escapeHtml(v.title)}${v.is_hero_pick ? ' <span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded ml-1">🌟 hero</span>' : ''}${v.is_vertical ? ' <span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded ml-1">vertical 9:16</span>' : ''}</h3>
                                 <p class="text-xs text-gray-500 mt-1">${escapeHtml(v.description || '')}</p>
                             </div>
                             <span class="text-xs text-gray-400 whitespace-nowrap">#${v.display_order}</span>
@@ -240,6 +241,10 @@
                             <input type="checkbox" id="editIsVertical-${v.id}" class="w-4 h-4" ${v.is_vertical ? 'checked' : ''}>
                             <span>Format vertical 9:16 <span class="text-xs text-gray-400">(YouTube Shorts)</span></span>
                         </label>
+                        <label class="flex items-center gap-2 text-sm text-gray-600 mb-3 cursor-pointer select-none">
+                            <input type="checkbox" id="editIsHeroPick-${v.id}" class="w-4 h-4" ${v.is_hero_pick ? 'checked' : ''}>
+                            <span>🌟 Afișat în hero <span class="text-xs text-gray-400">(homepage — 1 per categorie)</span></span>
+                        </label>
                         <div class="flex gap-2">
                             <button onclick="saveEdit('${v.id}')" class="btn-success"><i class="fas fa-check mr-1"></i> Salvează</button>
                             <button onclick="cancelEdit('${v.id}')" class="btn-secondary">Anulează</button>
@@ -257,6 +262,7 @@
         const title = document.getElementById('newTitle_' + category).value.trim();
         const description = document.getElementById('newDescription_' + category).value.trim();
         const isVertical = document.getElementById('newIsVertical_' + category).checked;
+        const isHeroPick = document.getElementById('newIsHeroPick_' + category).checked;
 
         const youtubeId = extractYouTubeId(rawId);
         if (!youtubeId) { alert('YouTube ID sau URL invalid.'); return; }
@@ -264,13 +270,19 @@
 
         const maxOrder = allVideos.length > 0 ? Math.max(...allVideos.map(v => v.display_order || 0)) : 0;
 
+        // Dacă e marcat hero pick, unmarchează automat toate celelalte din aceeași categorie
+        if (isHeroPick) {
+            await sb.from('videos').update({ is_hero_pick: false }).eq('category', category);
+        }
+
         const { error } = await sb.from('videos').insert({
             youtube_id: youtubeId,
             title: title,
             description: description || null,
             display_order: maxOrder + 1,
             category: category,
-            is_vertical: isVertical
+            is_vertical: isVertical,
+            is_hero_pick: isHeroPick
         });
 
         if (error) { alert('Eroare: ' + error.message); return; }
@@ -279,6 +291,7 @@
         document.getElementById('newTitle_' + category).value = '';
         document.getElementById('newDescription_' + category).value = '';
         document.getElementById('newIsVertical_' + category).checked = false;
+        document.getElementById('newIsHeroPick_' + category).checked = false;
         document.getElementById('previewThumb_' + category).style.display = 'none';
         loadVideos();
     }
@@ -331,14 +344,24 @@
         const description = document.getElementById('editDescription-' + id).value.trim();
         const category = document.getElementById('editCategory-' + id).value;
         const isVertical = document.getElementById('editIsVertical-' + id).checked;
+        const isHeroPick = document.getElementById('editIsHeroPick-' + id).checked;
 
         if (!title) { alert('Titlul este obligatoriu.'); return; }
+
+        // Dacă e marcat hero pick, unmarchează automat toate celelalte din aceeași categorie
+        // (excludând video-ul curent — îl actualizăm jos cu flag-ul nou)
+        if (isHeroPick) {
+            await sb.from('videos').update({ is_hero_pick: false })
+                .eq('category', category)
+                .neq('id', id);
+        }
 
         const { error } = await sb.from('videos').update({
             title: title,
             description: description || null,
             category: category,
-            is_vertical: isVertical
+            is_vertical: isVertical,
+            is_hero_pick: isHeroPick
         }).eq('id', id);
 
         if (error) { alert('Eroare: ' + error.message); return; }
