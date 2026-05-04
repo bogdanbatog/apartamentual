@@ -162,7 +162,7 @@
                         <!-- RIGHT card: Despre platformă -->
                         <div class="flex flex-col gap-3">
                             <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px;" id="platformaVideoContainer">
-                                <!-- populated by JS: hero pick din DB pentru categoria 'platforma' -->
+                                <!-- populated by JS: hero pick din DB pentru categoria 'platforma', cu thumbnail click-to-play -->
                                 <div class="video-placeholder w-full h-full relative" id="platformaVideoPlaceholder">
                                     <div class="absolute inset-0 flex items-center justify-center">
                                         <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
@@ -981,7 +981,8 @@ async function openVideoGallery(category) {
 // If the loaded video is horizontal, JS adjusts the aspect ratio.
 // Load hero video for a category (concept or platforma) into the corresponding card.
 // Strategy: first try is_hero_pick=true, fallback to first active video by display_order.
-// If nothing found, leaves the placeholder/fallback in place.
+// Display: thumbnail YouTube ca imagine simplă + buton play discret. La click → încarcă iframe cu autoplay.
+// Beneficii: fără logo Shorts roșu, pagină se încarcă mai rapid (no iframe inițial).
 async function loadHeroVideo(category, containerId) {
     try {
         // 1. Try hero pick first (explicit choice from admin)
@@ -1009,7 +1010,7 @@ async function loadHeroVideo(category, containerId) {
             videos = fallback.data;
         }
         
-        if (!videos || videos.length === 0) return; // keep placeholder/fallback
+        if (!videos || videos.length === 0) return; // keep placeholder
         
         const v = videos[0];
         const container = document.getElementById(containerId);
@@ -1021,17 +1022,62 @@ async function loadHeroVideo(category, containerId) {
             container.classList.add('aspect-video');
         }
         
+        // Construiesc thumbnail URL — încerc maxresdefault (HD), fallback la hqdefault
+        const thumbnailUrl = `https://i.ytimg.com/vi/${v.youtube_id}/hqdefault.jpg`;
+        const thumbnailUrlHD = `https://i.ytimg.com/vi/${v.youtube_id}/maxresdefault.jpg`;
+        const safeTitle = (v.title || '').replace(/"/g, '&quot;');
+        
+        // Thumbnail + play button styled (fără logo Shorts roșu)
         container.innerHTML = `
-            <iframe 
-                width="100%" height="100%" 
-                src="https://www.youtube.com/embed/${v.youtube_id}" 
-                title="${(v.title || '').replace(/"/g, '&quot;')}" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen
-                style="border-radius: 12px;">
-            </iframe>
+            <div class="hero-video-thumb" data-youtube-id="${v.youtube_id}" data-title="${safeTitle}" 
+                 style="position:relative; width:100%; height:100%; cursor:pointer; overflow:hidden; border-radius: 12px;">
+                <img src="${thumbnailUrlHD}" 
+                     onerror="this.onerror=null; this.src='${thumbnailUrl}';" 
+                     alt="${safeTitle}" 
+                     style="width:100%; height:100%; object-fit:cover; display:block;">
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 100%); transition: background 0.2s;">
+                    <div style="width:64px; height:64px; background:rgba(0,0,0,0.7); border-radius:50%; display:flex; align-items:center; justify-content:center; transition: transform 0.2s, background 0.2s;" class="hero-play-btn">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-left: 3px;">
+                            <path d="M8 5v14l11-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
         `;
+        
+        // Atașez handler de click (înlocuiește thumbnail-ul cu iframe autoplay)
+        const thumb = container.querySelector('.hero-video-thumb');
+        if (thumb) {
+            thumb.addEventListener('click', function() {
+                container.innerHTML = `
+                    <iframe 
+                        width="100%" height="100%" 
+                        src="https://www.youtube.com/embed/${v.youtube_id}?autoplay=1&rel=0" 
+                        title="${safeTitle}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen
+                        style="border-radius: 12px;">
+                    </iframe>
+                `;
+            });
+            
+            // Hover effect pe play button
+            thumb.addEventListener('mouseenter', function() {
+                const btn = thumb.querySelector('.hero-play-btn');
+                if (btn) {
+                    btn.style.transform = 'scale(1.1)';
+                    btn.style.background = 'rgba(249, 115, 22, 0.9)'; // accent orange
+                }
+            });
+            thumb.addEventListener('mouseleave', function() {
+                const btn = thumb.querySelector('.hero-play-btn');
+                if (btn) {
+                    btn.style.transform = 'scale(1)';
+                    btn.style.background = 'rgba(0, 0, 0, 0.7)';
+                }
+            });
+        }
     } catch (e) {
         console.warn(`Hero video load failed for ${category}:`, e);
     }
