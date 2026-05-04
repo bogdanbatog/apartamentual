@@ -109,7 +109,8 @@
             var zona = g.zona || g.zone_name || '-';
 
             return '<tr class="border-t hover:bg-gray-50">' +
-                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + (g.name || g.nume || 'Fără nume') + '</div>' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + (g.name || g.nume || 'Fără nume') + 
+                (g.is_demo ? ' <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 ml-1"><i class="fas fa-flask text-[9px]"></i> Demo</span>' : '') + '</div>' +
                 '<div class="text-xs text-gray-400">' + memberCount + '/' + (g.max_membri || '?') + ' membri</div></td>' +
                 '<td class="px-4 py-3 text-gray-600 text-xs">' + zona + '</td>' +
                 '<td class="px-4 py-3 text-center">' + memberCount + '</td>' +
@@ -119,10 +120,29 @@
                 '<td class="px-4 py-3 text-right">' +
                 '<a href="/grup-details.html?id=' + g.id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi grup"><i class="fas fa-eye"></i></a>' +
                 '<a href="/grup-edit.html?id=' + g.id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Editează"><i class="fas fa-edit"></i></a>' +
+                (g.is_demo 
+                    ? '<button onclick="toggleDemoGroup(\'' + g.id + '\', false, \'' + (g.name || g.nume || '').replace(/'/g, "\\'") + '\')" class="text-amber-600 hover:text-amber-800 mx-1" title="Scoate marcaj demo"><i class="fas fa-flask"></i></button>'
+                    : '<button onclick="toggleDemoGroup(\'' + g.id + '\', true, \'' + (g.name || g.nume || '').replace(/'/g, "\\'") + '\')" class="text-gray-300 hover:text-amber-600 mx-1" title="Marchează ca demo"><i class="fas fa-flask"></i></button>') +
                 '<button onclick="deleteGroup(\'' + g.id + '\', \'' + (g.name || g.nume || '').replace(/'/g, "\\'") + '\')" class="text-gray-400 hover:text-red-600 mx-1" title="Șterge"><i class="fas fa-trash"></i></button>' +
                 '</td></tr>';
         }).join('');
     }
+
+    // Toggle demo flag on a group
+    window.toggleDemoGroup = async function(groupId, makeDemo, name) {
+        var actionLabel = makeDemo ? 'marca DEMO' : 'scoate marcajul DEMO de la';
+        if (!confirm('Sigur vrei să ' + actionLabel + ' grupul „' + name + '"?')) return;
+        
+        var { error } = await sb.from('grupuri')
+            .update({ is_demo: makeDemo })
+            .eq('id', groupId);
+        
+        if (error) { alert('Eroare: ' + error.message); return; }
+        
+        var g = allGroups.find(function(x) { return x.id === groupId; });
+        if (g) g.is_demo = makeDemo;
+        renderTable();
+    };
 
     window.filterGroups = function(st) {
         currentFilter = st;

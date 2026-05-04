@@ -124,8 +124,22 @@
                 statusBadge = '<span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 ml-1">⏳ Pending</span>';
             }
             
+            // Demo badge
+            var demoBadge = u.is_demo 
+                ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 ml-1"><i class="fas fa-flask text-[9px]"></i> Demo</span>' 
+                : '';
+            
             // Actions
             var actions = '<a href="/profile-view-new.html?id=' + u.user_id + '" target="_blank" class="text-gray-400 hover:text-gray-700 mx-1" title="Vezi profil"><i class="fas fa-eye"></i></a>';
+            
+            // Demo toggle (doar pentru cei nedeleted, neadmin)
+            if (!u.is_super_admin && !isDeleted) {
+                if (u.is_demo) {
+                    actions += '<button onclick="toggleDemo(\'' + u.user_id + '\', false, \'' + name.replace(/'/g, "\\'") + '\')" class="text-amber-600 hover:text-amber-800 mx-1" title="Scoate marcaj demo"><i class="fas fa-flask"></i></button>';
+                } else {
+                    actions += '<button onclick="toggleDemo(\'' + u.user_id + '\', true, \'' + name.replace(/'/g, "\\'") + '\')" class="text-gray-300 hover:text-amber-600 mx-1" title="Marchează ca demo"><i class="fas fa-flask"></i></button>';
+                }
+            }
             if (isPending) {
                 actions += '<button onclick="approveAgency(\'' + u.user_id + '\', \'' + name.replace(/'/g, "\\'") + '\')" class="text-green-600 hover:text-green-800 mx-1" title="Aprobă agenția"><i class="fas fa-check-circle"></i></button>';
             }
@@ -139,7 +153,7 @@
             }
             
             return '<tr class="border-t hover:bg-gray-50' + (isDeleted ? ' opacity-50' : '') + '">' +
-                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + name + adminBadge + statusBadge + '</div></td>' +
+                '<td class="px-4 py-3"><div class="font-medium text-gray-900">' + name + adminBadge + statusBadge + demoBadge + '</div></td>' +
                 '<td class="px-4 py-3 text-gray-500 text-xs">' + (u.email || '-') + '</td>' +
                 '<td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full ' + typeColor + '">' + typeLabel + '</span></td>' +
                 '<td class="px-4 py-3 text-gray-600">' + (u.oras || '-') + '</td>' +
@@ -262,6 +276,22 @@
             }
         } catch(e) { console.warn('Unsuspend notify failed:', e); }
         
+        renderTable();
+    };
+
+    // Toggle demo flag on a profile
+    window.toggleDemo = async function(userId, makeDemo, name) {
+        var actionLabel = makeDemo ? 'marca DEMO' : 'scoate marcajul DEMO de la';
+        if (!confirm('Sigur vrei să ' + actionLabel + ' utilizatorul „' + name + '"?')) return;
+        
+        var { error } = await sb.from('profiles')
+            .update({ is_demo: makeDemo })
+            .eq('user_id', userId);
+        
+        if (error) { alert('Eroare: ' + error.message); return; }
+        
+        var u = allUsers.find(function(x) { return x.user_id === userId; });
+        if (u) u.is_demo = makeDemo;
         renderTable();
     };
 
