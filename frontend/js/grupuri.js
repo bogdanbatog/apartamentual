@@ -403,6 +403,11 @@ function renderGrupCard(grup, isMember) {
     
     const description = grup.descriere || 'Fără descriere.';
     
+    // Demo badge — pentru grupuri marcate ca demo
+    const demoBadge = grup.is_demo 
+        ? '<span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#92400e; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-flask" style="font-size:9px;"></i>demo</span>' 
+        : '';
+    
     // Zones and tags for public display
     const grupZones = (grup.grup_preferred_zones || []).map(gz => gz.zones).filter(Boolean);
     const grupTags = (grup.grup_tags || []).map(gt => gt.tags).filter(Boolean);
@@ -425,7 +430,7 @@ function renderGrupCard(grup, isMember) {
             <div class="grup-card" data-grup-id="${grup.id}">
                 <div class="grup-card-header">
                     <div class="grup-card-header-top">
-                        <h3>${escapeHtml(grup.nume)}</h3>
+                        <h3>${escapeHtml(grup.nume)}${demoBadge}</h3>
                         <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
                     </div>
                     <div class="grup-header-meta">
@@ -481,7 +486,7 @@ function renderGrupCard(grup, isMember) {
             <div class="grup-card-header">
                 <div class="grup-card-header-top">
                     <h3>
-                        <a href="grup-details.html?id=${grup.id}">${escapeHtml(grup.nume)}</a>
+                        <a href="grup-details.html?id=${grup.id}">${escapeHtml(grup.nume)}</a>${demoBadge}
                         ${isMember ? (currentUser && grup.admin_id === currentUser.id ? '<span class="member-badge admin-badge">Admin</span>' : '<span class="member-badge">Membru</span>') : ''}
                     </h3>
                     <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>

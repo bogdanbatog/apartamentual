@@ -72,7 +72,7 @@ function createNavigation() {
     <nav class="unified-nav">
         <div class="unified-nav-inner">
             <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span> <span class="logo-by">by LTFB studio</span>
+                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span><span style="display:inline-block; background:#fef3c7; color:#92400e; font-size:9px; font-weight:700; padding:2px 6px; border-radius:6px; margin-left:6px; vertical-align:middle; letter-spacing:0.5px; text-transform:uppercase; line-height:1;" title="Versiune beta — feedback bun-venit la office@ltfbstudio.ro">beta</span> <span class="logo-by">by LTFB studio</span>
             </a>
             <div class="unified-nav-links">
                 ${navLinksHTML}

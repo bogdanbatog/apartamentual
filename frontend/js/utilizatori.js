@@ -167,6 +167,7 @@ async function loadUsers() {
                 preferred_rooms,
                 preferred_area_sqm,
                 created_at,
+                is_demo,
                 user_tags(tag_id, tags(id, name)),
                 user_preferred_zones(zone_id, zones(id, name))
             `)
@@ -391,6 +392,11 @@ function renderUserCard(user) {
     const rooms = user.preferred_rooms ? `${user.preferred_rooms} camere` : '';
     const area = user.preferred_area_sqm ? `${user.preferred_area_sqm} mp` : '';
     
+    // Demo badge — pentru utilizatori marcaţi ca demo
+    const demoBadge = user.is_demo 
+        ? '<span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#92400e; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-flask" style="font-size:9px;"></i>demo</span>' 
+        : '';
+    
     // Zones (show max 3)
     const zones = user.zones || [];
     const zonesHtml = zones.length > 0
@@ -412,7 +418,7 @@ function renderUserCard(user) {
                 <div class="user-card-header">
                     <div class="user-avatar">${initials}</div>
                     <div class="user-basic-info">
-                        <h3 class="user-name">${escapeHtml(name)}</h3>
+                        <h3 class="user-name">${escapeHtml(name)}${demoBadge}</h3>
                         <div class="user-meta">
                             ${profession ? `<span><i class="fas fa-briefcase"></i> ${escapeHtml(profession)}</span>` : ''}
                         </div>
@@ -459,7 +465,7 @@ function renderUserCard(user) {
             <div class="user-card-header">
                 <div class="user-avatar">${initials}</div>
                 <div class="user-basic-info">
-                    <h3 class="user-name">${escapeHtml(name)}</h3>
+                    <h3 class="user-name">${escapeHtml(name)}${demoBadge}</h3>
                     <div class="user-meta">
                         ${profession ? `<span><i class="fas fa-briefcase"></i> ${escapeHtml(profession)}</span>` : ''}
                         ${rooms || area ? `<span><i class="fas fa-home"></i> ${[rooms, area].filter(Boolean).join(', ')}</span>` : ''}
