@@ -183,10 +183,12 @@
             cod_postal: (fd.get('cod_postal') || '').trim(),
 
             // Teren
+            nr_cadastral: (fd.get('nr_cadastral') || '').trim(),
             descriere_teren: (fd.get('descriere_teren') || '').trim(),
             link_teren: (fd.get('link_teren') || '').trim(),
 
             // Termeni
+            accept_cadastral: document.getElementById('accept_cadastral').checked,
             accept_termeni: document.getElementById('accept_termeni').checked,
             accept_gdpr: document.getElementById('accept_gdpr').checked,
             accept_retur: document.getElementById('accept_retur').checked,
@@ -215,10 +217,15 @@
         if (!p.oras) return 'Te rugăm să completezi orașul.';
         if (!p.judet) return 'Te rugăm să completezi județul.';
 
-        if (!p.descriere_teren || p.descriere_teren.length < 10) {
-            return 'Te rugăm să descrii terenul (minim 10 caractere — număr cadastral, adresă, etc.).';
+        if (!p.nr_cadastral || p.nr_cadastral.length < 3) {
+            return 'Te rugăm să completezi numărul cadastral al terenului (minim 3 caractere).';
         }
 
+        if (!p.descriere_teren || p.descriere_teren.length < 10) {
+            return 'Te rugăm să descrii terenul (minim 10 caractere — adresă, suprafață, etc.).';
+        }
+
+        if (!p.accept_cadastral) return 'Trebuie să confirmi că deții numărul cadastral al terenului.';
         if (!p.accept_termeni) return 'Trebuie să accepți termenii de utilizare a analizelor.';
         if (!p.accept_gdpr) return 'Trebuie să confirmi că ai citit politica GDPR.';
         if (!p.accept_retur) return 'Trebuie să confirmi politica de retur.';
