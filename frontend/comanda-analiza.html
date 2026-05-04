@@ -476,9 +476,17 @@
 
                     <div class="ord-row single">
                         <div class="ord-field">
+                            <label for="nr_cadastral">Număr cadastral <span class="req">*</span></label>
+                            <input type="text" id="nr_cadastral" name="nr_cadastral" placeholder="ex: 238123" required minlength="3" autocomplete="off">
+                            <div class="ord-field-hint">Obligatoriu pentru identificarea exactă a terenului. În lipsa acestuia, comanda nu poate fi procesată complet.</div>
+                        </div>
+                    </div>
+
+                    <div class="ord-row single">
+                        <div class="ord-field">
                             <label for="descriere_teren">Descriere teren <span class="req">*</span></label>
-                            <textarea id="descriere_teren" name="descriere_teren" placeholder="Număr cadastral, adresă exactă, suprafață, deschidere stradală, observații..." required></textarea>
-                            <div class="ord-field-hint">Minim 10 caractere. Cel mai util: număr cadastral sau adresă exactă.</div>
+                            <textarea id="descriere_teren" name="descriere_teren" placeholder="Adresă exactă, suprafață, deschidere stradală, observații..." required></textarea>
+                            <div class="ord-field-hint">Minim 10 caractere. Adaugă orice detalii relevante despre teren.</div>
                         </div>
                     </div>
                     <div class="ord-row single">
@@ -494,6 +502,10 @@
                     <h2>3. Acceptare termeni</h2>
                     <p class="ord-section-hint">Înainte de a continua la plată, te rugăm să confirmi următoarele:</p>
 
+                    <label class="ord-tos">
+                        <input type="checkbox" id="accept_cadastral" name="accept_cadastral">
+                        <span>Dețin numărul cadastral al terenului și continui cu comanda.</span>
+                    </label>
                     <label class="ord-tos">
                         <input type="checkbox" id="accept_termeni" name="accept_termeni">
                         <span>Sunt de acord cu <a href="termeni-analize.html" target="_blank" rel="noopener">termenii de utilizare a analizelor</a> — uz personal/de grup, fără republicare comercială.</span>
