@@ -26,6 +26,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
         setupToggle();
         setupSubmit();
+        setupLiveValidation();
         applyInitialBodyClass();
         await prefillFromContext();
     });
@@ -66,9 +67,8 @@
             if (terenId && linkTerenInput && !linkTerenInput.value) {
                 linkTerenInput.value = window.location.origin + '/teren-details.html?id=' + terenId;
             }
-            if (terenTitlu && descriereInput && !descriereInput.value) {
-                descriereInput.value = 'Teren: ' + terenTitlu + '\n\n[completează cu numărul cadastral sau adresa exactă]';
-            }
+            // Nu mai pre-completăm descriere_teren — utilizatorul descrie viziunea proprie
+            // (terenul e identificat prin nr_cadastral, separat)
         }
 
         // 2. Pre-completare din profilul userului (dacă e logat)
@@ -106,6 +106,42 @@
         formEl.addEventListener('submit', async (e) => {
             e.preventDefault();
             await handleSubmit();
+        });
+    }
+
+    // =====================================================
+    // LIVE VALIDATION — disable submit până când câmpurile critice
+    // sunt completate. Feedback vizual instant pentru utilizator.
+    // =====================================================
+    function setupLiveValidation() {
+        const nrCadastralInput = document.getElementById('nr_cadastral');
+        const acceptCadastral = document.getElementById('accept_cadastral');
+        const acceptTermeni = document.getElementById('accept_termeni');
+        const acceptGdpr = document.getElementById('accept_gdpr');
+        const acceptRetur = document.getElementById('accept_retur');
+        const submitBtn = document.getElementById('ord-submit');
+
+        if (!submitBtn) return;
+
+        function updateSubmitState() {
+            const cadastralOk = nrCadastralInput && nrCadastralInput.value.trim().length >= 3;
+            const allChecked = acceptCadastral?.checked
+                && acceptTermeni?.checked
+                && acceptGdpr?.checked
+                && acceptRetur?.checked;
+
+            const canSubmit = cadastralOk && allChecked;
+            submitBtn.disabled = !canSubmit;
+        }
+
+        // Inițial: dezactivat
+        updateSubmitState();
+
+        // Event listeners pe câmpurile critice
+        [nrCadastralInput, acceptCadastral, acceptTermeni, acceptGdpr, acceptRetur].forEach(el => {
+            if (!el) return;
+            el.addEventListener('input', updateSubmitState);
+            el.addEventListener('change', updateSubmitState);
         });
     }
 
