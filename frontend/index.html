@@ -136,17 +136,11 @@
                     <div class="grid grid-cols-2 gap-4 items-start" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start;">
                         <!-- LEFT card: Despre concept -->
                         <div class="flex flex-col gap-3">
-                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px; aspect-ratio: 9/16;" id="conceptVideoContainer">
+                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px; aspect-ratio: 9/16; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); border-radius: 12px;" id="conceptVideoContainer">
                                 <!-- populated by JS: either an iframe for the first 'concept' video, or a fallback placeholder -->
-                                <div class="video-placeholder w-full h-full relative" id="conceptVideoPlaceholder">
-                                    <div class="absolute inset-0 flex items-center justify-center">
-                                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                        </div>
-                                    </div>
-                                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                                        <p class="text-white text-sm font-medium">Ce este ApartamenTUal?</p>
-                                        <p class="text-white/70 text-xs">Prezentare concept</p>
+                                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;" id="conceptVideoPlaceholder">
+                                    <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                        <svg style="width:20px; height:20px; color:white;" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
                                     </div>
                                 </div>
                             </div>
@@ -161,17 +155,11 @@
                         </div>
                         <!-- RIGHT card: Despre platformă -->
                         <div class="flex flex-col gap-3">
-                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px; aspect-ratio: 9/16;" id="platformaVideoContainer">
+                            <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px; aspect-ratio: 9/16; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%); border-radius: 12px;" id="platformaVideoContainer">
                                 <!-- populated by JS: hero pick din DB pentru categoria 'platforma', cu thumbnail click-to-play -->
-                                <div class="video-placeholder w-full h-full relative" id="platformaVideoPlaceholder">
-                                    <div class="absolute inset-0 flex items-center justify-center">
-                                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                                        </div>
-                                    </div>
-                                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                                        <p class="text-white text-sm font-medium">Cum funcționează platforma</p>
-                                        <p class="text-white/70 text-xs">Tutorial</p>
+                                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;" id="platformaVideoPlaceholder">
+                                    <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); backdrop-filter:blur(8px); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                        <svg style="width:20px; height:20px; color:white;" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
                                     </div>
                                 </div>
                             </div>
