@@ -84,13 +84,6 @@
             flex-shrink: 0;
         }
     </style>
-    <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
 </head>
 <body class="min-h-screen flex flex-col bg-white text-gray-900">
     <div id="navigation"></div>
@@ -169,15 +162,18 @@
                         <!-- RIGHT card: Despre platformă -->
                         <div class="flex flex-col gap-3">
                             <div class="aspect-[9/16] rounded-xl overflow-hidden shadow-lg flex-1 mx-auto w-auto" style="max-height: 380px;" id="platformaVideoContainer">
-                                <iframe 
-                                    width="100%" height="100%" 
-                                    src="https://www.youtube.com/embed/64z6hMkW7do" 
-                                    title="Cum folosești platforma ApartamenTUal" 
-                                    frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                    allowfullscreen
-                                    style="border-radius: 12px;">
-                                </iframe>
+                                <!-- populated by JS: hero pick din DB pentru categoria 'platforma' -->
+                                <div class="video-placeholder w-full h-full relative" id="platformaVideoPlaceholder">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                        </div>
+                                    </div>
+                                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
+                                        <p class="text-white text-sm font-medium">Cum funcționează platforma</p>
+                                        <p class="text-white/70 text-xs">Tutorial</p>
+                                    </div>
+                                </div>
                             </div>
                             <button onclick="openVideoGallery('platforma')" 
                                     class="flex items-center justify-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-brand-200/50 rounded-lg text-sm font-medium text-brand-800 hover:bg-white hover:border-accent/50 transition-all">
@@ -983,21 +979,40 @@ async function openVideoGallery(category) {
 // If none exists yet, leaves the static placeholder in place.
 // Container default = aspect-[9/16] (Shorts) — most likely format right now.
 // If the loaded video is horizontal, JS adjusts the aspect ratio.
-async function loadConceptPreview() {
+// Load hero video for a category (concept or platforma) into the corresponding card.
+// Strategy: first try is_hero_pick=true, fallback to first active video by display_order.
+// If nothing found, leaves the placeholder/fallback in place.
+async function loadHeroVideo(category, containerId) {
     try {
-        const { data: videos, error } = await sb
+        // 1. Try hero pick first (explicit choice from admin)
+        let { data: videos, error } = await sb
             .from('videos')
-            .select('youtube_id, title, is_vertical')
+            .select('youtube_id, title, is_vertical, is_hero_pick')
             .eq('is_active', true)
-            .eq('category', 'concept')
-            .order('display_order')
+            .eq('category', category)
+            .eq('is_hero_pick', true)
             .limit(1);
         
         if (error) throw error;
-        if (!videos || videos.length === 0) return; // keep the placeholder
+        
+        // 2. Fallback: first active video sorted by display_order
+        if (!videos || videos.length === 0) {
+            const fallback = await sb
+                .from('videos')
+                .select('youtube_id, title, is_vertical, is_hero_pick')
+                .eq('is_active', true)
+                .eq('category', category)
+                .order('display_order')
+                .limit(1);
+            
+            if (fallback.error) throw fallback.error;
+            videos = fallback.data;
+        }
+        
+        if (!videos || videos.length === 0) return; // keep placeholder/fallback
         
         const v = videos[0];
-        const container = document.getElementById('conceptVideoContainer');
+        const container = document.getElementById(containerId);
         if (!container) return;
         
         // Container default e 9:16 (vertical/Shorts) — schimb DOAR dacă e orizontal
@@ -1018,17 +1033,16 @@ async function loadConceptPreview() {
             </iframe>
         `;
     } catch (e) {
-        console.warn('Concept preview load failed:', e);
-        // keep placeholder
+        console.warn(`Hero video load failed for ${category}:`, e);
     }
 }
 
-// Trigger concept preview load once Supabase client is ready
+// Trigger hero videos load once Supabase client is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait briefly for sb to initialize from supabase-config.js
     const tryLoad = (retries) => {
         if (typeof sb !== 'undefined' && sb) {
-            loadConceptPreview();
+            loadHeroVideo('concept', 'conceptVideoContainer');
+            loadHeroVideo('platforma', 'platformaVideoContainer');
         } else if (retries > 0) {
             setTimeout(() => tryLoad(retries - 1), 200);
         }
