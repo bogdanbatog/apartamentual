@@ -1022,17 +1022,18 @@ async function loadHeroVideo(category, containerId) {
             container.classList.add('aspect-video');
         }
         
-        // Construiesc thumbnail URL — încerc maxresdefault (HD), fallback la hqdefault
+        // Construiesc thumbnail URL — folosesc hqdefault care există aproape întotdeauna
+        // (maxresdefault e adesea 404 pentru Shorts și video-uri vechi)
         const thumbnailUrl = `https://i.ytimg.com/vi/${v.youtube_id}/hqdefault.jpg`;
-        const thumbnailUrlHD = `https://i.ytimg.com/vi/${v.youtube_id}/maxresdefault.jpg`;
         const safeTitle = (v.title || '').replace(/"/g, '&quot;');
         
         // Thumbnail + play button styled (fără logo Shorts roșu)
+        // Background gradient vizibil INSTANT (nu trebuie să aștepte încărcarea imaginii)
         container.innerHTML = `
             <div class="hero-video-thumb" data-youtube-id="${v.youtube_id}" data-title="${safeTitle}" 
-                 style="position:relative; width:100%; height:100%; cursor:pointer; overflow:hidden; border-radius: 12px;">
-                <img src="${thumbnailUrlHD}" 
-                     onerror="this.onerror=null; this.src='${thumbnailUrl}';" 
+                 style="position:relative; width:100%; height:100%; cursor:pointer; overflow:hidden; border-radius: 12px; background: linear-gradient(135deg, #1f211a 0%, #3d4035 100%);">
+                <img src="${thumbnailUrl}" 
+                     onerror="this.style.display='none';" 
                      alt="${safeTitle}" 
                      style="width:100%; height:100%; object-fit:cover; display:block;">
                 <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 100%); transition: background 0.2s;">
@@ -1041,6 +1042,9 @@ async function loadHeroVideo(category, containerId) {
                             <path d="M8 5v14l11-7z"></path>
                         </svg>
                     </div>
+                </div>
+                <div style="position:absolute; bottom:0; left:0; right:0; padding:0.75rem; background:linear-gradient(to top, rgba(0,0,0,0.7), transparent); pointer-events:none;">
+                    <p style="color:white; font-size:0.875rem; font-weight:500; margin:0; font-family:'DM Sans', sans-serif;">${safeTitle}</p>
                 </div>
             </div>
         `;
