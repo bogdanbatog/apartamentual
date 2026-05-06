@@ -102,10 +102,86 @@
             font-weight: 700;
             color: #f97316;
         }
+        .analize-card-price-sub {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        .analize-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed #e2e8f0;
+        }
+        .analize-card-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .analize-card-meta-item i {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
         .analize-card-price.cerere {
             font-size: 1.125rem;
             color: #475569;
             font-weight: 600;
+        }
+
+        /* Payment info section */
+        .payment-info-section {
+            max-width: 1200px;
+            margin: 2rem auto 3rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+            text-align: center;
+        }
+        .payment-info-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .payment-info-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+        .payment-info-logos img {
+            height: 28px;
+            width: auto;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+        .payment-info-logos img:hover {
+            opacity: 1;
+        }
+        .payment-info-text {
+            font-size: 0.8125rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        .payment-info-text a {
+            color: #f97316;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .payment-info-text a:hover {
+            text-decoration: underline;
         }
 
         /* Card body */
@@ -410,6 +486,11 @@
                     <span class="analize-card-tag simpla">Pentru evaluare rapidă</span>
                     <h2 class="analize-card-title">Analiză preliminară</h2>
                     <div class="analize-card-price"><s style="opacity:0.55;font-weight:400;">149</s> 99 RON</div>
+                    <div class="analize-card-price-sub">TVA 21% inclus în preț</div>
+                    <div class="analize-card-meta">
+                        <span class="analize-card-meta-item"><i class="fas fa-clock"></i> Livrare: 3-5 zile lucrătoare</span>
+                        <span class="analize-card-meta-item"><i class="fas fa-file-pdf"></i> Format: PDF prin email</span>
+                    </div>
                 </div>
                 <div class="analize-card-body">
                     <p>O abordare profesionistă pentru a analiza rapid un teren și a căuta un grup cu care să construiești pe el. Primești un plan de situație cu terenul, amprenta posibilă a construcției, și informațiile esențiale despre ce se poate ridica acolo.</p>
@@ -463,6 +544,11 @@
                     <span class="analize-card-tag detaliata">Pentru grupuri decise</span>
                     <h2 class="analize-card-title">Analiză detaliată</h2>
                     <div class="analize-card-price cerere">Preț stabilit la cerere</div>
+                    <div class="analize-card-price-sub">TVA 21% inclus în preț</div>
+                    <div class="analize-card-meta">
+                        <span class="analize-card-meta-item"><i class="fas fa-clock"></i> Livrare: stabilită prin contract</span>
+                        <span class="analize-card-meta-item"><i class="fas fa-file-pdf"></i> Format: PDF prin email</span>
+                    </div>
                 </div>
                 <div class="analize-card-body">
                     <p>O analiză mult mai amănunțită, recomandată atunci când grupul este deja decis pe 1-2 terenuri și vrea să vadă exact planurile cu apartamentele, suprafețele exacte, volumetria și randările.</p>
@@ -497,6 +583,25 @@
             <i class="fas fa-info-circle"></i>
             <p>Analiza preliminară este suficientă pentru o evaluare rapidă a potențialului unui teren. Dacă te-ai decis deja asupra unui teren și formezi un grup serios, analiza detaliată îți oferă baza tehnică pentru contractul de asociere.</p>
         </div>
+    </div>
+
+    <!-- Payment info — Netopia, metode plată, link-uri legale -->
+    <div class="payment-info-section">
+        <div class="payment-info-title">
+            <i class="fas fa-lock" style="margin-right: 0.375rem; color: #10b981;"></i>
+            Plată securizată
+        </div>
+        <div class="payment-info-logos">
+            <img src="https://www.netopia-payments.com/wp-content/uploads/2024/03/netopia-logo.svg" alt="Netopia Payments" onerror="this.onerror=null; this.src='https://netopia-payments.com/wp-content/themes/netopia-payments/assets/images/logo.svg';">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png" alt="Mastercard">
+        </div>
+        <p class="payment-info-text">
+            Procesatorul nostru de plăți este <strong>NETOPIA Payments</strong>, certificat <strong>PCI-DSS</strong>. Acceptăm carduri Visa și Mastercard. Datele cardului tău sunt introduse direct pe pagina securizată Netopia și nu trec prin serverele noastre. Factura fiscală este emisă automat prin Oblio și o primești pe email odată cu confirmarea plății.
+        </p>
+        <p class="payment-info-text" style="margin-top: 0.75rem;">
+            Vezi <a href="termeni-analize.html">termenii de utilizare</a> și <a href="politica-retur.html">politica de retur</a> înainte de a comanda.
+        </p>
     </div>
 
     <!-- Modal pentru solicitare ofertă analiză detaliată (preț la cerere) -->
