@@ -168,7 +168,7 @@ function bindFilterEvents() {
     
     DOM.btnResetFilters?.addEventListener('click', () => {
         DOM.filterOras.value = '';
-        DOM.filterStatus.value = '';
+        DOM.filterStatus && (DOM.filterStatus.value = '');
         DOM.filterSort.value = 'recent';
         applyFilters();
     });
@@ -431,7 +431,6 @@ function renderGrupCard(grup, isMember) {
                 <div class="grup-card-header">
                     <div class="grup-card-header-top">
                         <h3>${escapeHtml(grup.nume)}${demoBadge}</h3>
-                        <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
                     </div>
                     <div class="grup-header-meta">
                         <span class="grup-stat">
@@ -489,7 +488,6 @@ function renderGrupCard(grup, isMember) {
                         <a href="grup-details.html?id=${grup.id}">${escapeHtml(grup.nume)}</a>${demoBadge}
                         ${isMember ? (currentUser && grup.admin_id === currentUser.id ? '<span class="member-badge admin-badge">Admin</span>' : '<span class="member-badge">Membru</span>') : ''}
                     </h3>
-                    <span class="status-badge ${statusClass}">${statusLabels[grup.status]}</span>
                 </div>
                 <div class="grup-header-meta">
                     <span class="grup-stat">
@@ -508,8 +506,7 @@ function renderGrupCard(grup, isMember) {
                 ${matchingHtml}
                 <div class="grup-card-actions">
                     <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
-                    ${canJoin && isDeschis ? `<button class="btn-alatura" onclick="joinGroup('${grup.id}')">Alătură-te</button>` : ''}
-                    ${canJoin && isCuAprobare ? `<button class="btn-alatura" onclick="requestJoinGroup('${grup.id}')">Cere alăturarea</button>` : ''}
+                    ${canJoin ? `<button class="btn-alatura" onclick="requestJoinGroup('${grup.id}')">Cere alăturarea</button>` : ''}
                     ${isPending ? `<span class="btn-pending">Aprobare în așteptare</span>` : ''}
                 </div>
             </div>
