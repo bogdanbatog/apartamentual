@@ -279,12 +279,95 @@
     <script src="js/profile-edit-new.js"></script>
     <script>
     window.requestDeleteAccount = async function() {
-        if (!confirm('Ești sigur că vrei să ștergi contul? Toate datele tale vor fi eliminate definitiv. Această acțiune este ireversibilă.')) return;
-        if (!confirm('Ultima confirmare: contul și toate datele asociate vor fi șterse permanent. Continuă?')) return;
-        
         try {
             var { data: { user } } = await sb.auth.getUser();
             if (!user) { alert('Nu ești autentificat.'); return; }
+            
+            // ============================================================
+            // VERIFICARE PREALABILĂ: Userul e admin pe vreun grup activ?
+            // Dacă DA, blocăm ștergerea și-l rugăm să transfere admin-ul mai întâi.
+            // ============================================================
+            var { data: adminGroups, error: adminCheckError } = await sb
+                .from('grupuri')
+                .select('id, nume')
+                .eq('admin_id', user.id);
+            
+            if (adminCheckError) {
+                console.error('Admin check error:', adminCheckError);
+                alert('Eroare la verificarea grupurilor. Te rugăm încearcă din nou sau contactează-ne la office@ltfbstudio.ro.');
+                return;
+            }
+            
+            if (adminGroups && adminGroups.length > 0) {
+                // Pentru fiecare grup, verifică dacă mai are alți membri activi
+                var groupsWithMembers = [];
+                var groupsToDelete = [];  // grupurile fără alți membri pot fi șterse împreună cu contul
+                
+                for (var i = 0; i < adminGroups.length; i++) {
+                    var grup = adminGroups[i];
+                    var { data: otherMembers } = await sb
+                        .from('grup_membri')
+                        .select('user_id')
+                        .eq('grup_id', grup.id)
+                        .eq('status', 'activ')
+                        .neq('user_id', user.id);
+                    
+                    if (otherMembers && otherMembers.length > 0) {
+                        groupsWithMembers.push(grup);
+                    } else {
+                        groupsToDelete.push(grup);
+                    }
+                }
+                
+                // Dacă există grupuri cu alți membri, BLOCHEAZĂ ștergerea
+                if (groupsWithMembers.length > 0) {
+                    var groupsList = groupsWithMembers.map(function(g) {
+                        return '• ' + g.nume;
+                    }).join('\n');
+                    
+                    var msg = 'Nu poți șterge contul deocamdată.\n\n' +
+                              'Ești adminul următoarelor grupuri active:\n\n' +
+                              groupsList + '\n\n' +
+                              'Pentru fiecare grup, ai 2 opțiuni:\n' +
+                              '1. Mergi la grup → "Părăsește" → alege un membru să preia administrarea\n' +
+                              '2. Mergi la grup → "Părăsește" → vei deveni doar membru obișnuit\n\n' +
+                              'După ce nu mai ești admin nicăieri, poți șterge contul.';
+                    
+                    alert(msg);
+                    return;
+                }
+                
+                // Toate grupurile sunt "orfane" (doar adminul = singurul membru)
+                // → vor fi șterse automat odată cu contul
+                if (groupsToDelete.length > 0) {
+                    var orphanList = groupsToDelete.map(function(g) {
+                        return '• ' + g.nume;
+                    }).join('\n');
+                    
+                    var orphanMsg = 'Atenție: ești singurul membru în următoarele grupuri:\n\n' +
+                                    orphanList + '\n\n' +
+                                    'Acestea vor fi șterse automat odată cu contul tău.\n\n' +
+                                    'Continuă cu ștergerea contului?';
+                    
+                    if (!confirm(orphanMsg)) return;
+                    
+                    // Șterge grupurile fără alți membri
+                    for (var j = 0; j < groupsToDelete.length; j++) {
+                        await sb.from('grup_membri').delete().eq('grup_id', groupsToDelete[j].id);
+                        await sb.from('grupuri').delete().eq('id', groupsToDelete[j].id);
+                    }
+                }
+            }
+            
+            // ============================================================
+            // CONFIRMĂRI STANDARD
+            // ============================================================
+            if (!confirm('Ești sigur că vrei să ștergi contul? Toate datele tale vor fi eliminate definitiv. Această acțiune este ireversibilă.')) return;
+            if (!confirm('Ultima confirmare: contul și toate datele asociate vor fi șterse permanent. Continuă?')) return;
+            
+            // ============================================================
+            // ȘTERGERE PROPRIU-ZISĂ
+            // ============================================================
             
             // Delete user data
             await sb.from('user_tags').delete().eq('user_id', user.id);
