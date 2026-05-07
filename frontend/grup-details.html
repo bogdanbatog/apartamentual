@@ -2687,6 +2687,17 @@ window.leaveGroup = async function() {
         const { data: myProfile } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
         const myName = myProfile?.pseudonym || 'Un membru';
         
+        // Anulează voturile active de excludere care îl țintesc pe user — nu mai are sens
+        // să existe vot pentru cineva care a plecat singur din grup.
+        try {
+            await sb
+                .from('grup_kick_votes')
+                .update({ status: 'cancelled', resolved_at: new Date().toISOString() })
+                .eq('grup_id', currentGroup.id)
+                .eq('target_user_id', currentUser.id)
+                .eq('status', 'active');
+        } catch(e) { console.warn('Cancel kick votes failed:', e); }
+        
         const { error } = await sb
             .from('grup_membri')
             .delete()
@@ -2787,6 +2798,16 @@ window.confirmLeaveAsAdmin = async function() {
                 });
             }
         } catch(e) { console.warn('New admin notify failed:', e); }
+        
+        // Anulează voturile active de excludere care îl țintesc pe adminul care pleacă
+        try {
+            await sb
+                .from('grup_kick_votes')
+                .update({ status: 'cancelled', resolved_at: new Date().toISOString() })
+                .eq('grup_id', currentGroup.id)
+                .eq('target_user_id', currentUser.id)
+                .eq('status', 'active');
+        } catch(e) { console.warn('Cancel kick votes failed:', e); }
         
         // Remove current user from group
         await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id).eq('user_id', currentUser.id);
@@ -3633,21 +3654,38 @@ async function loadKickVotes() {
             .order('created_at', { ascending: false });
         
         if (error) throw error;
-        activeKickVotes = data || [];
+        let votes = data || [];
         
-        // Also load recently resolved (last 24h) for context
-        const { data: recentData } = await sb
-            .from('grup_kick_votes')
-            .select('*')
-            .eq('grup_id', currentGroup.id)
-            .in('status', ['passed', 'failed', 'expired'])
-            .gte('resolved_at', new Date(Date.now() - 24*60*60*1000).toISOString())
-            .order('resolved_at', { ascending: false });
+        // Safety net: anulează voturi unde target-ul nu mai e membru activ
+        // (poate fi cazul voturilor "zombie" rămase din eroare în trecut)
+        if (votes.length > 0) {
+            const memberIds = new Set(members.map(m => m.user_id));
+            const orphanedVotes = votes.filter(v => !memberIds.has(v.target_user_id));
+            
+            if (orphanedVotes.length > 0) {
+                try {
+                    const orphanIds = orphanedVotes.map(v => v.id);
+                    await sb
+                        .from('grup_kick_votes')
+                        .update({ status: 'cancelled', resolved_at: new Date().toISOString() })
+                        .in('id', orphanIds);
+                } catch(e) { console.warn('Auto-cancel orphan votes failed:', e); }
+                
+                // Filtrăm voturile zombie din lista afișată
+                votes = votes.filter(v => memberIds.has(v.target_user_id));
+            }
+        }
         
-        const allVotes = [...activeKickVotes, ...(recentData || [])];
+        activeKickVotes = votes;
         
-        if (allVotes.length > 0) {
-            await renderKickVotes(allVotes);
+        // Afișăm doar voturile active. Voturile încheiate (passed/failed/expired/cancelled)
+        // nu mai apar în UI — istoricul rămâne în DB pentru audit, dar nu încarcă pagina.
+        if (activeKickVotes.length > 0) {
+            await renderKickVotes(activeKickVotes);
+        } else {
+            // Hide section if no active votes
+            const section = document.getElementById('kickVotesSection');
+            if (section) section.style.display = 'none';
         }
     } catch (e) {
         console.error('Load kick votes error:', e);
