@@ -133,11 +133,24 @@
         var actionLabel = makeDemo ? 'marca DEMO' : 'scoate marcajul DEMO de la';
         if (!confirm('Sigur vrei să ' + actionLabel + ' grupul „' + name + '"?')) return;
         
-        var { error } = await sb.from('grupuri')
+        var { data, error } = await sb.from('grupuri')
             .update({ is_demo: makeDemo })
-            .eq('id', groupId);
+            .eq('id', groupId)
+            .select('id, is_demo');
         
         if (error) { alert('Eroare: ' + error.message); return; }
+        
+        // Verificare critică: dacă RLS blochează silent, data e [] și update-ul n-a avut efect
+        if (!data || data.length === 0) {
+            alert('Update-ul nu s-a salvat. Posibil ca politica RLS să blocheze. Contactează dezvoltatorul.');
+            return;
+        }
+        
+        // Verifică explicit că valoarea e cea așteptată
+        if (data[0].is_demo !== makeDemo) {
+            alert('Update-ul nu a fost persistat corect (DB are ' + data[0].is_demo + ' în loc de ' + makeDemo + ').');
+            return;
+        }
         
         var g = allGroups.find(function(x) { return x.id === groupId; });
         if (g) g.is_demo = makeDemo;
