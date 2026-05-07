@@ -3954,6 +3954,8 @@ async function checkAndResolveVote(voteId) {
                             group_id: currentGroup.id,
                             target_name: targetName,
                             result: 'exclus',
+                            votes_for: yesVotes,
+                            votes_against: noVotes,
                             admin_email: email
                         });
                     }
@@ -3970,7 +3972,9 @@ async function checkAndResolveVote(voteId) {
                         group_name: currentGroup.name || currentGroup.nume || 'Grup',
                         group_id: currentGroup.id,
                         target_name: targetName,
-                        result: 'exclus'
+                        result: 'exclus',
+                        votes_for: yesVotes,
+                        votes_against: noVotes
                     });
                 } catch (notifyErr) { console.warn('Vote result notify failed:', notifyErr); }
                 
@@ -4003,6 +4007,8 @@ async function checkAndResolveVote(voteId) {
                         group_id: currentGroup.id,
                         target_name: targetName,
                         result: 'rămâne în grup',
+                        votes_for: (ballots || []).filter(b => b.vote === true).length,
+                        votes_against: noVotes,
                         admin_email: email
                     });
                 }
@@ -4011,7 +4017,9 @@ async function checkAndResolveVote(voteId) {
                     group_name: currentGroup.name || currentGroup.nume || 'Grup',
                     group_id: currentGroup.id,
                     target_name: targetName,
-                    result: 'rămâne în grup'
+                    result: 'rămâne în grup',
+                    votes_for: (ballots || []).filter(b => b.vote === true).length,
+                    votes_against: noVotes
                 });
             } catch (notifyErr) { console.warn('Vote result notify failed:', notifyErr); }
         }
