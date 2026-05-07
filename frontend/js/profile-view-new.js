@@ -1042,19 +1042,38 @@ window.sendProfileInvite = async function(groupId, groupName) {
         
         // Check if already invited
         if (targetEmail) {
-            const { data: existingInvite } = await supabase
+            // Verifică dacă există invitație PENDING (în așteptare)
+            const { data: pendingInvite } = await supabase
                 .from('grup_invitations')
-                .select('id, status')
+                .select('id')
                 .eq('grup_id', groupId)
                 .eq('invited_email', targetEmail.toLowerCase())
-                .in('status', ['pending', 'accepted'])
+                .eq('status', 'pending')
                 .maybeSingle();
             
-            if (existingInvite) {
-                showToast(existingInvite.status === 'accepted' 
-                    ? `${targetName} a acceptat deja invitația.` 
-                    : `${targetName} a fost deja invitat.`, 'error');
+            if (pendingInvite) {
+                showToast(`${targetName} a fost deja invitat (în așteptare).`, 'error');
                 return;
+            }
+            
+            // Verifică dacă există invitație veche acceptată DAR persoana NU mai e membru activ
+            // (a părăsit grupul) → șterge invitația veche pentru a permite re-invitarea
+            const { data: oldAccepted } = await supabase
+                .from('grup_invitations')
+                .select('id')
+                .eq('grup_id', groupId)
+                .eq('invited_email', targetEmail.toLowerCase())
+                .eq('status', 'accepted');
+            
+            if (oldAccepted && oldAccepted.length > 0) {
+                // Persoana NU e membru activ (verificat mai sus la existingMember)
+                // → e clar că a părăsit grupul, deci ștergem invitațiile vechi acceptate
+                await supabase
+                    .from('grup_invitations')
+                    .delete()
+                    .eq('grup_id', groupId)
+                    .eq('invited_email', targetEmail.toLowerCase())
+                    .eq('status', 'accepted');
             }
         }
         
