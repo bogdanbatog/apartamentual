@@ -2739,19 +2739,50 @@ window.confirmLeaveAsAdmin = async function() {
             newAdminId = otherMembers[0].user_id;
         }
         
-        // Transfer admin
-        await sb.from('grupuri').update({ admin_id: newAdminId }).eq('id', currentGroup.id);
+        // Get name of previous admin (current user) and new admin BEFORE transferring
+        var { data: myProfile } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+        var previousAdminName = myProfile?.pseudonym || 'Adminul precedent';
+        
+        var { data: newAdminProfileFull } = await sb.from('profiles').select('pseudonym, email').eq('user_id', newAdminId).single();
+        var newAdminName = newAdminProfileFull?.pseudonym || 'Noul admin';
+        var newAdminEmail = newAdminProfileFull?.email;
+        
+        // ============================================================
+        // CRITICAL: Transfer admin WITH error checking
+        // Without this check, RLS may block the update silently and
+        // the group becomes orphaned (admin_id points to user who left).
+        // ============================================================
+        var { data: updateResult, error: transferError } = await sb
+            .from('grupuri')
+            .update({ admin_id: newAdminId })
+            .eq('id', currentGroup.id)
+            .select('id, admin_id')
+            .single();
+        
+        if (transferError) {
+            console.error('Admin transfer failed:', transferError);
+            showToast('Transferul de admin a eșuat. Te rugăm contactează-ne la office@ltfbstudio.ro.', 'error');
+            return;
+        }
+        
+        // Verify the update actually changed admin_id (defense against silent RLS failures)
+        if (!updateResult || updateResult.admin_id !== newAdminId) {
+            console.error('Admin transfer did not persist. Expected:', newAdminId, 'Got:', updateResult?.admin_id);
+            showToast('Transferul de admin nu a fost salvat. Te rugăm contactează-ne la office@ltfbstudio.ro.', 'error');
+            return;
+        }
         
         // Notify new admin BEFORE leaving (so auth is still valid)
         try {
-            var { data: newAdminProfile } = await sb.from('profiles').select('email').eq('user_id', newAdminId).single();
-            if (newAdminProfile && newAdminProfile.email) {
+            if (newAdminEmail) {
                 await sb.functions.invoke('notify-admins', {
                     body: {
                         event_type: 'admin_transferred',
-                        admin_email: newAdminProfile.email,
+                        admin_email: newAdminEmail,
                         group_name: currentGroup.name || currentGroup.nume || 'Grup',
-                        group_id: currentGroup.id
+                        group_id: currentGroup.id,
+                        previous_admin_name: previousAdminName,
+                        new_admin_name: newAdminName
                     }
                 });
             }
@@ -2760,27 +2791,28 @@ window.confirmLeaveAsAdmin = async function() {
         // Remove current user from group
         await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id).eq('user_id', currentUser.id);
         
-        // Notify all remaining members + superadmin that admin left
+        // Notify all remaining members + superadmin that admin left and who's the new admin
         try {
-            var { data: myProf } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
-            var myLeaveName = myProf?.pseudonym || 'Adminul';
             var remainingIds = members.map(m => m.user_id).filter(id => id !== currentUser.id);
             if (remainingIds.length > 0) {
                 var { data: profs } = await sb.from('profiles').select('email').in('user_id', remainingIds);
                 var emails = (profs || []).map(p => p.email).filter(Boolean);
                 for (var em of emails) {
-                    notifyAdmins('member_left', {
+                    notifyAdmins('admin_left_with_transfer', {
                         group_name: currentGroup.name || currentGroup.nume || 'Grup',
                         group_id: currentGroup.id,
-                        user_name: myLeaveName,
+                        previous_admin_name: previousAdminName,
+                        new_admin_name: newAdminName,
                         admin_email: em
                     });
                 }
             }
-            notifyAdmins('member_left', {
+            // Superadmin notification
+            notifyAdmins('admin_left_with_transfer', {
                 group_name: currentGroup.name || currentGroup.nume || 'Grup',
                 group_id: currentGroup.id,
-                user_name: myLeaveName
+                previous_admin_name: previousAdminName,
+                new_admin_name: newAdminName
             });
         } catch(e) { console.warn('Leave notify failed:', e); }
         
@@ -2788,12 +2820,12 @@ window.confirmLeaveAsAdmin = async function() {
         var modal = document.getElementById('transferAdminModal');
         if (modal) modal.remove();
         
-        showToast('Admin transferat. Ai părăsit grupul.', 'success');
+        showToast('Admin transferat la ' + newAdminName + '. Ai părăsit grupul.', 'success');
         setTimeout(() => window.location.href = 'grupuri.html', 1000);
         
     } catch (e) {
         console.error('Transfer admin error:', e);
-        showToast('Eroare la transferul adminului.', 'error');
+        showToast('Eroare la transferul adminului. Te rugăm contactează-ne la office@ltfbstudio.ro.', 'error');
     }
 };
 
