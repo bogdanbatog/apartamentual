@@ -22,6 +22,12 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **Duplicare `terrain-card.js`**
   Există în două locuri: `frontend/js/terrain-card.js` (3.1 KB) și `frontend/js/components/terrain-card.js` (3.0 KB). De verificat care e cel folosit efectiv (grep prin HTML-uri după calea de `<script>`) și de șters cel orfan, ca să nu edităm pe viitor varianta greșită.
 
+- [ ] **`frontend/js/faq.js` — fără diacritice**
+  Tot conținutul FAQ (39 întrebări) e scris fără diacritice românești („fata", „pretul" etc.), contrar regulii din CLAUDE.md. La integrarea homepage v9 (28 mai) am corectat doar întrebarea cu procentul de economie, păstrând stilul fără diacritice ca să rămână diff-ul minimal. De curățat tot fișierul la o trecere dedicată.
+
+- [ ] **FAQ pe homepage — insulă vizuală**
+  Homepage-ul v9 (Mona Sans, bej minimalist) afișează `faq.js` ca atare, care are stiluri proprii (carduri albe, accent portocaliu, DM Sans). Arată diferit de restul paginii. Decizie acceptată de Lucian la integrare; de armonizat dacă deranjează.
+
 ---
 
-*Ultima actualizare: 2026-05-20*
+*Ultima actualizare: 2026-05-28*

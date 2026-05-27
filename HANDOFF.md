@@ -1,7 +1,7 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 20 mai 2026
+> Ultima actualizare: 28 mai 2026
 
 ---
 
@@ -30,14 +30,14 @@ Lansare publică iminentă, dar nu există dată fixă.
 - Admin panel complet
 - Integrare Oblio + Netopia (edge functions deployate)
 - Database curat, migrațiile prin 029
-- Homepage v7 (hero + 3 căsuțe + Județul banner + secțiuni "de ce" și "cu ce te ajută") — finalizat ca draft, nu integrat încă pe site live
+- **Homepage v9 integrat și LIVE** (28 mai) — design + texte noi (Claude Design), font Mona Sans, portrete reale + carusel Strada Județului, footer cu secțiunile reale (Navigare/Legal) + bara firmă/Netopia/ANPC, FAQ real complet, timelapse în buclă, video cu buton play sub față, preview News din Supabase. Backup vechi în `_archive/index-pre-v9.html`. Detalii: `HANDOFF-integrare-homepage-v9.md`.
 
 ---
 
 ## Ce e în lucru sau pe orizont apropiat
 
-- **Integrare homepage v7 pe site real** (din fișierul apartamentual-homepage-v7.html)
-- **Întâlnire cu Ina** despre asociere și organizație GitHub
+- **Automatizare deploy** — apartamentual.ro se deployează prin **cPanel** (NU Render, cum scrie CLAUDE.md): `.cpanel.yml` copiază `frontend/*` în `/home/ar4/app.ltfbstudio.ro/`. Momentan Lucian dă manual din cPanel „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel sau remote git direct care rulează `.cpanel.yml` la push).
+- **Header pagini interioare — scoate „Acasă"** din `frontend/js/nav.js` (logo-ul apartamenTUal duce deja acasă). Observat: de pe homepage-ul v9 nou, click pe „Ce este" duce la o pagină cu header-ul VECHI (slate/portocaliu, DM Sans), diferit de nav-ul v9. Pe termen lung, aliniat nav-ul vechi la estetica v9.
 - **Patch analiza-simplificata.html** (înlocuire pop-up vechi cu link la /comanda-analiza.html)
 - **Solicită aprobare Netopia** + test plată reală
 - **Migrare domeniu** apartamentual.onrender.com → apartamentual.ro (DNS + URL-uri în cod și Supabase Auth)
