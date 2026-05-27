@@ -2,3 +2,6 @@
 supabase/.temp
 .DS_Store
 node_modules/
+
+# Pachet sursă homepage v9 (mockup de referință, nu se deployează)
+package-homepage-v9/
