@@ -1,7 +1,7 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 2 iunie 2026
+> Ultima actualizare: 3 iunie 2026
 
 ---
 
@@ -32,13 +32,22 @@ Lansare publică iminentă, dar nu există dată fixă.
 - Database curat, migrațiile prin 029
 - **Homepage v9 integrat și LIVE** (28 mai) — design + texte noi (Claude Design), font Mona Sans, portrete reale + carusel Strada Județului, footer cu secțiunile reale (Navigare/Legal) + bara firmă/Netopia/ANPC, FAQ real complet, timelapse în buclă, video cu buton play sub față, preview News din Supabase. Backup vechi în `_archive/index-pre-v9.html`. Detalii: `HANDOFF-integrare-homepage-v9.md`.
 - **Header + footer v9 unificat pe toate paginile interioare** (2 iunie, commit `864240c`) — `frontend/js/nav.js` și `frontend/js/footer.js` rescrise integral în stil v9 (Mona Sans, fundal crem, badge BETA, „Povestea noastră" în nav și footer, „Acasă" scoasă din ambele — click pe logo duce acasă). Logica auth (login, avatar+dropdown, mobile menu, blocare cont suspendat) păstrată 1:1. Banda firmă LTFB + Netopia + ANPC păstrată integral în footer. Butoanele flotante „Cere consultanță" și scroll-to-top restilizate v9. CTA-urile page-specifice „Propune teren" / „Creează grup" scoase din header (vor reapărea mai vizibil în corpul paginilor). Pe `parteneri.html` s-a descoperit că `fab-consultanta.js` era de fapt o copie veche a nav.js mascată sub alt nume — scos din pagină. Pe `povestea-noastra.html` lipsea `<script src="js/nav.js">` — adăugat.
+- **Polish header v9** (2–3 iunie, commits `d3f72db`, `bf91ebf`, `959953b`, `30b5885`, `0097cb6`):
+  - Scos badge BETA de peste tot.
+  - Redenumită clasa internă `logo-text` → `logo-mark` (eliminat conflict cu `utilizatori.css .logo-text { font-size:1.5rem }` care făcea logo-ul mai mare doar pe pagina utilizatori).
+  - Fix flash de auth: ambele variante (avatar + login) ascunse inițial; `checkAuthState` decide ce afișează → fără mai apare „Intră în cont" → avatar la fiecare load când userul e logat.
+  - Fix flash de header vechi pe `utilizatori.html` și `grupuri.html`: nav-ul vechi inline (`<nav class="navbar">` / `<nav class="main-nav">`) eliminat complet, înlocuit cu `<div id="navigation"></div>`. Mai rămân de curățat astfel: `terenuri.html`, `grup-details.html`, `grup-edit.html`, `grup-nou.html`.
+  - Homepage trecut la `<div id="navigation"></div>` + Supabase SDK + supabase-config.js + login-modal.js + nav.js (toate scripturile la finalul body, în aceeași ordine ca pe paginile interioare). Header-ul de pe homepage acum identic poziționat cu restul (banda crem full-width).
+  - Auth-aware nav pe homepage: când nelogat → „Intră în cont" (link text) + „Creează cont" (buton chenar); când logat → avatar+dropdown.
+  - CTA „Cum funcționează" din hero homepage → link la subpagina `/ce-este/cum-functioneaza.html` (înainte trimitea la `/ce-este/#cum-functioneaza`, hash spre o secțiune).
 
 ---
 
 ## Ce e în lucru sau pe orizont apropiat
 
 - **Automatizare deploy** — apartamentual.ro se deployează prin **cPanel** (NU Render, cum scrie CLAUDE.md): `.cpanel.yml` copiază `frontend/*` în `/home/ar4/app.ltfbstudio.ro/`. Momentan Lucian dă manual din cPanel „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel sau remote git direct care rulează `.cpanel.yml` la push).
-- **Cod mort de curățat după unificarea header/footer v9**:
+- **Cod mort + flash header rămas de curățat după unificarea header/footer v9**:
+  - **Flash de header vechi** încă vizibil la refresh pe: `terenuri.html`, `grup-details.html`, `grup-edit.html`, `grup-nou.html` — pe acestea nav-ul vechi e încă scris inline `<nav class="navbar">` / `<nav class="main-nav">`, înlocuit dinamic de nav.js la încărcare. De înlocuit cu `<div id="navigation"></div>` (același tratament ca pe utilizatori/grupuri, deja făcute).
   - `frontend/nav.css` — definește clase `.unified-nav-*` care nu mai există în DOM (nav.js generează acum `.site-nav-*`). Multe pagini încă includ `<link rel="stylesheet" href="/nav.css">` — inofensiv, dar de șters împreună cu referințele.
   - `frontend/js/fab-consultanta.js` (227 linii) — copie veche a nav.js, neutilizată acum (am scos referința de pe parteneri.html, singura care o avea). Fișierul rămâne pe disc — de șters.
   - `frontend/fab-consultanta.css` — același caz, neutilizat acum.
