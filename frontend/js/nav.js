@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════════
-// UNIFIED NAVIGATION COMPONENT — ApartamenTUal
-// Used on ALL pages: Acasă, Ce este, Terenuri, Utilizatori, Grupuri, etc.
-// Uses global `sb` (and `supabase`) from supabase-config.js
+// UNIFIED NAVIGATION COMPONENT — ApartamenTUal (stil v9)
+// Folosit pe TOATE paginile (mai puțin homepage care are nav inline).
+// Folosește global `sb` (și `supabase`) din supabase-config.js.
 // ══════════════════════════════════════════════════════════════
 
 // Global notify helper - available on all pages
@@ -18,103 +18,355 @@ window.notifyAdmins = async function(eventType, data) {
 
 (function() {
 
+// ── Font + stiluri v9 (injectate o singură dată) ──
+function injectChromeAssets() {
+    if (document.getElementById('site-chrome-assets')) return;
+
+    // Preconnect + Mona Sans
+    var pre1 = document.createElement('link');
+    pre1.rel = 'preconnect'; pre1.href = 'https://fonts.googleapis.com';
+    document.head.appendChild(pre1);
+    var pre2 = document.createElement('link');
+    pre2.rel = 'preconnect'; pre2.href = 'https://fonts.gstatic.com'; pre2.crossOrigin = '';
+    document.head.appendChild(pre2);
+    var font = document.createElement('link');
+    font.rel = 'stylesheet';
+    font.href = 'https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap';
+    document.head.appendChild(font);
+
+    var style = document.createElement('style');
+    style.id = 'site-chrome-assets';
+    style.textContent = `
+    /* ── Banda nav (full-width, fundal crem v9) ── */
+    .site-nav-band{
+        background:#faf8f3;
+        border-bottom:1px solid rgba(0,0,0,0.10);
+    }
+    .site-nav-band .site-nav-wrap{
+        max-width:1100px;
+        margin:0 auto;
+        padding:0 1.5rem;
+    }
+    .site-nav{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:18px 0 22px;
+        gap:24px;
+        font-family:"Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color:#1a1a1a;
+    }
+    .site-logo{
+        font-size:17px;
+        font-weight:500;
+        letter-spacing:-0.005em;
+        color:#1a1a1a;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        gap:10px;
+    }
+    .site-logo .logo-text{ display:inline-flex; align-items:baseline; }
+    .site-logo b{ font-weight:600; transition:color .5s ease; }
+    .site-logo .logo-beta{
+        display:inline-block;
+        background:#fef3c7;
+        color:#92400e;
+        font-size:9px;
+        font-weight:700;
+        padding:2px 6px;
+        border-radius:6px;
+        margin-left:6px;
+        vertical-align:middle;
+        letter-spacing:0.5px;
+        text-transform:uppercase;
+        line-height:1;
+    }
+    .site-logo .logo-by{
+        font-size:11px;
+        font-weight:400;
+        letter-spacing:0.06em;
+        color:#8a8a8a;
+        white-space:nowrap;
+    }
+    .site-nav-links{
+        display:flex;
+        gap:32px;
+        font-size:13.5px;
+        font-weight:500;
+    }
+    .site-nav-links a{
+        color:#1a1a1a;
+        text-decoration:none;
+        padding-bottom:2px;
+        border-bottom:1px solid transparent;
+        transition:border-color .2s ease;
+    }
+    .site-nav-links a:hover{ border-bottom-color:#1a1a1a; }
+    .site-nav-links a.active{ border-bottom-color:#1a1a1a; }
+    .site-nav-actions{
+        display:flex;
+        align-items:center;
+        gap:12px;
+    }
+    .site-nav-cta{
+        font-size:12px;
+        font-weight:500;
+        color:#1a1a1a;
+        text-decoration:none;
+        padding:6px 10px;
+        border:1px solid #1a1a1a;
+        border-radius:2px;
+        white-space:nowrap;
+        line-height:1.2;
+        transition:background .2s ease, color .2s ease;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+    }
+    .site-nav-cta:hover{ background:#1a1a1a; color:#fff; }
+    .site-nav-cta.ghost{
+        border-color:rgba(0,0,0,0.25);
+        color:#1a1a1a;
+    }
+    .site-nav-cta.ghost:hover{ background:rgba(0,0,0,0.03); color:#1a1a1a; }
+
+    /* User avatar + dropdown */
+    .site-nav-user{ position:relative; }
+    .site-btn-avatar{
+        background:none;
+        border:1px solid #1a1a1a;
+        border-radius:50%;
+        width:32px;
+        height:32px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        color:#1a1a1a;
+        font-size:14px;
+        padding:0;
+        line-height:1;
+    }
+    .site-btn-avatar:hover{ background:#1a1a1a; color:#fff; }
+    .site-user-dropdown{
+        display:none;
+        position:absolute;
+        top:42px;
+        right:0;
+        background:#faf8f3;
+        border:1px solid rgba(0,0,0,0.10);
+        border-radius:4px;
+        box-shadow:0 6px 20px rgba(0,0,0,0.10);
+        min-width:180px;
+        padding:6px;
+        z-index:1000;
+        font-family:"Mona Sans", sans-serif;
+    }
+    .site-user-dropdown.show{ display:block; }
+    .site-user-dropdown a,
+    .site-user-dropdown button{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        width:100%;
+        padding:8px 12px;
+        font-size:13px;
+        color:#1a1a1a;
+        text-decoration:none;
+        background:none;
+        border:none;
+        border-radius:2px;
+        cursor:pointer;
+        font-family:inherit;
+        text-align:left;
+        transition:background .15s;
+    }
+    .site-user-dropdown a:hover,
+    .site-user-dropdown button:hover{ background:rgba(0,0,0,0.04); }
+    .site-user-dropdown i{ width:14px; text-align:center; color:#8a8a8a; font-size:12px; }
+
+    /* Mobile */
+    .site-nav-burger{
+        display:none;
+        background:none;
+        border:1px solid rgba(0,0,0,0.25);
+        border-radius:2px;
+        width:36px;
+        height:36px;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        color:#1a1a1a;
+        font-size:14px;
+        padding:0;
+    }
+    .site-nav-mobile{
+        display:none;
+        flex-direction:column;
+        gap:4px;
+        padding:12px 0 18px;
+        border-top:1px solid rgba(0,0,0,0.10);
+        font-family:"Mona Sans", sans-serif;
+    }
+    .site-nav-mobile a{
+        color:#1a1a1a;
+        text-decoration:none;
+        font-size:14px;
+        padding:10px 12px;
+        border-radius:2px;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+    .site-nav-mobile a:hover{ background:rgba(0,0,0,0.04); }
+    .site-nav-mobile a.active{ background:rgba(0,0,0,0.04); font-weight:600; }
+    .site-nav-mobile .site-nav-cta{ justify-content:center; padding:10px; margin-top:6px; }
+    .site-nav-mobile-user{ display:none; flex-direction:column; gap:4px; margin-top:6px; padding-top:10px; border-top:1px solid rgba(0,0,0,0.10); }
+    .site-nav-mobile-user button{
+        background:none; border:none; cursor:pointer; font-family:inherit;
+        width:100%; text-align:left; color:#1a1a1a; font-size:14px;
+        padding:10px 12px; display:flex; align-items:center; gap:10px;
+    }
+
+    @media (max-width:768px){
+        .site-nav-links{ display:none; }
+        .site-nav-actions{ display:none; }
+        .site-nav-burger{ display:flex; }
+        .site-logo .logo-by{ display:none; }
+    }
+
+    /* Buton flotant scroll-to-top (stil v9) */
+    .site-scroll-top{
+        position:fixed; bottom:24px; left:24px; z-index:90;
+        width:42px; height:42px; border-radius:50%;
+        background:#1a1a1a; color:#fff; border:none; cursor:pointer;
+        font-size:14px; display:none; align-items:center; justify-content:center;
+        box-shadow:0 6px 20px rgba(0,0,0,0.18);
+        font-family:"Mona Sans", sans-serif;
+        transition:transform .2s ease;
+    }
+    .site-scroll-top:hover{ transform:translateY(-2px); }
+
+    /* Buton flotant Cere consultanță (stil v9) */
+    .site-fab-consult{
+        position:fixed; bottom:24px; right:24px; z-index:90;
+        display:inline-flex; align-items:center; gap:8px;
+        background:#1a1a1a; color:#fff; text-decoration:none;
+        padding:12px 18px; border-radius:50px;
+        font-size:13px; font-weight:500;
+        font-family:"Mona Sans", sans-serif;
+        box-shadow:0 6px 20px rgba(0,0,0,0.18);
+        transition:transform .2s ease;
+    }
+    .site-fab-consult:hover{ transform:translateY(-2px); color:#fff; }
+    `;
+    document.head.appendChild(style);
+}
+
 function getPageConfig() {
     const path = window.location.pathname;
-    
+
     let currentPage = '';
     let ctaButton = null;
-    
+
     if (path === '/' || (path.endsWith('/index.html') && !path.includes('ce-este'))) {
         currentPage = 'home';
     } else if (path.includes('ce-este')) {
         currentPage = 'about';
     } else if (path.includes('teren')) {
         currentPage = 'land';
-        ctaButton = { href: '/terenuri-propune.html', icon: 'fa-plus', label: 'Propune teren' };
     } else if (path.includes('utilizatori')) {
         currentPage = 'users';
     } else if (path.includes('grup')) {
         currentPage = 'groups';
-        ctaButton = { href: '/grup-nou.html', icon: 'fa-plus', label: 'Creează grup' };
     } else if (path.includes('parteneri')) {
         currentPage = 'partners';
+    } else if (path.includes('povestea-noastra')) {
+        currentPage = 'story';
     } else if (path.includes('register')) {
         currentPage = 'register';
-        // Flag to use direct link for login instead of modal
         window._registerPage = true;
     }
-    
+
     return { currentPage, ctaButton };
 }
 
 function createNavigation() {
     const { currentPage, ctaButton } = getPageConfig();
-    
+
     const navItems = [
-        { href: '/index.html', label: 'Acasă', id: 'home' },
-        { href: '/ce-este/', label: 'Ce este', id: 'about' },
-        { href: '/terenuri.html', label: 'Terenuri', id: 'land' },
-        { href: '/utilizatori.html', label: 'Utilizatori', id: 'users' },
-        { href: '/grupuri.html', label: 'Grupuri', id: 'groups' },
-        { href: '/parteneri.html', label: 'Parteneri', id: 'partners' },
+        { href: '/ce-este/',              label: 'Ce este',           id: 'about'    },
+        { href: '/terenuri.html',         label: 'Terenuri',          id: 'land'     },
+        { href: '/utilizatori.html',      label: 'Utilizatori',       id: 'users'    },
+        { href: '/grupuri.html',          label: 'Grupuri',           id: 'groups'   },
+        { href: '/parteneri.html',        label: 'Parteneri',         id: 'partners' },
+        { href: '/povestea-noastra.html', label: 'Povestea noastră',  id: 'story'    },
     ];
 
     const navLinksHTML = navItems.map(item => {
         const isActive = currentPage === item.id;
-        return `<a href="${item.href}" class="unified-nav-link ${isActive ? 'active' : ''}">${item.label}</a>`;
+        return `<a href="${item.href}" class="${isActive ? 'active' : ''}">${item.label}</a>`;
     }).join('');
 
-    const ctaHTML = ctaButton 
-        ? `<a href="${ctaButton.href}" class="unified-btn-cta"><i class="fas ${ctaButton.icon}"></i> ${ctaButton.label}</a>` 
+    const ctaHTML = ctaButton
+        ? `<a href="${ctaButton.href}" class="site-nav-cta ghost">${ctaButton.label}</a>`
         : '';
 
     return `
-    <nav class="unified-nav">
-        <div class="unified-nav-inner">
-            <a href="/index.html" class="unified-nav-logo">
-                <span class="logo-a">Apartamen</span><span class="logo-tu">TU</span><span class="logo-al">al</span><span style="display:inline-block; background:#fef3c7; color:#92400e; font-size:9px; font-weight:700; padding:2px 6px; border-radius:6px; margin-left:6px; vertical-align:middle; letter-spacing:0.5px; text-transform:uppercase; line-height:1;" title="Versiune beta — feedback bun-venit la office@ltfbstudio.ro">beta</span> <span class="logo-by">by LTFB studio</span>
+    <div class="site-nav-band">
+      <div class="site-nav-wrap">
+        <nav class="site-nav">
+            <a href="/" class="site-logo">
+                <span class="logo-text">apartamen<b>TU</b>al</span>
+                <span class="logo-beta" title="Versiune beta — feedback bun-venit la office@ltfbstudio.ro">beta</span>
+                <span class="logo-by">by LTFB Studio</span>
             </a>
-            <div class="unified-nav-links">
+            <div class="site-nav-links">
                 ${navLinksHTML}
             </div>
-            <div class="unified-nav-actions">
+            <div class="site-nav-actions">
                 ${ctaHTML}
-                <div class="unified-nav-user" id="navUser" style="display:none;">
-                    <button class="unified-btn-avatar" id="btnUserAvatar">
-                        <i class="fas fa-user-circle"></i>
+                <div class="site-nav-user" id="navUser" style="display:none;">
+                    <button class="site-btn-avatar" id="btnUserAvatar" aria-label="Meniu profil">
+                        <i class="fas fa-user"></i>
                     </button>
-                    <div class="unified-user-dropdown" id="userDropdown">
+                    <div class="site-user-dropdown" id="userDropdown">
                         <a href="#" id="navProfileLink"><i class="fas fa-user"></i> Profilul meu</a>
                         <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                     </div>
                 </div>
-                <a href="#" class="unified-btn-login" id="btnLoginNav" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
-                    <i class="fas fa-sign-in-alt"></i> Intră în cont
+                <a href="#" class="site-nav-cta" id="btnLoginNav" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
+                    Intră în cont
                 </a>
             </div>
-            <button class="unified-nav-burger" id="navMobileToggle">
+            <button class="site-nav-burger" id="navMobileToggle" aria-label="Meniu">
                 <i class="fas fa-bars"></i>
             </button>
-        </div>
-        <div class="unified-nav-mobile" id="navMobileMenu" style="display:none;">
+        </nav>
+        <div class="site-nav-mobile" id="navMobileMenu" style="display:none;">
             ${navLinksHTML}
             ${ctaHTML}
-            <a href="#" class="unified-btn-login" id="btnLoginNavMobile" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
-                <i class="fas fa-sign-in-alt"></i> Intră în cont
+            <a href="#" class="site-nav-cta" id="btnLoginNavMobile" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
+                Intră în cont
             </a>
-            <div class="unified-nav-mobile-user" id="navMobileUser" style="display:none;">
-                <a href="#" class="unified-nav-link" id="btnProfileMobile"><i class="fas fa-user"></i> Profilul meu</a>
-                <button class="unified-nav-link" id="btnLogoutMobile" style="text-align:left; background:none; border:none; cursor:pointer; font-family:inherit; width:100%;"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
+            <div class="site-nav-mobile-user" id="navMobileUser" style="display:none;">
+                <a href="#" id="btnProfileMobile"><i class="fas fa-user"></i> Profilul meu</a>
+                <button id="btnLogoutMobile"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
             </div>
         </div>
-    </nav>`;
+      </div>
+    </div>`;
 }
 
 function loadNavigation() {
+    injectChromeAssets();
+
     const navContainer = document.getElementById('navigation');
     if (navContainer) {
         navContainer.innerHTML = createNavigation();
         setupNavBehavior();
+        startLogoColorCycle();
         checkAuthState();
         return;
     }
@@ -125,8 +377,26 @@ function loadNavigation() {
         wrapper.innerHTML = createNavigation();
         existingNav.parentNode.replaceChild(wrapper, existingNav);
         setupNavBehavior();
+        startLogoColorCycle();
         checkAuthState();
     }
+}
+
+// Animația de culoare pe „TU" — identică cu cea de pe homepage v9
+function startLogoColorCycle() {
+    const palette = ['#c2604a','#5e8a6c','#5a7196','#a76782','#b8965c','#7a9a90'];
+    const tuEls = document.querySelectorAll('.site-logo b');
+    if (!tuEls.length) return;
+    let i = Math.floor(Math.random() * palette.length);
+    function paint(){
+        const c = palette[i];
+        tuEls.forEach(el => el.style.color = c);
+    }
+    paint();
+    setInterval(() => {
+        i = (i + 1) % palette.length;
+        paint();
+    }, 2400);
 }
 
 function setupNavBehavior() {
@@ -238,13 +508,13 @@ async function checkAuthState() {
                         var msg = isDeleted
                             ? '<h2 style="margin-bottom:8px;">Cont dezactivat</h2><p>Acest cont a fost dezactivat de administratorul platformei.</p>'
                             : '<h2 style="margin-bottom:8px;">Cont suspendat</h2><p>Contul tău este suspendat până la <strong>' + new Date(prof.suspended_until).toLocaleDateString('ro-RO') + '</strong>.</p><p style="margin-top:8px; font-size:13px; opacity:0.7;">Dacă ai întrebări, contactează echipa ApartamenTUal.</p>';
-                        overlay.innerHTML = '<div style="background:white; border-radius:12px; padding:2.5rem; max-width:440px; width:90%; text-align:center; font-family:DM Sans,sans-serif;">' + msg + '<a href="/index.html" style="display:inline-block; margin-top:20px; padding:10px 24px; background:#1e293b; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">Înapoi la pagina principală</a></div>';
+                        overlay.innerHTML = '<div style="background:#faf8f3; border-radius:4px; padding:2.5rem; max-width:440px; width:90%; text-align:center; font-family:Mona Sans,sans-serif; color:#1a1a1a;">' + msg + '<a href="/index.html" style="display:inline-block; margin-top:20px; padding:10px 24px; background:#1a1a1a; color:white; border-radius:2px; text-decoration:none; font-weight:500; font-size:13px;">Înapoi la pagina principală</a></div>';
                         document.body.appendChild(overlay);
                         // Hide nav elements
                         if (navUser) navUser.style.display = 'none';
                         if (navMobileUser) navMobileUser.style.display = 'none';
-                        if (btnLogin) btnLogin.style.display = 'flex';
-                        if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
+                        if (btnLogin) btnLogin.style.display = 'inline-flex';
+                        if (btnLoginMobile) btnLoginMobile.style.display = 'inline-flex';
                         return;
                     }
                 }
@@ -258,8 +528,8 @@ async function checkAuthState() {
         } else {
             if (navUser) navUser.style.display = 'none';
             if (navMobileUser) navMobileUser.style.display = 'none';
-            if (btnLogin) btnLogin.style.display = 'flex';
-            if (btnLoginMobile) btnLoginMobile.style.display = 'flex';
+            if (btnLogin) btnLogin.style.display = 'inline-flex';
+            if (btnLoginMobile) btnLoginMobile.style.display = 'inline-flex';
         }
     } catch (err) {
         console.error('Auth check error:', err);
@@ -269,14 +539,12 @@ async function checkAuthState() {
 document.addEventListener('DOMContentLoaded', function() {
     loadNavigation();
 
-    // Scroll-to-top button
+    // Scroll-to-top button (stil v9)
     var btn = document.createElement('button');
     btn.id = 'scrollToTop';
+    btn.className = 'site-scroll-top';
     btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
     btn.setAttribute('aria-label', 'Înapoi sus');
-    btn.style.cssText = 'position:fixed; bottom:24px; left:24px; width:42px; height:42px; border-radius:50%; background:#1e293b; color:white; border:none; cursor:pointer; font-size:16px; display:none; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,0.15); transition:all 0.3s; z-index:90;';
-    btn.onmouseover = function() { this.style.background = '#f97316'; };
-    btn.onmouseout = function() { this.style.background = '#1e293b'; };
     btn.onclick = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
     document.body.appendChild(btn);
 
@@ -284,16 +552,14 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
     });
 
-    // FAB Consultation button (skip on admin and consultanta pages)
+    // FAB Consultanță (stil v9) — sărim pe admin și pe pagina consultanță
     var p = window.location.pathname;
     if (!p.includes('admin') && !p.includes('consultanta')) {
         var fab = document.createElement('a');
         fab.href = '/consultanta.html';
         fab.title = 'Cere consultanță';
-        fab.style.cssText = 'position:fixed; bottom:24px; right:24px; display:flex; align-items:center; gap:8px; background:#1e293b; color:white; text-decoration:none; padding:12px 20px; border-radius:50px; font-size:14px; font-weight:500; font-family:DM Sans,sans-serif; box-shadow:0 4px 16px rgba(0,0,0,0.2); transition:all 0.3s; z-index:90;';
-        fab.innerHTML = '<i class="fas fa-comments"></i> <span>Cere consultanță</span>';
-        fab.onmouseover = function() { this.style.background = '#f97316'; };
-        fab.onmouseout = function() { this.style.background = '#1e293b'; };
+        fab.className = 'site-fab-consult';
+        fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>Cere consultanță</span>';
         document.body.appendChild(fab);
     }
 });
