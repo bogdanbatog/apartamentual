@@ -1,7 +1,7 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 28 mai 2026
+> Ultima actualizare: 2 iunie 2026
 
 ---
 
@@ -31,13 +31,18 @@ Lansare publică iminentă, dar nu există dată fixă.
 - Integrare Oblio + Netopia (edge functions deployate)
 - Database curat, migrațiile prin 029
 - **Homepage v9 integrat și LIVE** (28 mai) — design + texte noi (Claude Design), font Mona Sans, portrete reale + carusel Strada Județului, footer cu secțiunile reale (Navigare/Legal) + bara firmă/Netopia/ANPC, FAQ real complet, timelapse în buclă, video cu buton play sub față, preview News din Supabase. Backup vechi în `_archive/index-pre-v9.html`. Detalii: `HANDOFF-integrare-homepage-v9.md`.
+- **Header + footer v9 unificat pe toate paginile interioare** (2 iunie, commit `864240c`) — `frontend/js/nav.js` și `frontend/js/footer.js` rescrise integral în stil v9 (Mona Sans, fundal crem, badge BETA, „Povestea noastră" în nav și footer, „Acasă" scoasă din ambele — click pe logo duce acasă). Logica auth (login, avatar+dropdown, mobile menu, blocare cont suspendat) păstrată 1:1. Banda firmă LTFB + Netopia + ANPC păstrată integral în footer. Butoanele flotante „Cere consultanță" și scroll-to-top restilizate v9. CTA-urile page-specifice „Propune teren" / „Creează grup" scoase din header (vor reapărea mai vizibil în corpul paginilor). Pe `parteneri.html` s-a descoperit că `fab-consultanta.js` era de fapt o copie veche a nav.js mascată sub alt nume — scos din pagină. Pe `povestea-noastra.html` lipsea `<script src="js/nav.js">` — adăugat.
 
 ---
 
 ## Ce e în lucru sau pe orizont apropiat
 
 - **Automatizare deploy** — apartamentual.ro se deployează prin **cPanel** (NU Render, cum scrie CLAUDE.md): `.cpanel.yml` copiază `frontend/*` în `/home/ar4/app.ltfbstudio.ro/`. Momentan Lucian dă manual din cPanel „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel sau remote git direct care rulează `.cpanel.yml` la push).
-- **Header pagini interioare — scoate „Acasă"** din `frontend/js/nav.js` (logo-ul apartamenTUal duce deja acasă). Observat: de pe homepage-ul v9 nou, click pe „Ce este" duce la o pagină cu header-ul VECHI (slate/portocaliu, DM Sans), diferit de nav-ul v9. Pe termen lung, aliniat nav-ul vechi la estetica v9.
+- **Cod mort de curățat după unificarea header/footer v9**:
+  - `frontend/nav.css` — definește clase `.unified-nav-*` care nu mai există în DOM (nav.js generează acum `.site-nav-*`). Multe pagini încă includ `<link rel="stylesheet" href="/nav.css">` — inofensiv, dar de șters împreună cu referințele.
+  - `frontend/js/fab-consultanta.js` (227 linii) — copie veche a nav.js, neutilizată acum (am scos referința de pe parteneri.html, singura care o avea). Fișierul rămâne pe disc — de șters.
+  - `frontend/fab-consultanta.css` — același caz, neutilizat acum.
+  - În `nav.js`, mecanismul page-specific CTA (`ctaButton` din `getPageConfig`) rămâne dar nicio ramură nu îl mai setează. De curățat când e clar că nu mai e nevoie de el.
 - **Patch analiza-simplificata.html** (înlocuire pop-up vechi cu link la /comanda-analiza.html)
 - **Solicită aprobare Netopia** + test plată reală
 - **Migrare domeniu** apartamentual.onrender.com → apartamentual.ro (DNS + URL-uri în cod și Supabase Auth)
