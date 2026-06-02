@@ -125,6 +125,20 @@ function injectChromeAssets() {
     }
     .site-nav-cta.ghost:hover{ background:rgba(0,0,0,0.03); color:#1a1a1a; }
 
+    /* Link text de login (folosit pe homepage, alături de „Creează cont" CTA) */
+    .site-nav-login-link{
+        font-size:13px;
+        font-weight:500;
+        color:#1a1a1a;
+        text-decoration:none;
+        padding-bottom:2px;
+        border-bottom:1px solid transparent;
+        transition:border-color .2s ease;
+        white-space:nowrap;
+        line-height:1.2;
+    }
+    .site-nav-login-link:hover{ border-bottom-color:#1a1a1a; }
+
     /* User avatar + dropdown */
     .site-nav-user{ position:relative; }
     .site-btn-avatar{
@@ -289,13 +303,21 @@ function getPageConfig() {
 function createNavigation() {
     const { currentPage, ctaButton } = getPageConfig();
 
-    // CTA-ul pentru neautentificați: „Creează cont" pe homepage (drive signup),
-    // „Intră în cont" pe restul (utilizator existent care vine la cont).
+    // Pe homepage afișăm AMBELE elemente pentru neautentificați:
+    //   „Intră în cont" (link text simplu) + „Creează cont" (buton CTA în chenar)
+    // Pe paginile interioare doar „Intră în cont" în chenar.
     const isHome = currentPage === 'home';
-    const loginCtaLabel = isHome ? 'Creează cont' : 'Intră în cont';
-    const loginCtaOnclick = isHome
-        ? "window.location.href='/register.html'"
-        : "if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';";
+    const loginOnclick = "if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';";
+
+    // Markup pentru aria de auth — variabilă în funcție de pagină
+    const authHTML = isHome
+        ? `<a href="#" class="site-nav-login-link" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>
+           <a href="/register.html" class="site-nav-cta" id="btnRegisterCta" style="display:none;">Creează cont</a>`
+        : `<a href="#" class="site-nav-cta" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>`;
+    const authMobileHTML = isHome
+        ? `<a href="#" class="site-nav-login-link" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>
+           <a href="/register.html" class="site-nav-cta" id="btnRegisterCtaMobile" style="display:none;">Creează cont</a>`
+        : `<a href="#" class="site-nav-cta" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>`;
 
     const navItems = [
         { href: '/ce-este/',              label: 'Ce este',           id: 'about'    },
@@ -337,9 +359,7 @@ function createNavigation() {
                         <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                     </div>
                 </div>
-                <a href="#" class="site-nav-cta" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginCtaOnclick}">
-                    ${loginCtaLabel}
-                </a>
+                ${authHTML}
             </div>
             <button class="site-nav-burger" id="navMobileToggle" aria-label="Meniu">
                 <i class="fas fa-bars"></i>
@@ -348,9 +368,7 @@ function createNavigation() {
         <div class="site-nav-mobile" id="navMobileMenu" style="display:none;">
             ${navLinksHTML}
             ${ctaHTML}
-            <a href="#" class="site-nav-cta" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginCtaOnclick}">
-                ${loginCtaLabel}
-            </a>
+            ${authMobileHTML}
             <div class="site-nav-mobile-user" id="navMobileUser" style="display:none;">
                 <a href="#" id="btnProfileMobile"><i class="fas fa-user"></i> Profilul meu</a>
                 <button id="btnLogoutMobile"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
@@ -489,6 +507,9 @@ async function checkAuthState() {
         const navMobileUser = document.getElementById('navMobileUser');
         const btnLogin = document.getElementById('btnLoginNav');
         const btnLoginMobile = document.getElementById('btnLoginNavMobile');
+        // Pe homepage există și butonul „Creează cont" alături de link-ul de login
+        const btnRegister = document.getElementById('btnRegisterCta');
+        const btnRegisterMobile = document.getElementById('btnRegisterCtaMobile');
 
         if (user) {
             // Check if account is suspended or deleted (skip on admin pages)
@@ -516,6 +537,8 @@ async function checkAuthState() {
                         if (navMobileUser) navMobileUser.style.display = 'none';
                         if (btnLogin) btnLogin.style.display = 'inline-flex';
                         if (btnLoginMobile) btnLoginMobile.style.display = 'inline-flex';
+                        if (btnRegister) btnRegister.style.display = 'inline-flex';
+                        if (btnRegisterMobile) btnRegisterMobile.style.display = 'inline-flex';
                         return;
                     }
                 }
@@ -526,11 +549,15 @@ async function checkAuthState() {
             if (navMobileUser) navMobileUser.style.display = 'flex';
             if (btnLogin) btnLogin.style.display = 'none';
             if (btnLoginMobile) btnLoginMobile.style.display = 'none';
+            if (btnRegister) btnRegister.style.display = 'none';
+            if (btnRegisterMobile) btnRegisterMobile.style.display = 'none';
         } else {
             if (navUser) navUser.style.display = 'none';
             if (navMobileUser) navMobileUser.style.display = 'none';
             if (btnLogin) btnLogin.style.display = 'inline-flex';
             if (btnLoginMobile) btnLoginMobile.style.display = 'inline-flex';
+            if (btnRegister) btnRegister.style.display = 'inline-flex';
+            if (btnRegisterMobile) btnRegisterMobile.style.display = 'inline-flex';
         }
     } catch (err) {
         console.error('Auth check error:', err);
