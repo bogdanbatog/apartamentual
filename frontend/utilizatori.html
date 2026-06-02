@@ -20,43 +20,8 @@
     <meta name="theme-color" content="#0f172a">
 </head>
 <body>
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="index.html" class="nav-logo">
-                <span class="logo-text">Apartamen<span class="logo-highlight">TU</span>al</span>
-            </a>
-            <div class="nav-links">
-                <a href="index.html" class="nav-link">Acasă</a>
-                <a href="ce-este/index.html" class="nav-link">Ce este</a>
-                <a href="terenuri.html" class="nav-link">Terenuri</a>
-                <a href="utilizatori.html" class="nav-link active">Utilizatori</a>
-                <a href="grupuri.html" class="nav-link">Grupuri</a>
-            </div>
-            <div class="nav-actions">
-                <a href="#" class="btn-nav-login" id="btn-login-nav" onclick="event.preventDefault(); openLoginModal();">
-                    <i class="fas fa-sign-in-alt"></i> Intră în cont
-                </a>
-                <div class="nav-user" id="nav-user" style="display: none; position: relative;">
-                    <button class="btn-nav-profile" id="btn-profile-toggle" style="cursor: pointer; background: #f97316; border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 16px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-user"></i>
-                    </button>
-                    <div id="profile-dropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 8px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); min-width: 200px; z-index: 100; overflow: hidden; border: 1px solid #e2e8f0;">
-                        <a href="profile-view-new.html" style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; color: #334155; text-decoration: none; font-size: 14px; font-weight: 500; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                            <i class="fas fa-user" style="color: #64748b; width: 16px;"></i> Profilul meu
-                        </a>
-                        <div style="height: 1px; background: #e2e8f0; margin: 0 12px;"></div>
-                        <button id="btn-logout-nav" style="display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 18px; color: #334155; font-size: 14px; font-weight: 500; background: none; border: none; text-align: left; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
-                            <i class="fas fa-sign-out-alt" style="color: #64748b; width: 16px;"></i> Deconectare
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <button class="nav-mobile-toggle" id="mobile-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-    </nav>
+    <!-- NAV (injectat de nav.js, auth-aware) -->
+    <div id="navigation"></div>
 
     <!-- AUTH REQUIRED OVERLAY (for non-logged users) -->
     <div id="auth-overlay" class="auth-overlay" style="display: none;">

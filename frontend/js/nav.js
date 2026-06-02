@@ -66,22 +66,16 @@ function injectChromeAssets() {
         align-items:center;
         gap:10px;
     }
-    .site-logo .logo-text{ display:inline-flex; align-items:baseline; }
-    .site-logo b{ font-weight:600; transition:color .5s ease; }
-    .site-logo .logo-beta{
-        display:inline-block;
-        background:#fef3c7;
-        color:#92400e;
-        font-size:9px;
-        font-weight:700;
-        padding:2px 6px;
-        border-radius:6px;
-        margin-left:6px;
-        vertical-align:middle;
-        letter-spacing:0.5px;
-        text-transform:uppercase;
-        line-height:1;
+    .site-logo .logo-mark{
+        display:inline-flex;
+        align-items:baseline;
+        font-size:17px;
+        font-weight:500;
+        letter-spacing:-0.005em;
+        color:#1a1a1a;
+        font-family:inherit;
     }
+    .site-logo b{ font-weight:600; transition:color .5s ease; }
     .site-logo .logo-by{
         font-size:11px;
         font-weight:400;
@@ -295,6 +289,14 @@ function getPageConfig() {
 function createNavigation() {
     const { currentPage, ctaButton } = getPageConfig();
 
+    // CTA-ul pentru neautentificați: „Creează cont" pe homepage (drive signup),
+    // „Intră în cont" pe restul (utilizator existent care vine la cont).
+    const isHome = currentPage === 'home';
+    const loginCtaLabel = isHome ? 'Creează cont' : 'Intră în cont';
+    const loginCtaOnclick = isHome
+        ? "window.location.href='/register.html'"
+        : "if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';";
+
     const navItems = [
         { href: '/ce-este/',              label: 'Ce este',           id: 'about'    },
         { href: '/terenuri.html',         label: 'Terenuri',          id: 'land'     },
@@ -318,8 +320,7 @@ function createNavigation() {
       <div class="site-nav-wrap">
         <nav class="site-nav">
             <a href="/" class="site-logo">
-                <span class="logo-text">apartamen<b>TU</b>al</span>
-                <span class="logo-beta" title="Versiune beta — feedback bun-venit la office@ltfbstudio.ro">beta</span>
+                <span class="logo-mark">apartamen<b>TU</b>al</span>
                 <span class="logo-by">by LTFB Studio</span>
             </a>
             <div class="site-nav-links">
@@ -336,8 +337,8 @@ function createNavigation() {
                         <button id="btnLogout"><i class="fas fa-sign-out-alt"></i> Deconectare</button>
                     </div>
                 </div>
-                <a href="#" class="site-nav-cta" id="btnLoginNav" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
-                    Intră în cont
+                <a href="#" class="site-nav-cta" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginCtaOnclick}">
+                    ${loginCtaLabel}
                 </a>
             </div>
             <button class="site-nav-burger" id="navMobileToggle" aria-label="Meniu">
@@ -347,8 +348,8 @@ function createNavigation() {
         <div class="site-nav-mobile" id="navMobileMenu" style="display:none;">
             ${navLinksHTML}
             ${ctaHTML}
-            <a href="#" class="site-nav-cta" id="btnLoginNavMobile" onclick="event.preventDefault(); if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';">
-                Intră în cont
+            <a href="#" class="site-nav-cta" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginCtaOnclick}">
+                ${loginCtaLabel}
             </a>
             <div class="site-nav-mobile-user" id="navMobileUser" style="display:none;">
                 <a href="#" id="btnProfileMobile"><i class="fas fa-user"></i> Profilul meu</a>
