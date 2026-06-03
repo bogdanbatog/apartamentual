@@ -40,12 +40,13 @@
             gap: 0.6rem;
             padding: 0.75rem 1rem;
             border-radius: 0.75rem 0.75rem 0 0;
-            color: white;
+            color: #1a1a1a;
         }
         .phase-number {
             width: 32px;
             height: 32px;
-            background: rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.07);
+            color: #1a1a1a;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -64,7 +65,7 @@
             opacity: 0.85;
         }
         .phase-steps {
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(0,0,0,0.10);
             border-top: none;
             border-radius: 0 0 0.75rem 0.75rem;
             padding: 0.6rem;
@@ -86,7 +87,7 @@
             line-height: 1.3;
         }
         .step-item:hover {
-            background: #f8fafc;
+            background: #f3f0e7;
         }
         .step-dot {
             width: 6px;
@@ -111,7 +112,7 @@
             padding: 0.4rem 0;
         }
         .arrow-svg {
-            filter: drop-shadow(0 1px 2px rgba(245, 158, 11, 0.3));
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.12));
         }
         
         /* Grid placement */
@@ -160,7 +161,7 @@
                         <div class="process-diagram">
                             <!-- Row 1: Phase 1 → Phase 2 -->
                             <div class="diagram-cell-1 phase-block">
-                                <div class="phase-header" style="background: linear-gradient(135deg, #1a1a1a, #404040);">
+                                <div class="phase-header" style="background: #e9eef3;">
                                     <span class="phase-number">1</span>
                                     <div>
                                         <h3>Formarea Grupului</h3>
@@ -169,15 +170,15 @@
                                 </div>
                                 <div class="phase-steps">
                                     <a href="/grupuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #1a1a1a;"></span>
+                                        <span class="step-dot" style="background: #5a7196;"></span>
                                         <span>Găsirea membrilor → <b style="color:#1a1a1a;">Grupuri</b></span>
                                     </a>
                                     <a href="/grupuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #1a1a1a;"></span>
+                                        <span class="step-dot" style="background: #5a7196;"></span>
                                         <span>Stabilirea compatibilității — matching platformă</span>
                                     </a>
                                     <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #1a1a1a;"></span>
+                                        <span class="step-dot" style="background: #5a7196;"></span>
                                         <span>Acțiune în paralel cu căutarea terenurilor ↓</span>
                                     </a>
                                 </div>
@@ -188,7 +189,7 @@
                             </div>
 
                             <div class="diagram-cell-2 phase-block">
-                                <div class="phase-header" style="background: linear-gradient(135deg, #16a34a, #22c55e);">
+                                <div class="phase-header" style="background: #f5efe1;">
                                     <span class="phase-number">2</span>
                                     <div>
                                         <h3>Căutarea și Achiziția Terenului</h3>
@@ -197,35 +198,35 @@
                                 </div>
                                 <div class="phase-steps">
                                     <a href="/terenuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
-                                        <span>Căutare terenuri – filtrare pe → <b style="color:#16a34a;">Terenuri</b></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
+                                        <span>Căutare terenuri – filtrare pe → <b style="color:#1a1a1a;">Terenuri</b></span>
                                     </a>
                                     <a href="/terenuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Cere analiză teren pe platformă (nr. apartamente estimat)</span>
                                     </a>
                                     <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Verifică situație juridică – extras carte funciară online</span>
                                     </a>
                                     <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Vizitare teren + verificare vecini (posibil acord vecini)</span>
                                     </a>
                                     <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Verifică acte teren — notar</span>
                                     </a>
                                     <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Studiu geotehnic preliminar</span>
                                     </a>
                                     <a href="/terenuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Cere analiză detaliată pe platformă (1-2 terenuri finale)</span>
                                     </a>
                                     <a href="#faza2-complex" class="step-item">
-                                        <span class="step-dot" style="background: #16a34a;"></span>
+                                        <span class="step-dot" style="background: #b8965c;"></span>
                                         <span>Achiziția terenului (asociere sau SRL)</span>
                                     </a>
                                 </div>
@@ -241,7 +242,7 @@
 
                             <!-- Row 2: Phase 3 → Phase 4 -->
                             <div class="diagram-cell-3 phase-block">
-                                <div class="phase-header" style="background: linear-gradient(135deg, #555555, #7a7a7a);">
+                                <div class="phase-header" style="background: #f6ebe6;">
                                     <span class="phase-number">3</span>
                                     <div>
                                         <h3>Proiectarea</h3>
@@ -250,31 +251,31 @@
                                 </div>
                                 <div class="phase-steps">
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>Selectare echipă proiectanți (arhitectură-structură-instalații)</span>
                                     </a>
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>Concept (planuri, suprafețe, randări)</span>
                                     </a>
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>Certificat de urbanism pt construire</span>
                                     </a>
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>Avize</span>
                                     </a>
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>Proiect tehnic + oferte constructori</span>
                                     </a>
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>DTAC (autorizația de construire)</span>
                                     </a>
                                     <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #555555;"></span>
+                                        <span class="step-dot" style="background: #c2604a;"></span>
                                         <span>Detalii de execuție</span>
                                     </a>
                                 </div>
@@ -285,7 +286,7 @@
                             </div>
 
                             <div class="diagram-cell-4 phase-block">
-                                <div class="phase-header" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6);">
+                                <div class="phase-header" style="background: #f6eae9;">
                                     <span class="phase-number">4</span>
                                     <div>
                                         <h3>Construcția</h3>
@@ -294,28 +295,28 @@
                                 </div>
                                 <div class="phase-steps">
                                     <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span class="step-dot" style="background: #8f5a48;"></span>
                                         <span>Compară oferte constructori (cere consultanță)</span>
                                     </a>
                                     <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span class="step-dot" style="background: #8f5a48;"></span>
                                         <span>Selectează constructor – structură, instalații, arhitectură</span>
                                     </a>
                                     <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span class="step-dot" style="background: #8f5a48;"></span>
                                         <span>Centralizați-vă structurat cheltuielile</span>
                                     </a>
                                     <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span class="step-dot" style="background: #8f5a48;"></span>
                                         <span>Regulament comunicare grup / decizii</span>
                                     </a>
                                     <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #7c3aed;"></span>
+                                        <span class="step-dot" style="background: #8f5a48;"></span>
                                         <span>Monitorizează îndeaproape execuția / eventual project manager</span>
                                     </a>
                                 </div>
-                                <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: linear-gradient(135deg, #1a1a1a, #333333); border-radius: 0.5rem; text-align: center;">
-                                    <span style="color: #7a7a7a; font-weight: 700; font-size: 0.85rem;">🏠 Te muți în casa ta!</span>
+                                <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #f6eae9; border: 1px solid rgba(0,0,0,0.10); border-radius: 0.5rem; text-align: center;">
+                                    <span style="color: #1a1a1a; font-weight: 700; font-size: 0.85rem;">🏠 Te muți în casa ta!</span>
                                 </div>
                             </div>
                         </div>
@@ -327,10 +328,10 @@
                                 <span style="font-weight: 700; font-size: 0.85rem; color: #555555;">23–54 luni (2–4.5 ani)</span>
                             </div>
                             <div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #e2e8f0;">
-                                <div style="width: 15%; background: #1a1a1a;" title="Formarea Grupului"></div>
-                                <div style="width: 25%; background: #16a34a;" title="Căutarea Terenului"></div>
-                                <div style="width: 28%; background: #555555;" title="Proiectarea"></div>
-                                <div style="width: 32%; background: #7c3aed;" title="Construcția"></div>
+                                <div style="width: 15%; background: #5a7196;" title="Formarea Grupului"></div>
+                                <div style="width: 25%; background: #b8965c;" title="Căutarea Terenului"></div>
+                                <div style="width: 28%; background: #c2604a;" title="Proiectarea"></div>
+                                <div style="width: 32%; background: #8f5a48;" title="Construcția"></div>
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-top: 0.35rem; font-size: 0.7rem; color: #64748b;">
                                 <span>2–6 luni</span>

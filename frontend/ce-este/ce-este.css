@@ -247,14 +247,24 @@
 .ce-content .text-green-600,
 .ce-content .text-red-600 { color:#1a1a1a !important; }
 
-.ce-content .bg-gray-50,
-.ce-content .bg-blue-50,
-.ce-content .bg-green-50,
-.ce-content .bg-orange-50,
-.ce-content .bg-amber-50 { background:#faf8f3 !important; }
+/* Carduri info: pasteluri soft derivate din paleta de accent v9
+   (teracotă, salvie, ardezie, mov, ocru). Tente foarte deschise →
+   textul ink #1a1a1a rămâne lizibil, dar cardurile au culoare blândă. */
+.ce-content .bg-gray-50   { background:#f3f0e7 !important; } /* neutru soft (--bg-soft) */
+.ce-content .bg-blue-50   { background:#e9eef3 !important; } /* ardezie pal */
+.ce-content .bg-green-50  { background:#e9f0ea !important; } /* salvie pal */
+.ce-content .bg-yellow-50,
+.ce-content .bg-amber-50  { background:#f5efe1 !important; } /* nisip / ocru pal */
+.ce-content .bg-purple-50 { background:#f0eaef !important; } /* mov pal */
+.ce-content .bg-orange-50 { background:#f6ebe6 !important; } /* teracotă pal */
+.ce-content .bg-red-50    { background:#f6eae9 !important; } /* roz / cărămiziu pal */
 
+/* Bordurile colorate Tailwind → ton neutru subtil, ca să nu bată pastelurile. */
 .ce-content .border-green-200,
 .ce-content .border-amber-200,
+.ce-content .border-yellow-200,
+.ce-content .border-blue-200,
+.ce-content .border-purple-200,
 .ce-content .border-orange-400 { border-color:rgba(0,0,0,0.10) !important; }
 
 /* Buton portocaliu „Creează cont" → buton ink v9 */
