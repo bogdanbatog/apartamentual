@@ -25,6 +25,18 @@ Sunt **non-developer**. Lucrez iterativ, am nevoie de explicații clare, nu de j
 
 ---
 
+## Igienă context (workflow pentru sesiuni curate)
+
+Pentru a evita confuzia care apare când context window-ul se umple:
+
+1. **La fiecare 30% context folosit, propune `/clear`.** Nu aștepta să fie 50% sau 70% — la 30% calitatea raționamentului tău începe să scadă, mai ales pe cod cu plăți.
+2. **ÎNAINTE de `/clear`, actualizează NOTES.md** cu ce ai descoperit / învățat în sesiune. Astfel, sesiunea următoare începe cu informația salvată, nu pierd nimic.
+3. **Un task = o sesiune.** Nu amesteca task-uri diferite (refactor + bug fix + feature nou) în aceeași sesiune. Mai bine 3 sesiuni curate cu `/clear` între ele decât una lungă confuză.
+4. **La finalul sesiunii**, propune mereu să actualizez HANDOFF.md cu stadiul curent. Asta îmi salvează context pentru sesiunea următoare (mie, chat-ului meu, sau lui Claude care va veni după).
+5. **Înainte de orice task major** (refactor mare, schimbare arhitectură), spune-mi cât context ai estimat că va consuma. Dacă pare mult, fă-mi `/clear` întâi, apoi începem proaspăt.
+
+---
+
 ## ⚠️ REGULI DE SIGURANȚĂ (citește înainte de orice)
 
 Platforma are **plăți reale (Netopia/Oblio) și utilizatori reali**. Greșelile costă bani și încredere.
