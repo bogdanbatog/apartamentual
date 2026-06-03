@@ -102,6 +102,7 @@ function injectChromeAssets() {
         display:flex;
         align-items:center;
         gap:12px;
+        justify-content:flex-end; /* buton/avatar mereu lipite de dreapta */
     }
     .site-nav-cta{
         font-size:12px;
@@ -348,7 +349,7 @@ function createNavigation() {
             <div class="site-nav-links">
                 ${navLinksHTML}
             </div>
-            <div class="site-nav-actions">
+            <div class="site-nav-actions" style="min-width:${isHome ? '200px' : '112px'};">
                 ${ctaHTML}
                 <div class="site-nav-user" id="navUser" style="display:none;">
                     <button class="site-btn-avatar" id="btnUserAvatar" aria-label="Meniu profil">

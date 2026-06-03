@@ -74,8 +74,18 @@
   }
   .container{ max-width:1100px; margin:0 auto; padding:0 1.5rem; }
 
-  /* ── NAV (markup-ul vine din nav.js; lăsăm doar margin-bottom ca să dăm aer față de hero) ── */
-  .site-nav-band{ margin-bottom:3rem; }
+  /* ── NAV (markup-ul vine din nav.js) ──
+     Rezervăm înălțimea header-ului injectat de JS + aerul de 3rem față de hero,
+     direct pe #navigation, ca să nu sară conținutul când apare header-ul.
+     Valori măsurate: 69px desktop / 77px mobil (cu hamburger). */
+  #navigation{
+    min-height:69px;
+    background:var(--bg);
+    box-shadow:inset 0 -1px 0 var(--rule);
+    margin-bottom:3rem;
+  }
+  @media (max-width:768px){ #navigation{ min-height:77px; } }
+  .site-nav-band{ margin-bottom:0; }
   .site-logo{
     font-size:17px;
     font-weight:500;
