@@ -40,10 +40,17 @@ Lansare publică iminentă, dar nu există dată fixă.
   - Homepage trecut la `<div id="navigation"></div>` + Supabase SDK + supabase-config.js + login-modal.js + nav.js (toate scripturile la finalul body, în aceeași ordine ca pe paginile interioare). Header-ul de pe homepage acum identic poziționat cu restul (banda crem full-width).
   - Auth-aware nav pe homepage: când nelogat → „Intră în cont" (link text) + „Creează cont" (buton chenar); când logat → avatar+dropdown.
   - CTA „Cum funcționează" din hero homepage → link la subpagina `/ce-este/cum-functioneaza.html` (înainte trimitea la `/ce-este/#cum-functioneaza`, hash spre o secțiune).
+- **Aliniere corp pagini la v9 — secțiunea `ce-este/` (3 iunie)** — pas 1 din migrarea graficii v9 pe restul site-ului. Creat `frontend/css/apartamentual-v9.css` = fundația CSS comună pentru **corpul** paginilor (tokenuri `:root`, tipografie, butoane `.cta-primary/.cta-secondary`, `.section`, `.card`, `.avantaje`, `.steps`, `.faq`, `.cta-final`, footer), extrasă 1:1 din homepage. Migrate toate cele 6 pagini din `ce-este/`:
+  - `ce-este/index.html` (hub) rescris complet în v9 (hero, carduri-hub crem, `.avantaje`, `.cta-final`); scos Tailwind + styles.css + stilurile slate/portocaliu.
+  - Celelalte 5 (`prezentare-generala`, `cum-functioneaza`, `exemple-europa`, `legislatia-romania`, `testimoniale`): `ce-este/ce-este.css` rescris în paletă v9 (hero crem, secțiuni soft, tabele/tip-uri/stat-uri ink) + strat override scoped `.ce-content` pentru rămășițe Tailwind (bg-orange/amber, buton portocaliu, numere colorate). Head curățat: scos `/nav.css`, adăugat `apartamentual-v9.css`, scos `bg-gray-50/text-gray-900` de pe body. Tailwind + styles.css **păstrate** (markup-ul depinde de ele). Diagrama de proces din `cum-functioneaza` recolorată monocrom ink.
+  - **Conținut**: corectate 3 promisiuni de procent de economie din `testimoniale.html` („25%", „20% economie") → mesaj conform („toți banii rămân în apartament"). **DE FĂCUT**: `ce-este/testimoniale.html` conține un proiect care pare fabricat („Parcul Circului", stats inventate) — de înlocuit cu testimonialul real T.M. (Strada Județului).
+  - Strategie agreată pentru restul: **C (hibrid)** = fundație CSS comună + rafinare pagină cu pagină.
 
 ---
 
 ## Ce e în lucru sau pe orizont apropiat
+
+- **Aliniere v9 — paginile rămase** (după `ce-este/`, deja făcut): terenuri, grupuri, utilizatori, parteneri, povestea-noastra, contact, register, consultanta, devino-partener, ghid, news, analize, comanda-analiza, gdpr, termeni, politica-retur, teren-details, grup-detail. Pe fiecare: link `css/apartamentual-v9.css`, scos `/nav.css` (mort), aliniat corpul la componentele v9. Atenție la paginile cu fetch Supabase (terenuri, grupuri, teren-details, comanda-analiza) — doar straturi vizuale, fără structură DOM.
 
 - **Automatizare deploy** — apartamentual.ro se deployează prin **cPanel** (NU Render, cum scrie CLAUDE.md): `.cpanel.yml` copiază `frontend/*` în `/home/ar4/app.ltfbstudio.ro/`. Momentan Lucian dă manual din cPanel „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel sau remote git direct care rulează `.cpanel.yml` la push).
 - **Cod mort + flash header rămas de curățat după unificarea header/footer v9**:

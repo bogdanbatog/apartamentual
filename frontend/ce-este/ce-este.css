@@ -1,82 +1,107 @@
-/* ── CE ESTE PAGES - SHARED STYLES ── */
+/* ══════════════════════════════════════════════════════════════
+   CE ESTE — stiluri comune (reskin v9, self-contained)
+   Paletă: crem #faf8f3 / soft #f3f0e7 / ink #1a1a1a · font Mona Sans.
+   Recolorează clasele .ce-* și domolește rămășițele din styles.css
+   (linkuri albastre, carduri albe) în interiorul .ce-content.
+   ══════════════════════════════════════════════════════════════ */
 
-/* Hero banner */
+/* Hero banner (fost gradient slate → crem v9) */
 .ce-page-hero {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    color: white;
-    padding: 3rem 1rem 2rem;
+    background: #faf8f3;
+    border-bottom: 1px solid rgba(0,0,0,0.10);
+    color: #1a1a1a;
+    padding: 2.5rem 1.5rem 2.75rem;
     text-align: center;
+    font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 .ce-page-hero h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    font-size: 2.4rem;
+    font-weight: 500;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
+    color: #1a1a1a;
+    margin-bottom: 0.6rem;
 }
 .ce-page-hero p {
-    color: #94a3b8;
-    font-size: 1rem;
-    max-width: 600px;
+    color: #555555;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    max-width: 640px;
     margin: 0 auto;
 }
 
-/* Breadcrumb inside hero */
+/* Breadcrumb (fost portocaliu → ink) */
 .ce-breadcrumb {
     max-width: 800px;
     margin: 0 auto 1rem;
     font-size: 0.82rem;
-    color: #94a3b8;
+    color: #8a8a8a;
 }
 .ce-breadcrumb a {
-    color: #f59e0b;
+    color: #1a1a1a;
     text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s ease;
 }
 .ce-breadcrumb a:hover {
-    text-decoration: underline;
+    border-bottom-color: #1a1a1a;
+    text-decoration: none;
 }
 .ce-breadcrumb .sep {
     margin: 0 0.4rem;
     opacity: 0.5;
 }
 
-/* Main content area */
+/* Zona de conținut (fără overlap negativ peste hero) */
 .ce-content {
     max-width: 800px;
-    margin: -1rem auto 3rem;
-    padding: 0 1rem;
+    margin: 2.5rem auto 3rem;
+    padding: 0 1.5rem;
     position: relative;
     z-index: 1;
+    font-family: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+}
+/* Domolește rămășițele din styles.css în interiorul conținutului */
+.ce-content a {
+    color: #1a1a1a;
+}
+.ce-content a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
-/* Section cards */
+/* Carduri-secțiune (fost alb cu umbră → soft v9) */
 .ce-section {
-    background: white;
-    border-radius: 0.75rem;
-    border: 1px solid #e2e8f0;
-    padding: 2rem;
+    background: #f3f0e7;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.10);
+    padding: 2rem 2.25rem;
     margin-bottom: 1.25rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: none;
 }
 .ce-section h2 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #1e293b;
+    font-size: 1.45rem;
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    color: #1a1a1a;
     margin-bottom: 1rem;
 }
 .ce-section h3 {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #1e293b;
+    color: #1a1a1a;
     margin-bottom: 0.5rem;
 }
 .ce-section h4 {
     font-size: 0.92rem;
     font-weight: 600;
-    color: #334155;
+    color: #1a1a1a;
     margin-bottom: 0.4rem;
 }
 .ce-section p {
-    font-size: 0.92rem;
-    color: #475569;
+    font-size: 0.95rem;
+    color: #555555;
     line-height: 1.7;
     margin-bottom: 0.75rem;
 }
@@ -85,59 +110,62 @@
     padding: 0;
 }
 .ce-section li {
-    font-size: 0.88rem;
-    color: #475569;
+    font-size: 0.9rem;
+    color: #555555;
     line-height: 1.6;
     padding: 0.2rem 0;
 }
 
-/* Info boxes */
+/* Info box generic */
 .ce-info-box {
     padding: 1.25rem;
-    border-radius: 0.6rem;
+    border-radius: 8px;
     margin-bottom: 1rem;
+    background: #faf8f3;
+    border: 1px solid rgba(0,0,0,0.10);
 }
 .ce-info-box h3 {
     font-size: 0.95rem;
     margin-bottom: 0.6rem;
 }
 
-/* Highlight tip box */
+/* Tip / accent (fost amber → bandă ink stânga, stil quote v9) */
 .ce-tip {
     padding: 1rem 1.25rem;
-    border-radius: 0.6rem;
-    background: #fffbeb;
-    border-left: 3px solid #f59e0b;
+    border-radius: 0 8px 8px 0;
+    background: #faf8f3;
+    border-left: 3px solid #1a1a1a;
     margin-bottom: 1rem;
-    font-size: 0.88rem;
-    color: #92400e;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #1a1a1a;
 }
 
-/* Table styling */
+/* Tabele (fost slate → crem/ink) */
 .ce-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     margin-bottom: 1rem;
 }
 .ce-table th {
-    background: #f8fafc;
-    color: #1e293b;
+    background: #faf8f3;
+    color: #1a1a1a;
     font-weight: 600;
     text-align: left;
     padding: 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(0,0,0,0.10);
 }
 .ce-table td {
     padding: 0.75rem;
-    border: 1px solid #e2e8f0;
-    color: #475569;
+    border: 1px solid rgba(0,0,0,0.10);
+    color: #555555;
 }
 .ce-table tr:nth-child(even) td {
-    background: #f8fafc;
+    background: rgba(0,0,0,0.02);
 }
 
-/* Navigation links at bottom */
+/* Linkuri de navigație jos (fost hover portocaliu → ink) */
 .ce-nav-links {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -145,66 +173,101 @@
     margin-top: 1.5rem;
 }
 .ce-nav-link {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    background: #f3f0e7;
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 10px;
     padding: 1.25rem;
     text-decoration: none;
     color: inherit;
-    transition: all 0.2s;
+    transition: transform .2s ease, border-color .2s ease;
 }
 .ce-nav-link:hover {
-    border-color: #f59e0b;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.25);
     transform: translateY(-2px);
 }
 .ce-nav-link h4 {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #1e293b;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a1a;
     margin-bottom: 0.3rem;
 }
 .ce-nav-link p {
-    font-size: 0.78rem;
-    color: #64748b;
+    font-size: 0.8rem;
+    color: #555555;
     margin: 0;
 }
 
-/* 2 column grid */
+/* Grid-uri */
 .ce-grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
 }
-
-/* 3 column grid */
 .ce-grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.25rem;
 }
 
-/* Stat cards */
+/* Stat cards (fost număr portocaliu → ink) */
 .ce-stat {
     text-align: center;
     padding: 1.5rem 1rem;
 }
 .ce-stat .number {
     font-size: 2rem;
-    font-weight: 800;
-    color: #f59e0b;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #1a1a1a;
     line-height: 1;
     margin-bottom: 0.3rem;
 }
 .ce-stat .label {
     font-size: 0.82rem;
-    color: #64748b;
+    color: #8a8a8a;
 }
 
 @media (max-width: 640px) {
-    .ce-page-hero { padding: 2rem 1rem 1.5rem; }
-    .ce-page-hero h1 { font-size: 1.6rem; }
-    .ce-section { padding: 1.25rem; }
+    .ce-page-hero { padding: 2rem 1.25rem 1.75rem; }
+    .ce-page-hero h1 { font-size: 1.7rem; }
+    .ce-section { padding: 1.5rem 1.25rem; }
     .ce-grid-2, .ce-grid-3 { grid-template-columns: 1fr; }
     .ce-nav-links { grid-template-columns: 1fr; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   OVERRIDE rămășițe Tailwind (albastru/portocaliu/amber/verde)
+   în interiorul .ce-content → paletă v9. Scoped: afectează doar
+   paginile „Ce este". Folosim !important ca să batem utilitarele
+   Tailwind și stilurile inline neimportante.
+   ══════════════════════════════════════════════════════════════ */
+.ce-content .text-blue-600,
+.ce-content .text-orange-600,
+.ce-content .text-orange-800,
+.ce-content .text-green-600,
+.ce-content .text-red-600 { color:#1a1a1a !important; }
+
+/* Carduri info: pasteluri soft derivate din paleta de accent v9
+   (teracotă, salvie, ardezie, mov, ocru). Tente foarte deschise →
+   textul ink #1a1a1a rămâne lizibil, dar cardurile au culoare blândă. */
+.ce-content .bg-gray-50   { background:#f3f0e7 !important; } /* neutru soft (--bg-soft) */
+.ce-content .bg-blue-50   { background:#e9eef3 !important; } /* ardezie pal */
+.ce-content .bg-green-50  { background:#e9f0ea !important; } /* salvie pal */
+.ce-content .bg-yellow-50,
+.ce-content .bg-amber-50  { background:#f5efe1 !important; } /* nisip / ocru pal */
+.ce-content .bg-purple-50 { background:#f0eaef !important; } /* mov pal */
+.ce-content .bg-orange-50 { background:#f6ebe6 !important; } /* teracotă pal */
+.ce-content .bg-red-50    { background:#f6eae9 !important; } /* roz / cărămiziu pal */
+
+/* Bordurile colorate Tailwind → ton neutru subtil, ca să nu bată pastelurile. */
+.ce-content .border-green-200,
+.ce-content .border-amber-200,
+.ce-content .border-yellow-200,
+.ce-content .border-blue-200,
+.ce-content .border-purple-200,
+.ce-content .border-orange-400 { border-color:rgba(0,0,0,0.10) !important; }
+
+/* Buton portocaliu „Creează cont" → buton ink v9 */
+.ce-content .bg-orange-500,
+.ce-content .bg-orange-600 { background:#1a1a1a !important; }
+.ce-content .hover\:bg-orange-600:hover { background:#000 !important; }
