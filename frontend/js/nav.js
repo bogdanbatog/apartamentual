@@ -51,7 +51,10 @@ function injectChromeAssets() {
         display:flex;
         align-items:center;
         justify-content:space-between;
-        padding:18px 0 22px;
+        height:68px;          /* înălțime fixă → band-ul = 68px + 1px border = 69px,
+                                 egal cu spațiul rezervat pe #navigation. Nu mai depinde
+                                 de starea logat/nelogat sau de încărcarea fontului. */
+        box-sizing:border-box;
         gap:24px;
         font-family:"Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
         color:#1a1a1a;
