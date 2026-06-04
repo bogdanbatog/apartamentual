@@ -63,8 +63,8 @@ function injectChromeAssets() {
         color:#1a1a1a;
         text-decoration:none;
         display:inline-flex;
-        align-items:center;
-        gap:10px;
+        align-items:baseline;
+        gap:5px;
     }
     .site-logo .logo-mark{
         display:inline-flex;
