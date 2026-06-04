@@ -304,21 +304,19 @@ function getPageConfig() {
 function createNavigation() {
     const { currentPage, ctaButton } = getPageConfig();
 
-    // Pe homepage afișăm AMBELE elemente pentru neautentificați:
-    //   „Intră în cont" (link text simplu) + „Creează cont" (buton CTA în chenar)
-    // Pe paginile interioare doar „Intră în cont" în chenar.
-    const isHome = currentPage === 'home';
+    // Pe TOATE paginile afișăm aceleași elemente pentru neautentificați:
+    //   „Intră în cont" (link text) + „Creează cont" (buton CTA în chenar).
+    // Zona din dreapta are lățime fixă (vezi min-width mai jos), ca header-ul
+    // să nu „sară" între pagini sau între stările logat/nelogat.
     const loginOnclick = "if(window._registerPage){window.location.href='/index.html?login=1';return;} if(typeof openLoginModal==='function') openLoginModal(); else window.location.href='/index.html?login=1';";
 
-    // Markup pentru aria de auth — variabilă în funcție de pagină
-    const authHTML = isHome
-        ? `<a href="#" class="site-nav-login-link" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>
-           <a href="/register.html" class="site-nav-cta" id="btnRegisterCta" style="display:none;">Creează cont</a>`
-        : `<a href="#" class="site-nav-cta" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>`;
-    const authMobileHTML = isHome
-        ? `<a href="#" class="site-nav-login-link" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>
-           <a href="/register.html" class="site-nav-cta" id="btnRegisterCtaMobile" style="display:none;">Creează cont</a>`
-        : `<a href="#" class="site-nav-cta" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>`;
+    // Markup pentru aria de auth — identic pe toate paginile
+    const authHTML =
+        `<a href="#" class="site-nav-login-link" id="btnLoginNav" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>
+         <a href="/register.html" class="site-nav-cta" id="btnRegisterCta" style="display:none;">Creează cont</a>`;
+    const authMobileHTML =
+        `<a href="#" class="site-nav-login-link" id="btnLoginNavMobile" style="display:none;" onclick="event.preventDefault(); ${loginOnclick}">Intră în cont</a>
+         <a href="/register.html" class="site-nav-cta" id="btnRegisterCtaMobile" style="display:none;">Creează cont</a>`;
 
     const navItems = [
         { href: '/ce-este/',              label: 'Ce este',           id: 'about'    },
@@ -349,7 +347,7 @@ function createNavigation() {
             <div class="site-nav-links">
                 ${navLinksHTML}
             </div>
-            <div class="site-nav-actions" style="min-width:${isHome ? '200px' : '112px'};">
+            <div class="site-nav-actions" style="min-width:200px;">
                 ${ctaHTML}
                 <div class="site-nav-user" id="navUser" style="display:none;">
                     <button class="site-btn-avatar" id="btnUserAvatar" aria-label="Meniu profil">
