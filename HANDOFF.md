@@ -1,7 +1,7 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 3 iunie 2026 (sesiune migrare v9: povestea-noastra + parteneri + pasteluri ce-este)
+> Ultima actualizare: 5 iunie 2026 (sesiune polish v9: testimonial real, header fix/unificat, diagrama cronologiei, flash-uri header curățate)
 
 ---
 
@@ -43,7 +43,7 @@ Lansare publică iminentă, dar nu există dată fixă.
 - **Aliniere corp pagini la v9 — secțiunea `ce-este/` (3 iunie)** — pas 1 din migrarea graficii v9 pe restul site-ului. Creat `frontend/css/apartamentual-v9.css` = fundația CSS comună pentru **corpul** paginilor (tokenuri `:root`, tipografie, butoane `.cta-primary/.cta-secondary`, `.section`, `.card`, `.avantaje`, `.steps`, `.faq`, `.cta-final`, footer), extrasă 1:1 din homepage. Migrate toate cele 6 pagini din `ce-este/`:
   - `ce-este/index.html` (hub) rescris complet în v9 (hero, carduri-hub crem, `.avantaje`, `.cta-final`); scos Tailwind + styles.css + stilurile slate/portocaliu.
   - Celelalte 5 (`prezentare-generala`, `cum-functioneaza`, `exemple-europa`, `legislatia-romania`, `testimoniale`): `ce-este/ce-este.css` rescris în paletă v9 (hero crem, secțiuni soft, tabele/tip-uri/stat-uri ink) + strat override scoped `.ce-content` pentru rămășițe Tailwind (bg-orange/amber, buton portocaliu, numere colorate). Head curățat: scos `/nav.css`, adăugat `apartamentual-v9.css`, scos `bg-gray-50/text-gray-900` de pe body. Tailwind + styles.css **păstrate** (markup-ul depinde de ele). Diagrama de proces din `cum-functioneaza` recolorată monocrom ink.
-  - **Conținut**: corectate 3 promisiuni de procent de economie din `testimoniale.html` („25%", „20% economie") → mesaj conform („toți banii rămân în apartament"). **DE FĂCUT**: `ce-este/testimoniale.html` conține un proiect care pare fabricat („Parcul Circului", stats inventate) — de înlocuit cu testimonialul real T.M. (Strada Județului).
+  - **Conținut**: corectate 3 promisiuni de procent de economie din `testimoniale.html` („25%", „20% economie") → mesaj conform („toți banii rămân în apartament"). **REZOLVAT (5 iunie)**: proiectul fabricat („Parcul Circului" + stats inventate) înlocuit cu testimonialul real Tiberiu M. (Județului Housing) — vezi blocul „Sesiune polish v9 (5 iunie)" mai jos.
   - Strategie agreată pentru restul: **C (hibrid)** = fundație CSS comună + rafinare pagină cu pagină.
 - **Aliniere corp pagini la v9 — povestea-noastra + parteneri (3 iunie)** — pasul 2. Ambele migrate prin reskin în-pagină: scos DM Sans + `nav.css`, legat `apartamentual-v9.css`, blocul `<style>` propriu rescris în paletă v9 (crem/ink), păstrând structura HTML + layout-ul specific + logica.
   - `povestea-noastra.html` (commit `7c17f24`): hero video pe ink, articol long-form, figuri, autori; butoane final → `.cta-primary/.cta-secondary`.
@@ -54,6 +54,16 @@ Lansare publică iminentă, dar nu există dată fixă.
   - `cum-functioneaza.html`: headerele fazelor 1-4 din gradient verde/mov/gri-închis → pasteluri cu text ink; puncte + bara de timeline în tonuri saturate (`#5a7196`/`#b8965c`/`#c2604a`/`#8f5a48`); caseta „Te muți în casa ta!" din fundal închis → pastel cu text ink. (Înlocuiește nota mai veche „diagrama recolorată monocrom ink".)
   - **Regula de culoare a lui Lucian**: fundalurile pot fi colorate dar PALE, ca textul negru să rămână lizibil; NU negru/gri-închis cu text negru; a respins verde `#16a34a`, mov `#7c3aed`, gri-închis pe headere.
 - **Toate cele de mai sus sunt pe `main`** (PR #1 fuzionat, commit merge `f098320`). Rămâne doar deploy-ul din cPanel (checkout `main` → Update from Remote → Deploy HEAD Commit).
+- **Sesiune polish v9 (5 iunie) — totul pe `main`, împins, NEDEPLOYAT încă din cPanel**:
+  - `7b1b452` Testimonial real **Tiberiu M.** (Județului Housing) în loc de cel fabricat („Parcul Circului" + stats inventate) în `ce-este/testimoniale.html`; atribuirea citatului aliniată și pe homepage (T.M. → Tiberiu M.) + formulare identică. (Notă: „Parcul Circului" ca **reper geografic** în `povestea-noastra.html` e legitim — terenul real de pe Str. Județului e lângă Parcul Circului; NU e fabricație.)
+  - `1cc05ef` Scos cardul „Testimoniale" din hub-ul `ce-este/` + cele 2 cross-linkuri „Continuă să explorezi" (testimonialul unic nu justifică secțiune proeminentă). Pagina `testimoniale.html` rămâne accesibilă direct prin URL.
+  - `39ef02d` „by LTFB Studio" apropiat de logo (gap 10→5px) + aliniat la baseline (în `nav.js`).
+  - `71c87a6` Diagrama „Cronologia unui proiect" din `cum-functioneaza`: carduri **verticale** (1→2→3→4) în loc de zigzag cu săgeți, săgeți scoase, numere păstrate; culori per fază mai distincte (1 albastru `#e9eef3`, 2 verde `#e7f0e8`, 3 ocru `#f5efda`, 4 teracotă `#f3e3dc` — toate pale); bara „durată estimată" primește exact aceleași culori ca punctele/cardurile.
+  - `ae63f5c` Banda de credibilitate de pe homepage (cele 3 fraze sub grafica cu pătrate) distribuită echidistant (`justify-content:space-between`), scoase separatoarele „·".
+  - `1c438b9` **Header fix și identic pe toate paginile**: scoasă excepția de homepage din `nav.js` — zona din dreapta arată aceleași elemente peste tot pentru nelogați („Intră în cont" + „Creează cont"), cu lățime fixă (`min-width:200px`). Nu mai „sare" header-ul între homepage și restul, nici între logat/nelogat (cerculețul-avatar ocupă același spațiu).
+  - `0233d86` Eliminată **linia dublă + saltul** header-ului la încărcare: scoasă linia-placeholder `box-shadow inset` de pe `#navigation` (în `apartamentual-v9.css` + `index.html`); `.site-nav` are acum **înălțime fixă 68px** (band = 69px) = spațiul rezervat, deci nu mai depinde de stare/font; rezervare mobil 77→69px.
+  - `3c55677` `povestea-noastra`: adăugat SDK-ul Supabase (lipsea → `supabase-config.js` crăpa pe `window.supabase` undefined → `checkAuthState` nu rula → butoanele auth rămâneau ascunse). `terenuri`: nav vechi inline → `<div id="navigation">` (fără flash portocaliu „Propune teren").
+  - `24af9c9` Același fix de flash pe `grup-details`, `grup-edit`, `grup-nou` (nav vechi `<nav class="main-nav">` inline → `<div id="navigation">`).
 
 ---
 
@@ -63,7 +73,7 @@ Lansare publică iminentă, dar nu există dată fixă.
 
 - **Automatizare deploy** — apartamentual.ro se deployează prin **cPanel** (NU Render, cum scrie CLAUDE.md): `.cpanel.yml` copiază `frontend/*` în `/home/ar4/app.ltfbstudio.ro/`. Momentan Lucian dă manual din cPanel „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel sau remote git direct care rulează `.cpanel.yml` la push).
 - **Cod mort + flash header rămas de curățat după unificarea header/footer v9**:
-  - **Flash de header vechi** încă vizibil la refresh pe: `terenuri.html`, `grup-details.html`, `grup-edit.html`, `grup-nou.html` — pe acestea nav-ul vechi e încă scris inline `<nav class="navbar">` / `<nav class="main-nav">`, înlocuit dinamic de nav.js la încărcare. De înlocuit cu `<div id="navigation"></div>` (același tratament ca pe utilizatori/grupuri, deja făcute).
+  - **Flash de header vechi — REZOLVAT (5 iunie)** pe `terenuri.html`, `grup-details.html`, `grup-edit.html`, `grup-nou.html` (toate trecute la `<div id="navigation"></div>`). Nu mai sunt pagini cunoscute cu nav vechi inline.
   - `frontend/nav.css` — definește clase `.unified-nav-*` care nu mai există în DOM (nav.js generează acum `.site-nav-*`). Multe pagini încă includ `<link rel="stylesheet" href="/nav.css">` — inofensiv, dar de șters împreună cu referințele.
   - `frontend/js/fab-consultanta.js` (227 linii) — copie veche a nav.js, neutilizată acum (am scos referința de pe parteneri.html, singura care o avea). Fișierul rămâne pe disc — de șters.
   - `frontend/fab-consultanta.css` — același caz, neutilizat acum.
