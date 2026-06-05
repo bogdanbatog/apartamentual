@@ -1,15 +1,18 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 5 iunie 2026 (sesiune flash header: Font Awesome pe homepage, nav.js desenat imediat, reordonare scripturi pe 9 pagini)
+> Ultima actualizare: 6 iunie 2026 (sesiune curățare cod mort: șters fab-consultanta.js + .css, 303 linii; flash header confirmat rezolvat live + task închis)
 
 ---
 
 ## ⏭️ DE ÎNCEPUT ÎN SESIUNEA URMĂTOARE (după /clear)
 
-**Flash header — TASK ÎNCHIS (6 iunie).** Lucian a făcut deploy din cPanel și a confirmat că header-ul se încarcă vizibil bine, fără dispariție la refresh. A decis explicit să **lăsăm așa** paginile rămase (cele cu Supabase în `<head>` + `nav.js` la finalul body-ului: admin-*, `ce-este/*`, `parteneri`, `contact`, `gdpr`, `povestea-noastra`, `termeni`, `politica-retur`, `devino-partener`, `register`, `prototip`, `teren-details`, profile-uri, `consultanta`, `news`, `grup-*`). Pe alea flash-ul e neglijabil (Supabase e deja descărcat înainte de paint). Dacă se observă vreodată flash pe vreuna, soluția e mutarea `<script src="js/nav.js">` imediat după `<div id="navigation">`, cu grijă la scripturile inline care depind de `sb`/`supabase`. Commit-urile din rezolvarea aplicată: `15f3397` + `e5246f7` + `fecf80c`.
+**Niciun task obligatoriu în desfășurare — alege unul dintre cele de pe orizont.** Ultimele două sesiuni (flash header + curățare cod mort) sunt închise și deployate. Recomandate, în ordinea valorii:
 
-**Următorul task de ales** (vezi „Ce e în lucru sau pe orizont apropiat"): aliniere v9 pe paginile rămase SAU automatizare deploy cPanel.
+1. **Aliniere v9 — paginile rămase** (cel mai vizibil progres). Pagini nemigrate la design system v9: `terenuri`, `grupuri`, `utilizatori`, `contact`, `register`, `consultanta`, `devino-partener`, `ghid`, `news`, `analize`, `comanda-analiza`, `gdpr`, `termeni`, `politica-retur`, `teren-details`, `grup-details`. Pe fiecare: link `css/apartamentual-v9.css`, scos `<link href="/nav.css">` (devine mort DOAR după ce pagina are v9 — vezi nota despre nav.css mai jos), aliniat corpul la componentele v9. ATENȚIE la paginile cu fetch Supabase (terenuri, grupuri, utilizatori, teren-details, comanda-analiza) — doar straturi vizuale, NU schimba structura DOM; pe paginile cu markup generat din JS NU schimba numele claselor (vezi pattern-ul de la `parteneri`). Strategie agreată: **C (hibrid)** — fundație CSS comună + rafinare pagină cu pagină. Un task = o sesiune; ia 2-3 pagini odată, nu toate.
+2. **Automatizare deploy cPanel** — acum Lucian dă manual „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel).
+
+**Notă legată de nav.css (descoperită 6 iunie):** `nav.css` NU e cod mort cât timp paginile nu sunt migrate la v9 — el rezervă înălțimea header-ului (`#navigation { min-height:69px }`) ȘI încarcă fontul DM Sans pe ~25 de pagini. Pe măsură ce o pagină primește `apartamentual-v9.css`, ABIA ATUNCI se poate scoate `<link href="/nav.css">` de pe ea. Deci curățarea referințelor nav.css merge mână în mână cu migrarea v9, nu separat.
 
 ---
 
