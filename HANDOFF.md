@@ -1,7 +1,14 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 5 iunie 2026 (sesiune polish v9: testimonial real, header fix/unificat, diagrama cronologiei, flash-uri header curățate)
+> Ultima actualizare: 5 iunie 2026 (sesiune flash header: Font Awesome pe homepage, nav.js desenat imediat, reordonare scripturi pe 9 pagini)
+
+---
+
+## ⏭️ DE ÎNCEPUT ÎN SESIUNEA URMĂTOARE (după /clear)
+
+**Termină eliminarea flash-ului de header pe paginile cu Supabase în `<head>`.**
+În sesiunea din 5 iunie am rezolvat flash-ul de header gol pe homepage + 9 pagini care aveau scripturile (Supabase + config + login + nav.js) grupate la finalul body-ului — am mutat `nav.js` primul, ca header-ul să nu mai aștepte descărcarea bundle-ului Supabase. **Au rămas neatinse** paginile care încarcă Supabase SDK în `<head>` și au `nav.js` singur la finalul body-ului (admin-*, `ce-este/*`, `parteneri`, `contact`, `gdpr`, `povestea-noastra`, `termeni`, `politica-retur`, `devino-partener`, `register`, `prototip`, `teren-details`, profile-uri, `consultanta`, `news`, `grup-*`). Acolo Supabase e deja descărcat înainte de paint, deci flash-ul e mai mic (doar parsarea body-ului), dar pentru consistență totală header-ul ar trebui să apară imediat ce e parsat `#navigation`, nu la finalul body-ului. **Abordare de evaluat** (mai delicată — Supabase în head poate fi consumat de scripturi inline din pagină): fie muți `<script src="js/nav.js">` imediat după `<div id="navigation">`, fie altă soluție care nu strică ordinea `sb`. Vezi memoria `next-session-nav-flash-head-pages` și commit-urile `15f3397` + `e5246f7`.
 
 ---
 
@@ -64,6 +71,11 @@ Lansare publică iminentă, dar nu există dată fixă.
   - `0233d86` Eliminată **linia dublă + saltul** header-ului la încărcare: scoasă linia-placeholder `box-shadow inset` de pe `#navigation` (în `apartamentual-v9.css` + `index.html`); `.site-nav` are acum **înălțime fixă 68px** (band = 69px) = spațiul rezervat, deci nu mai depinde de stare/font; rezervare mobil 77→69px.
   - `3c55677` `povestea-noastra`: adăugat SDK-ul Supabase (lipsea → `supabase-config.js` crăpa pe `window.supabase` undefined → `checkAuthState` nu rula → butoanele auth rămâneau ascunse). `terenuri`: nav vechi inline → `<div id="navigation">` (fără flash portocaliu „Propune teren").
   - `24af9c9` Același fix de flash pe `grup-details`, `grup-edit`, `grup-nou` (nav vechi `<nav class="main-nav">` inline → `<div id="navigation">`).
+- **Sesiune flash header (5 iunie, seara) — totul pe `main`, împins, NEDEPLOYAT încă din cPanel**:
+  - `fecf80c` **Font Awesome pe homepage**: `index.html` era SINGURA pagină din 41 care nu încărca Font Awesome → iconițele injectate de `nav.js` (`fa-user` pe avatar, `fa-arrow-up` pe scroll-to-top, plus dropdown profil + burger mobil) rămâneau invizibile (doar cerculețe goale). Adăugat `<link>`-ul 6.5.1 de pe cdnjs, identic cu restul paginilor.
+  - `15f3397` **Eliminat flash-ul de header gol la refresh/navigare**: în `nav.js`, codul care desenează header-ul + butoanele flotante a fost mutat dintr-un handler `DOMContentLoaded` (care se declanșa abia după ce se descărcau TOATE scripturile, inclusiv bundle-ul mare Supabase) într-o funcție `initChrome()` apelată **imediat** (dacă `document.body` există deja — adevărat la finalul body-ului; altfel cade pe DOMContentLoaded). Pe homepage am reordonat și scripturile: `nav.js` primul, înaintea Supabase SDK → header-ul apare aproape instant; starea auth (avatar) se completează prin polling-ul existent după `sb`.
+  - `e5246f7` Aceeași reordonare (`nav.js` primul) pe **9 pagini** care aveau Supabase + config + login + nav.js grupate la finalul body-ului: `grupuri`, `terenuri`, `utilizatori`, `analize`, `analiza-detaliata`, `analiza-simplificata`, `comanda-analiza`, `termeni-analize`, `ghid`.
+  - ⏭️ **Rămâne** (vezi blocul de la începutul fișierului): paginile cu Supabase în `<head>` + `nav.js` singur la final — header-ul tot apare la finalul parsării body-ului. De abordat la începutul sesiunii următoare.
 
 ---
 
