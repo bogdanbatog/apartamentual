@@ -566,7 +566,10 @@ async function checkAuthState() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function initChrome() {
+    if (initChrome._ran) return;   // rulează o singură dată
+    initChrome._ran = true;
+
     loadNavigation();
 
     // Scroll-to-top button (stil v9)
@@ -592,6 +595,19 @@ document.addEventListener('DOMContentLoaded', function() {
         fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span>Cere consultanță</span>';
         document.body.appendChild(fab);
     }
-});
+}
+
+// Desenăm chrome-ul (header + butoane flotante) cât mai devreme posibil.
+// nav.js e încărcat la finalul body-ului, deci `document.body` și containerul
+// #navigation există deja → nu mai așteptăm evenimentul „DOMContentLoaded"
+// (care s-ar declanșa abia după ce se descarcă TOATE scripturile, inclusiv
+// bundle-ul mare Supabase). Așa eliminăm flash-ul header-ului gol la refresh /
+// schimbare de pagină. Dacă scriptul ajunge vreodată în <head> (fără body încă),
+// cădem elegant pe DOMContentLoaded.
+if (document.body) {
+    initChrome();
+} else {
+    document.addEventListener('DOMContentLoaded', initChrome);
+}
 
 })();
