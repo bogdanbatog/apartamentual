@@ -78,8 +78,8 @@
 }
 
 .note-btn-edit:hover {
-    color: #f97316;
-    background: #fff7ed;
+    color: #c2604a;
+    background: #f6ebe6;
 }
 
 .note-btn-delete:hover {
@@ -114,7 +114,7 @@
 }
 
 .teren-note-editor textarea:focus {
-    border-color: #f97316;
+    border-color: #c2604a;
 }
 
 .teren-note-editor textarea::placeholder {
@@ -130,7 +130,7 @@
 
 .note-btn-save {
     padding: 5px 14px;
-    background: #f97316;
+    background: #1a1a1a;
     color: white;
     border: none;
     border-radius: 6px;
@@ -144,7 +144,7 @@
 }
 
 .note-btn-save:hover {
-    background: #ea580c;
+    background: #000;
 }
 
 .note-btn-cancel {
