@@ -1,0 +1,64 @@
+/* ══════════════════════════════════════════════════════════════
+   ApartamenTUal — Reskin v9 pentru paginile-document (text lung).
+   Folosit de: gdpr.html, termeni.html (markup Tailwind + styles.css).
+   Totul e SCOPED sub `.legal-doc` ca să rescrie doar culorile/tipografia,
+   fără să atingă conținutul. Nu depinde de ordinea față de Tailwind:
+   `.legal-doc .clasă` (0-2-0) bate utilitarele Tailwind (0-1-0).
+   Paletă: pastelurile v9 aprobate (fundaluri PALE, text negru lizibil).
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── ANTET DOCUMENT (titlu + subtitlu) ── */
+.legal-doc h1{
+  font-size:40px; font-weight:500; line-height:1.1;
+  letter-spacing:-0.02em; color:var(--ink); margin:0 0 0.75rem;
+}
+.legal-doc .subtitle{
+  font-size:14px; color:var(--ink-3); font-weight:400;
+}
+
+/* ── CARD-SECȚIUNE (v9 soft, fără umbră) ── */
+.legal-doc .card{
+  background:var(--bg-soft); border:1px solid var(--rule);
+  border-radius:10px; padding:1.75rem 2rem; box-shadow:none;
+}
+.legal-doc .card:hover{ box-shadow:none; }
+
+/* ── TIPOGRAFIE INTERNĂ ── */
+.legal-doc h2{ font-size:21px; font-weight:600; color:var(--ink); }
+.legal-doc h3{ font-size:16px; font-weight:600; color:var(--ink); }
+.legal-doc h4{ font-weight:600; color:var(--ink); }
+.legal-doc p,
+.legal-doc li{ color:var(--ink-2); line-height:1.7; }
+.legal-doc strong{ color:var(--ink); }
+
+/* ── LINKURI (ink subliniat, nu albastru) ── */
+.legal-doc a{
+  color:var(--ink); text-decoration:underline; text-underline-offset:2px;
+  transition:opacity .2s ease;
+}
+.legal-doc a:hover{ opacity:0.6; }
+
+/* ── CUTII INFO COLORATE → PASTELURI v9 ──
+   Rescriem utilitarele Tailwind folosite în paginile legale. */
+.legal-doc .bg-blue-50{ background:#e9eef3; }   /* ardezie pală */
+.legal-doc .bg-green-50{ background:#e9f0ea; }  /* salvie pală */
+.legal-doc .bg-yellow-50{ background:#f5efe1; } /* ocru pal */
+.legal-doc .bg-amber-50{ background:#f3e9d8; }  /* ocru cald (callout legal) */
+.legal-doc .bg-gray-50{ background:#ece7db; }   /* neutru cald */
+
+/* Bordurile cutiilor → tonuri calde discrete în loc de galben/chihlimbar */
+.legal-doc .border-yellow-200{ border-color:#e4d9bf; }
+.legal-doc .border-amber-200{ border-color:#e4d3ad; }
+.legal-doc .border{ border-color:var(--rule); }
+
+/* ── BARE ACCENT (border-l-4) → cele 4 tonuri v9 aprobate ──
+   Marker de categorie (4px), nu fundal: tonuri saturate permise. */
+.legal-doc .border-l-4{ border-left-width:4px; }
+.legal-doc .border-blue-500{ border-color:#5a7196; }   /* ardezie */
+.legal-doc .border-green-500{ border-color:#b8965c; }  /* ocru */
+.legal-doc .border-orange-500{ border-color:#c2604a; } /* teracotă */
+.legal-doc .border-purple-500{ border-color:#8f5a48; } /* cărămiziu */
+
+/* Text secundar gri (Tailwind text-gray-600/700) → ink-2/ink-3 v9 */
+.legal-doc .text-gray-600{ color:var(--ink-3); }
+.legal-doc .text-gray-700{ color:var(--ink-2); }
