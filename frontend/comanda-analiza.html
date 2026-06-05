@@ -7,16 +7,16 @@
     <meta name="description" content="Comandă analiza preliminară pentru terenul tău. Primești în 3-5 zile lucrătoare un raport tehnic cu fezabilitatea construcției.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+        body { font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #faf8f3; color: #1a1a1a; line-height: 1.6; }
+        #navigation { margin-bottom: 0; }
 
         /* Hero */
         .ord-hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
             padding: 3rem 1.5rem 2rem;
             text-align: center;
             color: white;
@@ -25,7 +25,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             text-decoration: none;
             font-size: 0.9rem;
             margin-bottom: 1.5rem;
@@ -37,10 +37,10 @@
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        .ord-hero h1 span { color: #f97316; }
+        .ord-hero h1 span { color: #c2604a; }
         .ord-hero p {
             font-size: 1rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             max-width: 640px;
             margin: 0 auto 1.5rem;
         }
@@ -55,23 +55,23 @@
         }
         .ord-price-old {
             font-size: 1.05rem;
-            color: #94a3b8;
+            color: #a8a094;
             text-decoration: line-through;
         }
         .ord-price-new {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #f97316;
+            color: #c2604a;
         }
         .ord-price-tva {
             font-size: 0.8rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
         }
         .ord-promo-badge {
             display: inline-block;
             margin-top: 0.5rem;
             font-size: 0.75rem;
-            background: #f97316;
+            background: #c2604a;
             color: white;
             padding: 0.25rem 0.65rem;
             border-radius: 999px;
@@ -99,11 +99,11 @@
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 0.25rem;
-            color: #0f172a;
+            color: #1a1a1a;
         }
         .ord-section-hint {
             font-size: 0.85rem;
-            color: #64748b;
+            color: #6f6a61;
             margin-bottom: 1.25rem;
         }
 
@@ -113,7 +113,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
             margin-bottom: 1.25rem;
-            background: #f1f5f9;
+            background: #f3f0e7;
             border-radius: 10px;
             padding: 0.35rem;
         }
@@ -124,13 +124,13 @@
             border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            color: #475569;
+            color: #555555;
             transition: all 0.2s;
             font-size: 0.95rem;
         }
         .ord-toggle input:checked + label {
             background: white;
-            color: #0f172a;
+            color: #1a1a1a;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             font-weight: 600;
         }
@@ -148,7 +148,7 @@
             display: block;
             font-size: 0.8rem;
             font-weight: 500;
-            color: #475569;
+            color: #555555;
             margin-bottom: 0.35rem;
         }
         .ord-field label .req { color: #dc2626; }
@@ -157,20 +157,20 @@
         .ord-field select {
             width: 100%;
             padding: 0.6rem 0.75rem;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #d6cfc1;
             border-radius: 8px;
             font-family: inherit;
             font-size: 0.95rem;
             background: white;
-            color: #0f172a;
+            color: #1a1a1a;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         .ord-field input:focus,
         .ord-field textarea:focus,
         .ord-field select:focus {
             outline: none;
-            border-color: #f97316;
-            box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+            border-color: #c2604a;
+            box-shadow: 0 0 0 3px rgba(194,96,74,0.15);
         }
         .ord-field textarea {
             min-height: 110px;
@@ -178,7 +178,7 @@
         }
         .ord-field-hint {
             font-size: 0.75rem;
-            color: #94a3b8;
+            color: #a8a094;
             margin-top: 0.25rem;
         }
 
@@ -187,8 +187,8 @@
             display: flex;
             gap: 0.65rem;
             align-items: flex-start;
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
+            background: #f6ebe6;
+            border: 1px solid #efd9d0;
             border-radius: 10px;
             padding: 0.85rem 1rem;
             margin-bottom: 0.65rem;
@@ -197,24 +197,24 @@
             margin-top: 0.2rem;
             width: 1.05rem;
             height: 1.05rem;
-            accent-color: #f97316;
+            accent-color: #c2604a;
             flex-shrink: 0;
         }
         .ord-tos span {
             font-size: 0.875rem;
-            color: #7c2d12;
+            color: #5a3a2e;
             line-height: 1.45;
         }
         .ord-tos a {
-            color: #c2410c;
+            color: #a84f3c;
             text-decoration: underline;
             font-weight: 500;
         }
-        .ord-tos a:hover { color: #9a3412; }
+        .ord-tos a:hover { color: #8a3f30; }
 
         /* Submit */
         .ord-submit {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             border: none;
             padding: 1rem 1.5rem;
@@ -231,13 +231,13 @@
             gap: 0.5rem;
         }
         .ord-submit:hover:not(:disabled) {
-            background: #ea580c;
+            background: #000000;
         }
         .ord-submit:active:not(:disabled) {
             transform: translateY(1px);
         }
         .ord-submit:disabled {
-            background: #cbd5e1;
+            background: #d6cfc1;
             cursor: not-allowed;
         }
 
@@ -266,8 +266,8 @@
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: #dcfce7;
-            color: #16a34a;
+            background: #e9f0ea;
+            color: #2f8f5b;
             display: inline-flex;
             justify-content: center;
             align-items: center;
@@ -275,17 +275,17 @@
             margin-bottom: 1rem;
         }
         .ord-success h2 {
-            color: #0f172a;
+            color: #1a1a1a;
             font-size: 1.4rem;
             margin-bottom: 0.5rem;
         }
         .ord-success p {
-            color: #475569;
+            color: #555555;
             margin-bottom: 1rem;
         }
         .ord-success-order {
-            background: #f8fafc;
-            border-left: 4px solid #f97316;
+            background: #faf8f3;
+            border-left: 4px solid #c2604a;
             padding: 0.85rem 1rem;
             border-radius: 8px;
             margin: 1.25rem 0;
@@ -293,12 +293,12 @@
         }
         .ord-success-order .label {
             font-size: 0.8rem;
-            color: #64748b;
+            color: #6f6a61;
         }
         .ord-success-order .val {
             font-size: 1.05rem;
             font-weight: 600;
-            color: #0f172a;
+            color: #1a1a1a;
         }
         .ord-success-actions {
             display: flex;
@@ -319,16 +319,16 @@
             transition: all 0.2s;
         }
         .ord-btn-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
         }
-        .ord-btn-primary:hover { background: #ea580c; }
+        .ord-btn-primary:hover { background: #000000; }
         .ord-btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            background: #f3f0e7;
+            color: #555555;
+            border: 1px solid #e8e3d8;
         }
-        .ord-btn-secondary:hover { background: #e2e8f0; }
+        .ord-btn-secondary:hover { background: #e8e3d8; }
 
         /* Loading spinner inside submit */
         .spin {
@@ -363,7 +363,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1a1a1a">
 </head>
 <body>
     <div id="navigation"></div>
@@ -416,7 +416,7 @@
                     </div>
                     <div class="ord-row single pf-only">
                         <div class="ord-field">
-                            <label for="cnp">CNP <em style="color:#94a3b8;font-style:normal;font-size:0.8rem;">(opțional, dacă vrei pe factură)</em></label>
+                            <label for="cnp">CNP <em style="color:#a8a094;font-style:normal;font-size:0.8rem;">(opțional, dacă vrei pe factură)</em></label>
                             <input type="text" id="cnp" name="cnp" inputmode="numeric" maxlength="13">
                         </div>
                     </div>
@@ -544,7 +544,7 @@
                 <div class="label">Număr comandă</div>
                 <div class="val" id="ord-success-orderid"></div>
             </div>
-            <p style="font-size: 0.9rem; color: #64748b;">După plată, primești automat factura fiscală + confirmarea comenzii. Analiza va fi livrată în maxim <strong>3-5 zile lucrătoare</strong>.</p>
+            <p style="font-size: 0.9rem; color: #6f6a61;">După plată, primești automat factura fiscală + confirmarea comenzii. Analiza va fi livrată în maxim <strong>3-5 zile lucrătoare</strong>.</p>
             <div class="ord-success-actions">
                 <a id="ord-success-pay" href="#" class="ord-btn ord-btn-primary" target="_blank" rel="noopener">
                     <i class="fas fa-credit-card"></i> Plătește acum
