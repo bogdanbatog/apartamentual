@@ -20,7 +20,17 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/nav.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <style>
+        /* Reskin v9 scoped: rescrie accentele albastre Tailwind → ink/crem.
+           `.v9-page .clasă` (0-2-0) bate utilitarele Tailwind (0-1-0). */
+        .v9-page h1 { font-size: 2.25rem; font-weight: 500; letter-spacing: -0.02em; }
+        .v9-page a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+        .v9-page a:hover { opacity: 0.6; }
+        .v9-page .text-blue-600 { color: var(--ink); }
+        .v9-page .bg-blue-50 { background: var(--bg-soft); }
+        .v9-page .subtitle { color: var(--ink-2); }
+    </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -29,10 +39,10 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#0f172a">
 </head>
-<body class="min-h-screen flex flex-col bg-white text-gray-900">
+<body class="min-h-screen flex flex-col">
     <div id="navigation"></div>
 
-    <main class="flex-1">
+    <main class="flex-1 v9-page">
         <div class="container py-8">
 
             <div class="max-w-4xl mx-auto grid gap-8">

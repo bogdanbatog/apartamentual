@@ -13,7 +13,29 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/nav.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <style>
+        /* Reskin v9 scoped: accentele colorate Tailwind → pasteluri v9 / ink.
+           `.v9-page .clasă` (0-2-0) bate utilitarele Tailwind (0-1-0). */
+        .v9-page h1, .v9-page h2 { font-weight: 500; letter-spacing: -0.015em; }
+        /* Plăcuțele de iconițe ale tipurilor de cont */
+        .v9-page .bg-blue-100 { background: #e9eef3; }   /* ardezie pală */
+        .v9-page .text-blue-600 { color: #5a7196; }
+        .v9-page .bg-purple-100 { background: #f0eaef; } /* mov pal */
+        .v9-page .text-purple-600 { color: #8f5a48; }
+        /* Badge „Necesită aprobare admin" */
+        .v9-page .bg-yellow-100 { background: #f5efe1; } /* ocru pal */
+        .v9-page .text-yellow-800 { color: var(--ink); }
+        /* Stare de succes */
+        .v9-page .bg-green-100 { background: #e9f0ea; }  /* salvie pală */
+        .v9-page .text-green-600 { color: #5a7196; }
+        /* Butonul „Retrimite emailul" (portocaliu → ink) */
+        .v9-page .text-orange-600 { color: var(--ink); }
+        .v9-page .text-orange-600:hover,
+        .v9-page .hover\:text-orange-700:hover { color: #000; }
+        /* Linkuri termeni/GDPR (albastre → ink subliniat) */
+        .v9-page a.text-blue-600 { color: var(--ink); text-decoration: underline; }
+    </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -22,10 +44,10 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#0f172a">
 </head>
-<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+<body class="min-h-screen flex flex-col">
     <div id="navigation"></div>
 
-    <main class="flex-1 py-8">
+    <main class="flex-1 py-8 v9-page">
         <div class="container max-w-2xl mx-auto px-4">
             
             <!-- Step Indicator -->
@@ -141,7 +163,7 @@
 
                 <div class="mt-4 text-sm text-gray-500">
                     <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="checkbox" id="acceptTerms" class="rounded border-gray-300 mt-0.5" style="accent-color: #f97316;">
+                        <input type="checkbox" id="acceptTerms" class="rounded border-gray-300 mt-0.5" style="accent-color: #1a1a1a;">
                         <span>Sunt de acord cu 
                             <a href="termeni.html" target="_blank" class="text-blue-600 hover:underline">Termenii și condițiile</a> și 
                             <a href="gdpr.html" target="_blank" class="text-blue-600 hover:underline">Politica GDPR</a>.
@@ -155,8 +177,8 @@
             <!-- Step Verify Email -->
             <div id="step-verify" class="card hidden">
                 <div class="text-center py-8">
-                    <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <svg width="40" height="40" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; background: #f5efe1; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg width="40" height="40" fill="none" stroke="#1a1a1a" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                     </div>
