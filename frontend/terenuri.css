@@ -1,42 +1,45 @@
 /* ═══════════════════════════════════════════
-   TERENURI V2 — ApartamenTUal
-   DM Sans · Slate Blue (#475569) · Coral (#f97316)
+   TERENURI — ApartamenTUal (design system v9)
+   Mona Sans · Crem/Ink · accent teracotă (#c2604a)
+   Reskin prin redefinirea variabilelor; numele claselor NU se schimbă
+   (cardurile sunt generate din JS). Butoanele pline rămân ink.
    ═══════════════════════════════════════════ */
 
 /* ── RESET & VARIABLES ────────────────────── */
 :root {
-    --font-main: 'DM Sans', system-ui, sans-serif;
+    --font-main: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 
-    /* Core palette */
-    --slate-50:  #f8fafc;
-    --slate-100: #f1f5f9;
-    --slate-200: #e2e8f0;
-    --slate-300: #cbd5e1;
-    --slate-400: #94a3b8;
-    --slate-500: #64748b;
-    --slate-600: #475569;
-    --slate-700: #334155;
-    --slate-800: #1e293b;
-    --slate-900: #0f172a;
+    /* Core palette — neutre calde v9 (fost slate albastru-rece) */
+    --slate-50:  #faf8f3;
+    --slate-100: #f3f0e7;
+    --slate-200: #e8e3d8;
+    --slate-300: #d6cfc1;
+    --slate-400: #a8a094;
+    --slate-500: #6f6a61;
+    --slate-600: #555555;
+    --slate-700: #333333;
+    --slate-800: #1a1a1a;
+    --slate-900: #141414;
 
-    --coral:     #f97316;
-    --coral-light: #fb923c;
-    --coral-dark:  #ea580c;
-    --coral-50:  #fff7ed;
-    --coral-100: #ffedd5;
+    /* Accent v9: teracotă caldă (fost coral portocaliu). Butoanele pline rămân ink. */
+    --coral:     #c2604a;
+    --coral-light: #d4775e;
+    --coral-dark:  #a84f3c;
+    --coral-50:  #f6ebe6;
+    --coral-100: #efd9d0;
 
     --white:     #ffffff;
-    --success:   #22c55e;
-    --danger:    #ef4444;
-    --info:      #3b82f6;
+    --success:   #2f8f5b;
+    --danger:    #c0473a;
+    --info:      #5a7196;
 
-    /* Shadows */
-    --shadow-sm:  0 1px 2px rgba(15, 23, 42, 0.06);
-    --shadow-md:  0 4px 12px rgba(15, 23, 42, 0.08);
-    --shadow-lg:  0 8px 30px rgba(15, 23, 42, 0.12);
-    --shadow-xl:  0 12px 40px rgba(15, 23, 42, 0.16);
-    --shadow-card: 0 2px 8px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.04);
-    --shadow-card-hover: 0 8px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(249, 115, 22, 0.15);
+    /* Shadows (neutre, calde) */
+    --shadow-sm:  0 1px 2px rgba(26, 22, 15, 0.06);
+    --shadow-md:  0 4px 12px rgba(26, 22, 15, 0.08);
+    --shadow-lg:  0 8px 30px rgba(26, 22, 15, 0.12);
+    --shadow-xl:  0 12px 40px rgba(26, 22, 15, 0.16);
+    --shadow-card: 0 2px 8px rgba(26, 22, 15, 0.06), 0 0 0 1px rgba(26, 22, 15, 0.04);
+    --shadow-card-hover: 0 8px 25px rgba(26, 22, 15, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
 
     /* Radius */
     --radius-sm: 6px;
@@ -69,6 +72,9 @@ a { text-decoration: none; color: inherit; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 select { font-family: inherit; }
 img { max-width: 100%; display: block; }
+
+/* Hero full-bleed dark: anulează spațiul rezervat sub nav (din apartamentual-v9.css) */
+#navigation { margin-bottom: 0; }
 
 /* ── NAVBAR ───────────────────────────────── */
 .navbar {
@@ -320,7 +326,7 @@ img { max-width: 100%; display: block; }
 .filter-select:focus {
     outline: none;
     border-color: var(--coral);
-    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    box-shadow: 0 0 0 3px rgba(194, 96, 74, 0.15);
 }
 .filter-select:disabled {
     background: var(--slate-50);
@@ -483,7 +489,7 @@ img { max-width: 100%; display: block; }
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: var(--coral);
+    background: var(--slate-800);
     color: var(--white);
     font-size: 0.9rem;
     font-weight: 600;
@@ -491,9 +497,9 @@ img { max-width: 100%; display: block; }
     transition: all var(--transition-fast);
 }
 .btn-primary:hover {
-    background: var(--coral-dark);
+    background: #000;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* ══════════════════════════════════════════
@@ -577,7 +583,7 @@ img { max-width: 100%; display: block; }
     color: var(--slate-700);
 }
 .teren-badge-new {
-    background: rgba(249, 115, 22, 0.9);
+    background: rgba(194, 96, 74, 0.92);
     color: var(--white);
 }
 
@@ -625,7 +631,7 @@ img { max-width: 100%; display: block; }
     display: flex;
     flex-direction: column;
     padding: 8px 10px;
-    background: var(--slate-50);
+    background: var(--slate-100);
     border-radius: var(--radius-sm);
 }
 .teren-stat-label {
@@ -655,7 +661,7 @@ img { max-width: 100%; display: block; }
     margin-bottom: 12px;
     transition: color var(--transition-fast);
 }
-.teren-card-source:hover { color: #2563eb; }
+.teren-card-source:hover { color: #4a5f80; }
 .teren-card-source i { font-size: 0.7rem; }
 
 /* Groups associated */
@@ -833,17 +839,17 @@ img { max-width: 100%; display: block; }
     align-items: center;
     gap: 8px;
     padding: 14px 28px;
-    background: var(--coral);
-    color: var(--white);
+    background: #fff;
+    color: var(--slate-900);
     font-size: 0.95rem;
     font-weight: 700;
     border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
 }
 .btn-cta:hover {
-    background: var(--coral-dark);
+    background: rgba(255, 255, 255, 0.88);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.35);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* ── FOOTER ───────────────────────────────── */
