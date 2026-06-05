@@ -1,7 +1,7 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 5 iunie 2026 (sesiune v9 pagini legale: gdpr, termeni, politica-retur migrate la design v9 + fișier comun nou css/document.css)
+> Ultima actualizare: 5 iunie 2026 (sesiune v9: contact, register, consultanta migrate la design v9 — pattern nou `.v9-page` scoped pt. pagini Tailwind cu accente colorate)
 
 ---
 
@@ -9,7 +9,7 @@
 
 **Niciun task obligatoriu în desfășurare — alege unul dintre cele de pe orizont.** Ultimele două sesiuni (flash header + curățare cod mort) sunt închise și deployate. Recomandate, în ordinea valorii:
 
-1. **Aliniere v9 — paginile rămase** (cel mai vizibil progres). Pagini nemigrate la design system v9: `terenuri`, `grupuri`, `utilizatori`, `contact`, `register`, `consultanta`, `devino-partener`, `ghid`, `news`, `analize`, `comanda-analiza`, `teren-details`, `grup-detail`. (DONE: `ce-este/*`, `povestea-noastra`, `parteneri`, **`gdpr`, `termeni`, `politica-retur`**.) Pe fiecare: link `css/apartamentual-v9.css`, scos `<link href="/nav.css">` (devine mort DOAR după ce pagina are v9 — vezi nota despre nav.css mai jos), aliniat corpul la componentele v9. ATENȚIE la paginile cu fetch Supabase (terenuri, grupuri, utilizatori, teren-details, comanda-analiza) — doar straturi vizuale, NU schimba structura DOM; pe paginile cu markup generat din JS NU schimba numele claselor (vezi pattern-ul de la `parteneri`). Strategie agreată: **C (hibrid)** — fundație CSS comună + rafinare pagină cu pagină. Un task = o sesiune; ia 2-3 pagini odată, nu toate. **Pattern nou refolosibil pt. pagini-document Tailwind (text lung):** `css/document.css` (clasa `.legal-doc`) — vezi blocul sesiunii din 5 iunie.
+1. **Aliniere v9 — paginile rămase** (cel mai vizibil progres). Pagini nemigrate la design system v9: `terenuri`, `grupuri`, `utilizatori`, `devino-partener`, `ghid`, `news`, `analize`, `comanda-analiza`, `teren-details`, `grup-detail`. (DONE: `ce-este/*`, `povestea-noastra`, `parteneri`, `gdpr`, `termeni`, `politica-retur`, **`contact`, `register`, `consultanta`**.) Pe fiecare: link `css/apartamentual-v9.css`, scos `<link href="/nav.css">` (devine mort DOAR după ce pagina are v9 — vezi nota despre nav.css mai jos), aliniat corpul la componentele v9. ATENȚIE la paginile cu fetch Supabase (terenuri, grupuri, utilizatori, teren-details, comanda-analiza) — doar straturi vizuale, NU schimba structura DOM; pe paginile cu markup generat din JS NU schimba numele claselor (vezi pattern-ul de la `parteneri`). Strategie agreată: **C (hibrid)** — fundație CSS comună + rafinare pagină cu pagină. Un task = o sesiune; ia 2-3 pagini odată, nu toate. **Trei pattern-uri refolosibile pt. migrare:** (a) pagini-document Tailwind text lung → `css/document.css` (clasa `.legal-doc`); (b) pagini Tailwind cu accente colorate → bloc `<style>` în-pagină scoped sub `.v9-page` pe `<main>` (vezi `contact`/`register`); (c) pagini cu `<style>` propriu → reskin în-pagină (vezi `consultanta`/`politica-retur`).
 2. **Automatizare deploy cPanel** — acum Lucian dă manual „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel).
 
 **Notă legată de nav.css (descoperită 6 iunie):** `nav.css` NU e cod mort cât timp paginile nu sunt migrate la v9 — el rezervă înălțimea header-ului (`#navigation { min-height:69px }`) ȘI încarcă fontul DM Sans pe ~25 de pagini. Pe măsură ce o pagină primește `apartamentual-v9.css`, ABIA ATUNCI se poate scoate `<link href="/nav.css">` de pe ea. Deci curățarea referințelor nav.css merge mână în mână cu migrarea v9, nu separat.
@@ -88,9 +88,15 @@ Lansare publică iminentă, dar nu există dată fixă.
 
 ---
 
+- **Sesiune v9 contact/register/consultanta (5 iunie) — pe `main`, commit `7b53236`, NEDEPLOYAT încă din cPanel**:
+  - Migrate la design v9, **doar straturi vizuale** (niciun JS / fetch Supabase / logică de formular atinsă):
+  - `consultanta.html` (avea `<style>` propriu slate/portocaliu) → reskin în-pagină ca `politica-retur`: hero gradient slate → ink plin, card formular cu umbră → border subtil v9, info-box slate → crem-soft, inputuri/pills focus portocaliu `#d97706` → ink, buton submit slate → ink, nota „gratuită" + link succes portocaliu → tonuri v9, `#navigation{margin-bottom:0}` pt. hero full-bleed.
+  - `contact.html` + `register.html` (Tailwind + styles.css) → **pattern nou `.v9-page`**: `nav.css` → `apartamentual-v9.css`, scos `bg-*/text-*` Tailwind de pe body, clasă `v9-page` pe `<main>`, bloc `<style>` în-pagină care rescrie accentele colorate prin `.v9-page .clasă` (0-2-0 bate utilitarele Tailwind 0-1-0): albastru→ardezie, mov→cărămiziu pal, galben→ocru, verde→salvie, portocaliu→ink. Pe register, culorile inline (checkbox `accent-color`, cerc+plic „verifică email") editate direct → ink.
+  - ⚠️ FAQ-ul de pe `contact` e generat de `js/faq.js`, **partajat cu homepage-ul live** (accente portocalii hardcodate în JS) — lăsat NEATINS; recolorarea lui ar schimba și homepage-ul, e decizie separată.
+
 ## Ce e în lucru sau pe orizont apropiat
 
-- **Aliniere v9 — paginile rămase** (după `ce-este/`, `povestea-noastra`, `parteneri`, `gdpr`, `termeni`, `politica-retur`, deja făcute): terenuri, grupuri, utilizatori, contact, register, consultanta, devino-partener, ghid, news, analize, comanda-analiza, teren-details, grup-detail. Pe fiecare: link `css/apartamentual-v9.css`, scos `/nav.css` (mort), aliniat corpul la componentele v9. Atenție la paginile cu fetch Supabase (terenuri, grupuri, utilizatori, teren-details, comanda-analiza) — doar straturi vizuale, fără structură DOM; pe paginile unde markup-ul e generat din JS, NU schimba numele de clase (vezi pattern-ul de la `parteneri`).
+- **Aliniere v9 — paginile rămase** (după `ce-este/`, `povestea-noastra`, `parteneri`, `gdpr`, `termeni`, `politica-retur`, `contact`, `register`, `consultanta`, deja făcute): terenuri, grupuri, utilizatori, devino-partener, ghid, news, analize, comanda-analiza, teren-details, grup-detail. Pe fiecare: link `css/apartamentual-v9.css`, scos `/nav.css` (mort), aliniat corpul la componentele v9. Atenție la paginile cu fetch Supabase (terenuri, grupuri, utilizatori, teren-details, comanda-analiza) — doar straturi vizuale, fără structură DOM; pe paginile unde markup-ul e generat din JS, NU schimba numele de clase (vezi pattern-ul de la `parteneri`).
 
 - **Automatizare deploy** — apartamentual.ro se deployează prin **cPanel** (NU Render, cum scrie CLAUDE.md): `.cpanel.yml` copiază `frontend/*` în `/home/ar4/app.ltfbstudio.ro/`. Momentan Lucian dă manual din cPanel „Update from Remote" + „Deploy HEAD Commit" după fiecare push. De automatizat (webhook GitHub→cPanel sau remote git direct care rulează `.cpanel.yml` la push).
 - **Cod mort + flash header rămas de curățat după unificarea header/footer v9**:
