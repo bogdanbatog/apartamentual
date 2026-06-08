@@ -7,16 +7,16 @@
     <meta name="description" content="Analize de urbanism și concept arhitectural pentru terenurile de pe ApartamenTUal. Analiză preliminară sau detaliată, în funcție de stadiul proiectului.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.7; }
+        body { font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #faf8f3; color: #1a1a1a; line-height: 1.7; }
+        #navigation { margin-bottom: 0; }
 
         /* Hero */
         .analize-hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
             padding: 5rem 1.5rem 3rem;
             text-align: center;
             color: white;
@@ -26,10 +26,10 @@
             font-weight: 700;
             margin-bottom: 0.75rem;
         }
-        .analize-hero h1 span { color: #f97316; }
+        .analize-hero h1 span { color: #c2604a; }
         .analize-hero p {
             font-size: 1.1rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             max-width: 700px;
             margin: 0 auto;
         }
@@ -37,7 +37,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             text-decoration: none;
             font-size: 0.9rem;
             margin-bottom: 1.25rem;
@@ -64,12 +64,12 @@
             background: white;
             border-radius: 16px;
             padding: 2rem;
-            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             display: flex;
             flex-direction: column;
         }
         .analize-card-header {
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e8e3d8;
             padding-bottom: 1.25rem;
             margin-bottom: 1.5rem;
         }
@@ -84,28 +84,28 @@
             margin-bottom: 0.75rem;
         }
         .analize-card-tag.simpla {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #e8e3d8;
+            color: #555555;
         }
         .analize-card-tag.detaliata {
-            background: #fef3c7;
-            color: #92400e;
+            background: #f6ebe6;
+            color: #a84f3c;
         }
         .analize-card-title {
             font-size: 1.75rem;
             font-weight: 700;
-            color: #0f172a;
+            color: #1a1a1a;
             margin-bottom: 0.5rem;
         }
         .analize-card-price {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #f97316;
+            color: #c2604a;
         }
         .analize-card-price-sub {
             font-size: 0.75rem;
             font-weight: 500;
-            color: #64748b;
+            color: #6f6a61;
             margin-top: 0.25rem;
         }
         .analize-card-meta {
@@ -113,10 +113,10 @@
             flex-wrap: wrap;
             gap: 0.5rem 1rem;
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #6f6a61;
             margin-top: 0.75rem;
             padding-top: 0.75rem;
-            border-top: 1px dashed #e2e8f0;
+            border-top: 1px dashed #e8e3d8;
         }
         .analize-card-meta-item {
             display: inline-flex;
@@ -124,12 +124,12 @@
             gap: 0.375rem;
         }
         .analize-card-meta-item i {
-            color: #94a3b8;
+            color: #a8a094;
             font-size: 0.875rem;
         }
         .analize-card-price.cerere {
             font-size: 1.125rem;
-            color: #475569;
+            color: #555555;
             font-weight: 600;
         }
 
@@ -140,13 +140,13 @@
             padding: 1.5rem;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
             text-align: center;
         }
         .payment-info-title {
             font-size: 0.875rem;
             font-weight: 600;
-            color: #475569;
+            color: #555555;
             margin-bottom: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -170,13 +170,13 @@
         }
         .payment-info-text {
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #6f6a61;
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.5;
         }
         .payment-info-text a {
-            color: #f97316;
+            color: #c2604a;
             text-decoration: none;
             font-weight: 500;
         }
@@ -188,7 +188,7 @@
         .analize-card-body {
             flex: 1;
             font-size: 0.9375rem;
-            color: #334155;
+            color: #555555;
         }
         .analize-card-body p {
             margin-bottom: 1rem;
@@ -196,7 +196,7 @@
         .analize-card-body h3 {
             font-size: 0.95rem;
             font-weight: 700;
-            color: #0f172a;
+            color: #1a1a1a;
             margin: 1.25rem 0 0.625rem;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -219,7 +219,7 @@
             top: 0.6rem;
             width: 6px;
             height: 6px;
-            background: #f97316;
+            background: #c2604a;
             border-radius: 50%;
         }
 
@@ -227,7 +227,7 @@
         .analize-card-actions {
             margin-top: 1.5rem;
             padding-top: 1.5rem;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e8e3d8;
             display: flex;
             gap: 0.75rem;
         }
@@ -248,20 +248,20 @@
             gap: 0.5rem;
         }
         .btn-card-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
         }
         .btn-card-primary:hover {
-            background: #ea580c;
+            background: #000000;
         }
         .btn-card-secondary {
             background: white;
-            color: #0f172a;
-            border: 1px solid #cbd5e1;
+            color: #1a1a1a;
+            border: 1px solid #d6cfc1;
         }
         .btn-card-secondary:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
+            background: #f3f0e7;
+            border-color: #a8a094;
         }
 
         /* Info section below cards */
@@ -277,16 +277,16 @@
             display: flex;
             align-items: center;
             gap: 1.25rem;
-            border-left: 4px solid #f97316;
+            border-left: 4px solid #c2604a;
         }
         .analize-info-box i {
             font-size: 1.5rem;
-            color: #f97316;
+            color: #c2604a;
             flex-shrink: 0;
         }
         .analize-info-box p {
             font-size: 0.9375rem;
-            color: #475569;
+            color: #555555;
         }
 
         @media (max-width: 768px) {
@@ -303,7 +303,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(26, 26, 26, 0.7);
             z-index: 100;
             align-items: center;
             justify-content: center;
@@ -317,7 +317,7 @@
             width: 100%;
             padding: 2rem;
             position: relative;
-            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
         }
         .cmd-modal-close {
             position: absolute;
@@ -325,7 +325,7 @@
             right: 1rem;
             background: transparent;
             border: none;
-            color: #94a3b8;
+            color: #a8a094;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -336,11 +336,11 @@
             justify-content: center;
             transition: background 0.2s;
         }
-        .cmd-modal-close:hover { background: #f1f5f9; color: #334155; }
+        .cmd-modal-close:hover { background: #f3f0e7; color: #555555; }
         .cmd-modal-icon {
             width: 56px;
             height: 56px;
-            background: #fff7ed;
+            background: #f6ebe6;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -349,24 +349,24 @@
         }
         .cmd-modal-icon i {
             font-size: 1.5rem;
-            color: #f97316;
+            color: #c2604a;
         }
         .cmd-modal h3 {
             font-size: 1.375rem;
             font-weight: 700;
-            color: #0f172a;
+            color: #1a1a1a;
             margin-bottom: 0.625rem;
         }
         .cmd-modal p {
             font-size: 0.95rem;
-            color: #475569;
+            color: #555555;
             line-height: 1.6;
             margin-bottom: 1rem;
         }
-        .cmd-modal-box p strong { color: #0f172a; }
+        .cmd-modal-box p strong { color: #1a1a1a; }
         .cmd-modal-emails {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #faf8f3;
+            border: 1px solid #e8e3d8;
             border-radius: 10px;
             padding: 0.875rem 1rem;
             margin-top: 0.5rem;
@@ -375,7 +375,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #64748b;
+            color: #6f6a61;
             font-weight: 600;
             margin-bottom: 0.375rem;
         }
@@ -386,9 +386,9 @@
         }
         .cmd-modal-emails-list span {
             font-size: 0.95rem;
-            color: #0f172a;
+            color: #1a1a1a;
             font-weight: 500;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             user-select: all;
         }
         .cmd-modal-tos {
@@ -397,13 +397,13 @@
             gap: 0.625rem;
             margin-top: 1rem;
             padding: 0.75rem 0.875rem;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
+            background: #f6ebe6;
+            border: 1px solid #efd9d0;
             border-radius: 10px;
             cursor: pointer;
             font-size: 0.875rem;
             line-height: 1.5;
-            color: #334155;
+            color: #5a3a2e;
         }
         .cmd-modal-tos input[type="checkbox"] {
             flex-shrink: 0;
@@ -411,14 +411,14 @@
             width: 1rem;
             height: 1rem;
             cursor: pointer;
-            accent-color: #f97316;
+            accent-color: #c2604a;
         }
         .cmd-modal-tos a {
-            color: #c2410c;
+            color: #a84f3c;
             text-decoration: underline;
             font-weight: 600;
         }
-        .cmd-modal-tos a:hover { color: #9a3412; }
+        .cmd-modal-tos a:hover { color: #8a3f30; }
         .cmd-modal-btn.cmd-disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -444,18 +444,18 @@
             cursor: pointer;
         }
         .cmd-modal-btn-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             flex: 1;
             justify-content: center;
         }
-        .cmd-modal-btn-primary:hover { background: #ea580c; }
+        .cmd-modal-btn-primary:hover { background: #000000; }
         .cmd-modal-btn-secondary {
             background: white;
-            color: #475569;
-            border: 1px solid #cbd5e1;
+            color: #555555;
+            border: 1px solid #d6cfc1;
         }
-        .cmd-modal-btn-secondary:hover { background: #f8fafc; }
+        .cmd-modal-btn-secondary:hover { background: #f3f0e7; }
         @media (max-width: 480px) {
             .cmd-modal-actions { flex-direction: column; }
             .cmd-modal-btn-secondary { width: 100%; justify-content: center; }
@@ -467,7 +467,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1a1a1a">
 </head>
 <body>
     <div id="navigation"></div>
@@ -588,7 +588,7 @@
     <!-- Payment info — Netopia, metode plată, link-uri legale -->
     <div class="payment-info-section">
         <div class="payment-info-title">
-            <i class="fas fa-lock" style="margin-right: 0.375rem; color: #10b981;"></i>
+            <i class="fas fa-lock" style="margin-right: 0.375rem; color: #2f8f5b;"></i>
             Plată securizată
         </div>
         <div class="payment-info-logos">
