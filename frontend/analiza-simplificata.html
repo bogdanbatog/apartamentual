@@ -7,16 +7,16 @@
     <meta name="description" content="Vezi un exemplu real de analiză urbanistică preliminară — așa cum o vei primi pe email după comandă.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+        body { font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #faf8f3; color: #1a1a1a; line-height: 1.6; }
+        #navigation { margin-bottom: 0; }
 
         /* Hero */
         .ex-hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
             padding: 4rem 1.5rem 2.5rem;
             text-align: center;
             color: white;
@@ -25,7 +25,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             text-decoration: none;
             font-size: 0.9rem;
             margin-bottom: 1.5rem;
@@ -41,16 +41,16 @@
             margin-bottom: 1.5rem;
         }
         .ex-back-links .ex-back-link { margin-bottom: 0; }
-        .ex-back-sep { color: #475569; font-size: 0.9rem; }
+        .ex-back-sep { color: #8a8a8a; font-size: 0.9rem; }
         .ex-hero h1 {
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        .ex-hero h1 span { color: #f97316; }
+        .ex-hero h1 span { color: #c2604a; }
         .ex-hero p {
             font-size: 1rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             max-width: 700px;
             margin: 0 auto 1.5rem;
         }
@@ -71,8 +71,9 @@
             align-items: center;
             gap: 0.5rem;
         }
-        .ex-btn-primary { background: #f97316; color: white; }
-        .ex-btn-primary:hover { background: #ea580c; }
+        /* Buton primar pe hero ÎNTUNECAT: alb + text ink (convenția v9 .cta-final) */
+        .ex-btn-primary { background: #fff; color: #1a1a1a; }
+        .ex-btn-primary:hover { background: rgba(255, 255, 255, 0.88); }
         .ex-btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: white;
@@ -98,7 +99,7 @@
             justify-content: space-between;
             gap: 1rem;
             flex-wrap: wrap;
-            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
         }
         .ex-meta-info {
             display: flex;
@@ -108,17 +109,17 @@
         .ex-meta-item .label {
             font-size: 0.75rem;
             text-transform: uppercase;
-            color: #64748b;
+            color: #6f6a61;
             letter-spacing: 0.04em;
             font-weight: 600;
         }
         .ex-meta-item .value {
             font-size: 1rem;
             font-weight: 600;
-            color: #0f172a;
+            color: #1a1a1a;
         }
         .ex-meta-item .value.price {
-            color: #f97316;
+            color: #c2604a;
             font-size: 1.25rem;
         }
 
@@ -133,13 +134,13 @@
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .ex-pdf-page:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
         }
         .ex-pdf-page img {
             width: 100%;
@@ -148,35 +149,35 @@
         }
         .ex-pdf-page-label {
             padding: 0.875rem 1.5rem;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
+            background: #faf8f3;
+            border-top: 1px solid #e8e3d8;
             font-size: 0.875rem;
-            color: #64748b;
+            color: #6f6a61;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .ex-pdf-page-label i {
-            color: #94a3b8;
+            color: #a8a094;
             font-size: 0.8rem;
         }
 
         /* Bottom CTA */
         .ex-cta {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            background: linear-gradient(135deg, #f6ebe6 0%, #f0e0d8 100%);
             border-radius: 16px;
             padding: 2.5rem 2rem;
             text-align: center;
-            border: 1px solid #fed7aa;
+            border: 1px solid #efd9d0;
         }
         .ex-cta h2 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0f172a;
+            color: #1a1a1a;
             margin-bottom: 0.625rem;
         }
         .ex-cta p {
-            color: #475569;
+            color: #555555;
             margin-bottom: 1.5rem;
             max-width: 600px;
             margin-left: auto;
@@ -189,20 +190,20 @@
             flex-wrap: wrap;
         }
         .ex-btn-cta-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             padding: 0.875rem 2rem;
             font-size: 1rem;
         }
-        .ex-btn-cta-primary:hover { background: #ea580c; }
+        .ex-btn-cta-primary:hover { background: #000000; }
         .ex-btn-cta-secondary {
             background: white;
-            color: #0f172a;
-            border: 1px solid #cbd5e1;
+            color: #1a1a1a;
+            border: 1px solid #d6cfc1;
             padding: 0.875rem 2rem;
             font-size: 1rem;
         }
-        .ex-btn-cta-secondary:hover { background: #f8fafc; }
+        .ex-btn-cta-secondary:hover { background: #f3f0e7; }
 
         /* Image modal (lightbox) */
         .ex-modal {
@@ -253,7 +254,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1a1a1a">
 </head>
 <body>
     <div id="navigation"></div>
@@ -325,7 +326,7 @@
 
         <div class="ex-cta">
             <h2>Comandă acum analiza pentru terenul tău</h2>
-            <p>Completează formularul cu numărul cadastral sau adresa exactă. În <strong>3-5 zile lucrătoare</strong> primești pe email un document PDF similar cu cel de mai sus, calibrat exact pentru terenul tău. <strong style="color:#f97316;">Promoție: 99 RON prima lună</strong> (preț standard 149 RON).</p>
+            <p>Completează formularul cu numărul cadastral sau adresa exactă. În <strong>3-5 zile lucrătoare</strong> primești pe email un document PDF similar cu cel de mai sus, calibrat exact pentru terenul tău. <strong style="color:#c2604a;">Promoție: 99 RON prima lună</strong> (preț standard 149 RON).</p>
             <div class="ex-cta-actions">
                 <a id="cmdCtaBtn" href="comanda-analiza.html" class="ex-btn ex-btn-cta-primary">
                     <i class="fas fa-shopping-cart"></i> Comandă — <s style="opacity:0.6">149</s> 99 RON

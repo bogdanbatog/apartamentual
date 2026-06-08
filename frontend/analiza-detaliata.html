@@ -7,15 +7,15 @@
     <meta name="description" content="Vezi un exemplu real de analiză detaliată cu randări, planimetrie și bilanț pentru un imobil de locuințe colective.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="nav.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+        body { font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #faf8f3; color: #1a1a1a; line-height: 1.6; }
+        #navigation { margin-bottom: 0; }
 
         .ex-hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
             padding: 4rem 1.5rem 2.5rem;
             text-align: center;
             color: white;
@@ -24,7 +24,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             text-decoration: none;
             font-size: 0.9rem;
             margin-bottom: 1.5rem;
@@ -40,16 +40,16 @@
             margin-bottom: 1.5rem;
         }
         .ex-back-links .ex-back-link { margin-bottom: 0; }
-        .ex-back-sep { color: #475569; font-size: 0.9rem; }
+        .ex-back-sep { color: #8a8a8a; font-size: 0.9rem; }
         .ex-hero h1 {
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        .ex-hero h1 span { color: #f97316; }
+        .ex-hero h1 span { color: #c2604a; }
         .ex-hero p {
             font-size: 1rem;
-            color: #cbd5e1;
+            color: #d6cfc1;
             max-width: 700px;
             margin: 0 auto 1.5rem;
         }
@@ -70,8 +70,9 @@
             align-items: center;
             gap: 0.5rem;
         }
-        .ex-btn-primary { background: #f97316; color: white; }
-        .ex-btn-primary:hover { background: #ea580c; }
+        /* Buton primar pe hero ÎNTUNECAT: alb + text ink (convenția v9 .cta-final) */
+        .ex-btn-primary { background: #fff; color: #1a1a1a; }
+        .ex-btn-primary:hover { background: rgba(255, 255, 255, 0.88); }
         .ex-btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: white;
@@ -96,7 +97,7 @@
             justify-content: space-between;
             gap: 1rem;
             flex-wrap: wrap;
-            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
         }
         .ex-meta-info {
             display: flex;
@@ -106,17 +107,17 @@
         .ex-meta-item .label {
             font-size: 0.75rem;
             text-transform: uppercase;
-            color: #64748b;
+            color: #6f6a61;
             letter-spacing: 0.04em;
             font-weight: 600;
         }
         .ex-meta-item .value {
             font-size: 1rem;
             font-weight: 600;
-            color: #0f172a;
+            color: #1a1a1a;
         }
         .ex-meta-item .value.price {
-            color: #f97316;
+            color: #c2604a;
         }
 
         .ex-pdf-pages {
@@ -129,13 +130,13 @@
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .ex-pdf-page:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
         }
         .ex-pdf-page img {
             width: 100%;
@@ -144,34 +145,34 @@
         }
         .ex-pdf-page-label {
             padding: 0.875rem 1.5rem;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
+            background: #faf8f3;
+            border-top: 1px solid #e8e3d8;
             font-size: 0.875rem;
-            color: #64748b;
+            color: #6f6a61;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .ex-pdf-page-label i {
-            color: #94a3b8;
+            color: #a8a094;
             font-size: 0.8rem;
         }
 
         .ex-cta {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            background: linear-gradient(135deg, #f6ebe6 0%, #f0e0d8 100%);
             border-radius: 16px;
             padding: 2.5rem 2rem;
             text-align: center;
-            border: 1px solid #fed7aa;
+            border: 1px solid #efd9d0;
         }
         .ex-cta h2 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0f172a;
+            color: #1a1a1a;
             margin-bottom: 0.625rem;
         }
         .ex-cta p {
-            color: #475569;
+            color: #555555;
             margin-bottom: 1.5rem;
             max-width: 650px;
             margin-left: auto;
@@ -184,20 +185,20 @@
             flex-wrap: wrap;
         }
         .ex-btn-cta-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             padding: 0.875rem 2rem;
             font-size: 1rem;
         }
-        .ex-btn-cta-primary:hover { background: #ea580c; }
+        .ex-btn-cta-primary:hover { background: #000000; }
         .ex-btn-cta-secondary {
             background: white;
-            color: #0f172a;
-            border: 1px solid #cbd5e1;
+            color: #1a1a1a;
+            border: 1px solid #d6cfc1;
             padding: 0.875rem 2rem;
             font-size: 1rem;
         }
-        .ex-btn-cta-secondary:hover { background: #f8fafc; }
+        .ex-btn-cta-secondary:hover { background: #f3f0e7; }
 
         .ex-modal {
             display: none;
@@ -245,7 +246,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(26, 26, 26, 0.7);
             z-index: 200;
             align-items: center;
             justify-content: center;
@@ -259,7 +260,7 @@
             width: 100%;
             padding: 2rem;
             position: relative;
-            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
         }
         .cmd-modal-close {
             position: absolute;
@@ -267,7 +268,7 @@
             right: 1rem;
             background: transparent;
             border: none;
-            color: #94a3b8;
+            color: #a8a094;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -278,34 +279,34 @@
             justify-content: center;
             transition: background 0.2s;
         }
-        .cmd-modal-close:hover { background: #f1f5f9; color: #334155; }
+        .cmd-modal-close:hover { background: #f3f0e7; color: #555555; }
         .cmd-modal-icon {
             width: 56px;
             height: 56px;
-            background: #fff7ed;
+            background: #f6ebe6;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 1rem;
         }
-        .cmd-modal-icon i { font-size: 1.5rem; color: #f97316; }
+        .cmd-modal-icon i { font-size: 1.5rem; color: #c2604a; }
         .cmd-modal-box h3 {
             font-size: 1.375rem;
             font-weight: 700;
-            color: #0f172a;
+            color: #1a1a1a;
             margin-bottom: 0.625rem;
         }
         .cmd-modal-box p {
             font-size: 0.95rem;
-            color: #475569;
+            color: #555555;
             line-height: 1.6;
             margin-bottom: 1rem;
         }
-        .cmd-modal-box p strong { color: #0f172a; }
+        .cmd-modal-box p strong { color: #1a1a1a; }
         .cmd-modal-emails {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #faf8f3;
+            border: 1px solid #e8e3d8;
             border-radius: 10px;
             padding: 0.875rem 1rem;
             margin-top: 0.5rem;
@@ -314,7 +315,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #64748b;
+            color: #6f6a61;
             font-weight: 600;
             margin-bottom: 0.375rem;
         }
@@ -325,9 +326,9 @@
         }
         .cmd-modal-emails-list span {
             font-size: 0.95rem;
-            color: #0f172a;
+            color: #1a1a1a;
             font-weight: 500;
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             user-select: all;
         }
         .cmd-modal-tos {
@@ -336,13 +337,13 @@
             gap: 0.625rem;
             margin-top: 1rem;
             padding: 0.75rem 0.875rem;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
+            background: #f6ebe6;
+            border: 1px solid #efd9d0;
             border-radius: 10px;
             cursor: pointer;
             font-size: 0.875rem;
             line-height: 1.5;
-            color: #334155;
+            color: #5a3a2e;
         }
         .cmd-modal-tos input[type="checkbox"] {
             flex-shrink: 0;
@@ -350,14 +351,14 @@
             width: 1rem;
             height: 1rem;
             cursor: pointer;
-            accent-color: #f97316;
+            accent-color: #c2604a;
         }
         .cmd-modal-tos a {
-            color: #c2410c;
+            color: #a84f3c;
             text-decoration: underline;
             font-weight: 600;
         }
-        .cmd-modal-tos a:hover { color: #9a3412; }
+        .cmd-modal-tos a:hover { color: #8a3f30; }
         .cmd-modal-btn.cmd-disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -383,18 +384,18 @@
             cursor: pointer;
         }
         .cmd-modal-btn-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             flex: 1;
             justify-content: center;
         }
-        .cmd-modal-btn-primary:hover { background: #ea580c; }
+        .cmd-modal-btn-primary:hover { background: #000000; }
         .cmd-modal-btn-secondary {
             background: white;
-            color: #475569;
-            border: 1px solid #cbd5e1;
+            color: #555555;
+            border: 1px solid #d6cfc1;
         }
-        .cmd-modal-btn-secondary:hover { background: #f8fafc; }
+        .cmd-modal-btn-secondary:hover { background: #f3f0e7; }
         @media (max-width: 480px) {
             .cmd-modal-actions { flex-direction: column; }
             .cmd-modal-btn-secondary { width: 100%; justify-content: center; }
@@ -406,7 +407,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1a1a1a">
 </head>
 <body>
     <div id="navigation"></div>
