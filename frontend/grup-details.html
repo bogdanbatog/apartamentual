@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalii Grup - ApartamenTUal</title>
     <meta name="description" content="Detalii despre grup.">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
     <link rel="stylesheet" href="grupuri.css">
     <style>
         /* Additional styles for details page */
@@ -20,14 +20,14 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            color: #64748b;
+            color: #555555;
             text-decoration: none;
             font-size: 0.875rem;
             margin-bottom: 1.5rem;
         }
         
         .back-link:hover {
-            color: #f97316;
+            color: #c2604a;
         }
         
         /* Group Header */
@@ -49,7 +49,7 @@
         
         .grup-header h1 {
             font-size: 1.75rem;
-            color: #1e293b;
+            color: #1a1a1a;
             margin: 0 0 0.5rem 0;
         }
         
@@ -57,7 +57,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
-            color: #64748b;
+            color: #555555;
             font-size: 0.875rem;
         }
         
@@ -87,24 +87,24 @@
         }
         
         .btn-primary {
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             border: none;
         }
         
         .btn-primary:hover {
-            background: #ea580c;
+            background: #333333;
         }
         
         .btn-secondary {
             background: white;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            color: #1a1a1a;
+            border: 1px solid #e8e3d8;
         }
         
         .btn-secondary:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: #faf8f3;
+            border-color: #ddd5c6;
         }
         
         .btn-danger {
@@ -146,7 +146,7 @@
         
         .section-card h2 {
             font-size: 1.125rem;
-            color: #1e293b;
+            color: #1a1a1a;
             margin: 0 0 1rem 0;
             display: flex;
             align-items: center;
@@ -154,12 +154,12 @@
         }
         
         .section-card h2 i {
-            color: #f97316;
+            color: #c2604a;
         }
         
         /* Description */
         .grup-description {
-            color: #475569;
+            color: #1a1a1a;
             line-height: 1.7;
             white-space: pre-wrap;
             max-height: 200px;
@@ -168,7 +168,7 @@
         }
         
         .no-description {
-            color: #94a3b8;
+            color: #8a8a8a;
             font-style: italic;
         }
         
@@ -184,7 +184,7 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.75rem;
-            background: #f8fafc;
+            background: #faf8f3;
             border-radius: 8px;
             text-decoration: none;
             color: inherit;
@@ -192,14 +192,14 @@
         }
         
         .member-card:hover {
-            background: #f1f5f9;
+            background: #f3f0e7;
         }
         
         .member-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #475569;
+            background: #1a1a1a;
             color: white;
             display: flex;
             align-items: center;
@@ -215,7 +215,7 @@
         
         .member-name {
             font-weight: 500;
-            color: #1e293b;
+            color: #1a1a1a;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -223,7 +223,7 @@
         
         .member-role {
             font-size: 0.75rem;
-            color: #64748b;
+            color: #555555;
         }
         
         .member-badge {
@@ -231,7 +231,7 @@
             padding: 0.125rem 0.5rem;
             border-radius: 10px;
             background: #dbeafe;
-            color: #1e40af;
+            color: #4a5f80;
         }
         
         .admin-badge {
@@ -250,7 +250,7 @@
             display: flex;
             gap: 1rem;
             padding: 1rem;
-            background: #f8fafc;
+            background: #faf8f3;
             border-radius: 8px;
             text-decoration: none;
             color: inherit;
@@ -258,7 +258,7 @@
         }
         
         .teren-card-mini:hover {
-            background: #f1f5f9;
+            background: #f3f0e7;
             transform: translateY(-1px);
         }
         
@@ -271,20 +271,20 @@
         
         .teren-card-mini-info h4 {
             font-size: 0.9375rem;
-            color: #1e293b;
+            color: #1a1a1a;
             margin: 0 0 0.25rem 0;
         }
         
         .teren-card-mini-info p {
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #555555;
             margin: 0;
         }
 
         /* Teren comment card */
         .teren-with-comments {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: #faf8f3;
+            border: 1px solid #e8e3d8;
             border-radius: 12px;
             overflow: hidden;
         }
@@ -294,7 +294,7 @@
             gap: 12px;
             padding: 12px 16px;
             background: white;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e8e3d8;
         }
         .teren-with-comments .teren-header img {
             width: 64px;
@@ -305,7 +305,7 @@
         .teren-with-comments .teren-header h4 {
             font-size: 0.9375rem;
             font-weight: 600;
-            color: #0f172a;
+            color: #1a1a1a;
             margin: 0;
         }
         .teren-with-comments .teren-header h4 a {
@@ -313,11 +313,11 @@
             text-decoration: none;
         }
         .teren-with-comments .teren-header h4 a:hover {
-            color: #f97316;
+            color: #c2604a;
         }
         .teren-with-comments .teren-header p {
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #555555;
             margin: 2px 0 0;
         }
         .btn-cere-analiza {
@@ -326,7 +326,7 @@
             font-size: 0.78rem;
             font-weight: 600;
             color: #fff;
-            background: #f59e0b;
+            background: #1a1a1a;
             border-radius: 0.375rem;
             text-decoration: none;
             white-space: nowrap;
@@ -336,7 +336,7 @@
             align-self: center;
         }
         .btn-cere-analiza:hover {
-            background: #d97706;
+            background: #333333;
         }
         .teren-comments-area {
             padding: 12px 16px;
@@ -350,7 +350,7 @@
             display: flex;
             gap: 10px;
             padding: 8px 0;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f3f0e7;
         }
         .teren-comment:last-child {
             border-bottom: none;
@@ -359,13 +359,13 @@
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: #e2e8f0;
+            background: #e8e3d8;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: 700;
-            color: #64748b;
+            color: #555555;
             flex-shrink: 0;
         }
         .comment-body {
@@ -381,22 +381,22 @@
         .comment-author {
             font-size: 0.8125rem;
             font-weight: 600;
-            color: #334155;
+            color: #2a2a2a;
         }
         .comment-time {
             font-size: 0.6875rem;
-            color: #94a3b8;
+            color: #8a8a8a;
         }
         .comment-text {
             font-size: 0.8125rem;
-            color: #475569;
+            color: #1a1a1a;
             line-height: 1.5;
             word-break: break-word;
         }
         .comment-delete {
             background: none;
             border: none;
-            color: #cbd5e1;
+            color: #ddd5c6;
             cursor: pointer;
             font-size: 12px;
             padding: 2px 6px;
@@ -414,7 +414,7 @@
         .comment-input-row input {
             flex: 1;
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e8e3d8;
             border-radius: 8px;
             font-size: 0.8125rem;
             font-family: inherit;
@@ -422,11 +422,11 @@
             transition: border-color 0.2s;
         }
         .comment-input-row input:focus {
-            border-color: #f97316;
+            border-color: #c2604a;
         }
         .comment-input-row button {
             padding: 8px 16px;
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             border: none;
             border-radius: 8px;
@@ -437,23 +437,23 @@
             white-space: nowrap;
         }
         .comment-input-row button:hover {
-            background: #ea580c;
+            background: #333333;
         }
         .comment-input-row button:disabled {
-            background: #cbd5e1;
+            background: #ddd5c6;
             cursor: not-allowed;
         }
         .no-comments {
             text-align: center;
             padding: 16px;
-            color: #94a3b8;
+            color: #8a8a8a;
             font-size: 0.8125rem;
         }
         
         .empty-section {
             text-align: center;
             padding: 2rem;
-            color: #94a3b8;
+            color: #8a8a8a;
         }
         
         .empty-section i {
@@ -464,14 +464,14 @@
         
         /* Admin section */
         .admin-section {
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e8e3d8;
             margin-top: 1.5rem;
             padding-top: 1.5rem;
         }
         
         .admin-section h3 {
             font-size: 0.875rem;
-            color: #64748b;
+            color: #555555;
             margin: 0 0 1rem 0;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -485,7 +485,7 @@
         
         .status-btn {
             padding: 0.5rem 1rem;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e8e3d8;
             border-radius: 8px;
             background: white;
             cursor: pointer;
@@ -494,12 +494,12 @@
         }
         
         .status-btn:hover {
-            border-color: #cbd5e1;
+            border-color: #ddd5c6;
         }
         
         .status-btn.active {
-            border-color: #f97316;
-            background: #fff7ed;
+            border-color: #c2604a;
+            background: #f7efe9;
         }
         
         /* Status colors */
@@ -520,8 +520,8 @@
         }
         .kick-vote-card.expired {
             opacity: 0.6;
-            background: #f8fafc;
-            border-color: #e2e8f0;
+            background: #faf8f3;
+            border-color: #e8e3d8;
         }
         .kick-vote-header {
             display: flex;
@@ -532,7 +532,7 @@
         .kick-vote-target {
             font-weight: 600;
             font-size: 0.9rem;
-            color: #1e293b;
+            color: #1a1a1a;
         }
         .kick-vote-timer {
             font-size: 0.75rem;
@@ -543,12 +543,12 @@
             white-space: nowrap;
         }
         .kick-vote-timer.expired-timer {
-            background: #f1f5f9;
-            color: #94a3b8;
+            background: #f3f0e7;
+            color: #8a8a8a;
         }
         .kick-vote-reason {
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #555555;
             margin-bottom: 10px;
             font-style: italic;
         }
@@ -558,7 +558,7 @@
         .kick-vote-bar-bg {
             width: 100%;
             height: 8px;
-            background: #e2e8f0;
+            background: #e8e3d8;
             border-radius: 4px;
             overflow: hidden;
             margin-bottom: 4px;
@@ -574,7 +574,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 0.75rem;
-            color: #64748b;
+            color: #555555;
         }
         .kick-vote-actions {
             display: flex;
@@ -597,7 +597,7 @@
         .btn-vote-yes:hover { background: #fecaca; }
         .btn-vote-no {
             background: #dcfce7;
-            color: #16a34a;
+            color: #2f8f5b;
         }
         .btn-vote-no:hover { background: #bbf7d0; }
         .btn-vote-disabled {
@@ -612,18 +612,18 @@
             border-radius: 6px;
         }
         .kick-vote-result.passed { background: #fee2e2; color: #dc2626; }
-        .kick-vote-result.failed { background: #dcfce7; color: #16a34a; }
-        .kick-vote-result.expired-result { background: #f1f5f9; color: #94a3b8; }
+        .kick-vote-result.failed { background: #dcfce7; color: #2f8f5b; }
+        .kick-vote-result.expired-result { background: #f3f0e7; color: #8a8a8a; }
         .kick-vote-voted {
             text-align: center;
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #555555;
             padding: 6px;
         }
         .btn-kick-member {
             background: none;
             border: none;
-            color: #cbd5e1;
+            color: #ddd5c6;
             cursor: pointer;
             font-size: 11px;
             padding: 2px 6px;
@@ -655,17 +655,17 @@
         .kick-modal h3 {
             margin: 0 0 8px;
             font-size: 1.1rem;
-            color: #1e293b;
+            color: #1a1a1a;
         }
         .kick-modal p {
             font-size: 0.875rem;
-            color: #64748b;
+            color: #555555;
             margin: 0 0 16px;
         }
         .kick-modal textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e8e3d8;
             border-radius: 8px;
             font-size: 0.875rem;
             font-family: inherit;
@@ -675,7 +675,7 @@
             box-sizing: border-box;
             margin-bottom: 16px;
         }
-        .kick-modal textarea:focus { border-color: #f97316; }
+        .kick-modal textarea:focus { border-color: #c2604a; }
         .kick-modal-actions {
             display: flex;
             gap: 8px;
@@ -689,7 +689,7 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .btn-kick-cancel { background: #f1f5f9; color: #64748b; }
+        .btn-kick-cancel { background: #f3f0e7; color: #555555; }
         .btn-kick-confirm { background: #ef4444; color: white; }
         .btn-kick-confirm:hover { background: #dc2626; }
         
@@ -711,67 +711,67 @@
         /* ── CHECKLIST TIMELINE ── */
         .checklist-timeline { display: flex; flex-direction: column; gap: 0.75rem; }
         .cl-phase {
-            border: 1px solid #e2e8f0; border-radius: 0.75rem; overflow: hidden; background: white;
+            border: 1px solid #e8e3d8; border-radius: 0.75rem; overflow: hidden; background: white;
         }
         .cl-phase-header {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 0.85rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s;
         }
-        .cl-phase-header:hover { background: #f8fafc; }
+        .cl-phase-header:hover { background: #faf8f3; }
         .cl-phase-number {
             width: 28px; height: 28px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 0.8rem; color: white; flex-shrink: 0;
         }
-        .cl-phase-title { font-weight: 700; font-size: 0.92rem; color: #1e293b; flex: 1; }
-        .cl-phase-progress { font-size: 0.75rem; color: #94a3b8; font-weight: 600; margin-right: 0.5rem; }
-        .cl-phase-chevron { color: #94a3b8; transition: transform 0.2s; font-size: 0.8rem; }
+        .cl-phase-title { font-weight: 700; font-size: 0.92rem; color: #1a1a1a; flex: 1; }
+        .cl-phase-progress { font-size: 0.75rem; color: #8a8a8a; font-weight: 600; margin-right: 0.5rem; }
+        .cl-phase-chevron { color: #8a8a8a; transition: transform 0.2s; font-size: 0.8rem; }
         .cl-phase.open .cl-phase-chevron { transform: rotate(180deg); }
         .cl-phase-body { display: none; padding: 0 1.25rem 1rem; }
         .cl-phase.open .cl-phase-body { display: block; }
         .cl-step {
             display: flex; align-items: flex-start; gap: 0.75rem;
-            padding: 0.65rem 0; border-bottom: 1px solid #f1f5f9;
+            padding: 0.65rem 0; border-bottom: 1px solid #f3f0e7;
         }
         .cl-step:last-child { border-bottom: none; }
         .cl-check {
-            width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 5px;
+            width: 22px; height: 22px; border: 2px solid #ddd5c6; border-radius: 5px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; background: white;
         }
-        .cl-check:hover { border-color: #f59e0b; }
-        .cl-check.checked { background: #16a34a; border-color: #16a34a; }
+        .cl-check:hover { border-color: #c2604a; }
+        .cl-check.checked { background: #2f8f5b; border-color: #2f8f5b; }
         .cl-check.checked::after { content: '✓'; color: white; font-size: 0.75rem; font-weight: 700; }
         .cl-step-content { flex: 1; min-width: 0; }
-        .cl-step-title { font-size: 0.88rem; font-weight: 500; color: #1e293b; line-height: 1.3; }
-        .cl-step-subtitle { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; line-height: 1.4; }
-        .cl-step.done .cl-step-title { color: #64748b; text-decoration: line-through; text-decoration-color: #cbd5e1; }
+        .cl-step-title { font-size: 0.88rem; font-weight: 500; color: #1a1a1a; line-height: 1.3; }
+        .cl-step-subtitle { font-size: 0.78rem; color: #8a8a8a; margin-top: 2px; line-height: 1.4; }
+        .cl-step.done .cl-step-title { color: #555555; text-decoration: line-through; text-decoration-color: #ddd5c6; }
         .cl-step-meta {
             display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
-            font-size: 0.72rem; color: #94a3b8; flex-wrap: wrap;
+            font-size: 0.72rem; color: #8a8a8a; flex-wrap: wrap;
         }
         .cl-step-notes { margin-top: 0.4rem; }
         .cl-step-note {
-            font-size: 0.8rem; color: #475569; margin-top: 0.35rem;
-            padding: 0.4rem 0.6rem; background: #f8fafc; border-radius: 0.35rem; border-left: 2px solid #f59e0b;
+            font-size: 0.8rem; color: #1a1a1a; margin-top: 0.35rem;
+            padding: 0.4rem 0.6rem; background: #faf8f3; border-radius: 0.35rem; border-left: 2px solid #c2604a;
             display: flex; align-items: flex-start; gap: 0.5rem;
         }
         .cl-note-avatar {
-            width: 22px; height: 22px; border-radius: 50%; background: #e2e8f0;
+            width: 22px; height: 22px; border-radius: 50%; background: #e8e3d8;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.6rem; font-weight: 700; color: #64748b; flex-shrink: 0;
+            font-size: 0.6rem; font-weight: 700; color: #555555; flex-shrink: 0;
         }
         .cl-note-body { flex: 1; min-width: 0; }
         .cl-note-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.15rem; }
-        .cl-note-author { font-size: 0.72rem; font-weight: 600; color: #1e293b; }
-        .cl-note-time { font-size: 0.65rem; color: #94a3b8; }
-        .cl-note-text { font-size: 0.8rem; color: #475569; line-height: 1.5; }
+        .cl-note-author { font-size: 0.72rem; font-weight: 600; color: #1a1a1a; }
+        .cl-note-time { font-size: 0.65rem; color: #8a8a8a; }
+        .cl-note-text { font-size: 0.8rem; color: #1a1a1a; line-height: 1.5; }
         .cl-note-actions { display: flex; gap: 0.5rem; margin-top: 0.2rem; }
         .cl-note-action {
-            font-size: 0.65rem; color: #94a3b8; cursor: pointer; border: none;
+            font-size: 0.65rem; color: #8a8a8a; cursor: pointer; border: none;
             background: none; padding: 0;
         }
-        .cl-note-action:hover { color: #f59e0b; }
+        .cl-note-action:hover { color: #c2604a; }
         .cl-note-action.delete:hover { color: #ef4444; }
         /* Document attachments */
         .cl-step-files { margin-top: 0.35rem; }
@@ -780,37 +780,37 @@
             background: #f0f9ff; border-radius: 0.35rem; margin-top: 0.25rem;
             font-size: 0.75rem; border: 1px solid #bae6fd;
         }
-        .cl-file-item i { color: #3b82f6; }
-        .cl-file-name { flex: 1; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .cl-file-meta { font-size: 0.65rem; color: #94a3b8; }
+        .cl-file-item i { color: #5a7196; }
+        .cl-file-name { flex: 1; color: #1a1a1a; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cl-file-meta { font-size: 0.65rem; color: #8a8a8a; }
         .cl-file-download {
-            color: #3b82f6; cursor: pointer; border: none; background: none;
+            color: #5a7196; cursor: pointer; border: none; background: none;
             font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;
         }
         .cl-file-download:hover { background: #dbeafe; }
         .cl-file-delete {
-            color: #94a3b8; cursor: pointer; border: none; background: none;
+            color: #8a8a8a; cursor: pointer; border: none; background: none;
             font-size: 0.65rem; padding: 2px 4px;
         }
         .cl-file-delete:hover { color: #ef4444; }
         .cl-upload-btn {
-            font-size: 0.72rem; color: #94a3b8; cursor: pointer; border: none;
+            font-size: 0.72rem; color: #8a8a8a; cursor: pointer; border: none;
             background: none; padding: 0; text-decoration: underline;
         }
-        .cl-upload-btn:hover { color: #3b82f6; }
+        .cl-upload-btn:hover { color: #5a7196; }
         .cl-upload-btn i { margin-right: 2px; }
         .cl-note-btn {
-            font-size: 0.72rem; color: #94a3b8; cursor: pointer; border: none;
+            font-size: 0.72rem; color: #8a8a8a; cursor: pointer; border: none;
             background: none; padding: 0; text-decoration: underline;
         }
-        .cl-note-btn:hover { color: #f59e0b; }
+        .cl-note-btn:hover { color: #c2604a; }
         .cl-note-input { margin-top: 0.35rem; display: flex; gap: 0.35rem; }
         .cl-note-input input {
-            flex: 1; padding: 0.35rem 0.6rem; border: 1px solid #e2e8f0;
+            flex: 1; padding: 0.35rem 0.6rem; border: 1px solid #e8e3d8;
             border-radius: 0.35rem; font-size: 0.8rem;
         }
         .cl-note-input button {
-            padding: 0.35rem 0.6rem; background: #1e293b; color: white;
+            padding: 0.35rem 0.6rem; background: #1a1a1a; color: white;
             border: none; border-radius: 0.35rem; font-size: 0.75rem; cursor: pointer;
         }
         
@@ -882,14 +882,14 @@
     
     .tag-chip.zone {
         background: #eff6ff;
-        color: #2563eb;
+        color: #5a7196;
         border: 1px solid #bfdbfe;
     }
     
     .tag-chip.interest {
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
+        background: #f3f0e7;
+        color: #1a1a1a;
+        border: 1px solid #e8e3d8;
     }
     
     .tag-chip.match {
@@ -912,14 +912,13 @@
         margin-right: 0.25rem;
     }
     </style>
-    <link rel="stylesheet" href="/nav.css">
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1a1a1a">
 </head>
 <body>
 <!-- Nav unificat v9 (injectat de nav.js) -->
@@ -997,7 +996,7 @@
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="font-size: 1.25rem;">🔔</span>
                         <span style="font-weight: 600; color: #92400e; font-size: 0.9375rem;">Cereri de alăturare</span>
-                        <span id="pendingBannerCount" style="background: #f97316; color: white; font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 10px;">0</span>
+                        <span id="pendingBannerCount" style="background: #c2604a; color: white; font-size: 0.75rem; font-weight: 700; padding: 0.125rem 0.5rem; border-radius: 10px;">0</span>
                     </div>
                 </div>
                 <div id="pendingBannerList"></div>
@@ -1011,11 +1010,11 @@
                     <span style="font-size: 1.5rem; flex-shrink: 0;">👋</span>
                     <div style="flex: 1; min-width: 200px;">
                         <div style="font-weight: 700; color: #1e3a8a; font-size: 0.9375rem; margin-bottom: 0.125rem;">Bun venit în grup!</div>
-                        <div style="color: #1e40af; font-size: 0.8125rem; line-height: 1.5;">
+                        <div style="color: #4a5f80; font-size: 0.8125rem; line-height: 1.5;">
                             Completează-ți profilul ca ceilalți membri să te poată cunoaște (nume, descriere, interese).
                         </div>
                     </div>
-                    <a href="/profile-edit-new.html" class="btn-action" style="background: #2563eb; color: white; border: none; text-decoration: none; flex-shrink: 0;">
+                    <a href="/profile-edit-new.html" class="btn-action" style="background: #1a1a1a; color: white; border: none; text-decoration: none; flex-shrink: 0;">
                         <i class="fas fa-user-edit"></i> Completează profilul
                     </a>
                 </div>
@@ -1076,8 +1075,8 @@
             <div id="anuntFormContainer" style="margin-bottom: 1.25rem;">
                 <div style="display: flex; gap: 0.5rem;">
                     <textarea id="anuntInput" placeholder="Scrie un anunț pentru grup..." 
-                              style="flex: 1; padding: 0.625rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.875rem; font-family: inherit; resize: vertical; min-height: 60px;"></textarea>
-                    <button onclick="postAnunt()" style="padding: 0.625rem 1rem; background: #f97316; color: white; border: none; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: flex-end;">
+                              style="flex: 1; padding: 0.625rem 0.75rem; border: 1px solid #e8e3d8; border-radius: 8px; font-size: 0.875rem; font-family: inherit; resize: vertical; min-height: 60px;"></textarea>
+                    <button onclick="postAnunt()" style="padding: 0.625rem 1rem; background: #1a1a1a; color: white; border: none; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: flex-end;">
                         <i class="fas fa-paper-plane"></i> Postează
                     </button>
                 </div>
@@ -1085,14 +1084,14 @@
             
             <!-- Announcements list -->
             <div id="anunturiList" style="max-height: 280px; overflow-y: auto;">
-                <p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun anunț încă. Fii primul care postează!</p>
+                <p style="color: #8a8a8a; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun anunț încă. Fii primul care postează!</p>
             </div>
         </div>
         
         <!-- Journal & Checklist - Member only (Coming soon) -->
         <div id="journalSection" class="section-card member-only">
             <h2><i class="fas fa-tasks"></i> Progresul Grupului</h2>
-            <p id="checklistSubtitle" style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 1.25rem;">Urmărește și bifează pașii pe măsură ce avansați în procesul de construcție.</p>
+            <p id="checklistSubtitle" style="font-size: 0.82rem; color: #8a8a8a; margin-bottom: 1.25rem;">Urmărește și bifează pașii pe măsură ce avansați în procesul de construcție.</p>
             <div id="checklistReadonly" style="display: none; padding: 0.6rem 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.82rem; color: #92400e;">
                 <i class="fas fa-info-circle"></i> Acest grup este deschis — doar adminul poate edita jurnalul. Contactează adminul pentru modificări.
             </div>
@@ -1100,11 +1099,11 @@
             <!-- Progress bar -->
             <div style="margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                    <span style="font-size: 0.82rem; font-weight: 600; color: #1e293b;">Progres total</span>
-                    <span id="progressPercent" style="font-size: 0.82rem; font-weight: 700; color: #f59e0b;">0%</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #1a1a1a;">Progres total</span>
+                    <span id="progressPercent" style="font-size: 0.82rem; font-weight: 700; color: #c2604a;">0%</span>
                 </div>
-                <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                    <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 4px; transition: width 0.5s;"></div>
+                <div style="height: 8px; background: #e8e3d8; border-radius: 4px; overflow: hidden;">
+                    <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #c2604a, #dda88f); border-radius: 4px; transition: width 0.5s;"></div>
                 </div>
             </div>
             
@@ -1125,7 +1124,7 @@
                 <h3>Link WhatsApp</h3>
                 <div style="display: flex; gap: 0.5rem;">
                     <input type="url" id="whatsappInput" placeholder="https://chat.whatsapp.com/..." 
-                           style="flex: 1; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                           style="flex: 1; padding: 0.5rem; border: 1px solid #e8e3d8; border-radius: 6px;">
                     <button class="btn-action btn-secondary" onclick="saveWhatsApp()">
                         <i class="fas fa-save"></i> Salvează
                     </button>
@@ -1156,18 +1155,18 @@
             <button class="modal-close" onclick="closeInviteModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <p style="color: #64748b; margin-bottom: 1rem;">Introdu adresa de email a persoanei pe care vrei s-o inviți. Se va deschide clientul tău de email cu un link de invitație pre-completat.</p>
+            <p style="color: #555555; margin-bottom: 1rem;">Introdu adresa de email a persoanei pe care vrei s-o inviți. Se va deschide clientul tău de email cu un link de invitație pre-completat.</p>
             
             <div style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #1e293b;">Email</label>
+                <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: #1a1a1a;">Email</label>
                 <input type="email" id="inviteEmail" placeholder="exemplu@email.com" 
-                       style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9375rem; box-sizing: border-box;">
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #e8e3d8; border-radius: 8px; font-size: 0.9375rem; box-sizing: border-box;">
                 <p id="inviteError" style="color: #dc2626; font-size: 0.8125rem; margin-top: 0.25rem; display: none;"></p>
             </div>
 
             <!-- Pending invitations list -->
             <div id="pendingInvites" style="display: none; margin-bottom: 1rem;">
-                <h4 style="font-size: 0.8125rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Invitații trimise</h4>
+                <h4 style="font-size: 0.8125rem; color: #555555; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Invitații trimise</h4>
                 <div id="pendingInvitesList"></div>
             </div>
         </div>
@@ -1204,7 +1203,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e8e3d8;
     }
     .modal-header h2 {
         font-size: 1.125rem;
@@ -1213,34 +1212,34 @@
         align-items: center;
         gap: 0.5rem;
     }
-    .modal-header h2 i { color: #f97316; }
+    .modal-header h2 i { color: #c2604a; }
     .modal-close {
         background: none;
         border: none;
         font-size: 1.5rem;
-        color: #94a3b8;
+        color: #8a8a8a;
         cursor: pointer;
     }
-    .modal-close:hover { color: #475569; }
+    .modal-close:hover { color: #1a1a1a; }
     .modal-body { padding: 1.5rem; }
     .modal-footer {
         display: flex;
         justify-content: flex-end;
         gap: 0.75rem;
         padding: 1rem 1.5rem;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid #e8e3d8;
     }
     .invite-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0.5rem 0.75rem;
-        background: #f8fafc;
+        background: #faf8f3;
         border-radius: 6px;
         margin-bottom: 0.5rem;
         font-size: 0.875rem;
     }
-    .invite-item .invite-email { color: #1e293b; }
+    .invite-item .invite-email { color: #1a1a1a; }
     .invite-item .invite-status {
         font-size: 0.75rem;
         padding: 0.125rem 0.5rem;
@@ -1684,9 +1683,9 @@ function renderActions(group) {
         const isAgency = currentUserProfile && currentUserProfile.account_type === 'profesional';
         
         if (isAgency) {
-            html += `<span style="color: #94a3b8; font-size: 0.875rem;"><i class="fas fa-info-circle"></i> Conturile de agenție nu pot intra în grupuri.</span>`;
+            html += `<span style="color: #8a8a8a; font-size: 0.875rem;"><i class="fas fa-info-circle"></i> Conturile de agenție nu pot intra în grupuri.</span>`;
         } else if (hasPending) {
-            html += `<span style="color: #f59e0b; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
+            html += `<span style="color: #c2604a; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
         } else if (statusNorm === 'deschis' && hasRoom) {
             html += `
                 <button class="btn-action btn-primary" onclick="joinGroup()">
@@ -1700,7 +1699,7 @@ function renderActions(group) {
                 </button>
             `;
         } else {
-            html += `<span style="color: #94a3b8;">Grupul este plin.</span>`;
+            html += `<span style="color: #8a8a8a;">Grupul este plin.</span>`;
         }
     } else {
         html += `
@@ -1807,7 +1806,7 @@ function renderTerenuri(terenuri) {
 // ── CHECKLIST TIMELINE ──
 const CHECKLIST_PHASES = [
     {
-        key: 'faza1', title: 'Formarea Grupului', color: '#2563eb',
+        key: 'faza1', title: 'Formarea Grupului', color: '#5a7196',
         steps: [
             { key: 'f1_in_formare', title: 'În formare' },
             { key: 'f1_regulament', title: 'Regulament de funcționare', subtitle: 'Reguli de comunicare online · Reguli de luare a deciziilor · Responsabilități și disponibilitate' },
@@ -1816,13 +1815,13 @@ const CHECKLIST_PHASES = [
         ]
     },
     {
-        key: 'faza2', title: 'Căutarea și Achiziția Terenului', color: '#16a34a',
+        key: 'faza2', title: 'Căutarea și Achiziția Terenului', color: '#2f8f5b',
         steps: [
             { key: 'f2_identificare', title: 'Faza de identificare terenuri' },
             { key: 'f2_vizite', title: 'Vizite terenuri' },
-            { key: 'f2_extras_cf', title: 'Extras carte funciară obținut', subtitle: '<a href="https://epay.ancpi.ro/epay/SelectCat.action?catId=1" target="_blank" style="color:#3b82f6;text-decoration:underline;">ANCPI online</a>' },
+            { key: 'f2_extras_cf', title: 'Extras carte funciară obținut', subtitle: '<a href="https://epay.ancpi.ro/epay/SelectCat.action?catId=1" target="_blank" style="color:#5a7196;text-decoration:underline;">ANCPI online</a>' },
             { key: 'f2_cert_urbanism', title: 'Certificat de urbanism informativ', subtitle: 'Oricine poate face o cerere la primăria de sector sau generală pentru obținere' },
-            { key: 'f2_analiza_generala', title: 'Analiză generală cerută pe platformă', subtitle: '<a href="terenuri.html" target="_blank" style="color:#3b82f6;text-decoration:underline;">Vezi tipuri de analize</a>' },
+            { key: 'f2_analiza_generala', title: 'Analiză generală cerută pe platformă', subtitle: '<a href="terenuri.html" target="_blank" style="color:#5a7196;text-decoration:underline;">Vezi tipuri de analize</a>' },
             { key: 'f2_istoric_notar', title: 'Istoric teren verificat la notar' },
             { key: 'f2_studiu_geo', title: 'Studiu geotehnic preliminar realizat', subtitle: '1-2 foraje pentru a verifica natura solului de fundare – există situații în care terenul este slab și necesită costuri suplimentare pentru fundații' },
             { key: 'f2_analiza_complexa', title: 'Analiză complexă cerută (1-2 terenuri finale)' },
@@ -1832,7 +1831,7 @@ const CHECKLIST_PHASES = [
         ]
     },
     {
-        key: 'faza3', title: 'Proiectarea', color: '#f59e0b',
+        key: 'faza3', title: 'Proiectarea', color: '#c2604a',
         steps: [
             { key: 'f3_echipa', title: 'Echipă proiectanți selectată', subtitle: 'Arhitectură – Structură – Instalații · Lista parteneri (în viitor)' },
             { key: 'f3_cert_construire', title: 'Certificat de urbanism pt construire', subtitle: 'Se cere la primărie de către proprietarii terenului cu atașarea unui plan de situație și alte piese explicative de către arhitect' },
@@ -1845,7 +1844,7 @@ const CHECKLIST_PHASES = [
         ]
     },
     {
-        key: 'faza4', title: 'Construcția', color: '#7c3aed',
+        key: 'faza4', title: 'Construcția', color: '#8f5a48',
         steps: [
             { key: 'f4_oferte', title: 'Oferte execuție', subtitle: 'Structură, instalații, arhitectură · Lista parteneri (în viitor)' },
             { key: 'f4_constructor', title: 'Constructor selectat' },
@@ -1987,7 +1986,7 @@ function renderStep(step, phaseColor) {
                 <div class="cl-step-title">${step.title}</div>
                 ${step.subtitle ? `<div class="cl-step-subtitle">${step.subtitle}</div>` : ''}
                 <div class="cl-step-meta">
-                    ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #16a34a;"></i> ${checkedAt}</span>` : ''}
+                    ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #2f8f5b;"></i> ${checkedAt}</span>` : ''}
                     ${isChecked && checkedBy ? `<span>de ${checkedBy}</span>` : ''}
                     ${noteBtn}
                     ${uploadBtn}
@@ -2633,9 +2632,9 @@ window.leaveGroup = async function() {
         var overlay = document.createElement('div');
         overlay.id = 'transferAdminModal';
         overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center;';
-        overlay.innerHTML = '<div style="background:white; border-radius:12px; padding:2rem; max-width:420px; width:90%; font-family:DM Sans,sans-serif;">' +
+        overlay.innerHTML = '<div style="background:white; border-radius:12px; padding:2rem; max-width:420px; width:90%; font-family:Mona Sans,sans-serif;">' +
             '<h3 style="font-size:1.1rem; font-weight:600; margin-bottom:0.5rem;">Transferă rolul de admin</h3>' +
-            '<p style="font-size:0.85rem; color:#64748b; margin-bottom:1rem;">Ești adminul grupului. Înainte de a pleca, alege cine preia administrarea sau lasă sistemul să aleagă automat.</p>' +
+            '<p style="font-size:0.85rem; color:#555555; margin-bottom:1rem;">Ești adminul grupului. Înainte de a pleca, alege cine preia administrarea sau lasă sistemul să aleagă automat.</p>' +
             '<select id="newAdminSelect" style="width:100%; padding:0.5rem 0.75rem; border:1px solid #d1d5db; border-radius:8px; font-size:0.9rem; margin-bottom:1rem;">' +
             '<option value="auto">🔄 Automat (cel mai vechi membru)</option>' +
             options +
@@ -3034,17 +3033,17 @@ function showInviteLinkModal(link, email, grupName) {
                 <button class="modal-close" onclick="document.getElementById('inviteLinkModal').remove()">&times;</button>
             </div>
             <div class="modal-body">
-                <p style="color: #64748b; margin-bottom: 1rem;">Invitație creată pentru <strong>${escapeHtml(email)}</strong>. Trimite-i link-ul de mai jos:</p>
+                <p style="color: #555555; margin-bottom: 1rem;">Invitație creată pentru <strong>${escapeHtml(email)}</strong>. Trimite-i link-ul de mai jos:</p>
                 
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
                     <input type="text" value="${link}" readonly id="inviteLinkInput"
-                           style="flex: 1; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.8125rem; background: #f8fafc; color: #475569;">
+                           style="flex: 1; padding: 0.75rem; border: 1px solid #e8e3d8; border-radius: 8px; font-size: 0.8125rem; background: #faf8f3; color: #1a1a1a;">
                     <button onclick="copyInviteLink()" class="btn-action btn-primary" style="white-space: nowrap;">
                         <i class="fas fa-copy"></i> Copiază
                     </button>
                 </div>
                 
-                <p style="font-size: 0.8125rem; color: #94a3b8; margin-bottom: 1rem;">Sau trimite direct prin:</p>
+                <p style="font-size: 0.8125rem; color: #8a8a8a; margin-bottom: 1rem;">Sau trimite direct prin:</p>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <button onclick="sendInviteEmail('${email.replace(/'/g, "\\'")}', '${grupName.replace(/'/g, "\\'").replace(/"/g, '\\"')}', '${link}')" 
                             class="btn-action btn-secondary" id="btnSendInviteEmail">
@@ -3160,8 +3159,8 @@ function renderPendingRequests() {
                 <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: white; border-radius: 8px; margin-bottom: 6px;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: #92400e; flex-shrink: 0;">${initials}</div>
                     <div style="flex: 1; min-width: 0;">
-                        <span style="font-weight: 600; font-size: 0.8125rem; color: #1e293b;">${escapeHtml(name)}</span>
-                        <span style="font-size: 0.75rem; color: #94a3b8; margin-left: 0.5rem;">Cerere din ${time}</span>
+                        <span style="font-weight: 600; font-size: 0.8125rem; color: #1a1a1a;">${escapeHtml(name)}</span>
+                        <span style="font-size: 0.75rem; color: #8a8a8a; margin-left: 0.5rem;">Cerere din ${time}</span>
                     </div>
                     <div style="display: flex; gap: 6px; flex-shrink: 0;">
                         <button onclick="approveRequest('${r.id}', '${escapeHtml(name)}', '${escapeHtml(email)}')" style="padding: 5px 10px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
@@ -3763,7 +3762,7 @@ async function renderKickVotes(votes) {
                 <div class="kick-vote-header">
                     <div>
                         <div class="kick-vote-target">Vot excludere: ${escapeHtml(targetName)}</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8;">Inițiat de ${escapeHtml(initiatorName)}</div>
+                        <div style="font-size: 0.75rem; color: #8a8a8a;">Inițiat de ${escapeHtml(initiatorName)}</div>
                     </div>
                     <span class="${timerClass}">${isActive && !isExpired ? '⏱ ' + timeStr : (v.status === 'passed' ? 'Exclus' : v.status === 'failed' ? 'Eșuat' : 'Expirat')}</span>
                 </div>
@@ -4270,7 +4269,7 @@ function renderAnunturi() {
     const list = document.getElementById('anunturiList');
     
     if (anunturiData.length === 0) {
-        list.innerHTML = '<p style="color: #94a3b8; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun anunț încă. Fii primul care postează!</p>';
+        list.innerHTML = '<p style="color: #8a8a8a; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun anunț încă. Fii primul care postează!</p>';
         return;
     }
     
@@ -4280,15 +4279,15 @@ function renderAnunturi() {
         const canDelete = currentUser && (a.user_id === currentUser.id || isAdmin || isSuperAdmin);
         
         return `
-            <div style="display: flex; gap: 0.75rem; padding: 0.875rem; background: #f8fafc; border-radius: 10px; margin-bottom: 0.5rem;">
+            <div style="display: flex; gap: 0.75rem; padding: 0.875rem; background: #faf8f3; border-radius: 10px; margin-bottom: 0.5rem;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; flex-shrink: 0;">${initials}</div>
                 <div style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                        <span style="font-weight: 600; font-size: 0.8125rem; color: #1e293b;">${escapeHtml(a.author_name)}</span>
-                        <span style="font-size: 0.75rem; color: #94a3b8;">${timeAgo}</span>
-                        ${canDelete ? `<button onclick="deleteAnunt('${a.id}')" style="margin-left: auto; background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 0.75rem; padding: 2px 6px;" title="Șterge"><i class="fas fa-trash"></i></button>` : ''}
+                        <span style="font-weight: 600; font-size: 0.8125rem; color: #1a1a1a;">${escapeHtml(a.author_name)}</span>
+                        <span style="font-size: 0.75rem; color: #8a8a8a;">${timeAgo}</span>
+                        ${canDelete ? `<button onclick="deleteAnunt('${a.id}')" style="margin-left: auto; background: none; border: none; color: #ddd5c6; cursor: pointer; font-size: 0.75rem; padding: 2px 6px;" title="Șterge"><i class="fas fa-trash"></i></button>` : ''}
                     </div>
-                    <p style="font-size: 0.875rem; color: #334155; line-height: 1.5; white-space: pre-wrap; margin: 0;">${escapeHtml(a.content)}</p>
+                    <p style="font-size: 0.875rem; color: #2a2a2a; line-height: 1.5; white-space: pre-wrap; margin: 0;">${escapeHtml(a.content)}</p>
                 </div>
             </div>
         `;

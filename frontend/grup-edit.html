@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editează grupul - ApartamenTUal</title>
     <meta name="description" content="Creează un grup nou de construcție și invită persoane cu aceeași viziune.">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
     <link rel="stylesheet" href="grupuri.css">
     <style>
         /* Additional styles for form page */
@@ -30,12 +30,12 @@
         
         .form-header h1 {
             font-size: 1.75rem;
-            color: #1e293b;
+            color: #1a1a1a;
             margin-bottom: 0.5rem;
         }
         
         .form-header p {
-            color: #64748b;
+            color: #555555;
         }
         
         .form-group {
@@ -45,7 +45,7 @@
         .form-group label {
             display: block;
             font-weight: 500;
-            color: #334155;
+            color: #2a2a2a;
             margin-bottom: 0.5rem;
         }
         
@@ -58,7 +58,7 @@
         .form-group textarea {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e8e3d8;
             border-radius: 8px;
             font-size: 1rem;
             font-family: inherit;
@@ -69,7 +69,7 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #f97316;
+            border-color: #c2604a;
         }
         
         .form-group textarea {
@@ -79,7 +79,7 @@
         
         .form-group .hint {
             font-size: 0.8125rem;
-            color: #64748b;
+            color: #555555;
             margin-top: 0.375rem;
         }
         
@@ -98,7 +98,7 @@
         .btn-submit {
             flex: 1;
             padding: 0.875rem 1.5rem;
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             border: none;
             border-radius: 8px;
@@ -109,19 +109,19 @@
         }
         
         .btn-submit:hover {
-            background: #ea580c;
+            background: #333333;
         }
         
         .btn-submit:disabled {
-            background: #fdba74;
+            background: #dda88f;
             cursor: not-allowed;
         }
         
         .btn-cancel {
             padding: 0.875rem 1.5rem;
-            background: #f1f5f9;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
+            background: #f3f0e7;
+            color: #555555;
+            border: 1px solid #e8e3d8;
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 500;
@@ -132,8 +132,8 @@
         }
         
         .btn-cancel:hover {
-            background: #e2e8f0;
-            color: #475569;
+            background: #e8e3d8;
+            color: #1a1a1a;
         }
         
         .status-options {
@@ -154,7 +154,7 @@
         .status-option label {
             display: block;
             padding: 0.75rem 1rem;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e8e3d8;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
@@ -163,8 +163,8 @@
         }
         
         .status-option input:checked + label {
-            border-color: #f97316;
-            background: #fff7ed;
+            border-color: #c2604a;
+            background: #f7efe9;
         }
         
         .status-option label .status-icon {
@@ -175,7 +175,7 @@
         
         .status-option label .status-name {
             font-size: 0.875rem;
-            color: #334155;
+            color: #2a2a2a;
         }
         
         /* Auth required overlay */
@@ -186,17 +186,17 @@
         
         .auth-required i {
             font-size: 3rem;
-            color: #f97316;
+            color: #c2604a;
             margin-bottom: 1rem;
         }
         
         .auth-required h2 {
-            color: #1e293b;
+            color: #1a1a1a;
             margin-bottom: 0.5rem;
         }
         
         .auth-required p {
-            color: #64748b;
+            color: #555555;
             margin-bottom: 1.5rem;
         }
         
@@ -205,7 +205,7 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.75rem 1.5rem;
-            background: #f97316;
+            background: #1a1a1a;
             color: white;
             border-radius: 8px;
             text-decoration: none;
@@ -244,7 +244,7 @@
             max-height: 200px;
             overflow-y: auto;
             padding: 0.5rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e8e3d8;
             border-radius: 8px;
         }
         
@@ -253,7 +253,7 @@
             align-items: center;
             gap: 0.375rem;
             padding: 0.375rem 0.75rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e8e3d8;
             border-radius: 20px;
             font-size: 0.8125rem;
             cursor: pointer;
@@ -262,13 +262,13 @@
         }
         
         .zone-chip:hover {
-            border-color: #f97316;
+            border-color: #c2604a;
         }
         
         .zone-chip.selected {
-            background: #fff7ed;
-            border-color: #f97316;
-            color: #ea580c;
+            background: #f7efe9;
+            border-color: #c2604a;
+            color: #a84e3a;
         }
         
         .zone-chip input {
@@ -284,7 +284,7 @@
         .tag-category-title {
             font-size: 0.8125rem;
             font-weight: 600;
-            color: #64748b;
+            color: #555555;
             margin-bottom: 0.25rem;
         }
         
@@ -296,28 +296,28 @@
         
         .tag-btn {
             padding: 0.375rem 0.875rem;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e8e3d8;
             border-radius: 20px;
             font-size: 0.8125rem;
             cursor: pointer;
             transition: all 0.2s;
             background: white;
-            color: #475569;
+            color: #1a1a1a;
         }
         
         .tag-btn:hover {
-            border-color: #94a3b8;
+            border-color: #8a8a8a;
         }
         
         .tag-btn.selected {
-            background: #1e293b;
+            background: #1a1a1a;
             color: white;
-            border-color: #1e293b;
+            border-color: #1a1a1a;
         }
         
         .hint-inline {
             font-weight: 400;
-            color: #94a3b8;
+            color: #8a8a8a;
             font-size: 0.875rem;
         }
         
@@ -334,7 +334,7 @@
             align-items: center;
             gap: 0.25rem;
             padding: 0.25rem 0.625rem;
-            background: #f97316;
+            background: #c2604a;
             color: white;
             border-radius: 20px;
             font-size: 0.75rem;
@@ -343,7 +343,7 @@
         }
         
         .selected-zones-display .selected-chip:hover {
-            background: #ea580c;
+            background: #a84e3a;
         }
         
         .selected-zones-display .selected-chip .remove-x {
@@ -351,14 +351,13 @@
             margin-left: 0.25rem;
         }
     </style>
-    <link rel="stylesheet" href="/nav.css">
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#1a1a1a">
 </head>
 <body>
 <!-- Nav unificat v9 (injectat de nav.js) -->
@@ -427,7 +426,7 @@
             <div class="form-group" id="zone-group" style="display: none;">
                 <label>Zone preferate</label>
                 <div id="selected-zones-display" class="selected-zones-display" style="display: none;">
-                    <p class="hint" style="margin-bottom: 0.25rem; font-weight: 500; color: #475569;">Selectate (<span id="zone-count">0</span>):</p>
+                    <p class="hint" style="margin-bottom: 0.25rem; font-weight: 500; color: #1a1a1a;">Selectate (<span id="zone-count">0</span>):</p>
                     <div id="selected-zones-chips"></div>
                 </div>
                 <div id="zone-checkboxes" class="checkbox-grid"></div>
@@ -606,7 +605,7 @@ function toggleTag(id) {
 
 function updateTagsCounter() {
     const c = document.getElementById('tags-counter');
-    if (c) { c.textContent = `${selectedTags.length} din 15 selectate`; c.style.color = selectedTags.length >= 15 ? '#ea580c' : '#64748b'; }
+    if (c) { c.textContent = `${selectedTags.length} din 15 selectate`; c.style.color = selectedTags.length >= 15 ? '#a84e3a' : '#555555'; }
 }
 
 // ── CITIES & ZONES FROM SUPABASE ──
