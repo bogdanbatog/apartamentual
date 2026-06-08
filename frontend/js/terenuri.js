@@ -45,7 +45,9 @@ let currentTerenForGroup = null;  // teren ID when opening "add to group" modal
 
 // ── INIT ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    initNav();
+    // Nav-ul (avatar, dropdown profil, logout, mobil) e gestionat integral de
+    // nav.js. Nu mai atașăm handlere aici — duplicarea făcea dublu-toggle pe
+    // dropdown și butonul „Profilul meu" nu se mai deschidea.
     populateOrasFilter();
     bindFilterEvents();
     bindModalEvents();
@@ -63,9 +65,8 @@ async function checkAuth() {
         const { data: { user } } = await sb.auth.getUser();
         if (user) {
             currentUser = user;
-            DOM.navUser.style.display = 'block';
-            DOM.btnLoginNav.style.display = 'none';
-            
+            // Afișarea nav-ului (avatar vs. login) e gestionată de nav.js.
+
             // Get user profile to check account type
             const { data: profile } = await sb
                 .from('profiles')
@@ -97,39 +98,6 @@ async function loadUserLikes(userId) {
         }
     } catch (e) {
         console.warn('Could not load user likes:', e);
-    }
-}
-
-// ══════════════════════════════════════════
-//  NAV
-// ══════════════════════════════════════════
-function initNav() {
-    // User dropdown toggle
-    if (DOM.btnUserAvatar) {
-        DOM.btnUserAvatar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            DOM.userDropdown.classList.toggle('show');
-        });
-        document.addEventListener('click', () => {
-            DOM.userDropdown.classList.remove('show');
-        });
-    }
-
-    // Logout
-    if (DOM.btnLogout) {
-        DOM.btnLogout.addEventListener('click', async () => {
-            await sb.auth.signOut();
-            window.location.reload();
-        });
-    }
-
-    // Mobile toggle (simplified - you can expand)
-    if (DOM.navMobileToggle) {
-        DOM.navMobileToggle.addEventListener('click', () => {
-            // Simple: redirect to homepage or toggle a mobile menu
-            // For now, just a placeholder
-            document.querySelector('.nav-links').classList.toggle('show-mobile');
-        });
     }
 }
 

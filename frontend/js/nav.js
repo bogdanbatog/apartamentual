@@ -388,6 +388,7 @@ function loadNavigation() {
         navContainer.innerHTML = createNavigation();
         setupNavBehavior();
         startLogoColorCycle();
+        applyInitialAuthUI(quickAuthGuess());
         checkAuthState();
         return;
     }
@@ -399,7 +400,59 @@ function loadNavigation() {
         existingNav.parentNode.replaceChild(wrapper, existingNav);
         setupNavBehavior();
         startLogoColorCycle();
+        applyInitialAuthUI(quickAuthGuess());
         checkAuthState();
+    }
+}
+
+// ── Ghicire SINCRONĂ a stării de autentificare ──────────────────────────
+// Citim tokenul de sesiune Supabase direct din localStorage (cheia
+// `sb-<ref>-auth-token`, salvată automat de SDK). Asta ne lasă să afișăm
+// instant avatarul sau butoanele de login, FĂRĂ să așteptăm bundle-ul mare
+// Supabase + apelul de rețea getUser(). Elimină flash-ul/pop-in-ul header-ului
+// la refresh. NU înlocuiește verificarea reală — checkAuthState() rulează
+// imediat după și confirmă/corectează (sesiune expirată, cont suspendat etc.).
+function quickAuthGuess() {
+    try {
+        for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (!k || !/^sb-.*-auth-token$/.test(k)) continue;
+            var raw = localStorage.getItem(k);
+            if (!raw) continue;
+            var obj = JSON.parse(raw);
+            var sess = (obj && obj.currentSession) ? obj.currentSession : obj;
+            var token = sess && sess.access_token;
+            var expiresAt = sess && sess.expires_at; // unix seconds
+            if (token && (!expiresAt || expiresAt * 1000 > Date.now())) return true;
+        }
+    } catch (e) { /* localStorage indisponibil / JSON invalid → tratăm ca nelogat */ }
+    return false;
+}
+
+// Aplică starea inițială (logat / nelogat) pe elementele de nav, înainte de
+// verificarea de rețea. Aceleași elemente sunt apoi rescrise de checkAuthState().
+function applyInitialAuthUI(loggedIn) {
+    var navUser = document.getElementById('navUser');
+    var navMobileUser = document.getElementById('navMobileUser');
+    var btnLogin = document.getElementById('btnLoginNav');
+    var btnLoginMobile = document.getElementById('btnLoginNavMobile');
+    var btnRegister = document.getElementById('btnRegisterCta');
+    var btnRegisterMobile = document.getElementById('btnRegisterCtaMobile');
+
+    if (loggedIn) {
+        if (navUser) navUser.style.display = 'flex';
+        if (navMobileUser) navMobileUser.style.display = 'flex';
+        if (btnLogin) btnLogin.style.display = 'none';
+        if (btnLoginMobile) btnLoginMobile.style.display = 'none';
+        if (btnRegister) btnRegister.style.display = 'none';
+        if (btnRegisterMobile) btnRegisterMobile.style.display = 'none';
+    } else {
+        if (navUser) navUser.style.display = 'none';
+        if (navMobileUser) navMobileUser.style.display = 'none';
+        if (btnLogin) btnLogin.style.display = 'inline-flex';
+        if (btnLoginMobile) btnLoginMobile.style.display = 'inline-flex';
+        if (btnRegister) btnRegister.style.display = 'inline-flex';
+        if (btnRegisterMobile) btnRegisterMobile.style.display = 'inline-flex';
     }
 }
 

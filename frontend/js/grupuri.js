@@ -50,38 +50,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     filterTerenId = urlParams.get('teren');
     
-    initNav();
+    // Nav-ul (avatar, dropdown profil, logout, mobil) e gestionat integral de
+    // nav.js. Nu mai atașăm handlere aici — duplicarea făcea dublu-toggle pe
+    // dropdown și butonul „Profilul meu" nu se mai deschidea.
     populateOrasFilter();
     bindFilterEvents();
     await checkAuth();
     await loadGrupuri();
 });
-
-// ── NAV ──
-function initNav() {
-    if (DOM.btnUserAvatar) {
-        DOM.btnUserAvatar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            DOM.userDropdown.classList.toggle('show');
-        });
-        document.addEventListener('click', () => {
-            DOM.userDropdown.classList.remove('show');
-        });
-    }
-    
-    if (DOM.btnLogout) {
-        DOM.btnLogout.addEventListener('click', async () => {
-            await sb.auth.signOut();
-            window.location.reload();
-        });
-    }
-    
-    if (DOM.navMobileToggle) {
-        DOM.navMobileToggle.addEventListener('click', () => {
-            // Mobile menu toggle - to be implemented
-        });
-    }
-}
 
 // ── AUTH ──
 let myZones = [];
@@ -92,9 +68,8 @@ async function checkAuth() {
         const { data: { user } } = await sb.auth.getUser();
         if (user) {
             currentUser = user;
-            if (DOM.navUser) DOM.navUser.style.display = 'block';
-            if (DOM.btnLoginNav) DOM.btnLoginNav.style.display = 'none';
-            
+            // Afișarea nav-ului (avatar vs. login) e gestionată de nav.js.
+
             // Get account type
             const { data: profile } = await sb
                 .from('profiles')
