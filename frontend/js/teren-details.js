@@ -12,18 +12,67 @@ let userGroups = [];
 let terenGroupLikes = [];
 let currentTerenId = null;
 
+// Global state for image gallery
+let terenImages = [];      // array de URL-uri (din image_urls sau fallback image_url)
+let currentImageIndex = 0; // imaginea afișată curent (în main + modal)
+
 // Extract teren ID from URL query parameter
 function getTerenIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('id');
 }
 
-// Get image URL from storage
-function getImageUrl(teren) {
-    if (teren.image_url) {
-        return teren.image_url;
+// Get all image URLs from teren.
+// Prefer image_urls (array, multi-photo). Fall back to image_url (legacy single
+// photo) pentru terenurile vechi salvate înainte de multi-upload.
+function getImageUrls(teren) {
+    if (teren.image_urls && Array.isArray(teren.image_urls) && teren.image_urls.length > 0) {
+        return teren.image_urls.filter(Boolean);
     }
-    return null;
+    if (teren.image_url) {
+        return [teren.image_url];
+    }
+    return [];
+}
+
+// Setează imaginea principală afișată + evidențiază miniatura activă.
+function setMainImage(index) {
+    if (index < 0 || index >= terenImages.length) return;
+    currentImageIndex = index;
+    const imageEl = document.getElementById('teren-image');
+    if (imageEl) imageEl.src = terenImages[index];
+    document.querySelectorAll('#teren-thumbnails .teren-thumb').forEach((el, i) => {
+        if (i === index) {
+            el.classList.add('ring-2', 'ring-orange-500');
+        } else {
+            el.classList.remove('ring-2', 'ring-orange-500');
+        }
+    });
+}
+
+// Construiește miniaturile sub imaginea principală. Apar doar dacă sunt >1 imagini.
+function renderThumbnails() {
+    const thumbsContainer = document.getElementById('teren-thumbnails');
+    if (!thumbsContainer) return;
+
+    if (terenImages.length <= 1) {
+        thumbsContainer.classList.add('hidden');
+        thumbsContainer.innerHTML = '';
+        return;
+    }
+
+    thumbsContainer.classList.remove('hidden');
+    thumbsContainer.innerHTML = terenImages.map((url, i) => `
+        <img src="${url}" alt="Miniatură ${i + 1}"
+             class="teren-thumb w-full h-20 object-cover rounded-md border border-gray-200 cursor-pointer hover:opacity-80 transition"
+             data-index="${i}">
+    `).join('');
+
+    thumbsContainer.querySelectorAll('.teren-thumb').forEach(el => {
+        el.addEventListener('click', function() {
+            setMainImage(parseInt(this.getAttribute('data-index'), 10));
+        });
+    });
 }
 
 // Format date
@@ -39,12 +88,40 @@ function formatDate(dateString) {
 
 // Image modal functions
 function openImageModal() {
-    const imageSrc = document.getElementById('teren-image').src;
-    if (imageSrc) {
-        document.getElementById('modal-image').src = imageSrc;
-        document.getElementById('image-modal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+    if (terenImages.length === 0) return;
+    showModalImage(currentImageIndex);
+    document.getElementById('image-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Afișează în modal imaginea de la index + actualizează contor / săgeți și sincronizează main + miniaturi.
+function showModalImage(index) {
+    if (index < 0 || index >= terenImages.length) return;
+    const modalImg = document.getElementById('modal-image');
+    if (modalImg) modalImg.src = terenImages[index];
+
+    const hasMultiple = terenImages.length > 1;
+    const counter = document.getElementById('modal-counter');
+    const prevBtn = document.getElementById('modal-prev');
+    const nextBtn = document.getElementById('modal-next');
+    if (counter) {
+        counter.textContent = `${index + 1} / ${terenImages.length}`;
+        counter.classList.toggle('hidden', !hasMultiple);
     }
+    if (prevBtn) prevBtn.classList.toggle('hidden', !hasMultiple);
+    if (nextBtn) nextBtn.classList.toggle('hidden', !hasMultiple);
+
+    // Ține main image + miniatura activă sincronizate cu modalul.
+    setMainImage(index);
+}
+
+// Navighează în modal: direction = -1 (înapoi) / +1 (înainte), cu wrap circular.
+function navigateModal(direction) {
+    if (terenImages.length === 0) return;
+    let newIndex = currentImageIndex + direction;
+    if (newIndex < 0) newIndex = terenImages.length - 1;
+    if (newIndex >= terenImages.length) newIndex = 0;
+    showModalImage(newIndex);
 }
 
 function closeImageModal() {
@@ -601,28 +678,33 @@ async function displayTerenDetails(teren, userProfile) {
         actionButtons.classList.add('hidden');
     }
     
-    // Image handling
+    // Image handling — galerie cu miniaturi (multi-photo)
     const imageContainer = document.getElementById('teren-image-container');
     const noImageDiv = document.getElementById('no-image');
     const imageEl = document.getElementById('teren-image');
-    
-    const imageUrl = getImageUrl(teren);
-    
-    if (imageUrl) {
-        imageEl.src = imageUrl;
+    const thumbsContainer = document.getElementById('teren-thumbnails');
+
+    terenImages = getImageUrls(teren);
+    currentImageIndex = 0;
+
+    if (terenImages.length > 0) {
         imageEl.alt = `Imagine teren - ${teren.titlu}`;
-        
+
         if (isDisabled) {
             imageEl.classList.add('opacity-50');
         } else {
             imageEl.classList.remove('opacity-50');
         }
-        
+
         imageContainer.classList.remove('hidden');
         noImageDiv.classList.add('hidden');
+
+        renderThumbnails();
+        setMainImage(0); // setează imaginea principală + evidențiază prima miniatură
     } else {
         imageContainer.classList.add('hidden');
         noImageDiv.classList.remove('hidden');
+        if (thumbsContainer) thumbsContainer.classList.add('hidden');
     }
     
     // Show teren details section
@@ -747,10 +829,16 @@ function redirectToAnalize(teren) {
     window.location.href = qs ? `analize.html?${qs}` : 'analize.html';
 }
 
-// Close modals with Escape key
+// Close modals with Escape key + navighează cu săgețile când modalul e deschis
 document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('image-modal');
+    const modalOpen = modal && !modal.classList.contains('hidden');
     if (e.key === 'Escape') {
         closeImageModal();
+    } else if (modalOpen && e.key === 'ArrowLeft') {
+        navigateModal(-1);
+    } else if (modalOpen && e.key === 'ArrowRight') {
+        navigateModal(1);
     }
 });
 
