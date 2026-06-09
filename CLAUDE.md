@@ -61,7 +61,7 @@ Platforma are **plăți reale (Netopia/Oblio) și utilizatori reali**. Greșelil
 - **Plăți**: **Netopia** (onboarding completat, urmează "Solicită aprobare")
 - **Facturare**: **Oblio** prin API (fix `client.save: 1` confirmat funcțional)
 - **Edge Functions deployate**: `notify-admins`, `creeaza-proforma-oblio`, `oblio-webhook`
-- **Deploy edge functions**: `npx supabase functions deploy <nume>` din `C:\Users\lucia\supabase` (Docker Desktop trebuie pornit)
+- **Deploy edge functions**: `npx supabase functions deploy <nume>` din `C:\Users\lucia\supabase` (Supabase CLI 2.x — **NU necesită Docker**; Docker e doar pentru rulare locală). Funcțiile se editează în repo (`apartamentual/supabase/functions/`), apoi se copiază manual în folderul de deploy `C:\Users\lucia\supabase\supabase\functions\<nume>\index.ts` înainte de `deploy`.
 
 ---
 
@@ -70,7 +70,7 @@ Platforma are **plăți reale (Netopia/Oblio) și utilizatori reali**. Greșelil
 1. Editări locale în repo → îmi arăți diff-ul → aprob → **commit + push pe GitHub** (`bogdanbatog/apartamentual`)
 2. **Render face deploy automat** (~2-3 min) după push
 3. Migrații DB → tu scrii SQL complet comentat → eu îl rulez manual în **Supabase SQL Editor**
-4. Edge functions → tu pregătești `index.ts` complet → eu deploy din `C:\Users\lucia\supabase` cu `npx supabase functions deploy <nume>` (Docker Desktop pornit)
+4. Edge functions → tu pregătești `index.ts` complet (în repo) → se copiază în `C:\Users\lucia\supabase\supabase\functions\<nume>\` → eu deploy din `C:\Users\lucia\supabase` cu `npx supabase functions deploy <nume>` (**fără Docker** — CLI 2.x)
 5. La final de sesiune lungă: pregătește un **handoff summary** (stadiu exact + pași rămași + comenzi concrete)
 
 ---
