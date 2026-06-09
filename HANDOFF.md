@@ -1,15 +1,15 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 9 iunie 2026 (3 lucruri: (1) galerie cu miniaturi pe `teren-details` — afișa o singură poză deși formularul salvează toate în `image_urls`, commit c7c3cb4; (2) fix upload — nume unic per imagine, pozele se suprascriau în storage, commit bcc097f; (3) aliniere v9 a esteticii emailurilor — `notify-admins` + `oblio-webhook`, commit 6fdca71. Sesiunea anterioară, 8 iunie: clusterul „analize" complet + 2 fix-uri nav. **Aliniere v9 a întregului site = ÎNCHEIATĂ.**)
+> Ultima actualizare: 9 iunie 2026 (4 lucruri: (1) galerie cu miniaturi pe `teren-details`, commit c7c3cb4; (2) fix upload — nume unic per imagine, pozele se suprascriau în storage, commit bcc097f; (3) aliniere v9 a esteticii emailurilor — `notify-admins` + `oblio-webhook`, commit 6fdca71, **deployat cu succes, fără erori**; (4) fix teren `pending` care nu se încărca din linkul de email de aprobare — race auth + `.single()`, commit f6152f6. Sesiunea anterioară, 8 iunie: clusterul „analize" complet + 2 fix-uri nav. **Aliniere v9 a întregului site = ÎNCHEIATĂ.**)
 
 ---
 
 ## ⏭️ DE ÎNCEPUT ÎN SESIUNEA URMĂTOARE (după /clear)
 
 **Niciun task obligatoriu în desfășurare — alege unul dintre cele de pe orizont.** Ultimele sesiuni (flash header, curățare cod mort, clusterul analize, fix-uri terenuri, estetica emailuri v9) sunt închise și împinse.
-⚠️ **NEDEPLOYAT din cPanel** (commits a8a149a + 0cd4096 + 7d460fc + **c7c3cb4** + **bcc097f**; plus `e3d8bbb`/`6fdca71`/acest commit = docs).
-⚠️ **EDGE FUNCTIONS NEDEPLOYATE** (commit `6fdca71`, estetica emailuri) — NU merg prin cPanel; deploy manual din `C:\Users\lucia\supabase` cu Docker pornit: `npx supabase functions deploy notify-admins` + `npx supabase functions deploy oblio-webhook`.
+⚠️ **DE DEPLOYAT din cPanel** (frontend): commits a8a149a + 0cd4096 + 7d460fc + **bcc097f** + **f6152f6** (plus docs). NOTĂ: `c7c3cb4` (galeria) e deja LIVE — confirmat de Lucian. Restul commit-urilor frontend de după pot să nu fie încă deployate.
+✅ **EDGE FUNCTIONS DEPLOYATE** (commit `6fdca71`, estetica emailuri v9) — Lucian a rulat deploy 9 iunie, fără erori. (Deploy edge functions: din `C:\Users\lucia\supabase`, `npx supabase functions deploy <nume>` — **fără Docker**, CLI 2.x; vezi memoria `edge-functions-deploy-no-docker`.)
 Recomandate, în ordinea valorii:
 
 1. **✅ Aliniere v9 — ÎNCHEIATĂ.** Tot site-ul e migrat. Ultimul cluster, „analize" (`analize`, `analiza-simplificata`, `analiza-detaliata`, `termeni-analize`), a fost migrat în sesiunea din 8 iunie (commits 0cd4096 + 7d460fc) — reskin strict vizual (paleta rece slate+portocaliu `#f97316` → v9 crem/ink/teracotă `#c2604a`, DM Sans → Mona Sans, nav.css → apartamentual-v9.css), fără atingere de JS/preț/flux. (DONE complet: `ce-este/*`, `povestea-noastra`, `parteneri`, `gdpr`, `termeni`, `politica-retur`, `contact`, `register`, `consultanta`, `devino-partener`, `ghid`, `news`, `terenuri`, `utilizatori`, `teren-details`, `profile-view-new`, `comanda-analiza`, `grupuri`+`grup-nou`+`grup-edit`+`grup-details`, **`analize`+`analiza-simplificata`+`analiza-detaliata`+`termeni-analize`**.)
@@ -76,7 +76,12 @@ Lansare publică iminentă, dar nu există dată fixă.
   - `cum-functioneaza.html`: headerele fazelor 1-4 din gradient verde/mov/gri-închis → pasteluri cu text ink; puncte + bara de timeline în tonuri saturate (`#5a7196`/`#b8965c`/`#c2604a`/`#8f5a48`); caseta „Te muți în casa ta!" din fundal închis → pastel cu text ink. (Înlocuiește nota mai veche „diagrama recolorată monocrom ink".)
   - **Regula de culoare a lui Lucian**: fundalurile pot fi colorate dar PALE, ca textul negru să rămână lizibil; NU negru/gri-închis cu text negru; a respins verde `#16a34a`, mov `#7c3aed`, gri-închis pe headere.
 - **Toate cele de mai sus sunt pe `main`** (PR #1 fuzionat, commit merge `f098320`). Rămâne doar deploy-ul din cPanel (checkout `main` → Update from Remote → Deploy HEAD Commit).
-- **Bugfix galerie imagini teren (9 iunie) — pe `main`, commit `c7c3cb4`, împins, NEDEPLOYAT încă din cPanel**:
+- **Fix teren `pending` nu se încărca din linkul de email de aprobare (9 iunie) — pe `main`, commit `f6152f6`, DE DEPLOYAT din cPanel**:
+  - **Simptom**: superadminul primește email la propunerea unui teren; click pe linkul de vizualizare → „eroare la încărcarea terenului — cannot coerce the result to a single JSON object".
+  - **Cauză**: terenul abia propus are `status = 'pending'`. RLS pe `terenuri` (în `000_init.sql`): nelogații (anon, linia 830) văd doar `status='active'`; autentificații (linia 842) văd toate ne-șterse, inclusiv pending. `teren-details.js` interoga terenul cu `.single()` **înainte** să se restaureze sesiunea din localStorage (race condition) → query rula ca anonim → terenul pending invizibil → 0 rânduri → `.single()` arunca eroarea criptică.
+  - **Fix**: `await supabase.auth.getSession()` înainte de query (tokenul de login e atașat → adminul logat vede pending); `.single()` → `.maybeSingle()` (null pe 0 rânduri, fără eroare); mesaj clar dacă tot nu apare („Acest teren nu este vizibil public… Autentifică-te"). NEatins: RLS, date, alte query-uri, formular, plăți.
+  - **⏭️ DE TESTAT după deploy**: propune un teren nou → din emailul de aprobare, fiind logat ca superadmin, deschide linkul → terenul trebuie să se încarce.
+- **Bugfix galerie imagini teren (9 iunie) — pe `main`, commit `c7c3cb4`, DEPLOYAT din cPanel (LIVE)**:
   - **Simptom raportat de un user**: la „Propune teren" putea încărca mai multe imagini, dar când apărea postarea se vedea doar una.
   - **Cauză**: upload-ul era OK — `terrain-form-v2.js` salvează toate pozele în coloana `image_urls` (array) + prima în `image_url` (legacy). Problema era la **afișare**: `teren-details.js` citea doar `image_url` (o singură poză) și afișa un singur `<img>`. Lista (`terenuri.js`) folosea deja corect `image_urls[0]` (o poză per card = intenționat).
   - **Fix (strict vizual, 2 fișiere)**: `getImageUrl` → `getImageUrls` (citește array-ul `image_urls`, fallback pe `image_url` pt. terenuri vechi). Adăugat galerie: imagine principală + miniaturi sub ea (`#teren-thumbnails`, apar doar la 2+ poze), click pe miniatură schimbă imaginea mare (inel teracotă pe cea activă), modal navigabil (săgeți `‹`/`›` pe ecran + taste ←/→ + contor „1 / 4", wrap circular). **NEatins**: upload, formular, DB, RLS, plăți, edge functions. Un teren cu o singură poză arată exact ca înainte.
