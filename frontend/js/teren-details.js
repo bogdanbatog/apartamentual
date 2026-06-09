@@ -452,14 +452,21 @@ async function fetchTerenDetails() {
 
     try {
         showLoading();
-        
+
+        // Așteaptă restaurarea sesiunii din localStorage ÎNAINTE de query.
+        // Fără asta, pagina poate interoga ca utilizator anonim (race condition la
+        // încărcare), iar terenurile cu status 'pending' (abia propuse) sunt vizibile
+        // doar utilizatorilor autentificați (RLS). Anonim → 0 rânduri → .single() arunca
+        // „cannot coerce the result to a single JSON object".
+        const { data: { session } } = await supabase.auth.getSession();
+
         // Fetch teren details, user profile, user groups, and teren group likes in parallel
         const [terenResult, userProfile, groups, groupLikes] = await Promise.all([
             supabase
                 .from('terenuri')
                 .select('*')
                 .eq('id', terenId)
-                .single(),
+                .maybeSingle(),  // maybeSingle: întoarce null pe 0 rânduri, nu aruncă eroare
             fetchUserProfile(),
             fetchUserGroups(),
             fetchTerenGroupLikes(terenId)
@@ -472,7 +479,13 @@ async function fetchTerenDetails() {
         }
 
         if (!terenData) {
-            showNotFound();
+            // 0 rânduri: fie terenul nu există, fie e 'pending' și nu ești autentificat
+            // (terenurile în așteptarea aprobării nu sunt vizibile public).
+            if (!session) {
+                showError('Acest teren nu este vizibil public (posibil în așteptarea aprobării). Autentifică-te pentru a-l vizualiza.');
+            } else {
+                showNotFound();
+            }
             return;
         }
 
