@@ -383,9 +383,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // === UPLOAD IMAGINE ===
-    async function uploadImageToStorage(file, userId) {
+    // `index` + sufix aleator garantează nume unic per fișier. Fără el, mai multe
+    // poze încărcate în paralel primeau același Date.now() → același nume → se
+    // suprascriau (rămânea o singură imagine, repetată în image_urls).
+    async function uploadImageToStorage(file, userId, index) {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${userId}/${Date.now()}.${fileExt}`;
+        const uniqueSuffix = `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`;
+        const fileName = `${userId}/${uniqueSuffix}.${fileExt}`;
 
         const { data, error } = await supabase.storage
             .from('terrain-images')
@@ -429,11 +433,11 @@ document.addEventListener('DOMContentLoaded', function() {
             //   - 'existing' → păstrăm URL-ul deja salvat
             //   - 'new' → upload file, înlocuim cu URL-ul public
             // Rezultatul final respectă ordinea din basket (prima imagine = principala).
-            const uploadedUrls = await Promise.all(imageItems.map(async (item) => {
+            const uploadedUrls = await Promise.all(imageItems.map(async (item, index) => {
                 if (item.kind === 'existing') {
                     return item.url;
                 }
-                return await uploadImageToStorage(item.file, user.id);
+                return await uploadImageToStorage(item.file, user.id, index);
             }));
 
             // Calcul preț/mp
