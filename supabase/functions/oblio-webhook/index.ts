@@ -186,29 +186,29 @@ async function sendUserConfirmationEmail(supabase: any, comanda: any) {
 
   const subject = `Comandă confirmată — ${comanda.order_id}`
   const html = `
-    <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-      <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 2rem 1.5rem; text-align: center;">
-        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;">ApartamenTUal</h1>
+    <div style="font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #555555;">
+      <div style="background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); color: white; padding: 2rem 1.5rem; text-align: center;">
+        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 600;">apartamen<span style="color: #c2604a;">TU</span>al</h1>
         <p style="margin: 0.5rem 0 0; opacity: 0.85;">Comandă confirmată</p>
       </div>
-      <div style="padding: 2rem 1.5rem; background: #f8fafc;">
-        <h2 style="margin: 0 0 1rem; color: #f97316;">Mulțumim, ${escapeHtml(numeClient)}!</h2>
+      <div style="padding: 2rem 1.5rem; background: #faf8f3;">
+        <h2 style="margin: 0 0 1rem; color: #1a1a1a;">Mulțumim, ${escapeHtml(numeClient)}!</h2>
         <p>Plata pentru analiza preliminară a fost primită cu succes.</p>
-        <div style="background: white; padding: 1rem 1.25rem; border-radius: 12px; margin: 1.5rem 0; border-left: 4px solid #f97316;">
-          <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.25rem;">Număr comandă</div>
-          <div style="font-size: 1.1rem; font-weight: 600; color: #0f172a;">${escapeHtml(comanda.order_id)}</div>
+        <div style="background: #ffffff; padding: 1rem 1.25rem; border-radius: 12px; margin: 1.5rem 0; border-left: 4px solid #c2604a;">
+          <div style="font-size: 0.85rem; color: #8a8a8a; margin-bottom: 0.25rem;">Număr comandă</div>
+          <div style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a;">${escapeHtml(comanda.order_id)}</div>
         </div>
-        <h3 style="margin: 1.5rem 0 0.75rem; color: #0f172a;">Ce urmează?</h3>
-        <ol style="padding-left: 1.25rem; color: #334155; line-height: 1.7;">
+        <h3 style="margin: 1.5rem 0 0.75rem; color: #1a1a1a;">Ce urmează?</h3>
+        <ol style="padding-left: 1.25rem; color: #555555; line-height: 1.7;">
           <li>Vei primi separat <strong>factura fiscală</strong> de la Oblio (pe adresa ta de email).</li>
           <li>Echipa noastră analizează terenul și pregătește raportul tehnic.</li>
           <li>În <strong>maxim 3-5 zile lucrătoare</strong> primești pe email un PDF cu analiza completă.</li>
         </ol>
-        <p style="margin: 1.5rem 0 0; color: #64748b; font-size: 0.9rem;">Pentru orice întrebare, scrie-ne la <a href="mailto:apartamentual@ltfbstudio.ro" style="color: #f97316;">apartamentual@ltfbstudio.ro</a>.</p>
+        <p style="margin: 1.5rem 0 0; color: #8a8a8a; font-size: 0.9rem;">Pentru orice întrebare, scrie-ne la <a href="mailto:apartamentual@ltfbstudio.ro" style="color: #c2604a;">apartamentual@ltfbstudio.ro</a>.</p>
       </div>
-      <div style="padding: 1rem 1.5rem; background: #0f172a; color: #94a3b8; text-align: center; font-size: 0.8rem;">
+      <div style="padding: 1rem 1.5rem; background: #1a1a1a; color: #b5ada0; text-align: center; font-size: 0.8rem;">
         ApartamenTUal — locuințe colaborative, după modelul Baugruppen<br>
-        <a href="https://apartamentual.ro" style="color: #cbd5e1; text-decoration: none;">apartamentual.ro</a>
+        <a href="https://apartamentual.ro" style="color: #e8e3d8; text-decoration: none;">apartamentual.ro</a>
       </div>
     </div>
   `

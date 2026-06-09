@@ -115,11 +115,11 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
     .join('')
 
   const detailsHtml = detailsList.length > 0
-    ? `<table style="width: 100%; border-collapse: collapse; margin: 16px 0 24px; background: #f8fafc; border-radius: 8px; overflow: hidden;">
+    ? `<table style="width: 100%; border-collapse: collapse; margin: 16px 0 24px; background: #f3f0e7; border-radius: 8px; overflow: hidden;">
          ${detailsList.map(d => `
            <tr>
-             <td style="padding: 10px 14px; font-size: 13px; color: #64748b; border-bottom: 1px solid #e2e8f0; font-weight: 500;">${d.label}</td>
-             <td style="padding: 10px 14px; font-size: 13px; color: #0f172a; border-bottom: 1px solid #e2e8f0;">${d.value}</td>
+             <td style="padding: 10px 14px; font-size: 13px; color: #8a8a8a; border-bottom: 1px solid #e8e3d8; font-weight: 500;">${d.label}</td>
+             <td style="padding: 10px 14px; font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #e8e3d8;">${d.value}</td>
            </tr>
          `).join('')}
        </table>`
@@ -127,26 +127,26 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
 
   const ctaHtml = (ctaLink && ctaLabel)
     ? `<div style="text-align: center; margin: 28px 0;">
-         <a href="${ctaLink}" style="display: inline-block; background: #f97316; color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
+         <a href="${ctaLink}" style="display: inline-block; background: #1a1a1a; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
            ${ctaLabel}
          </a>
        </div>`
     : ''
 
   const footerHtml = footerNote
-    ? `<p style="margin: 20px 0 0; font-size: 13px; line-height: 1.6; color: #94a3b8;">${footerNote}</p>`
+    ? `<p style="margin: 20px 0 0; font-size: 13px; line-height: 1.6; color: #8a8a8a;">${footerNote}</p>`
     : ''
 
   return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px; color: #334155;">
-      <div style="text-align: center; padding: 24px 0; border-bottom: 1px solid #e2e8f0;">
-        <h1 style="margin: 0; font-size: 22px; color: #0f172a;">
-          Apartamen<span style="color: #f97316;">TU</span>al
+    <div style="font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px; background: #faf8f3; color: #555555;">
+      <div style="text-align: center; padding: 24px 0; border-bottom: 1px solid #e8e3d8;">
+        <h1 style="margin: 0; font-size: 22px; color: #1a1a1a; font-weight: 600;">
+          apartamen<span style="color: #c2604a;">TU</span>al
         </h1>
-        <p style="margin: 4px 0 0; font-size: 12px; color: #94a3b8;">by LTFB studio</p>
+        <p style="margin: 4px 0 0; font-size: 12px; color: #8a8a8a;">by LTFB studio</p>
       </div>
       <div style="padding: 32px 8px;">
-        <h2 style="margin: 0 0 16px; font-size: 20px; color: #0f172a; line-height: 1.3;">
+        <h2 style="margin: 0 0 16px; font-size: 20px; color: #1a1a1a; line-height: 1.3;">
           ${headerEmoji} ${headerTitle}
         </h2>
         ${intro ? `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6;">${intro}</p>` : ''}
@@ -155,10 +155,10 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
         ${ctaHtml}
         ${footerHtml}
       </div>
-      <div style="border-top: 1px solid #e2e8f0; padding: 20px 8px 0; text-align: center;">
-        <p style="margin: 0; font-size: 13px; color: #94a3b8;">
+      <div style="border-top: 1px solid #e8e3d8; padding: 20px 8px 0; text-align: center;">
+        <p style="margin: 0; font-size: 13px; color: #8a8a8a;">
           — Echipa ApartamenTUal<br>
-          <a href="${PLATFORM_URL}" style="color: #f97316; text-decoration: none;">apartamentual.ro</a>
+          <a href="${PLATFORM_URL}" style="color: #c2604a; text-decoration: none;">apartamentual.ro</a>
         </p>
       </div>
     </div>
@@ -190,12 +190,12 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerTitle: 'Ai primit o invitație!',
         intro: 'Salut!',
         bodyParagraphs: [
-          `<strong>${inviterName}</strong> te-a invitat să te alături grupului <strong style="color: #f97316;">„${groupName}"</strong> pe ApartamenTUal — platforma unde oameni construiesc împreună blocuri și apartamente, împărțind costurile.`,
+          `<strong>${inviterName}</strong> te-a invitat să te alături grupului <strong style="color: #c2604a;">„${groupName}"</strong> pe ApartamenTUal — platforma unde oameni construiesc împreună blocuri și apartamente, împărțind costurile.`,
           'Apasă butonul de mai jos ca să vezi detaliile grupului și să decizi dacă vrei să te alături:',
         ],
         ctaLink: inviteLink,
         ctaLabel: 'Vezi grupul și răspunde',
-        footerNote: `Pe pagina grupului vei putea vedea descrierea, membrii, zonele de interes, și vei avea opțiunea să accepți sau să respingi invitația. Dacă nu ai cont încă pe ApartamenTUal, vei fi invitat/ă să-ți creezi unul înainte să poți răspunde invitației.<br><br>Dacă butonul nu funcționează, copiază acest link în browser:<br><a href="${inviteLink}" style="color: #f97316; word-break: break-all;">${inviteLink}</a>`,
+        footerNote: `Pe pagina grupului vei putea vedea descrierea, membrii, zonele de interes, și vei avea opțiunea să accepți sau să respingi invitația. Dacă nu ai cont încă pe ApartamenTUal, vei fi invitat/ă să-ți creezi unul înainte să poți răspunde invitației.<br><br>Dacă butonul nu funcționează, copiază acest link în browser:<br><a href="${inviteLink}" style="color: #c2604a; word-break: break-all;">${inviteLink}</a>`,
       })
       return { title, body, html }
     }
@@ -210,7 +210,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '📨',
         headerTitle: 'O nouă invitație a fost trimisă în grupul tău',
         bodyParagraphs: [
-          `<strong>${inviterName}</strong> (membru în grupul tău) a trimis o invitație către <strong>${invitedName}</strong> pentru grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${inviterName}</strong> (membru în grupul tău) a trimis o invitație către <strong>${invitedName}</strong> pentru grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
           'Invitația a fost creată și invitatul a primit un email cu link de acceptare. Când va accepta, cererea lui va apărea automat pe pagina grupului pentru aprobare din partea ta (pentru că invitația vine de la un membru obișnuit, nu direct de la admin).',
         ],
         ctaLink: groupLink,
@@ -229,7 +229,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '👋',
         headerTitle: 'O nouă cerere de alăturare',
         bodyParagraphs: [
-          `<strong>${userName}</strong> a acceptat o invitație și așteaptă aprobarea ta pentru a intra în grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${userName}</strong> a acceptat o invitație și așteaptă aprobarea ta pentru a intra în grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
           'Pentru că invitația a fost trimisă de un membru obișnuit (nu direct de tine), cererea trebuie aprobată de tine ca admin înainte ca persoana să devină membru activ.',
         ],
         detailsList: [
@@ -258,7 +258,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '✨',
         headerTitle: 'Grup nou pe platformă',
         bodyParagraphs: [
-          `Un nou grup a fost creat: <strong style="color: #f97316;">„${groupName}"</strong>`,
+          `Un nou grup a fost creat: <strong style="color: #c2604a;">„${groupName}"</strong>`,
         ],
         detailsList: [
           { label: 'Nume grup', value: groupName },
@@ -282,7 +282,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '📝',
         headerTitle: 'Un grup a fost actualizat',
         bodyParagraphs: [
-          `Grupul <strong style="color: #f97316;">„${groupName}"</strong> a fost modificat (nume, descriere sau status).`,
+          `Grupul <strong style="color: #c2604a;">„${groupName}"</strong> a fost modificat (nume, descriere sau status).`,
         ],
         detailsList: [
           { label: 'Grup', value: groupName },
@@ -304,7 +304,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '👋',
         headerTitle: 'Cerere nouă de alăturare',
         bodyParagraphs: [
-          `<strong>${userName}</strong> a cerut să se alăture grupului <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${userName}</strong> a cerut să se alăture grupului <strong style="color: #c2604a;">„${groupName}"</strong>.`,
         ],
         detailsList: [
           { label: 'Utilizator', value: userName },
@@ -326,7 +326,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '✅',
         headerTitle: 'Membru aprobat în grup',
         bodyParagraphs: [
-          `<strong>${userName}</strong> a fost aprobat ca membru în grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${userName}</strong> a fost aprobat ca membru în grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
         ],
         detailsList: [
           { label: 'Utilizator', value: userName },
@@ -348,7 +348,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '🎉',
         headerTitle: 'Un nou membru s-a alăturat grupului',
         bodyParagraphs: [
-          `<strong>${userName}</strong> a acceptat o invitație și s-a alăturat grupului <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${userName}</strong> a acceptat o invitație și s-a alăturat grupului <strong style="color: #c2604a;">„${groupName}"</strong>.`,
           'Îl/o poți saluta în grupul de WhatsApp sau pe pagina grupului.',
         ],
         detailsList: [
@@ -371,7 +371,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '❌',
         headerTitle: 'Cerere de alăturare respinsă',
         bodyParagraphs: [
-          `Cererea lui <strong>${userName}</strong> de a se alătura grupului <strong style="color: #f97316;">„${groupName}"</strong> a fost respinsă de admin.`,
+          `Cererea lui <strong>${userName}</strong> de a se alătura grupului <strong style="color: #c2604a;">„${groupName}"</strong> a fost respinsă de admin.`,
         ],
         detailsList: [
           { label: 'Utilizator', value: userName },
@@ -390,7 +390,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '👋',
         headerTitle: 'Un membru a părăsit grupul',
         bodyParagraphs: [
-          `<strong>${userName}</strong> a părăsit voluntar grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${userName}</strong> a părăsit voluntar grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
         ],
         detailsList: [
           { label: 'Membru', value: userName },
@@ -413,7 +413,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '🚫',
         headerTitle: 'Un membru a fost eliminat',
         bodyParagraphs: [
-          `<strong>${userName}</strong> a fost eliminat din grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${userName}</strong> a fost eliminat din grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
         ],
         detailsList: [
           { label: 'Membru eliminat', value: userName },
@@ -436,7 +436,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '🔄',
         headerTitle: 'Admin transferat',
         bodyParagraphs: [
-          `Rolul de administrator al grupului <strong style="color: #f97316;">„${groupName}"</strong> a fost transferat.`,
+          `Rolul de administrator al grupului <strong style="color: #c2604a;">„${groupName}"</strong> a fost transferat.`,
         ],
         detailsList: [
           { label: 'Grup', value: groupName },
@@ -461,7 +461,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: '⚖️',
         headerTitle: 'Vot de excludere inițiat',
         bodyParagraphs: [
-          `<strong>${initiatorName}</strong> a inițiat un vot pentru excluderea lui <strong>${targetName}</strong> din grupul <strong style="color: #f97316;">„${groupName}"</strong>.`,
+          `<strong>${initiatorName}</strong> a inițiat un vot pentru excluderea lui <strong>${targetName}</strong> din grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
           data.reason ? `<em>Motiv: ${data.reason}</em>` : 'Ceilalți membri ai grupului vor vota dacă excluderea se aprobă sau nu.',
         ],
         detailsList: [
@@ -487,7 +487,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         headerEmoji: emoji,
         headerTitle: 'Vot de excludere încheiat',
         bodyParagraphs: [
-          `Votul de excludere pentru <strong>${targetName}</strong> în grupul <strong style="color: #f97316;">„${groupName}"</strong> s-a încheiat.`,
+          `Votul de excludere pentru <strong>${targetName}</strong> în grupul <strong style="color: #c2604a;">„${groupName}"</strong> s-a încheiat.`,
           `<strong>${targetName} ${resultText}.</strong>`,
         ],
         detailsList: [
