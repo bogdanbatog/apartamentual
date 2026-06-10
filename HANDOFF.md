@@ -1,14 +1,15 @@
 # HANDOFF — ApartamenTUal
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
-> Ultima actualizare: 9 iunie 2026 (4 lucruri: (1) galerie cu miniaturi pe `teren-details`, commit c7c3cb4; (2) fix upload — nume unic per imagine, pozele se suprascriau în storage, commit bcc097f; (3) aliniere v9 a esteticii emailurilor — `notify-admins` + `oblio-webhook`, commit 6fdca71, **deployat cu succes, fără erori**; (4) fix teren `pending` care nu se încărca din linkul de email de aprobare — race auth + `.single()`, commit f6152f6. Sesiunea anterioară, 8 iunie: clusterul „analize" complet + 2 fix-uri nav. **Aliniere v9 a întregului site = ÎNCHEIATĂ.**)
+> Ultima actualizare: 10 iunie 2026 (favicon nou „TU" aliniat la v9 — commit 1ebf868, **deployat din cPanel, LIVE, confirmat de Lucian**: vechiul „A" alb pe bleumarin #0f172a cu punct portocaliu #f97316 → semnătura „TU" cărămizie #c2604a pe ink #1a1a1a, fidelă logo-ului; regenerat tot setul svg/png 16-32-48/apple-touch 180/ico, „TU" desenat vectorial ca paths ca să nu depindă de font la rasterizare; niciun HTML atins — nume de fișier identice. Generare raster: sharp + png-to-ico instalate temporar într-un folder din afara repo-ului.)
+> Sesiunea 9 iunie (4 lucruri): (1) galerie cu miniaturi pe `teren-details`, commit c7c3cb4; (2) fix upload — nume unic per imagine, pozele se suprascriau în storage, commit bcc097f; (3) aliniere v9 a esteticii emailurilor — `notify-admins` + `oblio-webhook`, commit 6fdca71, **deployat cu succes, fără erori**; (4) fix teren `pending` care nu se încărca din linkul de email de aprobare — race auth + `.single()`, commit f6152f6. Sesiunea 8 iunie: clusterul „analize" complet + 2 fix-uri nav. **Aliniere v9 a întregului site = ÎNCHEIATĂ.**
 
 ---
 
 ## ⏭️ DE ÎNCEPUT ÎN SESIUNEA URMĂTOARE (după /clear)
 
 **Niciun task obligatoriu în desfășurare — alege unul dintre cele de pe orizont.** Ultimele sesiuni (flash header, curățare cod mort, clusterul analize, fix-uri terenuri, estetica emailuri v9) sunt închise și împinse.
-⚠️ **DE DEPLOYAT din cPanel** (frontend): commits a8a149a + 0cd4096 + 7d460fc + **bcc097f** + **f6152f6** (plus docs). NOTĂ: `c7c3cb4` (galeria) e deja LIVE — confirmat de Lucian. Restul commit-urilor frontend de după pot să nu fie încă deployate.
+✅ **DEPLOY cPanel (10 iunie):** Lucian a făcut deploy din cPanel — favicon-ul nou (`1ebf868`) e LIVE, confirmat. Un deploy manual din cPanel încarcă tot folderul frontend, deci commit-urile pending anterioare (a8a149a + 0cd4096 + 7d460fc + bcc097f + f6152f6 + docs) au intrat foarte probabil în același deploy — **de confirmat vizual la nevoie**, nu mai e blocant.
 ✅ **EDGE FUNCTIONS DEPLOYATE** (commit `6fdca71`, estetica emailuri v9) — Lucian a rulat deploy 9 iunie, fără erori. (Deploy edge functions: din `C:\Users\lucia\supabase`, `npx supabase functions deploy <nume>` — **fără Docker**, CLI 2.x; vezi memoria `edge-functions-deploy-no-docker`.)
 Recomandate, în ordinea valorii:
 
