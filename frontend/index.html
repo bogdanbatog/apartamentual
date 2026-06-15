@@ -444,7 +444,7 @@
   }
   .aptbar__cols{ flex:1 1 auto; display:flex; flex-direction:column; gap:5px; min-width:0; }
   .aptbar__row{ flex:1; display:flex; gap:5px; }
-  .aptbar__row > span{ flex:var(--w,1); border-radius:2px; }
+  .aptbar__row > span{ flex:var(--w,1); border-radius:2px; transition:background .6s ease; }
   .aptbar__big{ flex:none; width:11.5%; border-radius:2px; background:var(--ochre); }
 
   /* responsive variante A/B */
@@ -1850,6 +1850,7 @@
 <script src="js/faq.js"></script>
 <script>
   // ── BARA DE APARTAMENTE: pătrate ponderate, separate prin gap (fără borders) ──
+  // Ritm de șantier: după randarea inițială, câteva pătrate se sting/reaprind continuu.
   (function(){
     var bar = document.querySelector('.js-aptbar');
     if(!bar) return;
@@ -1859,12 +1860,15 @@
       sg:'var(--sage)', sg2:'var(--sage-2)', sl:'var(--slate)',
       tc:'var(--terracotta)', mv:'var(--mauve)'
     };
+    var EMPTY = 'var(--bg)';                       // culoarea fundalului => pătrat „gol" (se vede ca gap)
+    var COLORS = Object.keys(T).map(function(k){ return T[k]; });
     // [culoare, pondere-lățime] — compoziția din design-ul de referință
     var ROWS = [
       [['cr',1],['mv',.7],['sg',1.4],['cr2',.8],['sg2',1.2],['cr',.7],['sg',1.7],['sl',.8],['tc',.8],['cr2',.7],['sg',1.8],['cr',1.5],['sl',.7],['sl',.7]],
       [['mv',.7],['sg',1.8],['cr',1.5],['sl',1.9],['sg2',2.2],['cr2',.9],['sg',.9],['tc',.9],['cr',1.4],['sg',.9],['cr2',1.1],['cr',.9]],
       [['mv',.7],['mv',.7],['sg',1.4],['cr',.8],['sl',1.7],['cr2',.7],['cr',.7],['sg2',.7],['cr',.7],['tc',.7],['sg',.7],['sl',.9],['cr2',.7],['tc',.7],['sl',.7]]
     ];
+    var cells = [];                               // toate <span>-urile, ca să le putem anima
     ROWS.forEach(function(row){
       var r = document.createElement('div');
       r.className = 'aptbar__row';
@@ -1873,9 +1877,33 @@
         s.style.background = T[t[0]];
         s.style.setProperty('--w', t[1]);
         r.appendChild(s);
+        cells.push({ el:s, filled:true });
       });
       bar.appendChild(r);
     });
+
+    // Respectă preferința de mișcare redusă: lasă bara statică.
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var rnd = function(n){ return Math.floor(Math.random() * n); };
+    // Ritm continuu — câteva pătrate se sting spre fundal și altele se reaprind în culoare nouă.
+    function tick(){
+      var moves = 2 + rnd(3);                     // 2–4 pătrate pe bătaie
+      for(var m = 0; m < moves; m++){
+        var cell = cells[rnd(cells.length)];
+        var dice = Math.random();
+        if(!cell.filled){                         // gol -> reaprinde în culoare nouă
+          cell.el.style.background = COLORS[rnd(COLORS.length)];
+          cell.filled = true;
+        } else if(dice < 0.55){                    // plin -> se stinge spre fundal
+          cell.el.style.background = EMPTY;
+          cell.filled = false;
+        } else {                                   // plin -> doar schimbă culoarea
+          cell.el.style.background = COLORS[rnd(COLORS.length)];
+        }
+      }
+    }
+    setInterval(tick, 720);                        // ~720ms între bătăi, ca în varianta veche
   })();
 
   // ── Signature TU/tău color cycle ──
