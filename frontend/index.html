@@ -288,13 +288,193 @@
   }
   .cred-sep{ color:var(--ink-3); }
 
-  /* ── SQUARES ── */
-  .squares{
-    margin:2.5rem -1.5rem 3.5rem;
-    padding:0 1.5rem;
-    overflow:hidden;
+  /* ── HERO PE ROLURI (variante A/B) + BARA DE APARTAMENTE ──
+     Tot CSS-ul de mai jos e SCOPAT pe .hero-stage ca să NU afecteze :root
+     sau hero-ul de marketing (care își păstrează clasele .hero-title/.hero-sub).
+     Paletă pământie din design-ul de referință. Variabilele neutre sunt
+     mapate la tokenii existenți ai site-ului (--bg, --ink, --ink-2…). */
+  .hero-stage{
+    /* paletă pământie (din referință) */
+    --terracotta:#c06a4f;
+    --slate:#6f80a4;
+    --sage:#84a07f;
+    --sage-2:#93a98c;
+    --mauve:#a96f84;
+    --ochre:#bf9a63;
+    --cream-tile:#ece8db;
+    --cream-tile-2:#e4dfd0;
+    /* neutre locale, mapate la tokenii site-ului */
+    --h-ink:var(--ink);
+    --h-ink-soft:var(--ink-2);
+    --h-ink-faint:var(--ink-3);
+    --h-line:var(--rule);
+    --h-line-strong:var(--rule-2);
+    --h-card:#ffffff;
+    --ok:#6f9168;
+    --pending:#c79a4f;
+    --accent:var(--slate);
+    --pad-x:0px;
   }
-  .squares svg{ width:100%; height:auto; display:block; }
+  .hero-stage .hero[hidden]{ display:none !important; }
+
+  /* hero variante A/B — layout din referință, font moștenit (Mona Sans) */
+  .hero-stage .hero[data-variant="a"],
+  .hero-stage .hero[data-variant="b"]{
+    position:relative;
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+    max-width:100%;
+    padding:clamp(28px,6vh,72px) var(--pad-x) clamp(36px,7vh,80px);
+    min-height:clamp(380px,48vh,500px);
+    margin:0;
+  }
+  /* doar elementele de text stau în prim-plan; clusterul rămâne în fundal (poziționat separat) */
+  .hero-stage .hero[data-variant] > .eyebrow,
+  .hero-stage .hero[data-variant] > .title,
+  .hero-stage .hero[data-variant] > .lead,
+  .hero-stage .hero[data-variant] > .status,
+  .hero-stage .hero[data-variant] > .actions,
+  .hero-stage .hero[data-variant] > .micro{ position:relative; z-index:1; max-width:560px; }
+
+  .hero-stage .hero[data-variant] .eyebrow{
+    display:flex; align-items:center; gap:11px; white-space:nowrap;
+    font-size:.82rem; font-weight:700; letter-spacing:.19em; text-transform:uppercase;
+    color:var(--h-ink-faint); margin:0 0 26px;
+  }
+  .hero-stage .hero[data-variant] .eyebrow .dot{
+    width:9px; height:9px; border-radius:50%; background:var(--accent); flex:none;
+  }
+  .hero-stage .hero[data-variant] .title{
+    font-weight:600; font-size:clamp(2.2rem,5vw,4rem); line-height:1.04;
+    letter-spacing:-.022em; margin:0 0 .5em; max-width:15ch; color:var(--h-ink);
+  }
+  .hero-stage .hero[data-variant] .title .accent{ color:var(--accent); }
+  .hero-stage .hero[data-variant] .lead{
+    font-size:clamp(1.02rem,1.4vw,1.22rem); line-height:1.5; color:var(--h-ink-soft);
+    max-width:32ch; margin:0 0 30px;
+  }
+
+  /* status agenție (B) */
+  .hero-stage .hero[data-variant] .status{
+    align-self:start; display:flex; flex-direction:column; gap:16px; margin:0 0 30px; max-width:36ch;
+  }
+  .hero-stage .hero[data-variant] .status__line{
+    font-size:clamp(1.02rem,1.4vw,1.18rem); line-height:1.5; color:var(--h-ink-soft); margin:0;
+  }
+  .hero-stage .hero[data-variant] .status__chips{ display:flex; flex-wrap:wrap; gap:10px; }
+  .hero-stage .hero[data-variant] .chip{
+    display:inline-flex; align-items:center; gap:9px; white-space:nowrap;
+    padding:9px 16px 9px 13px; background:var(--h-card); border:1px solid var(--h-line-strong);
+    border-radius:999px; font-weight:600; font-size:1rem; color:var(--h-ink);
+  }
+  .hero-stage .hero[data-variant] .chip .sdot{ width:9px; height:9px; border-radius:50%; }
+  .hero-stage .hero[data-variant] .chip .sdot.ok{ background:var(--ok); }
+  .hero-stage .hero[data-variant] .chip .sdot.pending{ background:var(--pending); }
+
+  .hero-stage .hero[data-variant] .actions{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
+  .hero-stage .hero[data-variant] .btn{
+    font-family:inherit; font-weight:600; font-size:1.02rem; padding:15px 24px; border-radius:13px;
+    cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:.5em;
+    transition:transform .15s ease, background .18s, border-color .18s, color .18s;
+    border:1.5px solid transparent; white-space:nowrap;
+  }
+  .hero-stage .hero[data-variant] .btn:active{ transform:translateY(1px); }
+  .hero-stage .hero[data-variant] .btn--primary{ background:var(--h-ink); color:#fff; }
+  .hero-stage .hero[data-variant] .btn--primary:hover{ background:#000; }
+  .hero-stage .hero[data-variant] .btn--ghost{ background:transparent; color:var(--h-ink); border-color:var(--h-line-strong); }
+  .hero-stage .hero[data-variant] .btn--ghost:hover{ border-color:var(--h-ink); }
+
+  .hero-stage .hero[data-variant] .micro{ font-size:.96rem; color:var(--h-ink-faint); margin:0; }
+  .hero-stage .hero[data-variant] .micro[hidden]{ display:none; }
+  .hero-stage .hero[data-variant] .micro b{ color:var(--h-ink-soft); font-weight:600; }
+
+  /* cluster plutitor (A) */
+  .hero-stage .cluster{
+    position:absolute; z-index:0; top:0; right:var(--pad-x); bottom:0;
+    width:clamp(320px,42%,560px); max-width:none;
+  }
+  @keyframes hero-floaty{ 0%,100%{ translate:0 0; } 50%{ translate:0 var(--amp,-9px); } }
+  .hero-stage .floater{
+    position:absolute; animation:hero-floaty var(--dur,8s) ease-in-out var(--delay,0s) infinite; will-change:translate;
+  }
+  /* pătrate-avatar vecini (A) — culoarea vine din --bg-tile (NU --bg, ca să nu intre în coliziune) */
+  .hero-stage .neighbor{
+    width:calc(var(--size,96px) * var(--k,1)); height:calc(var(--size,96px) * var(--k,1));
+    border-radius:5px; rotate:var(--rot,0deg); display:grid; place-items:center;
+    background:var(--bg-tile,var(--slate)); color:#fff; text-decoration:none;
+    box-shadow:0 18px 40px -16px rgba(28,27,24,.5); cursor:pointer; transition:box-shadow .2s, filter .2s;
+  }
+  .hero-stage .neighbor .ini{ font-weight:700; font-size:calc(var(--size,96px) * var(--k,1) * .3); letter-spacing:.02em; }
+  .hero-stage .neighbor:hover{ filter:brightness(1.05); box-shadow:0 26px 50px -16px rgba(28,27,24,.62); }
+  .hero-stage .neighbor:focus-visible{ outline:3px solid var(--h-ink); outline-offset:4px; }
+  .hero-stage .neighbor .pct{
+    position:absolute; bottom:-7px; left:50%; transform:translateX(-50%);
+    background:var(--h-card); color:var(--h-ink); font-weight:700; font-size:.78rem;
+    padding:4px 9px; border-radius:999px; box-shadow:0 4px 12px -4px rgba(28,27,24,.35);
+    border:1px solid var(--h-line); white-space:nowrap;
+  }
+  .hero-stage .neighbor .tip{
+    position:absolute; bottom:calc(100% + 12px); left:50%; transform:translate(-50%,6px);
+    background:var(--h-ink); color:#fff; padding:9px 13px; border-radius:10px;
+    font-size:.86rem; font-weight:500; line-height:1.3; white-space:nowrap;
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+    box-shadow:0 12px 28px -10px rgba(0,0,0,.5); z-index:5;
+  }
+  .hero-stage .neighbor .tip b{ font-weight:700; }
+  .hero-stage .neighbor .tip::after{
+    content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+    border:6px solid transparent; border-top-color:var(--h-ink);
+  }
+  .hero-stage .neighbor:hover .tip, .hero-stage .neighbor:focus-visible .tip{ opacity:1; transform:translate(-50%,0); }
+  .hero-stage .neighbor .tip--down{ bottom:auto; top:calc(100% + 22px); transform:translate(-50%,-6px); }
+  .hero-stage .neighbor .tip--down::after{ top:auto; bottom:100%; border-top-color:transparent; border-bottom-color:var(--h-ink); }
+
+  /* stare goală cluster (A) */
+  .hero-stage .cluster-empty{
+    position:absolute; top:50%; right:var(--pad-x); transform:translateY(-50%);
+    width:clamp(240px,34%,360px); padding:22px 24px; background:var(--h-card);
+    border:1px dashed var(--h-line-strong); border-radius:16px; color:var(--h-ink-soft);
+    font-size:.98rem; line-height:1.5;
+  }
+  .hero-stage .cluster-empty a{ color:var(--h-ink); font-weight:600; }
+
+  /* ── BARA DE APARTAMENTE (pătrate separate prin GAP de 5px, fără borders) ── */
+  .aptbar{
+    display:flex; gap:5px; height:clamp(170px,22vh,260px);
+    background:var(--bg); margin:2.5rem 0 3.5rem;
+  }
+  .aptbar__cols{ flex:1 1 auto; display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .aptbar__row{ flex:1; display:flex; gap:5px; }
+  .aptbar__row > span{ flex:var(--w,1); border-radius:2px; }
+  .aptbar__big{ flex:none; width:11.5%; border-radius:2px; background:var(--ochre); }
+
+  /* responsive variante A/B */
+  @media (max-width:980px){
+    .hero-stage .hero[data-variant="a"], .hero-stage .hero[data-variant="b"]{ min-height:0; }
+    .hero-stage .hero[data-variant] > *{ max-width:100%; }
+    .hero-stage .hero[data-variant] .title{ max-width:18ch; }
+    .hero-stage .hero[data-variant] .eyebrow{ order:1; }
+    .hero-stage .hero[data-variant] .title{ order:2; }
+    .hero-stage .cluster, .hero-stage .cluster-empty{ order:3; }
+    .hero-stage .hero[data-variant] .lead{ order:4; }
+    .hero-stage .hero[data-variant] .status{ order:4; }
+    .hero-stage .hero[data-variant] .actions{ order:5; }
+    .hero-stage .hero[data-variant] .micro{ order:6; }
+    .hero-stage .cluster{
+      position:static; width:100%; max-width:100%; display:flex; flex-wrap:wrap;
+      gap:30px 26px; align-items:center; justify-content:flex-start; margin:8px 0 28px;
+    }
+    .hero-stage .cluster-empty{ position:static; transform:none; width:100%; max-width:100%; margin:4px 0 24px; }
+    .hero-stage .floater{ position:static !important; }
+    .hero-stage .neighbor{ --k:.62 !important; }
+    .hero-stage .cluster .floater:nth-child(n+4){ display:none; } /* max 3 pe tabletă */
+    .hero-stage .neighbor .pct{ bottom:-6px; }
+  }
+  @media (max-width:560px){
+    .hero-stage .cluster .floater:nth-child(n+3){ display:none; } /* max 2 pe mobil */
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hero-stage .floater{ animation:none !important; }
+  }
 
   /* ── SECTION ── */
   .section{
@@ -1229,9 +1409,6 @@
     .ic-grid{ grid-template-columns:repeat(2, 1fr); }
   }
 
-  /* ── SQUARES (continuous build) ── */
-  .squares svg rect{ transition:fill .65s ease, fill-opacity .65s ease; }
-
   @media (max-width:900px){
     .punchy-inner{ grid-template-columns:1fr; }
     .team-layout{ grid-template-columns:1fr; gap:2rem; }
@@ -1267,27 +1444,65 @@
 
 <div class="container">
 
-  <!-- ── HERO ── -->
-  <section class="hero">
-    <p class="eyebrow"><span class="dot"></span> Platformă de construcție colaborativă</p>
-    <h1 class="hero-title">
-      Cauți demult un <span class="title-tau">apartament</span> în zonă bună, la preț corect.
-    </h1>
-    <p class="hero-sub">
-      5 familii din București s-au oprit din căutat și au construit propriul bloc, susținute de experți la fiecare pas. Și tu poți avea apartamentul dorit, fără dezvoltator.
-    </p>
-    <div class="cta-group">
-      <div class="hero-ctas">
-        <a href="https://luma.com/ba9sq1yp" target="_blank" rel="noopener" class="cta-primary">Înscrie-te la webinar <span class="arr">→</span></a>
-        <a href="/ce-este/cum-functioneaza.html" class="cta-secondary">Cum funcționează</a>
-      </div>
-      <p class="cta-note">Pune întrebări fondatorilor · Zoom · Gratuit</p>
-    </div>
-  </section>
+  <!-- ── HERO PE ROLURI (marketing / A / B) + BARA DE APARTAMENTE ──
+       Hero-ul vizibil se alege în funcție de sesiune + rol (vezi scriptul
+       „HERO PE ROLURI" de la finalul paginii). Default: marketing (nelogat). -->
+  <div class="hero-stage">
 
-  <!-- ── SQUARES GRAPHIC ── -->
-  <div class="squares" aria-hidden="true">
-    <svg id="squaresSvg" viewBox="0 0 1056 144" preserveAspectRatio="xMidYMid meet"></svg>
+    <!-- STARE 1 · NELOGAT → hero de marketing (NESCHIMBAT) -->
+    <section class="hero" data-variant="marketing">
+      <p class="eyebrow"><span class="dot"></span> Platformă de construcție colaborativă</p>
+      <h1 class="hero-title">
+        Cauți demult un <span class="title-tau">apartament</span> în zonă bună, la preț corect.
+      </h1>
+      <p class="hero-sub">
+        5 familii din București s-au oprit din căutat și au construit propriul bloc, susținute de experți la fiecare pas. Și tu poți avea apartamentul dorit, fără dezvoltator.
+      </p>
+      <div class="cta-group">
+        <div class="hero-ctas">
+          <a href="https://luma.com/ba9sq1yp" target="_blank" rel="noopener" class="cta-primary">Înscrie-te la webinar <span class="arr">→</span></a>
+          <a href="/ce-este/cum-functioneaza.html" class="cta-secondary">Cum funcționează</a>
+        </div>
+        <p class="cta-note">Pune întrebări fondatorilor · Zoom · Gratuit</p>
+      </div>
+    </section>
+
+    <!-- STARE 2/4 · LOGAT fără grup (sau în grup → fallback A) -->
+    <section class="hero" data-variant="a" hidden style="--accent:var(--terracotta);" aria-label="Hero — utilizator logat fără grup">
+      <p class="eyebrow"><span class="dot"></span>Bun venit înapoi</p>
+      <h1 class="title">Hai să-ți găsești <span class="accent">grupul</span><span class="js-hero-name"></span>.</h1>
+      <p class="lead">Terenuri filtrate de arhitecți și grupuri care se formează chiar acum, în zonele care te interesează.</p>
+      <div class="actions">
+        <a class="btn btn--primary" href="/terenuri.html">Vezi terenuri <span aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="/grupuri.html">Grupuri în formare</a>
+      </div>
+      <p class="micro js-hero-a-micro" hidden></p>
+      <div class="cluster js-cluster-a" role="list" aria-label="Vecini compatibili"></div>
+    </section>
+
+    <!-- STARE 3 · CONT AGENȚIE (fără avataruri de utilizatori) -->
+    <section class="hero" data-variant="b" hidden style="--accent:var(--slate);" aria-label="Hero — cont agenție imobiliară">
+      <p class="eyebrow"><span class="dot"></span>Cont agenție</p>
+      <h1 class="title">Terenurile tale<span class="accent js-hero-agency"></span>.</h1>
+      <div class="status">
+        <p class="status__line">Propunerile tale de teren, într-un singur loc. Urmărești statusul fiecăreia și adaugi unele noi.</p>
+        <div class="status__chips">
+          <span class="chip"><span class="sdot ok"></span><span class="js-agency-approved">0</span> aprobate</span>
+          <span class="chip"><span class="sdot pending"></span><span class="js-agency-pending">0</span> în așteptare</span>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn btn--primary" href="/terenuri-propune.html">Propune un teren nou <span aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost js-agency-proposals" href="/terenuri-propune.html">Vezi propunerile mele</a>
+      </div>
+      <p class="micro js-hero-b-micro" hidden></p>
+    </section>
+
+    <!-- ── BARA DE APARTAMENTE (separare prin gap, fără borders) ── -->
+    <div class="aptbar" aria-hidden="true">
+      <div class="aptbar__cols js-aptbar"></div>
+      <div class="aptbar__big"></div>
+    </div>
   </div>
 
   <!-- ── CREDIBILITY BAND ── -->
@@ -1634,105 +1849,39 @@
 
 <script src="js/faq.js"></script>
 <script>
-  // ── SQUARES: continuous, slow build ──
+  // ── BARA DE APARTAMENTE: pătrate ponderate, separate prin gap (fără borders) ──
   (function(){
-    const palette = ['#c2604a','#5e8a6c','#5a7196','#a76782','#b8965c','#7a9a90'];
-    const SVGNS = 'http://www.w3.org/2000/svg';
-    const svg = document.getElementById('squaresSvg');
-    if(!svg) return;
-    const U = 48;
-    const COLS = 22;
-    const ROWS = 3;
-
-    const occ = Array.from({length: ROWS}, () => Array(COLS).fill(false));
-    const squares = [];
-    function fits(r, c, s){
-      if(r+s > ROWS || c+s > COLS) return false;
-      for(let i=0;i<s;i++) for(let j=0;j<s;j++) if(occ[r+i][c+j]) return false;
-      return true;
-    }
-    function place(r, c, s){
-      for(let i=0;i<s;i++) for(let j=0;j<s;j++) occ[r+i][c+j] = true;
-      squares.push({r, c, s});
-    }
-    for(let attempt=0; attempt<3; attempt++){
-      const r = Math.floor(Math.random()*ROWS);
-      const c = Math.floor(Math.random()*COLS);
-      if(fits(r, c, 3)) place(r, c, 3);
-    }
-    for(let attempt=0; attempt<20; attempt++){
-      const r = Math.floor(Math.random()*ROWS);
-      const c = Math.floor(Math.random()*COLS);
-      if(fits(r, c, 2)) place(r, c, 2);
-    }
-    for(let r=0; r<ROWS; r++){
-      for(let c=0; c<COLS; c++){
-        if(!occ[r][c]) place(r, c, 1);
-      }
-    }
-
-    const elems = [];
-    squares.forEach(sq => {
-      const rect = document.createElementNS(SVGNS, 'rect');
-      rect.setAttribute('x', sq.c * U);
-      rect.setAttribute('y', sq.r * U);
-      rect.setAttribute('width', sq.s * U);
-      rect.setAttribute('height', sq.s * U);
-      rect.setAttribute('fill', 'transparent');
-      rect.setAttribute('stroke', '#1a1a1a');
-      rect.setAttribute('stroke-width', '0.8');
-      rect.setAttribute('fill-opacity', '0');
-      svg.appendChild(rect);
-      elems.push({ rect, filled:false, color:null });
+    var bar = document.querySelector('.js-aptbar');
+    if(!bar) return;
+    // mapare scurtă -> variabilele de culoare din paleta .hero-stage
+    var T = {
+      cr:'var(--cream-tile)', cr2:'var(--cream-tile-2)',
+      sg:'var(--sage)', sg2:'var(--sage-2)', sl:'var(--slate)',
+      tc:'var(--terracotta)', mv:'var(--mauve)'
+    };
+    // [culoare, pondere-lățime] — compoziția din design-ul de referință
+    var ROWS = [
+      [['cr',1],['mv',.7],['sg',1.4],['cr2',.8],['sg2',1.2],['cr',.7],['sg',1.7],['sl',.8],['tc',.8],['cr2',.7],['sg',1.8],['cr',1.5],['sl',.7],['sl',.7]],
+      [['mv',.7],['sg',1.8],['cr',1.5],['sl',1.9],['sg2',2.2],['cr2',.9],['sg',.9],['tc',.9],['cr',1.4],['sg',.9],['cr2',1.1],['cr',.9]],
+      [['mv',.7],['mv',.7],['sg',1.4],['cr',.8],['sl',1.7],['cr2',.7],['cr',.7],['sg2',.7],['cr',.7],['tc',.7],['sg',.7],['sl',.9],['cr2',.7],['tc',.7],['sl',.7]]
+    ];
+    ROWS.forEach(function(row){
+      var r = document.createElement('div');
+      r.className = 'aptbar__row';
+      row.forEach(function(t){
+        var s = document.createElement('span');
+        s.style.background = T[t[0]];
+        s.style.setProperty('--w', t[1]);
+        r.appendChild(s);
+      });
+      bar.appendChild(r);
     });
-
-    // Initial fill — about 45% colored, staggered build-in
-    const initialOrder = elems.map((_, i) => i).sort(() => Math.random() - 0.5);
-    const initialCount = Math.floor(elems.length * 0.45);
-    initialOrder.slice(0, initialCount).forEach((idx, i) => {
-      setTimeout(() => {
-        const c = palette[Math.floor(Math.random()*palette.length)];
-        elems[idx].rect.setAttribute('fill', c);
-        elems[idx].rect.setAttribute('fill-opacity', '0.92');
-        elems[idx].filled = true;
-        elems[idx].color = c;
-      }, 150 + i * 55);
-    });
-
-    // Continuous, lively rhythm — squares appear and disappear like ongoing construction
-    function tick(){
-      // Pick 2–4 squares at random each beat
-      const moves = 2 + Math.floor(Math.random() * 3);
-      for(let m=0; m<moves; m++){
-        const idx = Math.floor(Math.random() * elems.length);
-        const e = elems[idx];
-        const dice = Math.random();
-        if(!e.filled){
-          const c = palette[Math.floor(Math.random()*palette.length)];
-          e.rect.setAttribute('fill', c);
-          e.rect.setAttribute('fill-opacity', '0.92');
-          e.filled = true;
-          e.color = c;
-        } else if(dice < 0.55){
-          e.rect.setAttribute('fill-opacity', '0');
-          setTimeout(() => { if(!e.filled) e.rect.setAttribute('fill', 'transparent'); }, 700);
-          e.filled = false;
-          e.color = null;
-        } else {
-          const c = palette[Math.floor(Math.random()*palette.length)];
-          e.rect.setAttribute('fill', c);
-          e.color = c;
-        }
-      }
-    }
-    // Faster cadence — ~720ms between beats
-    setTimeout(() => setInterval(tick, 720), initialCount * 55 + 400);
   })();
 
   // ── Signature TU/tău color cycle ──
   (function(){
     const palette = ['#c2604a','#5e8a6c','#5a7196','#a76782','#b8965c','#7a9a90'];
-    const tuEls = document.querySelectorAll('.site-logo b, .footer-logo b, .hero-title .title-tau, .eyebrow .dot, .apt-tu');
+    const tuEls = document.querySelectorAll('.site-logo b, .footer-logo b, .hero-title .title-tau, .hero[data-variant="marketing"] .eyebrow .dot, .apt-tu');
     let i = Math.floor(Math.random() * palette.length);
     function paint(){
       const c = palette[i];
@@ -1852,5 +2001,216 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/login-modal.js"></script>
+
+<script>
+  // ════════════════════════════════════════════════════════════════════
+  //  HERO PE ROLURI — alege varianta de hero după sesiune + rol + grup
+  //  Stările:
+  //    nelogat                         → marketing (default, deja vizibil)
+  //    logat, account_type='profesional' → varianta B (agenție)
+  //    logat, restul                   → varianta A (utilizator)
+  //  Folosește clientul global `sb` din supabase-config.js (același pattern
+  //  de retry ca nav.js). Hero-ul e deja randat; aici doar comutăm varianta
+  //  și populăm clusterul/chips-urile DUPĂ ce vin datele (non-blocking).
+  // ════════════════════════════════════════════════════════════════════
+  (function(){
+    var STAGE = document.querySelector('.hero-stage');
+    if(!STAGE) return;
+
+    function showVariant(v){
+      STAGE.querySelectorAll('.hero[data-variant]').forEach(function(h){
+        h.hidden = (h.getAttribute('data-variant') !== v);
+      });
+    }
+    function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+    function initials(name){
+      if(!name) return '··';
+      var parts = String(name).trim().split(/\s+/).slice(0,2);
+      return parts.map(function(p){ return p.charAt(0).toUpperCase(); }).join('') || '··';
+    }
+    function relTime(iso){
+      if(!iso) return '';
+      var then = new Date(iso).getTime();
+      if(isNaN(then)) return '';
+      var days = Math.floor((Date.now() - then) / 86400000);
+      if(days <= 0) return 'astăzi';
+      if(days === 1) return 'acum o zi';
+      if(days < 30) return 'acum ' + days + ' zile';
+      var months = Math.floor(days / 30);
+      if(months === 1) return 'acum o lună';
+      return 'acum ' + months + ' luni';
+    }
+
+    // ── VARIANTA A — vecini cu cele mai multe interese comune ──
+    // O singură interogare: toate profilurile active (cu tag-urile/zonele lor).
+    // Mă extrag pe mine din rezultat ca să obțin propriile interese/zone, apoi
+    // calculez nr. de interese comune (tags) client-side, ca pe pagina Utilizatori.
+    var TILE = [
+      { size:138, rot:'-4deg', tipDown:true,  top:'3%',  left:'30%', amp:'-11px', dur:'8.2s', delay:'0s'   },
+      { size:124, rot:'3deg',  tipDown:true,  top:'34%', left:'62%', amp:'-9px',  dur:'9.4s', delay:'-2.4s'},
+      { size:110, rot:'-2.5deg',               top:'56%', left:'14%', amp:'-10px', dur:'7.6s', delay:'-1.2s'},
+      { size:96,  rot:'4deg',                   top:'72%', left:'55%', amp:'-8px',  dur:'8.8s', delay:'-3.2s'}
+    ];
+    var TILE_BG = ['var(--sage)','var(--terracotta)','var(--slate)','var(--mauve)'];
+
+    function populateVariantA(user, prof){
+      // numele din titlu: pseudonim (fallback: fără nume, fără virgulă goală)
+      var nameEl = STAGE.querySelector('.js-hero-name');
+      if(nameEl && prof && prof.pseudonym) nameEl.textContent = ', ' + prof.pseudonym;
+
+      var cluster = STAGE.querySelector('.js-cluster-a');
+      var micro   = STAGE.querySelector('.js-hero-a-micro');
+      if(!cluster) return;
+
+      sb.from('profiles')
+        .select('user_id, pseudonym, account_type, account_status, user_tags(tag_id), user_preferred_zones(zone_id)')
+        .eq('account_type', 'activ')
+        .or('account_status.is.null,account_status.eq.active')
+        .then(function(res){
+          var rows = (res && res.data) ? res.data : [];
+
+          // interesele/zonele MELE (mă găsesc în listă; dacă nu sunt, rămân goale)
+          var me = rows.find(function(r){ return r.user_id === user.id; }) || {};
+          var myTags  = (me.user_tags || []).map(function(t){ return t.tag_id; });
+          var myZones = (me.user_preferred_zones || []).map(function(z){ return z.zone_id; });
+
+          // profilul incomplet → stare goală blândă (NU inventăm date)
+          if(myTags.length === 0 && myZones.length === 0){
+            renderEmptyA(cluster, micro,
+              'Completează-ți profilul (interese și zone preferate) ca să-ți găsim vecini compatibili.',
+              true);
+            return;
+          }
+
+          // calculează nr. de interese (tags) și zone comune pentru ceilalți
+          var neighbors = rows
+            .filter(function(r){ return r.user_id !== user.id && r.pseudonym; })
+            .map(function(r){
+              var tags  = (r.user_tags || []).map(function(t){ return t.tag_id; });
+              var zones = (r.user_preferred_zones || []).map(function(z){ return z.zone_id; });
+              var commonTags  = tags.filter(function(id){ return myTags.indexOf(id) !== -1; }).length;
+              var commonZones = zones.filter(function(id){ return myZones.indexOf(id) !== -1; }).length;
+              return { id:r.user_id, name:r.pseudonym, commonTags:commonTags, commonZones:commonZones };
+            })
+            .filter(function(n){ return n.commonTags > 0; })           // doar cu interese comune reale
+            .sort(function(a,b){ return (b.commonTags - a.commonTags) || (b.commonZones - a.commonZones); })
+            .slice(0, 4);
+
+          if(neighbors.length === 0){
+            renderEmptyA(cluster, micro,
+              'Momentan nu găsim vecini cu interese comune cu tine. Revino curând — comunitatea crește.',
+              false);
+            return;
+          }
+
+          renderNeighbors(cluster, neighbors);
+          if(micro){
+            micro.innerHTML = '<b>' + neighbors.length + (neighbors.length === 1 ? ' vecin</b> cu cele mai multe interese comune cu tine.' : ' vecini</b> cu cele mai multe interese comune cu tine.');
+            micro.hidden = false;
+          }
+        })
+        .catch(function(e){ console.warn('hero A:', e); });
+    }
+
+    function renderEmptyA(cluster, micro, message, withProfileLink){
+      var box = document.createElement('div');
+      box.className = 'cluster-empty';
+      box.innerHTML = esc(message) + (withProfileLink ? ' <a href="/profile-edit-new.html">Completează profilul →</a>' : '');
+      cluster.replaceWith(box);
+      if(micro) micro.hidden = true;
+    }
+
+    function renderNeighbors(cluster, neighbors){
+      cluster.innerHTML = '';
+      neighbors.forEach(function(n, i){
+        var t = TILE[i] || TILE[TILE.length - 1];
+        var a = document.createElement('a');
+        a.className = 'floater neighbor';
+        a.href = '/profile-view-new.html?id=' + encodeURIComponent(n.id);
+        a.setAttribute('role', 'listitem');
+        a.setAttribute('aria-label', 'Profil ' + n.name + ', ' + n.commonTags + ' interese comune');
+        a.style.cssText = '--bg-tile:' + TILE_BG[i % TILE_BG.length] +
+          ';--size:' + t.size + 'px;--rot:' + t.rot +
+          ';top:' + t.top + ';left:' + t.left +
+          ';--amp:' + t.amp + ';--dur:' + t.dur + ';--delay:' + t.delay + ';';
+        a.innerHTML =
+          '<span class="ini" aria-hidden="true">' + esc(initials(n.name)) + '</span>' +
+          '<span class="pct" aria-hidden="true">' + n.commonTags + ' interese</span>' +
+          '<span class="tip' + (t.tipDown ? ' tip--down' : '') + '" aria-hidden="true"><b>' +
+            esc(n.name) + '</b> · ' + n.commonTags + ' interese comune</span>';
+        cluster.appendChild(a);
+      });
+    }
+
+    // ── VARIANTA B — cont agenție (FĂRĂ avataruri de utilizatori) ──
+    function populateVariantB(user, prof){
+      var nameEl = STAGE.querySelector('.js-hero-agency');
+      if(nameEl && prof && prof.agency_name) nameEl.textContent = ', ' + prof.agency_name;
+
+      var proposalsLink = STAGE.querySelector('.js-agency-proposals');
+      if(proposalsLink) proposalsLink.href = '/profile-view-new.html?id=' + encodeURIComponent(user.id);
+
+      sb.from('terenuri')
+        .select('id, titlu, status, created_at')
+        .eq('created_by_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then(function(res){
+          var rows = (res && res.data) ? res.data : [];
+          var approved = rows.filter(function(r){ return r.status === 'approved'; }).length;
+          var pending  = rows.filter(function(r){ return r.status === 'pending'; }).length;
+
+          var apEl = STAGE.querySelector('.js-agency-approved');
+          var peEl = STAGE.querySelector('.js-agency-pending');
+          if(apEl) apEl.textContent = approved;
+          if(peEl) peEl.textContent = pending;
+
+          // micro: ultima propunere (dată relativă + titlu), doar dacă există
+          var micro = STAGE.querySelector('.js-hero-b-micro');
+          if(micro && rows.length > 0){
+            var last = rows[0];
+            var when = relTime(last.created_at);
+            micro.innerHTML = 'Ultima propunere: <b>' + esc(when || '—') + '</b>' +
+              (last.titlu ? ' · ' + esc(last.titlu) : '');
+            micro.hidden = false;
+          }
+        })
+        .catch(function(e){ console.warn('hero B:', e); });
+    }
+
+    // ── alegerea variantei ──
+    function decide(user){
+      sb.from('profiles')
+        .select('account_type, pseudonym, agency_name')
+        .eq('user_id', user.id)
+        .single()
+        .then(function(res){
+          var prof = (res && res.data) ? res.data : {};
+          if(prof.account_type === 'profesional'){
+            showVariant('b');
+            populateVariantB(user, prof);
+          } else {
+            // utilizator (cu sau fără grup → fallback A, conform planului)
+            showVariant('a');
+            populateVariantA(user, prof);
+          }
+        })
+        .catch(function(e){ console.warn('hero variant:', e); });
+    }
+
+    function init(){
+      if(typeof sb === 'undefined' || !sb){
+        init._r = (init._r || 0) + 1;
+        if(init._r < 25){ setTimeout(init, 200); }
+        return;
+      }
+      sb.auth.getUser().then(function(res){
+        var user = (res && res.data) ? res.data.user : null;
+        if(!user) return;            // nelogat → rămâne hero-ul de marketing
+        decide(user);
+      }).catch(function(e){ console.warn('hero auth:', e); });
+    }
+    init();
+  })();
+</script>
 
 </body></html>
