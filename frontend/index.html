@@ -321,9 +321,9 @@
   .hero-stage .hero[data-variant="a"],
   .hero-stage .hero[data-variant="b"]{
     position:relative;
-    display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start;
     max-width:100%;
-    padding:clamp(28px,6vh,72px) var(--pad-x) clamp(36px,7vh,80px);
+    padding:1rem var(--pad-x) clamp(36px,7vh,80px);
     min-height:clamp(380px,48vh,500px);
     margin:0;
   }
@@ -370,12 +370,12 @@
   .hero-stage .hero[data-variant] .chip .sdot.ok{ background:var(--ok); }
   .hero-stage .hero[data-variant] .chip .sdot.pending{ background:var(--pending); }
 
-  .hero-stage .hero[data-variant] .actions{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
+  .hero-stage .hero[data-variant] .actions{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
   .hero-stage .hero[data-variant] .btn{
-    font-family:inherit; font-weight:600; font-size:1.02rem; padding:15px 24px; border-radius:13px;
-    cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:.5em;
+    font-family:inherit; font-weight:500; font-size:13px; padding:13px 22px; border-radius:4px;
+    cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; line-height:1;
     transition:transform .15s ease, background .18s, border-color .18s, color .18s;
-    border:1.5px solid transparent; white-space:nowrap;
+    border:1px solid transparent; white-space:nowrap;
   }
   .hero-stage .hero[data-variant] .btn:active{ transform:translateY(1px); }
   .hero-stage .hero[data-variant] .btn--primary{ background:var(--h-ink); color:#fff; }
@@ -2238,10 +2238,12 @@
         .then(function(res){
           var prof = (res && res.data) ? res.data : {};
           if(prof.account_type === 'profesional'){
+            cacheVariant('b');
             showVariant('b');
             populateVariantB(user, prof);
           } else {
             // utilizator (cu sau fără grup → fallback A, conform planului)
+            cacheVariant('a');
             showVariant('a');
             populateVariantA(user, prof);
           }
@@ -2249,16 +2251,25 @@
         .catch(function(e){ console.warn('hero variant:', e); });
     }
 
+    // variantă memorată local => o afișăm instant la următoarea încărcare (fără flash)
+    function cachedVariant(){ try{ return localStorage.getItem('atu_hero_variant'); }catch(e){ return null; } }
+    function cacheVariant(v){ try{ localStorage.setItem('atu_hero_variant', v); }catch(e){} }
+
     function init(){
       if(typeof sb === 'undefined' || !sb){
         init._r = (init._r || 0) + 1;
         if(init._r < 25){ setTimeout(init, 200); }
         return;
       }
-      sb.auth.getUser().then(function(res){
-        var user = (res && res.data) ? res.data.user : null;
+      // getSession() citește sesiunea din localStorage (fără apel de rețea) => rapid,
+      // ca să nu mai stea hero-ul de marketing ~1s după login.
+      sb.auth.getSession().then(function(res){
+        var session = (res && res.data) ? res.data.session : null;
+        var user = session ? session.user : null;
         if(!user) return;            // nelogat → rămâne hero-ul de marketing
-        decide(user);
+        var cv = cachedVariant();    // afișează instant varianta memorată, dacă există
+        if(cv === 'a' || cv === 'b') showVariant(cv);
+        decide(user);                // confirmă varianta + populează datele reale
       }).catch(function(e){ console.warn('hero auth:', e); });
     }
     init();
