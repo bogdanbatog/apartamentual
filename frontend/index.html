@@ -439,11 +439,12 @@
 
   /* ── BARA DE APARTAMENTE (pătrate separate prin GAP de 5px, fără borders) ── */
   .aptbar{
-    display:flex; gap:5px; height:clamp(170px,22vh,260px);
+    display:flex; gap:5px; align-items:stretch;
     background:var(--bg); margin:2.5rem 0 3.5rem;
   }
+  /* înălțimea rândurilor o setează JS (px), egală cu lățimea coloanei => pătrate */
   .aptbar__cols{ flex:1 1 auto; min-width:0; display:grid; gap:5px;
-    grid-template-columns:repeat(22,1fr); grid-template-rows:repeat(3,1fr); }
+    grid-template-columns:repeat(22,1fr); }
   .aptbar__cols > span{ border-radius:2px; transition:background .6s ease; }
   .aptbar__big{ flex:none; width:11.5%; border-radius:2px; background:var(--ochre); }
 
@@ -1895,10 +1896,21 @@
       cells.push({ el:s, filled:true });
     });
 
+    // ── 3. Sizing: înălțimea rândurilor = lățimea coloanei => pătrate (ca SVG-ul vechi) ──
+    function layout(){
+      var gap = 5;
+      var w = bar.clientWidth;
+      if(!w) return;
+      var cell = (w - (COLS - 1) * gap) / COLS;
+      bar.style.gridTemplateRows = 'repeat(' + ROWS + ', ' + cell + 'px)';
+    }
+    layout();
+    window.addEventListener('resize', layout);
+
     // Respectă preferința de mișcare redusă: lasă bara statică.
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // ── 3. Ritm de șantier: câteva pătrate se sting spre fundal / reaprind / schimbă culoarea ──
+    // ── 4. Ritm de șantier: câteva pătrate se sting spre fundal / reaprind / schimbă culoarea ──
     function tick(){
       var moves = 2 + rnd(3);                     // 2–4 pătrate pe bătaie
       for(var m = 0; m < moves; m++){
