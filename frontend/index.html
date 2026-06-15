@@ -348,11 +348,6 @@
     letter-spacing:-.025em; margin:0 0 .5em; max-width:15ch; color:var(--h-ink);
   }
   .hero-stage .hero[data-variant] .title .accent{ color:var(--accent); }
-  /* numele agenției (B): mai mic, pe rândul lui, ca să nu crească titlul și să împingă bara */
-  .hero-stage .hero[data-variant="b"] .hero-agency{
-    display:block; font-size:30px; line-height:1.12; margin-top:6px; font-weight:500;
-  }
-  .hero-stage .hero[data-variant="b"] .hero-agency:empty{ display:none; }
   .hero-stage .hero[data-variant] .lead{
     font-size:18px; line-height:1.55; color:var(--h-ink-soft);
     max-width:32ch; margin:0 0 30px;
@@ -442,6 +437,17 @@
   }
   .hero-stage .cluster-empty a{ color:var(--h-ink); font-weight:600; }
 
+  /* statistici agenție (B) — 2 pătrate plutitoare cu cifre, în locul chips-urilor */
+  .hero-stage .stat-tile{
+    width:calc(var(--size,150px) * var(--k,1)); height:calc(var(--size,150px) * var(--k,1));
+    border-radius:5px; rotate:var(--rot,0deg); padding:10px; text-align:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    background:var(--bg-tile,var(--slate)); color:#fff;
+    box-shadow:0 18px 40px -16px rgba(28,27,24,.5);
+  }
+  .hero-stage .stat-tile .stat-num{ font-weight:700; font-size:calc(var(--size,150px) * var(--k,1) * .34); line-height:1; }
+  .hero-stage .stat-tile .stat-label{ font-weight:600; font-size:calc(var(--size,150px) * var(--k,1) * .125); letter-spacing:.03em; }
+
   /* ── BARA DE APARTAMENTE (pătrate separate prin GAP de 5px, fără borders) ── */
   .aptbar{
     display:flex; gap:5px; align-items:stretch;
@@ -471,7 +477,7 @@
     }
     .hero-stage .cluster-empty{ position:static; transform:none; width:100%; max-width:100%; margin:4px 0 24px; }
     .hero-stage .floater{ position:static !important; }
-    .hero-stage .neighbor{ --k:.62 !important; }
+    .hero-stage .neighbor, .hero-stage .stat-tile{ --k:.62 !important; }
     .hero-stage .cluster .floater:nth-child(n+4){ display:none; } /* max 3 pe tabletă */
     .hero-stage .neighbor .pct{ bottom:-6px; }
   }
@@ -1422,7 +1428,6 @@
   @media (max-width:768px){
     .hero-title, .hero-stage .hero[data-variant] .title{ font-size:32px; }
     .hero-sub, .hero-stage .hero[data-variant] .lead{ font-size:16px; }
-    .hero-stage .hero[data-variant="b"] .hero-agency{ font-size:22px; }
     .section-title{ font-size:24px; }
     .hero-ctas{ flex-direction:column; align-items:stretch; }
     .cta-primary, .cta-secondary{ justify-content:center; width:100%; }
@@ -1490,19 +1495,24 @@
     <!-- STARE 3 · CONT AGENȚIE (fără avataruri de utilizatori) -->
     <section class="hero" data-variant="b" hidden style="--accent:var(--slate);" aria-label="Hero — cont agenție imobiliară">
       <p class="eyebrow"><span class="dot"></span>Cont agenție</p>
-      <h1 class="title">Terenurile tale<span class="accent hero-agency js-hero-agency"></span></h1>
-      <div class="status">
-        <p class="status__line">Propunerile tale de teren, într-un singur loc. Urmărești statusul fiecăreia și adaugi unele noi.</p>
-        <div class="status__chips">
-          <span class="chip"><span class="sdot ok"></span><span class="js-agency-approved">0</span> aprobate</span>
-          <span class="chip"><span class="sdot pending"></span><span class="js-agency-pending">0</span> în așteptare</span>
-        </div>
-      </div>
+      <h1 class="title">Terenurile tale<span class="accent js-hero-agency"></span>.</h1>
+      <p class="lead">Propunerile tale de teren, într-un singur loc. Urmărești statusul fiecăreia și adaugi unele noi.</p>
       <div class="actions">
         <a class="btn btn--primary" href="/terenuri-propune.html">Propune un teren nou <span aria-hidden="true">→</span></a>
         <a class="btn btn--ghost js-agency-proposals" href="/terenuri-propune.html">Vezi propunerile mele</a>
       </div>
       <p class="micro js-hero-b-micro" hidden></p>
+      <!-- 2 pătrate plutitoare cu statistici, în dreapta (ca vecinii din A) -->
+      <div class="cluster cluster--b" aria-hidden="true">
+        <div class="floater stat-tile" style="--size:150px;--rot:-4deg;top:9%;left:30%;--bg-tile:var(--ok);--amp:-10px;--dur:8.2s;--delay:0s;">
+          <span class="stat-num js-agency-approved">0</span>
+          <span class="stat-label">aprobate</span>
+        </div>
+        <div class="floater stat-tile" style="--size:138px;--rot:3deg;top:50%;left:60%;--bg-tile:var(--pending);--amp:-8px;--dur:9.4s;--delay:-2.4s;">
+          <span class="stat-num js-agency-pending">0</span>
+          <span class="stat-label">în așteptare</span>
+        </div>
+      </div>
     </section>
 
     <!-- ── BARA DE APARTAMENTE (separare prin gap, fără borders) ── -->
@@ -2203,11 +2213,7 @@
     // ── VARIANTA B — cont agenție (FĂRĂ avataruri de utilizatori) ──
     function populateVariantB(user, prof){
       var nameEl = STAGE.querySelector('.js-hero-agency');
-      if(nameEl && prof && prof.agency_name){
-        // virgula intră în titlul mare doar când există nume (altfel rămâne „Terenurile tale")
-        nameEl.parentNode.firstChild.textContent = 'Terenurile tale,';
-        nameEl.textContent = prof.agency_name;
-      }
+      if(nameEl && prof && prof.agency_name) nameEl.textContent = ', ' + prof.agency_name;
 
       var proposalsLink = STAGE.querySelector('.js-agency-proposals');
       if(proposalsLink) proposalsLink.href = '/profile-view-new.html?id=' + encodeURIComponent(user.id);
