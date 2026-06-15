@@ -442,9 +442,9 @@
     display:flex; gap:5px; height:clamp(170px,22vh,260px);
     background:var(--bg); margin:2.5rem 0 3.5rem;
   }
-  .aptbar__cols{ flex:1 1 auto; display:flex; flex-direction:column; gap:5px; min-width:0; }
-  .aptbar__row{ flex:1; display:flex; gap:5px; }
-  .aptbar__row > span{ flex:var(--w,1); border-radius:2px; transition:background .6s ease; }
+  .aptbar__cols{ flex:1 1 auto; min-width:0; display:grid; gap:5px;
+    grid-template-columns:repeat(22,1fr); grid-template-rows:repeat(3,1fr); }
+  .aptbar__cols > span{ border-radius:2px; transition:background .6s ease; }
   .aptbar__big{ flex:none; width:11.5%; border-radius:2px; background:var(--ochre); }
 
   /* responsive variante A/B */
@@ -1849,8 +1849,8 @@
 
 <script src="js/faq.js"></script>
 <script>
-  // ── BARA DE APARTAMENTE: pătrate ponderate, separate prin gap (fără borders) ──
-  // Ritm de șantier: după randarea inițială, câteva pătrate se sting/reaprind continuu.
+  // ── BARA DE APARTAMENTE: grilă cu blocuri de mărimi diferite (random la fiecare load) ──
+  // Trama (1x1 / 2x2 / 3x3) se regenerează la fiecare încărcare, apoi ritm de șantier pe culori.
   (function(){
     var bar = document.querySelector('.js-aptbar');
     if(!bar) return;
@@ -1862,44 +1862,56 @@
     };
     var EMPTY = 'var(--bg)';                       // culoarea fundalului => pătrat „gol" (se vede ca gap)
     var COLORS = Object.keys(T).map(function(k){ return T[k]; });
-    // [culoare, pondere-lățime] — compoziția din design-ul de referință
-    var ROWS = [
-      [['cr',1],['mv',.7],['sg',1.4],['cr2',.8],['sg2',1.2],['cr',.7],['sg',1.7],['sl',.8],['tc',.8],['cr2',.7],['sg',1.8],['cr',1.5],['sl',.7],['sl',.7]],
-      [['mv',.7],['sg',1.8],['cr',1.5],['sl',1.9],['sg2',2.2],['cr2',.9],['sg',.9],['tc',.9],['cr',1.4],['sg',.9],['cr2',1.1],['cr',.9]],
-      [['mv',.7],['mv',.7],['sg',1.4],['cr',.8],['sl',1.7],['cr2',.7],['cr',.7],['sg2',.7],['cr',.7],['tc',.7],['sg',.7],['sl',.9],['cr2',.7],['tc',.7],['sl',.7]]
-    ];
-    var cells = [];                               // toate <span>-urile, ca să le putem anima
-    ROWS.forEach(function(row){
-      var r = document.createElement('div');
-      r.className = 'aptbar__row';
-      row.forEach(function(t){
-        var s = document.createElement('span');
-        s.style.background = T[t[0]];
-        s.style.setProperty('--w', t[1]);
-        r.appendChild(s);
-        cells.push({ el:s, filled:true });
-      });
-      bar.appendChild(r);
+    var rnd = function(n){ return Math.floor(Math.random() * n); };
+    var pick = function(){ return COLORS[rnd(COLORS.length)]; };
+
+    var COLS = 22, ROWS = 3;
+    // ── 1. Generează trama: pătrate 3x3 / 2x2 / 1x1 plasate aleatoriu, fără suprapunere ──
+    var occ = [];
+    for(var r = 0; r < ROWS; r++){ occ.push([]); for(var c = 0; c < COLS; c++) occ[r].push(false); }
+    var squares = [];
+    function fits(r, c, s){
+      if(r + s > ROWS || c + s > COLS) return false;
+      for(var i = 0; i < s; i++) for(var j = 0; j < s; j++) if(occ[r+i][c+j]) return false;
+      return true;
+    }
+    function place(r, c, s){
+      for(var i = 0; i < s; i++) for(var j = 0; j < s; j++) occ[r+i][c+j] = true;
+      squares.push({ r:r, c:c, s:s });
+    }
+    var a;
+    for(a = 0; a < 3; a++){ var r3 = rnd(ROWS), c3 = rnd(COLS); if(fits(r3, c3, 3)) place(r3, c3, 3); }
+    for(a = 0; a < 20; a++){ var r2 = rnd(ROWS), c2 = rnd(COLS); if(fits(r2, c2, 2)) place(r2, c2, 2); }
+    for(var rr = 0; rr < ROWS; rr++) for(var cc = 0; cc < COLS; cc++) if(!occ[rr][cc]) place(rr, cc, 1);
+
+    // ── 2. Randează tile-urile în grilă, colorate random ──
+    var cells = [];
+    squares.forEach(function(sq){
+      var s = document.createElement('span');
+      s.style.gridColumn = (sq.c + 1) + ' / span ' + sq.s;
+      s.style.gridRow = (sq.r + 1) + ' / span ' + sq.s;
+      s.style.background = pick();
+      bar.appendChild(s);
+      cells.push({ el:s, filled:true });
     });
 
     // Respectă preferința de mișcare redusă: lasă bara statică.
     if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    var rnd = function(n){ return Math.floor(Math.random() * n); };
-    // Ritm continuu — câteva pătrate se sting spre fundal și altele se reaprind în culoare nouă.
+    // ── 3. Ritm de șantier: câteva pătrate se sting spre fundal / reaprind / schimbă culoarea ──
     function tick(){
       var moves = 2 + rnd(3);                     // 2–4 pătrate pe bătaie
       for(var m = 0; m < moves; m++){
         var cell = cells[rnd(cells.length)];
         var dice = Math.random();
         if(!cell.filled){                         // gol -> reaprinde în culoare nouă
-          cell.el.style.background = COLORS[rnd(COLORS.length)];
+          cell.el.style.background = pick();
           cell.filled = true;
         } else if(dice < 0.55){                    // plin -> se stinge spre fundal
           cell.el.style.background = EMPTY;
           cell.filled = false;
         } else {                                   // plin -> doar schimbă culoarea
-          cell.el.style.background = COLORS[rnd(COLORS.length)];
+          cell.el.style.background = pick();
         }
       }
     }
