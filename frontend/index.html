@@ -348,6 +348,11 @@
     letter-spacing:-.025em; margin:0 0 .5em; max-width:15ch; color:var(--h-ink);
   }
   .hero-stage .hero[data-variant] .title .accent{ color:var(--accent); }
+  /* numele agenției (B): mai mic, pe rândul lui, ca să nu crească titlul și să împingă bara */
+  .hero-stage .hero[data-variant="b"] .hero-agency{
+    display:block; font-size:30px; line-height:1.12; margin-top:6px; font-weight:500;
+  }
+  .hero-stage .hero[data-variant="b"] .hero-agency:empty{ display:none; }
   .hero-stage .hero[data-variant] .lead{
     font-size:18px; line-height:1.55; color:var(--h-ink-soft);
     max-width:32ch; margin:0 0 30px;
@@ -1417,6 +1422,7 @@
   @media (max-width:768px){
     .hero-title, .hero-stage .hero[data-variant] .title{ font-size:32px; }
     .hero-sub, .hero-stage .hero[data-variant] .lead{ font-size:16px; }
+    .hero-stage .hero[data-variant="b"] .hero-agency{ font-size:22px; }
     .section-title{ font-size:24px; }
     .hero-ctas{ flex-direction:column; align-items:stretch; }
     .cta-primary, .cta-secondary{ justify-content:center; width:100%; }
@@ -1484,7 +1490,7 @@
     <!-- STARE 3 · CONT AGENȚIE (fără avataruri de utilizatori) -->
     <section class="hero" data-variant="b" hidden style="--accent:var(--slate);" aria-label="Hero — cont agenție imobiliară">
       <p class="eyebrow"><span class="dot"></span>Cont agenție</p>
-      <h1 class="title">Terenurile tale<span class="accent js-hero-agency"></span>.</h1>
+      <h1 class="title">Terenurile tale<span class="accent hero-agency js-hero-agency"></span></h1>
       <div class="status">
         <p class="status__line">Propunerile tale de teren, într-un singur loc. Urmărești statusul fiecăreia și adaugi unele noi.</p>
         <div class="status__chips">
@@ -2197,7 +2203,11 @@
     // ── VARIANTA B — cont agenție (FĂRĂ avataruri de utilizatori) ──
     function populateVariantB(user, prof){
       var nameEl = STAGE.querySelector('.js-hero-agency');
-      if(nameEl && prof && prof.agency_name) nameEl.textContent = ', ' + prof.agency_name;
+      if(nameEl && prof && prof.agency_name){
+        // virgula intră în titlul mare doar când există nume (altfel rămâne „Terenurile tale")
+        nameEl.parentNode.firstChild.textContent = 'Terenurile tale,';
+        nameEl.textContent = prof.agency_name;
+      }
 
       var proposalsLink = STAGE.querySelector('.js-agency-proposals');
       if(proposalsLink) proposalsLink.href = '/profile-view-new.html?id=' + encodeURIComponent(user.id);
