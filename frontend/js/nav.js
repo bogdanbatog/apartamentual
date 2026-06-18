@@ -294,6 +294,8 @@ function getPageConfig() {
         currentPage = 'groups';
     } else if (path.includes('parteneri')) {
         currentPage = 'partners';
+    } else if (path.includes('servicii')) {
+        currentPage = 'services';
     } else if (path.includes('povestea-noastra')) {
         currentPage = 'story';
     } else if (path.includes('register')) {
@@ -322,12 +324,12 @@ function createNavigation() {
          <a href="/register.html" class="site-nav-cta" id="btnRegisterCtaMobile" style="display:none;">Creează cont</a>`;
 
     const navItems = [
-        { href: '/ce-este/',              label: 'Ce este',           id: 'about'    },
-        { href: '/terenuri.html',         label: 'Terenuri',          id: 'land'     },
-        { href: '/utilizatori.html',      label: 'Utilizatori',       id: 'users'    },
-        { href: '/grupuri.html',          label: 'Grupuri',           id: 'groups'   },
-        { href: '/parteneri.html',        label: 'Parteneri',         id: 'partners' },
-        { href: '/povestea-noastra.html', label: 'Povestea noastră',  id: 'story'    },
+        { href: '/ce-este/',              label: 'Ce este',     id: 'about'    },
+        { href: '/servicii.html',         label: 'Servicii',    id: 'services' },
+        { href: '/terenuri.html',         label: 'Terenuri',    id: 'land'     },
+        { href: '/utilizatori.html',      label: 'Utilizatori', id: 'users'    },
+        { href: '/grupuri.html',          label: 'Grupuri',     id: 'groups'   },
+        { href: '/parteneri.html',        label: 'Parteneri',   id: 'partners' },
     ];
 
     const navLinksHTML = navItems.map(item => {

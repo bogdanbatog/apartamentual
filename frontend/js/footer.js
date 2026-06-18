@@ -153,6 +153,7 @@ function createFooter() {
                 <h4>Navigare</h4>
                 <ul>
                     <li><a href="/ce-este/">Ce este</a></li>
+                    <li><a href="/servicii.html">Servicii</a></li>
                     <li><a href="/povestea-noastra.html">Povestea noastră</a></li>
                     <li><a href="/terenuri.html">Terenuri</a></li>
                     <li><a href="/utilizatori.html">Utilizatori</a></li>

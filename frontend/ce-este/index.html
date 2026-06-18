@@ -36,6 +36,28 @@
         .hub-card p{ font-size:13px; color:var(--ink-2); line-height:1.5; margin:0; }
         .hub-card .arrow{ margin-left:auto; color:var(--ink-3); align-self:center; transition:transform .2s ease; }
         .hub-card:hover .arrow{ transform:translateX(3px); }
+
+        /* ── Bloc „Povestea noastră" (teaser studiu de caz real) ── */
+        .story-block{
+            display:grid; grid-template-columns:1.1fr 1fr; align-items:stretch;
+            gap:0; border:1px solid var(--rule); border-radius:12px; overflow:hidden;
+            background:var(--bg-soft);
+        }
+        .story-media{ min-height:280px; }
+        .story-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+        .story-body{
+            padding:2.5rem 2.75rem;
+            display:flex; flex-direction:column; justify-content:center;
+        }
+        .story-body .section-eyebrow{ margin-bottom:0.75rem; }
+        .story-body .section-title{ margin-bottom:0.5rem; }
+        .story-body .section-body{ margin-bottom:0; }
+        .story-cta{ margin-top:1.5rem; align-self:flex-start; }
+        @media (max-width:768px){
+            .story-block{ grid-template-columns:1fr; }
+            .story-media{ min-height:200px; }
+            .story-body{ padding:1.75rem 1.5rem; }
+        }
     </style>
 </head>
 <body>
@@ -112,6 +134,21 @@
                 <div class="avantaj">
                     <h3>Personalizare</h3>
                     <p>Influențezi designul, finisajele și calitatea construcției. E casa ta, croită după nevoile tale, nu un plan standardizat.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── POVESTEA NOASTRĂ (teaser studiu de caz real) ── -->
+        <section class="section" id="povestea">
+            <div class="story-block">
+                <div class="story-media">
+                    <img src="../assets/images/judetul-housing/randari/14-randare-fatada-strada.jpg" alt="Județului Housing — primul Baugruppen finalizat în România" loading="lazy">
+                </div>
+                <div class="story-body">
+                    <p class="section-eyebrow">Povestea noastră</p>
+                    <h2 class="section-title">Județului Housing</h2>
+                    <p class="section-body">5 familii, primul Baugruppen finalizat în România.</p>
+                    <a href="/povestea-noastra.html" class="cta-primary story-cta">Citește povestea <span class="arr">→</span></a>
                 </div>
             </div>
         </section>
