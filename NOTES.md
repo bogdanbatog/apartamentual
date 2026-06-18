@@ -30,4 +30,13 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ---
 
-*Ultima actualizare: 2026-05-28*
+## Rezolvate
+
+- [x] **2026-06-18 — Ștergere teren din admin nu se propaga pe platformă**
+  Cauză: `terenuri` are RLS pornit fără politică DELETE → hard delete-ul era blocat tăcut, iar `deleteTeren` nu verifica eroarea (rândul dispărea doar local din admin, rămânea în DB). Schema avea `deleted_at` (soft delete) dar nefolosit corect.
+  Rezolvare: `migrations/004_terenuri_hard_delete.sql` adaugă politica RLS de DELETE pentru superadmin; `admin-terenuri.html` face acum hard delete real cu verificare de eroare. Toate tabelele-copil (grup_terenuri, terenuri_likes_grupuri, grup_teren_comments, terenuri_likes, user_teren_notes) au deja `ON DELETE CASCADE`, deci ștergerea curăță automat dependențele. Confirmat funcțional.
+  Lecție: în panourile admin, **mereu verifică `error`** la `.delete()`/`.update()` pe tabele cu RLS — altfel eșecurile de politică trec neobservate. Notă: poza din Storage (`image_url`) NU se șterge automat la hard delete — rămâne fișier orfan în bucket (inofensiv).
+
+---
+
+*Ultima actualizare: 2026-06-18*
