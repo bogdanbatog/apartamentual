@@ -147,10 +147,8 @@
     };
 
     window.deleteTeren = async function(id) {
-        if (!confirm('Sigur vrei să ștergi acest teren?')) return;
-        var { error } = await sb.from('terenuri')
-            .update({ deleted_at: new Date().toISOString() })
-            .eq('id', id);
+        if (!confirm('Sigur vrei să ștergi DEFINITIV acest teren? Acțiunea nu poate fi anulată.')) return;
+        var { error } = await sb.from('terenuri').delete().eq('id', id);
         if (error) { alert('Eroare la ștergere: ' + error.message); return; }
         allTerenuri = allTerenuri.filter(function(x) { return x.id !== id; });
         renderTable();
