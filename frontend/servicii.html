@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicii — ApartamenTUal</title>
+    <meta name="description" content="Accesul la platformă e gratuit. Plătești doar serviciile care te ajută concret: analize de teren, consultanță de arhitectură, parteneri și coordonare de grup.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <style>
+        /* ── Stiluri specifice paginii Servicii (reutilizează tokenurile v9) ── */
+
+        /* Etichetă de preț */
+        .price-tag{
+            display:inline-flex; align-items:baseline; flex-wrap:wrap; gap:0.5rem;
+            margin:0.25rem 0 0.75rem;
+        }
+        .price-now{ font-size:24px; font-weight:600; color:var(--ink); line-height:1; }
+        .price-old{ font-size:15px; color:var(--ink-3); text-decoration:line-through; }
+        .price-unit{ font-size:13px; color:var(--ink-2); }
+        .price-note{ font-size:13px; line-height:1.6; color:var(--ink-2); margin:0; }
+
+        /* Badge-uri (gratuit / mai târziu) */
+        .badge{
+            display:inline-block; font-size:11px; font-weight:600; letter-spacing:0.06em;
+            text-transform:uppercase; padding:0.25rem 0.65rem; border-radius:999px;
+            vertical-align:middle;
+        }
+        .badge-free{ background:#e9f0ea; color:#2f7a4f; }
+        .badge-soon{ background:var(--bg-placeholder); color:var(--ink-2); }
+
+        /* Card serviciu (reutilizează .card din v9) */
+        .svc-card{ margin-top:1.75rem; }
+        .svc-card + .svc-card{ margin-top:1.25rem; }
+        .svc-card h3{ font-size:18px; font-weight:600; line-height:1.3; margin:0 0 0.35rem; color:var(--ink); }
+        .svc-card p{ font-size:14px; line-height:1.65; color:var(--ink-2); margin:0; }
+        .svc-card p + p{ margin-top:0.6rem; }
+
+        /* Callout informativ (ex: diferența filtrare vs analiză) */
+        .svc-callout{
+            margin-top:1.5rem; padding:1.1rem 1.35rem;
+            background:var(--bg-soft); border-left:3px solid var(--ink);
+            border-radius:0 8px 8px 0;
+            font-size:14px; line-height:1.65; color:var(--ink-2);
+        }
+        .svc-callout strong{ color:var(--ink); }
+
+        /* Rând de butoane sub un bloc */
+        .svc-ctas{ display:flex; gap:12px; flex-wrap:wrap; margin-top:1.5rem; }
+
+        /* Listă „ce e gratuit" — reutilizează .avantaje, doar mic ajustaj */
+        .avantaje.svc-free .avantaj h3{ font-size:15px; }
+
+        /* Pâlnia (flux simplu, vizual) */
+        .funnel{
+            display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem;
+            margin-top:2rem;
+        }
+        .funnel-step{
+            font-size:13px; line-height:1.3; color:var(--ink);
+            background:var(--bg-soft); border:1px solid var(--rule);
+            border-radius:999px; padding:0.55rem 1rem;
+        }
+        .funnel-step .tag{
+            display:block; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;
+            color:var(--ink-3); margin-bottom:2px;
+        }
+        .funnel-arrow{ color:var(--ink-3); font-size:14px; }
+
+        @media (max-width:768px){
+            .funnel{ flex-direction:column; align-items:stretch; }
+            .funnel-step{ text-align:center; }
+            .funnel-arrow{ align-self:center; transform:rotate(90deg); }
+        }
+    </style>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#1a1a1a">
+</head>
+<body>
+    <div id="navigation"></div>
+
+    <div class="container">
+
+        <!-- HERO / INTRO -->
+        <header class="hero">
+            <p class="eyebrow"><span class="dot"></span> Servicii</p>
+            <h1 class="hero-title">Plătești serviciile, nu accesul.</h1>
+            <p class="hero-sub">
+                Accesul la platformă e gratuit: cont, matching, terenuri, grupuri.
+                Plătești doar serviciile care te ajută concret — analize, consultanță, coordonare —
+                atunci când ai nevoie de ele.
+            </p>
+        </header>
+
+        <!-- 1. GRATUIT -->
+        <section class="section" id="gratuit">
+            <p class="section-eyebrow">Inclus, fără plată</p>
+            <h2 class="section-title">Accesul la platformă e gratuit <span class="badge badge-free">Gratuit</span></h2>
+            <p class="section-body">
+                Tot ce ține de organizarea grupului tău nu costă nimic.
+            </p>
+
+            <div class="avantaje svc-free">
+                <div class="avantaj"><h3>Cont și profil</h3><p>Îți creezi contul, completezi preferințele și ești vizibil pentru grupuri compatibile.</p></div>
+                <div class="avantaj"><h3>Matching</h3><p>Vezi oameni și grupuri cu zone și interese comune cu ale tale.</p></div>
+                <div class="avantaj"><h3>Terenuri și grupuri</h3><p>Explorezi terenurile propuse și grupurile existente, fără limită.</p></div>
+                <div class="avantaj"><h3>Formare și aderare la grup</h3><p>Creezi un grup nou sau te alături unuia existent.</p></div>
+                <div class="avantaj"><h3>Notificări de matching</h3><p>Ești anunțat când apare un grup sau un teren potrivit.</p></div>
+                <div class="avantaj"><h3>Webinarii și newsletter</h3><p>Înveți modelul pas cu pas, gratuit.</p></div>
+                <div class="avantaj"><h3>Prima discuție de consultanță</h3><p>Primele 30 de minute cu un arhitect din echipă sunt gratuite.</p></div>
+            </div>
+
+            <div class="svc-ctas">
+                <a class="cta-primary" href="https://luma.com/ba9sq1yp" target="_blank" rel="noopener">Înscrie-te la webinar <span class="arr">→</span></a>
+                <a class="cta-secondary" href="register.html">Creează cont</a>
+            </div>
+        </section>
+
+        <!-- 2. ANALIZE DE TEREN -->
+        <section class="section" id="analize">
+            <p class="section-eyebrow">Serviciu plătit</p>
+            <h2 class="section-title">Analize de teren</h2>
+            <p class="section-body">
+                Un raport tehnic care îți spune ce se poate construi pe un teren — suprafețe,
+                regim de înălțime, retrageri, număr aproximativ de apartamente.
+            </p>
+
+            <div class="card svc-card">
+                <h3>Analiză preliminară</h3>
+                <div class="price-tag">
+                    <span class="price-now">99 RON</span>
+                    <span class="price-old">preț standard 149 RON</span>
+                    <span class="price-unit">· TVA inclus</span>
+                </div>
+                <p class="price-note">Preț de lansare. Livrare în 3–5 zile lucrătoare, raport PDF.</p>
+            </div>
+
+            <div class="card svc-card">
+                <h3>Analiză detaliată</h3>
+                <div class="price-tag">
+                    <span class="price-now">La cerere</span>
+                </div>
+                <p class="price-note">Pentru terenuri mai complexe sau scenarii multiple. Prețul se stabilește în funcție de complexitate — ți-l confirmăm înainte să începem.</p>
+            </div>
+
+            <div class="svc-callout">
+                <strong>Atenție la diferență:</strong> filtrarea terenurilor pe platformă (filtrul arhitecților, prin care vezi doar terenuri viabile) este <strong>gratuită</strong>. Analiza de teren este <strong>serviciul plătit</strong> — un raport tehnic dedicat terenului tău.
+            </div>
+
+            <div class="svc-ctas">
+                <a class="cta-primary" href="comanda-analiza.html">Comandă o analiză <span class="arr">→</span></a>
+                <a class="cta-secondary" href="politica-retur.html">Politica de retur</a>
+            </div>
+        </section>
+
+        <!-- 3. CONSULTANȚĂ -->
+        <section class="section" id="consultanta">
+            <p class="section-eyebrow">Serviciu plătit</p>
+            <h2 class="section-title">Consultanță</h2>
+            <p class="section-body">
+                Discuți direct cu un arhitect din echipa LTFB Studio — despre teren, despre proiect
+                sau despre cum funcționează construcția colaborativă.
+            </p>
+
+            <div class="card svc-card">
+                <h3>Consultanță online</h3>
+                <div class="price-tag">
+                    <span class="price-now">299 RON</span>
+                    <span class="price-unit">/ oră</span>
+                </div>
+                <p class="price-note">Primele 30 de minute sunt gratuite. Online, la o oră stabilită împreună.</p>
+            </div>
+
+            <div class="card svc-card">
+                <h3>Consultanță la birou</h3>
+                <div class="price-tag">
+                    <span class="price-now">499 RON</span>
+                    <span class="price-unit">/ oră</span>
+                </div>
+                <p class="price-note">Față în față, la biroul LTFB Studio. Include deplasarea la teren.</p>
+            </div>
+
+            <div class="svc-ctas">
+                <a class="cta-primary" href="consultanta.html">Cere consultanță <span class="arr">→</span></a>
+            </div>
+        </section>
+
+        <!-- 4. PARTENERI -->
+        <section class="section" id="parteneri">
+            <p class="section-eyebrow">Rețea de profesioniști</p>
+            <h2 class="section-title">Parteneri</h2>
+            <p class="section-body">
+                Un director de birouri de arhitectură, design interior, urbanism, constructori și
+                furnizori de produse și finisaje — oameni care pot duce proiectul grupului mai departe.
+            </p>
+            <p class="section-body" style="margin-top:1rem;">
+                Suntem la început: la lansare găsești puțini parteneri, iar rețeaua crește în timp.
+            </p>
+
+            <div class="svc-ctas">
+                <a class="cta-primary" href="parteneri.html">Vezi partenerii <span class="arr">→</span></a>
+                <a class="cta-secondary" href="devino-partener.html">Vrei să devii partener?</a>
+            </div>
+        </section>
+
+        <!-- 5. ASISTENȚĂ ȘI COORDONARE GRUP -->
+        <section class="section" id="coordonare">
+            <p class="section-eyebrow">Serviciu plătit</p>
+            <h2 class="section-title">Asistență și coordonare grup <span class="badge badge-soon">Mai târziu / la cerere</span></h2>
+            <p class="section-body">
+                Serviciul prin care un grup format e dus de la organizare spre construcție:
+                coordonarea proiectului, a deciziilor și a relației cu proiectanții și constructorul.
+            </p>
+            <p class="section-body" style="margin-top:1rem;">
+                Lucrăm pe <strong>onorariu</strong>, nu pe procent din valoarea proiectului. Stabilim
+                împreună forma potrivită pentru grupul tău — întreabă-ne când ajungi la acest pas.
+            </p>
+
+            <div class="svc-ctas">
+                <a class="cta-secondary" href="consultanta.html">Întreabă-ne</a>
+            </div>
+        </section>
+
+        <!-- PÂLNIA -->
+        <section class="section" id="parcurs">
+            <p class="section-eyebrow">De la primul contact la construcție</p>
+            <h2 class="section-title">Cum se leagă serviciile</h2>
+            <p class="section-body">
+                Începi gratuit și plătești doar când ai nevoie de un pas concret.
+            </p>
+
+            <div class="funnel">
+                <span class="funnel-step"><span class="tag">Gratuit</span>Webinar</span>
+                <span class="funnel-arrow">→</span>
+                <span class="funnel-step"><span class="tag">Gratuit</span>30 min consultanță</span>
+                <span class="funnel-arrow">→</span>
+                <span class="funnel-step"><span class="tag">Plătit</span>Consultanță</span>
+                <span class="funnel-arrow">→</span>
+                <span class="funnel-step"><span class="tag">Plătit</span>Analiză preliminară</span>
+                <span class="funnel-arrow">→</span>
+                <span class="funnel-step"><span class="tag">Plătit</span>Analiză detaliată</span>
+                <span class="funnel-arrow">→</span>
+                <span class="funnel-step"><span class="tag">Mai târziu</span>Coordonare grup</span>
+            </div>
+        </section>
+
+        <!-- FAQ (specific serviciilor) -->
+        <section class="section" id="faq">
+            <p class="section-eyebrow">Întrebări frecvente</p>
+            <h2 class="section-title">Despre prețuri și servicii</h2>
+
+            <div class="faq">
+                <details>
+                    <summary>Chiar e gratuit accesul la platformă?</summary>
+                    <div class="faq-answer">Da. Contul, profilul, matching-ul, explorarea terenurilor și a grupurilor, formarea și aderarea la un grup, notificările, webinariile și newsletterul sunt gratuite. Plătești doar serviciile listate pe această pagină.</div>
+                </details>
+                <details>
+                    <summary>Care e diferența dintre filtrarea terenurilor și analiza de teren?</summary>
+                    <div class="faq-answer">Filtrarea terenurilor pe platformă — prin care arhitecții afișează doar terenuri viabile — este gratuită și o vezi în lista de terenuri. Analiza de teren este un serviciu plătit: un raport tehnic dedicat terenului tău, cu ce se poate construi concret pe el.</div>
+                </details>
+                <details>
+                    <summary>Analiza preliminară costă 99 sau 149 RON?</summary>
+                    <div class="faq-answer">99 RON este prețul de lansare, cu TVA inclus. Prețul standard este 149 RON. Afișăm ambele ca să fie transparent. Livrarea e în 3–5 zile lucrătoare, ca raport PDF.</div>
+                </details>
+                <details>
+                    <summary>Prima consultanță e gratuită?</summary>
+                    <div class="faq-answer">Da — primele 30 de minute de consultanță sunt gratuite. După aceea, consultanța online costă 299 RON/oră, iar cea la birou (cu deplasare la teren inclusă) 499 RON/oră.</div>
+                </details>
+                <details>
+                    <summary>Cât costă coordonarea de grup?</summary>
+                    <div class="faq-answer">Lucrăm pe onorariu, nu pe procent din valoarea proiectului. Nu fixăm un preț standard acum — îl stabilim împreună, în funcție de grup și de proiect, când ajungi la acest pas.</div>
+                </details>
+                <details>
+                    <summary>Pot returna o analiză după ce am primit-o?</summary>
+                    <div class="faq-answer">Analiza este un serviciu personalizat, livrat ca raport. Condițiile de retur sunt detaliate în <a href="politica-retur.html" style="color:var(--ink); text-decoration:underline; text-underline-offset:3px;">politica de retur</a>.</div>
+                </details>
+            </div>
+        </section>
+
+        <!-- CTA FINAL -->
+        <div class="cta-final">
+            <h2 class="section-title">Începe gratuit, de la webinar.</h2>
+            <p class="section-body">Înțelegi modelul, pui întrebări și decizi singur dacă urmează un pas plătit.</p>
+            <div class="hero-ctas">
+                <a class="cta-primary" href="https://luma.com/ba9sq1yp" target="_blank" rel="noopener">Înscrie-te la webinar <span class="arr">→</span></a>
+                <a class="cta-secondary" href="register.html">Creează cont</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+</body>
+</html>
