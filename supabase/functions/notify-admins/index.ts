@@ -74,6 +74,7 @@ const SUPERADMIN_CC_IF_NO_RECIPIENT = new Set<string>([
   'account_deleted',
   'partner_application',
   'consultation_request',
+  'newsletter_signup',
   'terrain_proposed',
   // Comenzi de analiză (plată Oblio + Netopia) — fără primary recipient,
   // notificarea merge doar către superadmin pe Slack + email.
@@ -642,6 +643,27 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         ],
         ctaLink: `${PLATFORM_URL}/admin-parteneri.html`,
         ctaLabel: 'Vezi cererile din admin',
+      })
+      return { title, body, html }
+    }
+
+    case 'newsletter_signup': {
+      const subEmail = data.email || 'N/A'
+      const src = data.source || 'necunoscut'
+      const title = `📨 Newsletter: abonare nouă (pending)`
+      const body = `O adresă nouă s-a abonat la newsletter și așteaptă confirmarea (double opt-in). Email: ${subEmail} · sursă: ${src}`
+      const html = buildEmailHtml({
+        headerEmoji: '📨',
+        headerTitle: 'Abonare nouă la newsletter',
+        intro: 'O adresă nouă s-a abonat la newsletter și a primit emailul de confirmare (double opt-in). Va intra în lista de trimitere doar după ce confirmă.',
+        detailsList: [
+          { label: 'Email', value: subEmail },
+          { label: 'Sursă', value: src },
+          { label: 'Zonă interes', value: data.zone_interest || '—' },
+          { label: 'Status', value: 'pending (neconfirmat)' },
+        ],
+        ctaLink: `${PLATFORM_URL}/admin-newsletter.html`,
+        ctaLabel: 'Vezi abonații',
       })
       return { title, body, html }
     }

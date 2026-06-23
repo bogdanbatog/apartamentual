@@ -3,6 +3,10 @@
 
 (function() {
 
+// Reținem URL-ul scriptului curent (footer.js) ca să putem deriva calea către
+// newsletter.js, corectă indiferent de adâncimea paginii (ex. /ce-este/).
+var FOOTER_SCRIPT_SRC = (document.currentScript && document.currentScript.src) || '';
+
 function injectFooterStyles() {
     if (document.getElementById('site-footer-styles')) return;
     var style = document.createElement('style');
@@ -72,6 +76,52 @@ function injectFooterStyles() {
         transition:opacity .2s ease;
     }
     .site-footer-col a:hover{ opacity:0.6; }
+
+    /* ── Newsletter (double opt-in) — discret, sub navigarea footer-ului ── */
+    .site-footer-newsletter{
+        display:flex;
+        flex-wrap:wrap;
+        align-items:flex-start;
+        gap:20px 48px;
+        padding:28px 0;
+        margin-bottom:8px;
+        border-top:1px solid rgba(0,0,0,0.10);
+    }
+    .site-footer-newsletter .sfn-text{ flex:1 1 240px; max-width:300px; }
+    .site-footer-newsletter h4{
+        font-size:11px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase;
+        color:#8a8a8a; margin:0 0 8px;
+    }
+    .site-footer-newsletter .sfn-text p{
+        font-size:13.5px; line-height:1.6; color:#555555; margin:0;
+    }
+    .site-footer-newsletter .sfn-form{ flex:1 1 320px; max-width:420px; }
+    .site-footer-newsletter .sfn-row{ display:flex; gap:8px; margin-bottom:10px; }
+    .site-footer-newsletter input[type=email]{
+        flex:1 1 auto; min-width:0; padding:11px 14px; font-size:14px;
+        border:1px solid rgba(0,0,0,0.18); border-radius:8px; background:#fff; color:#1a1a1a;
+        font-family:inherit;
+    }
+    .site-footer-newsletter button{
+        padding:11px 20px; font-size:14px; font-weight:600; cursor:pointer;
+        border:1px solid #1a1a1a; border-radius:8px; background:#fff; color:#1a1a1a;
+        font-family:inherit; transition:background .2s ease, color .2s ease; white-space:nowrap;
+    }
+    .site-footer-newsletter button:hover{ background:#1a1a1a; color:#fff; }
+    .site-footer-newsletter button:disabled{ opacity:0.5; cursor:default; }
+    .site-footer-newsletter .sfn-consent{
+        display:flex; gap:8px; align-items:flex-start;
+        font-size:12px; line-height:1.5; color:#8a8a8a;
+    }
+    .site-footer-newsletter .sfn-consent input{ margin-top:2px; flex:0 0 auto; }
+    .site-footer-newsletter .sfn-consent a{ color:#c2604a; text-decoration:none; }
+    .site-footer-newsletter .sfn-consent a:hover{ opacity:0.7; }
+    .site-footer-newsletter .js-newsletter-msg{ margin:8px 0 0; font-size:12.5px; }
+    .site-footer-newsletter .js-newsletter-success{ margin:0; font-size:13.5px; color:#1a1a1a; }
+    @media (max-width:560px){
+        .site-footer-newsletter .sfn-row{ flex-direction:column; }
+        .site-footer-newsletter button{ width:100%; }
+    }
 
     /* Banda firmă (cerință Netopia/ANPC) */
     .site-footer-legal{
@@ -174,6 +224,25 @@ function createFooter() {
             </div>
         </div>
 
+        <!-- Newsletter (double opt-in) — captură discretă, pe toate paginile interne -->
+        <div class="site-footer-newsletter">
+            <div class="sfn-text">
+                <h4>Newsletter</h4>
+                <p>Povești despre construcția în grup și terenuri noi. Fără spam.</p>
+            </div>
+            <form class="js-newsletter-form sfn-form" data-source="footer" novalidate>
+                <div class="sfn-row">
+                    <input type="email" placeholder="adresa ta de email" aria-label="Adresa ta de email" required>
+                    <button type="submit">Abonează-mă</button>
+                </div>
+                <label class="sfn-consent">
+                    <input type="checkbox" required>
+                    <span>Sunt de acord să primesc newsletterul ApartamenTUal și am citit <a href="/gdpr.html">politica de confidențialitate</a>.</span>
+                </label>
+                <p class="js-newsletter-msg" style="display:none;"></p>
+            </form>
+        </div>
+
         <!-- Identificare firmă (cerință Netopia / ANPC) -->
         <div class="site-footer-legal">
             <span><b>SC LTFB Studio SRL</b></span>
@@ -222,12 +291,27 @@ function startFooterLogoColorCycle() {
     }, 2400);
 }
 
+// Încarcă newsletter.js (handler-ul comun al formularelor) o singură dată.
+// Calea e derivată din src-ul lui footer.js, deci e corectă și pe subpagini (/ce-este/).
+function ensureNewsletterScript() {
+    if (window.__newsletterBound) return;
+    if (document.querySelector('script[data-newsletter]')) return;
+    var src = FOOTER_SCRIPT_SRC
+        ? FOOTER_SCRIPT_SRC.replace(/footer\.js(\?.*)?$/, 'newsletter.js')
+        : 'js/newsletter.js';
+    var s = document.createElement('script');
+    s.src = src;
+    s.setAttribute('data-newsletter', '1');
+    document.body.appendChild(s);
+}
+
 function loadFooter() {
     injectFooterStyles();
     const footerContainer = document.getElementById('footer');
     if (footerContainer) {
         footerContainer.innerHTML = createFooter();
         startFooterLogoColorCycle();
+        ensureNewsletterScript();
     }
 }
 

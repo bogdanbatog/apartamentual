@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Newsletter - ApartamenTUal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'DM Sans', system-ui, sans-serif; }</style>
+    <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#0f172a">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-bold text-gray-900">Admin — Newsletter</h1>
+            <p class="text-sm text-gray-500">Abonați (sursa de adevăr pentru consimțământ). Lista de trimitere efectivă trăiește în Resend.</p>
+        </div>
+        <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
+    </div>
+
+    <div class="px-6 py-4 flex gap-2 flex-wrap items-center">
+        <button onclick="filterSubs('all')" class="n-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toți</button>
+        <button onclick="filterSubs('confirmed')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-green-300 bg-green-50 text-green-700 hover:bg-green-100" data-st="confirmed">✅ Confirmați</button>
+        <button onclick="filterSubs('pending')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100" data-st="pending">⏳ Pending</button>
+        <button onclick="filterSubs('unsubscribed')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="unsubscribed">🚫 Dezabonați</button>
+        <button onclick="exportConfirmedCsv()" class="ml-auto px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-download mr-1"></i> Export CSV (confirmați)
+        </button>
+        <div class="text-sm text-gray-400" id="subCount"></div>
+    </div>
+
+    <div class="px-6 pb-10">
+        <div class="bg-white rounded-xl border overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Email</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Sursă</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Zonă interes</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Consimțământ</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Confirmat</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">Adăugat</th>
+                    </tr>
+                </thead>
+                <tbody id="subsBody">
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/nav.js"></script>
+    <script>
+    var allSubs = [];
+    var currentFilter = 'all';
+
+    async function checkAdmin() {
+        var { data: { user } } = await sb.auth.getUser();
+        if (!user) { window.location.href = '/index.html'; return; }
+        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
+        loadSubs();
+    }
+
+    async function loadSubs() {
+        var { data, error } = await sb
+            .from('newsletter_subscribers')
+            .select('email, status, source, zone_interest, consent_at, confirmed_at, created_at')
+            .order('created_at', { ascending: false });
+        if (error) {
+            document.getElementById('subsBody').innerHTML =
+                '<tr><td colspan="7" class="px-4 py-8 text-center text-red-500">Eroare la încărcare. Ai rulat migrațiile 023 + 024?</td></tr>';
+            return;
+        }
+        allSubs = data || [];
+        renderTable();
+    }
+
+    function filterSubs(st) {
+        currentFilter = st;
+        document.querySelectorAll('.n-filter').forEach(function(b) {
+            var active = b.getAttribute('data-st') === st;
+            b.classList.toggle('bg-gray-900', active);
+            b.classList.toggle('text-white', active);
+        });
+        renderTable();
+    }
+
+    function fmtDate(d) {
+        if (!d) return '—';
+        return new Date(d).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function statusBadge(s) {
+        if (s === 'confirmed') return '<span class="text-[11px] px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Confirmat</span>';
+        if (s === 'pending')   return '<span class="text-[11px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">⏳ Pending</span>';
+        if (s === 'unsubscribed') return '<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">🚫 Dezabonat</span>';
+        return '<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">' + (s || '—') + '</span>';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function renderTable() {
+        var filtered = currentFilter === 'all'
+            ? allSubs
+            : allSubs.filter(function(s) { return s.status === currentFilter; });
+
+        var counts = { confirmed: 0, pending: 0, unsubscribed: 0 };
+        allSubs.forEach(function(s) { if (counts[s.status] !== undefined) counts[s.status]++; });
+        document.getElementById('subCount').textContent =
+            filtered.length + ' afișați · ' + counts.confirmed + ' confirmați, ' +
+            counts.pending + ' pending, ' + counts.unsubscribed + ' dezabonați';
+
+        var body = document.getElementById('subsBody');
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Niciun abonat.</td></tr>';
+            return;
+        }
+        body.innerHTML = filtered.map(function(s) {
+            return '<tr class="border-t">' +
+                '<td class="px-4 py-3 text-gray-900">' + escapeHtml(s.email) + '</td>' +
+                '<td class="px-4 py-3">' + statusBadge(s.status) + '</td>' +
+                '<td class="px-4 py-3 text-gray-600">' + escapeHtml(s.source || '—') + '</td>' +
+                '<td class="px-4 py-3 text-gray-600">' + escapeHtml(s.zone_interest || '—') + '</td>' +
+                '<td class="px-4 py-3 text-gray-500">' + fmtDate(s.consent_at) + '</td>' +
+                '<td class="px-4 py-3 text-gray-500">' + fmtDate(s.confirmed_at) + '</td>' +
+                '<td class="px-4 py-3 text-gray-500">' + fmtDate(s.created_at) + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    // Export CSV doar pentru confirmați (lista utilă pentru referință internă;
+    // trimiterea efectivă se face din Resend, nu de aici).
+    function exportConfirmedCsv() {
+        var rows = allSubs.filter(function(s) { return s.status === 'confirmed'; });
+        if (rows.length === 0) { alert('Niciun abonat confirmat de exportat.'); return; }
+        var header = ['email', 'source', 'zone_interest', 'confirmed_at'];
+        var lines = [header.join(',')];
+        rows.forEach(function(s) {
+            var vals = [s.email, s.source || '', s.zone_interest || '', s.confirmed_at || ''];
+            // Escape pentru CSV: ghilimele duble + virgule.
+            lines.push(vals.map(function(v) {
+                v = String(v).replace(/"/g, '""');
+                return /[",\n]/.test(v) ? '"' + v + '"' : v;
+            }).join(','));
+        });
+        var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'newsletter-confirmati.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    checkAdmin();
+    </script>
+</body>
+</html>

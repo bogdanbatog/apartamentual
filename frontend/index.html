@@ -1678,6 +1678,62 @@
     </div>
   </section>
 
+  <!-- ── NEWSLETTER (bandă ușoară, double opt-in) ── -->
+  <section class="section nl-band" aria-label="Abonare newsletter">
+    <style>
+      .nl-band .nl-inner{
+        max-width:720px; margin:0 auto; text-align:center;
+        background:#f3f0e7; border:1px solid rgba(0,0,0,0.08);
+        border-radius:16px; padding:40px 32px;
+      }
+      .nl-band .section-eyebrow{ margin-bottom:10px; }
+      .nl-band .nl-title{ font-size:clamp(22px,3vw,28px); margin:0 0 12px; color:#1a1a1a; line-height:1.25; }
+      .nl-band .nl-sub{ font-size:15px; line-height:1.6; color:#555555; margin:0 auto 24px; max-width:520px; }
+      .nl-band .nl-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+      .nl-band input[type=email]{
+        flex:1 1 260px; max-width:320px; padding:13px 16px; font-size:15px;
+        border:1px solid rgba(0,0,0,0.18); border-radius:10px; background:#fff; color:#1a1a1a;
+        font-family:inherit;
+      }
+      .nl-band button{
+        padding:13px 26px; border-radius:10px; border:1px solid #1a1a1a;
+        background:#fff; color:#1a1a1a; font-weight:600; font-size:15px; cursor:pointer;
+        font-family:inherit; transition:background .2s ease, color .2s ease;
+      }
+      .nl-band button:hover{ background:#1a1a1a; color:#fff; }
+      .nl-band button:disabled{ opacity:0.5; cursor:default; }
+      .nl-band .nl-consent{
+        display:flex; gap:8px; align-items:flex-start; justify-content:center;
+        font-size:12.5px; line-height:1.5; color:#8a8a8a; max-width:460px; margin:0 auto; text-align:left;
+      }
+      .nl-band .nl-consent input{ margin-top:2px; flex:0 0 auto; }
+      .nl-band .nl-consent a{ color:#c2604a; text-decoration:none; }
+      .nl-band .nl-consent a:hover{ opacity:0.7; }
+      .nl-band .js-newsletter-msg{ margin-top:12px; font-size:13.5px; }
+      .nl-band .js-newsletter-success{ font-size:15px; color:#1a1a1a; margin:0; }
+      @media (max-width:600px){
+        .nl-band .nl-inner{ padding:32px 20px; }
+        .nl-band button{ width:100%; max-width:320px; }
+      }
+    </style>
+    <div class="nl-inner">
+      <p class="section-eyebrow">Newsletter</p>
+      <h2 class="nl-title">Urmărește cum se construiește în grup.</h2>
+      <p class="nl-sub">Primești povestea reală a blocurilor construite colaborativ, terenuri noi și pașii practici. Fără spam, te dezabonezi oricând.</p>
+      <form class="js-newsletter-form" data-source="homepage_band" novalidate>
+        <div class="nl-row">
+          <input type="email" placeholder="adresa ta de email" aria-label="Adresa ta de email" required>
+          <button type="submit">Abonează-mă</button>
+        </div>
+        <label class="nl-consent">
+          <input type="checkbox" required>
+          <span>Sunt de acord să primesc newsletterul ApartamenTUal și am citit <a href="/gdpr.html">politica de confidențialitate</a>.</span>
+        </label>
+        <p class="js-newsletter-msg" style="display:none;"></p>
+      </form>
+    </div>
+  </section>
+
   <!-- ── ECHIPA ── -->
   <section class="section">
     <p class="section-eyebrow">Echipa</p>
@@ -2070,6 +2126,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/login-modal.js"></script>
+<!-- Handler newsletter (banda de mai sus). Pe homepage îl includem explicit,
+     fiindcă footer-ul e inline și NU încarcă footer.js care l-ar fi injectat. -->
+<script src="js/newsletter.js"></script>
 
 <script>
   // ════════════════════════════════════════════════════════════════════
