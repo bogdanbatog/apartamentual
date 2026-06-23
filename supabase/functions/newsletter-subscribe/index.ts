@@ -163,7 +163,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'ApartamenTUal <apartamentual@ltfbstudio.ro>',
+          from: 'ApartamenTUal by LTFB Studio <apartamentual@ltfbstudio.ro>',
           to: [normalized],
           subject: 'Confirmă abonarea la newsletter ApartamenTUal',
           html: buildConfirmEmailHtml(confirmUrl),
