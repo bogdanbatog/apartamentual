@@ -48,10 +48,11 @@
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Consimțământ</th>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Confirmat</th>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Adăugat</th>
+                        <th class="text-right px-4 py-3 font-medium text-gray-600">Acțiuni</th>
                     </tr>
                 </thead>
                 <tbody id="subsBody">
-                    <tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
+                    <tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">Se încarcă...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -78,7 +79,7 @@
             .order('created_at', { ascending: false });
         if (error) {
             document.getElementById('subsBody').innerHTML =
-                '<tr><td colspan="7" class="px-4 py-8 text-center text-red-500">Eroare la încărcare. Ai rulat migrațiile 023 + 024?</td></tr>';
+                '<tr><td colspan="8" class="px-4 py-8 text-center text-red-500">Eroare la încărcare. Ai rulat migrațiile 023 + 024?</td></tr>';
             return;
         }
         allSubs = data || [];
@@ -127,10 +128,15 @@
 
         var body = document.getElementById('subsBody');
         if (filtered.length === 0) {
-            body.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400">Niciun abonat.</td></tr>';
+            body.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">Niciun abonat.</td></tr>';
             return;
         }
         body.innerHTML = filtered.map(function(s) {
+            var action = s.status === 'unsubscribed'
+                ? '<span class="text-gray-300">—</span>'
+                : '<button onclick="unsubscribe(\'' + encodeURIComponent(s.email) + '\')" ' +
+                  'class="px-2.5 py-1 rounded-md text-xs font-medium border border-gray-300 bg-white text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-300">' +
+                  'Dezabonează</button>';
             return '<tr class="border-t">' +
                 '<td class="px-4 py-3 text-gray-900">' + escapeHtml(s.email) + '</td>' +
                 '<td class="px-4 py-3">' + statusBadge(s.status) + '</td>' +
@@ -139,8 +145,27 @@
                 '<td class="px-4 py-3 text-gray-500">' + fmtDate(s.consent_at) + '</td>' +
                 '<td class="px-4 py-3 text-gray-500">' + fmtDate(s.confirmed_at) + '</td>' +
                 '<td class="px-4 py-3 text-gray-500">' + fmtDate(s.created_at) + '</td>' +
+                '<td class="px-4 py-3 text-right">' + action + '</td>' +
                 '</tr>';
         }).join('');
+    }
+
+    // Dezabonare (admin). Trece prin edge function newsletter-unsubscribe, care
+    // verifică superadmin, marchează unsubscribed în Supabase ȘI în Resend.
+    async function unsubscribe(emailEnc) {
+        var email = decodeURIComponent(emailEnc);
+        if (!confirm('Dezabonezi „' + email + '"? Persoana nu va mai primi newsletterul.')) return;
+        try {
+            var res = await sb.functions.invoke('newsletter-unsubscribe', { body: { email: email } });
+            if (res && res.error) throw res.error;
+            var data = res && res.data ? res.data : {};
+            if (data.resend_ok === false) {
+                alert('Marcat dezabonat în Supabase, dar sincronizarea cu Resend a eșuat. Verifică manual contactul în Resend.');
+            }
+            await loadSubs();
+        } catch (e) {
+            alert('Eroare la dezabonare. Încearcă din nou.');
+        }
     }
 
     // Export CSV doar pentru confirmați (lista utilă pentru referință internă;
