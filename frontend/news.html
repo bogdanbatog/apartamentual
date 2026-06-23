@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Articole - ApartamenTUal</title>
     <meta name="description" content="Articole, sfaturi și noutăți despre construcția în grup.">
+    <!-- Open Graph / Twitter (previzualizare link la distribuire) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ApartamenTUal">
+    <meta property="og:locale" content="ro_RO">
+    <meta property="og:title" content="Povești și resurse despre construcția în grup">
+    <meta property="og:description" content="Articole, exemple și povestea reală a primului mic bloc colaborativ din România.">
+    <meta property="og:image" content="https://apartamentual.ro/assets/images/judetul-housing/randari/15-randare-fatada-curte.jpg">
+    <meta property="og:url" content="https://apartamentual.ro/news.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Povești și resurse despre construcția în grup">
+    <meta name="twitter:description" content="Articole, exemple și povestea reală a primului mic bloc colaborativ din România.">
+    <meta name="twitter:image" content="https://apartamentual.ro/assets/images/judetul-housing/randari/15-randare-fatada-curte.jpg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
@@ -277,6 +289,23 @@
         <img id="articleViewImage" class="article-full-image" style="display: none;">
         <div class="article-full-content" id="articleViewContent"></div>
         <div id="articleViewExtraImages" style="display: none; margin-top: 2rem;"></div>
+
+        <!-- Distribuire articol -->
+        <style>
+            .article-share{ margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+            .article-share__label{ display: block; font-size: 0.9rem; color: #555; margin-bottom: 0.75rem; font-weight: 600; }
+            .article-share__btns{ display: flex; flex-wrap: wrap; gap: 0.6rem; }
+            .article-share__btn{ display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; font-size: 0.9rem; font-family: inherit; color: #1a1a1a; background: #fff; border: 1px solid rgba(0,0,0,0.18); border-radius: 0.6rem; cursor: pointer; text-decoration: none; transition: background .2s ease, color .2s ease; }
+            .article-share__btn:hover{ background: #1a1a1a; color: #fff; }
+        </style>
+        <div class="article-share">
+            <span class="article-share__label">Distribuie articolul</span>
+            <div class="article-share__btns">
+                <button type="button" id="shareCopy" class="article-share__btn"><i class="fas fa-link"></i> Copiază link</button>
+                <a id="shareWhatsApp" class="article-share__btn" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a id="shareFacebook" class="article-share__btn" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i> Facebook</a>
+            </div>
+        </div>
     </div>
 
     <div id="footer"></div>
@@ -437,7 +466,25 @@
         // Update URL hash
         window.location.hash = article.slug;
         document.title = article.title + ' - ApartamenTUal';
-        
+
+        // Butoane de distribuire (URL canonic al articolului)
+        const shareUrl = 'https://apartamentual.ro/news.html#' + article.slug;
+        const shareText = article.title + ' · ApartamenTUal';
+        const waBtn = document.getElementById('shareWhatsApp');
+        const fbBtn = document.getElementById('shareFacebook');
+        if (waBtn) waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + shareUrl);
+        if (fbBtn) fbBtn.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl);
+        const copyBtn = document.getElementById('shareCopy');
+        if (copyBtn) {
+            copyBtn.onclick = function() {
+                navigator.clipboard.writeText(shareUrl).then(function() {
+                    const orig = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Link copiat';
+                    setTimeout(function() { copyBtn.innerHTML = orig; }, 2000);
+                });
+            };
+        }
+
         // Scroll to top
         window.scrollTo(0, 0);
     }

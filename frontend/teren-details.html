@@ -184,15 +184,23 @@
                                 </svg>
                                 Adaugă la profil
                             </button>
-                            <button id="btn-share" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
-                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-                                </svg>
-                                Trimite unui prieten
-                            </button>
                             <button id="btn-cere-analiza" class="flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-lg transition text-sm ml-auto">
                                 Cere o analiză
                             </button>
+                        </div>
+
+                        <!-- Distribuire teren (public, vizibil oricui) -->
+                        <div id="share-buttons" class="flex flex-wrap items-center gap-3 mb-6">
+                            <span class="text-sm text-gray-500 font-medium">Distribuie:</span>
+                            <button type="button" id="btn-share-copy" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                <i class="fas fa-link text-gray-500"></i> Copiază link
+                            </button>
+                            <a id="btn-share-whatsapp" target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                <i class="fab fa-whatsapp text-gray-500"></i> WhatsApp
+                            </a>
+                            <a id="btn-share-facebook" target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                <i class="fab fa-facebook-f text-gray-500"></i> Facebook
+                            </a>
                         </div>
 
                         <!-- Group Likes Section (populated by JS if user has groups) -->
@@ -255,6 +263,29 @@
 <script src="js/auth-modal.js"></script>
 <script src="js/app.js"></script>
 <script src="js/teren-details.js"></script>
+<script>
+// Distribuire teren (public). URL canonic = teren-details.html?id=<id>
+(function() {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id) return;
+    const url = 'https://apartamentual.ro/teren-details.html?id=' + encodeURIComponent(id);
+    const waText = 'Am găsit un teren potrivit pentru construcție în grup pe ApartamenTUal: ' + url;
+    const wa = document.getElementById('btn-share-whatsapp');
+    const fb = document.getElementById('btn-share-facebook');
+    if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(waText);
+    if (fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+    const copy = document.getElementById('btn-share-copy');
+    if (copy) {
+        copy.addEventListener('click', function() {
+            navigator.clipboard.writeText(url).then(function() {
+                const orig = copy.innerHTML;
+                copy.innerHTML = '<i class="fas fa-check text-gray-500"></i> Link copiat';
+                setTimeout(function() { copy.innerHTML = orig; }, 2000);
+            });
+        });
+    }
+})();
+</script>
 </body>
 </html>
     
