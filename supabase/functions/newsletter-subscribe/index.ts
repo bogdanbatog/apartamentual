@@ -48,13 +48,13 @@ function buildConfirmEmailHtml(confirmUrl: string): string {
   return `
   <div style="font-family:'Mona Sans',-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;max-width:560px;margin:0 auto;padding:20px;background:#faf8f3;color:#555555;">
     <div style="text-align:center;padding:24px 0;border-bottom:1px solid #e8e3d8;">
-      <h1 style="margin:0;font-size:22px;color:#1a1a1a;font-weight:600;">apartamen<span style="color:#c2604a;">TU</span>al</h1>
-      <p style="margin:4px 0 0;font-size:12px;color:#8a8a8a;">by LTFB studio</p>
+      <h1 translate="no" class="notranslate" style="margin:0;font-size:22px;color:#1a1a1a;font-weight:600;">apartamen<span style="color:#c2604a;">TU</span>al</h1>
+      <p translate="no" class="notranslate" style="margin:4px 0 0;font-size:12px;color:#8a8a8a;">by LTFB Studio</p>
     </div>
     <div style="padding:32px 8px;">
       <h2 style="margin:0 0 16px;font-size:20px;color:#1a1a1a;line-height:1.3;">Mai e un pas: confirmă-ți adresa</h2>
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Bună,</p>
-      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Mulțumim că vrei să primești newsletterul ApartamenTUal — povestea reală a construcției colaborative, terenuri noi și pașii practici din spatele blocurilor construite în grup.</p>
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;">Mulțumim că vrei să primești newsletterul <span translate="no" class="notranslate">ApartamenTUal</span> — povestea reală a construcției colaborative, terenuri noi și pașii practici din spatele blocurilor construite în grup.</p>
       <p style="margin:0 0 8px;font-size:15px;line-height:1.6;">Mai e un singur pas: confirmă-ți adresa.</p>
       <div style="text-align:center;margin:28px 0;">
         <a href="${confirmUrl}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">Confirmă abonarea</a>
@@ -62,7 +62,7 @@ function buildConfirmEmailHtml(confirmUrl: string): string {
       <p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#8a8a8a;">Dacă nu te-ai abonat tu, poți ignora liniștit acest email.<br><br>Dacă butonul nu funcționează, copiază acest link în browser:<br><a href="${confirmUrl}" style="color:#c2604a;word-break:break-all;">${confirmUrl}</a></p>
     </div>
     <div style="border-top:1px solid #e8e3d8;padding:20px 8px 0;text-align:center;">
-      <p style="margin:0;font-size:13px;color:#8a8a8a;">— Echipa ApartamenTUal<br><a href="https://apartamentual.ro" style="color:#c2604a;text-decoration:none;">apartamentual.ro</a></p>
+      <p style="margin:0;font-size:13px;color:#8a8a8a;">— Echipa <span translate="no" class="notranslate">ApartamenTUal</span><br><a href="https://apartamentual.ro" style="color:#c2604a;text-decoration:none;">apartamentual.ro</a></p>
     </div>
   </div>
   `
