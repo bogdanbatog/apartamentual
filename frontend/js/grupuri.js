@@ -352,8 +352,21 @@ function renderGrupuri(grupuri) {
         DOM.myGroupsSection.style.display = 'none';
     }
     
-    // Render other groups
-    DOM.grupuriGrid.innerHTML = otherGroups.map(g => renderGrupCard(g, false)).join('');
+    // Render other groups (card de recrutare ca prim card, doar vizitatori nelogați)
+    const recruitCard = !currentUser ? renderRecruitCard() : '';
+    DOM.grupuriGrid.innerHTML = recruitCard + otherGroups.map(g => renderGrupCard(g, false)).join('');
+}
+
+// Card de recrutare afișat ca prim card în grilă (doar vizitatori nelogați)
+function renderRecruitCard() {
+    return `
+        <div class="grup-card recruit-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:12px; padding:24px; border:2px dashed #c2604a; background:#faf6f2;">
+            <div style="font-size:26px; color:#c2604a;"><i class="fas fa-users"></i></div>
+            <h3 style="margin:0; font-size:1.1rem; color:#1a1a1a;">Fii primul grup real</h3>
+            <p style="margin:0; font-size:0.9rem; line-height:1.5; color:#6f6a61; max-width:260px;">Creează un grup și invită-ți prietenii, sau lasă oameni cu aceeași viziune să ți se alăture.</p>
+            <a href="register.html" style="display:inline-block; background:#1a1a1a; color:#fff; padding:9px 18px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.85rem;">Creează un grup</a>
+        </div>
+    `;
 }
 
 // ── RENDER GRUP CARD ──
@@ -378,9 +391,9 @@ function renderGrupCard(grup, isMember) {
     
     const description = grup.descriere || 'Fără descriere.';
     
-    // Demo badge — pentru grupuri marcate ca demo
-    const demoBadge = grup.is_demo 
-        ? '<span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#92400e; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-flask" style="font-size:9px;"></i>demo</span>' 
+    // Badge "Exemplu" — pentru grupuri marcate ca exemplu (is_demo)
+    const demoBadge = grup.is_demo
+        ? '<span style="display:inline-flex; align-items:center; gap:4px; background:#f0ece3; color:#6f6a61; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; letter-spacing:0.3px;">Exemplu</span>'
         : '';
     
     // Zones and tags for public display
