@@ -90,7 +90,7 @@ Pe scurt:
   - Coloana 1: ApartamenTUal + tagline
   - Coloana 2: NAVIGARE (Acasă, Ce este, Povestea noastră, Terenuri, Utilizatori, Grupuri, Parteneri)
   - Coloana 3: LEGAL (Termeni și condiții, GDPR, Politica de retur, FAQ, Ghid platformă, Contact)
-  - Bara firmă: SC LTFB Studio SRL · CUI: RO22004992 · Reg. Com.: J2007012417402 · Sediu: Str. Popa Petre 23, Sector 2, București · Telefon: +40 723 870 834 · Email: office@ltfbstudio.ro
+  - Bara firmă: SC LTFB Studio SRL · CUI: RO22004992 · Reg. Com.: J40/12417/2007 · Sediu: Str. Popa Petre 23, Sector 2, București · Telefon: +40 723 870 834 · Email: office@ltfbstudio.ro
   - Logos: Netopia Payments + Visa
   - Link-uri: ANPC, SAL, Platforma SAL
   - Copyright: © 2026 ApartamenTUal. Toate drepturile rezervate.
