@@ -247,7 +247,7 @@ function createFooter() {
         <div class="site-footer-legal">
             <span><b>SC LTFB Studio SRL</b></span>
             <span>CUI: RO22004992</span>
-            <span>Reg. Com.: J40/12417/2007</span>
+            <span>Reg. Com.: J2007012417402</span>
             <span>Sediu: Str. Popa Petre 23, Sector 2, București</span>
             <span>Telefon: <a href="tel:+40723870834">+40 723 870 834</a></span>
             <span>Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a></span>
