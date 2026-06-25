@@ -629,18 +629,39 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
     }
 
     case 'partner_application': {
+      // Etichete lizibile pentru categorie (trebuie să corespundă cu cele din
+      // formularul devino-partener.html).
+      const partnerCatLabels: Record<string, string> = {
+        arhitectura: 'Arhitectură / Urbanism',
+        design_interior: 'Design interior',
+        constructii: 'Construcții',
+        furnizori: 'Furnizori produse & finisaje',
+        juridic: 'Avocatură / Consultanță juridică imobiliară',
+        financiar: 'Consultanță financiară / Brokeri credite',
+        agentii_imobiliare: 'Agenții imobiliare',
+      }
+      const companyName = data.company_name || data.name || 'N/A'
+      const categoryRaw = data.category || data.domain || ''
+      const categoryLabel = partnerCatLabels[categoryRaw] || categoryRaw || 'N/A'
+      const description = data.description || data.message || 'N/A'
+
+      const details = [
+        { label: 'Nume/Companie', value: companyName },
+        { label: 'Categorie', value: categoryLabel },
+        { label: 'Email', value: data.email || 'N/A' },
+        { label: 'Telefon', value: data.phone || 'N/A' },
+        { label: 'Oraș', value: data.city || 'N/A' },
+        { label: 'Website', value: data.website || 'N/A' },
+        { label: 'Descriere', value: description },
+      ]
+
       const title = `🤝 Cerere nouă de parteneriat`
-      const body = `O nouă cerere de parteneriat: ${data.company_name || data.name || 'N/A'}`
+      const body = `O nouă cerere de parteneriat: ${companyName} (${categoryLabel})`
       const html = buildEmailHtml({
         headerEmoji: '🤝',
         headerTitle: 'Cerere nouă de parteneriat',
-        intro: 'Cineva a aplicat pentru a deveni partener al platformei.',
-        detailsList: [
-          { label: 'Nume/Companie', value: data.company_name || data.name || 'N/A' },
-          { label: 'Email', value: data.email || 'N/A' },
-          { label: 'Domeniu', value: data.domain || data.category || 'N/A' },
-          { label: 'Mesaj', value: data.message || 'N/A' },
-        ],
+        intro: 'Cineva a aplicat pentru a deveni partener al platformei. Cererea e salvată ca inactivă și așteaptă aprobarea ta din panoul de admin.',
+        detailsList: details,
         ctaLink: `${PLATFORM_URL}/admin-parteneri.html`,
         ctaLabel: 'Vezi cererile din admin',
       })
