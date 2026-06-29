@@ -573,7 +573,7 @@ async function displayTerenDetails(teren, userProfile) {
     if (apartamenteRange) {
         apartamenteEl.textContent = apartamenteRange;
     } else {
-        apartamenteEl.innerHTML = '<a href="#" id="apartamente-cere-analiza" class="text-blue-600 hover:underline">Cere o analiză</a>';
+        apartamenteEl.innerHTML = '<a href="#" id="apartamente-cere-analiza" class="inline-flex items-center px-3 py-1 bg-black hover:bg-gray-800 text-white text-xs font-semibold rounded-md border-2 border-black shadow-sm transition">Cere o analiză</a>';
         const apartLink = document.getElementById('apartamente-cere-analiza');
         if (apartLink) {
             apartLink.addEventListener('click', (e) => {
