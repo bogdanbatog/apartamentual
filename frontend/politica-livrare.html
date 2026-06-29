@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politica de livrare — ApartamenTUal</title>
+    <meta name="description" content="Politica de livrare pentru analizele ApartamenTUal. Servicii digitale livrate prin email, în format PDF, fără costuri de transport.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    <style>
+        /* Reskin v9 (paletă crem/ink, Mona Sans). Tokenurile vin din apartamentual-v9.css. */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font); background: var(--bg); color: var(--ink); line-height: 1.7; }
+
+        /* Anulează spațiul rezervat sub nav (pagina are hero full-bleed pe ink) */
+        #navigation { margin-bottom: 0; }
+
+        /* Hero — bandă ink, ca pe homepage */
+        .pr-hero {
+            background: var(--ink);
+            padding: 3rem 1.5rem 3rem;
+            text-align: center;
+            color: #fff;
+        }
+        .pr-hero h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+        .pr-hero p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.7);
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Container — secțiunile flotează ușor peste banda ink */
+        .pr-container {
+            max-width: 800px;
+            margin: -1.5rem auto 3rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Secțiuni — carduri crem-soft v9 */
+        .pr-section {
+            background: var(--bg-soft);
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            padding: 2rem 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .pr-section h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--ink);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+        .pr-section h2 .pr-num {
+            color: var(--ink-3);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .pr-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .pr-section p {
+            margin-bottom: 0.75rem;
+            color: var(--ink-2);
+        }
+        .pr-section ul {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            color: var(--ink-2);
+        }
+        .pr-section li {
+            margin-bottom: 0.4rem;
+        }
+        .pr-section strong {
+            color: var(--ink);
+        }
+        .pr-section a {
+            color: var(--ink);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .pr-section a:hover { opacity: 0.6; }
+
+        /* Callout — accent ink la stânga, fundal crem (ca .family-quote din v9) */
+        .pr-callout {
+            background: var(--bg);
+            border-left: 3px solid var(--ink);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        .pr-callout p { margin-bottom: 0; }
+        .pr-legal-ref {
+            font-size: 0.85rem;
+            color: var(--ink-3);
+            font-style: italic;
+        }
+
+        /* „Pe scurt" — pastel ocru cald, distinct dar pal */
+        .pr-tldr {
+            background: #f3ede0;
+            border: 1px solid #e4d9bf;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+        .pr-tldr h2 {
+            color: var(--ink);
+            margin-bottom: 0.75rem;
+        }
+        .pr-tldr p {
+            color: var(--ink-2);
+        }
+        .pr-contact-box {
+            background: var(--bg);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+        }
+        .pr-contact-box p {
+            margin-bottom: 0.25rem;
+        }
+        .pr-updated {
+            text-align: center;
+            color: var(--ink-3);
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .pr-hero h1 { font-size: 1.5rem; }
+            .pr-section { padding: 1.5rem 1.25rem; }
+            .pr-container { padding: 0 0.75rem; }
+        }
+    </style>
+    <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#0f172a">
+</head>
+<body>
+    <div id="navigation"></div>
+
+    <!-- HERO -->
+    <div class="pr-hero">
+        <h1>Politica de livrare</h1>
+        <p>Reguli clare privind livrarea rapoartelor de analiză.</p>
+    </div>
+
+    <div class="pr-container">
+
+        <!-- TLDR -->
+        <div class="pr-tldr">
+            <h2><i class="fas fa-info-circle"></i> Pe scurt</h2>
+            <p>
+                Analizele ApartamenTUal sunt <strong>servicii digitale</strong>. Primești raportul în format PDF,
+                pe email, la adresa folosită la facturare. Nu există livrare fizică, deci <strong>nu se percep costuri
+                de transport</strong>. Termen: <strong>3-5 zile lucrătoare</strong> pentru analiza preliminară, stabilit
+                prin contract pentru analiza detaliată.
+            </p>
+        </div>
+
+        <!-- 1. Ce livrăm -->
+        <section class="pr-section">
+            <h2><span class="pr-num">1.</span> Ce livrăm</h2>
+            <p>
+                ApartamenTUal livrează <strong>servicii digitale</strong>: rapoarte de analiză de teren, elaborate de
+                biroul de arhitectură, în format PDF. Nu livrăm produse fizice. Nu se percep taxe de livrare, ambalare
+                sau transport.
+            </p>
+        </section>
+
+        <!-- 2. Modalitatea de livrare -->
+        <section class="pr-section">
+            <h2><span class="pr-num">2.</span> Modalitatea de livrare</h2>
+            <p>
+                Raportul se transmite <strong>electronic, prin email</strong>, la adresa indicată în datele de facturare
+                la momentul comenzii. Asigură-te că adresa de email este corectă, fiindcă acolo primești atât factura,
+                cât și raportul.
+            </p>
+        </section>
+
+        <!-- 3. Termenul de livrare -->
+        <section class="pr-section">
+            <h2><span class="pr-num">3.</span> Termenul de livrare</h2>
+            <p>
+                <strong>Analiză preliminară:</strong> în maximum <strong>3-5 zile lucrătoare</strong> de la confirmarea plății.
+            </p>
+            <p>
+                <strong>Analiză detaliată:</strong> termenul se stabilește prin contract, de comun acord, în funcție de
+                complexitatea proiectului, fiindcă acest tip de analiză se elaborează la cerere.
+            </p>
+            <p>
+                Termenul curge din momentul în care plata este confirmată, cu condiția ca datele necesare (în special
+                numărul cadastral) să fie complete și corecte.
+            </p>
+        </section>
+
+        <!-- 4. Date insuficiente sau incorecte -->
+        <section class="pr-section">
+            <h2><span class="pr-num">4.</span> Date insuficiente sau incorecte</h2>
+            <p>
+                Dacă, după plată, datele furnizate sunt incomplete sau neclare (de exemplu un număr cadastral care nu
+                poate fi identificat), termenul de livrare se <strong>suspendă</strong> până la clarificare. În acest caz
+                te contactăm prin email în maximum <strong>24 de ore lucrătoare</strong>, ai la dispoziție
+                <strong>7 zile lucrătoare</strong> pentru a transmite clarificările, iar după primirea datelor corecte
+                termenul repornește. Detaliile complete sunt în
+                <a href="/politica-retur.html">Politica de retur</a>, secțiunea „Date insuficiente pentru identificarea terenului".
+            </p>
+        </section>
+
+        <!-- 5. Întârzieri și imposibilitate de livrare -->
+        <section class="pr-section">
+            <h2><span class="pr-num">5.</span> Întârzieri și imposibilitate de livrare</h2>
+            <p>
+                Dacă, din motive care țin exclusiv de noi (indisponibilitate tehnică sau a echipei), nu putem livra
+                raportul în termenul agreat și nici într-un termen rezonabil ulterior, ai dreptul la <strong>refund
+                integral</strong>, conform <a href="/politica-retur.html">Politicii de retur</a>, secțiunea „Cazuri
+                excepționale de refund integral".
+            </p>
+        </section>
+
+        <!-- 6. Confirmarea livrării -->
+        <section class="pr-section">
+            <h2><span class="pr-num">6.</span> Confirmarea livrării</h2>
+            <p>
+                Raportul este considerat <strong>livrat</strong> în momentul în care îți este transmis pe email, în
+                format PDF, la adresa folosită la comandă.
+            </p>
+        </section>
+
+        <!-- 7. Contact -->
+        <section class="pr-section">
+            <h2><span class="pr-num">7.</span> Contact</h2>
+            <p>
+                Pentru orice întrebare legată de livrarea unei analize:
+                <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a>. Răspundem în maximum 24 de ore în zilele lucrătoare.
+            </p>
+            <div class="pr-contact-box">
+                <p><strong>SC LTFB Studio SRL</strong></p>
+                <p>CUI: RO22004992 · Reg. Com.: J2007012417402</p>
+                <p>Str. Popa Petre 23, Sector 2, București</p>
+            </div>
+        </section>
+
+        <p class="pr-updated">Ultima actualizare: 29 iunie 2026</p>
+
+    </div>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/login-modal.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/footer.js"></script>
+</body>
+</html>
