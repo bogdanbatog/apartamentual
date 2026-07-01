@@ -47,7 +47,8 @@ interface ComandaInput {
   cod_postal?: string
 
   // Detalii teren
-  nr_cadastral: string
+  nr_cadastral?: string
+  adresa_teren?: string
   descriere_teren: string
   link_teren?: string
 
@@ -146,7 +147,8 @@ serve(async (req) => {
         tva: tvaValoare,
         cota_tva: cotaTva,
         moneda: 'RON',
-        nr_cadastral: input.nr_cadastral.trim(),
+        nr_cadastral: input.nr_cadastral?.trim() || null,
+        adresa_teren: input.adresa_teren?.trim() || null,
         descriere_teren: input.descriere_teren.trim(),
         link_teren: input.link_teren?.trim() || null,
         status: 'pending_payment',
@@ -208,7 +210,8 @@ serve(async (req) => {
               ? `${input.prenume} ${input.nume}`
               : input.denumire_firma,
             pret: pretTotal,
-            nr_cadastral: input.nr_cadastral.trim(),
+            nr_cadastral: input.nr_cadastral?.trim() || null,
+            adresa_teren: input.adresa_teren?.trim() || null,
             descriere_teren: input.descriere_teren.substring(0, 200),
             link_teren: input.link_teren?.trim() || null,
             proforma: `${oblioResult.seriesName} ${oblioResult.number}`,
@@ -260,8 +263,11 @@ function validateInput(input: ComandaInput): string | null {
   if (!input.adresa?.trim()) return 'Adresa este obligatorie'
   if (!input.oras?.trim()) return 'Orașul este obligatoriu'
   if (!input.judet?.trim()) return 'Județul este obligatoriu'
-  if (!input.nr_cadastral?.trim() || input.nr_cadastral.trim().length < 3) {
-    return 'Numărul cadastral al terenului este obligatoriu (minim 3 caractere)'
+  // Terenul trebuie identificat prin CEL PUȚIN unul: nr. cadastral SAU adresa exactă.
+  const hasCadastral = !!input.nr_cadastral?.trim() && input.nr_cadastral.trim().length >= 3
+  const hasAdresaTeren = !!input.adresa_teren?.trim() && input.adresa_teren.trim().length >= 5
+  if (!hasCadastral && !hasAdresaTeren) {
+    return 'Te rugăm să completezi fie numărul cadastral (minim 3 caractere), fie adresa exactă a terenului'
   }
   if (!input.descriere_teren?.trim() || input.descriere_teren.trim().length < 10) {
     return 'Te rugăm să descrii terenul (minim 10 caractere)'

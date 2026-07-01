@@ -717,6 +717,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       const proforma = data.proforma || 'N/A'
       const proformaUrl = data.proforma_url || ''
       const nrCadastral = (data.nr_cadastral || '').toString().trim()
+      const adresaTeren = (data.adresa_teren || '').toString().trim()
       const linkTeren = (data.link_teren || '').toString().trim()
       const descriereTeren = (data.descriere_teren || '').toString().substring(0, 250)
 
@@ -732,7 +733,8 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Email client', value: data.email || 'N/A' },
           { label: 'Sumă (TVA inclus)', value: pret },
           { label: 'Proformă Oblio', value: proforma },
-          { label: 'Nr. cadastral teren', value: nrCadastral || 'N/A' },
+          { label: 'Nr. cadastral teren', value: nrCadastral || '—' },
+          { label: 'Adresa teren', value: adresaTeren || '—' },
           { label: 'Link anunț teren', value: linkTeren ? `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>` : '—' },
           { label: 'Descriere teren', value: descriereTeren ? descriereTeren + (descriereTeren.length === 250 ? '…' : '') : 'N/A' },
         ],
@@ -750,6 +752,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       const pret = data.pret ? `${data.pret} RON` : 'N/A'
       const factura = data.factura || 'În curs de generare'
       const nrCadastral = (data.nr_cadastral || '').toString().trim()
+      const adresaTeren = (data.adresa_teren || '').toString().trim()
       const linkTeren = (data.link_teren || '').toString().trim()
 
       const title = `✅ Plată confirmată — ${orderId} | începe analiza`
@@ -764,7 +767,8 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Email client', value: data.email || 'N/A' },
           { label: 'Sumă încasată', value: pret },
           { label: 'Factură fiscală', value: factura },
-          { label: 'Nr. cadastral teren', value: nrCadastral || 'N/A' },
+          { label: 'Nr. cadastral teren', value: nrCadastral || '—' },
+          { label: 'Adresa teren', value: adresaTeren || '—' },
           { label: 'Link anunț teren', value: linkTeren ? `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>` : '—' },
         ],
         bodyParagraphs: [
@@ -813,6 +817,46 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         title: `🔔 Site Event: ${event_type}`,
         body: `Event: ${event_type}\n\nData: ${JSON.stringify(data, null, 2)}`
       }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Logging în notification_log (pentru pagina de admin „Notificări")
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Scrie un rând per canal (email / slack) după fiecare încercare de trimitere.
+// Este BEST-EFFORT: orice eroare aici e prinsă și ignorată, ca logarea să NU
+// blocheze vreodată trimiterea notificării reale. Folosește REST-ul PostgREST
+// cu service_role (env-uri disponibile automat în edge functions), deci nu
+// adaugă nicio dependință nouă. Coloanele id + created_at se completează
+// automat de DB (default), deci nu le trimitem.
+
+async function logNotification(row: {
+  event_type: string
+  channel: string
+  recipient: string | null
+  subject: string | null
+  status: string
+  payload: unknown
+}): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseUrl || !serviceKey) return
+
+    await fetch(`${supabaseUrl}/rest/v1/notification_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(row),
+    })
+  } catch (err) {
+    // Non-fatal — nu blocăm notificarea dacă logarea eșuează
+    console.error('notification_log insert failed (non-fatal):', err)
   }
 }
 
@@ -894,8 +938,18 @@ serve(async (req) => {
       } catch (error) {
         results.error = `Slack error: ${error.message}`
       }
+
+      // Înregistrează încercarea Slack în notification_log (best-effort)
+      await logNotification({
+        event_type: payload.event_type,
+        channel: 'slack',
+        recipient: '#app_events',
+        subject: message.title,
+        status: results.slack ? 'sent' : 'error',
+        payload: payload.data,
+      })
     }
-    
+
     // Send email if configured
     if (emailApiKey) {
       try {
@@ -962,6 +1016,16 @@ serve(async (req) => {
             const errText = await emailResponse.text()
             results.error = results.error ? `${results.error}; Email error: ${errText}` : `Email error: ${errText}`
           }
+
+          // Înregistrează încercarea de email în notification_log (best-effort)
+          await logNotification({
+            event_type: payload.event_type,
+            channel: 'email',
+            recipient: recipients.join(', '),
+            subject: message.title,
+            status: results.email ? 'sent' : 'error',
+            payload: payload.data,
+          })
         }
       } catch (error) {
         results.error = results.error ? `${results.error}; Email error: ${error.message}` : `Email error: ${error.message}`

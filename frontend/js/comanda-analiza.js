@@ -115,6 +115,7 @@
     // =====================================================
     function setupLiveValidation() {
         const nrCadastralInput = document.getElementById('nr_cadastral');
+        const adresaTerenInput = document.getElementById('adresa_teren');
         const acceptCadastral = document.getElementById('accept_cadastral');
         const acceptTermeni = document.getElementById('accept_termeni');
         const acceptGdpr = document.getElementById('accept_gdpr');
@@ -125,12 +126,14 @@
 
         function updateSubmitState() {
             const cadastralOk = nrCadastralInput && nrCadastralInput.value.trim().length >= 3;
+            const adresaTerenOk = adresaTerenInput && adresaTerenInput.value.trim().length >= 5;
+            const terenIdentificat = cadastralOk || adresaTerenOk;
             const allChecked = acceptCadastral?.checked
                 && acceptTermeni?.checked
                 && acceptGdpr?.checked
                 && acceptRetur?.checked;
 
-            const canSubmit = cadastralOk && allChecked;
+            const canSubmit = terenIdentificat && allChecked;
             submitBtn.disabled = !canSubmit;
         }
 
@@ -138,7 +141,7 @@
         updateSubmitState();
 
         // Event listeners pe câmpurile critice
-        [nrCadastralInput, acceptCadastral, acceptTermeni, acceptGdpr, acceptRetur].forEach(el => {
+        [nrCadastralInput, adresaTerenInput, acceptCadastral, acceptTermeni, acceptGdpr, acceptRetur].forEach(el => {
             if (!el) return;
             el.addEventListener('input', updateSubmitState);
             el.addEventListener('change', updateSubmitState);
@@ -220,6 +223,7 @@
 
             // Teren
             nr_cadastral: (fd.get('nr_cadastral') || '').trim(),
+            adresa_teren: (fd.get('adresa_teren') || '').trim(),
             descriere_teren: (fd.get('descriere_teren') || '').trim(),
             link_teren: (fd.get('link_teren') || '').trim(),
 
@@ -253,8 +257,10 @@
         if (!p.oras) return 'Te rugăm să completezi orașul.';
         if (!p.judet) return 'Te rugăm să completezi județul.';
 
-        if (!p.nr_cadastral || p.nr_cadastral.length < 3) {
-            return 'Te rugăm să completezi numărul cadastral al terenului (minim 3 caractere).';
+        const hasCadastral = p.nr_cadastral && p.nr_cadastral.length >= 3;
+        const hasAdresaTeren = p.adresa_teren && p.adresa_teren.length >= 5;
+        if (!hasCadastral && !hasAdresaTeren) {
+            return 'Te rugăm să completezi fie numărul cadastral (minim 3 caractere), fie adresa exactă a terenului.';
         }
 
         if (!p.descriere_teren || p.descriere_teren.length < 10) {
