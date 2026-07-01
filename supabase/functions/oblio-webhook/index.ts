@@ -68,7 +68,7 @@ serve(async (req) => {
     // (we stored these when we created the proforma)
     const { data: comanda, error: lookupError } = await supabase
       .from('comenzi_analize')
-      .select('id, status, order_id, email, tip_persoana, nume, prenume, denumire_firma, pret_total, oblio_factura_serie, oblio_factura_numar')
+      .select('id, status, order_id, email, tip_persoana, nume, prenume, denumire_firma, pret_total, oblio_factura_serie, oblio_factura_numar, nr_cadastral, link_teren')
       .eq('oblio_factura_serie', serie)
       .eq('oblio_factura_numar', numar)
       .maybeSingle()
@@ -265,6 +265,8 @@ async function notifySuperAdmin(supabase: any, comanda: any, docData: any) {
           tip_persoana: comanda.tip_persoana,
           nume_client: numeClient,
           pret: comanda.pret_total,
+          nr_cadastral: comanda.nr_cadastral || null,
+          link_teren: comanda.link_teren || null,
           factura: docData.invoiceSeriesName && docData.invoiceNumber
             ? `${docData.invoiceSeriesName} ${docData.invoiceNumber}`
             : 'În curs de generare',

@@ -716,10 +716,12 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       const pret = data.pret ? `${data.pret} RON` : 'N/A'
       const proforma = data.proforma || 'N/A'
       const proformaUrl = data.proforma_url || ''
+      const nrCadastral = (data.nr_cadastral || '').toString().trim()
+      const linkTeren = (data.link_teren || '').toString().trim()
       const descriereTeren = (data.descriere_teren || '').toString().substring(0, 250)
 
       const title = `🛒 Comandă nouă — ${orderId} (așteaptă plată)`
-      const body = `O comandă nouă a fost creată și așteaptă plata clientului. Comandă: ${orderId} | Client: ${numeClient} | Sumă: ${pret}`
+      const body = `O comandă nouă a fost creată și așteaptă plata clientului. Comandă: ${orderId} | Client: ${numeClient} | Sumă: ${pret} | Nr. cadastral: ${nrCadastral || 'N/A'}`
       const html = buildEmailHtml({
         headerEmoji: '🛒',
         headerTitle: 'Comandă nouă — așteaptă plată',
@@ -730,6 +732,8 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Email client', value: data.email || 'N/A' },
           { label: 'Sumă (TVA inclus)', value: pret },
           { label: 'Proformă Oblio', value: proforma },
+          { label: 'Nr. cadastral teren', value: nrCadastral || 'N/A' },
+          { label: 'Link anunț teren', value: linkTeren ? `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>` : '—' },
           { label: 'Descriere teren', value: descriereTeren ? descriereTeren + (descriereTeren.length === 250 ? '…' : '') : 'N/A' },
         ],
         ctaLink: proformaUrl,
@@ -745,6 +749,8 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       const tipPersoana = data.tip_persoana === 'PJ' ? 'persoană juridică' : 'persoană fizică'
       const pret = data.pret ? `${data.pret} RON` : 'N/A'
       const factura = data.factura || 'În curs de generare'
+      const nrCadastral = (data.nr_cadastral || '').toString().trim()
+      const linkTeren = (data.link_teren || '').toString().trim()
 
       const title = `✅ Plată confirmată — ${orderId} | începe analiza`
       const body = `Plată confirmată pentru ${orderId}. Client: ${numeClient}. Sumă: ${pret}. Factură: ${factura}.`
@@ -758,6 +764,8 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Email client', value: data.email || 'N/A' },
           { label: 'Sumă încasată', value: pret },
           { label: 'Factură fiscală', value: factura },
+          { label: 'Nr. cadastral teren', value: nrCadastral || 'N/A' },
+          { label: 'Link anunț teren', value: linkTeren ? `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>` : '—' },
         ],
         bodyParagraphs: [
           '⏰ <strong>Termen livrare</strong>: 3-5 zile lucrătoare de la confirmarea plății.',
