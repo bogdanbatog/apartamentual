@@ -64,8 +64,25 @@
         if (terenTitlu || terenId) {
             const linkTerenInput = document.getElementById('link_teren');
             const descriereInput = document.getElementById('descriere_teren');
-            if (terenId && linkTerenInput && !linkTerenInput.value) {
-                linkTerenInput.value = window.location.origin + '/teren-details.html?id=' + terenId;
+            if (terenId && linkTerenInput) {
+                if (!linkTerenInput.value) {
+                    linkTerenInput.value = window.location.origin + '/teren-details.html?id=' + terenId;
+                }
+                // Teren de pe platformă: blocăm câmpul ca linkul să nu poată fi
+                // șters/modificat accidental înainte de trimiterea comenzii.
+                // (readonly => valoarea rămâne și se trimite normal cu formularul)
+                linkTerenInput.readOnly = true;
+                linkTerenInput.style.background = '#f4f4f4';
+                linkTerenInput.style.cursor = 'not-allowed';
+                const lbl = document.querySelector('label[for="link_teren"]');
+                if (lbl) lbl.textContent = 'Teren de pe platformă (completat automat)';
+                const field = linkTerenInput.parentElement;
+                if (field && !field.querySelector('.ord-field-hint')) {
+                    const hint = document.createElement('div');
+                    hint.className = 'ord-field-hint';
+                    hint.textContent = '🔒 Terenul este preluat de pe platformă. Linkul e completat automat și nu poate fi modificat.';
+                    field.appendChild(hint);
+                }
             }
             // Nu mai pre-completăm descriere_teren — utilizatorul descrie viziunea proprie
             // (terenul e identificat prin nr_cadastral, separat)
