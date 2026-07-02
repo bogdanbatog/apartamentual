@@ -85,6 +85,34 @@ const SUPERADMIN_CC_IF_NO_RECIPIENT = new Set<string>([
 const PLATFORM_URL = 'https://apartamentual.ro'
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Helper: rândul „teren" din emailul de comandă
+// ═══════════════════════════════════════════════════════════════════════════
+// Distinge un teren de pe PLATFORMĂ (link intern .../teren-details.html?id=UUID)
+// de un anunț EXTERN (OLX, Storia etc.), ca să știi imediat, din email, dacă și
+// despre ce teren de pe platformă e vorba — și să-l poți corela rapid după ID.
+function buildTerenRow(linkTeren: string): { label: string; value: string } {
+  if (!linkTeren) {
+    return { label: 'Link teren', value: '—' }
+  }
+  // Caută UUID-ul terenului în linkul intern al platformei.
+  const match = linkTeren.match(/teren-details\.html\?id=([0-9a-fA-F-]{36})/)
+  if (match) {
+    const terenId = match[1]
+    return {
+      label: '🟢 Teren pe platformă',
+      value:
+        `<a href="${linkTeren}" style="color: #c2604a;">Deschide terenul pe platformă</a>` +
+        `<br><span style="color:#888;font-size:12px;">ID teren: ${terenId}</span>`,
+    }
+  }
+  // Link extern (anunț sursă) — păstrăm comportamentul anterior, dar etichetat clar.
+  return {
+    label: 'Link anunț teren (extern)',
+    value: `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>`,
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // HTML email template helper
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -735,7 +763,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Proformă Oblio', value: proforma },
           { label: 'Nr. cadastral teren', value: nrCadastral || '—' },
           { label: 'Adresa teren', value: adresaTeren || '—' },
-          { label: 'Link anunț teren', value: linkTeren ? `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>` : '—' },
+          buildTerenRow(linkTeren),
           { label: 'Descriere teren', value: descriereTeren ? descriereTeren + (descriereTeren.length === 250 ? '…' : '') : 'N/A' },
         ],
         ctaLink: proformaUrl,
@@ -769,7 +797,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Factură fiscală', value: factura },
           { label: 'Nr. cadastral teren', value: nrCadastral || '—' },
           { label: 'Adresa teren', value: adresaTeren || '—' },
-          { label: 'Link anunț teren', value: linkTeren ? `<a href="${linkTeren}" style="color: #c2604a;">${linkTeren}</a>` : '—' },
+          buildTerenRow(linkTeren),
         ],
         bodyParagraphs: [
           '⏰ <strong>Termen livrare</strong>: 3-5 zile lucrătoare de la confirmarea plății.',
