@@ -172,8 +172,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const loginBtn = document.getElementById('auth-required-login');
                 if (loginBtn) {
                     loginBtn.addEventListener('click', () => {
-                        const authModal = document.getElementById('auth-modal');
-                        if (authModal) authModal.classList.remove('hidden');
+                        if (window.openLoginModal) window.openLoginModal();
+                        else window.location.href = '/register.html';
                     });
                 }
                 return;
