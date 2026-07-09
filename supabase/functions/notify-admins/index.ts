@@ -48,6 +48,10 @@ const SUPERADMIN_CC_ALWAYS = new Set<string>([
   'invitation_sent',
   'member_invited_someone',
   'join_request_admin_email',
+  // Cerere spontană de alăturare: frontendul trimite admin_email (adminul
+  // grupului) ca recipient explicit, dar superadminul vrea să vadă și el fiecare
+  // cerere. Deci CC mereu, nu doar când lipsește recipientul.
+  'join_request',
   // Platform-wide events that may have a recipient (e.g. the new user themselves)
   // but still need superadmin visibility.
   'new_user',
@@ -69,7 +73,6 @@ const SUPERADMIN_CC_IF_NO_RECIPIENT = new Set<string>([
   'member_rejected',
   'group_created',
   'group_updated',
-  'join_request',
   'account_suspended',
   'account_deleted',
   'partner_application',

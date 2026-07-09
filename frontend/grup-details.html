@@ -2361,29 +2361,23 @@ window.requestJoinGroup = async function() {
         
         if (error) throw error;
         
-        // Notify admin of the group + Slack
-        if (typeof notifyAdmins === 'function') {
-            notifyAdmins('join_request', {
-                group_name: currentGroup.name || currentGroup.nume || 'Grup',
-                user_email: currentUser.email,
-                group_id: currentGroup.id
-            });
-        }
-        // Send email to group admin
+        // Notifică adminul grupului (To) + superadminul (CC) + Slack, cu textul
+        // corect de cerere spontană. Un singur eveniment: join_request.
+        // NU mai folosim join_request_admin_email aici (acela e pentru invitații
+        // acceptate, unde mențiunea "membru obișnuit" chiar se aplică).
         try {
             var { data: adminProfile } = await sb.from('profiles').select('email').eq('user_id', currentGroup.admin_id).single();
-            if (adminProfile && adminProfile.email && typeof notifyAdmins === 'function') {
-                sb.functions.invoke('notify-admins', {
-                    body: {
-                        event_type: 'join_request_admin_email',
-                        admin_email: adminProfile.email,
-                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
-                        user_email: currentUser.email,
-                        group_id: currentGroup.id
-                    }
+            var { data: userProfile } = await sb.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
+            if (typeof notifyAdmins === 'function') {
+                notifyAdmins('join_request', {
+                    group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                    user_email: currentUser.email,
+                    user_name: userProfile?.pseudonym || currentUser.email,
+                    admin_email: adminProfile?.email || undefined,
+                    group_id: currentGroup.id
                 });
             }
-        } catch(e) { console.warn('Admin email notify failed:', e); }
+        } catch(e) { console.warn('Join request notify failed:', e); }
         
         showToast('Cererea ta a fost trimisă! Adminul grupului o va analiza.', 'success');
         setTimeout(() => window.location.reload(), 1500);
