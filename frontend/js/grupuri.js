@@ -383,8 +383,7 @@ function renderGrupCard(grup, isMember) {
     
     const statusClass = `status-${grup.status}`;
     const membriCount = grup.membri?.[0]?.count || 0;
-    const activityBadge = getActivityBadge(grup.last_activity_at);
-    
+
     const location = grup.oras ? 
         (grup.zona ? `${grup.oras}, ${grup.zona}` : grup.oras) : 
         'Locație nespecificată';
@@ -482,9 +481,6 @@ function renderGrupCard(grup, isMember) {
                         <i class="fas fa-users"></i>
                         ${membriCount}/${grup.max_membri}
                     </span>
-                    <span class="activity-badge activity-${activityBadge.class}">
-                        ${activityBadge.label}
-                    </span>
                 </div>
             </div>
             <div class="grup-card-body">
@@ -500,23 +496,6 @@ function renderGrupCard(grup, isMember) {
             </div>
         </div>
     `;
-}
-
-// ── GET ACTIVITY BADGE ──
-function getActivityBadge(lastActivity) {
-    if (!lastActivity) return { class: 'inactiv', label: 'Inactiv' };
-    
-    const now = new Date();
-    const last = new Date(lastActivity);
-    const daysDiff = Math.floor((now - last) / (1000 * 60 * 60 * 24));
-    
-    if (daysDiff < 14) {
-        return { class: 'recent', label: 'Activ recent' };
-    } else if (daysDiff < 45) {
-        return { class: 'moderat', label: 'Moderat activ' };
-    } else {
-        return { class: 'inactiv', label: 'Inactiv' };
-    }
 }
 
 // ── JOIN GROUP ──
