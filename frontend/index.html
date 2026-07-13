@@ -1862,32 +1862,10 @@
     <p class="section-eyebrow">Resurse</p>
     <h2 class="section-title">News</h2>
     <p class="section-body">Articole și resurse despre Baugruppen din întreaga lume.</p>
-    <div class="news-grid">
-      <a href="https://apartamentual.ro/news.html#de-sijs-leuven-cohousing-in-jurul-unei-foste-cafenele-mrjryu7q" class="article-card">
-        <div class="article-image">
-          <img src="assets/images/news/files/card-news-desijs.png" alt="De Sijs, Leuven, Belgia" loading="lazy">
-        </div>
-        <p class="article-meta">Exemple internaționale</p>
-        <h3 class="article-title">De Sijs, Leuven: locuire în comun în jurul unei foste cafenele.</h3>
-        <p class="article-excerpt">Un grup de viitori locatari din Leuven a construit împreună un ansamblu cu spații comune extinse, în jurul unei cafenele din secolul al XVIII-lea.</p>
-      </a>
-      <a href="https://apartamentual.ro/news.html#brutopia-stekke-fraas-mllkph1u" class="article-card">
-        <div class="article-image">
-          <img src="assets/images/news/files/card-news-brutopia.png" alt="Brutopia, Bruxelles" loading="lazy">
-        </div>
-        <p class="article-meta">Exemple internaționale</p>
-        <h3 class="article-title">Brutopia, Bruxelles: 29 de familii care au construit împreună.</h3>
-        <p class="article-excerpt">Un grup de vecini din Bruxelles a construit împreună 29 de apartamente în jurul unei grădini comune.</p>
-      </a>
-      <a href="https://apartamentual.ro/news.html#judetului-housing-episodul-0" class="article-card">
-        <div class="article-image placeholder" data-article-slug="judetului-housing-episodul-0">
-          <span class="ph-tag">SERIAL · EPISODUL 0</span>
-        </div>
-        <p class="article-meta">Studiu de caz · prototip</p>
-        <h3 class="article-title">Serial Județului Housing: episodul 0</h3>
-        <p class="article-excerpt">Primul episod din povestea reală a primului mic bloc colaborativ din România: avizele, vecinii, banii, șantierul.</p>
-      </a>
-    </div>
+    <!-- Cardurile se randează dinamic din Supabase (vezi scriptul de mai jos):
+         episoadele serialului Județului apar automat (nou→vechi), urmate de
+         exemplele alese manual în CURATED_EXAMPLES. -->
+    <div class="news-grid" id="newsGrid"></div>
     <div class="news-more">
       <a href="/news.html" class="text-link">Vezi toate articolele →</a>
     </div>
@@ -2149,31 +2127,65 @@
 </script>
 
 <script>
-  // ── Preview imagini articole News (read-only din Supabase, date publice; fallback la placeholder) ──
+  // ── Secțiunea News de pe homepage (read-only din Supabase, date publice) ──
+  // Regulă: episoadele serialului Județului apar automat (nou→vechi), urmate de
+  // exemplele alese manual mai jos. Imaginile: episoadele au imagine proprie în
+  // DB; exemplele au image_url gol în DB, deci folosesc grafica locală.
   (function(){
-    var cards = document.querySelectorAll('.article-image[data-article-slug]');
-    if(!cards.length) return;
-    var slugs = Array.prototype.map.call(cards, function(c){ return c.dataset.articleSlug; });
+    var grid = document.getElementById('newsGrid');
+    if(!grid) return;
+
+    // Exemple alese pentru homepage. Se potrivesc după o bucată STABILĂ din slug,
+    // ca linkul să nu se rupă dacă slug-ul se regenerează la editarea în admin.
+    // Ca să adaugi De Sijs, decomentează linia lui.
+    var CURATED_EXAMPLES = [
+      { match: 'brutopia', image: 'assets/images/news/files/card-news-brutopia.png' }
+      // { match: 'de-sijs', image: 'assets/images/news/files/card-news-desijs.png' }
+    ];
+
     var base = 'https://glbvbbgmcobtswwlktic.supabase.co';
     var key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYnZiYmdtY29idHN3d2xrdGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4ODgyMDMsImV4cCI6MjA3MjQ2NDIwM30.1Gd2UKwjVOJC_3iHxKOhV5KJkl_D1vpa8j_lHNiQIII';
-    var url = base + '/rest/v1/articles?select=slug,image_url&slug=in.(' + slugs.join(',') + ')';
+    var url = base + '/rest/v1/articles?select=slug,title,summary,image_url,published_at&status=eq.published&order=published_at.desc';
+
+    function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+    function episodeNo(slug){ var m = /judetului-housing-episodul-(\d+)/.exec(slug || ''); return m ? m[1] : null; }
+
+    function card(a, meta, imgSrc){
+      var img = imgSrc
+        ? '<div class="article-image"><img src="' + esc(imgSrc) + '" alt="' + esc(a.title) + '" loading="lazy"></div>'
+        : '<div class="article-image placeholder"></div>';
+      return '<a href="news.html#' + esc(a.slug) + '" class="article-card">'
+        + img
+        + '<p class="article-meta">' + esc(meta) + '</p>'
+        + '<h3 class="article-title">' + esc(a.title) + '</h3>'
+        + '<p class="article-excerpt">' + esc(a.summary || '') + '</p>'
+        + '</a>';
+    }
+
     fetch(url, { headers: { apikey: key, Authorization: 'Bearer ' + key } })
       .then(function(r){ return r.ok ? r.json() : []; })
       .then(function(rows){
-        rows.forEach(function(row){
-          if(!row.image_url) return;
-          var el = document.querySelector('.article-image[data-article-slug="' + row.slug + '"]');
-          if(!el) return;
-          var img = document.createElement('img');
-          img.src = row.image_url;
-          img.alt = '';
-          img.loading = 'lazy';
-          img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block; position:absolute; inset:0;';
-          el.classList.remove('placeholder');
-          el.insertBefore(img, el.firstChild);
+        if(!Array.isArray(rows)) return;
+        // Episoade (rows deja sortate desc după published_at, deci nou→vechi):
+        var episodes = rows.filter(function(a){ return episodeNo(a.slug) !== null; });
+        // Exemple alese, în ordinea din config:
+        var examples = [];
+        CURATED_EXAMPLES.forEach(function(cfg){
+          var a = rows.find(function(r){ return (r.slug || '').indexOf(cfg.match) !== -1; });
+          if(a) examples.push({ a: a, image: cfg.image });
         });
+
+        var html = '';
+        episodes.forEach(function(a){
+          html += card(a, 'Serialul Județului Housing · Episodul ' + episodeNo(a.slug), a.image_url);
+        });
+        examples.forEach(function(e){
+          html += card(e.a, 'Exemple internaționale', e.image || e.a.image_url);
+        });
+
+        if(html) grid.innerHTML = html;
       })
-      .catch(function(){ /* păstrează placeholder-ul */ });
+      .catch(function(){ /* lasă secțiunea goală dacă pică fetch-ul */ });
   })();
 </script>
 
