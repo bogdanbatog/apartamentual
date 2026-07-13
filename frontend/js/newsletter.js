@@ -44,6 +44,12 @@
       });
       if (res && res.error) throw res.error;
       replaceWithSuccess(form);
+      // Eveniment Plausible opțional, per formular (ex. blocul de final de episod).
+      // Guard: nu crapă dacă Plausible e blocat de un adblocker.
+      var goal = form.getAttribute('data-plausible-goal');
+      if (goal && window.plausible) {
+        try { window.plausible(goal); } catch (e) {}
+      }
     } catch (err) {
       if (btn) btn.disabled = false;
       showMsg(msg, 'Ceva n-a mers. Mai încearcă o dată în câteva momente.', true);
@@ -60,7 +66,10 @@
   function replaceWithSuccess(form) {
     var p = document.createElement('p');
     p.className = 'js-newsletter-success';
-    p.textContent = 'Verifică-ți emailul — ți-am trimis un link de confirmare.';
+    // Text de succes: implicit comun (fără em-dash), sau specific per formular
+    // via data-success-msg (ex. blocul de final de episod).
+    p.textContent = form.getAttribute('data-success-msg')
+      || 'Verifică-ți emailul: ți-am trimis un link de confirmare.';
     p.style.margin = '0';
     p.style.fontSize = '14px';
     p.style.lineHeight = '1.6';

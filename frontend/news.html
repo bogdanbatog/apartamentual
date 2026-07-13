@@ -296,6 +296,49 @@
         <div class="article-full-content" id="articleViewContent"></div>
         <div id="articleViewExtraImages" style="display: none; margin-top: 2rem;"></div>
 
+        <!-- Final de episod: newsletter inline + link poveste (doar pentru episoadele serialului) -->
+        <style>
+            .episode-outro{ display: none; margin-top: 2.5rem; padding: 1.75rem 1.5rem; background: #F7F5F0; border: 1px solid rgba(191,107,80,0.28); border-radius: 0.9rem; }
+            .episode-outro__teaser{ font-size: 1.05rem; line-height: 1.55; font-weight: 600; color: #1A1916; margin: 0 0 1rem; }
+            .episode-outro__lead{ font-size: 0.95rem; color: #555; margin: 0 0 0.75rem; }
+            .episode-outro__form .eo-row{ display: flex; gap: 0.6rem; margin-bottom: 0.75rem; }
+            .episode-outro__form input[type=email]{ flex: 1 1 auto; min-width: 0; padding: 0.85rem 1rem; font-size: 1rem; font-family: inherit; border: 1px solid rgba(0,0,0,0.2); border-radius: 0.6rem; background: #fff; color: #1A1916; }
+            .episode-outro__form button{ padding: 0.85rem 1.4rem; font-size: 1rem; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; color: #fff; background: #BF6B50; border: 1px solid #BF6B50; border-radius: 0.6rem; transition: opacity .2s ease; }
+            .episode-outro__form button:hover{ opacity: 0.88; }
+            .episode-outro__form button:disabled{ opacity: 0.5; cursor: default; }
+            .episode-outro__micro{ font-size: 0.85rem; color: #777; margin: 0 0 0.75rem; }
+            .episode-outro__consent{ display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.8rem; line-height: 1.5; color: #777; }
+            .episode-outro__consent input{ margin-top: 0.2rem; flex: 0 0 auto; }
+            .episode-outro__consent a{ color: #BF6B50; text-decoration: none; }
+            .episode-outro__consent a:hover{ opacity: 0.7; }
+            .episode-outro .js-newsletter-msg{ margin: 0.6rem 0 0; font-size: 0.85rem; }
+            .episode-outro .js-newsletter-success{ margin: 0; font-size: 0.95rem; color: #1A1916; }
+            .episode-outro__story{ margin: 1.5rem 0 0; padding-top: 1.25rem; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.95rem; line-height: 1.55; color: #555; }
+            .episode-outro__story a{ color: #BF6B50; text-decoration: none; font-weight: 600; }
+            .episode-outro__story a:hover{ opacity: 0.75; }
+            @media (max-width: 560px){
+                .episode-outro__form .eo-row{ flex-direction: column; }
+                .episode-outro__form button{ width: 100%; }
+            }
+        </style>
+        <div class="episode-outro" id="episodeOutro">
+            <p class="episode-outro__teaser">Episodul 2 vine în curând: luna în care autorizația s-a blocat și nu mai știam dacă proiectul mai merge înainte.</p>
+            <p class="episode-outro__lead">Primește-l direct pe email:</p>
+            <form class="js-newsletter-form episode-outro__form" data-source="news_episod" data-plausible-goal="Newsletter Episod" data-success-msg="Aproape gata: verifică-ți emailul și confirmă abonarea." novalidate>
+                <div class="eo-row">
+                    <input type="email" placeholder="adresa ta de email" aria-label="Adresa ta de email" required>
+                    <button type="submit">Abonează-mă</button>
+                </div>
+                <p class="episode-outro__micro">Un email pe săptămână, doar când avem ceva de spus. Fără spam.</p>
+                <label class="episode-outro__consent">
+                    <input type="checkbox" required>
+                    <span>Sunt de acord să primesc newsletterul ApartamenTUal și am citit <a href="/gdpr.html">politica de confidențialitate</a>.</span>
+                </label>
+                <p class="js-newsletter-msg" style="display:none;"></p>
+            </form>
+            <p class="episode-outro__story">Nu ne cunoști încă? <a href="/povestea-noastra.html">Povestea noastră, de la o pagină de Facebook la un bloc construit împreună →</a></p>
+        </div>
+
         <!-- Distribuire articol -->
         <style>
             .article-share{ margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
@@ -489,6 +532,14 @@
                     setTimeout(function() { copyBtn.innerHTML = orig; }, 2000);
                 });
             };
+        }
+
+        // Blocul de final de episod (newsletter inline + link poveste): doar pentru
+        // episoadele serialului Județului Housing, detectate după prefixul slug-ului.
+        const outro = document.getElementById('episodeOutro');
+        if (outro) {
+            const isEpisode = !!article.slug && article.slug.indexOf('judetului-housing-episodul') === 0;
+            outro.style.display = isEpisode ? 'block' : 'none';
         }
 
         // Scroll to top
