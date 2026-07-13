@@ -296,6 +296,21 @@
         <div class="article-full-content" id="articleViewContent"></div>
         <div id="articleViewExtraImages" style="display: none; margin-top: 2rem;"></div>
 
+        <!-- Navigare de serial (episod anterior / următor) — doar pentru episoade -->
+        <style>
+            .episode-nav{ display: flex; gap: 1rem; margin-top: 2.5rem; }
+            .episode-nav a{ flex: 1 1 0; display: flex; flex-direction: column; gap: 0.35rem; text-decoration: none; padding: 1rem 1.25rem; border: 1px solid rgba(0,0,0,0.14); border-radius: 0.7rem; transition: border-color .2s ease, background .2s ease; }
+            .episode-nav a:hover{ border-color: #BF6B50; background: #F7F5F0; }
+            .episode-nav__label{ font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; color: #BF6B50; }
+            .episode-nav__title{ font-size: 0.95rem; line-height: 1.4; color: #1A1916; }
+            .episode-nav__next{ text-align: right; align-items: flex-end; }
+            @media (max-width: 560px){
+                .episode-nav{ flex-direction: column; }
+                .episode-nav__next{ text-align: left; align-items: flex-start; }
+            }
+        </style>
+        <div class="episode-nav" id="episodeNav" style="display: none;"></div>
+
         <!-- Final de episod: newsletter inline + link poveste (doar pentru episoadele serialului) -->
         <style>
             .episode-outro{ display: none; margin-top: 2.5rem; padding: 1.75rem 1.5rem; background: #F7F5F0; border: 1px solid rgba(191,107,80,0.28); border-radius: 0.9rem; }
@@ -532,6 +547,31 @@
                     setTimeout(function() { copyBtn.innerHTML = orig; }, 2000);
                 });
             };
+        }
+
+        // Navigare de serial: la finalul unui episod, link spre episodul anterior
+        // și/sau următor, ca să nu fie fundătură. Numărul episodului vine din slug.
+        const nav = document.getElementById('episodeNav');
+        if (nav) {
+            const m = article.slug ? /judetului-housing-episodul-(\d+)/.exec(article.slug) : null;
+            if (m) {
+                const cur = parseInt(m[1], 10);
+                const byNo = {};
+                articles.forEach(a => {
+                    const mm = /judetului-housing-episodul-(\d+)/.exec(a.slug || '');
+                    if (mm) byNo[parseInt(mm[1], 10)] = a;
+                });
+                const prev = byNo[cur - 1];
+                const next = byNo[cur + 1];
+                let navHtml = '';
+                if (prev) navHtml += `<a class="episode-nav__prev" href="#${escapeHtml(prev.slug)}"><span class="episode-nav__label">← Episodul ${cur - 1}</span><span class="episode-nav__title">${escapeHtml(prev.title)}</span></a>`;
+                if (next) navHtml += `<a class="episode-nav__next" href="#${escapeHtml(next.slug)}"><span class="episode-nav__label">Episodul ${cur + 1} →</span><span class="episode-nav__title">${escapeHtml(next.title)}</span></a>`;
+                nav.innerHTML = navHtml;
+                nav.style.display = navHtml ? 'flex' : 'none';
+            } else {
+                nav.innerHTML = '';
+                nav.style.display = 'none';
+            }
         }
 
         // Blocul de final de episod (newsletter inline + link poveste): doar pentru
