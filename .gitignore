@@ -5,3 +5,9 @@ node_modules/
 
 # Pachet sursă homepage v9 (mockup de referință, nu se deployează)
 package-homepage-v9/
+
+# Capturi de ecran temporare — dump local, NU se comit.
+# Pune aici capturile de lucru/throwaway (mai ales cele mari, full-page).
+# Capturile intenționate le pui direct în screenshots/ și le comiți normal.
+screenshots/tmp/
+screenshots/screencapture_*
