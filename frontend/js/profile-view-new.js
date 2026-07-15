@@ -252,9 +252,13 @@ function renderBasicInfo() {
     // Name
     document.getElementById('profile-name').textContent = name;
     
-    // Account type badge
+    // Account type badge. Utilizatorii-exemplu (is_demo) sunt marcați „Exemplu",
+    // nu „Utilizator Activ" — ca să nu pară conturi reale active.
     const typeBadge = document.getElementById('account-type-badge');
-    if (profileData.account_type === 'activ') {
+    if (profileData.is_demo) {
+        typeBadge.textContent = 'Exemplu';
+        typeBadge.className = 'px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm';
+    } else if (profileData.account_type === 'activ') {
         typeBadge.textContent = 'Utilizator Activ';
         typeBadge.className = 'px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm';
     } else {

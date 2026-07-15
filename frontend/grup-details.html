@@ -960,7 +960,10 @@
         <div class="grup-header">
             <div class="grup-header-top">
                 <div>
-                    <h1 id="grupNume">Nume Grup</h1>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <h1 id="grupNume">Nume Grup</h1>
+                        <span id="grupDemoBadge" style="display:none; background:#f0ece3; color:#6f6a61; font-size:11px; font-weight:600; padding:3px 10px; border-radius:10px; letter-spacing:0.3px;">Exemplu</span>
+                    </div>
                     <div class="grup-meta">
                         <span><i class="fas fa-users"></i> <span id="grupMembriCount">0</span>/<span id="grupMaxMembri">20</span> membri</span>
                         <span><i class="fas fa-calendar"></i> Creat <span id="grupCreatedAt">azi</span></span>
@@ -1370,7 +1373,7 @@ async function loadGroupDetails() {
             const userIds = members.map(m => m.user_id);
             const { data: profilesData } = await sb
                 .from('profiles')
-                .select('user_id, pseudonym, email, account_status')
+                .select('user_id, pseudonym, email, account_status, is_demo')
                 .in('user_id', userIds);
             
             // Attach profile to each member
@@ -1469,6 +1472,10 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     
     // Header info
     document.getElementById('grupNume').textContent = group.nume;
+    // Marcaj „Exemplu" pe grupurile-exemplu (is_demo), la fel ca pe listare.
+    if (group.is_demo) {
+        document.getElementById('grupDemoBadge').style.display = 'inline-flex';
+    }
     document.getElementById('grupMembriCount').textContent = members.length;
     document.getElementById('grupMaxMembri').textContent = group.max_membri;
     document.getElementById('grupCreatedAt').textContent = formatDate(group.created_at);
@@ -1760,7 +1767,7 @@ function renderMembers(members, adminId) {
                 <a href="${profileHref}" style="display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; color: inherit; padding: 12px; ${linkExtra}">
                     <div class="member-avatar">${initial}</div>
                     <div class="member-info">
-                        <div class="member-name">${escapeHtml(name)}</div>
+                        <div class="member-name">${escapeHtml(name)}${m.profile?.is_demo ? '<span style="display:inline-block; background:#f0ece3; color:#6f6a61; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-left:6px; letter-spacing:0.3px; vertical-align:middle;">Exemplu</span>' : ''}</div>
                         <div class="member-role">Membru din ${formatDate(m.joined_at)}</div>
                     </div>
                     ${isAdminMember ? '<span class="member-badge admin-badge">Admin</span>' : ''}
