@@ -1677,6 +1677,17 @@ function renderActions(group) {
                 </button>
             `;
         }
+    } else if (group.is_demo) {
+        // Grup exemplu: nu se cere alăturarea (nu are oameni reali în spate).
+        // Îl îndrumăm pe utilizator spre crearea propriului grup.
+        html += `
+            <a href="grup-nou.html" class="btn-action btn-primary">
+                <i class="fas fa-plus"></i> Pornește un grup ca acesta
+            </a>
+            <p style="margin:10px 0 0; font-size:0.875rem; color:#6f6a61; line-height:1.5;">
+                Acesta este un grup exemplu. Grupurile reale se formează chiar acum; poți porni primul din zona ta.
+            </p>
+        `;
     } else if (currentUser) {
         // Check if user has a pending request
         const hasPending = pendingRequests.some(r => r.user_id === currentUser.id);

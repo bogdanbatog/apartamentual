@@ -490,8 +490,11 @@ function renderGrupCard(grup, isMember) {
                 ${matchingHtml}
                 <div class="grup-card-actions">
                     <a href="grup-details.html?id=${grup.id}" class="btn-vezi-grup">Vezi</a>
-                    ${canJoin ? `<button class="btn-alatura" onclick="requestJoinGroup('${grup.id}')">Cere alăturarea</button>` : ''}
-                    ${isPending ? `<span class="btn-pending">Aprobare în așteptare</span>` : ''}
+                    ${grup.is_demo
+                        ? `<a href="grup-nou.html" class="btn-alatura">Pornește un grup ca acesta</a>`
+                        : `${canJoin ? `<button class="btn-alatura" onclick="requestJoinGroup('${grup.id}')">Cere alăturarea</button>` : ''}
+                           ${isPending ? `<span class="btn-pending">Aprobare în așteptare</span>` : ''}`
+                    }
                 </div>
             </div>
         </div>
