@@ -315,6 +315,9 @@
         <style>
             .episode-outro{ display: none; margin-top: 2.5rem; padding: 1.75rem 1.5rem; background: #F7F5F0; border: 1px solid rgba(191,107,80,0.28); border-radius: 0.9rem; }
             .episode-outro__teaser{ font-size: 1.05rem; line-height: 1.55; font-weight: 600; color: #1A1916; margin: 0 0 1rem; }
+            .episode-outro__next{ font-size: 1.05rem; line-height: 1.55; font-weight: 600; margin: 0 0 1rem; }
+            .episode-outro__next a{ color: #BF6B50; text-decoration: none; }
+            .episode-outro__next a:hover{ opacity: 0.75; }
             .episode-outro__lead{ font-size: 0.95rem; color: #555; margin: 0 0 0.75rem; }
             .episode-outro__form .eo-row{ display: flex; gap: 0.6rem; margin-bottom: 0.75rem; }
             .episode-outro__form input[type=email]{ flex: 1 1 auto; min-width: 0; padding: 0.85rem 1rem; font-size: 1rem; font-family: inherit; border: 1px solid rgba(0,0,0,0.2); border-radius: 0.6rem; background: #fff; color: #1A1916; }
@@ -337,8 +340,9 @@
             }
         </style>
         <div class="episode-outro" id="episodeOutro">
-            <p class="episode-outro__teaser">Episodul 2 vine în curând: luna în care autorizația s-a blocat și nu mai știam dacă proiectul mai merge înainte.</p>
-            <p class="episode-outro__lead">Primește-l direct pe email:</p>
+            <p class="episode-outro__teaser" id="episodeOutroTeaser">Episodul 2 vine în curând: povestea grupului, cum s-au găsit câteva familii de străini pe o pagină de Facebook și de ce a trebuit să se găsească încă o dată.</p>
+            <p class="episode-outro__next" id="episodeOutroNext" style="display: none;"></p>
+            <p class="episode-outro__lead" id="episodeOutroLead">Primește-l direct pe email:</p>
             <form class="js-newsletter-form episode-outro__form" data-source="news_episod" data-plausible-goal="Newsletter Episod" data-success-msg="Aproape gata: verifică-ți emailul și confirmă abonarea." novalidate>
                 <div class="eo-row">
                     <input type="email" placeholder="adresa ta de email" aria-label="Adresa ta de email" required>
@@ -580,6 +584,35 @@
         if (outro) {
             const isEpisode = !!article.slug && article.slug.indexOf('judetului-housing-episodul') === 0;
             outro.style.display = isEpisode ? 'block' : 'none';
+            if (isEpisode) {
+                // Teaser vs. link spre episodul următor: dacă episodul următor e deja
+                // publicat (există în lista `articles`, care conține doar articole
+                // publicate), afișăm linkul cu titlul lui; altfel, teaserul static.
+                const teaser = document.getElementById('episodeOutroTeaser');
+                const nextRow = document.getElementById('episodeOutroNext');
+                const lead = document.getElementById('episodeOutroLead');
+                const mEp = /judetului-housing-episodul-(\d+)/.exec(article.slug);
+                const curEp = mEp ? parseInt(mEp[1], 10) : null;
+                let nextEp = null;
+                if (curEp !== null) {
+                    nextEp = articles.find(a => {
+                        const mm = /judetului-housing-episodul-(\d+)/.exec(a.slug || '');
+                        return mm && parseInt(mm[1], 10) === curEp + 1;
+                    }) || null;
+                }
+                if (nextEp) {
+                    nextRow.innerHTML = `<a href="#${escapeHtml(nextEp.slug)}">Episodul ${curEp + 1} e aici: ${escapeHtml(nextEp.title)} →</a>`;
+                    nextRow.style.display = 'block';
+                    teaser.style.display = 'none';
+                    lead.textContent = 'Primește episoadele direct pe email:';
+                } else {
+                    // Teaserul static e scris pentru finalul Episodului 1; pe alte
+                    // episoade fără urmare publicată rămâne doar formularul.
+                    nextRow.style.display = 'none';
+                    teaser.style.display = curEp === 1 ? 'block' : 'none';
+                    lead.textContent = 'Primește-l direct pe email:';
+                }
+            }
         }
 
         // Scroll to top
