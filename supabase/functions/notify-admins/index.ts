@@ -281,8 +281,10 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
     case 'group_created':
     case 'grup_created': {
       const groupName = data.nume || data.group_name || 'un grup nou'
-      const ownerEmail = data.owner_email || data.creator_email || 'N/A'
-      const zona = data.zona || 'N/A'
+      // Acceptăm și numele trimise de frontend (grup-nou.html): created_by pentru
+      // creator și oras pentru zonă. Fără asta, ambele apăreau „N/A" în email.
+      const ownerEmail = data.owner_email || data.creator_email || data.created_by || 'N/A'
+      const zona = data.zona || data.oras || 'N/A'
       const maxMembers = data.max_members || data.max_membri || 'N/A'
       const title = `✨ Grup nou creat: „${groupName}"`
       const body = `Un nou grup a fost creat pe platformă: ${groupName} (zona ${zona}, max ${maxMembers} membri). Creator: ${ownerEmail}`
