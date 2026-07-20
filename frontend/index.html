@@ -2326,16 +2326,18 @@
         a.className = 'floater neighbor';
         a.href = '/profile-view-new.html?id=' + encodeURIComponent(n.id);
         a.setAttribute('role', 'listitem');
-        a.setAttribute('aria-label', 'Profil ' + n.name + ', ' + n.commonTags + ' interese comune');
+        var tagShort = n.commonTags === 1 ? 'interes' : 'interese';
+        var tagLong = n.commonTags === 1 ? 'interes comun' : 'interese comune';
+        a.setAttribute('aria-label', 'Profil ' + n.name + ', ' + n.commonTags + ' ' + tagLong);
         a.style.cssText = '--bg-tile:' + TILE_BG[i % TILE_BG.length] +
           ';--size:' + t.size + 'px;--rot:' + t.rot +
           ';top:' + t.top + ';left:' + t.left +
           ';--amp:' + t.amp + ';--dur:' + t.dur + ';--delay:' + t.delay + ';';
         a.innerHTML =
           '<span class="ini" aria-hidden="true">' + esc(initials(n.name)) + '</span>' +
-          '<span class="pct" aria-hidden="true">' + n.commonTags + ' interese</span>' +
+          '<span class="pct" aria-hidden="true">' + n.commonTags + ' ' + tagShort + '</span>' +
           '<span class="tip' + (t.tipDown ? ' tip--down' : '') + '" aria-hidden="true"><b>' +
-            esc(n.name) + '</b> · ' + n.commonTags + ' interese comune</span>';
+            esc(n.name) + '</b> · ' + n.commonTags + ' ' + tagLong + '</span>';
         cluster.appendChild(a);
       });
     }

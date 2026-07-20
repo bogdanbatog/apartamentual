@@ -459,11 +459,14 @@ function renderGrupCard(grup, isMember) {
         
         const zoneClass = commonZones.length > 0 ? 'matching-yes' : 'matching-no';
         const tagClass = commonTags.length > 0 ? 'matching-yes' : 'matching-no';
-        
+
+        const zoneText = commonZones.length === 1 ? 'o zonă comună' : `${commonZones.length} zone comune`;
+        const tagText = commonTags.length === 1 ? 'un interes comun' : `${commonTags.length} interese comune`;
+
         matchingHtml = `
             <div class="grup-matching-stack">
-                <span class="${zoneClass}"><i class="fas fa-map-marker-alt"></i> ${commonZones.length} zone comune</span>
-                <span class="${tagClass}"><i class="fas fa-tags"></i> ${commonTags.length} interese comune</span>
+                <span class="${zoneClass}"><i class="fas fa-map-marker-alt"></i> ${zoneText}</span>
+                <span class="${tagClass}"><i class="fas fa-tags"></i> ${tagText}</span>
             </div>`;
     }
     
