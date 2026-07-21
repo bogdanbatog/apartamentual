@@ -552,6 +552,11 @@ function createMemberItem(membership, profilesByUserId, options) {
     const { showApprove, showRemove } = options || {};
     const profile = profilesByUserId.get(membership.user_id) || {};
     const displayName = profile.full_name || redactEmail(profile.email || '');
+    // Fă numele link către profil, dacă avem un profil valid (la fel ca la owner)
+    const hasProfile = !!(profile.full_name || profile.email);
+    const nameHtml = hasProfile
+        ? `<a href="/profile-view-new.html?id=${membership.user_id}" class="font-medium text-blue-600 hover:text-blue-800 hover:underline">${escapeHtml(displayName || 'Utilizator')}</a>`
+        : `<span class="font-medium">${escapeHtml(displayName || 'Utilizator')}</span>`;
     const roleText = membership.role ? ` · rol: ${membership.role}` : '';
     const statusBadge = membership.status === 'pending'
         ? '<span class="badge bg-yellow-100 text-yellow-800">în așteptare</span>'
@@ -572,7 +577,7 @@ function createMemberItem(membership, profilesByUserId, options) {
     return `
         <li class="flex items-center justify-between">
             <div class="truncate">
-                <span class="font-medium">${escapeHtml(displayName || 'Utilizator')}</span>
+                ${nameHtml}
                 <span class="text-gray-500">${roleText}</span>
             </div>
             <div class="flex items-center gap-2">
