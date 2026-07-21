@@ -118,6 +118,18 @@ async function checkAuth() {
     return null;
 }
 
+// ── MATCHING (folosit la sortare cand esti logat) ──
+// Cate dintre zonele mele preferate are in comun acest utilizator
+function zoneMatchCount(u) {
+    if (!currentUser) return 0;
+    return (u.zones || []).filter(z => myZones.some(mz => mz.id === z.id)).length;
+}
+// Cate interese (tag-uri) am in comun cu acest utilizator
+function tagMatchCount(u) {
+    if (!currentUser) return 0;
+    return (u.tags || []).filter(t => myTags.some(mt => mt.id === t.id)).length;
+}
+
 // ── LOAD DATA ──
 async function loadTags() {
     try {
@@ -204,25 +216,34 @@ async function loadUsers() {
             zones: user.user_preferred_zones?.map(uz => uz.zones).filter(Boolean) || []
         }));
         
-        // Calculate completeness score and sort by it (most complete first)
-        allUsers.forEach(u => {
-            let score = 0;
-            if (u.pseudonym) score += 1;
-            if (u.profesie) score += 2;
-            if (u.descriere && u.descriere.length > 20) score += 3;
-            if (u.zones && u.zones.length > 0) score += 3;
-            if (u.tags && u.tags.length > 0) score += 3;
-            if (u.preferred_city) score += 1;
-            if (u.preferred_rooms) score += 1;
-            if (u.preferred_surface) score += 1;
-            u._completeness = score;
-        });
-        allUsers.sort((a, b) => b._completeness - a._completeness);
-        
         // Exclude current user from the list
         if (currentUser) {
             allUsers = allUsers.filter(u => u.user_id !== currentUser.id);
         }
+
+        // Ordonare:
+        //  1. Utilizatorii reali intai, cei marcati ca exemplu (is_demo) mereu la sfarsit
+        //  2. Printre reali:
+        //     - logat: dupa matching-ul de zona cu tine (apoi interese comune), descrescator
+        //     - nelogat: in ordinea inscrierii (cei mai vechi primii)
+        //  3. Exemplele raman la coada, ordonate dupa aceleasi criterii intre ele
+        allUsers.sort((a, b) => {
+            // 1. Reali (is_demo fals) inaintea exemplelor (is_demo adevarat)
+            const aDemo = a.is_demo ? 1 : 0;
+            const bDemo = b.is_demo ? 1 : 0;
+            if (aDemo !== bDemo) return aDemo - bDemo;
+
+            // 2. Doar cand esti logat: matching de zona, apoi de interese
+            if (currentUser) {
+                const zoneDiff = zoneMatchCount(b) - zoneMatchCount(a);
+                if (zoneDiff !== 0) return zoneDiff;
+                const tagDiff = tagMatchCount(b) - tagMatchCount(a);
+                if (tagDiff !== 0) return tagDiff;
+            }
+
+            // 3. Nelogat sau egalitate la matching: ordinea inscrierii (cei mai vechi primii)
+            return new Date(a.created_at) - new Date(b.created_at);
+        });
         
         applyFilters();
         
