@@ -27,7 +27,7 @@
     <meta name="theme-color" content="#0f172a">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+    <div class="bg-white border-b px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-bold text-gray-900">Admin — Parteneri</h1>
             <p class="text-sm text-gray-500">Gestionează partenerii platformei ApartamenTUal</p>
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="px-6 py-4 flex gap-2 flex-wrap">
+    <div class="px-4 sm:px-6 py-4 flex gap-2 flex-wrap">
         <button onclick="filterAdmin('all')" class="admin-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-cat="all">Toți</button>
         <button onclick="filterAdmin('arhitectura')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="arhitectura">Arhitectură</button>
         <button onclick="filterAdmin('design_interior')" class="admin-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-cat="design_interior">Design interior</button>
@@ -53,9 +53,9 @@
     </div>
 
     <!-- Table -->
-    <div class="px-6">
-        <div class="bg-white rounded-xl border overflow-hidden">
-            <table class="w-full text-sm">
+    <div class="px-4 sm:px-6 pb-10">
+        <div class="bg-white rounded-xl border overflow-x-auto">
+            <table class="w-full text-sm min-w-[720px]">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Partener</th>

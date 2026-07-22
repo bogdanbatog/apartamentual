@@ -23,7 +23,7 @@
     <meta name="theme-color" content="#0f172a">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+    <div class="bg-white border-b px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-bold text-gray-900">Admin — Notificări</h1>
             <p class="text-sm text-gray-500">Istoric email-uri și mesaje Slack trimise de platformă</p>
@@ -31,16 +31,16 @@
         <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
     </div>
 
-    <div class="px-6 py-4 flex gap-2 flex-wrap items-center">
+    <div class="px-4 sm:px-6 py-4 flex gap-2 flex-wrap items-center">
         <button onclick="filterLog('all')" class="n-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-ch="all">Toate</button>
         <button onclick="filterLog('email')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-ch="email">📧 Email</button>
         <button onclick="filterLog('slack')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-ch="slack">💬 Slack</button>
         <div class="ml-auto text-sm text-gray-400" id="logCount"></div>
     </div>
 
-    <div class="px-6">
-        <div class="bg-white rounded-xl border overflow-hidden">
-            <table class="w-full text-sm">
+    <div class="px-4 sm:px-6 pb-10">
+        <div class="bg-white rounded-xl border overflow-x-auto">
+            <table class="w-full text-sm min-w-[860px]">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Data</th>

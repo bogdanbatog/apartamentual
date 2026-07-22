@@ -23,7 +23,7 @@
     <meta name="theme-color" content="#0f172a">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+    <div class="bg-white border-b px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-bold text-gray-900">Admin — Newsletter</h1>
             <p class="text-sm text-gray-500">Abonați (sursa de adevăr pentru consimțământ). Lista de trimitere efectivă trăiește în Resend.</p>
@@ -31,7 +31,7 @@
         <a href="/admin.html" class="text-sm text-gray-500 hover:text-gray-700">← Admin panel</a>
     </div>
 
-    <div class="px-6 py-4 flex gap-2 flex-wrap items-center">
+    <div class="px-4 sm:px-6 py-4 flex gap-2 flex-wrap items-center">
         <button onclick="filterSubs('all')" class="n-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toți</button>
         <button onclick="filterSubs('confirmed')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-green-300 bg-green-50 text-green-700 hover:bg-green-100" data-st="confirmed">✅ Confirmați</button>
         <button onclick="filterSubs('pending')" class="n-filter px-3 py-1.5 rounded-full text-xs font-medium border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100" data-st="pending">⏳ Pending</button>
@@ -42,9 +42,9 @@
         <div class="text-sm text-gray-400" id="subCount"></div>
     </div>
 
-    <div class="px-6 pb-10">
-        <div class="bg-white rounded-xl border overflow-hidden">
-            <table class="w-full text-sm">
+    <div class="px-4 sm:px-6 pb-10">
+        <div class="bg-white rounded-xl border overflow-x-auto">
+            <table class="w-full text-sm min-w-[1000px]">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Email</th>

@@ -23,7 +23,7 @@
     <meta name="theme-color" content="#0f172a">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <div class="bg-white border-b px-6 py-4 flex items-center justify-between">
+    <div class="bg-white border-b px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-bold text-gray-900">Admin — Terenuri</h1>
             <p class="text-sm text-gray-500">Aprobă sau respinge propunerile de terenuri</p>
@@ -34,7 +34,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="px-6 py-4 flex gap-2 flex-wrap">
+    <div class="px-4 sm:px-6 py-4 flex gap-2 flex-wrap">
         <button onclick="filterTeren('all')" class="t-filter active px-3 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-gray-900 text-white" data-st="all">Toate</button>
         <button onclick="filterTeren('pending')" class="t-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="pending">⏳ În așteptare</button>
         <button onclick="filterTeren('approved')" class="t-filter px-3 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400" data-st="approved">✅ Aprobate</button>
@@ -42,9 +42,9 @@
     </div>
 
     <!-- Table -->
-    <div class="px-6">
-        <div class="bg-white rounded-xl border overflow-hidden">
-            <table class="w-full text-sm">
+    <div class="px-4 sm:px-6 pb-10">
+        <div class="bg-white rounded-xl border overflow-x-auto">
+            <table class="w-full text-sm min-w-[900px]">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Teren</th>

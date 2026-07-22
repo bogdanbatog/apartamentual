@@ -325,6 +325,9 @@
             .charts-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .admin-main { padding: 1rem; }
+            /* Tabelele nu mai sunt taiate pe ecran mic: se pot derula orizontal */
+            .table-card { padding: 1rem; overflow-x: auto; }
+            .admin-table { min-width: 560px; }
         }
     </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
