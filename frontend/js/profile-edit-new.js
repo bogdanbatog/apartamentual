@@ -19,14 +19,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function initEditPage() {
     try {
-        // Check authentication
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        // Check authentication.
+        // ATENȚIE: aici aterizează omul după ce dă click pe „confirmă emailul"
+        // (register.js trimite linkul spre /profile-edit-new.html?welcome=1).
+        // Înainte, dacă nu exista sesiune, pagina făcea redirect MUT către
+        // homepage — omul rămânea cu profilul gol fără să înțeleagă de ce.
+        // Acum așteptăm sesiunea și, dacă tot nu vine, explicăm ce s-a întâmplat.
+        const user = await resolveUserOnArrival();
+
         if (!user) {
-            window.location.href = '/index.html';
+            renderArrivalProblem();
             return;
         }
-        
+
         currentUser = user;
         
         // Get profile ID from URL
@@ -57,6 +62,183 @@ async function initEditPage() {
     } catch (error) {
         console.error('Init error:', error);
         alert('A apărut o eroare la încărcarea paginii');
+    }
+}
+
+// =====================================================
+// ATERIZARE DIN LINKUL DE CONFIRMARE A EMAILULUI
+// =====================================================
+// Linkul din emailul de confirmare aduce tokenul în hash-ul URL-ului, iar
+// SDK-ul Supabase îl consumă ASINCRON. Un getUser() apelat imediat poate
+// întoarce null chiar și pentru un link perfect valid. În plus, linkul poate
+// fi deja consumat (scanere de email / al doilea click) sau expirat — caz în
+// care Supabase ne trimite înapoi cu #error=... în URL.
+
+// Are URL-ul un „bagaj" de autentificare (token sau eroare) de la Supabase?
+function hasAuthPayloadInUrl() {
+    const blob = (window.location.hash || '') + (window.location.search || '');
+    return /access_token=|refresh_token=|error_code=|[?&#]error=|[?&]code=/.test(blob);
+}
+
+// Citește eroarea pe care o pune Supabase în URL când linkul nu mai e valid.
+function getAuthErrorFromUrl() {
+    const fromHash = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+    const fromQuery = new URLSearchParams(window.location.search || '');
+    const code = fromHash.get('error_code') || fromQuery.get('error_code');
+    const err = fromHash.get('error') || fromQuery.get('error');
+    if (!code && !err) return null;
+    return { error: err, code: code };
+}
+
+// Întoarce utilizatorul dacă există sesiune. Dacă venim dintr-un link de email,
+// mai așteptăm până la 2 secunde evenimentul de autentificare, în loc să
+// decidem din prima că omul nu e logat.
+async function resolveUserOnArrival() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) return user;
+
+    // getUser() întreabă serverul. La un semnal prost poate întoarce null deși
+    // omul E logat — verificăm și sesiunea locală înainte să-l declarăm nelogat,
+    // ca să nu-i cerem degeaba autentificare cuiva care are deja cont deschis.
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && session.user) return session.user;
+
+    const isWelcome = new URLSearchParams(window.location.search).get('welcome') === '1';
+    if (!isWelcome && !hasAuthPayloadInUrl()) return null;   // navigare normală, fără sesiune
+    if (getAuthErrorFromUrl()) return null;                   // Supabase ne-a spus deja că linkul e mort
+
+    return await new Promise((resolve) => {
+        let settled = false;
+        let subscription = null;
+        let timer = null;
+        const finish = (u) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            try { if (subscription) subscription.unsubscribe(); } catch (e) {}
+            resolve(u || null);
+        };
+
+        const { data } = supabase.auth.onAuthStateChange((event, session) => {
+            if (session && session.user) finish(session.user);
+        });
+        subscription = data && data.subscription;
+
+        // Plasă de siguranță: dacă evenimentul nu vine, mai verificăm o dată.
+        timer = setTimeout(async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                finish(session && session.user);
+            } catch (e) {
+                finish(null);
+            }
+        }, 2000);
+    });
+}
+
+// În loc de redirect mut către homepage: explicăm ce s-a întâmplat și dăm
+// omului cele două ieșiri utile — retrimiterea emailului sau autentificarea.
+function renderArrivalProblem() {
+    const isWelcome = new URLSearchParams(window.location.search).get('welcome') === '1';
+    const authError = getAuthErrorFromUrl();
+    const cameFromEmail = isWelcome || !!authError || hasAuthPayloadInUrl();
+
+    // Semnalăm în Plausible că cineva s-a pierdut exact aici (dacă e configurat).
+    try {
+        if (typeof plausible === 'function') {
+            plausible(cameFromEmail ? 'Confirmare link esuat' : 'Profil fara sesiune');
+        }
+    } catch (e) {}
+
+    const container = document.querySelector('main .container') || document.body;
+    Array.from(container.children).forEach(el => { el.style.display = 'none'; });
+
+    const card = document.createElement('div');
+    card.id = 'arrival-problem';
+    card.className = 'bg-white border border-gray-200 rounded-xl p-6 sm:p-8 shadow-sm';
+
+    if (!cameFromEmail) {
+        // Cineva a deschis direct pagina de editare, fără să fie logat.
+        card.innerHTML = `
+            <h1 class="text-xl font-semibold mb-2">Trebuie să fii autentificat</h1>
+            <p class="text-gray-600 mb-6">Ca să-ți editezi profilul, conectează-te la contul tău.</p>
+            <div class="flex flex-wrap gap-3">
+                <button type="button" id="arrival-login" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg hover:bg-black transition font-medium">Autentifică-te</button>
+                <a href="/index.html" class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition">Mergi pe pagina principală</a>
+            </div>`;
+    } else {
+        card.innerHTML = `
+            <h1 class="text-xl font-semibold mb-2">Linkul de confirmare nu a mai funcționat</h1>
+            <p class="text-gray-600 mb-4">
+                Contul tău există, dar linkul din email fie a expirat, fie fusese deja folosit.
+                Se întâmplă des: unele servicii de email deschid automat linkurile din mesaje,
+                înainte să apuci tu să dai click.
+            </p>
+            <p class="text-gray-600 mb-6">
+                Îți trimitem altul acum — apoi te întorci aici și îți completezi profilul,
+                ca să te poată găsi vecinii și grupurile potrivite.
+            </p>
+            <label for="arrival-email" class="block text-sm font-medium text-gray-700 mb-1">Adresa ta de email</label>
+            <input type="email" id="arrival-email" autocomplete="email" placeholder="nume@exemplu.ro"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-gray-900">
+            <div class="flex flex-wrap gap-3">
+                <button type="button" id="arrival-resend" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg hover:bg-black transition font-medium">Trimite-mi din nou emailul</button>
+                <button type="button" id="arrival-login" class="px-5 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition">Am confirmat deja — autentifică-mă</button>
+            </div>
+            <p id="arrival-msg" class="hidden mt-4 text-sm"></p>`;
+    }
+
+    container.appendChild(card);
+
+    const btnLogin = document.getElementById('arrival-login');
+    if (btnLogin) {
+        btnLogin.addEventListener('click', () => {
+            if (typeof window.openLoginModal === 'function') window.openLoginModal();
+            else window.location.href = '/index.html?login=1';
+        });
+    }
+
+    const btnResend = document.getElementById('arrival-resend');
+    if (btnResend) btnResend.addEventListener('click', resendConfirmationFromArrival);
+}
+
+async function resendConfirmationFromArrival() {
+    const input = document.getElementById('arrival-email');
+    const btn = document.getElementById('arrival-resend');
+    const msg = document.getElementById('arrival-msg');
+    const email = (input && input.value || '').trim();
+
+    const show = (text, ok) => {
+        if (!msg) return;
+        msg.textContent = text;
+        msg.className = 'mt-4 text-sm ' + (ok ? 'text-green-700' : 'text-red-600');
+        msg.classList.remove('hidden');
+    };
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        show('Scrie adresa de email cu care ți-ai făcut contul.', false);
+        return;
+    }
+
+    btn.disabled = true;
+    const originalLabel = btn.textContent;
+    btn.textContent = 'Se trimite...';
+
+    try {
+        await supabase.auth.resend({
+            type: 'signup',
+            email: email,
+            options: { emailRedirectTo: `${window.location.origin}/profile-edit-new.html?welcome=1` }
+        });
+        // Mesaj generic indiferent de rezultat — nu confirmăm public dacă
+        // adresa există în platformă (același principiu ca la resetarea parolei).
+        show('Gata. Dacă adresa are un cont neconfirmat, ți-am trimis un link nou. Verifică inbox-ul și folderele Spam/Promoții.', true);
+    } catch (e) {
+        console.error('Resend confirmation error:', e);
+        show('Nu am putut trimite emailul acum. Încearcă din nou în câteva minute sau scrie-ne la office@ltfbstudio.ro.', false);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalLabel;
     }
 }
 

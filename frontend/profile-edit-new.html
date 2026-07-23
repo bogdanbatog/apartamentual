@@ -431,9 +431,17 @@
             if (!sessionStorage.getItem('_welcomeNotifSent')) {
                 setTimeout(async () => {
                     try {
-                        const { data: { user } } = await sb.auth.getUser();
+                        // Aceeași problemă ca la gardul de autentificare: venind din
+                        // linkul de email, sesiunea nu e gata neapărat în 100ms, iar
+                        // un `getUser()` sec întorcea null → tipul de cont nu se mai
+                        // sincroniza din metadata în `profiles` (la agenții se pierdea
+                        // și statusul `pending`). Folosim aceeași așteptare ca în
+                        // js/profile-edit-new.js.
+                        const user = typeof resolveUserOnArrival === 'function'
+                            ? await resolveUserOnArrival()
+                            : (await sb.auth.getUser()).data.user;
                         if (!user) return;
-                        
+
                         // Read account_type from user metadata (set during signUp)
                         const metaAccountType = user.user_metadata?.account_type || 'activ';
                         const newStatus = metaAccountType === 'profesional' ? 'pending' : 'active';
