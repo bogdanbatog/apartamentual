@@ -731,13 +731,48 @@ async function handleSubmit(e) {
                         .in('user_id', memberIds);
                     
                     const emails = (memberProfiles || []).map(p => p.email).filter(Boolean);
-                    for (const email of emails) {
-                        notifyAdmins('group_updated', {
+
+                    // Un singur email per salvare, ca să nu inundăm membrii:
+                    //   - dacă linkul de WhatsApp e nou/schimbat → doar emailul
+                    //     cu linkul (cel mai util), care menționează și dacă s-au
+                    //     schimbat alte detalii ale grupului;
+                    //   - altfel → emailul obișnuit „Grup actualizat".
+                    const prevWhatsapp = (currentGroup.link_whatsapp || '').trim();
+                    const whatsappChanged = !!link_whatsapp && link_whatsapp !== prevWhatsapp;
+
+                    if (whatsappChanged) {
+                        // Au mai fost și alte modificări în aceeași salvare?
+                        const otherChanged =
+                            nume !== (currentGroup.nume || '') ||
+                            (descriere || '') !== (currentGroup.descriere || '') ||
+                            oras !== (currentGroup.oras || '') ||
+                            max_membri !== currentGroup.max_membri ||
+                            status !== currentGroup.status;
+
+                        const waPayload = {
                             group_name: nume,
                             group_id: groupId,
-                            updated_by: currentUser.email || 'admin',
-                            admin_email: email
-                        });
+                            whatsapp_link: link_whatsapp,
+                            admin_name: currentUser.email ? currentUser.email.split('@')[0] : 'Adminul grupului',
+                            is_update: prevWhatsapp !== '',
+                            also_updated: otherChanged
+                        };
+                        // Așteptăm trimiterea, ca redirect-ul de mai jos să nu
+                        // anuleze cererile aflate în zbor.
+                        await Promise.all(emails.map(email =>
+                            notifyAdmins('whatsapp_link_shared', { ...waPayload, admin_email: email })
+                        ));
+                        // Apel dedicat superadminului — fără admin_email
+                        await notifyAdmins('whatsapp_link_shared', waPayload);
+                    } else {
+                        for (const email of emails) {
+                            notifyAdmins('group_updated', {
+                                group_name: nume,
+                                group_id: groupId,
+                                updated_by: currentUser.email || 'admin',
+                                admin_email: email
+                            });
+                        }
                     }
                 }
             }

@@ -77,6 +77,10 @@ const SUPERADMIN_CC_IF_NO_RECIPIENT = new Set<string>([
   'member_rejected',
   'group_created',
   'group_updated',
+  // Linkul grupului de WhatsApp a fost salvat/schimbat de admin: frontendul
+  // trimite un email per membru activ (cu admin_email) + un apel dedicat
+  // superadminului (fără admin_email). Deci CC doar când lipsește recipientul.
+  'whatsapp_link_shared',
   'account_suspended',
   'account_deleted',
   'partner_application',
@@ -418,6 +422,56 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         ],
         ctaLink: groupLink,
         ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    // ─── Link WhatsApp de grup ─────────────────────────────────────────────
+    // Adminul a salvat (sau a schimbat) linkul conversației de WhatsApp a
+    // grupului. Emailul merge la fiecare membru activ, ca să se poată alătura.
+    case 'whatsapp_link_shared': {
+      const groupName = data.group_name || 'grupul tău'
+      const adminName = data.admin_name || 'Adminul grupului'
+      const rawLink = (data.whatsapp_link || '').toString().trim()
+      // Protecție minimă: punem în buton doar linkuri http(s), ca un
+      // „javascript:..." scris din greșeală în câmpul din admin să nu ajungă
+      // ca href în emailul membrilor.
+      const safeLink = /^https?:\/\//i.test(rawLink) ? rawLink : ''
+      const isUpdate = data.is_update === true
+      // Când linkul a fost salvat din pagina de editare a grupului odată cu alte
+      // modificări (nume, descriere, oraș, plafon, status), trimitem un SINGUR
+      // email — acesta — și menționăm aici că s-au schimbat și alte detalii.
+      const alsoUpdated = data.also_updated === true
+
+      const title = isUpdate
+        ? `💬 Link WhatsApp actualizat — grupul „${groupName}"`
+        : `💬 Grupul „${groupName}" are acum o conversație pe WhatsApp`
+      const body = isUpdate
+        ? `${adminName} a actualizat linkul conversației de WhatsApp pentru grupul „${groupName}": ${rawLink}`
+        : `${adminName} a adăugat o conversație de WhatsApp pentru grupul „${groupName}": ${rawLink}`
+      const html = buildEmailHtml({
+        headerEmoji: '💬',
+        headerTitle: isUpdate
+          ? 'Linkul de WhatsApp al grupului s-a schimbat'
+          : 'Grupul tău are acum o conversație pe WhatsApp',
+        bodyParagraphs: [
+          isUpdate
+            ? `<strong>${adminName}</strong> a actualizat linkul conversației de WhatsApp a grupului <strong style="color: #c2604a;">„${groupName}"</strong>. Linkul vechi s-ar putea să nu mai funcționeze — folosește-l pe cel de mai jos.`
+            : `<strong>${adminName}</strong> a deschis o conversație pe WhatsApp pentru grupul <strong style="color: #c2604a;">„${groupName}"</strong>, ca discuțiile de zi cu zi să fie mai simple.`,
+          'Apasă butonul de mai jos ca să intri în conversație:',
+          ...(alsoUpdated
+            ? ['<em>Notă: în aceeași salvare au fost actualizate și alte detalii ale grupului (nume, descriere, oraș, număr maxim de membri sau modul de alăturare). Le poți vedea pe pagina grupului.</em>']
+            : []),
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: 'Adăugat de', value: adminName },
+        ],
+        ctaLink: safeLink || groupLink,
+        ctaLabel: safeLink ? 'Intră în grupul de WhatsApp' : 'Vezi grupul pe platformă',
+        footerNote: safeLink
+          ? `Dacă butonul nu funcționează, copiază acest link în browser:<br><a href="${safeLink}" style="color: #c2604a; word-break: break-all;">${safeLink}</a><br><br>Linkul e pentru membrii grupului — te rugăm să nu îl distribui în afara lui. Îl găsești oricând și pe <a href="${groupLink}" style="color: #c2604a;">pagina grupului</a>.`
+          : `Linkul îl găsești pe <a href="${groupLink}" style="color: #c2604a;">pagina grupului</a>.`,
       })
       return { title, body, html }
     }

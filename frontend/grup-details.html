@@ -3580,23 +3580,68 @@ window.saveWhatsApp = async function() {
     if (!isAdmin || !currentGroup) return;
     
     const link = document.getElementById('whatsappInput').value.trim();
-    
+    const previousLink = (currentGroup.link_whatsapp || '').trim();
+
     try {
         const { error } = await sb
             .from('grupuri')
             .update({ link_whatsapp: link || null, updated_at: new Date().toISOString() })
             .eq('id', currentGroup.id);
-        
+
         if (error) throw error;
-        
+
+        // Anunțăm membrii DOAR dacă linkul chiar s-a schimbat și nu e gol.
+        // Re-salvarea aceleiași valori sau ștergerea linkului nu trimit email.
+        if (link && link !== previousLink) {
+            await notifyMembersWhatsAppLink(link, previousLink !== '');
+        }
+
         showToast('Link salvat!', 'success');
         setTimeout(() => window.location.reload(), 1000);
-        
+
     } catch (e) {
         console.error('Save WhatsApp error:', e);
         showToast('Eroare la salvare.', 'error');
     }
 };
+
+// Trimite un email fiecărui membru activ (mai puțin adminului care a salvat)
+// când linkul grupului de WhatsApp e adăugat sau schimbat, plus un apel dedicat
+// pentru superadmin (fără admin_email → CC o singură dată din edge function).
+// Același pattern de broadcast ca member_joined / group_updated.
+async function notifyMembersWhatsAppLink(link, isUpdate) {
+    try {
+        const adminName =
+            (currentUserProfile && currentUserProfile.pseudonym && currentUserProfile.pseudonym.trim())
+            || (currentUser.email ? currentUser.email.split('@')[0] : '')
+            || 'Adminul grupului';
+
+        // `members` conține deja doar membrii activi, cu profilul atașat și fără
+        // conturile șterse. Excludem adminul care tocmai a salvat linkul.
+        const emails = members
+            .filter(m => m.user_id !== currentUser.id)
+            .map(m => m.profile && m.profile.email)
+            .filter(Boolean);
+
+        const payload = {
+            group_name: currentGroup.nume,
+            group_id: currentGroup.id,
+            whatsapp_link: link,
+            admin_name: adminName,
+            is_update: isUpdate
+        };
+
+        // Broadcast per membru (admin_email setat → fără CC la superadmin)
+        await Promise.all(emails.map(email =>
+            notifyAdmins('whatsapp_link_shared', { ...payload, admin_email: email })
+        ));
+        // Apel dedicat superadminului — fără admin_email
+        await notifyAdmins('whatsapp_link_shared', payload);
+
+    } catch (e) {
+        console.warn('WhatsApp link notify failed:', e);
+    }
+}
 
 // ── HELPERS ──
 function showError() {
