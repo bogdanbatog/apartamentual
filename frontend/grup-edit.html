@@ -503,7 +503,7 @@ const DOM = {
     toastContainer: document.getElementById('toastContainer'),
 };
 
-let currentUser = null, selectedZones = [], selectedTags = [], allTags = [], groupId = null, currentGroup = null;
+let currentUser = null, selectedZones = [], selectedTags = [], allTags = [], groupId = null, currentGroup = null, isSuperAdmin = false;
 let allZonesCache = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -520,6 +520,11 @@ async function checkAuth() {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { DOM.authRequired.style.display = 'block'; return; }
         currentUser = user;
+        // Aflăm dacă utilizatorul e superadmin (poate edita orice grup, nu doar al lui).
+        // Folosim aceeași verificare ca în restul platformei: profiles.is_super_admin === true.
+        const { data: prof } = await sb.from('profiles')
+            .select('is_super_admin').eq('user_id', user.id).single();
+        isSuperAdmin = prof && prof.is_super_admin === true;
         await loadGroupForEdit();
     } catch (e) { DOM.authRequired.style.display = 'block'; }
 }
@@ -533,8 +538,8 @@ async function loadGroupForEdit() {
             setTimeout(() => window.location.href = 'grupuri.html', 2000); 
             return; 
         }
-        if (group.admin_id !== currentUser.id) { 
-            showToast('Doar adminul poate edita.', 'error'); 
+        if (group.admin_id !== currentUser.id && !isSuperAdmin) {
+            showToast('Doar adminul poate edita.', 'error');
             setTimeout(() => window.location.href = `grup-details.html?id=${groupId}`, 2000); 
             return; 
         }
