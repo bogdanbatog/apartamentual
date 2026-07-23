@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setează o parolă nouă — ApartamenTUal</title>
+    <meta name="robots" content="noindex">
+    <!-- Capturăm sincron, ÎNAINTE ca SDK-ul să curețe hash-ul, dacă venim dintr-un
+         link de recuperare (token în hash sau cod PKCE în query). -->
+    <script>
+        window.__hadRecovery = /type=recovery|access_token=|[?&]code=/.test(
+            window.location.hash + window.location.search
+        );
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #faf8f3;
+            color: #1f2937;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            max-width: 440px;
+            width: 100%;
+            padding: 2rem;
+        }
+        .brand {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            color: #1e293b;
+            letter-spacing: 0.2px;
+        }
+        .brand span { color: #c2604a; }
+        h1 { font-size: 1.25rem; margin: 0 0 0.5rem; }
+        p.sub { font-size: 0.9rem; color: #6b7280; margin: 0 0 1.5rem; line-height: 1.5; }
+        label { display: block; font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 0.3rem; }
+        input[type=password] {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        input:focus { outline: none; border-color: #c2604a; box-shadow: 0 0 0 3px rgba(194,96,74,0.12); }
+        button.primary {
+            width: 100%;
+            padding: 0.75rem;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        button.primary:disabled { opacity: 0.6; cursor: default; }
+        .msg { display: none; padding: 0.75rem; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.45; }
+        .msg.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .msg.ok { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .center { text-align: center; }
+        .link { color: #c2604a; text-decoration: none; font-weight: 500; }
+        .link:hover { text-decoration: underline; }
+        .hint { font-size: 0.8rem; color: #9ca3af; margin-top: 0.25rem; }
+        #state-loading, #state-invalid, #state-success { display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">apartamen<span>TU</span>al</div>
+
+        <!-- Se verifică linkul -->
+        <div id="state-loading" class="center">
+            <p class="sub">Se verifică linkul de resetare…</p>
+        </div>
+
+        <!-- Formular parolă nouă -->
+        <div id="state-form">
+            <h1>Setează o parolă nouă</h1>
+            <p class="sub">Alege o parolă nouă pentru contul tău. Minim 8 caractere.</p>
+
+            <div id="msg" class="msg"></div>
+
+            <label for="pw1">Parolă nouă</label>
+            <input type="password" id="pw1" placeholder="Parola nouă" autocomplete="new-password">
+
+            <label for="pw2">Confirmă parola</label>
+            <input type="password" id="pw2" placeholder="Repetă parola" autocomplete="new-password">
+
+            <button class="primary" id="btn-save">Salvează parola</button>
+        </div>
+
+        <!-- Link invalid / expirat -->
+        <div id="state-invalid" class="center">
+            <h1>Link invalid sau expirat</h1>
+            <p class="sub">Linkul de resetare nu mai este valid (poate a expirat sau a fost deja folosit). Cere unul nou din fereastra de autentificare.</p>
+            <a class="link" href="/?login=1">Înapoi la autentificare</a>
+        </div>
+
+        <!-- Succes -->
+        <div id="state-success" class="center">
+            <h1>Parolă schimbată ✓</h1>
+            <p class="sub">Parola ta a fost actualizată. Te ducem la pagina principală…</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var elLoading = document.getElementById('state-loading');
+        var elForm    = document.getElementById('state-form');
+        var elInvalid = document.getElementById('state-invalid');
+        var elSuccess = document.getElementById('state-success');
+        var msg       = document.getElementById('msg');
+        var btn       = document.getElementById('btn-save');
+
+        var recoveryReady = false;
+
+        function show(el) {
+            [elLoading, elForm, elInvalid, elSuccess].forEach(function (e) { e.style.display = 'none'; });
+            el.style.display = 'block';
+        }
+        function showMsg(text, kind) {
+            msg.textContent = text;
+            msg.className = 'msg ' + (kind === 'ok' ? 'ok' : 'error');
+            msg.style.display = 'block';
+        }
+
+        // Pornim în starea „se verifică linkul".
+        show(elLoading);
+
+        // Sesiunea de recuperare se stabilește automat din URL (detectSessionInUrl).
+        // Ascultăm evenimentul PASSWORD_RECOVERY (sau SIGNED_IN dacă am venit din
+        // link) și abia atunci arătăm formularul.
+        sb.auth.onAuthStateChange(function (event) {
+            if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && window.__hadRecovery)) {
+                recoveryReady = true;
+                show(elForm);
+                setTimeout(function () { document.getElementById('pw1').focus(); }, 100);
+            }
+        });
+
+        // Plasă de siguranță: dacă evenimentul a apărut înainte să atașăm listener-ul,
+        // verificăm direct sesiunea. Dacă am venit dintr-un link valid și există
+        // sesiune → formular; altfel → link invalid.
+        window.addEventListener('load', function () {
+            setTimeout(async function () {
+                if (recoveryReady) return;
+                try {
+                    var res = await sb.auth.getSession();
+                    if (window.__hadRecovery && res.data && res.data.session) {
+                        recoveryReady = true;
+                        show(elForm);
+                        setTimeout(function () { document.getElementById('pw1').focus(); }, 100);
+                    } else {
+                        show(elInvalid);
+                    }
+                } catch (e) {
+                    show(elInvalid);
+                }
+            }, 1500);
+        });
+
+        async function saveNewPassword() {
+            var pw1 = document.getElementById('pw1').value;
+            var pw2 = document.getElementById('pw2').value;
+
+            if (!pw1 || pw1.length < 8) {
+                showMsg('Parola trebuie să aibă cel puțin 8 caractere.', 'error');
+                return;
+            }
+            if (pw1 !== pw2) {
+                showMsg('Cele două parole nu coincid.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Se salvează…';
+            msg.style.display = 'none';
+
+            try {
+                var result = await sb.auth.updateUser({ password: pw1 });
+                if (result.error) {
+                    showMsg('Nu am putut schimba parola: ' + result.error.message, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Salvează parola';
+                    return;
+                }
+                show(elSuccess);
+                setTimeout(function () { window.location.href = '/'; }, 2200);
+            } catch (e) {
+                showMsg('Eroare: ' + e.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Salvează parola';
+            }
+        }
+
+        btn.addEventListener('click', saveNewPassword);
+        ['pw1', 'pw2'].forEach(function (id) {
+            document.getElementById(id).addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') saveNewPassword();
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

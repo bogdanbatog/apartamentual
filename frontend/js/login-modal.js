@@ -33,8 +33,12 @@
                     <button id="lm-submit" style="width:100%; padding:0.75rem; background:#1e293b; color:white; border:none; border-radius:0.5rem; font-size:1rem; font-weight:500; cursor:pointer;">
                         Autentificare
                     </button>
-                    
-                    <p style="text-align:center; font-size:0.875rem; color:#6b7280; margin-top:1rem;">
+
+                    <p style="text-align:center; font-size:0.8125rem; margin-top:0.75rem;">
+                        <a href="#" id="lm-forgot" style="color:#6b7280; text-decoration:underline;">Ai uitat parola?</a>
+                    </p>
+
+                    <p style="text-align:center; font-size:0.875rem; color:#6b7280; margin-top:0.5rem;">
                         Nu ai cont? <a href="/register.html" style="color:#2563eb; text-decoration:none;">Creează unul nou</a>
                     </p>
                 </div>
@@ -57,6 +61,9 @@
         
         // Submit handler
         document.getElementById('lm-submit').addEventListener('click', handleLogin);
+
+        // Forgot-password handler
+        document.getElementById('lm-forgot').addEventListener('click', handleForgotPassword);
         
         // Enter key
         ['lm-email', 'lm-password'].forEach(function(id) {
@@ -132,6 +139,30 @@
         }
     }
     
+    async function handleForgotPassword(e) {
+        if (e) e.preventDefault();
+        var email = document.getElementById('lm-email').value.trim();
+        var msg = document.getElementById('lm-message');
+
+        if (!email) {
+            msg.textContent = 'Scrie întâi adresa de email, apoi apasă „Ai uitat parola?".';
+            msg.style.cssText = 'display:block; padding:0.75rem; border-radius:0.5rem; font-size:0.875rem; margin-bottom:1rem; background:#fef2f2; color:#991b1b; border:1px solid #fecaca;';
+            document.getElementById('lm-email').focus();
+            return;
+        }
+
+        try {
+            var redirectTo = window.location.origin + '/reset-parola.html';
+            await sb.auth.resetPasswordForEmail(email, { redirectTo: redirectTo });
+            // Mesaj generic (nu dezvăluim dacă emailul există — anti-enumerare).
+            msg.textContent = 'Dacă există un cont cu acest email, ți-am trimis un link de resetare. Verifică inbox-ul (și folderele Spam/Promoții).';
+            msg.style.cssText = 'display:block; padding:0.75rem; border-radius:0.5rem; font-size:0.875rem; margin-bottom:1rem; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;';
+        } catch (err) {
+            msg.textContent = 'Eroare la trimiterea emailului. Încearcă din nou.';
+            msg.style.cssText = 'display:block; padding:0.75rem; border-radius:0.5rem; font-size:0.875rem; margin-bottom:1rem; background:#fef2f2; color:#991b1b; border:1px solid #fecaca;';
+        }
+    }
+
     // Make functions globally available
     window.openLoginModal = openLoginModal;
     window.closeLoginModal = closeLoginModal;
