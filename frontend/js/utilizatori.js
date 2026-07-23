@@ -295,10 +295,19 @@ function applyFilters() {
     
     let filtered = [...allUsers];
     
-    // Filter by city (through zones)
+    // Filter by city: userul are cel puțin o zonă care aparține orașului ales,
+    // folosind maparea oraș→zone (ORASE_CARTIERE). Înainte se compara GREȘIT
+    // numele zonei cu numele orașului prin includes(), așa că treceau doar userii
+    // cu o zonă al cărei nume conținea orașul (ex. „București Noi") — restul,
+    // deși evident din oraș, erau ascunși.
     if (filters.oras) {
-        filtered = filtered.filter(user => 
-            user.zones.some(z => z.name && z.name.toLowerCase().includes(filters.oras.toLowerCase()))
+        const zoneleOrasului = new Set(
+            (typeof ORASE_CARTIERE !== 'undefined' && Array.isArray(ORASE_CARTIERE[filters.oras]))
+                ? ORASE_CARTIERE[filters.oras]
+                : []
+        );
+        filtered = filtered.filter(user =>
+            user.zones.some(z => z.name && zoneleOrasului.has(z.name))
         );
     }
     
