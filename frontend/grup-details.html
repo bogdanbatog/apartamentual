@@ -2447,7 +2447,27 @@ window.approveRequest = async function(memberId, userName, userEmail) {
             setTimeout(() => window.location.reload(), 800);
             return;
         }
-        
+
+        // Gardă de plafon: nu aproba peste numărul maxim de membri (max_membri).
+        // Numărăm membrii activi curenți; dacă s-a atins deja maximul, blocăm
+        // aprobarea și îi spunem adminului să mărească plafonul din editare.
+        const maxMembri = currentGroup.max_membri || 0;
+        const { count: activeCount } = await sb
+            .from('grup_membri')
+            .select('id', { count: 'exact', head: true })
+            .eq('grup_id', currentGroup.id)
+            .eq('status', 'activ');
+
+        if (maxMembri && activeCount !== null && activeCount >= maxMembri) {
+            showToast(`Grupul a atins numărul maxim de membri (${maxMembri}). Mărește plafonul din „Editează grupul" dacă vrei să aprobi mai mulți.`, 'error');
+            // Restaurăm cererea în listă (a fost scoasă optimist mai sus).
+            if (originalRequest) {
+                pendingRequests.splice(requestIndex, 0, originalRequest);
+                renderPendingRequests();
+            }
+            return;
+        }
+
         // Update the row only when it is still pending. The .eq('status', 'pending')
         // filter makes the update conditional at the database level.
         const { data: updatedRows, error } = await sb
@@ -2465,7 +2485,28 @@ window.approveRequest = async function(memberId, userName, userEmail) {
             setTimeout(() => window.location.reload(), 800);
             return;
         }
-        
+
+        // Dacă această aprobare a dus grupul EXACT la plafon, anunțăm adminul
+        // grupului (+ superadmin în CC, setat în edge function) că s-a atins
+        // numărul maxim de membri. activeCount = nr. dinainte de aprobare.
+        if (maxMembri && (activeCount + 1) >= maxMembri && typeof notifyAdmins === 'function') {
+            try {
+                const { data: adminProf } = await sb
+                    .from('profiles')
+                    .select('email')
+                    .eq('user_id', currentGroup.admin_id)
+                    .single();
+                if (adminProf && adminProf.email) {
+                    notifyAdmins('group_full', {
+                        group_name: currentGroup.name || currentGroup.nume || 'Grup',
+                        group_id: currentGroup.id,
+                        max_membri: maxMembri,
+                        admin_email: adminProf.email
+                    });
+                }
+            } catch (e) { console.warn('group_full notify failed:', e); }
+        }
+
         // Notification flow for member_approved:
         //   1. Confirmation email TO the approved user (member_approved event).
         //   2. "X joined the group" broadcast TO every other active group member

@@ -56,6 +56,10 @@ const SUPERADMIN_CC_ALWAYS = new Set<string>([
   // but still need superadmin visibility.
   'new_user',
   'account_reactivated',
+  // Grupul a atins numărul maxim de membri: emailul merge la adminul grupului
+  // (admin_email), dar superadminul vrea să știe de fiecare dată când un grup
+  // s-a umplut. Deci CC mereu.
+  'group_full',
 ])
 
 // Events that CC the superadmin ONLY if the frontend did not specify a recipient.
@@ -389,6 +393,28 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Nou membru', value: userName },
           { label: 'Email', value: data.user_email || 'N/A' },
           { label: 'Grup', value: groupName },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Vezi grupul',
+      })
+      return { title, body, html }
+    }
+
+    case 'group_full': {
+      const groupName = data.group_name || data.grup_nume || 'un grup'
+      const maxM = data.max_membri || data.max || 'maximul stabilit'
+      const title = `👥 Grupul „${groupName}" a atins numărul maxim de membri`
+      const body = `Grupul „${groupName}" a atins numărul maxim de membri (${maxM}). Noi cereri nu mai pot fi aprobate până nu mărești plafonul din editarea grupului.`
+      const html = buildEmailHtml({
+        headerEmoji: '👥',
+        headerTitle: 'Grupul a atins numărul maxim de membri',
+        bodyParagraphs: [
+          `Grupul <strong style="color: #c2604a;">„${groupName}"</strong> a atins numărul maxim de membri (<strong>${maxM}</strong>).`,
+          'Nu mai poți aproba cereri noi până nu mărești plafonul. Dacă vrei mai mulți membri, deschide grupul, apasă „Editează" și crește numărul maxim de membri.',
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: 'Număr maxim', value: String(maxM) },
         ],
         ctaLink: groupLink,
         ctaLabel: 'Vezi grupul',
