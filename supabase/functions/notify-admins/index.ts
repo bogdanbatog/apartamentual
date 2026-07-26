@@ -951,6 +951,10 @@ async function logNotification(row: {
   subject: string | null
   status: string
   payload: unknown
+  // Textul erorii, când statusul e 'error'. Fără el, o notificare picată apărea
+  // în admin doar ca „Eroare", fără niciun indiciu despre cauză — pe 26.07.2026
+  // au picat 18 emailuri și motivul a trebuit dedus din tiparul orelor.
+  error?: string | null
 }): Promise<void> {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -971,6 +975,91 @@ async function logNotification(row: {
     // Non-fatal — nu blocăm notificarea dacă logarea eșuează
     console.error('notification_log insert failed (non-fatal):', err)
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Trimiterea emailului, cu reîncercare când Resend ne refuză temporar
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// De ce e nevoie: broadcasturile (member_joined, group_updated,
+// whatsapp_link_shared) pornesc din frontend câte un apel per membru, toate
+// în aceeași milisecundă. Fiecare apel e o invocare separată a funcției, deci
+// un POST separat la Resend. La un grup de 15 oameni înseamnă 15 cereri
+// simultane, iar Resend respinge surplusul cu 429 („prea multe cereri").
+// Pe 26.07.2026 s-au pierdut astfel 18 emailuri într-o singură minută, printre
+// care și confirmarea de aprobare a unui membru.
+//
+// Soluția: reîncercăm de câteva ori, cu pauză crescătoare plus o componentă
+// aleatoare. Aleatorul e esențial — fără el, toate invocările paralele ar
+// reveni fix în același moment și s-ar lovi de aceeași limită.
+
+const EMAIL_MAX_ATTEMPTS = 4
+const EMAIL_BASE_DELAY_MS = 400
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// Pauză crescătoare: ~0,4s, ~0,8s, ~1,6s, fiecare cu până la 300ms aleator.
+function backoffDelay(attempt: number): number {
+  return EMAIL_BASE_DELAY_MS * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 300)
+}
+
+interface EmailSendResult {
+  ok: boolean
+  error?: string
+  attempts: number
+}
+
+async function sendEmailWithRetry(apiKey: string, body: unknown): Promise<EmailSendResult> {
+  let lastError = 'unknown error'
+  let attempt = 0
+
+  while (attempt < EMAIL_MAX_ATTEMPTS) {
+    attempt++
+
+    let response: Response
+    try {
+      response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+    } catch (err) {
+      // Rețeaua a căzut sub noi — merită reîncercat.
+      lastError = `network error: ${err instanceof Error ? err.message : String(err)}`
+      if (attempt >= EMAIL_MAX_ATTEMPTS) break
+      await sleep(backoffDelay(attempt))
+      continue
+    }
+
+    if (response.ok) {
+      return { ok: true, attempts: attempt }
+    }
+
+    const errText = await response.text()
+    lastError = `HTTP ${response.status}: ${errText}`
+
+    // Reîncercăm DOAR ce are șanse să meargă a doua oară: 429 (limită de rată)
+    // și erorile de server. O adresă invalidă sau o cheie greșită (restul de
+    // 4xx) va eșua identic de fiecare dată — nu are rost să insistăm.
+    const isRetriable = response.status === 429 || response.status >= 500
+    if (!isRetriable || attempt >= EMAIL_MAX_ATTEMPTS) break
+
+    // Dacă Resend ne spune explicit cât să așteptăm, îl ascultăm.
+    const retryAfterHeader = Number(response.headers.get('retry-after'))
+    const waitMs = Number.isFinite(retryAfterHeader) && retryAfterHeader > 0
+      ? retryAfterHeader * 1000
+      : backoffDelay(attempt)
+
+    console.log(`Resend ${response.status} — reîncerc peste ${waitMs}ms (încercarea ${attempt}/${EMAIL_MAX_ATTEMPTS})`)
+    await sleep(waitMs)
+  }
+
+  return { ok: false, error: lastError, attempts: attempt }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1060,6 +1149,7 @@ serve(async (req) => {
         subject: message.title,
         status: results.slack ? 'sent' : 'error',
         payload: payload.data,
+        error: results.slack ? null : (results.error || 'unknown error').substring(0, 1000),
       })
     }
 
@@ -1108,29 +1198,27 @@ serve(async (req) => {
                 <p><small>Time: ${new Date().toISOString()}</small></p>
               `
           
-          const emailResponse = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${emailApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: 'apartamentual@ltfbstudio.ro',
-              to: recipients,
-              subject: message.title,
-              html: emailHtml
-            })
+          const sendResult = await sendEmailWithRetry(emailApiKey, {
+            from: 'apartamentual@ltfbstudio.ro',
+            to: recipients,
+            subject: message.title,
+            html: emailHtml
           })
-          
-          if (emailResponse.ok) {
+
+          if (sendResult.ok) {
             results.email = true
             results.recipients = recipients
+            if (sendResult.attempts > 1) {
+              console.log(`Email trimis din a ${sendResult.attempts}-a încercare către ${recipients.join(', ')}`)
+            }
           } else {
-            const errText = await emailResponse.text()
+            const errText = sendResult.error || 'unknown error'
             results.error = results.error ? `${results.error}; Email error: ${errText}` : `Email error: ${errText}`
           }
 
-          // Înregistrează încercarea de email în notification_log (best-effort)
+          // Înregistrează încercarea de email în notification_log (best-effort).
+          // Pe eroare salvăm și textul întors de Resend plus numărul de
+          // încercări, ca să nu mai fie nevoie de arheologie prin ore.
           await logNotification({
             event_type: payload.event_type,
             channel: 'email',
@@ -1138,6 +1226,9 @@ serve(async (req) => {
             subject: message.title,
             status: results.email ? 'sent' : 'error',
             payload: payload.data,
+            error: results.email
+              ? null
+              : `[${sendResult.attempts} încercări] ${sendResult.error || 'unknown error'}`.substring(0, 1000),
           })
         }
       } catch (error) {

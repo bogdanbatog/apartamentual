@@ -77,6 +77,16 @@
         'partner_application': '🤝 Parteneriat'
     };
 
+    // Textul erorii vine de la Resend, deci e text străin — îl escapăm înainte
+    // să-l punem în pagină, ca să nu poată injecta markup.
+    function escHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function escAttr(s) {
+        return escHtml(s).replace(/"/g, '&quot;');
+    }
+
     async function checkAdmin() {
         var { data: { user } } = await sb.auth.getUser();
         if (!user) { window.location.href = '/index.html'; return; }
@@ -105,9 +115,13 @@
             var channelBadge = l.channel === 'email'
                 ? '<span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">📧 Email</span>'
                 : '<span class="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">💬 Slack</span>';
+            // Pe eroare arătăm și motivul: prescurtat în tabel, complet la hover.
+            var errText = l.error || '';
+            var errShort = errText.length > 70 ? errText.substring(0, 70) + '…' : errText;
             var statusBadge = l.status === 'sent'
                 ? '<span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Trimis</span>'
-                : '<span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Eroare</span>';
+                : '<span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700" title="' + escAttr(errText) + '">Eroare</span>'
+                  + (errShort ? '<div class="text-[10px] text-red-500 mt-1 break-words" title="' + escAttr(errText) + '">' + escHtml(errShort) + '</div>' : '');
             var subject = (l.subject || '').substring(0, 60) + ((l.subject || '').length > 60 ? '...' : '');
 
             return '<tr class="border-t hover:bg-gray-50">' +
