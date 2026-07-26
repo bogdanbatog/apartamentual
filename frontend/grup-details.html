@@ -1287,6 +1287,30 @@ let canEditChecklist = false;
 let members = [];
 let pendingRequests = [];
 
+// ── REÎNCĂRCARE SIGURĂ A PAGINII ──
+// Aproape fiecare acțiune de pe pagină (aprobare, respingere, plecare, vot)
+// trimite emailuri prin `notifyAdmins` și apoi reîncarcă pagina. Reîncărcarea
+// anulează cererile care n-au apucat să plece → notificări pierdute complet,
+// fără urmă nici măcar în jurnal. `reloadPage()` amână reîncărcarea până se
+// termină tot ce e în zbor (logica stă în js/nav.js).
+// Adaptoarele de mai jos păstrează comportamentul vechi dacă nav.js lipsește.
+function beginOp() {
+    if (typeof window.beginSideEffect === 'function') window.beginSideEffect();
+}
+function endOp() {
+    if (typeof window.endSideEffect === 'function') window.endSideEffect();
+}
+function reloadPage(delay) {
+    if (typeof window.reloadWhenIdle === 'function') window.reloadWhenIdle(delay);
+    else setTimeout(function() { window.location.reload(); }, delay);
+}
+// Aceeași problemă la ieșirea din grup: plecarea către altă pagină anulează
+// emailurile „a plecat din grup" care n-au apucat să iasă.
+function navigatePage(url, delay) {
+    if (typeof window.navigateWhenIdle === 'function') window.navigateWhenIdle(url, delay);
+    else setTimeout(function() { window.location.href = url; }, delay);
+}
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
@@ -2363,7 +2387,7 @@ window.joinGroup = async function() {
         if (error) throw error;
         
         showToast('Te-ai alăturat grupului!', 'success');
-        setTimeout(() => window.location.reload(), 1000);
+        reloadPage(1000);
         
     } catch (e) {
         console.error('Join error:', e);
@@ -2404,7 +2428,7 @@ window.requestJoinGroup = async function() {
         } catch(e) { console.warn('Join request notify failed:', e); }
         
         showToast('Cererea ta a fost trimisă! Adminul grupului o va analiza.', 'success');
-        setTimeout(() => window.location.reload(), 1500);
+        reloadPage(1500);
         
     } catch (e) {
         console.error('Request join error:', e);
@@ -2424,7 +2448,11 @@ window.approveRequest = async function(memberId, userName, userEmail) {
         pendingRequests = pendingRequests.filter(r => r.id !== memberId);
         renderPendingRequests();
     }
-    
+
+    // Marcăm aprobarea ca operațiune în curs: dacă adminul aprobă mai multe
+    // cereri una după alta, reîncărcarea programată de prima nu mai are voie
+    // să taie notificările celorlalte (vezi reloadPage / nav.js).
+    beginOp();
     try {
         // Look up the approved user's user_id BEFORE updating, so we can
         // exclude them from the broadcast list later.
@@ -2444,7 +2472,7 @@ window.approveRequest = async function(memberId, userName, userEmail) {
             showToast('Cererea a fost deja procesată.', 'info');
             // Already removed from UI optimistically — just trigger a reload
             // so the page reflects whatever the real state is.
-            setTimeout(() => window.location.reload(), 800);
+            reloadPage(800);
             return;
         }
 
@@ -2482,9 +2510,14 @@ window.approveRequest = async function(memberId, userName, userEmail) {
         // If no rows were updated, another admin won the race. Skip notifications.
         if (!updatedRows || updatedRows.length === 0) {
             showToast('Cererea a fost deja procesată între timp.', 'info');
-            setTimeout(() => window.location.reload(), 800);
+            reloadPage(800);
             return;
         }
+
+        // Toate notificările acestei aprobări se adună aici și se AȘTEAPTĂ
+        // împreună, înainte de reîncărcarea paginii. `notifyAdmins` nu aruncă
+        // niciodată (are try/catch propriu), deci Promise.all nu poate cădea.
+        const notifications = [];
 
         // Dacă această aprobare a dus grupul EXACT la plafon, anunțăm adminul
         // grupului (+ superadmin în CC, setat în edge function) că s-a atins
@@ -2497,12 +2530,12 @@ window.approveRequest = async function(memberId, userName, userEmail) {
                     .eq('user_id', currentGroup.admin_id)
                     .single();
                 if (adminProf && adminProf.email) {
-                    notifyAdmins('group_full', {
+                    notifications.push(notifyAdmins('group_full', {
                         group_name: currentGroup.name || currentGroup.nume || 'Grup',
                         group_id: currentGroup.id,
                         max_membri: maxMembri,
                         admin_email: adminProf.email
-                    });
+                    }));
                 }
             } catch (e) { console.warn('group_full notify failed:', e); }
         }
@@ -2518,13 +2551,13 @@ window.approveRequest = async function(memberId, userName, userEmail) {
             //    `recipient_email` is the modern field; we use it (not admin_email)
             //    so the routing in the edge function works correctly.
             if (userEmail) {
-                notifyAdmins('member_approved', {
+                notifications.push(notifyAdmins('member_approved', {
                     group_name: currentGroup.name || currentGroup.nume || 'Grup',
                     group_id: currentGroup.id,
                     user_name: userName,
                     user_email: userEmail,
                     recipient_email: userEmail
-                });
+                }));
             }
             
             // 2. Broadcast to all other active members of the group.
@@ -2544,36 +2577,44 @@ window.approveRequest = async function(memberId, userName, userEmail) {
                         .in('user_id', memberIds);
                     const emails = (profs || []).map(p => p.email).filter(Boolean);
                     for (const email of emails) {
-                        notifyAdmins('member_joined', {
+                        notifications.push(notifyAdmins('member_joined', {
                             group_name: currentGroup.name || currentGroup.nume || 'Grup',
                             group_id: currentGroup.id,
                             user_name: userName,
                             user_email: userEmail,
                             admin_email: email
-                        });
+                        }));
                     }
                 }
                 // 3a. Dedicated superadmin call for member_joined.
-                notifyAdmins('member_joined', {
+                notifications.push(notifyAdmins('member_joined', {
                     group_name: currentGroup.name || currentGroup.nume || 'Grup',
                     group_id: currentGroup.id,
                     user_name: userName,
                     user_email: userEmail
-                });
+                }));
             } catch (e) { console.warn('Member joined broadcast failed:', e); }
-            
+
             // 3b. Dedicated superadmin call for member_approved (no recipient).
-            notifyAdmins('member_approved', {
+            notifications.push(notifyAdmins('member_approved', {
                 group_name: currentGroup.name || currentGroup.nume || 'Grup',
                 group_id: currentGroup.id,
                 user_name: userName,
                 user_email: userEmail
-            });
+            }));
         }
-        
+
+        // Confirmarea către admin apare imediat — aprobarea în sine s-a făcut
+        // deja în baza de date, emailurile sunt pasul următor.
         showToast(`${userName} a fost acceptat în grup!`, 'success');
-        setTimeout(() => window.location.reload(), 1000);
-        
+
+        // Așteptăm plecarea notificărilor ÎNAINTE de reîncărcare. Fără asta, o
+        // reîncărcare care prinde cererile în zbor le anulează și nu rămâne
+        // nicio urmă — nici email, nici rând în jurnal.
+        await Promise.all(notifications);
+
+        reloadPage(1000);
+
     } catch (e) {
         console.error('Approve error:', e);
         // Restore the request in the UI so the admin can try again.
@@ -2582,6 +2623,8 @@ window.approveRequest = async function(memberId, userName, userEmail) {
             renderPendingRequests();
         }
         showToast('Eroare la aprobare.', 'error');
+    } finally {
+        endOp();
     }
 };
 
@@ -2613,7 +2656,7 @@ window.rejectRequest = async function(memberId, userName, userEmail) {
         
         if (!deletedRows || deletedRows.length === 0) {
             showToast('Cererea a fost deja procesată.', 'info');
-            setTimeout(() => window.location.reload(), 800);
+            reloadPage(800);
             return;
         }
         
@@ -2640,7 +2683,7 @@ window.rejectRequest = async function(memberId, userName, userEmail) {
         }
         
         showToast(`Cererea lui ${userName} a fost respinsă.`, 'success');
-        setTimeout(() => window.location.reload(), 1000);
+        reloadPage(1000);
         
     } catch (e) {
         console.error('Reject error:', e);
@@ -2679,7 +2722,7 @@ window.leaveGroup = async function() {
                 await sb.from('grup_membri').delete().eq('grup_id', currentGroup.id);
                 await sb.from('grupuri').delete().eq('id', currentGroup.id);
                 showToast('Grupul a fost șters.', 'success');
-                setTimeout(() => window.location.href = 'grupuri.html', 1000);
+                navigatePage('grupuri.html', 1000);
             } catch (e) {
                 console.error('Delete group error:', e);
                 showToast('Eroare la ștergerea grupului.', 'error');
@@ -2764,7 +2807,7 @@ window.leaveGroup = async function() {
         } catch(e) { console.warn('Leave notify failed:', e); }
         
         showToast('Ai părăsit grupul.', 'success');
-        setTimeout(() => window.location.href = 'grupuri.html', 1000);
+        navigatePage('grupuri.html', 1000);
         
     } catch (e) {
         console.error('Leave error:', e);
@@ -2876,7 +2919,7 @@ window.confirmLeaveAsAdmin = async function() {
         if (modal) modal.remove();
         
         showToast('Admin transferat la ' + newAdminName + '. Ai părăsit grupul.', 'success');
-        setTimeout(() => window.location.href = 'grupuri.html', 1000);
+        navigatePage('grupuri.html', 1000);
         
     } catch (e) {
         console.error('Transfer admin error:', e);
@@ -3496,7 +3539,7 @@ window.acceptInvitationBanner = async function() {
         } catch(e) {}
         
         // Reload after a brief delay to refresh membership state, actions, etc.
-        setTimeout(() => window.location.reload(), 1200);
+        reloadPage(1200);
         
     } catch (e) {
         console.error('Accept invitation failed:', e);
@@ -3597,7 +3640,7 @@ window.saveWhatsApp = async function() {
         }
 
         showToast('Link salvat!', 'success');
-        setTimeout(() => window.location.reload(), 1000);
+        reloadPage(1000);
 
     } catch (e) {
         console.error('Save WhatsApp error:', e);
@@ -3974,7 +4017,7 @@ window.confirmKickVote = async function() {
         
         showToast('Votul de excludere a fost inițiat!', 'success');
         closeKickModal();
-        setTimeout(() => window.location.reload(), 1000);
+        reloadPage(1000);
         
     } catch (e) {
         console.error('Create kick vote error:', e);
@@ -4010,7 +4053,7 @@ window.castKickBallot = async function(voteId, voteYes) {
         // Check if vote should be resolved
         await checkAndResolveVote(voteId);
         
-        setTimeout(() => window.location.reload(), 1000);
+        reloadPage(1000);
         
     } catch (e) {
         console.error('Cast ballot error:', e);

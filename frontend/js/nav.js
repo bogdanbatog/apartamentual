@@ -5,15 +5,72 @@
 // ══════════════════════════════════════════════════════════════
 
 // Global notify helper - available on all pages
+//
+// ⚠️ De ce există contorul de mai jos:
+// Notificarea pleacă printr-un fetch către edge function. Dacă pagina se
+// reîncarcă (sau navighează) înainte ca acea cerere să ajungă la server,
+// browserul o anulează — iar notificarea dispare COMPLET, nici măcar ca
+// „Eroare" în jurnal, fiindcă jurnalul e scris de edge function, care nu mai e
+// apelată niciodată. Ca să nu se mai piardă nimic în tăcere, ținem socoteala
+// operațiunilor în zbor și oferim `reloadWhenIdle()`, care amână reîncărcarea
+// până se termină.
+window.__pendingSideEffects = 0;
+
+// De folosit și în jurul unei operațiuni mai lungi (ex: o aprobare care face
+// mai multe interogări înainte de a trimite emailurile), nu doar în jurul
+// notificărilor: altfel un reload programat de altă acțiune o poate tăia.
+window.beginSideEffect = function() {
+    window.__pendingSideEffects++;
+};
+
+window.endSideEffect = function() {
+    window.__pendingSideEffects = Math.max(0, window.__pendingSideEffects - 1);
+};
+
 window.notifyAdmins = async function(eventType, data) {
+    if (typeof sb === 'undefined' || !sb) return;
+    // Incrementarea e sincronă (înainte de primul `await`), deci contorul
+    // urcă imediat și pentru apelurile lansate fără `await`.
+    window.beginSideEffect();
     try {
-        if (typeof sb === 'undefined' || !sb) return;
         await sb.functions.invoke('notify-admins', {
             body: { event_type: eventType, ...data }
         });
     } catch (err) {
         console.warn('Notify failed:', err);
+    } finally {
+        window.endSideEffect();
     }
+};
+
+// Reîncarcă pagina după `delay` ms, dar numai după ce nu mai e nimic în zbor.
+// `maxWait` (implicit 8s) e plasa de siguranță: dacă o cerere rămâne agățată,
+// reîncărcăm oricum, ca pagina să nu rămână blocată pe date vechi.
+window.reloadWhenIdle = function(delay, maxWait) {
+    window.__navigateWhenIdle(null, delay, maxWait);
+};
+
+// Varianta pentru plecarea către altă pagină (ex: ieșirea din grup).
+window.navigateWhenIdle = function(url, delay, maxWait) {
+    window.__navigateWhenIdle(url, delay, maxWait);
+};
+
+window.__navigateWhenIdle = function(url, delay, maxWait) {
+    var wait = typeof delay === 'number' ? delay : 0;
+    var deadline = Date.now() + wait + (typeof maxWait === 'number' ? maxWait : 8000);
+    if (window.__reloadTimer) clearTimeout(window.__reloadTimer);
+    function go() {
+        if (url) window.location.href = url;
+        else window.location.reload();
+    }
+    function tick() {
+        if (window.__pendingSideEffects > 0 && Date.now() < deadline) {
+            window.__reloadTimer = setTimeout(tick, 250);
+            return;
+        }
+        go();
+    }
+    window.__reloadTimer = setTimeout(tick, wait);
 };
 
 (function() {
