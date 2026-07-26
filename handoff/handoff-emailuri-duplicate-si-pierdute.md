@@ -101,15 +101,44 @@ s-au aprobat doi membri aproape în același timp → ~30 cereri în 1,5 secunde
 **Rezervă onestă:** textul exact al erorii nu se salva nicăieri, deci „429" e o
 deducție din tipar, nu o citire directă. Exact asta a rezolvat fixul 3.
 
+**A doua rezervă, mai importantă:** cifra de 18 eșecuri e un **minim, nu un
+total**. Scrierea în `notification_log` e și ea best-effort (try/catch, fără
+reîncercare), deci sub aceeași încărcare poate să fi eșuat și ea în tăcere.
+Ce nu s-a logat nu apare nicăieri. Vezi problema 4.
+
 ### Cine a pierdut ceva
 
-- **cristianghita123@gmail.com** — nu a primit confirmarea propriei aprobări
-  („Membru aprobat"). **Retrimisă manual pe 26 iulie, ora 11:46** — status OK.
-- 5 membri nu au primit „Grup actualizat" (cristianghita123, ionutcosminlupu,
-  mihai.ppscu, timestreamer, sld.bogdan) — **NEretrimise**, considerate
-  neimportante.
-- ~8 membri nu au aflat că li s-au alăturat Robert și radulesc — **NEretrimise**.
-- Superadminul a ratat 2 notificări.
+În rafala de la 10:48 au fost aprobați **patru** oameni: radulesc, Robert,
+CristianH și cristian (gherasim).
+
+**Confirmările „Membru aprobat" către cei aprobați** — 3 din 4 au ajuns:
+
+| Aprobat | Confirmare |
+|---|---|
+| radulesc | trimisă |
+| Robert | trimisă |
+| cristian (gherasim) | trimisă |
+| CristianH (cristianghita123@gmail.com) | **eșuată** → retrimisă manual pe 26 iulie, 11:46, status OK |
+
+**Către superadmin — 4 încercări, 1 reușită:**
+
+| Notificare | Status |
+|---|---|
+| „radulesc s-a alăturat" | trimisă — **singura primită** |
+| „Robert s-a alăturat" | eșuată |
+| „Membru aprobat — radulesc" | eșuată |
+| „Membru aprobat — Robert" | eșuată |
+| orice despre CristianH | **nicio încercare în jurnal** |
+| orice despre gherasim | **nicio încercare în jurnal** |
+
+Confirmat de Lucian: a primit un singur email, cel despre radulesc.
+
+**Către ceilalți membri:** broadcastul „X s-a alăturat" a plecat doar despre
+Robert și radulesc — 26 emailuri, din care 10 eșuate. **NEretrimise.**
+
+**Alte pierderi:** 5 membri nu au primit „Grup actualizat" (cristianghita123,
+ionutcosminlupu, mihai.ppscu, timestreamer, sld.bogdan). **NEretrimise**,
+considerate neimportante.
 
 ### Ce s-a făcut — commit `284c6f6`
 
@@ -153,7 +182,46 @@ salvat niciodată, e pierdută definitiv.
 
 ---
 
+## Problema 4 — NEREZOLVATĂ: două aprobări din patru n-au declanșat nimic
+
+Descoperită la finalul sesiunii, când Lucian a observat că primise un singur
+email deși fuseseră aprobați patru oameni.
+
+Pentru aprobările lui **CristianH** și **cristian (gherasim)**, în jurnal există
+**doar** confirmarea personală către cel aprobat. Lipsește tot restul fluxului:
+broadcastul „X s-a alăturat" către ceilalți membri și ambele apeluri dedicate
+superadminului. Zero rânduri, nici măcar cu status „Eroare".
+
+Pentru radulesc și Robert, în schimb, fluxul complet apare în jurnal (parțial
+eșuat, dar apare).
+
+**Asta NU e limitarea de rată.** La limitare rămâne urmă în jurnal. Aici nu
+există nici măcar încercarea.
+
+Două explicații posibile, nedepartajabile din datele existente:
+
+1. Apelurile chiar nu s-au făcut — ceva a picat în JS după `notifyAdmins`-ul cu
+   confirmarea personală, iar restul blocului de notificare nu a mai rulat.
+2. Apelurile s-au făcut, dar nici jurnalizarea lor nu a reușit (best-effort,
+   fără reîncercare, sub aceeași încărcare).
+
+**Unde se caută:** `frontend/grup-details.html`, funcția de aprobare din jurul
+liniilor 2510–2572. Structura e: (1) `member_approved` către cel aprobat →
+(2) `try { fetch membri; loop member_joined; 3a superadmin member_joined }
+catch` → (3b) `member_approved` către superadmin. Punctul 3b e **în afara**
+try/catch-ului, deci în teorie ar fi trebuit să ruleze mereu. Faptul că lipsește
+sugerează că execuția s-a oprit înainte — de investigat cu atenție, nu în fugă.
+
+Reîncercarea din commit `284c6f6` **nu** acoperă cazul ăsta. Rezolvă doar
+notificările care ajung la Resend și sunt respinse.
+
+---
+
 ## Deschise pentru sesiuni viitoare
+
+**0. Problema 4 de mai sus** — cea mai importantă. Un flux de notificare care
+tace complet e mai grav decât unul care eșuează zgomotos: nu-ți dai seama că ai
+pierdut ceva.
 
 **1. Trimitere în lot la Resend (rădăcina problemei 2).** Reîncercarea tratează
 simptomul. Fixul corect: un singur apel către edge function cu lista de
