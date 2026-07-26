@@ -1,7 +1,7 @@
 # Handoff — emailuri duplicate la înregistrare + emailuri pierdute la Resend
 
 **Data:** 26 iulie 2026
-**Commits:** `9a00d07`, `284c6f6` (ambele pe `main`, împinse pe GitHub)
+**Commits:** `9a00d07`, `284c6f6`, `1743a56` (toate pe `main`, împinse pe GitHub)
 **Punct de plecare:** „utilizatorul petru.birgoveanu@gmail.com s-a înregistrat și
 am primit 2 mailuri în loc de unul — de ce?"
 
@@ -15,7 +15,7 @@ am primit 2 mailuri în loc de unul — de ce?"
 
 Ordinea contează (dacă apeși Deploy fără Update from Remote, se recopiază
 versiunea veche din clona de pe server — vezi `HANDOFF-2026-06-15-hero-roluri-bara.md`).
-Deployul publică ambele commit-uri deodată. După, Ctrl+F5 pe site.
+Deployul publică toate cele trei commit-uri deodată. După, Ctrl+F5 pe site.
 
 Restul e gata: SQL rulat, edge function deployat, email retrimis.
 
@@ -182,7 +182,7 @@ salvat niciodată, e pierdută definitiv.
 
 ---
 
-## Problema 4 — NEREZOLVATĂ: două aprobări din patru n-au declanșat nimic
+## Problema 4 — două aprobări din patru n-au declanșat nimic
 
 Descoperită la finalul sesiunii, când Lucian a observat că primise un singur
 email deși fuseseră aprobați patru oameni.
@@ -198,37 +198,88 @@ eșuat, dar apare).
 **Asta NU e limitarea de rată.** La limitare rămâne urmă în jurnal. Aici nu
 există nici măcar încercarea.
 
-Două explicații posibile, nedepartajabile din datele existente:
+### Cauza — reîncărcarea paginii taie cererile în zbor
 
-1. Apelurile chiar nu s-au făcut — ceva a picat în JS după `notifyAdmins`-ul cu
-   confirmarea personală, iar restul blocului de notificare nu a mai rulat.
-2. Apelurile s-au făcut, dar nici jurnalizarea lor nu a reușit (best-effort,
-   fără reîncercare, sub aceeași încărcare).
+`notifyAdmins` (`frontend/js/nav.js`) trimite o cerere de rețea către edge
+function, iar aprobarea o apela **fără `await`** — „lansează și uită". La final,
+aprobarea făcea `setTimeout(() => window.location.reload(), 1000)`.
 
-**Unde se caută:** `frontend/grup-details.html`, funcția de aprobare din jurul
-liniilor 2510–2572. Structura e: (1) `member_approved` către cel aprobat →
-(2) `try { fetch membri; loop member_joined; 3a superadmin member_joined }
-catch` → (3b) `member_approved` către superadmin. Punctul 3b e **în afara**
-try/catch-ului, deci în teorie ar fi trebuit să ruleze mereu. Faptul că lipsește
-sugerează că execuția s-a oprit înainte — de investigat cu atenție, nu în fugă.
+Când pagina se reîncarcă, browserul **anulează** cererile care n-au apucat să
+iasă. Ele nu ajung la edge function → edge function-ul nu rulează → **nu scrie
+nimic în `notification_log`**. De-aia lipsesc complet, nu apar nici măcar ca
+„Eroare": jurnalul e scris de funcția care n-a fost niciodată apelată.
 
-Reîncercarea din commit `284c6f6` **nu** acoperă cazul ăsta. Rezolvă doar
+**De ce exact CristianH și gherasim.** Confirmarea personală (pasul 1) pleacă
+imediat după update. Broadcastul și apelurile către superadmin (pașii 2–3) vin
+după încă **două** interogări la Supabase. Aprobând patru oameni unul după altul
+în ~o secundă, reîncărcarea programată de **prima** aprobare a căzut exact peste
+pașii 2–3 ai ultimelor două. Rămâne în jurnal doar pasul 1 — exact ce s-a văzut.
+
+**Cum s-a departajat de explicația „s-au făcut, dar nu s-au jurnalizat":**
+
+- Pasul 3b (`member_approved` către superadmin) e **în afara** oricărui
+  try/catch. Nicio eroare JS nu-l poate sări; singurul lucru care oprește
+  execuția în afara unui try/catch e plecarea de pe pagină.
+- Dacă apelurile s-ar fi făcut, Lucian ar fi primit patru emailuri de
+  superadmin, nu unul.
+- `grup-details.html` e **singura** pagină care emite `member_approved` /
+  `member_joined` — nu există altă cale de aprobare care să explice lipsa.
+- Precedent în propriul cod: pe 24 iulie, la linkul de WhatsApp, s-a scris deja
+  explicit „trimite cu `Promise.all` AȘTEPTAT ca reload-ul de la 1s să nu taie
+  cererile în zbor". Același bug, reparat atunci într-un singur loc.
+
+### Ce s-a făcut — commit `1743a56`
+
+**`frontend/js/nav.js`** — contor global de operațiuni în zbor:
+
+- `notifyAdmins` îl incrementează sincron la pornire (deci prinde și apelurile
+  lansate fără `await`) și îl decrementează în `finally`;
+- `reloadWhenIdle(delay)` / `navigateWhenIdle(url, delay)` — reîncarcă sau
+  navighează **numai după** ce nu mai e nimic în zbor;
+- plasă de siguranță de 8s: dacă o cerere rămâne agățată, pagina se reîncarcă
+  oricum, ca să nu rămână blocată pe date vechi.
+
+**`frontend/grup-details.html`**:
+
+- toate cele 13 reîncărcări/navigări de pe pagină (aprobare, respingere,
+  alăturare, invitație, plecare din grup, transfer admin, voturi) trec prin
+  helperii locali `reloadPage()` / `navigatePage()` → nicio acțiune nu mai poate
+  tăia emailurile alteia;
+- în aprobare, notificările se adună într-o listă și se **așteaptă**
+  (`await Promise.all`) înainte de reîncărcare;
+- aprobarea e marcată `beginOp()` / `endOp()` pe toată durata ei, ca reîncărcarea
+  programată de o aprobare anterioară să nu-i taie mijlocul;
+- mesajul „X a fost acceptat în grup!" rămâne instant (aprobarea în sine s-a
+  făcut deja în DB) — doar reîncărcarea așteaptă.
+
+Zero atingeri DB, RLS, plăți sau edge functions. Nicio interogare Supabase
+modificată. Sintaxa verificată cu Node pe ambele fișiere.
+
+**⏭️ De deployat din cPanel** (împreună cu celelalte commituri, vezi sus).
+**Test:** pe un grup de test cu 2–3 cereri în așteptare, aprobă-le rapid una
+după alta; în admin → Notificări trebuie să apară fluxul **complet** pentru
+fiecare aprobare, nu doar confirmarea personală la ultimele din rafală.
+
+**Limită rămasă, onestă:** dacă tabul e închis manual imediat după aprobare,
+emailurile tot se pot pierde. Nimic client-side nu repară asta complet —
+reparația durabilă e mutarea difuzării pe server (vezi punctul 1 de mai jos).
+
+Reîncercarea din commit `284c6f6` **nu** acoperea cazul ăsta. Rezolvă doar
 notificările care ajung la Resend și sunt respinse.
 
 ---
 
 ## Deschise pentru sesiuni viitoare
 
-**0. Problema 4 de mai sus** — cea mai importantă. Un flux de notificare care
-tace complet e mai grav decât unul care eșuează zgomotos: nu-ți dai seama că ai
-pierdut ceva.
-
-**1. Trimitere în lot la Resend (rădăcina problemei 2).** Reîncercarea tratează
-simptomul. Fixul corect: un singur apel către edge function cu lista de
-destinatari, iar funcția să folosească endpointul de trimitere în lot al Resend
-(`/emails/batch`) — 15 emailuri într-o cerere în loc de 15 cereri. Atinge toate
-locurile de broadcast din `frontend/grup-details.html` (liniile ~2546, ~3465,
-~3635) plus edge function-ul. Merită o sesiune dedicată.
+**1. Trimitere în lot la Resend (rădăcina problemei 2 — și jumătate din 4).**
+Reîncercarea tratează simptomul. Fixul corect: un singur apel către edge function
+cu lista de destinatari, iar funcția să folosească endpointul de trimitere în lot
+al Resend (`/emails/batch`) — 15 emailuri într-o cerere în loc de 15 cereri.
+Bonus: cu o singură cerere în loc de 15, și fereastra în care reîncărcarea
+paginii poate tăia ceva devine mult mai mică. Atinge toate locurile de broadcast
+din `frontend/grup-details.html` (aprobare, acceptare invitație, link WhatsApp —
+caută `for (const email of emails)` și `Promise.all`) plus edge function-ul.
+Merită o sesiune dedicată.
 
 **2. Patru avertismente de tipare preexistente** în `notify-admins/index.ts`:
 `error.message` în blocurile `catch`, unde `error` e `unknown`. `deno check` le
