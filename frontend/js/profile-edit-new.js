@@ -9,6 +9,13 @@ let tags = [];
 let selectedTags = [];
 let selectedZones = [];
 
+// Gard anti-dublu-submit. Cât timp o salvare e în curs, click-urile următoare pe
+// „Salvează" sunt ignorate. Fără el, un dublu-click pornea salvarea de două ori
+// în paralel: două notificări „Utilizator nou" către superadmin (în fluxul
+// ?welcome=1) și, mai grav, două cicluri delete+insert peste user_tags și
+// user_preferred_zones, care se pot suprascrie reciproc și pierde selecțiile.
+let isSaving = false;
+
 // =====================================================
 // INITIALIZATION
 // =====================================================
@@ -568,7 +575,8 @@ function toggleTag(tagId) {
 
 async function handleActiveFormSubmit(event) {
     event.preventDefault();
-    
+    if (isSaving) return;  // salvare deja în curs — ignorăm al doilea click
+
     const errorDiv = document.getElementById('form-error');
     const successDiv = document.getElementById('form-success');
     errorDiv.classList.add('hidden');
@@ -584,7 +592,10 @@ async function handleActiveFormSubmit(event) {
         showError(errorDiv, 'Te rugăm să selectezi cel puțin un tag de interes');
         return;
     }
-    
+
+    // De aici începe partea asincronă — blocăm butonul până la redirect sau eroare.
+    setSaving(event.target, true);
+
     try {
         // Update profile
         const formData = {
@@ -667,6 +678,8 @@ async function handleActiveFormSubmit(event) {
         }, 1500);
         
     } catch (error) {
+        // Salvarea a eșuat — deblocăm butonul ca omul să poată reîncerca.
+        setSaving(event.target, false);
         showError(errorDiv, 'A apărut o eroare: ' + error.message);
         console.error('Save error:', error);
     }
@@ -674,12 +687,16 @@ async function handleActiveFormSubmit(event) {
 
 async function handleProfessionalFormSubmit(event) {
     event.preventDefault();
-    
+    if (isSaving) return;  // salvare deja în curs — ignorăm al doilea click
+
     const errorDiv = document.getElementById('form-error-pro');
     const successDiv = document.getElementById('form-success-pro');
     errorDiv.classList.add('hidden');
     successDiv.classList.add('hidden');
-    
+
+    // De aici începe partea asincronă — blocăm butonul până la redirect sau eroare.
+    setSaving(event.target, true);
+
     try {
         let websiteValue = document.getElementById('agency_website').value.trim();
         if (websiteValue && !/^https?:\/\//i.test(websiteValue)) {
@@ -732,6 +749,8 @@ async function handleProfessionalFormSubmit(event) {
         }, 1500);
         
     } catch (error) {
+        // Salvarea a eșuat — deblocăm butonul ca omul să poată reîncerca.
+        setSaving(event.target, false);
         showError(errorDiv, 'A apărut o eroare: ' + error.message);
         console.error('Save error:', error);
     }
@@ -740,6 +759,27 @@ async function handleProfessionalFormSubmit(event) {
 // =====================================================
 // HELPERS
 // =====================================================
+
+// Blochează/deblochează butonul „Salvează" al unui formular cât timp salvarea e
+// în curs. Pe succes NU deblocăm intenționat: urmează redirectul după 1,5s, iar
+// butonul trebuie să rămână inert până atunci.
+function setSaving(form, saving) {
+    isSaving = saving;
+    const btn = form ? form.querySelector('button[type="submit"]') : null;
+    if (!btn) return;
+
+    if (saving) {
+        // Reținem eticheta originală ca s-o putem pune la loc pe eroare.
+        btn.dataset.labelOriginal = btn.dataset.labelOriginal || btn.textContent.trim();
+        btn.disabled = true;
+        btn.classList.add('opacity-60', 'cursor-not-allowed');
+        btn.textContent = 'Se salvează…';
+    } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-60', 'cursor-not-allowed');
+        btn.textContent = btn.dataset.labelOriginal || 'Salvează modificările';
+    }
+}
 
 function showError(element, message) {
     if (element) {
