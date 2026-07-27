@@ -594,15 +594,20 @@ window.requestJoinGroup = async function(grupId) {
                 if (adminProfile?.email) {
                     await sb.functions.invoke('notify-admins', {
                         body: {
-                            event_type: 'membership_request',
+                            // Evenimentul modern: text in romana, template cu buton,
+                            // si copie automata la superadmin (SUPERADMIN_CC_ALWAYS).
+                            // Inainte era 'membership_request' (legacy, englezesc,
+                            // fara copie la superadmin) — pagina grupului folosea deja
+                            // 'join_request', deci acelasi buton dadea doua rezultate.
+                            event_type: 'join_request',
                             data: {
-                                grup_id: grupId,
-                                grup_nume: grup.nume,
+                                // numele moderne: linkul din buton se face din group_id
+                                group_id: grupId,
+                                group_name: grup.nume,
                                 user_id: currentUser.id,
                                 user_email: requesterProfile?.email || currentUser.email,
                                 user_name: requesterProfile?.pseudonym || 'Utilizator',
-                                admin_email: adminProfile.email,
-                                status: 'pending'
+                                admin_email: adminProfile.email
                             }
                         }
                     });
