@@ -1,7 +1,12 @@
-# Email: „zonele tale au cerere, dar niciun grup" (draft, de aprobat)
+# Email: „zonele tale au cerere, dar niciun grup"
+
+⚠️ **Textul care se trimite efectiv este cel din
+`scripts/emailuri-zone/trimite-emailuri-zone.js`** (funcția `continut()`). Fișierul de față
+e versiunea de citit și de discutat; dacă schimbi ceva aici, schimbă și acolo.
 
 **Sursa datelor:** `db_schema/analiza-zone/5-merge-multizona.sql` — un rând per persoană.
-**Lot:** cei care au cel puțin o zonă fără grup cu 9+ oameni (38 de persoane la 27 iulie 2026).
+**Lot:** cei care au cel puțin o zonă fără grup cu 9+ oameni (38 de persoane la 27 iulie 2026,
+minus „DeathArrow" scos manual = 37).
 
 Câmpuri de merge (numele coloanelor din interogarea 5):
 
@@ -20,7 +25,7 @@ Câmpuri de merge (numele coloanelor din interogarea 5):
 ## Subiect (variante)
 
 1. `{{zona_1}}: {{oameni_1_text}}, niciun grup` → *„Tineretului: 20 de oameni, niciun grup"*
-2. `În {{zona_1}} nu s-a pornit încă niciun grup`
+2. ✅ **ALES** — `În {{zona_1}} nu s-a pornit încă niciun grup`
 3. `Zonele în care cauți nu au încă niciun grup`
 
 Preheader: `Ești unul dintre ei. Deocamdată nu v-ați întâlnit.`
@@ -37,31 +42,36 @@ Iată cum arată ele astăzi:
 > {{zone_pentru_email}}
 
 *(exemplu de cum se completează:*
-> *Tineretului — 20 de oameni*
-> *Aviației — 12 oameni*
-> *Uranus — 11 oameni)*
+> *Tineretului: 20 de oameni*
+> *Aviației: 12 oameni*
+> *Uranus: 11 oameni)*
+
+*(dacă are mai mult de 3 zone, aici vine în loc rândul:*
+> *Și încă 4 zone bifate, tot fără niciun grup.)*
 
 În niciuna dintre ele nu există încă vreun grup.
 
 Așa arată, de fapt, momentul dinaintea unui grup de construcție: câțiva oameni care vor
 același lucru, în același loc, dar care nu s-au întâlnit încă. Noi am trecut exact prin
-punctul ăsta la Județului Housing — cinci familii care la început nu se cunoșteau între ele.
+punctul ăsta la Județului Housing, câteva familii care la început nu se cunoșteau între ele.
 
 **Un grup nu începe cu un teren. Începe cu o conversație.**
 
 Când pornești un grup nu semnezi nimic și nu te angajezi la nimic. Deschizi un loc unde
-ceilalți care caută în aceeași zonă pot cere să intre — iar tu, ca fondator, aprobi cine
+ceilalți care caută în aceeași zonă pot cere să intre, iar tu, ca fondator, aprobi cine
 intră. De acolo discutați ce fel de bloc vreți, ce buget aveți și dacă are sens să mergeți
 mai departe împreună.
 
-👉 **[Pornește un grup](https://apartamentual.ro/grup-nou.html)** — durează vreo două minute.
+Grupul apare imediat pe platformă, iar ceilalți care caută în {{zona_1}} îl văd și pot cere
+să intre. Primești o notificare la fiecare cerere.
+
+👉 **[Pornește un grup](https://apartamentual.ro/grup-nou.html)** (durează vreo două minute)
 
 Dacă preferi să nu-l pornești tu, e în regulă: rămâi cu zonele bifate și te anunțăm în
 momentul în care apare un grup în vreuna dintre ele.
 
 Un lucru pe care nu vrem să-l ascundem: drumul e lung. Găsit teren, autorizații, ani, nu
-luni, și multe decizii luate împreună. În schimb, toți banii tăi rămân în apartamentul tău —
-nu se duc în marja unui dezvoltator.
+luni, și multe decizii luate împreună. În schimb, toți banii tăi rămân în apartamentul tău.
 
 Lucian
 ApartamenTUal / LTFB Studio

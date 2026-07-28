@@ -11,3 +11,7 @@ package-homepage-v9/
 # Capturile intenționate le pui direct în screenshots/ și le comiți normal.
 screenshots/tmp/
 screenshots/screencapture_*
+
+# Campania de emailuri pe zone: previzualizări + jurnalul trimiterilor.
+# Conțin adrese de email ale utilizatorilor reali — NU se comit.
+scripts/emailuri-zone/local/
