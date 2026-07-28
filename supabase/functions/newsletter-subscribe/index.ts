@@ -68,6 +68,61 @@ function buildConfirmEmailHtml(confirmUrl: string): string {
   `
 }
 
+// ─── Notificare internă pentru un abonat NOU ───────────────────────────────
+// Slack #app_events + email la apartamentual@ltfbstudio.ro, prin notify-admins.
+// Best-effort: o eroare aici NU strică abonarea. Extrasă ca funcție fiindcă e
+// folosită din două locuri (fluxul normal cu double opt-in și cel de la
+// înregistrare, cu adresa deja verificată).
+async function notifyNewSubscriber(email: string, source: string, zone: string | null) {
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/notify-admins`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event_type: 'newsletter_signup',
+        data: {
+          // Destinatar explicit: notificările de newsletter merg la
+          // apartamentual@ltfbstudio.ro (nu la ADMIN_EMAIL). Pentru că setăm un
+          // recipient explicit, notify-admins NU mai adaugă și CC-ul de
+          // superadmin → emailul ajunge DOAR aici.
+          recipient_email: 'apartamentual@ltfbstudio.ro',
+          email,
+          source,
+          zone_interest: zone,
+        },
+      }),
+    })
+  } catch (e) {
+    console.error('notify-admins (newsletter_signup) failed:', (e as Error).message)
+  }
+}
+
+// ─── Contact global în Resend (model nou nov. 2025, fără audience_id) ───────
+// Idempotent: dacă există deja, tratăm răspunsul non-ok ca succes — Supabase
+// rămâne sursa noastră de adevăr. Aceeași logică ca în newsletter-confirm.
+async function createResendContact(email: string) {
+  if (!RESEND_API_KEY) return
+  try {
+    const resp = await fetch('https://api.resend.com/contacts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, unsubscribed: false }),
+    })
+    if (!resp.ok) {
+      const t = await resp.text()
+      console.error('Resend contacts non-ok (tratat ca idempotent):', resp.status, t)
+    }
+  } catch (e) {
+    console.error('Resend contacts call failed:', (e as Error).message)
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -75,8 +130,8 @@ serve(async (req) => {
 
   try {
     const payload = await req.json().catch(() => ({}))
-    const { email, source, zone_interest } = payload as {
-      email?: string; source?: string; zone_interest?: string
+    const { email, source, zone_interest, verified_signup } = payload as {
+      email?: string; source?: string; zone_interest?: string; verified_signup?: boolean
     }
 
     // Validare + normalizare (lowercase + trim). Stocăm mereu lowercase, ca
@@ -95,6 +150,76 @@ serve(async (req) => {
       .eq('email', normalized)
       .maybeSingle()
     if (selErr) throw selErr
+
+    // ── Mod „abonare la înregistrare" (fără al doilea email de confirmare) ──
+    // Apelat din pagina de bun-venit, imediat după ce utilizatorul a dat clic pe
+    // linkul de confirmare a CONTULUI. În acest punct adresa e deja dovedită de
+    // Supabase Auth, iar bifa de la înregistrare e consimțământul explicit, deci
+    // putem marca direct 'confirmed' fără să mai trimitem un email de confirmare.
+    //
+    // SECURITATE: acceptăm asta DOAR dacă tokenul din headerul Authorization e un
+    // JWT de utilizator real, cu emailul confirmat, ȘI emailul din cerere e chiar
+    // al acelui utilizator. Fără verificările astea, oricine ar putea abona pe
+    // altcineva sărind peste double opt-in.
+    if (verified_signup === true) {
+      const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim()
+      if (!jwt) return json({ ok: false, error: 'Neautorizat' }, 401)
+
+      const { data: userData, error: userErr } = await supabase.auth.getUser(jwt)
+      const authUser = userData?.user
+      if (userErr || !authUser) return json({ ok: false, error: 'Neautorizat' }, 401)
+      if (!authUser.email_confirmed_at) {
+        return json({ ok: false, error: 'Email neconfirmat' }, 403)
+      }
+      if ((authUser.email || '').toLowerCase() !== normalized) {
+        return json({ ok: false, error: 'Emailul nu corespunde contului' }, 403)
+      }
+
+      // S-a dezabonat cândva → NU îl reabonăm automat, îi respectăm decizia.
+      if (existing && existing.status === 'unsubscribed') {
+        return json({ ok: true, respected_unsubscribe: true })
+      }
+      // Deja pe listă → nimic de făcut (apelul e idempotent).
+      if (existing && existing.status === 'confirmed') {
+        return json({ ok: true, already: true })
+      }
+
+      const nowIso = new Date().toISOString()
+      if (existing) {
+        // Era 'pending' (se abonase de pe site, dar n-a apăsat linkul din email).
+        // Îl confirmăm acum și păstrăm consimțământul original ca dovadă GDPR.
+        const { error } = await supabase
+          .from('newsletter_subscribers')
+          .update({
+            status: 'confirmed',
+            confirmed_at: nowIso,
+            consent_at: existing.consent_at || nowIso,
+          })
+          .eq('id', existing.id)
+        if (error) throw error
+      } else {
+        // Abonat nou, direct 'confirmed'. `confirm_token` primește valoarea
+        // implicită din schemă (gen_random_uuid), nu e folosit pe traseul ăsta.
+        const { error } = await supabase
+          .from('newsletter_subscribers')
+          .insert({
+            email: normalized,
+            status: 'confirmed',
+            source: source || 'register',
+            zone_interest: zone_interest || null,
+            consent_at: nowIso,
+            confirmed_at: nowIso,
+          })
+        if (error) throw error
+      }
+
+      await createResendContact(normalized)
+      if (!existing) {
+        await notifyNewSubscriber(normalized, source || 'register', zone_interest || null)
+      }
+
+      return json({ ok: true, confirmed: true })
+    }
 
     let tokenToSend: string | null = null
     let isNew = false
@@ -176,36 +301,9 @@ serve(async (req) => {
       }
     }
 
-    // Notificare internă (Slack #app_events + email superadmin) prin notify-admins,
-    // best-effort, doar pentru abonați noi. O eroare aici NU strică abonarea.
-    // notify-admins decide singur destinatarii (event-ul newsletter_signup e în
-    // SUPERADMIN_CC_IF_NO_RECIPIENT, deci fără recipient → CC superadmin pe email
-    // + mesaj pe Slack). Apelul intern e autorizat cu service_role.
+    // Notificare internă (Slack #app_events + email), doar pentru abonați noi.
     if (isNew) {
-      try {
-        await fetch(`${SUPABASE_URL}/functions/v1/notify-admins`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            event_type: 'newsletter_signup',
-            data: {
-              // Destinatar explicit: notificările de newsletter merg la
-              // apartamentual@ltfbstudio.ro (nu la ADMIN_EMAIL). Pentru că setăm
-              // un recipient explicit, notify-admins NU mai adaugă și CC-ul de
-              // superadmin → emailul ajunge DOAR aici.
-              recipient_email: 'apartamentual@ltfbstudio.ro',
-              email: normalized,
-              source: source || 'necunoscut',
-              zone_interest: zone_interest || null,
-            },
-          }),
-        })
-      } catch (e) {
-        console.error('notify-admins (newsletter_signup) failed:', (e as Error).message)
-      }
+      await notifyNewSubscriber(normalized, source || 'necunoscut', zone_interest || null)
     }
 
     return json({ ok: true })

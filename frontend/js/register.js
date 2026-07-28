@@ -442,7 +442,15 @@ async function handleAuthSubmit(event) {
         return;
     }
     if (termsError) termsError.classList.add('hidden');
-    
+
+    // Bifa de newsletter (opțională, nebifată implicit). NU abonăm acum: adresa
+    // nu e încă verificată. Salvăm doar intenția în metadata contului, iar
+    // abonarea efectivă se face pe pagina de bun-venit, DUPĂ ce utilizatorul dă
+    // clic pe linkul de confirmare a contului (vezi profile-edit-new.html).
+    // Astfel primește un singur email, nu două.
+    const newsletterCheckbox = document.getElementById('newsletterOptin');
+    const newsletterOptin = !!(newsletterCheckbox && newsletterCheckbox.checked);
+
     try {
         // Build email redirect - confirmation link goes to profile completion page
         const urlParams = new URLSearchParams(window.location.search);
@@ -459,7 +467,8 @@ async function handleAuthSubmit(event) {
             password: password,
             options: {
                 data: {
-                    account_type: selectedAccountType
+                    account_type: selectedAccountType,
+                    newsletter_optin: newsletterOptin
                 },
                 emailRedirectTo: emailRedirectTo
             }

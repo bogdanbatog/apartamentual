@@ -162,21 +162,35 @@
 
                     <div id="auth-error" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
                     
+                    <!-- Bifele stau ÎNAINTEA butonului, ca să fie citite până să apeși
+                         „Continuă". Când erau după buton, cădeau sub marginea ecranului:
+                         bifa obligatorie de termeni se rata (iar eroarea ei apărea tot
+                         în afara ecranului), iar cea de newsletter nu se vedea deloc. -->
+                    <div class="text-sm text-gray-500 pt-1">
+                        <label class="flex items-start gap-2 cursor-pointer">
+                            <input type="checkbox" id="acceptTerms" class="rounded border-gray-300 mt-0.5" style="accent-color: #1a1a1a;">
+                            <span>Sunt de acord cu
+                                <a href="termeni.html" target="_blank" class="text-blue-600 hover:underline">Termenii și condițiile</a> și
+                                <a href="gdpr.html" target="_blank" class="text-blue-600 hover:underline">Politica GDPR</a>.
+                            </span>
+                        </label>
+                        <p id="termsError" class="text-red-500 text-xs mt-1 hidden" style="margin-left: 1.5rem;">Trebuie să accepți termenii și condițiile.</p>
+
+                        <!-- Newsletter — OPȚIONAL, intenționat NEBIFAT implicit (consimțământ
+                             explicit, cerință GDPR). Abonarea nu se face aici: bifa se salvează
+                             în metadata contului, iar abonarea efectivă are loc după ce
+                             utilizatorul confirmă emailul (vezi profile-edit-new.html), ca să
+                             primească un singur email, nu două. -->
+                        <label class="flex items-start gap-2 cursor-pointer mt-3">
+                            <input type="checkbox" id="newsletterOptin" class="rounded border-gray-300 mt-0.5" style="accent-color: #1a1a1a;">
+                            <span>Vreau să primesc newsletterul: episoadele din construcția Județului Housing, blocul ridicat colaborativ prin ApartamenTUal, plus terenuri noi și pași practici. Fără spam, te dezabonezi oricând.</span>
+                        </label>
+                    </div>
+
                     <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-lg hover:bg-black transition font-medium">
                         Continuă
                     </button>
                 </form>
-
-                <div class="mt-4 text-sm text-gray-500">
-                    <label class="flex items-start gap-2 cursor-pointer">
-                        <input type="checkbox" id="acceptTerms" class="rounded border-gray-300 mt-0.5" style="accent-color: #1a1a1a;">
-                        <span>Sunt de acord cu 
-                            <a href="termeni.html" target="_blank" class="text-blue-600 hover:underline">Termenii și condițiile</a> și 
-                            <a href="gdpr.html" target="_blank" class="text-blue-600 hover:underline">Politica GDPR</a>.
-                        </span>
-                    </label>
-                    <p id="termsError" class="text-red-500 text-xs mt-1 hidden" style="margin-left: 1.5rem;">Trebuie să accepți termenii și condițiile.</p>
-                </div>
             </div>
 
             <!-- Step 3: Profile Information -->

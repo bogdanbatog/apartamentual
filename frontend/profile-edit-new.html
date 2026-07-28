@@ -452,6 +452,23 @@
                             account_status: newStatus
                         }).eq('user_id', user.id);
                         
+                        // Newsletter: dacă a bifat caseta la înregistrare, îl abonăm ACUM.
+                        // Aici adresa e deja dovedită (tocmai a apăsat linkul de confirmare
+                        // a contului), iar bifa e consimțământul explicit — deci abonarea e
+                        // validă fără un al doilea email de confirmare. Apelul e idempotent
+                        // și respectă o dezabonare anterioară (vezi newsletter-subscribe).
+                        // Best-effort: o eroare aici NU strică restul fluxului de bun-venit.
+                        if (user.user_metadata?.newsletter_optin === true) {
+                            try {
+                                const nlRes = await sb.functions.invoke('newsletter-subscribe', {
+                                    body: { email: user.email, source: 'register', verified_signup: true }
+                                });
+                                if (nlRes && nlRes.error) console.warn('Newsletter (înregistrare):', nlRes.error);
+                            } catch (e) {
+                                console.warn('Newsletter (înregistrare) a eșuat:', e);
+                            }
+                        }
+
                         // For agencies: show special banner explaining approval process
                         if (metaAccountType === 'profesional') {
                             const wb = document.getElementById('welcome-banner');
