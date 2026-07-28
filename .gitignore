@@ -15,3 +15,11 @@ screenshots/screencapture_*
 # Campania de emailuri pe zone: previzualizări + jurnalul trimiterilor.
 # Conțin adrese de email ale utilizatorilor reali — NU se comit.
 scripts/emailuri-zone/local/
+
+# Exporturi CSV din Supabase (interogări de analiză).
+# Conțin date personale ale utilizatorilor reali: adrese de email, pseudonime,
+# zonele bifate. Se lucrează cu ele local, NU ajung în repo.
+# Interogările care le produc sunt versionate în db_schema/ — alea sunt sursa,
+# CSV-ul e doar rezultatul de moment.
+# Dacă vreodată chiar trebuie comis un CSV fără date personale: git add -f <fișier>
+*.csv
