@@ -212,7 +212,9 @@ serve(async (req) => {
             pret: pretTotal,
             nr_cadastral: input.nr_cadastral?.trim() || null,
             adresa_teren: input.adresa_teren?.trim() || null,
-            descriere_teren: input.descriere_teren.substring(0, 200),
+            // Descrierea merge integral: e singurul loc din care aflăm ce vrea
+            // clientul. Plafonul de afișare se aplică în notify-admins.
+            descriere_teren: input.descriere_teren.trim(),
             link_teren: input.link_teren?.trim() || null,
             proforma: `${oblioResult.seriesName} ${oblioResult.number}`,
             proforma_url: oblioResult.link,

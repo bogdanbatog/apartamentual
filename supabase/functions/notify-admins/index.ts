@@ -124,6 +124,20 @@ function buildTerenRow(linkTeren: string): { label: string; value: string } {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Helper: text scris de utilizator, afișat într-un rând de email
+// ═══════════════════════════════════════════════════════════════════════════
+// Valorile din detailsList intră direct în HTML, deci rândurile scrise de om
+// s-ar lipi într-un bloc. Aici scăpăm caracterele HTML (textul vine de la
+// client, nu de la noi) și transformăm rândurile noi în <br>.
+function formatMultilineText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\r\n|\r|\n/g, '<br>')
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // HTML email template helper
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -851,7 +865,14 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       const nrCadastral = (data.nr_cadastral || '').toString().trim()
       const adresaTeren = (data.adresa_teren || '').toString().trim()
       const linkTeren = (data.link_teren || '').toString().trim()
-      const descriereTeren = (data.descriere_teren || '').toString().substring(0, 250)
+      // Descrierea e scrisă de client și e partea cea mai utilă din comandă.
+      // O păstrăm aproape întreagă (plafon larg, doar ca protecție la emailuri
+      // uriașe) și marcăm tăierea comparând cu lungimea reală, nu cu plafonul.
+      const DESCRIERE_MAX = 2000
+      const descriereRaw = (data.descriere_teren || '').toString().trim()
+      const descriereTeren = descriereRaw.length > DESCRIERE_MAX
+        ? descriereRaw.substring(0, DESCRIERE_MAX) + '…'
+        : descriereRaw
 
       const title = `🛒 Comandă nouă — ${orderId} (așteaptă plată)`
       const body = `O comandă nouă a fost creată și așteaptă plata clientului. Comandă: ${orderId} | Client: ${numeClient} | Sumă: ${pret} | Nr. cadastral: ${nrCadastral || 'N/A'}`
@@ -868,7 +889,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           { label: 'Nr. cadastral teren', value: nrCadastral || '—' },
           { label: 'Adresa teren', value: adresaTeren || '—' },
           buildTerenRow(linkTeren),
-          { label: 'Descriere teren', value: descriereTeren ? descriereTeren + (descriereTeren.length === 250 ? '…' : '') : 'N/A' },
+          { label: 'Descriere teren', value: descriereTeren ? formatMultilineText(descriereTeren) : 'N/A' },
         ],
         ctaLink: proformaUrl,
         ctaLabel: proformaUrl ? 'Vezi proforma' : undefined,
