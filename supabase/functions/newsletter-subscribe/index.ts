@@ -73,7 +73,17 @@ function buildConfirmEmailHtml(confirmUrl: string): string {
 // Best-effort: o eroare aici NU strică abonarea. Extrasă ca funcție fiindcă e
 // folosită din două locuri (fluxul normal cu double opt-in și cel de la
 // înregistrare, cu adresa deja verificată).
-async function notifyNewSubscriber(email: string, source: string, zone: string | null) {
+// `status` spune pe care dintre cele două trasee a venit abonarea: 'pending'
+// (din footer/homepage, așteaptă clic pe linkul de confirmare) sau 'confirmed'
+// (de la înregistrarea contului, adresă deja dovedită). notify-admins alege
+// textul notificării după el — altfel Slack ar raporta „pending" și pentru
+// abonările care sunt de fapt deja active pe listă.
+async function notifyNewSubscriber(
+  email: string,
+  source: string,
+  zone: string | null,
+  status: 'pending' | 'confirmed',
+) {
   try {
     await fetch(`${SUPABASE_URL}/functions/v1/notify-admins`, {
       method: 'POST',
@@ -92,6 +102,7 @@ async function notifyNewSubscriber(email: string, source: string, zone: string |
           email,
           source,
           zone_interest: zone,
+          status,
         },
       }),
     })
@@ -215,7 +226,8 @@ serve(async (req) => {
 
       await createResendContact(normalized)
       if (!existing) {
-        await notifyNewSubscriber(normalized, source || 'register', zone_interest || null)
+        // Traseul de la înregistrare: abonatul e scris direct 'confirmed'.
+        await notifyNewSubscriber(normalized, source || 'register', zone_interest || null, 'confirmed')
       }
 
       return json({ ok: true, confirmed: true })
@@ -303,7 +315,8 @@ serve(async (req) => {
 
     // Notificare internă (Slack #app_events + email), doar pentru abonați noi.
     if (isNew) {
-      await notifyNewSubscriber(normalized, source || 'necunoscut', zone_interest || null)
+      // Traseul normal (footer/homepage): abonatul rămâne 'pending' până confirmă.
+      await notifyNewSubscriber(normalized, source || 'necunoscut', zone_interest || null, 'pending')
     }
 
     return json({ ok: true })

@@ -784,17 +784,36 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
     case 'newsletter_signup': {
       const subEmail = data.email || 'N/A'
       const src = data.source || 'necunoscut'
-      const title = `📨 Newsletter: abonare nouă (pending)`
-      const body = `O adresă nouă s-a abonat la newsletter și așteaptă confirmarea (double opt-in). Email: ${subEmail} · sursă: ${src}`
+      // Sunt două trasee de abonare, cu status DIFERIT în baza de date:
+      //  • din footer / banda de pe homepage → 'pending', adresa nu e dovedită,
+      //    abonatul primește email de confirmare (double opt-in) și intră în
+      //    lista de trimitere abia după ce dă clic;
+      //  • de la înregistrarea contului (sursă 'register') → 'confirmed' direct,
+      //    fiindcă adresa e deja dovedită prin confirmarea contului, iar bifa de
+      //    la înregistrare e consimțământul explicit. Contactul Resend se creează
+      //    pe loc, deci abonatul e DEJA pe lista de trimitere.
+      // Până acum notificarea spunea „pending" în ambele cazuri, ceea ce dădea
+      // impresia falsă de abonări nefinalizate. `status` vine din
+      // newsletter-subscribe; dacă lipsește, păstrăm comportamentul vechi.
+      const isConfirmed = data.status === 'confirmed'
+      const statusLabel = isConfirmed ? 'confirmat (activ pe listă)' : 'pending (neconfirmat)'
+      const title = isConfirmed
+        ? `📨 Newsletter: abonare nouă (confirmată)`
+        : `📨 Newsletter: abonare nouă (pending)`
+      const body = isConfirmed
+        ? `O adresă nouă s-a abonat la newsletter, direct de la înregistrarea contului — adresa e deja confirmată și intră în lista de trimitere. Email: ${subEmail} · sursă: ${src}`
+        : `O adresă nouă s-a abonat la newsletter și așteaptă confirmarea (double opt-in). Email: ${subEmail} · sursă: ${src}`
       const html = buildEmailHtml({
         headerEmoji: '📨',
         headerTitle: 'Abonare nouă la newsletter',
-        intro: 'O adresă nouă s-a abonat la newsletter și a primit emailul de confirmare (double opt-in). Va intra în lista de trimitere doar după ce confirmă.',
+        intro: isConfirmed
+          ? 'O adresă nouă s-a abonat la newsletter în timpul înregistrării contului. Adresa fiind deja confirmată prin linkul de activare a contului, abonarea e validă fără un al doilea email — abonatul e deja în lista de trimitere.'
+          : 'O adresă nouă s-a abonat la newsletter și a primit emailul de confirmare (double opt-in). Va intra în lista de trimitere doar după ce confirmă.',
         detailsList: [
           { label: 'Email', value: subEmail },
           { label: 'Sursă', value: src },
           { label: 'Zonă interes', value: data.zone_interest || '—' },
-          { label: 'Status', value: 'pending (neconfirmat)' },
+          { label: 'Status', value: statusLabel },
         ],
         ctaLink: `${PLATFORM_URL}/admin-newsletter.html`,
         ctaLabel: 'Vezi abonații',
