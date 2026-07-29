@@ -11,6 +11,19 @@
   plausible.init()
 </script>
     <meta name="description" content="Creează un grup nou de construcție și invită persoane cu aceeași viziune.">
+<!-- Open Graph / Twitter (previzualizare link la distribuire) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ApartamenTUal">
+<meta property="og:locale" content="ro_RO">
+<meta property="og:title" content="Pornește un grup de construcție — ApartamenTUal">
+<meta property="og:description" content="Ai o zonă în care ai vrea să locuiești? Pornește grupul și adună oamenii cu care poți construi blocul. Durează câteva minute.">
+<meta property="og:image" content="https://apartamentual.ro/assets/images/judetul-housing/randari/15-randare-fatada-curte.jpg">
+<meta property="og:url" content="https://apartamentual.ro/grup-nou.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pornește un grup de construcție — ApartamenTUal">
+<meta name="twitter:description" content="Ai o zonă în care ai vrea să locuiești? Pornește grupul și adună oamenii cu care poți construi blocul. Durează câteva minute.">
+<meta name="twitter:image" content="https://apartamentual.ro/assets/images/judetul-housing/randari/15-randare-fatada-curte.jpg">
+<link rel="canonical" href="https://apartamentual.ro/grup-nou.html">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/apartamentual-v9.css">
     <link rel="stylesheet" href="grupuri.css">
@@ -218,6 +231,18 @@
             font-weight: 600;
         }
         
+        .auth-required .auth-register-hint {
+            margin: 1.25rem 0 0;
+            font-size: 0.95rem;
+            color: #6b7280;
+        }
+
+        .auth-required .auth-register-hint a {
+            color: #c2604a;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
         .agency-blocked {
             text-align: center;
             padding: 3rem;
@@ -379,6 +404,12 @@
         <a href="#" class="btn-login" onclick="event.preventDefault(); openLoginModal();">
             <i class="fas fa-sign-in-alt"></i> Conectează-te
         </a>
+        <!-- Vizitator venit din postare/link extern: îl ducem la înregistrare cu
+             redirect înapoi aici, ca după confirmarea emailului să ajungă direct
+             pe formularul de creare grup. -->
+        <p class="auth-register-hint">
+            Nu ai cont? <a href="/register.html?redirect=%2Fgrup-nou.html">Creează-l în doi pași</a>
+        </p>
     </div>
     
     <!-- Agency Blocked State -->

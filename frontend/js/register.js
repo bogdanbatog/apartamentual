@@ -456,9 +456,11 @@ async function handleAuthSubmit(event) {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect');
         
-        // If coming from invitation, redirect to invite link; otherwise to profile-edit with welcome flag
-        const emailRedirectTo = redirectUrl 
-            ? decodeURIComponent(redirectUrl)
+        // If coming from invitation, redirect to invite link; otherwise to profile-edit with welcome flag.
+        // Redirectul poate fi absolut (invitații: window.location.href) sau relativ
+        // (ex. /grup-nou.html). Supabase are nevoie de URL absolut, deci îl completăm.
+        const emailRedirectTo = redirectUrl
+            ? new URL(decodeURIComponent(redirectUrl), window.location.origin).href
             : `${window.location.origin}/profile-edit-new.html?welcome=1`;
         
         // Create account
@@ -706,7 +708,11 @@ function showSuccess(accountType) {
             const successLink = document.getElementById('success-link');
             if (successLink) {
                 successLink.href = decodedUrl;
-                successLink.textContent = '✓ Am confirmat — acceptă invitația';
+                // Redirectul nu vine doar din invitații — poate veni și din
+                // „Pornește un grup". Potrivim textul butonului cu destinația.
+                successLink.textContent = decodedUrl.includes('grup-nou')
+                    ? '✓ Am confirmat — creează grupul'
+                    : '✓ Am confirmat — acceptă invitația';
             }
         } else {
             textEl.textContent = 'Contul tău a fost creat cu succes. Verifică-ți emailul pentru confirmare, apoi poți explora grupurile și terenurile disponibile.';
