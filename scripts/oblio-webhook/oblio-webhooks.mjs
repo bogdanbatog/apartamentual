@@ -40,6 +40,16 @@ const steag = (nume) => {
 
 // ------------------------------------------------------------------ ajutoare
 
+/**
+ * Ascunde cheia din orice adresă afișată în consolă.
+ * OBLIGATORIU la afișarea răspunsurilor brute de la Oblio: la înregistrare,
+ * Oblio întoarce în răspuns endpoint-ul COMPLET, deci cu tot cu ?k=...
+ * (așa a ajuns cheia pe ecran prima dată, pe 30 iulie 2026).
+ */
+function mascheaza(text) {
+  return String(text ?? '').replace(/([?&]k=)[^&"'\\\s]+/g, '$1***')
+}
+
 function iesiCuEroare(mesaj) {
   console.error(`\n  EROARE: ${mesaj}\n`)
   process.exit(1)
@@ -110,7 +120,7 @@ async function cmdList(token, cif) {
   const lista = r.json?.data
   if (!Array.isArray(lista)) {
     console.log('  Răspuns brut de la Oblio:\n')
-    console.log('  ' + (r.text || '(gol)').replace(/\n/g, '\n  '))
+    console.log('  ' + mascheaza(r.text || '(gol)').replace(/\n/g, '\n  '))
     console.log()
     return
   }
@@ -125,7 +135,7 @@ async function cmdList(token, cif) {
   for (const w of lista) {
     console.log(`    id:       ${w.id}`)
     console.log(`    topic:    ${w.topic}`)
-    console.log(`    endpoint: ${w.endpoint}`)
+    console.log(`    endpoint: ${mascheaza(w.endpoint)}`)
     console.log()
   }
 }
@@ -151,9 +161,10 @@ async function cmdRegister(token, cif) {
 
   const r = await apel(token, 'POST', '/webhooks', { cif, topic, endpoint })
   console.log(`\n  HTTP ${r.httpStatus}`)
-  console.log('  ' + (r.text || '(gol)').replace(/\n/g, '\n  '))
+  console.log('  ' + mascheaza(r.text || '(gol)').replace(/\n/g, '\n  '))
 
-  if (r.json?.status === 200) {
+  // Oblio răspunde 201 la creare (nu 200) — acceptăm orice 2xx.
+  if (r.httpStatus >= 200 && r.httpStatus < 300) {
     console.log(`\n  ÎNREGISTRAT. id = ${r.json?.data?.id}\n`)
   } else {
     console.log(
