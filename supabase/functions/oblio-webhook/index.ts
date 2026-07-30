@@ -3,11 +3,31 @@
 // Marchează comanda ca paid, salvează detaliile facturii fiscale generate
 // automat, și notifică superadmin (email + Slack).
 //
-// Webhook-uri Oblio relevante:
-//   - "invoice"   — factură fiscală creată/modificată (apare după ce proforma a fost plătită)
-//   - "proforma"  — proformă creată/modificată/încasată
+// Topicuri Oblio relevante (numele exacte cerute de API):
+//   - "Collect/Inserted"   — s-a înregistrat o încasare  <-- ăsta ne interesează cel mai mult
+//   - "Proforma/Update"    — proforma s-a modificat (ex: a fost marcată încasată)
+//   - "Invoice/SaveDraft"  — s-a creat factura fiscală din proforma încasată
 //
-// Configurare webhook în Oblio: se face printr-un singur API call (descris în README).
+// ÎNREGISTRARE: `node scripts/oblio-webhook/oblio-webhooks.mjs register ...` din repo.
+// (Până pe 30 iulie 2026 NU era înregistrat NICIUN webhook — de aceea prima comandă
+//  reală plătită a rămas `pending_payment`. Vezi HANDOFF.md.)
+//
+// ⚠️ TREI CONDIȚII, toate obligatorii, altfel Oblio nu ajunge niciodată aici:
+//
+//  1. DEPLOY CU `--no-verify-jwt`. Oblio nu trimite token Supabase; cu verificarea
+//     pornită, poarta Supabase răspunde 401 și cererea nu ajunge la codul ăsta
+//     (nici măcar în logurile funcției).
+//
+//  2. SECRET ÎN URL. Fiind fără JWT, adresa e publică, iar Oblio NU are câmp de
+//     secret în configurarea webhook-ului (doar cif/topic/endpoint). De aceea
+//     cheia merge în adresa înregistrată: `.../oblio-webhook?k=<OBLIO_WEBHOOK_SECRET>`.
+//     Dacă `OBLIO_WEBHOOK_SECRET` nu e setat în secretele Supabase, funcția
+//     REFUZĂ să proceseze (fail closed) — mai bine se oprește zgomotos decât să
+//     lase pe oricine să declare o comandă ca plătită.
+//
+//  3. ECOU `X-Oblio-Request-Id`. Oblio verifică adresa înainte să o accepte și
+//     la fiecare livrare: cere status 200 și, în corp, valoarea acelui header
+//     codificată base64. Fără ecou, înregistrarea webhook-ului pică.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -27,6 +47,39 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Ecoul cerut de Oblio: 200 + base64(X-Oblio-Request-Id) în corp.
+  // Se calculează ÎNAINTE de orice altceva, ca să răspundem corect inclusiv
+  // la cererea de verificare trimisă la înregistrarea webhook-ului (care poate
+  // veni fără corp sau cu alt corp decât cel obișnuit).
+  const oblioRequestId = req.headers.get('x-oblio-request-id')
+  const ecou = (body: any) =>
+    oblioRequestId
+      ? new Response(btoa(oblioRequestId), {
+          headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+          status: 200,
+        })
+      : jsonResponse(body)
+
+  // Cheia din adresă (?k=...) SAU dintr-un header, dacă Oblio va suporta cândva secrete.
+  // Fail closed: fără secret configurat, funcția nu procesează nimic.
+  const expectedSecret = Deno.env.get('OBLIO_WEBHOOK_SECRET')
+  if (!expectedSecret) {
+    console.error('OBLIO_WEBHOOK_SECRET nu e setat — refuz să procesez (endpoint public fără JWT).')
+    return jsonResponse({ error: 'Webhook not configured' }, 503)
+  }
+  const provided = new URL(req.url).searchParams.get('k')
+    || req.headers.get('x-oblio-signature')
+    || req.headers.get('x-webhook-secret')
+  if (provided !== expectedSecret) {
+    console.warn('Cheie de webhook greșită sau lipsă — cerere respinsă.')
+    return jsonResponse({ error: 'Invalid signature' }, 401)
+  }
+
+  // Verificarea de la înregistrare poate veni ca GET — răspundem cu ecoul.
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    return ecou({ success: true, message: 'ok' })
+  }
+
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405)
   }
@@ -37,7 +90,10 @@ serve(async (req) => {
     try {
       payload = JSON.parse(rawBody)
     } catch {
-      return jsonResponse({ error: 'Invalid JSON' }, 400)
+      // Corp neinteligibil (sau gol, la verificare): tot îi dăm ecoul, altfel
+      // Oblio consideră adresa invalidă și refuză înregistrarea.
+      console.log('Webhook cu corp non-JSON:', rawBody.slice(0, 500))
+      return ecou({ success: true, message: 'no json body' })
     }
 
     // Initialize Supabase admin client (service_role bypasses RLS)
@@ -45,16 +101,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
-
-    // Optional shared-secret check (dacă Oblio îți permite să configurezi un secret în webhook)
-    const expectedSecret = Deno.env.get('OBLIO_WEBHOOK_SECRET')
-    if (expectedSecret) {
-      const provided = req.headers.get('x-oblio-signature') || req.headers.get('x-webhook-secret')
-      if (provided !== expectedSecret) {
-        console.warn('Webhook signature mismatch')
-        return jsonResponse({ error: 'Invalid signature' }, 401)
-      }
-    }
 
     // Idempotency key: hash of (topic + serie + numar + status)
     const topic = payload.topic || payload.event || 'unknown'
@@ -64,25 +110,74 @@ serve(async (req) => {
     const status = docData.status || docData.collected || ''
     const idempotencyKey = `oblio_${topic}_${serie}_${numar}_${status}`
 
-    // Lookup comanda by oblio_factura_serie + oblio_factura_numar
-    // (we stored these when we created the proforma)
-    const { data: comanda, error: lookupError } = await supabase
-      .from('comenzi_analize')
-      .select('id, status, order_id, email, tip_persoana, nume, prenume, denumire_firma, pret_total, oblio_factura_serie, oblio_factura_numar, nr_cadastral, adresa_teren, link_teren')
-      .eq('oblio_factura_serie', serie)
-      .eq('oblio_factura_numar', numar)
-      .maybeSingle()
+    // Forma exactă a payload-ului nu e documentată de Oblio. Îl logăm integral
+    // ca să știm, după primul webhook real, ce câmpuri primim de fapt.
+    console.log(`Oblio webhook [${topic}]:`, rawBody.slice(0, 2000))
 
-    if (lookupError) {
+    // ---- Găsirea comenzii -------------------------------------------------
+    // Atenție: în `oblio_factura_serie/numar` stă PROFORMA (ex. APT/0013) până
+    // la plată, și abia după plată se scrie factura fiscală (ex. LTFB/0205).
+    // Un webhook poate purta oricare dintre ele, deci încercăm pe rând:
+    //   1. seria/numărul din payload, așa cum vin
+    //   2. seria/numărul facturii, dacă payload-ul le poartă separat
+    //   3. order_id-ul (APT-AAAALLZZ-xxxxxx) căutat în tot corpul cererii —
+    //      îl punem atât în `mentions`, cât și în numele clientului de pe
+    //      proformă, deci apare în payload indiferent de forma lui.
+    const CAMPURI = 'id, status, order_id, email, tip_persoana, nume, prenume, denumire_firma, pret_total, oblio_factura_serie, oblio_factura_numar, nr_cadastral, adresa_teren, link_teren'
+
+    let comanda: any = null
+    let gasitPrin = ''
+
+    const cautaDupaDocument = async (s: string, n: string) => {
+      if (!s || !n) return null
+      const { data, error } = await supabase
+        .from('comenzi_analize')
+        .select(CAMPURI)
+        .eq('oblio_factura_serie', s)
+        .eq('oblio_factura_numar', n)
+        .maybeSingle()
+      if (error) throw error
+      return data
+    }
+
+    try {
+      comanda = await cautaDupaDocument(String(serie), String(numar))
+      if (comanda) gasitPrin = `document ${serie} ${numar}`
+
+      if (!comanda) {
+        comanda = await cautaDupaDocument(
+          String(docData.invoiceSeriesName || ''),
+          String(docData.invoiceNumber || '')
+        )
+        if (comanda) gasitPrin = `factura ${docData.invoiceSeriesName} ${docData.invoiceNumber}`
+      }
+
+      if (!comanda) {
+        const potrivire = rawBody.match(/APT-\d{8}-[0-9a-f]{6}/i)
+        if (potrivire) {
+          const { data, error } = await supabase
+            .from('comenzi_analize')
+            .select(CAMPURI)
+            .eq('order_id', potrivire[0])
+            .maybeSingle()
+          if (error) throw error
+          comanda = data
+          if (comanda) gasitPrin = `order_id ${potrivire[0]}`
+        }
+      }
+    } catch (lookupError) {
       console.error('Lookup error:', lookupError)
       return jsonResponse({ error: 'DB lookup failed' }, 500)
     }
 
     if (!comanda) {
-      // Webhook for an Oblio document we don't have in DB — log and ignore
-      console.log(`Webhook for unknown doc ${serie} ${numar} — ignoring`)
-      return jsonResponse({ success: true, message: 'Document not found in DB, ignored' })
+      // Document Oblio pe care nu-l avem în DB (ex. o factură emisă manual).
+      // Răspundem 200 cu ecou — altfel Oblio marchează livrarea ca eșuată.
+      console.log(`Webhook pentru document necunoscut (${serie} ${numar}) — ignorat.`)
+      return ecou({ success: true, message: 'Document not found in DB, ignored' })
     }
+
+    console.log(`Comanda ${comanda.order_id} găsită prin ${gasitPrin}.`)
 
     // Idempotency: dacă log-ul cu această cheie există deja, ignorăm webhook-ul duplicat
     const { data: existingLog } = await supabase
@@ -93,7 +188,7 @@ serve(async (req) => {
 
     if (existingLog) {
       console.log(`Duplicate webhook for ${idempotencyKey} — ignoring`)
-      return jsonResponse({ success: true, message: 'Duplicate webhook ignored' })
+      return ecou({ success: true, message: 'Duplicate webhook ignored' })
     }
 
     // Detectăm dacă e plată confirmată
@@ -114,7 +209,7 @@ serve(async (req) => {
       await processPayment(supabase, comanda, docData)
     }
 
-    return jsonResponse({
+    return ecou({
       success: true,
       comanda_id: comanda.id,
       status_after: isPaid ? 'paid' : comanda.status,
@@ -148,10 +243,27 @@ async function processPayment(supabase: any, comanda: any, docData: any) {
     }
   }
 
-  await supabase
+  // Condiția `.eq('status', 'pending_payment')` e plasa de siguranță:
+  // Oblio poate trimite două notificări pentru aceeași plată (ex. Collect/Inserted
+  // și Invoice/SaveDraft), iar ele pot sosi în același timp. Dacă între timp
+  // altcineva a trecut deja comanda pe `paid`, actualizarea nu prinde niciun rând
+  // și ne oprim aici — clientul primește UN SINGUR email de confirmare.
+  const { data: randuriActualizate, error: updateError } = await supabase
     .from('comenzi_analize')
     .update(updateFields)
     .eq('id', comanda.id)
+    .eq('status', 'pending_payment')
+    .select('id')
+
+  if (updateError) {
+    console.error('Eroare la trecerea comenzii pe paid:', updateError)
+    throw updateError
+  }
+
+  if (!randuriActualizate || randuriActualizate.length === 0) {
+    console.log(`Comanda ${comanda.order_id} era deja procesată — nu retrimit emailurile.`)
+    return
+  }
 
   // Log status change
   await supabase.from('comenzi_analize_log').insert({
@@ -299,6 +411,10 @@ async function notifySuperAdmin(supabase: any, comanda: any, docData: any) {
 function detectPaid(topic: string, data: any): boolean {
   // Oblio webhook se poate manifesta cu mai multe shape-uri.
   // Detectăm "plata confirmata" cu cea mai largă acoperire.
+
+  // Topicul "Collect/Inserted" înseamnă, prin definiție, o încasare înregistrată.
+  if (String(topic).toLowerCase().startsWith('collect')) return true
+
   if (data.collected === 1 || data.collected === '1' || data.collected === true) return true
   if (data.status === 'paid' || data.status === 'incasata' || data.status === 'collected') return true
   // Dacă există invoiceNumber în webhook = proforma a fost convertită în factură = e plătită
