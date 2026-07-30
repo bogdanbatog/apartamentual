@@ -223,7 +223,44 @@
             font-style: italic;
             color: var(--ink-2);
         }
-        
+
+        /* CTA la mijlocul articolului — inserat din JS (vezi insertMidArticleCta).
+           Ton discret: e o paranteza in poveste, nu un banner. */
+        .article-midcta {
+            display: block;
+            margin: 2.25rem 0;
+            padding: 1.25rem 1.4rem;
+            background: var(--bg-soft);
+            border-left: 3px solid #BF6B50;
+            border-radius: 0 0.6rem 0.6rem 0;
+        }
+        .article-midcta__text {
+            margin: 0 0 0.85rem;
+            font-size: 0.98rem;
+            line-height: 1.6;
+            color: #555;
+        }
+        .article-midcta__links { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+        .article-midcta__links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.95rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #1A1916;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.18);
+            border-radius: 0.6rem;
+            text-decoration: none;
+            transition: background .2s ease, color .2s ease;
+        }
+        .article-midcta__links a:hover { background: #1A1916; color: #fff; }
+        @media (max-width: 560px) {
+            .article-midcta__links { flex-direction: column; }
+            .article-midcta__links a { justify-content: center; }
+        }
+
         /* Loading & empty */
         .news-loading, .news-empty {
             text-align: center;
@@ -359,6 +396,7 @@
                 <p class="js-newsletter-msg" style="display:none;"></p>
             </form>
             <p class="episode-outro__story">Nu ne cunoști încă? <a href="/povestea-noastra.html">Povestea noastră, de la o pagină de Facebook la un bloc construit împreună →</a></p>
+            <p class="episode-outro__story">Vrei să vezi ce se întâmplă acum? <a href="/grupuri.html">Grupurile de construcție care se formează</a> și <a href="/terenuri.html">terenurile căutate pentru ele</a> →</p>
         </div>
 
         <!-- Distribuire articol -->
@@ -522,7 +560,8 @@
         
         // Content
         document.getElementById('articleViewContent').innerHTML = article.content;
-        
+        insertMidArticleCta(document.getElementById('articleViewContent'));
+
         // Extra images
         const extraContainer = document.getElementById('articleViewExtraImages');
         if (article.extra_images && article.extra_images.length > 0) {
@@ -646,6 +685,37 @@
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // Insereaza un CTA discret dupa ~40% din articol, catre paginile care
+    // duc mai departe (/grupuri.html si /terenuri.html). Datele Plausible din
+    // iulie 2026: 82% dintre cititorii de articol plecau fara nicio actiune,
+    // iar singurul link de iesire era la finalul unui text de ~25 de ecrane.
+    //
+    // Nu modifica article.content din baza de date — lucreaza pe DOM dupa
+    // randare, deci se aplica automat tuturor articolelor, si celor viitoare.
+    function insertMidArticleCta(container) {
+        if (!container) return;
+
+        // Doar paragrafele de nivel inalt: pe articolele scurte CTA-ul ar fi
+        // mai lung decat textul din jurul lui.
+        const paras = Array.from(container.children).filter(el => el.tagName === 'P');
+        if (paras.length < 8) return;
+
+        const anchor = paras[Math.floor(paras.length * 0.4)];
+        if (!anchor) return;
+
+        const cta = document.createElement('aside');
+        cta.className = 'article-midcta';
+        cta.innerHTML =
+            '<p class="article-midcta__text">Povestea asta e despre un grup care s-a format acum câțiva ani. ' +
+            'Între timp se formează altele, și se caută terenuri pentru ele.</p>' +
+            '<div class="article-midcta__links">' +
+                '<a href="/grupuri.html">Vezi grupurile de construcție</a>' +
+                '<a href="/terenuri.html">Vezi terenurile</a>' +
+            '</div>';
+
+        anchor.insertAdjacentElement('afterend', cta);
     }
     </script>
 </body>
