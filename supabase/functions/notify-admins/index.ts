@@ -13,6 +13,17 @@
 //     where the frontend makes N calls (one per member) plus a separate
 //     no-recipient call dedicated to the superadmin.
 //   - Slack is sent in parallel regardless of event type.
+//
+// Adrese rezolvate pe server (1 august 2026):
+//   - Frontendul poate trimite `user_id`-uri în loc de adrese. Orice câmp
+//     `*_user_id` devine `*_email` prin `hydrateEmailsFromUserIds`, folosind
+//     service role. Un `*_email` trimis explicit NU se suprascrie, deci
+//     traseele vechi merg neschimbate.
+//   - `recipient_user_ids` (listă) trimite anunțul întregului grup dintr-un
+//     singur apel, cu câte un email separat per destinatar.
+//   Motivul: până acum browserul trebuia să citească `profiles.email` ca să
+//   compună notificările, ceea ce obliga la a lăsa coloana citibilă de orice
+//   utilizator logat.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
@@ -1018,6 +1029,139 @@ async function logNotification(row: {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Rezolvarea adreselor pe server, pornind de la `user_id`
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// DE CE EXISTĂ. Până acum, paginile de grup își adunau în browser emailurile
+// membrilor (`select('email').in('user_id', ...)`) și le pasau aici gata
+// scrise. Asta cerea ca orice utilizator logat să aibă drept de citire pe
+// coloana `email` din `profiles` — adică oricine își făcea cont putea
+// descărca toate adresele platformei.
+//
+// De acum browserul trimite `user_id`-uri, iar adresele se rezolvă AICI, cu
+// service role. Adresa nu mai trece niciodată prin browserul cuiva.
+//
+// ⚠ Nu e o breșă: funcția nu ÎNTOARCE adresele apelantului, doar trimite
+// emailul la ele. Cine apelează nu află nimic.
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function resolveUserEmails(userIds: string[]): Promise<Map<string, string>> {
+  const found = new Map<string, string>()
+
+  // Doar UUID-uri valide ajung în interogare — restul sunt ignorate, ca să nu
+  // se poată strecura nimic în șirul `in.(...)`.
+  const ids = [...new Set(userIds.filter((id) => typeof id === 'string' && UUID_RE.test(id)))]
+  if (ids.length === 0) return found
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!supabaseUrl || !serviceKey) {
+    console.error('resolveUserEmails: lipsesc SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY')
+    return found
+  }
+
+  const headers = {
+    'apikey': serviceKey,
+    'Authorization': `Bearer ${serviceKey}`,
+  }
+
+  // Sursa principală: `profiles`, o singură cerere pentru toți.
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/profiles?select=user_id,email&user_id=in.(${ids.join(',')})`,
+      { headers },
+    )
+    if (res.ok) {
+      const rows = await res.json()
+      for (const row of rows) {
+        if (row?.user_id && row?.email) found.set(row.user_id, row.email)
+      }
+    } else {
+      console.error('resolveUserEmails: profiles a răspuns', res.status, await res.text())
+    }
+  } catch (err) {
+    console.error('resolveUserEmails: eroare la interogarea profiles:', err)
+  }
+
+  // Plasă de siguranță: cine n-are rând în `profiles` se caută în auth.
+  // Există cel puțin un cont în situația asta (`fabian_224@yahoo.com`, găsit
+  // pe 31 iulie), iar o notificare netrimisă în tăcere e exact tiparul de bug
+  // care ne-a costat deja timp la Oblio.
+  const lipsa = ids.filter((id) => !found.has(id))
+  for (const id of lipsa) {
+    try {
+      const res = await fetch(`${supabaseUrl}/auth/v1/admin/users/${id}`, { headers })
+      if (res.ok) {
+        const user = await res.json()
+        if (user?.email) found.set(id, user.email)
+      }
+    } catch (err) {
+      console.error(`resolveUserEmails: nu s-a putut rezolva ${id} din auth:`, err)
+    }
+  }
+
+  const nerezolvate = ids.filter((id) => !found.has(id))
+  if (nerezolvate.length > 0) {
+    console.warn('resolveUserEmails: fără adresă pentru', nerezolvate.join(', '))
+  }
+
+  return found
+}
+
+// Completează câmpurile `*_email` din payload pornind de la `*_user_id`.
+//
+// Regula e mecanică, ca să nu fie nevoie de o listă de excepții:
+//     user_id            → user_email
+//     admin_user_id      → admin_email
+//     target_user_id     → target_email
+//     recipient_user_id  → recipient_email
+//     old_admin_user_id  → old_admin_email        (și așa mai departe)
+//
+// Un câmp `*_email` trimis explicit de frontend NU se suprascrie — așa
+// traseele vechi, nemodificate încă, merg mai departe exact ca înainte, iar
+// migrarea paginilor se poate face pe rând, fără „big bang".
+//
+// În plus, `recipient_user_ids` (listă) devine `recipient_emails`, folosită
+// pentru anunțurile către tot grupul: un singur apel din browser în loc de
+// câte unul per membru.
+async function hydrateEmailsFromUserIds(data: Record<string, any>): Promise<void> {
+  const deRezolvat: string[] = []
+  const perechi: Array<{ cheieEmail: string; userId: string }> = []
+
+  for (const [cheie, valoare] of Object.entries(data)) {
+    if (typeof valoare !== 'string' || !UUID_RE.test(valoare)) continue
+
+    let cheieEmail: string | null = null
+    if (cheie === 'user_id') cheieEmail = 'user_email'
+    else if (cheie.endsWith('_user_id')) cheieEmail = `${cheie.slice(0, -'_user_id'.length)}_email`
+    if (!cheieEmail) continue
+
+    // Nu suprascriem ce a trimis deja frontendul.
+    if (data[cheieEmail]) continue
+
+    perechi.push({ cheieEmail, userId: valoare })
+    deRezolvat.push(valoare)
+  }
+
+  const lista = Array.isArray(data.recipient_user_ids) ? data.recipient_user_ids : []
+  deRezolvat.push(...lista)
+
+  if (deRezolvat.length === 0) return
+
+  const adrese = await resolveUserEmails(deRezolvat)
+
+  for (const { cheieEmail, userId } of perechi) {
+    const adresa = adrese.get(userId)
+    if (adresa) data[cheieEmail] = adresa
+  }
+
+  if (lista.length > 0) {
+    data.recipient_emails = lista.map((id: string) => adrese.get(id)).filter(Boolean)
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Trimiterea emailului, cu reîncercare când Resend ne refuză temporar
 // ═══════════════════════════════════════════════════════════════════════════
 //
@@ -1146,6 +1290,12 @@ serve(async (req) => {
       throw new Error('Missing required fields: event_type and data')
     }
 
+    // Rezolvă pe server adresele pentru orice `*_user_id` primit, ÎNAINTE de
+    // formatare — formatările citesc `data.user_email`, `data.target_email`
+    // etc. și rămân neatinse. Traseele care încă trimit adresa direct merg
+    // mai departe nemodificate (câmpurile deja completate nu se suprascriu).
+    await hydrateEmailsFromUserIds(payload.data)
+
     const message = formatNotificationMessage(payload)
     
     const slackWebhookUrl = Deno.env.get('SLACK_WEBHOOK_URL')
@@ -1200,13 +1350,31 @@ serve(async (req) => {
         // The field `recipient_email` is the modern name; `admin_email` is the
         // legacy name used by many frontend call sites. Either one indicates
         // that the frontend intentionally targeted someone specific.
-        const hasExplicitRecipient = !!(payload.data.recipient_email || payload.data.admin_email)
+        //
+        // Al treilea caz, nou: `recipient_user_ids` — un anunț către tot
+        // grupul, într-un singur apel. Adresele au fost rezolvate pe server
+        // în `hydrateEmailsFromUserIds` și au ajuns în `recipient_emails`.
+        const broadcastEmails: string[] = Array.isArray(payload.data.recipient_emails)
+          ? payload.data.recipient_emails.filter(Boolean)
+          : []
+
+        // Ne uităm la ce a CERUT frontendul, nu la ce s-a rezolvat. Dacă a
+        // cerut un anunț către grup dar nicio adresă n-a putut fi rezolvată,
+        // mesajul nu trebuie să cadă înapoi pe superadmin ca „destinatar
+        // implicit" — ar ajunge la persoana greșită și, la evenimentele cu
+        // copie automată, în dublu exemplar.
+        const hasBroadcastRequest =
+          Array.isArray(payload.data.recipient_user_ids) && payload.data.recipient_user_ids.length > 0
+
+        const hasExplicitRecipient = !!(
+          payload.data.recipient_email || payload.data.admin_email || hasBroadcastRequest
+        )
         const primaryRecipient = payload.data.recipient_email || payload.data.admin_email || adminEmail
-        
+
         // Build recipients list, deduplicated.
         const recipients: string[] = []
-        if (primaryRecipient) recipients.push(primaryRecipient)
-        
+        if (!hasBroadcastRequest && primaryRecipient) recipients.push(primaryRecipient)
+
         // Superadmin CC logic:
         //   - SUPERADMIN_CC_ALWAYS events: always add the superadmin, even when
         //     there's an explicit recipient (e.g. invitation sent to an outsider).
@@ -1224,7 +1392,24 @@ serve(async (req) => {
           recipients.push(adminEmail)
         }
         
-        if (recipients.length === 0) {
+        // Lista de trimiteri. Fiecare intrare devine UN email separat.
+        //
+        // ⚠ La broadcast, fiecare destinatar primește mesajul lui, nu unul
+        // comun. Dacă am pune toate adresele într-un singur `to:`, fiecare
+        // membru al grupului ar vedea adresele celorlalți în antetul „Către" —
+        // exact scurgerea pe care o închidem.
+        const deliveries: string[][] = hasBroadcastRequest
+          ? broadcastEmails.map((adresa) => [adresa])
+          : (recipients.length > 0 ? [recipients] : [])
+
+        // Copia pentru superadmin, la broadcast, pleacă separat — o singură
+        // dată, nu o dată per membru.
+        if (hasBroadcastRequest && shouldCcSuperadmin && adminEmail
+            && !broadcastEmails.includes(adminEmail)) {
+          deliveries.push([adminEmail])
+        }
+
+        if (deliveries.length === 0) {
           // No one to send to — log and skip
           console.log('No email recipients for event', payload.event_type)
         } else {
@@ -1237,39 +1422,53 @@ serve(async (req) => {
                 <p><small>Event Type: ${payload.event_type}</small></p>
                 <p><small>Time: ${new Date().toISOString()}</small></p>
               `
-          
-          const sendResult = await sendEmailWithRetry(emailApiKey, {
-            from: 'apartamentual@ltfbstudio.ro',
-            to: recipients,
-            subject: message.title,
-            html: emailHtml
-          })
 
-          if (sendResult.ok) {
-            results.email = true
-            results.recipients = recipients
-            if (sendResult.attempts > 1) {
-              console.log(`Email trimis din a ${sendResult.attempts}-a încercare către ${recipients.join(', ')}`)
+          const trimise: string[] = []
+          const esuate: string[] = []
+
+          for (const to of deliveries) {
+            const sendResult = await sendEmailWithRetry(emailApiKey, {
+              from: 'apartamentual@ltfbstudio.ro',
+              to,
+              subject: message.title,
+              html: emailHtml
+            })
+
+            if (sendResult.ok) {
+              trimise.push(...to)
+              if (sendResult.attempts > 1) {
+                console.log(`Email trimis din a ${sendResult.attempts}-a încercare către ${to.join(', ')}`)
+              }
+            } else {
+              esuate.push(...to)
+              const errText = sendResult.error || 'unknown error'
+              results.error = results.error ? `${results.error}; Email error: ${errText}` : `Email error: ${errText}`
             }
-          } else {
-            const errText = sendResult.error || 'unknown error'
-            results.error = results.error ? `${results.error}; Email error: ${errText}` : `Email error: ${errText}`
+
+            // Înregistrează încercarea de email în notification_log (best-effort).
+            // Un rând per trimitere, ca în admin să se vadă exact cine a primit
+            // și cine nu — la broadcast, o singură linie ar ascunde eșecurile
+            // individuale.
+            await logNotification({
+              event_type: payload.event_type,
+              channel: 'email',
+              recipient: to.join(', '),
+              subject: message.title,
+              status: sendResult.ok ? 'sent' : 'error',
+              payload: payload.data,
+              error: sendResult.ok
+                ? null
+                : `[${sendResult.attempts} încercări] ${sendResult.error || 'unknown error'}`.substring(0, 1000),
+            })
           }
 
-          // Înregistrează încercarea de email în notification_log (best-effort).
-          // Pe eroare salvăm și textul întors de Resend plus numărul de
-          // încercări, ca să nu mai fie nevoie de arheologie prin ore.
-          await logNotification({
-            event_type: payload.event_type,
-            channel: 'email',
-            recipient: recipients.join(', '),
-            subject: message.title,
-            status: results.email ? 'sent' : 'error',
-            payload: payload.data,
-            error: results.email
-              ? null
-              : `[${sendResult.attempts} încercări] ${sendResult.error || 'unknown error'}`.substring(0, 1000),
-          })
+          if (trimise.length > 0) {
+            results.email = true
+            results.recipients = trimise
+          }
+          if (esuate.length > 0) {
+            console.error('Emailuri netrimise către:', esuate.join(', '))
+          }
         }
       } catch (error) {
         results.error = results.error ? `${results.error}; Email error: ${error.message}` : `Email error: ${error.message}`
