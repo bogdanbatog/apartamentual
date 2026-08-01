@@ -205,6 +205,13 @@ COMMENT ON VIEW public.profiles_visible IS
 -- caz adresa e oricum cunoscuta de cel care o tasteaza, deci nu se
 -- divulga nimic — dar verificarile se muta tot pe server.
 
+-- ⚠ VERSIUNEA ASTA E GRESITA — a fost reparata in
+-- `5b-repara-tipuri-functii-invitatii.sql`, care e sursa de adevar.
+-- `token` era declarat `uuid`, dar coloana `grup_invitations.token` e
+-- `varchar(100)`, deci functia crapa cu 42804 la prima invitatie reala.
+-- Lasata aici asa cum a fost rulata pe 1 august, ca sa se inteleaga
+-- istoricul; NU o re-rula peste versiunea reparata.
+
 CREATE OR REPLACE FUNCTION public.create_group_invitation(
     p_grup_id         uuid,
     p_target_user_id  uuid DEFAULT NULL,

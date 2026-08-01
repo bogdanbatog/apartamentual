@@ -30,6 +30,10 @@
 -- ═══════════════════════════════════════════════════════════════════
 
 
+-- ⚠ Versiunea asta a fost inlocuita de cea din
+-- `5b-repara-tipuri-functii-invitatii.sql`, unde valorile din coloane
+-- sunt castate explicit. NU o re-rula peste versiunea reparata.
+
 CREATE OR REPLACE FUNCTION public.list_group_invitations(p_grup_id uuid)
 RETURNS TABLE (
     invited_email text,
@@ -102,8 +106,24 @@ SELECT p.proname, p.prosecdef AS security_definer
 FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'public' AND p.proname = 'list_group_invitations';
 
--- B. Rulata de tine (superadmin) pe un grup real, trebuie sa intoarca
---    aceleasi randuri pe care le vezi azi in modalul „Invita membru".
---    Inlocuieste ID-ul cu al unui grup care are invitatii:
+-- B. ⚠ NU O APELA DIRECT DIN EDITORUL SQL. Acolo rulezi ca `postgres`,
+--    unde `auth.uid()` e NULL, iar functia e scrisa sa nu intoarca nimic
+--    fara cont — deci va da ZERO randuri chiar daca e perfect sanatoasa.
+--    Verificat pe 1 august 2026: exact asa pare „stricata" cand nu e.
 --
---    SELECT * FROM public.list_group_invitations('75a1c2cf-6683-4802-8ff8-1a236661f82f');
+--    Proba corecta cere impersonare. Inlocuieste UUID-ul cu al tau si
+--    ID-ul cu al unui grup care ARE invitatii:
+--
+--      BEGIN;
+--        SELECT set_config('request.jwt.claims',
+--               '{"sub":"UUID-UL-TAU","role":"authenticated"}', true);
+--        SET LOCAL role authenticated;
+--        SELECT * FROM public.list_group_invitations('PUNE-ID-UL-GRUPULUI');
+--      ROLLBACK;
+--
+--    (`ROLLBACK` e permis aici — fisierul asta nu contine GRANT/REVOKE.)
+--
+--    Inainte de asta, verifica daca grupul are ce afisa:
+--
+--      SELECT status, count(*) FROM public.grup_invitations
+--      WHERE grup_id = 'PUNE-ID-UL-GRUPULUI' GROUP BY status;

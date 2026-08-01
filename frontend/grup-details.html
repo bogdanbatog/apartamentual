@@ -3650,9 +3650,10 @@ function escapeHtml(text) {
 // Priority: pseudonym → email local-part → 'Utilizator'
 // Used to avoid showing a bare "Utilizator" for members who joined via
 // invitation but haven't completed their profile yet.
-// ⚠ După trecerea pe `profiles_visible`, `profile.email` e null pentru profilul
-// altcuiva, deci ramura de mai jos se aplică practic doar pe rândul propriu și
-// pentru adminii de platformă. Un membru fără pseudonim apare „Utilizator".
+// ⚠ Ramura pe email e COD MORT din 1 august 2026: interogarea membrilor nu mai
+// cere deloc coloana `email` (vezi `loadGroupDetails`), deci `profile.email` e
+// mereu undefined aici — inclusiv pentru superadmin. Un membru fără pseudonim
+// apare „Utilizator" pentru toată lumea. Verificat pe viu de Lucian.
 function displayName(profile) {
     if (!profile) return 'Utilizator';
     if (profile.pseudonym && profile.pseudonym.trim()) return profile.pseudonym;
