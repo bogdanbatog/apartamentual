@@ -33,7 +33,7 @@ async function loadProfile() {
         showLoading();
         
         const { data: profile, error } = await supabase
-            .from('profiles')
+            .from('profiles_visible')
             .select('*')
             .eq('user_id', currentUser.id)
             .single();

@@ -70,13 +70,16 @@
     async function checkAdmin() {
         var { data: { user } } = await sb.auth.getUser();
         if (!user) { window.location.href = '/index.html'; return; }
-        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        var { data: profile } = await sb.from('profiles_visible').select('is_super_admin').eq('user_id', user.id).single();
         if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
         loadUsers();
     }
 
     async function loadUsers() {
-        var { data } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+        // Citirile trec prin `profiles_visible`; pentru adminii de platformă
+        // view-ul întoarce toate coloanele, exact ca tabela. Scrierile de mai jos
+        // rămân pe `profiles` — un view nu se scrie.
+        var { data } = await sb.from('profiles_visible').select('*').order('created_at', { ascending: false });
         allUsers = data || [];
         renderTable();
     }
@@ -192,7 +195,7 @@
         // Notify the agency that they've been approved
         try {
             // Get email from profiles table (denormalized from auth.users)
-            var { data: prof, error: profErr } = await sb.from('profiles')
+            var { data: prof, error: profErr } = await sb.from('profiles_visible')
                 .select('email')
                 .eq('user_id', userId)
                 .single();
@@ -238,7 +241,7 @@
         // Notify user by email + dedicated superadmin call (account_suspended
         // is in CC_IF_NO_RECIPIENT, so we need a separate no-recipient call).
         try {
-            var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
+            var { data: prof } = await sb.from('profiles_visible').select('email').eq('user_id', userId).single();
             if (typeof notifyAdmins === 'function') {
                 if (prof && prof.email) {
                     notifyAdmins('account_suspended', {
@@ -272,7 +275,7 @@
         // Notify user by email. account_reactivated is in SUPERADMIN_CC_ALWAYS,
         // so the superadmin always gets a copy — no second call needed.
         try {
-            var { data: prof } = await sb.from('profiles').select('email, pseudonym').eq('user_id', userId).single();
+            var { data: prof } = await sb.from('profiles_visible').select('email, pseudonym').eq('user_id', userId).single();
             if (prof && prof.email && typeof notifyAdmins === 'function') {
                 notifyAdmins('account_reactivated', {
                     user_name: prof.pseudonym || 'Utilizator',
@@ -307,7 +310,7 @@
         // Get email BEFORE marking as deleted
         var userEmail = null;
         try {
-            var { data: prof } = await sb.from('profiles').select('email').eq('user_id', userId).single();
+            var { data: prof } = await sb.from('profiles_visible').select('email').eq('user_id', userId).single();
             userEmail = prof?.email;
         } catch(e) {}
         

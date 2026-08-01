@@ -630,7 +630,10 @@ async function checkAuthState() {
             var isAdminPage = window.location.pathname.includes('admin');
             if (!isAdminPage) {
             try {
-                var { data: prof } = await sb.from('profiles').select('suspended_until, account_status').eq('user_id', user.id).single();
+                // Citire prin `profiles_visible`: pe rândul propriu view-ul întoarce
+                // exact ce întorcea tabela. `suspended_until` nu mai e citibil direct
+                // din `profiles` după revocarea drepturilor rolului `authenticated`.
+                var { data: prof } = await sb.from('profiles_visible').select('suspended_until, account_status').eq('user_id', user.id).single();
                 if (prof) {
                     var isSuspended = prof.suspended_until && new Date(prof.suspended_until) > new Date();
                     var isDeleted = prof.account_status === 'deleted';

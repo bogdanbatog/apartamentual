@@ -310,12 +310,15 @@ async function loadTags() {
 async function loadProfile(userId) {
     try {
         // Load profile
+        // Citirea trece prin `profiles_visible` (rândul propriu → toate coloanele).
+        // SALVAREA rămâne pe `profiles`, mai jos: un view nu se scrie, iar
+        // revocarea drepturilor atinge doar SELECT, nu UPDATE.
         const { data: profile, error } = await supabase
-            .from('profiles')
+            .from('profiles_visible')
             .select('*')
             .eq('user_id', userId)
             .single();
-        
+
         if (error) throw error;
         profileData = profile;
         

@@ -105,7 +105,7 @@ async function loadCurrentUser() {
         if (user) {
             // Get user profile
             const { data: profile, error: profileError } = await supabase
-                .from('profiles')
+                .from('profiles_visible')
                 .select('*')
                 .eq('user_id', user.id)
                 .single();

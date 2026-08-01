@@ -137,7 +137,7 @@ async function loadCurrentUser() {
         if (user) {
             // Get user profile
             const { data: profile, error: profileError } = await supabase
-                .from('profiles')
+                .from('profiles_visible')
                 .select('*')
                 .eq('user_id', user.id)
                 .single();
@@ -168,7 +168,7 @@ async function loadGroupOwner() {
         console.log('Loading group owner for user_id:', currentGroup.owner_user_id);
         
         const { data: owner, error } = await supabase
-            .from('profiles')
+            .from('profiles_visible')
             .select('*')
             .eq('user_id', currentGroup.owner_user_id)
             .single();
@@ -536,7 +536,7 @@ async function fetchProfilesByUserIds(userIds) {
 
     try {
         const { data, error } = await supabase
-            .from('profiles')
+            .from('profiles_visible')
             .select('*')
             .in('user_id', unique);
         if (error) throw error;

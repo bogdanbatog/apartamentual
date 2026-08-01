@@ -93,8 +93,11 @@
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
+            // Rândul propriu prin `profiles_visible` — view-ul întoarce datele
+            // personale complet pentru propriul profil. Doar sursa se schimbă;
+            // pre-completarea și restul formularului rămân neatinse.
             const { data: profile } = await supabase
-                .from('profiles')
+                .from('profiles_visible')
                 .select('first_name, last_name, email, phone')
                 .eq('user_id', user.id)
                 .maybeSingle();

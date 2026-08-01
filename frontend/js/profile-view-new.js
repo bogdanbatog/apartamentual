@@ -84,23 +84,16 @@ async function initProfilePage() {
 
 async function loadProfile(profileId) {
     try {
-        // De unde citim profilul:
-        //  - vizitator NELOGAT  → view-ul `profiles_public`, care nu conține
-        //    deloc telefon, nume real, notițe sau flagurile de admin, iar
-        //    emailul și vârsta ies doar dacă omul a bifat explicit că vrea
-        //    să fie vizibile. Regulile de intimitate se aplică pe server,
-        //    nu în browser, unde oricine le poate ocoli.
-        //  - utilizator LOGAT   → tabela `profiles`, ca până acum. Rolul
-        //    `authenticated` are în continuare drept de citire pe tot; se
-        //    închide separat, când notificările vor primi `user_id`-uri în
-        //    loc de emailuri adunate în browser.
-        // Propriul profil trece pe aceeași ramură „logat", deci notițele,
-        // telefonul și vârsta rămân disponibile pentru bara de progres.
-        const profileSource = currentUser ? 'profiles' : 'profiles_public';
-
-        // First get the profile without the join
+        // O SINGURĂ poartă de citire, pentru toată lumea: `profiles_visible`.
+        // Regulile de intimitate se aplică pe server, nu în browser:
+        //  - rândul propriu (sau admin de platformă) → toate coloanele, deci
+        //    notițele, telefonul și vârsta rămân pentru bara de progres;
+        //  - profilul altcuiva → telefon, nume real, notițe și flagurile de
+        //    admin ies NULL, iar emailul și vârsta doar cu bifa explicită.
+        // Nu mai e nevoie de ramificarea `logat / nelogat` de dinainte:
+        // view-ul se degradează singur corect pentru un vizitator anonim.
         const { data: profile, error: profileError } = await supabase
-            .from(profileSource)
+            .from('profiles_visible')
             .select('*')
             .eq('user_id', profileId)
             .single();
@@ -1042,142 +1035,76 @@ window.sendProfileInvite = async function(groupId, groupName) {
     console.log('sendProfileInvite called:', groupId, groupName);
     const targetUserId = profileData.user_id;
     const targetName = profileData.pseudonym || 'Utilizator';
-    const targetEmail = profileData.email;
-    
+
     try {
-        // Check if already a member
-        const { data: existingMember } = await supabase
-            .from('grup_membri')
-            .select('id')
-            .eq('grup_id', groupId)
-            .eq('user_id', targetUserId)
-            .maybeSingle();
-        
-        if (existingMember) {
+        // Toată treaba se face pe server, în `create_group_invitation`:
+        // verifică dacă cel care invită are dreptul, rezolvă adresa celui
+        // invitat, se uită dacă e deja membru sau deja invitat, curăță o
+        // invitație veche acceptată și scrie rândul nou. Browserul primește
+        // înapoi DOAR tokenul — adresa nu mai ajunge niciodată aici.
+        const { data: rpcRows, error: rpcError } = await supabase
+            .rpc('create_group_invitation', {
+                p_grup_id: groupId,
+                p_target_user_id: targetUserId
+            });
+
+        if (rpcError) throw rpcError;
+
+        // Funcția întoarce o tabelă cu un singur rând.
+        const result = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
+
+        if (!result || result.status === 'not_allowed') {
+            showToast('Nu ai dreptul să inviți pe cineva în acest grup.', 'error');
+            return;
+        }
+        if (result.status === 'already_member') {
             showToast(`${targetName} este deja în grupul „${groupName}".`, 'error');
             return;
         }
-        
-        // Check if already invited
-        if (targetEmail) {
-            // Verifică dacă există invitație PENDING (în așteptare)
-            const { data: pendingInvite } = await supabase
-                .from('grup_invitations')
-                .select('id')
-                .eq('grup_id', groupId)
-                .eq('invited_email', targetEmail.toLowerCase())
-                .eq('status', 'pending')
-                .maybeSingle();
-            
-            if (pendingInvite) {
-                showToast(`${targetName} a fost deja invitat (în așteptare).`, 'error');
-                return;
-            }
-            
-            // Verifică dacă există invitație veche acceptată DAR persoana NU mai e membru activ
-            // (a părăsit grupul) → șterge invitația veche pentru a permite re-invitarea
-            const { data: oldAccepted } = await supabase
-                .from('grup_invitations')
-                .select('id')
-                .eq('grup_id', groupId)
-                .eq('invited_email', targetEmail.toLowerCase())
-                .eq('status', 'accepted');
-            
-            if (oldAccepted && oldAccepted.length > 0) {
-                // Persoana NU e membru activ (verificat mai sus la existingMember)
-                // → e clar că a părăsit grupul, deci ștergem invitațiile vechi acceptate
-                await supabase
-                    .from('grup_invitations')
-                    .delete()
-                    .eq('grup_id', groupId)
-                    .eq('invited_email', targetEmail.toLowerCase())
-                    .eq('status', 'accepted');
-            }
+        if (result.status === 'already_invited') {
+            showToast(`${targetName} a fost deja invitat (în așteptare).`, 'error');
+            return;
         }
-        
-        if (targetEmail) {
-            // Create invitation with token
-            const { data: newInvite, error: insertError } = await supabase
-                .from('grup_invitations')
-                .insert({
-                    grup_id: groupId,
-                    invited_email: targetEmail.toLowerCase(),
-                    invited_by: currentUser.id
-                })
-                .select('token')
-                .single();
-            
-            if (insertError) throw insertError;
-            
-            // Build invite link
-            const inviteLink = `${window.location.origin}/accept-invite.html?token=${newInvite.token}&grup=${encodeURIComponent(groupName)}`;
-            
-            // Get inviter name
-            const { data: myProf } = await supabase.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
-            const myName = myProf?.pseudonym || 'Un membru';
-            
-            // 1. Send email to the invited person
-            if (typeof notifyAdmins === 'function') {
-                notifyAdmins('invitation_sent', {
-                    group_name: groupName,
-                    group_id: groupId,
-                    invite_link: inviteLink,
-                    invited_by: myName,
-                    recipient_email: targetEmail
-                });
-            }
-            
-            // 2. Notify group admin that a member invited someone
-            const { data: groupData } = await supabase.from('grupuri').select('admin_id').eq('id', groupId).single();
-            if (groupData && groupData.admin_id) {
-                const { data: adminProf } = await supabase.from('profiles').select('email').eq('user_id', groupData.admin_id).single();
-                if (adminProf && adminProf.email && typeof notifyAdmins === 'function') {
-                    notifyAdmins('member_invited_someone', {
-                        group_name: groupName,
-                        group_id: groupId,
-                        invited_name: targetName,
-                        invited_by: myName,
-                        admin_email: adminProf.email
-                    });
-                }
-            }
-        } else {
-            // No email — create pending member, notify admin
-            const { error: joinError } = await supabase
-                .from('grup_membri')
-                .insert({
-                    grup_id: groupId,
-                    user_id: targetUserId,
-                    status: 'pending',
-                    rol: 'membru'
-                });
-            
-            if (joinError) {
-                if (joinError.code === '23505') {
-                    showToast(`${targetName} are deja o cerere pentru „${groupName}".`, 'error');
-                } else {
-                    throw joinError;
-                }
-                return;
-            }
-            
-            // Notify group admin
-            const { data: groupData } = await supabase.from('grupuri').select('admin_id').eq('id', groupId).single();
-            if (groupData && groupData.admin_id) {
-                const { data: adminProf } = await supabase.from('profiles').select('email').eq('user_id', groupData.admin_id).single();
-                const { data: myProf } = await supabase.from('profiles').select('pseudonym').eq('user_id', currentUser.id).single();
-                if (adminProf && adminProf.email && typeof notifyAdmins === 'function') {
-                    notifyAdmins('member_invited_someone', {
-                        group_name: groupName,
-                        group_id: groupId,
-                        invited_name: targetName,
-                        invited_by: myProf?.pseudonym || 'Un membru',
-                        admin_email: adminProf.email
-                    });
-                }
-            }
+        if (result.status !== 'ok' || !result.token) {
+            // `no_target`: profilul nu are adresă de email, deci nu avem unde
+            // trimite invitația. Înainte, ramura asta îl băga pe om direct ca
+            // `pending` în grup, ceea ce nu e o invitație, ci o înscriere
+            // făcută în locul lui.
+            showToast(`${targetName} nu are o adresă de email pe profil, deci nu poate fi invitat.`, 'error');
+            return;
         }
-        
+
+        // Build invite link
+        const inviteLink = `${window.location.origin}/accept-invite.html?token=${result.token}&grup=${encodeURIComponent(groupName)}`;
+
+        // Get inviter name
+        const { data: myProf } = await supabase.from('profiles_visible').select('pseudonym').eq('user_id', currentUser.id).single();
+        const myName = myProf?.pseudonym || 'Un membru';
+
+        // 1. Emailul către cel invitat. Trimitem `recipient_user_id`, iar
+        //    `notify-admins` rezolvă adresa pe server, cu service role.
+        if (typeof notifyAdmins === 'function') {
+            notifyAdmins('invitation_sent', {
+                group_name: groupName,
+                group_id: groupId,
+                invite_link: inviteLink,
+                invited_by: myName,
+                recipient_user_id: targetUserId
+            });
+        }
+
+        // 2. Notify group admin that a member invited someone
+        const { data: groupData } = await supabase.from('grupuri').select('admin_id').eq('id', groupId).single();
+        if (groupData && groupData.admin_id && typeof notifyAdmins === 'function') {
+            notifyAdmins('member_invited_someone', {
+                group_name: groupName,
+                group_id: groupId,
+                invited_name: targetName,
+                invited_by: myName,
+                admin_user_id: groupData.admin_id
+            });
+        }
+
         showToast(`Invitație trimisă lui ${targetName} pe „${groupName}".`, 'success');
         
         // Hide dropdown

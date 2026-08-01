@@ -169,7 +169,7 @@
     async function checkAdmin() {
         const { data: { user } } = await sb.auth.getUser();
         if (!user) { window.location.href = 'register.html'; return; }
-        const { data: prof } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        const { data: prof } = await sb.from('profiles_visible').select('is_super_admin').eq('user_id', user.id).single();
         if (!prof || !prof.is_super_admin) { window.location.href = 'index.html'; return; }
         loadVideos();
     }

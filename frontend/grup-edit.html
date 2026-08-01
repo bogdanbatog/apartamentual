@@ -522,7 +522,7 @@ async function checkAuth() {
         currentUser = user;
         // Aflăm dacă utilizatorul e superadmin (poate edita orice grup, nu doar al lui).
         // Folosim aceeași verificare ca în restul platformei: profiles.is_super_admin === true.
-        const { data: prof } = await sb.from('profiles')
+        const { data: prof } = await sb.from('profiles_visible')
             .select('is_super_admin').eq('user_id', user.id).single();
         isSuperAdmin = prof && prof.is_super_admin === true;
         await loadGroupForEdit();
@@ -725,12 +725,11 @@ async function handleSubmit(e) {
             if (membersList && membersList.length > 0) {
                 const memberIds = membersList.map(m => m.user_id).filter(id => id !== currentUser.id);
                 if (memberIds.length > 0) {
-                    const { data: memberProfiles } = await sb
-                        .from('profiles')
-                        .select('email')
-                        .in('user_id', memberIds);
-                    
-                    const emails = (memberProfiles || []).map(p => p.email).filter(Boolean);
+                    // Adresele membrilor NU se mai citesc din browser. Trimitem
+                    // `recipient_user_ids` într-un singur apel, iar `notify-admins`
+                    // le rezolvă pe server, cu service role, și trimite câte un
+                    // email SEPARAT fiecăruia (un `to:` comun ar arăta fiecărui
+                    // membru adresele celorlalți).
 
                     // Un singur email per salvare, ca să nu inundăm membrii:
                     //   - dacă linkul de WhatsApp e nou/schimbat → doar emailul
@@ -759,20 +758,24 @@ async function handleSubmit(e) {
                         };
                         // Așteptăm trimiterea, ca redirect-ul de mai jos să nu
                         // anuleze cererile aflate în zbor.
-                        await Promise.all(emails.map(email =>
-                            notifyAdmins('whatsapp_link_shared', { ...waPayload, admin_email: email })
-                        ));
-                        // Apel dedicat superadminului — fără admin_email
+                        await notifyAdmins('whatsapp_link_shared', {
+                            ...waPayload,
+                            recipient_user_ids: memberIds
+                        });
+                        // Apel dedicat superadminului — fără destinatar.
+                        // Rămâne separat: la un apel cu `recipient_user_ids`,
+                        // evenimentul e considerat „cu destinatar explicit", deci
+                        // copia pentru superadmin nu mai pleacă automat.
                         await notifyAdmins('whatsapp_link_shared', waPayload);
                     } else {
-                        for (const email of emails) {
-                            notifyAdmins('group_updated', {
-                                group_name: nume,
-                                group_id: groupId,
-                                updated_by: currentUser.email || 'admin',
-                                admin_email: email
-                            });
-                        }
+                        // Ca și înainte, aici NU pleacă o copie la superadmin —
+                        // apelul are destinatari expliciți.
+                        notifyAdmins('group_updated', {
+                            group_name: nume,
+                            group_id: groupId,
+                            updated_by: currentUser.email || 'admin',
+                            recipient_user_ids: memberIds
+                        });
                     }
                 }
             }

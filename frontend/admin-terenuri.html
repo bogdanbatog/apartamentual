@@ -72,7 +72,7 @@
     async function checkAdmin() {
         var { data: { user } } = await sb.auth.getUser();
         if (!user) { window.location.href = '/index.html'; return; }
-        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        var { data: profile } = await sb.from('profiles_visible').select('is_super_admin').eq('user_id', user.id).single();
         if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
         loadTerenuri();
     }
@@ -84,9 +84,12 @@
         // Get user emails for proposed_by
         var userIds = [...new Set(allTerenuri.map(t => t.created_by_user_id).filter(Boolean))];
         if (userIds.length > 0) {
-            var { data: profiles } = await sb.from('profiles').select('user_id, email, pseudonim').in('user_id', userIds);
+            // `profiles_visible` întoarce emailurile complet pentru adminii de
+            // platformă. `pseudonim` era o scriere greșită (coloana e `pseudonym`),
+            // deci interogarea pica și coloana „Propus de" rămânea goală.
+            var { data: profiles } = await sb.from('profiles_visible').select('user_id, email, pseudonym').in('user_id', userIds);
             if (profiles) {
-                profiles.forEach(function(p) { usersMap[p.user_id] = p.email || p.pseudonim || 'N/A'; });
+                profiles.forEach(function(p) { usersMap[p.user_id] = p.email || p.pseudonym || 'N/A'; });
             }
         }
         renderTable();

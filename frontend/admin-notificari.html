@@ -90,7 +90,7 @@
     async function checkAdmin() {
         var { data: { user } } = await sb.auth.getUser();
         if (!user) { window.location.href = '/index.html'; return; }
-        var { data: profile } = await sb.from('profiles').select('is_super_admin').eq('user_id', user.id).single();
+        var { data: profile } = await sb.from('profiles_visible').select('is_super_admin').eq('user_id', user.id).single();
         if (!profile || !profile.is_super_admin) { window.location.href = '/index.html'; return; }
         loadLog();
     }

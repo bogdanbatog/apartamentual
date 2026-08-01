@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Verifică dacă e super admin
             const { data: profile } = await supabase
-                .from('profiles')
+                .from('profiles_visible')
                 .select('is_super_admin')
                 .eq('user_id', user.id)
                 .single();
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Verifică permisiuni
             const { data: profile } = await supabase
-                .from('profiles')
+                .from('profiles_visible')
                 .select('*')
                 .eq('user_id', userId)
                 .single();

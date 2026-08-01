@@ -579,39 +579,35 @@ window.requestJoinGroup = async function(grupId) {
                 .single();
             
             if (grup && grup.admin_id) {
-                const { data: adminProfile } = await sb
-                    .from('profiles')
-                    .select('email')
-                    .eq('user_id', grup.admin_id)
-                    .single();
-                
+                // Adresa adminului NU se mai citeste din browser — trimitem
+                // `admin_user_id`, iar `notify-admins` o rezolva pe server, cu
+                // service role. La fel si adresa proprie: e deja in sesiune
+                // (`currentUser.email`), deci nu mai are rost o interogare.
                 const { data: requesterProfile } = await sb
-                    .from('profiles')
-                    .select('pseudonym, email')
+                    .from('profiles_visible')
+                    .select('pseudonym')
                     .eq('user_id', currentUser.id)
                     .single();
-                
-                if (adminProfile?.email) {
-                    await sb.functions.invoke('notify-admins', {
-                        body: {
-                            // Evenimentul modern: text in romana, template cu buton,
-                            // si copie automata la superadmin (SUPERADMIN_CC_ALWAYS).
-                            // Inainte era 'membership_request' (legacy, englezesc,
-                            // fara copie la superadmin) — pagina grupului folosea deja
-                            // 'join_request', deci acelasi buton dadea doua rezultate.
-                            event_type: 'join_request',
-                            data: {
-                                // numele moderne: linkul din buton se face din group_id
-                                group_id: grupId,
-                                group_name: grup.nume,
-                                user_id: currentUser.id,
-                                user_email: requesterProfile?.email || currentUser.email,
-                                user_name: requesterProfile?.pseudonym || 'Utilizator',
-                                admin_email: adminProfile.email
-                            }
+
+                await sb.functions.invoke('notify-admins', {
+                    body: {
+                        // Evenimentul modern: text in romana, template cu buton,
+                        // si copie automata la superadmin (SUPERADMIN_CC_ALWAYS).
+                        // Inainte era 'membership_request' (legacy, englezesc,
+                        // fara copie la superadmin) — pagina grupului folosea deja
+                        // 'join_request', deci acelasi buton dadea doua rezultate.
+                        event_type: 'join_request',
+                        data: {
+                            // numele moderne: linkul din buton se face din group_id
+                            group_id: grupId,
+                            group_name: grup.nume,
+                            user_id: currentUser.id,
+                            user_email: currentUser.email,
+                            user_name: requesterProfile?.pseudonym || 'Utilizator',
+                            admin_user_id: grup.admin_id
                         }
-                    });
-                }
+                    }
+                });
             }
         } catch (notifyErr) {
             console.warn('Could not notify group admin:', notifyErr);

@@ -27,7 +27,7 @@ async function fetchUserProfile() {
         if (!user) return null;
 
         const { data, error } = await supabase
-            .from('profiles')
+            .from('profiles_visible')
             .select('*')
             .eq('user_id', user.id)
             .single();
