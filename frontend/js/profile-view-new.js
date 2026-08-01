@@ -84,9 +84,23 @@ async function initProfilePage() {
 
 async function loadProfile(profileId) {
     try {
+        // De unde citim profilul:
+        //  - vizitator NELOGAT  → view-ul `profiles_public`, care nu conține
+        //    deloc telefon, nume real, notițe sau flagurile de admin, iar
+        //    emailul și vârsta ies doar dacă omul a bifat explicit că vrea
+        //    să fie vizibile. Regulile de intimitate se aplică pe server,
+        //    nu în browser, unde oricine le poate ocoli.
+        //  - utilizator LOGAT   → tabela `profiles`, ca până acum. Rolul
+        //    `authenticated` are în continuare drept de citire pe tot; se
+        //    închide separat, când notificările vor primi `user_id`-uri în
+        //    loc de emailuri adunate în browser.
+        // Propriul profil trece pe aceeași ramură „logat", deci notițele,
+        // telefonul și vârsta rămân disponibile pentru bara de progres.
+        const profileSource = currentUser ? 'profiles' : 'profiles_public';
+
         // First get the profile without the join
         const { data: profile, error: profileError } = await supabase
-            .from('profiles')
+            .from(profileSource)
             .select('*')
             .eq('user_id', profileId)
             .single();

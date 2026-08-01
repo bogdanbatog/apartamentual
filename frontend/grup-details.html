@@ -1376,13 +1376,23 @@ async function loadGroupDetails() {
             .eq('status', 'pending');
         
         pendingRequests = pendingData || [];
-        
+
+        // De unde citim profilurile membrilor și ale cererilor:
+        //  - vizitator NELOGAT → view-ul `profiles_public` (fără email,
+        //    fără telefon, fără nume real). Pagina de grup e publică, deci
+        //    până acum orice trecător primea în browser emailurile tuturor
+        //    membrilor.
+        //  - utilizator LOGAT → tabela `profiles`, ca până acum: aprobarea
+        //    unei cereri și notificările către membri au nevoie de email.
+        const profileSource = currentUser ? 'profiles' : 'profiles_public';
+        const emailCol = currentUser ? 'email, ' : '';
+
         // Load profiles for pending requests
         if (pendingRequests.length > 0) {
             const pendingUserIds = pendingRequests.map(m => m.user_id);
             const { data: pendingProfiles } = await sb
-                .from('profiles')
-                .select('user_id, pseudonym, email, account_status')
+                .from(profileSource)
+                .select(`user_id, pseudonym, ${emailCol}account_status`)
                 .in('user_id', pendingUserIds);
             if (pendingProfiles) {
                 pendingRequests = pendingRequests.map(m => ({
@@ -1402,8 +1412,8 @@ async function loadGroupDetails() {
         if (members.length > 0) {
             const userIds = members.map(m => m.user_id);
             const { data: profilesData } = await sb
-                .from('profiles')
-                .select('user_id, pseudonym, email, account_status, is_demo')
+                .from(profileSource)
+                .select(`user_id, pseudonym, ${emailCol}account_status, is_demo`)
                 .in('user_id', userIds);
             
             // Attach profile to each member
