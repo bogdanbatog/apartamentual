@@ -129,7 +129,23 @@ SELECT count(*) AS randuri_prin_view FROM public.profiles_visible;
 --         SELECT email FROM public.profiles LIMIT 1;   -- trebuie sa CRAPE
 --       ROLLBACK;
 --
---     Mesajul asteptat: „permission denied for column email".
+--     Mesajul asteptat: „42501: permission denied for TABLE profiles".
+--     ⚠ Scrie „table", nu „column", desi dreptul lipsa e pe coloana —
+--     asa raporteaza Postgres. E rezultatul CORECT, nu un esec.
+--     ⚠⚠ Mesajul vine insotit de un HINT care iti spune sa rulezi
+--     `GRANT SELECT ON public.profiles TO authenticated` — adica exact
+--     comanda care ANULEAZA revocarea. E un sfat generic al motorului.
+--     NU-L URMA. (E plasa de siguranta, daca se rupe ceva pe site.)
+--
+--     Verifica si reversul, altfel nu stii daca ai revocat prea mult:
+--
+--       BEGIN;
+--         SELECT set_config('request.jwt.claims',
+--                '{"sub":"UUID-UL","role":"authenticated"}', true);
+--         SET LOCAL role authenticated;
+--         SELECT user_id, pseudonym, account_type
+--         FROM public.profiles LIMIT 3;   -- trebuie sa MEARGA
+--       ROLLBACK;
 --
 --  2. Acelasi utilizator, prin view: primeste randuri, dar aproape
 --     numai emailuri NULL — doar cele 13 legitime (1 agentie + 12 cu
