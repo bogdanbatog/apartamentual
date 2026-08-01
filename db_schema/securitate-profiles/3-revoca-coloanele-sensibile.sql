@@ -18,6 +18,27 @@
 -- ═══════════════════════════════════════════════════════════════════
 
 
+--  ⚠ NU PUNE NICIODATA `BEGIN ... ROLLBACK` in acelasi script cu
+--  REVOKE/GRANT. Editorul SQL din Supabase ruleaza TOT scriptul ca o
+--  singura tranzactie; un `ROLLBACK` scris undeva mai jos anuleaza si
+--  modificarile de mai sus, tacut, dupa ce controalele au afisat deja
+--  rezultate care par bune. Exact asa a picat prima incercare, pe
+--  1 august 2026: SQL-ul „a mers", dar emailurile se citeau in
+--  continuare anonim. Proba „ca anon" se ruleaza SEPARAT, in alt tab.
+-- ═══════════════════════════════════════════════════════════════════
+
+
+-- ── Pasul 0 (diagnostic): cine are drept de citire pe tabela ────────
+-- Ne intereseaza daca apare `PUBLIC` in lista. Daca da, `anon` mosteneste
+-- dreptul de acolo si revocarea de mai jos nu e de ajuns singura.
+SELECT grantee, privilege_type
+FROM information_schema.role_table_grants
+WHERE table_schema = 'public'
+  AND table_name = 'profiles'
+  AND privilege_type = 'SELECT'
+ORDER BY grantee;
+
+
 -- ── Pasul 1: ia-i lui `anon` dreptul global de citire pe tabela ─────
 -- Fara asta, un GRANT pe coloane n-ar avea efect: dreptul la nivel de
 -- tabela le acopera oricum pe toate.
@@ -53,6 +74,14 @@ GRANT SELECT (
 ) ON public.profiles TO anon;
 
 
+-- ── Pasul 3: asigura-te ca utilizatorii LOGATI raman neatinsi ───────
+-- Idempotent (in Supabase dreptul exista deja). E aici ca plasa: daca
+-- vreodata se revoca ceva de la `PUBLIC`, logatii sa nu cada odata cu
+-- vizitatorii. Rolul `authenticated` ramane deliberat cu acces complet;
+-- se strange separat, cand notificarile vor primi `user_id`-uri.
+GRANT SELECT ON public.profiles TO authenticated;
+
+
 -- ═══════════════════════════════════════════════════════════════════
 --  CONTROL — ruleaza dupa, ca sa vezi ca a prins
 -- ═══════════════════════════════════════════════════════════════════
@@ -67,13 +96,24 @@ WHERE grantee = 'anon'
   AND privilege_type = 'SELECT'
 ORDER BY column_name;
 
--- B. Proba directa: citeste ca `anon`. Prima trebuie sa DEA EROARE
---    („permission denied for column email"), a doua trebuie sa mearga.
-BEGIN;
-  SET LOCAL role anon;
-  -- SELECT email FROM public.profiles LIMIT 1;      -- <- decomenteaza: trebuie sa crape
-  SELECT user_id, pseudonym FROM public.profiles LIMIT 1;   -- <- trebuie sa mearga
-ROLLBACK;
+-- B. Proba directa „ca anon" — ⚠ RULEAZA-O SINGURA, IN ALT TAB,
+--    NICIODATA in acelasi script cu REVOKE/GRANT de mai sus (vezi
+--    avertismentul din capul fisierului: `ROLLBACK` ar anula tot).
+--
+--    Copiaza intr-un tab nou DOAR randurile astea, fara alte comenzi:
+--
+--      BEGIN;
+--        SET LOCAL role anon;
+--        SELECT email FROM public.profiles LIMIT 1;   -- trebuie sa CRAPE
+--      ROLLBACK;
+--
+--    Mesajul asteptat: „permission denied for column email".
+--    Apoi, tot separat, ca sa vezi ca restul merge:
+--
+--      BEGIN;
+--        SET LOCAL role anon;
+--        SELECT user_id, pseudonym FROM public.profiles LIMIT 1;
+--      ROLLBACK;
 
 
 -- ═══════════════════════════════════════════════════════════════════
