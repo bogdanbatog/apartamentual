@@ -495,44 +495,11 @@ function renderGrupCard(grup, isMember) {
 }
 
 // ── JOIN GROUP ──
-window.joinGroup = async function(grupId) {
-    if (!currentUser) {
-        showToast('Trebuie să fii conectat pentru a te alătura unui grup.', 'info');
-        setTimeout(() => window.location.href = 'register.html', 1500);
-        return;
-    }
-    
-    if (userAccountType === 'profesional') {
-        showToast('Conturile de agenție nu pot face parte din grupuri.', 'info');
-        return;
-    }
-    
-    try {
-        const { error } = await sb
-            .from('grup_membri')
-            .insert({
-                grup_id: grupId,
-                user_id: currentUser.id,
-                status: 'activ'
-            });
-        
-        if (error) throw error;
-        
-        myGrupuri.add(grupId);
-        showToast('Te-ai alăturat grupului cu succes!', 'success');
-        
-        // Reload to update UI
-        setTimeout(() => window.location.reload(), 1000);
-        
-    } catch (e) {
-        console.error('Join group error:', e);
-        if (e.message?.includes('max_membri')) {
-            showToast('Grupul este plin.', 'error');
-        } else {
-            showToast('Eroare la alăturare. Încearcă din nou.', 'error');
-        }
-    }
-};
+// `joinGroup()` — intrarea directă ca `activ` — a fost ștearsă. Nu era
+// apelată de nicăieri (cardurile de pe /grupuri.html oferă doar „Cere
+// alăturarea"), iar politica de INSERT pe `grup_membri` refuză de acum
+// inserarea directă ca membru activ. Rămâne o singură cale: cererea de
+// mai jos, pe care o aprobă adminul grupului.
 
 window.requestJoinGroup = async function(grupId) {
     if (!currentUser) {
@@ -608,6 +575,15 @@ window.requestJoinGroup = async function(grupId) {
         
     } catch (e) {
         console.error('Request join error:', e);
+        // 42501 = politica de INSERT a refuzat rândul. În practică:
+        // profil necompletat (pragul cerut de `profil_complet`) sau cont
+        // de agenție. Mesajul generic ar lăsa omul fără nicio idee ce are
+        // de făcut.
+        if (e && (e.code === '42501' || String(e.message || '').indexOf('row-level security') !== -1)) {
+            showToast('Ca să te poți alătura unui grup, completează-ți întâi profilul.', 'error');
+            setTimeout(() => window.location.href = 'profile-edit-new.html', 2500);
+            return;
+        }
         showToast('Eroare la trimiterea cererii.', 'error');
     }
 };

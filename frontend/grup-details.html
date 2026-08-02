@@ -1279,6 +1279,7 @@
 // ── STATE ──
 let currentUser = null;
 let currentUserProfile = null;
+let currentUserProfileComplete = false;
 let currentGroup = null;
 let isMember = false;
 let isAdmin = false;
@@ -1324,6 +1325,13 @@ function checkAuth() {
             try {
                 var { data: prof } = await sb.from('profiles_visible').select('account_type, user_id, is_super_admin, pseudonym').eq('user_id', currentUser.id).single();
                 currentUserProfile = prof;
+                // Pragul „profil completat" se calculează pe server, într-un
+                // singur loc (`profil_complet`), ca să nu ajungem cu trei
+                // definiții ușor diferite: una în HTML, una în JS, una în
+                // politica RLS. Aici e folosit DOAR ca să arătăm mesajul
+                // potrivit pe buton — bariera adevărată e politica.
+                var { data: complet } = await sb.rpc('profil_complet', { p_user_id: currentUser.id });
+                currentUserProfileComplete = (complet === true);
             } catch(e) {}
         }
     }).catch(function(e) {
@@ -1746,13 +1754,20 @@ function renderActions(group) {
             html += `<span style="color: #8a8a8a; font-size: 0.875rem;"><i class="fas fa-info-circle"></i> Conturile de agenție nu pot intra în grupuri.</span>`;
         } else if (hasPending) {
             html += `<span style="color: #c2604a; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
-        } else if (statusNorm === 'deschis' && hasRoom) {
+        } else if (!currentUserProfileComplete && hasRoom) {
+            // Cine nu și-a completat profilul nu poate intra în grup — regula
+            // e aplicată în bază (politica de INSERT pe `grup_membri`), iar
+            // aici doar o explicăm, ca omul să nu primească o eroare seacă.
             html += `
-                <button class="btn-action btn-primary" onclick="joinGroup()">
-                    <i class="fas fa-user-plus"></i> Alătură-te grupului
-                </button>
+                <a href="profile-edit-new.html" class="btn-action btn-primary">
+                    <i class="fas fa-user-edit"></i> Completează-ți profilul ca să te poți alătura
+                </a>
             `;
-        } else if (statusNorm === 'cu_aprobare' && hasRoom) {
+        } else if ((statusNorm === 'deschis' || statusNorm === 'cu_aprobare') && hasRoom) {
+            // Grupurile „deschise" (intrare directă, fără aprobare) nu mai
+            // există ca decizie de produs, iar baza refuză de acum inserarea
+            // directă ca `activ`. Ambele stări duc în același loc: o cerere
+            // pe care o aprobă adminul grupului.
             html += `
                 <button class="btn-action btn-primary" onclick="requestJoinGroup()">
                     <i class="fas fa-user-plus"></i> Cere alăturarea
@@ -2396,28 +2411,11 @@ function timeAgo(dateStr) {
 }
 
 // ── ACTIONS ──
-window.joinGroup = async function() {
-    if (!currentUser || !currentGroup) return;
-    
-    try {
-        const { error } = await sb
-            .from('grup_membri')
-            .insert({
-                grup_id: currentGroup.id,
-                user_id: currentUser.id,
-                status: 'activ'
-            });
-        
-        if (error) throw error;
-        
-        showToast('Te-ai alăturat grupului!', 'success');
-        reloadPage(1000);
-        
-    } catch (e) {
-        console.error('Join error:', e);
-        showToast('Eroare la alăturare.', 'error');
-    }
-};
+// `joinGroup()` — intrarea directă ca `activ`, fără aprobare — a fost
+// ștearsă. Era folosită doar de butonul grupurilor cu status `deschis`,
+// stare pe care n-o mai producem, iar de acum politica de INSERT o
+// refuză oricum. A rămas o singură cale de intrare din pagină: cererea
+// de mai jos, pe care o aprobă adminul grupului.
 
 window.requestJoinGroup = async function() {
     if (!currentUser || !currentGroup) return;
@@ -2456,6 +2454,14 @@ window.requestJoinGroup = async function() {
         
     } catch (e) {
         console.error('Request join error:', e);
+        // Codul 42501 = politica de INSERT a refuzat rândul. În practică
+        // înseamnă profil necompletat (butonul ar fi trebuit să arate deja
+        // altceva, dar pagina poate fi deschisă de mult) sau cont de agenție.
+        if (e && (e.code === '42501' || String(e.message || '').indexOf('row-level security') !== -1)) {
+            showToast('Ca să te poți alătura unui grup, completează-ți întâi profilul.', 'error');
+            setTimeout(function() { window.location.href = 'profile-edit-new.html'; }, 2500);
+            return;
+        }
         showToast('Eroare la trimiterea cererii.', 'error');
     }
 };
@@ -3324,6 +3330,12 @@ async function checkPendingInvitation() {
         // Store for the accept/reject handlers
         pendingInvitation = {
             id: invitation.id,
+            // Tokenul e singura cheie cu care serverul recunoaște invitația
+            // la acceptare (`accept_group_invitation`). Vine fie din URL,
+            // fie din rândul găsit după adresa proprie de email.
+            token: invitation.token,
+            // Rămâne doar pentru textul bannerului și eticheta butonului.
+            // Decizia reală „activ sau pending" o ia serverul.
             invitedByAdmin: invitedByAdmin,
             inviterName: inviterName,
             groupName: currentGroup.nume
@@ -3369,53 +3381,53 @@ window.acceptInvitationBanner = async function() {
     if (label) label.textContent = 'Se procesează...';
     
     try {
-        // Check group capacity before joining
-        const { count } = await sb
-            .from('grup_membri')
-            .select('id', { count: 'exact', head: true })
-            .eq('grup_id', currentGroup.id)
-            .eq('status', 'activ');
+        // Tot lanțul se face acum pe server, într-un singur apel:
+        // tokenul, adresa de email, expirarea, locurile libere, profilul
+        // completat, decizia activ-vs-pending și scrierea rândului de
+        // membru. Înainte, „intru direct sau cer aprobare" se decidea în
+        // browser, comparând două valori tot din browser — deci regula
+        // „doar adminul poate băga pe cineva direct" era o convenție de
+        // JavaScript, nu o garanție.
+        const { data: rpcRows, error: rpcError } = await sb
+            .rpc('accept_group_invitation', { p_token: pendingInvitation.token });
+        if (rpcError) throw rpcError;
+        const rez = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
         
-        if (count >= currentGroup.max_membri) {
-            showToast('Grupul a atins numărul maxim de membri. Contactează adminul grupului.', 'error');
+        // Serverul spune și DE CE nu se poate (grup plin, invitație
+        // expirată, altă adresă, profil incomplet), cu text gata de
+        // arătat. `motiv` e codul scurt, pentru ramificare.
+        if (!rez || !rez.ok) {
+            showToast((rez && rez.mesaj) || 'Invitația nu a putut fi acceptată.', 'error');
+            if (rez && rez.motiv === 'profil_incomplet') {
+                setTimeout(function() { window.location.href = 'profile-edit-new.html'; }, 2500);
+                return;
+            }
             if (btnAccept) btnAccept.disabled = false;
             if (btnReject) btnReject.disabled = false;
             if (label) label.textContent = originalLabel;
             return;
         }
         
-        // Admin inviter → activ, regular member inviter → pending
-        const joinStatus = pendingInvitation.invitedByAdmin ? 'activ' : 'pending';
-        
-        // Check if there's a pre-existing membership row (could be from previous leave/kick)
-        const { data: existingMember } = await sb
-            .from('grup_membri')
-            .select('id, status')
-            .eq('grup_id', currentGroup.id)
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
-        
-        if (existingMember) {
-            await sb
-                .from('grup_membri')
-                .update({ status: joinStatus, joined_at: new Date().toISOString() })
-                .eq('id', existingMember.id);
-        } else {
-            const { error: joinError } = await sb
-                .from('grup_membri')
-                .insert({
-                    grup_id: currentGroup.id,
-                    user_id: currentUser.id,
-                    status: joinStatus
-                });
-            if (joinError) throw joinError;
+        // Statusul vine de la server; browserul nu-l mai decide.
+        const joinStatus = rez.status_membru;
+
+        // „Ești deja membru": nimic nu s-a schimbat, deci nu anunțăm pe
+        // nimeni. Fără ramura asta, o a doua apăsare ar trimite tuturor
+        // membrilor emailul „a intrat un membru nou".
+        if (rez.motiv === 'deja_membru') {
+            showToast(rez.mesaj, 'info');
+            document.getElementById('invitationBanner').style.display = 'none';
+            pendingInvitation = null;
+            reloadPage(1200);
+            return;
         }
         
-        // Mark invitation as accepted
-        await sb
-            .from('grup_invitations')
-            .update({ status: 'accepted' })
-            .eq('id', pendingInvitation.id);
+        // Rândul de membru (inclusiv cazul „rând vechi, de la o plecare
+        // sau o excludere anterioară") l-a scris deja funcția de pe
+        // server. Browserul nu mai are voie să scrie `activ` aici.
+        
+        // Invitația a fost marcată `accepted` tot de server, în același
+        // apel — nu mai rămâne nimic de scris din browser.
         
         // If pending, notify admin to approve
         if (joinStatus === 'pending') {
