@@ -12,9 +12,11 @@ package-homepage-v9/
 screenshots/tmp/
 screenshots/screencapture_*
 
-# Campania de emailuri pe zone: previzualizări + jurnalul trimiterilor.
+# Campaniile de emailuri: previzualizări + jurnalul trimiterilor.
 # Conțin adrese de email ale utilizatorilor reali — NU se comit.
-scripts/emailuri-zone/local/
+# Regula e pe tipar, ca o campanie nouă să fie acoperită din start, fără să fie
+# nevoie să-ți aduci aminte să adaugi aici încă un rând.
+scripts/*/local/
 
 # Exporturi CSV din Supabase (interogări de analiză).
 # Conțin date personale ale utilizatorilor reali: adrese de email, pseudonime,
