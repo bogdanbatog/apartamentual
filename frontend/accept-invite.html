@@ -228,37 +228,43 @@ async function processInvitation() {
     }
     
     try {
-        // 1. Look up the invitation
-        const { data: invitation, error: invError } = await sb
-            .from('grup_invitations')
-            .select('id, grup_id, invited_email, invited_by, status, expires_at')
-            .eq('token', token)
-            .maybeSingle();
-        
-        if (invError || !invitation) {
+        // 1. Validate the invitation ON THE SERVER.
+        //    The table `grup_invitations` is closed to the browser: it holds
+        //    the invited person's email address and the token, and used to be
+        //    readable by anyone with the anon key. The RPC returns only what
+        //    this page needs — state, group, and whether the invitation is
+        //    ours — with the email comparison done server-side. The address
+        //    comes back masked, just enough to recognise your own account.
+        const { data: invRows, error: invError } = await sb
+            .rpc('get_invitation_by_token', { p_token: token });
+
+        const invitation = Array.isArray(invRows) ? invRows[0] : invRows;
+
+        if (invError || !invitation || !invitation.gasit) {
             showError('Invitație negăsită', 'Această invitație nu există sau link-ul este incorect.');
             return;
         }
-        
+
         // Check if already used
         if (invitation.status === 'accepted') {
             showError('Invitație deja folosită', 'Această invitație a fost deja acceptată.');
             return;
         }
-        
-        if (invitation.status === 'expired' || invitation.status === 'cancelled') {
-            showError('Invitație expirată', 'Această invitație nu mai este validă.');
+
+        // Anything that isn't still pending is a dead end: expired, cancelled
+        // or rejected. (Expiry by date is applied by the RPC itself, which
+        // also flips the row to `expired` — the browser no longer writes it.)
+        if (invitation.status !== 'pending') {
+            showError('Invitație expirată', 'Această invitație nu mai este validă. Cere o nouă invitație de la un membru al grupului.');
             return;
         }
-        
-        // Check expiry
-        if (invitation.expires_at && new Date(invitation.expires_at) < new Date()) {
-            await sb.from('grup_invitations').update({ status: 'expired' }).eq('id', invitation.id);
-            showError('Invitație expirată', 'Această invitație a expirat. Cere o nouă invitație de la un membru al grupului.');
+
+        if (!invitation.grup_nume) {
+            showError('Grup negăsit', 'Grupul asociat acestei invitații nu mai există.');
             return;
         }
-        
-        // 2. Check if user is logged in FIRST (before querying grupuri which needs auth)
+
+        // 2. Check if the user is logged in (the membership lookup below needs it)
         let user = null;
         
         // Try getUser first
@@ -276,34 +282,22 @@ async function processInvitation() {
         }
         
         if (!user) {
-            // Not logged in - show auth state with return URL
-            // Try to get group name from URL parameter
-            const grupNameFromUrl = urlParams.get('grup');
-            const displayName = grupNameFromUrl ? `„${decodeURIComponent(grupNameFromUrl)}"` : 'un grup';
-            document.getElementById('grupNameAuth').textContent = displayName;
-            document.querySelector('#stateAuth p').innerHTML = `Ai fost invitat/ă în grupul <span class="grup-name">${displayName}</span> de pe platforma <strong>ApartamenTUal</strong>. Trebuie să te autentifici pentru a accepta invitația.`;
+            // Not logged in - show auth state with return URL.
+            // The group name now comes from the server (the RPC), not from the
+            // `?grup=` URL parameter, which could be missing or faked.
+            document.getElementById('grupNameAuth').textContent = `„${invitation.grup_nume}"`;
             const returnUrl = encodeURIComponent(window.location.href);
             document.getElementById('btnRegister').href = `register.html?redirect=${returnUrl}`;
             showState('stateAuth');
             return;
         }
-        
-        // 3. Get group info (now we're authenticated, RLS allows it)
-        const { data: group } = await sb
-            .from('grupuri')
-            .select('id, nume, max_membri, status, admin_id')
-            .eq('id', invitation.grup_id)
-            .single();
-        
-        if (!group) {
-            showError('Grup negăsit', 'Grupul asociat acestei invitații nu mai există.');
-            return;
-        }
-        
-        // 3b. Verify email matches invitation
-        if (user.email.toLowerCase() !== invitation.invited_email.toLowerCase()) {
+
+        // 3. Verify the invitation is ours. The comparison happened on the
+        //    server; here we only react to it. The address is shown masked —
+        //    enough to recognise which account to use.
+        if (!invitation.email_matches) {
             document.getElementById('errorTitle').textContent = 'Email diferit';
-            document.getElementById('errorMessage').innerHTML = `Această invitație a fost trimisă la <strong>${invitation.invited_email}</strong>. Tu ești logat/ă cu <strong>${user.email}</strong>.<br><br>Apasă butonul de mai jos pentru a te deconecta și a accesa invitația cu contul corect.`;
+            document.getElementById('errorMessage').innerHTML = `Această invitație a fost trimisă la <strong>${invitation.invited_email_mascat}</strong>. Tu ești logat/ă cu <strong>${user.email}</strong>.<br><br>Apasă butonul de mai jos pentru a te deconecta și a accesa invitația cu contul corect.`;
             
             // Replace the back button with a logout button
             const errorDiv = document.getElementById('stateError');
@@ -328,23 +322,25 @@ async function processInvitation() {
         const { data: existingMember } = await sb
             .from('grup_membri')
             .select('id, status')
-            .eq('grup_id', group.id)
+            .eq('grup_id', invitation.grup_id)
             .eq('user_id', user.id)
             .maybeSingle();
-        
+
         if (existingMember && existingMember.status === 'activ') {
-            document.getElementById('grupNameAlready').textContent = group.nume;
-            document.getElementById('btnGoToGroupAlready').href = `grup-details.html?id=${group.id}`;
-            // Still mark invitation as accepted (user is already in group)
-            await sb.from('grup_invitations').update({ status: 'accepted' }).eq('id', invitation.id);
+            document.getElementById('grupNameAlready').textContent = invitation.grup_nume;
+            document.getElementById('btnGoToGroupAlready').href = `grup-details.html?id=${invitation.grup_id}`;
+            // Still mark invitation as accepted (user is already in group).
+            // Matched on the token we already hold — the row itself is only
+            // writable by the person it was addressed to.
+            await sb.from('grup_invitations').update({ status: 'accepted' }).eq('token', token);
             showState('stateAlready');
             return;
         }
-        
+
         // 5. Redirect to group details page with invite token — user will see a
         //    confirmation banner there with Accept / Reject buttons. We no longer
         //    auto-join: the user should see the group content first and decide.
-        window.location.href = `grup-details.html?id=${group.id}&invite=${encodeURIComponent(token)}`;
+        window.location.href = `grup-details.html?id=${invitation.grup_id}&invite=${encodeURIComponent(token)}`;
         
     } catch (e) {
         console.error('Error processing invitation:', e);
