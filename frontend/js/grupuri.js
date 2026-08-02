@@ -199,49 +199,39 @@ async function loadGrupuri() {
         
         if (error) throw error;
         
-        // Compute the real "active member" count for each group, excluding
-        // members whose profile has account_status = 'deleted'. The previous
-        // implementation used grup_membri(count) inside the select, which
-        // counted every row regardless of profile status, leading to inflated
-        // counts on cards (e.g. "3/20" when only 1 real user remained).
-        // 
-        // We do this in two separate queries (rather than an embedded join)
-        // because RLS on `profiles` may restrict which profiles a non-admin
-        // user can read, and an inner join would silently drop rows that
-        // hide behind RLS.
+        // Numărul de membri activi vine de pe SERVER, din view-ul
+        // `grup_membri_count` — nu se mai calculează în browser.
+        //
+        // De ce s-a schimbat: până pe 2 august 2026, numărul se obținea
+        // citind direct `grup_membri`, ceea ce cerea ca tabela să fie
+        // deschisă vizitatorilor fără cont. Efectul secundar era că
+        // oricine putea descărca toate cele 34 de rânduri — cine, în ce
+        // grup, cu ce status, din ce dată. View-ul expune doar
+        // `grup_id` + un număr, deci vitrina publică funcționează fără
+        // ca identitățile să iasă din bază.
+        //
+        // Logica de numărare (doar `activ`, fără conturile șterse soft)
+        // a fost mutată ca atare în definiția view-ului, ca numerele să
+        // rămână identice cu cele de dinainte.
         const grupuri = data || [];
         if (grupuri.length > 0) {
             const grupIds = grupuri.map(g => g.id);
-            
-            // 1. Get all active membership rows for these groups.
-            const { data: membriRows } = await sb
-                .from('grup_membri')
-                .select('grup_id, user_id')
-                .in('grup_id', grupIds)
-                .eq('status', 'activ');
-            
-            // 2. Get account_status for all the user_ids we found.
-            const allUserIds = [...new Set((membriRows || []).map(r => r.user_id))];
-            let deletedUserIds = new Set();
-            if (allUserIds.length > 0) {
-                const { data: profs } = await sb
-                    .from('profiles')
-                    .select('user_id, account_status')
-                    .in('user_id', allUserIds)
-                    .eq('account_status', 'deleted');
-                deletedUserIds = new Set((profs || []).map(p => p.user_id));
-            }
-            
-            // 3. Count members per group, skipping the soft-deleted ones.
+
+            const { data: countRows } = await sb
+                .from('grup_membri_count')
+                .select('grup_id, membri_count')
+                .in('grup_id', grupIds);
+
             const countByGrup = {};
-            (membriRows || []).forEach(row => {
-                if (!deletedUserIds.has(row.user_id)) {
-                    countByGrup[row.grup_id] = (countByGrup[row.grup_id] || 0) + 1;
-                }
+            (countRows || []).forEach(row => {
+                countByGrup[row.grup_id] = row.membri_count;
             });
-            
+
             grupuri.forEach(g => {
-                // Mimic the old shape (membri[0].count) so render code works unchanged.
+                // Grupurile fără niciun membru activ nu apar în view
+                // (așa lucrează GROUP BY), deci lipsa lor înseamnă 0.
+                // Păstrăm forma veche (membri[0].count) ca restul
+                // codului de randare să rămână neatins.
                 g.membri = [{ count: countByGrup[g.id] || 0 }];
             });
         }

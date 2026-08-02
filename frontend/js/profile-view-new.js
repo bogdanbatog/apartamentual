@@ -157,13 +157,17 @@ async function loadActiveUserData(profileId) {
         
         profileData.zones = userZones?.map(uz => uz.zones) || [];
         
-        // Load user's groups
-        const { data: memberships, error: groupsError } = await supabase
-            .from('grup_membri')
-            .select('grup_id, status')
-            .eq('user_id', profileId)
-            .eq('status', 'activ');
-        
+        // Load user's groups — doar pentru vizitatorii logați. Fără cont,
+        // baza refuză oricum (RLS), deci cererea ar fi o pierdere de timp;
+        // `renderUserGroups()` afișează în locul listei un îndemn la cont.
+        const { data: memberships, error: groupsError } = currentUser
+            ? await supabase
+                .from('grup_membri')
+                .select('grup_id, status')
+                .eq('user_id', profileId)
+                .eq('status', 'activ')
+            : { data: [], error: null };
+
         if (groupsError) {
             console.error('Error loading groups:', groupsError);
             profileData.groups = [];
@@ -677,12 +681,28 @@ window._noteDelete = async function(terenId) {
 
 function renderUserGroups() {
     const container = document.getElementById('user-groups');
-    
+
+    // Vizitatorii fără cont nu văd apartenența la grupuri (decizie de
+    // produs, 2 august 2026). Baza de date o refuză oricum de la
+    // 2-inchide-grup-membri.sql încoace — aici doar explicăm de ce
+    // secțiunea e goală, în loc s-o lăsăm mută.
+    //
+    // Verificarea se face pe `currentUser`, nu pe lista întoarsă, ca să
+    // nu confundăm „nu ai voie să vezi" cu „omul chiar nu e în niciun
+    // grup" — două situații diferite, care altfel arată identic.
+    if (!currentUser) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">' +
+            'Creează-ți cont ca să vezi din ce grupuri face parte. ' +
+            '<a href="register.html" class="text-gray-900 underline hover:no-underline">Creează cont</a>' +
+            '</p>';
+        return;
+    }
+
     if (!profileData.groups || profileData.groups.length === 0) {
         container.innerHTML = '<p class="text-gray-400 text-sm">Nu faci parte din niciun grup încă.</p>';
         return;
     }
-    
+
     container.innerHTML = profileData.groups.map(membership => {
         const group = membership.grupuri;
         if (!group) return '';

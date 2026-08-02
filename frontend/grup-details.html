@@ -1774,10 +1774,28 @@ function renderActions(group) {
 
 // ── RENDER MEMBERS ──
 function renderMembers(members, adminId) {
-    document.getElementById('membriCountTitle').textContent = members.length;
-    
     const grid = document.getElementById('membersGrid');
-    
+
+    // Pagina asta e accesibilă direct pe URL și fără cont (nu are poartă
+    // de autentificare), iar din 2 august 2026 baza nu mai servește
+    // `grup_membri` anonimilor. Fără blocul de mai jos, un vizitator ar
+    // vedea „Niciun membru încă." pe un grup cu 5 oameni — o minciună,
+    // nu o restricție. Verificăm `currentUser`, nu lungimea listei,
+    // tocmai ca să nu confundăm „n-ai voie" cu „chiar nu e nimeni".
+    if (!currentUser) {
+        document.getElementById('membriCountTitle').textContent = '—';
+        grid.innerHTML = `
+            <div class="empty-section">
+                <i class="fas fa-user-lock"></i>
+                <p>Membrii grupului se văd doar cu un cont.</p>
+                <a href="register.html" class="btn-action" style="margin-top:12px; display:inline-block;">Creează cont</a>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById('membriCountTitle').textContent = members.length;
+
     if (members.length === 0) {
         grid.innerHTML = `
             <div class="empty-section">
@@ -1787,7 +1805,7 @@ function renderMembers(members, adminId) {
         `;
         return;
     }
-    
+
     const isAgencyUser = currentUserProfile && currentUserProfile.account_type === 'profesional';
     grid.innerHTML = members.map(m => {
         const name = displayName(m.profile);
