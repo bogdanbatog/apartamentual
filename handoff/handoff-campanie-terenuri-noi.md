@@ -1,31 +1,32 @@
 # Handoff: campania „au apărut terenuri noi în zonele tale”
 
-**Data:** 2 august 2026, seara
-**Stadiu:** totul pregătit și testat. **Trimiterea live NU s-a făcut** — Lucian a decis să
-trimită luni 3 august dimineața, ca emailurile să nu se piardă în inboxul de weekend.
+**Data:** 2 august 2026 (pregătire) → **3 august 2026 (trimis)**
+**Stadiu:** ✅ **CAMPANIA A PLECAT.** 38 de emailuri trimise, 0 eșecuri.
 
 ---
 
-## ⏭️ CE AI DE FĂCUT MÂINE DIMINEAȚĂ (o singură comandă)
+## ✅ TRIMITEREA LIVE — FĂCUTĂ (3 august 2026)
 
-Deschide PowerShell:
+| | |
+|---|---|
+| Trimise | **38** |
+| Eșuate | **0** |
+| Interval | 3 august, 16:42–16:43 (ora României) |
+| Probe test înainte | 3, toate reușite, cu cheia nouă |
+| Jurnal | `scripts/emailuri-terenuri-noi/local/trimise-2026-08-03.json` |
 
-```powershell
-cd C:\Users\lucia\proiecte\apartamentual
-$env:RESEND_API_KEY="re_..."
-node scripts\emailuri-terenuri-noi\trimite-emailuri-terenuri.js --csv="C:\Users\lucia\Desktop\terenuri.csv" --mod=live --confirm-trimit
-```
+Înainte de trimitere s-a rulat proba (dry-run), care a confirmat că nimic nu se mișcase
+peste noapte: 38 de destinatari, împărțirea 29 cu frază de legătură / 9 oameni noi.
 
-Pleacă **38 de emailuri**, câte unul la 600 ms, deci durează ~25 de secunde.
+⚠️ **Nu șterge jurnalele din `scripts/emailuri-terenuri-noi/local/`.** Sunt dovada cine a
+primit și ce sare peste o eventuală re-rulare. Sunt ignorate de git (conțin adrese reale).
 
-**Cheia Resend** se ia de la https://resend.com/api-keys → Create API Key → *Sending access*
-pe domeniul `ltfbstudio.ro`. Nu se poate recupera cea veche: cheia folosită de edge
-functions stă ca secret în Supabase și dashboard-ul **nu arată valoarea**, doar numele.
-După campanie, ștergi cheia din Resend.
-
-⚠️ **Nu șterge `scripts/emailuri-terenuri-noi/local/trimise-2026-08-02.json`** (sau cel cu
-data de mâine). E jurnalul care sare peste adresele deja trimise dacă re-rulezi comanda.
-Fără el, o re-rulare trimite a doua oară acelorași oameni.
+**Capcană găsită azi:** dacă cheia Resend e greșită, scriptul **nu se oprește singur** —
+reîncearcă de 4 ori pentru fiecare din cele 38 de adrese, deci aștepți minute bune degeaba.
+De aceea se rulează întâi `--mod=test` (3 emailuri către tine, ~2 secunde): validează cheia
+imediat. Probele în modul test **nu** blochează trimiterea live — jurnalul le ține separat,
+cheia fiind `mod:email`. De adăugat, dacă se mai face o campanie: oprire după N eșecuri
+consecutive de autentificare.
 
 Dacă CSV-ul de pe Desktop dispare, se reface exportând `db_schema/terenuri-noi/4-lot-destinatari.sql`.
 
@@ -71,7 +72,7 @@ trimiterea se mai amână cu o zi.
 
 ---
 
-## Fișiere (necomise la închiderea sesiunii)
+## Fișiere (comise în `8b3a59e`, 2 august)
 
 ```
 db_schema/terenuri-noi/1-ce-terenuri-avem.sql          52 rânduri
@@ -115,9 +116,14 @@ eroare — pare că baza n-are date. Refăcut: **un fișier = o interogare rulab
 
 ## Rămas de făcut
 
-- [ ] **Trimiterea live** (comanda de sus)
-- [ ] Șters cheia Resend după trimitere
-- [ ] Commit-ul celor 8 fișiere + `.gitignore` (nu s-a făcut, se arată diff-ul întâi)
+- [x] **Trimiterea live** — făcută 3 august, 38/38
+- [x] Commit-ul celor 8 fișiere + `.gitignore` — făcut 2 august (`8b3a59e`)
+- [ ] **Șters cheia Resend** creată azi (https://resend.com/api-keys) — singurul lucru
+      rămas din campanie. Cheia veche, a edge functions, stă ca secret în Supabase și nu se
+      vede în dashboard, deci asta e una nouă, separată, de unică folosință.
+- [ ] Peste câteva zile: uită-te pe răspunsuri și pe cererile de „stop” (răspunsurile vin
+      la `apartamentual@ltfbstudio.ro`, e `reply_to`-ul emailului). Cine cere stop se trece
+      la `--fara=` la campania următoare.
 - [ ] **Cod mort minor, fără efect pentru utilizator:** `js/teren-details.js:647` caută
       `btn-like-grup`, dar elementul nu există în `teren-details.html`, deci `if (btnLikeGrup)`
       e mereu fals. Era doar o scurtătură care ar fi derulat pagina până la secțiunea de
