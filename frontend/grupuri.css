@@ -340,6 +340,24 @@ body {
     font-weight: 500;
 }
 
+/* Buton inline „Creează un grup" — pereche cu „Propune un teren" de pe /terenuri */
+.btn-creeaza-inline {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c2604a;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-creeaza-inline:hover {
+    color: #a44f3c;
+    transform: translateX(2px);
+}
+
 /* ═══════════════ LOADING STATE ═══════════════ */
 .loading-state {
     text-align: center;
@@ -774,6 +792,11 @@ body {
         gap: 2rem;
     }
     
+    .content-header {
+        flex-wrap: wrap;
+        gap: 0.6rem 1rem;
+    }
+
     .banner-content {
         flex-direction: column;
         align-items: flex-start;
