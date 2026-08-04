@@ -321,7 +321,23 @@ async function loadProfile(userId) {
 
         if (error) throw error;
         profileData = profile;
-        
+
+        // Bifa digestului de anunțuri NU e în `profiles_visible`: view-ul
+        // enumeră explicit cele 31 de coloane de pe 31 iulie, iar coloana a
+        // apărut abia acum. Se citește separat, de pe rândul propriu din
+        // `profiles` — acolo `authenticated` are drept de SELECT dat anume
+        // pe această coloană.
+        // Dacă citirea eșuează, presupunem PORNIT, la fel ca valoarea
+        // implicită din baza de date: o eroare de rețea n-are voie să arate
+        // căsuța nebifată și să dezaboneze omul fără să vrea.
+        const { data: preferinteEmail } = await supabase
+            .from('profiles')
+            .select('email_anunturi_grup')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        profileData.email_anunturi_grup = preferinteEmail?.email_anunturi_grup !== false;
+
         // Load user tags
         const { data: userTags } = await supabase
             .from('user_tags')
@@ -377,6 +393,10 @@ function populateActiveForm() {
     document.getElementById('age').value = profileData.age || '';
     document.getElementById('is_email_public').checked = profileData.is_email_public || false;
     document.getElementById('is_age_public').checked = profileData.is_age_public || false;
+
+    // Digestul zilnic: bifat = primești. Implicit pornit, ca în baza de date.
+    const bifaAnunturi = document.getElementById('email_anunturi_grup');
+    if (bifaAnunturi) bifaAnunturi.checked = profileData.email_anunturi_grup !== false;
     
     // Preferences
     document.getElementById('preferred_rooms').value = profileData.preferred_rooms || '';
@@ -611,6 +631,11 @@ async function handleActiveFormSubmit(event) {
             age: parseInt(document.getElementById('age').value) || null,
             is_email_public: document.getElementById('is_email_public').checked,
             is_age_public: document.getElementById('is_age_public').checked,
+            // ⚠️ Coloana asta are nevoie de `grant update (email_anunturi_grup)`
+            // pe `profiles` (dat în db_schema/digest-anunturi/1-baza.sql). Fără
+            // grant, TOT update-ul e refuzat, nu doar câmpul ăsta — deci SQL-ul
+            // se rulează ÎNAINTE de deployul acestui fișier.
+            email_anunturi_grup: document.getElementById('email_anunturi_grup').checked,
             preferred_rooms: document.getElementById('preferred_rooms').value,
             preferred_area_sqm: parseInt(document.getElementById('preferred_area_sqm').value),
             preferred_city_id: parseInt(document.getElementById('preferred_city').value),

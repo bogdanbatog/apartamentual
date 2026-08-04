@@ -546,7 +546,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         ctaLabel: 'Citește pe pagina grupului',
         footerNote:
           'Primești acest email o dată pe zi, seara, și doar în zilele în care cineva a scris ceva pe grupul tău. ' +
-          'Dacă nu vrei să-l mai primești, răspunde la acest mesaj cu „stop".',
+          `Dacă nu vrei să-l mai primești, debifează-l în <a href="${PLATFORM_URL}/profile-edit-new.html" style="color: #c2604a;">profilul tău</a>, la „Notificări pe email".`,
       })
       return { title, body, html }
     }
