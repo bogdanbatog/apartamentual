@@ -60,7 +60,7 @@ Platforma are **plăți reale (Netopia/Oblio) și utilizatori reali**. Greșelil
 - **Notificări interne**: **Slack** (canal `#app_events`)
 - **Plăți**: **Netopia** (onboarding completat, urmează "Solicită aprobare")
 - **Facturare**: **Oblio** prin API (fix `client.save: 1` confirmat funcțional)
-- **Edge Functions deployate**: `notify-admins`, `creeaza-proforma-oblio`, `oblio-webhook`
+- **Edge Functions deployate**: `notify-admins`, `creeaza-proforma-oblio`, `oblio-webhook`, `digest-anunturi-grup` (⚠️ ultima se deployează cu `--no-verify-jwt`, ca și `oblio-webhook`; poarta ei e antetul `x-cron-secret`)
 - **Deploy edge functions**: `npx supabase functions deploy <nume>` din `C:\Users\lucia\supabase` (Supabase CLI 2.x — **NU necesită Docker**; Docker e doar pentru rulare locală). Funcțiile se editează în repo (`apartamentual/supabase/functions/`), apoi se copiază manual în folderul de deploy `C:\Users\lucia\supabase\supabase\functions\<nume>\index.ts` înainte de `deploy`.
 
 ---
