@@ -501,6 +501,56 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       return { title, body, html }
     }
 
+    // Digestul zilnic de anunțuri, trimis seara la 19:00 de edge function-ul
+    // `digest-anunturi-grup`. Un singur apel per grup, cu `recipient_user_ids`.
+    //
+    // Emailul spune CÂTE mesaje sunt și primele cuvinte din ultimul — atât.
+    // Textul integral rămâne pe platformă, intenționat: emailul e un semnal
+    // („merită să intri"), nu un înlocuitor al paginii de grup.
+    case 'anunturi_digest': {
+      const groupName = data.group_name || 'grupul tău'
+      const numar = Math.max(1, Number(data.numar_anunturi) || 1)
+      const autor = data.autor_ultim || 'Un membru'
+      // Textul e scris de utilizatori și intră în HTML — trebuie scăpat.
+      const preview = data.preview_ultim
+        ? formatMultilineText(String(data.preview_ultim))
+        : ''
+
+      // Numeralul în românește: 1 mesaj / 3 mesaje / 21 DE mesaje.
+      const cateMesaje = numar === 1
+        ? 'un mesaj nou'
+        : numar < 20
+          ? `${numar} mesaje noi`
+          : `${numar} de mesaje noi`
+
+      const title = numar === 1
+        ? `📣 Un mesaj nou în grupul „${groupName}"`
+        : `📣 ${numar < 20 ? numar : `${numar} de`} mesaje noi în grupul „${groupName}"`
+      const body = `Azi s-a scris în grupul „${groupName}": ${cateMesaje}. Ultimul, de la ${autor}: „${data.preview_ultim || ''}"`
+
+      const html = buildEmailHtml({
+        headerEmoji: '📣',
+        headerTitle: numar === 1 ? 'Ai un mesaj nou pe grup' : 'Ai mesaje noi pe grup',
+        bodyParagraphs: [
+          `Azi s-${numar === 1 ? 'a' : 'au'} scris <strong>${cateMesaje}</strong> în grupul <strong style="color: #c2604a;">„${groupName}"</strong>.`,
+          ...(preview
+            ? [`Ultimul, de la <strong>${autor}</strong>:<br><em style="color: #5a5a5a;">„${preview}"</em>`]
+            : []),
+        ],
+        detailsList: [
+          { label: 'Grup', value: groupName },
+          { label: numar === 1 ? 'Mesaj nou' : 'Mesaje noi', value: String(numar) },
+          { label: 'Ultimul scris de', value: autor },
+        ],
+        ctaLink: groupLink,
+        ctaLabel: 'Citește pe pagina grupului',
+        footerNote:
+          'Primești acest email o dată pe zi, seara, și doar în zilele în care cineva a scris ceva pe grupul tău. ' +
+          'Dacă nu vrei să-l mai primești, răspunde la acest mesaj cu „stop".',
+      })
+      return { title, body, html }
+    }
+
     case 'member_rejected': {
       const groupName = data.group_name || data.grup_nume || 'un grup'
       const userName = data.user_name || data.user_email || 'un utilizator'
