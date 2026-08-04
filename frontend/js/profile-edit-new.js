@@ -464,11 +464,11 @@ function updateProgressBadge() {
     let completion = 0;
     
     if (profileData.account_type === 'activ') {
+        // Telefonul și vârsta sunt opționale — nu le socotim în progres, ca să
+        // nu-i spunem omului „mai ai de completat" pentru ceva ce nu-i cerem.
         const fields = [
             profileData.pseudonym,
             profileData.profession,
-            profileData.phone,
-            profileData.age,
             profileData.preferred_rooms,
             profileData.preferred_area_sqm,
             profileData.preferred_city_id,
@@ -604,8 +604,11 @@ async function handleActiveFormSubmit(event) {
         const formData = {
             pseudonym: document.getElementById('pseudonym').value,
             profession: document.getElementById('profession').value,
-            phone: document.getElementById('phone').value,
-            age: parseInt(document.getElementById('age').value),
+            // Câmpuri opționale: lăsate goale se salvează ca `null`, nu ca șir
+            // gol. Altfel un telefon necompletat ar trece drept completat la
+            // orice verificare de tip `IS NOT NULL`.
+            phone: document.getElementById('phone').value.trim() || null,
+            age: parseInt(document.getElementById('age').value) || null,
             is_email_public: document.getElementById('is_email_public').checked,
             is_age_public: document.getElementById('is_age_public').checked,
             preferred_rooms: document.getElementById('preferred_rooms').value,

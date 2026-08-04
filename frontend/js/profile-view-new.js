@@ -828,11 +828,10 @@ function renderProgressBar() {
 
 function calculateCompletion() {
     if (profileData.account_type === 'activ') {
+        // Telefonul și vârsta sunt opționale în formular — nu intră în procent.
         const fields = [
             profileData.pseudonym,
             profileData.profession,
-            profileData.phone,
-            profileData.age,
             profileData.preferred_rooms,
             profileData.preferred_area_sqm,
             profileData.preferred_city_id,
@@ -859,8 +858,6 @@ function getMissingFields() {
     if (profileData.account_type === 'activ') {
         if (!profileData.pseudonym) missing.push('nume');
         if (!profileData.profession) missing.push('profesie');
-        if (!profileData.phone) missing.push('telefon');
-        if (!profileData.age) missing.push('vârstă');
         if (!profileData.preferred_rooms) missing.push('nr. camere');
         if (!profileData.preferred_area_sqm) missing.push('suprafață');
         if (!profileData.preferred_city_id) missing.push('oraș');
