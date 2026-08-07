@@ -46,6 +46,18 @@
 -- Ștergem printr-un bloc care le enumeră singur, ca să nu ghicim
 -- numele. Fiecare ștergere e anunțată — uită-te în panoul de mesaje
 -- („Notices") după rulare și compară cu diagnosticul.
+--
+-- CE ȘTIM CĂ E ACOLO (CSV 72, 7 august) — o singură politică:
+--   "Authenticated users can create groups"
+--   roluri: {public}   check: (auth.role() = 'authenticated'::text)
+--
+-- Adică singura condiție ca să creezi un grup era SĂ FII LOGAT.
+-- `created_by` și `admin_id` nu erau verificate deloc: printr-o cerere
+-- directă la API puteai crea un grup administrat de altcineva. Nu s-a
+-- întâmplat, dar nimic nu împiedica.
+--
+-- ⚠️ Dacă blocul anunță ALTCEVA decât politica de mai sus, oprește-te —
+-- înseamnă că s-a schimbat ceva între diagnostic și rulare.
 
 DO $$
 DECLARE
@@ -215,12 +227,12 @@ ORDER BY sectiune, rezultat;
 -- ═══════════════════════════════════════════════════════════════════
 --  DACĂ SE STRICĂ CEVA — revenire la starea de dinainte
 -- ═══════════════════════════════════════════════════════════════════
--- ⚠️ Completează numele și condiția politicii vechi din rezultatul
--- interogării 1 a diagnosticului ÎNAINTE de a avea nevoie de asta —
--- după DROP nu mai poți afla ce scria acolo.
+-- Politica veche, culeasă din diagnostic (CSV 72, 7 august), scrisă
+-- aici cuvânt cu cuvânt. Decomentează și rulează: redeschide gaura, dar
+-- repune site-ul exact cum era, până înțelegem ce n-a mers.
 --
 -- DROP POLICY IF EXISTS "Creare grup: doar cu profil completat" ON public.grupuri;
 --
--- CREATE POLICY "✏️ NUMELE VECHI" ON public.grupuri
+-- CREATE POLICY "Authenticated users can create groups" ON public.grupuri
 --     FOR INSERT TO public
---     WITH CHECK ( /* ✏️ CONDIȚIA VECHE, din diagnostic */ );
+--     WITH CHECK (auth.role() = 'authenticated'::text);
