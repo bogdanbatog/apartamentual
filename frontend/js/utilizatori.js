@@ -277,9 +277,9 @@ function populateZoneFilter(oras) {
     
     if (oras && typeof ORASE_CARTIERE !== 'undefined' && ORASE_CARTIERE[oras]) {
         DOM.filterZona.disabled = false;
-        ORASE_CARTIERE[oras].forEach(zona => {
-            DOM.filterZona.innerHTML += `<option value="${zona}">${zona}</option>`;
-        });
+        // Aceeași ordine ca la filtrul de terenuri: cartierele alfabetic, apoi
+        // comunele periurbane într-un grup separat la final („Ilfov").
+        appendCartiereOptions(DOM.filterZona, oras);
     } else {
         DOM.filterZona.disabled = true;
         DOM.filterZona.innerHTML = '<option value="">Alege mai întâi orașul</option>';

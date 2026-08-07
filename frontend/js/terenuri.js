@@ -135,19 +135,12 @@ function populateCartierFilter(oras) {
     DOM.filterCartier.disabled = false;
     DOM.filterCartier.innerHTML = '<option value="">Toate cartierele</option>';
 
-    const cartiere = ORASE_CARTIERE[oras] || [];
-    cartiere.forEach(c => {
-        const opt = document.createElement('option');
-        // Handle both formats: string or { id, name }
-        if (typeof c === 'string') {
-            opt.value = c;
-            opt.textContent = c;
-        } else {
-            opt.value = c.name || c.id;
-            opt.textContent = c.name || c.id;
-        }
-        DOM.filterCartier.appendChild(opt);
-    });
+    // Ordinea vine din `orase-cartiere.js`: cartierele orașului alfabetic, iar
+    // comunele periurbane într-un grup separat la final („Ilfov"). Înainte,
+    // bucla de aici mergea pe ordinea brută din fișier — geografică, dinspre
+    // nord în sensul acelor de ceasornic — deci o zonă nu se putea găsi nici
+    // după literă, nici scanând lista.
+    appendCartiereOptions(DOM.filterCartier, oras);
 }
 
 function bindFilterEvents() {
