@@ -702,12 +702,11 @@ async function handleActiveFormSubmit(event) {
         successDiv.classList.remove('hidden');
         successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // Redirect after delay - check welcome flow
+        // Redirect after delay - check welcome flow / redirect param
         setTimeout(() => {
-            const isWelcome = new URLSearchParams(window.location.search).get('welcome') === '1';
-            window.location.href = isWelcome ? '/index.html' : '/profile-view-new.html?id=' + currentUser.id;
+            window.location.href = destinatiaDupaSalvare(currentUser.id);
         }, 1500);
-        
+
     } catch (error) {
         // Salvarea a eșuat — deblocăm butonul ca omul să poată reîncerca.
         setSaving(event.target, false);
@@ -774,6 +773,10 @@ async function handleProfessionalFormSubmit(event) {
         successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
         // Redirect - check welcome flow
+        // ⚠️ Intenționat NU folosim aici `destinatiaDupaSalvare()`: singurul
+        // `redirect` care există azi duce la crearea de grup, iar conturile de
+        // agenție n-au voie în grupuri. Le-am trimite direct într-un zid
+        // („Acces restricționat"). Traseul agențiilor rămâne neatins.
         setTimeout(() => {
             const isWelcome = new URLSearchParams(window.location.search).get('welcome') === '1';
             window.location.href = isWelcome ? '/index.html' : '/profile-view-new.html?id=' + currentUser.id;
@@ -790,6 +793,37 @@ async function handleProfessionalFormSubmit(event) {
 // =====================================================
 // HELPERS
 // =====================================================
+
+// Unde ducem omul după ce și-a salvat profilul.
+//
+// Trei cazuri, în ordinea priorității:
+//   1. `?redirect=…` — a venit de undeva anume și trebuie dus înapoi acolo.
+//      Azi îl pune traseul „Pornește un grup" (`register.js`), care înainte
+//      sărea complet peste profil (reparat 7 august).
+//   2. `?welcome=1` fără redirect — prima completare, îl ducem pe homepage.
+//   3. editare obișnuită — îi arătăm profilul.
+//
+// ⚠️ Acceptăm DOAR căi relative de pe același site. Un `redirect` venit din
+// bara de adrese e text scris de oricine: fără verificarea asta, un link
+// trimis pe mail ar putea muta omul pe alt domeniu imediat după salvare.
+function destinatiaDupaSalvare(userId) {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+
+    if (redirect) {
+        const decodat = decodeURIComponent(redirect);
+        // O singură bară la început și nicio schemă/gazdă ⇒ e o cale internă.
+        // („//alt-site.ro" și "https://…" cad amândouă aici.)
+        if (/^\/(?!\/)/.test(decodat) && !/^\/\//.test(decodat)) {
+            return decodat;
+        }
+        console.warn('Redirect ignorat, nu e o cale internă:', decodat);
+    }
+
+    return params.get('welcome') === '1'
+        ? '/index.html'
+        : '/profile-view-new.html?id=' + userId;
+}
 
 // Blochează/deblochează butonul „Salvează" al unui formular cât timp salvarea e
 // în curs. Pe succes NU deblocăm intenționat: urmează redirectul după 1,5s, iar

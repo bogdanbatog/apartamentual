@@ -219,7 +219,8 @@
             margin-bottom: 1.5rem;
         }
         
-        .auth-required .btn-login {
+        .auth-required .btn-login,
+        .profile-incomplete .btn-login {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -253,7 +254,31 @@
             color: #ef4444;
             margin-bottom: 1rem;
         }
-        
+
+        /* Profil necompletat — nu e o interdicție, e un pas care lipsește.
+           De aceea culoarea e caldă (ca la „în așteptare"), nu roșie ca la
+           conturile de agenție, care chiar sunt blocate definitiv. */
+        .profile-incomplete {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .profile-incomplete i {
+            font-size: 3rem;
+            color: #c2604a;
+            margin-bottom: 1rem;
+        }
+
+        .profile-incomplete h2 {
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-incomplete p {
+            color: #5a5a5a;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
         @media (max-width: 640px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -422,6 +447,26 @@
         </a>
     </div>
     
+    <!-- Profil necompletat ────────────────────────────────────────────
+         Cine pornește un grup devine adminul lui: numele îi apare în
+         listă, primește cereri de alăturare, îi scriu oameni. Fără profil
+         completat, ceilalți n-au ce vedea despre el.
+         Bariera adevărată e politica de INSERT pe `grupuri` — aici doar
+         o explicăm, ca omul să nu primească o eroare seacă. -->
+    <div id="profileIncomplete" class="form-card profile-incomplete" style="display: none;">
+        <i class="fas fa-user-edit"></i>
+        <h2>Mai e un pas</h2>
+        <p>
+            Când pornești un grup devii adminul lui — oamenii îți văd profilul
+            înainte să ceară alăturarea. Completează-ți profilul (pseudonim,
+            orașul, zonele și tipul de apartament căutat) și te aducem înapoi
+            aici, direct la formular.
+        </p>
+        <a href="profile-edit-new.html?redirect=%2Fgrup-nou.html" class="btn-login">
+            <i class="fas fa-user-edit"></i> Completează-ți profilul
+        </a>
+    </div>
+
     <!-- Create Group Form -->
     <div id="formCard" class="form-card" style="display: none;">
         <div class="form-header">
@@ -524,6 +569,7 @@
 const DOM = {
     authRequired: document.getElementById('authRequired'),
     agencyBlocked: document.getElementById('agencyBlocked'),
+    profileIncomplete: document.getElementById('profileIncomplete'),
     formCard: document.getElementById('formCard'),
     form: document.getElementById('createGroupForm'),
     btnSubmit: document.getElementById('btnSubmit'),
@@ -715,10 +761,31 @@ async function checkAuth() {
             DOM.agencyBlocked.style.display = 'block';
             return;
         }
-        
+
+        // Pragul „profil completat" se calculează pe server, într-un singur
+        // loc (`profil_complet`), ca să nu ajungem cu încă o definiție pe
+        // lângă cele din formularul de profil și din politica RLS.
+        // Aici e folosit DOAR ca să arătăm mesajul potrivit — bariera
+        // adevărată e politica de INSERT pe `grupuri`.
+        // ⚠️ Pe eroare de rețea NU blocăm: politica refuză oricum, iar un
+        // fals negativ ar opri pe cineva cu profilul complet.
+        let profilComplet = true;
+        try {
+            const { data: complet, error: rpcError } =
+                await sb.rpc('profil_complet', { p_user_id: user.id });
+            if (!rpcError) profilComplet = (complet === true);
+        } catch (e) {
+            console.warn('Verificarea profilului a eșuat, lăsăm formularul:', e);
+        }
+
+        if (!profilComplet) {
+            DOM.profileIncomplete.style.display = 'block';
+            return;
+        }
+
         // Show form
         DOM.formCard.style.display = 'block';
-        
+
     } catch (e) {
         console.error('Auth error:', e);
         DOM.authRequired.style.display = 'block';
