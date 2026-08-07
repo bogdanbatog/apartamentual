@@ -1,6 +1,6 @@
 // Orașe și cartiere/zone disponibile pe platformă
 // Numele trebuie să fie IDENTICE cu cele din tabelul `zones` din Supabase
-// București: 61 cartiere PUG (zone IDs 101-161)
+// București: 61 cartiere PUG (zone IDs 101-161) + comune periurbane Ilfov (IDs 162+)
 // Cluj-Napoca: 20 zone (IDs 201-220)
 // Timișoara: 18 zone (IDs 301-318)
 // Iași: 18 zone (IDs 401-418)
@@ -22,7 +22,10 @@ const ORASE_CARTIERE = {
         "Valea Cascadelor", "Ghencea", "Rahova", "Ferentari",
         "Uranus", "Cotroceni", "13 Septembrie / Trafic Greu", "Carol",
         "Tineretului", "Văcărești", "Giurgiului", "Berceni",
-        "Progresul", "Apărătorii Patriei", "IMGB"
+        "Progresul", "Apărătorii Patriei", "IMGB",
+        // Comune periurbane Ilfov — se adaugă pe măsură ce apar cereri reale.
+        // Precedent: Florești/Baciu la Cluj, Dumbrăvița/Giroc la Timișoara.
+        "Corbeanca"
     ],
     "Cluj-Napoca": [
         "Centru", "Mărăști", "Gheorgheni", "Mănăștur", "Zorilor", "Grigorescu",
