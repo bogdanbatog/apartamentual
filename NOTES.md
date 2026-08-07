@@ -25,6 +25,15 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **`frontend/js/faq.js` — fără diacritice**
   Tot conținutul FAQ (39 întrebări) e scris fără diacritice românești („fata", „pretul" etc.), contrar regulii din CLAUDE.md. La integrarea homepage v9 (28 mai) am corectat doar întrebarea cu procentul de economie, păstrând stilul fără diacritice ca să rămână diff-ul minimal. De curățat tot fișierul la o trecere dedicată.
 
+- [ ] **Harta de cartiere e cod mort (`bucuresti-map.js` + `bucuresti-cartiere.js`)**
+  `bucuresti-cartiere.js` (511 linii, poligoanele GeoJSON ale celor 61 de cartiere) e încărcat de `register.html`, dar singurul lui consumator, `bucuresti-map.js`, **nu e încărcat de nicio pagină** — deci se descarcă degeaba la fiecare înregistrare. De decis: reînviem harta (era o selecție de zone pe hartă, mai plăcută decât bifele) sau scoatem ambele fișiere? Descoperit pe 7 august, la adăugarea Corbeancăi. Consecință practică: o zonă nouă **nu** are nevoie de poligon.
+
+- [ ] **Gruparea zonelor periurbane nu ajunge în locurile care citesc din DB**
+  De pe 7 august, filtrele de pe `/terenuri` și `/utilizatori` și formularul de propunere teren afișează zonele alfabetic, cu comunele din jur într-un `<optgroup>` separat („Ilfov"). Dar **chips-urile de la crearea/editarea grupului** (din DB, `.order('name')`) și **bifele din profil/înregistrare** (`.order('display_order')`) nu știu de grupare — acolo Corbeanca stă alfabetic printre cartiere, respectiv ultima. De decis, când adăugăm a doua comună: punem un marcaj în baza de date (coloană nouă pe `zones`, gen `tip` sau `judet`) și grupăm peste tot din aceeași sursă, sau lăsăm așa? Cât e o singură comună, nu deranjează.
+
+- [ ] **Secvența `zones_id_seq` a rămas la 36, id-urile reale ajung la 519**
+  Zonele au fost inserate cu id scris de mână, pe intervale per oraș (București 101-161, Cluj 201+, Timișoara 301+, Iași 401+, Brașov 501+), deci secvența n-a fost avansată niciodată. Un `INSERT` fără id explicit ar primi 37 — liber, deci **fără eroare**, dar în afara convenției. Nu e stricat nimic (37-100 sunt libere) și zonele se adaugă oricum manual. De ținut minte doar ca să nu pară bug dacă apare vreodată o zonă cu id mic.
+
 - [ ] **FAQ pe homepage — insulă vizuală**
   Homepage-ul v9 (Mona Sans, bej minimalist) afișează `faq.js` ca atare, care are stiluri proprii (carduri albe, accent portocaliu, DM Sans). Arată diferit de restul paginii. Decizie acceptată de Lucian la integrare; de armonizat dacă deranjează.
 
@@ -39,4 +48,4 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ---
 
-*Ultima actualizare: 2026-06-18*
+*Ultima actualizare: 2026-08-07*
