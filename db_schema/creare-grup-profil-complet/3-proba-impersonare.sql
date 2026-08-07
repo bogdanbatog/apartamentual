@@ -52,16 +52,36 @@ ORDER BY public.profil_complet(u.id), u.created_at DESC;
 --       „new row violates row-level security policy for table grupuri"
 --  ❌ Dacă scrie „Success" fără eroare, poarta NU ține. Oprește-te și
 --     spune-mi — nu deploya nimic mai departe.
+--
+--  ⚠️ Când INSERT-ul crapă (adică exact când proba REUȘEȘTE), editorul
+--  arată doar eroarea, nu și rezultatul SELECT-ului de control de
+--  deasupra. E în regulă: eroarea E răspunsul. Dacă vrei totuși să vezi
+--  controlul, selectează cu mouse-ul doar primele trei rânduri ale
+--  blocului (BEGIN, set_config, SET LOCAL, SELECT) și rulează-le
+--  singure, apoi blocul întreg.
 -- ═══════════════════════════════════════════════════════════════════
+--
+-- UUID-urile de mai jos sunt completate din CSV 74 (7 august).
+-- Contul: luta.lucian.m+test98@gmail.com — cel cu care Lucian a
+-- reprodus traseul lui Max pe 7 august. Profil gol pe toate cele șase.
 --
 -- BEGIN;
 --   SELECT set_config('request.jwt.claims',
---       '{"sub":"UUID-PROFIL-INCOMPLET","role":"authenticated"}', true);
+--       '{"sub":"c5315c99-377c-40d5-817b-f4a668024fc7","role":"authenticated"}', true);
 --   SET LOCAL role authenticated;
+--
+--   -- Control înainte de probă: contul NU trebuie să fie admin de
+--   -- platformă, altfel trece prin prima ramură a politicii și proba
+--   -- nu dovedește nimic. Aici `auth.uid()` e setat, deci funcția
+--   -- răspunde corect (în afara impersonării ar fi NULL).
+--   -- Așteptat: is_platform_admin = false, profil_complet = false
+--   SELECT public.is_platform_admin() AS is_platform_admin,
+--          public.profil_complet(auth.uid()) AS profil_complet;
 --
 --   INSERT INTO public.grupuri (nume, oras, status, created_by, admin_id)
 --   VALUES ('Proba RLS — de sters daca o vezi', 'București', 'explorare',
---           'UUID-PROFIL-INCOMPLET', 'UUID-PROFIL-INCOMPLET');
+--           'c5315c99-377c-40d5-817b-f4a668024fc7',
+--           'c5315c99-377c-40d5-817b-f4a668024fc7');
 -- ROLLBACK;
 
 
@@ -80,14 +100,31 @@ ORDER BY public.profil_complet(u.id), u.created_at DESC;
 --     vizibil pe site.
 -- ═══════════════════════════════════════════════════════════════════
 --
+-- Contul: luta.lucian.m+test12@gmail.com, profil complet.
+--
+-- ⚠️ DE CE NU CONTUL PRINCIPAL (`luta.lucian.m@gmail.com`):
+-- coloana `atentie` de la pasul A verifică `is_super_admin`, dar
+-- politica trece prin `is_platform_admin()` — sunt DOUĂ flaguri
+-- diferite (capcana din 30 iulie). Un cont admin prin celălalt flag ar
+-- trece proba pe ramura de admin, fără să atingă condiția de profil, și
+-- ar da un „merge" fals. Controlul de mai jos închide întrebarea
+-- oricum: dacă `is_platform_admin` iese `true`, schimbă contul.
+--
 -- BEGIN;
 --   SELECT set_config('request.jwt.claims',
---       '{"sub":"UUID-PROFIL-COMPLET","role":"authenticated"}', true);
+--       '{"sub":"bb7c9ca6-6cf3-42aa-bec8-9c13ca3657c6","role":"authenticated"}', true);
 --   SET LOCAL role authenticated;
+--
+--   -- Așteptat: is_platform_admin = FALSE, profil_complet = TRUE.
+--   -- Dacă is_platform_admin e true, proba nu dovedește nimic —
+--   -- alege alt cont din lista „COMPLET" de la pasul A.
+--   SELECT public.is_platform_admin() AS is_platform_admin,
+--          public.profil_complet(auth.uid()) AS profil_complet;
 --
 --   INSERT INTO public.grupuri (nume, oras, status, created_by, admin_id)
 --   VALUES ('Proba RLS — de sters daca o vezi', 'București', 'explorare',
---           'UUID-PROFIL-COMPLET', 'UUID-PROFIL-COMPLET');
+--           'bb7c9ca6-6cf3-42aa-bec8-9c13ca3657c6',
+--           'bb7c9ca6-6cf3-42aa-bec8-9c13ca3657c6');
 -- ROLLBACK;
 
 
