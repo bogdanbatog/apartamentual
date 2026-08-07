@@ -26,10 +26,13 @@
 --  rulează tot fișierul ca o singură tranzacție, iar un ROLLBACK de
 --  probă anulează tăcut și ce e deasupra lui (lecția din 1 august).
 --
---  ⚠️ RULEAZĂ ÎNTÂI `0-diagnostic.sql` și uită-te la interogarea 1.
---  Blocul de mai jos șterge TOATE politicile de INSERT de pe `grupuri`
---  și pune una singură în loc. Dacă în diagnostic apare vreo politică
---  de INSERT pe care n-o recunoști, oprește-te și întreabă-mă.
+--  ⚠️ RULEAZĂ ÎNTÂI `0b-diagnostic-intr-o-singura-interogare.sql` și
+--  uită-te la secțiunea 1. Blocul de mai jos șterge TOATE politicile de
+--  INSERT de pe `grupuri` și pune una singură în loc. Dacă în diagnostic
+--  apare vreo politică de INSERT pe care n-o recunoști, oprește-te și
+--  întreabă-mă. Notează-ți condiția veche — după DROP nu mai poate fi
+--  aflată, iar blocul de revenire de la finalul fișierului are nevoie
+--  de ea.
 -- ═══════════════════════════════════════════════════════════════════
 
 
@@ -122,35 +125,52 @@ WITH CHECK (
 
 
 -- ═══════════════════════════════════════════════════════════════════
---  CONTROALE
+--  CONTROALE — toate într-o singură interogare, dinadins
 -- ═══════════════════════════════════════════════════════════════════
+-- ⚠️ Editorul SQL din Supabase arată DOAR rezultatul ultimei
+-- interogări. Trei controale separate ar fi însemnat două invizibile —
+-- exact ce s-a întâmplat cu `0-diagnostic.sql` pe 7 august.
+-- Rulează blocul ăsta SEPARAT, după ce partea de sus a mers.
 
--- CONTROL 1 — o singură politică de INSERT, pe `authenticated`
--- Așteptat: exact 1 rând. Dacă apar două, ștergerea de la pasul 1
--- n-a prins ceva, iar cea largă o anulează pe cea nouă.
-SELECT policyname, cmd, roles, with_check
-FROM pg_policies
-WHERE schemaname = 'public'
-  AND tablename  = 'grupuri'
-  AND cmd = 'INSERT';
+SELECT sectiune, rezultat FROM (
 
+    -- CONTROL 1 — o singură politică de INSERT, pe `authenticated`
+    -- Așteptat: exact 1 rând, cu numele nou. Dacă apar două, ștergerea
+    -- de la pasul 1 n-a prins ceva, iar cea largă o anulează pe cea
+    -- nouă (permisivele se combină cu OR).
+    SELECT '1. politici INSERT pe grupuri' AS sectiune,
+           policyname || '  |  roluri: ' || roles::text
+             || '  |  check: ' || COALESCE(with_check, '—') AS rezultat
+    FROM pg_policies
+    WHERE schemaname = 'public' AND tablename = 'grupuri' AND cmd = 'INSERT'
 
--- CONTROL 2 — nicio politică de pe `grupuri` nu citește `profiles`
--- direct. Capcana din 1 august: o politică ce citește o coloană
--- revocată nu întoarce fals, ci CRAPĂ toată interogarea, și odată cu
--- ea toată pagina. Citirile noastre trec prin funcții SECURITY DEFINER.
--- Așteptat: 0 rânduri.
-SELECT policyname, cmd
-FROM pg_policies
-WHERE schemaname = 'public'
-  AND tablename  = 'grupuri'
-  AND (qual ILIKE '%profiles%' OR with_check ILIKE '%profiles%');
+    UNION ALL
 
+    -- CONTROL 2 — nicio politică de pe `grupuri` nu citește `profiles`
+    -- direct. Capcana din 1 august: o politică ce citește o coloană
+    -- revocată nu întoarce fals, ci CRAPĂ toată interogarea, și odată
+    -- cu ea toată pagina. Citirile noastre trec prin SECURITY DEFINER.
+    -- Așteptat: rândul „curat".
+    SELECT '2. politici care citesc profiles',
+           COALESCE(
+               (SELECT string_agg(policyname || ' (' || cmd || ')', ', ')
+                FROM pg_policies
+                WHERE schemaname = 'public' AND tablename = 'grupuri'
+                  AND (qual ILIKE '%profiles%' OR with_check ILIKE '%profiles%')),
+               '✓ curat — niciuna')
 
--- CONTROL 3 — grupurile existente n-au fost atinse
--- Așteptat: același număr ca înainte de rulare, iar grupul lui Max
--- încă acolo.
-SELECT COUNT(*) AS grupuri_totale FROM public.grupuri;
+    UNION ALL
+
+    -- CONTROL 3 — grupurile existente n-au fost atinse
+    -- Așteptat: același număr ca în diagnostic, iar grupul lui Max
+    -- încă acolo (decizia (a): rămâne).
+    SELECT '3. grupuri existente',
+           count(*) || ' grupuri, dintre care cu fondator incomplet: '
+             || count(*) FILTER (WHERE NOT public.profil_complet(admin_id))
+    FROM public.grupuri
+
+) t
+ORDER BY sectiune, rezultat;
 
 
 -- ═══════════════════════════════════════════════════════════════════

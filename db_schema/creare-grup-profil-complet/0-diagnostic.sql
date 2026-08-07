@@ -1,9 +1,20 @@
 -- ═══════════════════════════════════════════════════════════════════
 --  DIAGNOSTIC — cum a putut un cont cu profilul gol să creeze un grup
 --
+--  ⚠️⚠️ NU RULA FIȘIERUL ĂSTA. Folosește `0b-diagnostic-intr-o-
+--  singura-interogare.sql`.
+--
+--  DE CE: editorul SQL din Supabase afișează DOAR rezultatul ULTIMEI
+--  interogări dintr-un script. Fișierul ăsta are cinci, deci din el se
+--  vede una singură — exact ce s-a întâmplat pe 7 august (CSV 71 a
+--  întors doar interogarea 5). Lecția era deja scrisă în
+--  `securitate-grupuri/5b-inventar-intr-o-singura-interogare.sql`.
+--
+--  Îl păstrăm doar pentru că interogările sunt lizibile una câte una și
+--  se pot rula manual, separat, dacă vrei să te uiți la ceva anume.
+--
 --  Fișier PUR DE CITIRE. Nu modifică nimic, nu are BEGIN/ROLLBACK
 --  (lecția din 1 august: ROLLBACK-ul anulează tăcut tot scriptul).
---  Rulează-l în Supabase SQL Editor și trimite-mi rezultatele.
 -- ═══════════════════════════════════════════════════════════════════
 
 
