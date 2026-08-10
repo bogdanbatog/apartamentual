@@ -463,24 +463,26 @@ async function handleAuthSubmit(event) {
             ? new URL(decodeURIComponent(redirectUrl), window.location.origin)
             : null;
 
-        // ⚠️ TRASEUL „PORNEȘTE UN GRUP" OCOLEA PROFILUL (reparat 7 august).
-        // Linkul de confirmare ducea drept pe `grup-nou.html`, deci omul
-        // ajungea să creeze un grup fără să fi văzut vreodată formularul de
-        // profil — devenea admin de grup cu profilul gol. Îl trecem întâi
-        // prin profil, cu destinația păstrată: după salvare ajunge exact
-        // unde voia, la formularul de creare grup.
-        // Invitațiile NU sunt atinse aici — au propriul lor traseu, probat.
-        const cereProfilIntai = !!destinatie && destinatie.pathname.includes('grup-nou');
-
+        // ⚠️ ORICE DESTINAȚIE TRECE ÎNTÂI PRIN FORMULARUL DE PROFIL.
+        // Pe 7 august am reparat traseul „Pornește un grup", care ducea drept
+        // pe `grup-nou.html`: omul devenea admin de grup fără să fi văzut
+        // vreodată formularul de profil. Invitațiile au rămas atunci pe vechiul
+        // drum și pățeau același lucru, doar mai târziu: linkul de confirmare
+        // îl ducea înapoi la invitație cu profilul gol, iar zidul apărea abia
+        // la „Acceptă", unde serverul răspunde `profil_incomplet`.
+        // Acum amândouă drumurile trec prin profil, cu destinația păstrată:
+        // după salvare omul ajunge exact unde voia.
         let emailRedirectTo;
-        if (cereProfilIntai) {
+        if (destinatie) {
             const inapoiLa = encodeURIComponent(destinatie.pathname + destinatie.search);
             emailRedirectTo = `${window.location.origin}/profile-edit-new.html?welcome=1&redirect=${inapoiLa}`;
-        } else if (destinatie) {
-            emailRedirectTo = destinatie.href;
         } else {
             emailRedirectTo = `${window.location.origin}/profile-edit-new.html?welcome=1`;
         }
+
+        // Reținut pentru „Retrimite emailul": înainte, retrimiterea folosea un
+        // link fix spre profil și pierdea destinația (grupul sau invitația).
+        window._pendingEmailRedirectTo = emailRedirectTo;
         
         // Create account
         const { data, error } = await supabase.auth.signUp({
@@ -550,7 +552,10 @@ window.resendConfirmEmail = async function() {
             type: 'signup',
             email: email,
             options: {
-                emailRedirectTo: `${window.location.origin}/profile-edit-new.html?welcome=1`
+                // Aceeași destinație ca la primul email, altfel retrimiterea
+                // pierde drumul (invitație / creare grup) și îl lasă în profil.
+                emailRedirectTo: window._pendingEmailRedirectTo
+                    || `${window.location.origin}/profile-edit-new.html?welcome=1`
             }
         });
         
@@ -728,18 +733,13 @@ function showSuccess(accountType) {
             if (successLink) {
                 // Butonul ăsta e a doua cale către aceeași destinație (pentru
                 // cine confirmă emailul în alt tab). Trebuie să ducă unde duce
-                // și linkul din email, altfel avem iar o poartă ocolită:
-                // „Pornește un grup" trece întâi prin profil.
-                const spreGrupNou = decodedUrl.includes('grup-nou');
-                if (spreGrupNou) {
-                    const dest = new URL(decodedUrl, window.location.origin);
-                    const inapoiLa = encodeURIComponent(dest.pathname + dest.search);
-                    successLink.href = `/profile-edit-new.html?welcome=1&redirect=${inapoiLa}`;
-                    successLink.textContent = '✓ Am confirmat — continuă';
-                } else {
-                    successLink.href = decodedUrl;
-                    successLink.textContent = '✓ Am confirmat — acceptă invitația';
-                }
+                // și linkul din email, altfel avem iar o poartă ocolită —
+                // amândouă drumurile (creare grup și invitație) trec prin
+                // formularul de profil, cu destinația păstrată.
+                const dest = new URL(decodedUrl, window.location.origin);
+                const inapoiLa = encodeURIComponent(dest.pathname + dest.search);
+                successLink.href = `/profile-edit-new.html?welcome=1&redirect=${inapoiLa}`;
+                successLink.textContent = '✓ Am confirmat — continuă';
             }
         } else {
             textEl.textContent = 'Contul tău a fost creat cu succes. Verifică-ți emailul pentru confirmare, apoi poți explora grupurile și terenurile disponibile.';

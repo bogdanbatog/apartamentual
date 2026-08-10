@@ -142,6 +142,17 @@
         </a>
     </div>
     
+    <!-- Profile required state -->
+    <div id="stateProfile" style="display:none;">
+        <div class="invite-icon auth"><i class="fas fa-user-pen"></i></div>
+        <h1>A mai rămas un pas</h1>
+        <p>Ai fost invitat/ă în grupul <span class="grup-name" id="grupNameProfile"></span>. Ca să te poți alătura, completează-ți întâi profilul: nume sau pseudonim, ce fel de apartament cauți, orașul, cel puțin o zonă și cel puțin un interes.</p>
+        <p style="font-size: 0.875rem;">Durează câteva minute. După ce salvezi, te aducem înapoi aici — invitația te așteaptă.</p>
+        <a href="#" id="btnCompleteProfile" class="btn btn-primary">
+            <i class="fas fa-user-pen"></i> Completează-ți profilul
+        </a>
+    </div>
+
     <!-- Error state -->
     <div id="stateError" style="display:none;">
         <div class="invite-icon error"><i class="fas fa-times"></i></div>
@@ -170,7 +181,7 @@
 
 function showState(stateId) {
     currentState = stateId;
-    ['stateLoading', 'stateSuccess', 'stateAuth', 'stateError', 'stateAlready'].forEach(id => {
+    ['stateLoading', 'stateSuccess', 'stateAuth', 'stateProfile', 'stateError', 'stateAlready'].forEach(id => {
         document.getElementById(id).style.display = id === stateId ? 'block' : 'none';
     });
 }
@@ -334,6 +345,32 @@ async function processInvitation() {
             // writable by the person it was addressed to.
             await sb.from('grup_invitations').update({ status: 'accepted' }).eq('token', token);
             showState('stateAlready');
+            return;
+        }
+
+        // 4b. Profilul completat — aceeași regulă pe care o aplică serverul la
+        //     acceptare (`accept_group_invitation` refuză cu `profil_incomplet`).
+        //     Fără pasul ăsta, omul era dus în pagina grupului, apăsa „Acceptă",
+        //     primea un refuz și era aruncat în formularul de profil fără drum
+        //     de întoarcere. Pragul îl citim din funcția SQL `profil_complet`,
+        //     singurul loc care decide cu adevărat cine intră în grupuri — nu
+        //     îl rescriem aici, ca să nu ajungem cu două definiții diferite.
+        let profilComplet = true;
+        try {
+            const { data: pc, error: pcErr } = await sb.rpc('profil_complet', { p_user_id: user.id });
+            if (!pcErr) profilComplet = (pc === true);
+            // La eroare mergem mai departe: refuzul serverului de la acceptare
+            // rămâne plasa de siguranță, deci nimeni nu intră pe ușa asta.
+        } catch (e) { console.warn('profil_complet check failed:', e); }
+
+        if (!profilComplet) {
+            document.getElementById('grupNameProfile').textContent = `„${invitation.grup_nume}"`;
+            // Cale relativă: `profile-edit-new.js` acceptă doar redirecturi
+            // interne (începute cu o singură „/"), tocmai ca un link primit pe
+            // email să nu poată muta omul pe alt site după salvare.
+            const inapoiLa = encodeURIComponent(`/accept-invite.html?token=${encodeURIComponent(token)}`);
+            document.getElementById('btnCompleteProfile').href = `profile-edit-new.html?redirect=${inapoiLa}`;
+            showState('stateProfile');
             return;
         }
 

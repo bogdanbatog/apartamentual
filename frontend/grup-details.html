@@ -3399,7 +3399,19 @@ window.acceptInvitationBanner = async function() {
         if (!rez || !rez.ok) {
             showToast((rez && rez.mesaj) || 'Invitația nu a putut fi acceptată.', 'error');
             if (rez && rez.motiv === 'profil_incomplet') {
-                setTimeout(function() { window.location.href = 'profile-edit-new.html'; }, 2500);
+                // Îl ducem la formular CU drumul de întoarcere. Înainte ateriza
+                // în profilul lui și trebuia să caute grupul din nou de mână —
+                // invitația rămânea validă, dar omul n-avea de unde să știe.
+                // Cu tokenul păstrat în URL, bannerul îl așteaptă la revenire.
+                const inapoiLa = encodeURIComponent(
+                    `/grup-details.html?id=${currentGroup.id}` +
+                    (pendingInvitation && pendingInvitation.token
+                        ? `&invite=${encodeURIComponent(pendingInvitation.token)}`
+                        : '')
+                );
+                setTimeout(function() {
+                    window.location.href = `profile-edit-new.html?redirect=${inapoiLa}`;
+                }, 2500);
                 return;
             }
             if (btnAccept) btnAccept.disabled = false;
