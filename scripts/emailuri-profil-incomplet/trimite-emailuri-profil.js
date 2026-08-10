@@ -226,7 +226,7 @@ function continut(r) {
       // „Amandoua” tine doar cat sunt doua puncte. Cine n-are pseudonim vede
       // trei, iar al treilea (nu apare in lista) NU e o regula din august.
       `${blocaje.length > 2 ? 'Primele două' : 'Amândouă'} sunt din august. Când am început platforma, aceste lucruri se puteau face și cu profilul necompletat, dar am rectificat aspectul acesta pentru transparență și pentru eficiența scopului platformei: găsirea de grupuri cu care să-ți construiești propriul apartament.`,
-      'Nu sunt reguli puse ca să fie. Un grup de construcție ajunge, în timp, să însemne câțiva oameni care semnează împreună pentru un teren și pentru un constructor. Înainte de asta vor să știe cu cine stau de vorbă: în ce oraș cauți, ce fel de apartament, în ce zone. Fondatorul care aprobă cererile se uită exact la lucrurile astea, iar un profil gol nu-i spune nimic despre tine.',
+      'Punem aceste reguli pentru că un grup de construcție ajunge, în timp, să însemne câțiva oameni care semnează împreună pentru un teren și pentru un constructor. Înainte de asta vor să știe cu cine stau de vorbă: în ce oraș cauți, ce fel de apartament, în ce zone. Fondatorul care aprobă cererile se uită exact la lucrurile astea, iar un profil gol nu-i spune nimic despre tine.',
     ],
     // Acordul: cine are o singura lipsa nu trebuie sa citeasca „mai lipsesc”.
     inainteDeLipsuri: lista.length === 1

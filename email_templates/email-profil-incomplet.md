@@ -74,7 +74,7 @@ apartament.
 iar al treilea nu e o regulă din august — pentru el scriptul scrie „Primele două sunt din
 august". Se schimbă singur, nu-l atinge.
 
-Nu sunt reguli puse ca să fie. Un grup de construcție ajunge, în timp, să însemne câțiva
+Punem aceste reguli pentru că un grup de construcție ajunge, în timp, să însemne câțiva
 oameni care semnează împreună pentru un teren și pentru un constructor. Înainte de asta
 vor să știe cu cine stau de vorbă: în ce oraș cauți, ce fel de apartament, în ce zone.
 Fondatorul care aprobă cererile se uită exact la lucrurile astea, iar un profil gol nu-i
