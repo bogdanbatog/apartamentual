@@ -1,19 +1,20 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026 (actualizat seara)
-**Stadiu:** 🟡 **PLANIFICAT, NECONSTRUIT.** Zero cod scris pentru automatizarea propriu-zisă.
-Ziua s-a dus pe trei lucruri pregătitoare, toate ✅ **încheiate și comise**: verificarea
-premisei (potrivirea teren↔zonă), o curățenie neprevăzută în `zones` (`cf60a4f`), și
-steagul `cont_intern` (`c0c317d`).
+**Data:** 12 august 2026 (actualizat seara) · **13 august: Piesa 1 gata**
+**Stadiu:** ✅ **PIESA 1 SCRISĂ, RULATĂ ȘI DOVEDITĂ. Piesele 2–4 nescrise.**
 
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
 - ✅ măsurătorile rulate și interpretate (ritmul + distribuția zonelor)
 - ✅ **pragul ridicat de la 12 la 20 de zone bifate** (decizia lui Lucian, pe baza distribuției)
 - ✅ **`profiles.cont_intern` există în bază** — lista de excluderi scrisă de mână a dispărut
+- ✅ **ziua și ora: LUNI 10:00** (decizia lui Lucian, 13 august)
+- ✅ **declanșare manuală: comandă locală** cu `dry_run`/`force` — zero cod nou (13 august)
+- 🟡 **Piesa 1 (SQL de bază) scrisă** — trei fișiere, ✋ **NERULATE de Lucian**
 
-**Ce mai lipsește ca să se poată construi:** ziua și ora trimiterii, și cum o declanșează
-Lucian manual. Ambele sunt la finalul acestui fișier.
+**Următorul pas concret:** Piesa 2 — edge function `digest-terenuri-zone`. Cheamă
+`lot_terenuri_noi(now() - interval '14 days', 20)`, verifică singură că la București e
+**luni, ora 10**, și scrie în `terenuri_digest_log` după fiecare om servit.
 
 ---
 
@@ -319,18 +320,80 @@ om de pe platformă**: doar nu-i trimite acest email anume, restul rămâne nesc
 
 ---
 
-## 🔴 DECIZII ÎNCĂ DESCHISE
+## ✅ DECIZII LUATE (13 august)
 
-1. **Ziua și ora.** Propuneri: luni 10:00 (recomandat — acoperă terenurile apărute în
-   weekend), marți 10:00 (rată de deschidere mai bună, dar pierde senzația de „început de
-   săptămână"), luni 19:00 (ca digestul de anunțuri). Măsurătoarea de ritm arată că
-   săptămânalul e potrivit, deci rămâne doar alegerea momentului.
+1. **Ziua și ora: LUNI 10:00.** Prinde terenurile apărute în weekend și păstrează senzația
+   de „început de săptămână". ⚠️ Ora se verifică **în funcție**, la București, nu în
+   `pg_cron` — cronul rulează din oră în oră. `pg_cron` socotește în UTC, iar la ultima
+   duminică din octombrie emailurile ar începe să plece la 09:00, tăcut, șase luni pe an.
 
-2. **Cum o declanșează Lucian manual.** Comandă locală (curl cu `dry_run`/`force` — zero cod
-   nou, zero suprafață de atac) vs. buton în `/admin.html` (mai comod, dar cere ca funcția
-   să accepte și autentificare de superadmin pe lângă secretul de cron — **cod nou pe o
-   poartă de securitate**). Recomandarea mea: comanda locală întâi, butonul după 2–3
-   săptămâni de funcționare, dacă mai e nevoie.
+2. **Declanșarea manuală: comandă locală** (curl cu `dry_run` / `force`). Zero cod nou,
+   zero suprafață de atac în plus. Butonul în `/admin.html` rămâne o opțiune de peste 2–3
+   săptămâni de funcționare, dacă se dovedește necesar — el cere ca funcția să accepte și
+   autentificare de superadmin pe lângă secretul de cron, adică **cod nou pe o poartă de
+   securitate**.
+
+---
+
+## ✅ PIESA 1 — SCRISĂ ȘI RULATĂ (13 august)
+
+Toate blocurile rulate de Lucian, fără erori. **Funcția e dovedită pe date reale.**
+
+**Ce a ieșit la probe:**
+- `6c` — funcția întoarce **62 de destinatari** (fereastră de 14 zile, prag 20), zero erori
+  de tip. `nr_zone_bifate` maxim **19** pe toate rândurile ⇒ pragul funcționează.
+  `fereastra_de_la` identică la toți ⇒ jurnalul gol, toți cad pe podea, cum trebuie.
+  Acordul gramatical corect. **Niciun cont de-al nostru în listă.** (CSV 94)
+- `2b` — **secțiunea C GOALĂ**: cei 49 de oameni prezenți în ambele variante au exact
+  aceleași cifre. Secțiunea B goală: lista scrisă de mână nu excludea niciun om real.
+  Secțiunea A un singur rând, `ltfb.studio@gmail.com` — singura diferență față de august,
+  și e o îmbunătățire. (CSV 96)
+- `3b` (cheia străină către `auth.users`) — **a mers**, după ce s-a reluat cu linia `do $$`
+  inclusă. ⚠️ Capcană de copiere, nu de cod: selecția pornită de la `begin` lasă `do $$`
+  afară și dă `42601 syntax error at or near "if"`. Aceeași pereche de `$$` contează și la
+  corpul funcției din BLOC 5.
+
+**Verificat și consemnat:** `rox.brustur@yahoo.com` apare în lot. Pe 28 iulie fusese scoasă
+manual din campania „zone fără grup" (de aceea 36 de emailuri, nu 37). **Lucian a confirmat
+pe 13 august că a fost o excludere de moment** — profil real, fără steag. Rămâne în lot.
+
+---
+
+### Fișierele Piesei 1
+
+Toate în `db_schema/digest-terenuri/`. **Ordinea de rulare:**
+
+| Fișier | Ce face | Scrie în bază? |
+|---|---|---|
+| `0e-control-digest-anunturi.sql` | verificarea de 2 minute: a trimis digestul de anunțuri ceva **singur**, de la proba manuală din 5 august? | nu — strict SELECT |
+| `2-baza.sql` | bifa `email_terenuri_noi`, jurnalul `terenuri_digest_log`, funcția `lot_terenuri_noi` | **da** — se rulează pe blocuri |
+| `2b-control-lot-vs-august.sql` | dovada că funcția dă aceleași cifre ca interogarea validată în august | nu — strict SELECT |
+
+### ⚠️ Trei lucruri de știut înainte de a scrie Piesa 2
+
+1. **Funcția are TREI schimbări față de interogarea din august, nu una.** Handoff-ul de
+   ieri prevedea doar înlocuirea listei de excluderi cu `cont_intern`. Celelalte două au
+   apărut la scriere: filtrul pe bifa nouă `email_terenuri_noi` (coloana nu exista în
+   august), și **fereastra per persoană**, care a cerut mutarea numărătorii de terenuri
+   dintr-un CTE global într-unul per (om, zonă) — doi oameni cu ferestre diferite trebuie
+   să vadă cifre diferite. A treia e o restructurare reală, de aceea există `2b`.
+
+2. **`2b` are sens DOAR cât timp jurnalul e gol.** După prima trimitere reală, fiecare om
+   are propria fereastră și cele două variante n-au cum să mai dea la fel. Fișierul îți
+   spune singur, în secțiunea Z, dacă mai e valabil.
+
+3. **Plafonul de 14 zile NU e în funcție**, deși handoff-ul de ieri îl punea acolo.
+   `p_de_la` e podeaua ferestrei și se dă din afară, ca plafonul să stea într-un singur
+   loc — în edge function — nu ascuns în SQL. Piesa 2 cheamă
+   `lot_terenuri_noi(now() - interval '14 days', 20)`.
+
+### Ce rămâne nescris
+
+Piesa 2 (edge function `digest-terenuri-zone`), Piesa 3 (șablonul din `notify-admins`),
+Piesa 4 (bifa în pagina de profil) — toate descrise mai sus, niciuna începută.
+⚠️ **Granturile Piesei 4 sunt deja în `2-baza.sql`, BLOC 2** — deci SQL-ul e rulat
+înaintea deployului de frontend, cum trebuie. Fără grantul de UPDATE, formularul de profil
+pică în întregime, pentru toți, tăcut.
 
 ---
 
@@ -340,9 +403,17 @@ om de pe platformă**: doar nu-i trimite acest email anume, restul rămâne nesc
   `profiles.cont_intern` — vezi secțiunea dedicată de mai sus. (Numele propus atunci era
   `email_exclus_campanii`; s-a ales `cont_intern`, fiindcă steagul spune *ce e contul*, nu
   doar *ce nu-i trimitem* — se folosește și la statistici, nu numai la emailuri.)
-- **Digestul de anunțuri n-a fost încă confirmat că a trimis un email real** în producție —
-  verificarea primei nopți (5 august) e tot nebifată în `HANDOFF.md`. Nu blochează, dar dacă
-  tiparul are un defect, l-am moșteni în ambele. 2 minute de SQL la început.
+- ~~Digestul de anunțuri n-a fost încă confirmat că a trimis un email real în producție.~~
+  ✅ **CONFIRMAT 13 august** cu `0e-control-digest-anunturi.sql` (CSV 92). Digesturi plecate
+  **singure** pe 10 și 11 august, 16 destinatari, emailuri `sent` în `notification_log`.
+  Verificarea orei la București funcționează (`{"sarit":true,"motiv":"la București e ora 17;
+  digestul pleacă la 19"}`). **Tiparul se poate copia fără rezerve.**
+  ⚠️ Găsit pe drum: `cron.job_run_details` **nu are coloana `jobname`**, doar `jobid` —
+  numele se ia din `cron.job` printr-un JOIN. Greșeala era în
+  `digest-anunturi/2-programare.sql` pasul 3b din 5 august, semn că interogarea aceea
+  n-a fost rulată niciodată. Corectată în ambele fișiere.
+  ⚠️ Găsit pe drum (2): numele grupului **„Parcul Circului,"** are o virgulă la coadă în
+  bază, deci apare așa în emailurile către 16 oameni. De reparat din admin.
 - **Nu se preia „cele două deschideri"** din campania manuală (fraza de legătură pentru cine
   primise emailul din iulie). E un email recurent, n-are nevoie de cârlig la fiecare rundă.
 

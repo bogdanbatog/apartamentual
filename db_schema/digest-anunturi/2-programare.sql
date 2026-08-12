@@ -84,10 +84,14 @@ where jobname = 'digest-anunturi-grup';
 -- 3b. Ultimele execuții (rulează asta mâine dimineață, după prima seară).
 --     `status` trebuie să fie 'succeeded'. Atenție: „succeeded" înseamnă că
 --     CEREREA a plecat, nu că s-au trimis emailuri — pentru asta e 3c.
-select runid, status, return_message, start_time
-from cron.job_run_details
-where jobname = 'digest-anunturi-grup'
-order by start_time desc
+-- ⚠️ Corectat pe 13 august: `cron.job_run_details` NU are coloana `jobname`
+--    (dă `42703: column jobname does not exist`). Are doar `jobid`, deci
+--    numele se ia din `cron.job` printr-un JOIN.
+select d.runid, d.status, d.return_message, d.start_time
+from cron.job_run_details d
+join cron.job j on j.jobid = d.jobid
+where j.jobname = 'digest-anunturi-grup'
+order by d.start_time desc
 limit 10;
 
 -- 3c. Ce a răspuns funcția. AICI se vede dacă a trimis ceva.
