@@ -9,7 +9,7 @@ drop function if exists public.lot_terenuri_noi(timestamptz, integer, integer);
 create function public.lot_terenuri_noi(
     p_de_la         timestamptz,          -- podeaua ferestrei
     p_prag_zone     integer default 20,   -- peste atâtea zone bifate, îl sărim
-    p_max_terenuri  integer default 6     -- câte terenuri intră în listă
+    p_max_terenuri  integer default 40    -- plafon de SIGURANȚĂ, nu editorial
 )
 returns table (
     user_id                uuid,

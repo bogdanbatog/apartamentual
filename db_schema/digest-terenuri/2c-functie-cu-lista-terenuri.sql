@@ -14,11 +14,27 @@
 -- link gata filtrat nu i se putea da. L-am fi trimis pe listă să caute singur.
 --
 -- CE SE SCHIMBĂ, EXACT:
---   • un parametru nou, `p_max_terenuri` (implicit 6) — câte terenuri intră
---     în listă; restul rămân numărate în `total_terenuri`, ca emailul să
---     poată spune „și încă N";
+--   • un parametru nou, `p_max_terenuri` (implicit 40) — plafon de SIGURANȚĂ,
+--     nu o alegere editorială. Vezi mai jos de ce.
 --   • o coloană nouă, `terenuri_lista jsonb` — cele mai NOI p_max_terenuri
 --     terenuri ale omului, în ordine descrescătoare după data adăugării.
+--
+-- ⚠️ DE CE INTRĂ TOATE TERENURILE, NU DOAR PRIMELE CÂTEVA (Lucian, 13 august).
+-- Prima versiune tăia lista la 6, iar emailul ar fi spus „și încă 14 în
+-- celelalte zone ale tale". Aia e o FUNDĂTURĂ: ca să vadă cele 14, omul ar
+-- trebui să intre pe pagina de terenuri și să filtreze zonă cu zonă, câte una
+-- — exact frecarea pentru care s-a adăugat lista la început. Iar numărul 6 nu
+-- venea din nicio măsurătoare.
+--
+-- Acum funcția întoarce TOT materialul, iar șablonul decide cum îl arată:
+-- primele câteva ca dreptunghiuri cu poză, restul ca linii scurte, fiecare cu
+-- linkul ei. Nimeni nu mai trebuie să filtreze nimic. ⚠️ **Câte dreptunghiuri
+-- și câte linii e o decizie de TEXT** — se schimbă în șablon, fără SQL.
+--
+-- Plafonul de 40 e doar ca emailul să nu devină nefolosibil dacă apar 200 de
+-- terenuri într-o săptămână. Cel mai „încărcat" om avea 27 într-o fereastră de
+-- 14 zile (CSV 94), deci în practică nu se atinge. Dacă se atinge vreodată,
+-- `total_terenuri` rămâne numărul REAL, deci diferența e vizibilă.
 --
 -- CE NU SE SCHIMBĂ: cine primește (aceleași filtre), pragul, ordinea zonelor,
 -- primele 3 zone, acordul gramatical. Toate coloanele vechi rămân, cu același
@@ -84,7 +100,7 @@ drop function if exists public.lot_terenuri_noi(timestamptz, integer, integer);
 create function public.lot_terenuri_noi(
     p_de_la         timestamptz,          -- podeaua ferestrei
     p_prag_zone     integer default 20,   -- peste atâtea zone bifate, îl sărim
-    p_max_terenuri  integer default 6     -- câte terenuri intră în listă
+    p_max_terenuri  integer default 40    -- plafon de SIGURANȚĂ, nu editorial
 )
 returns table (
     user_id                uuid,
@@ -335,7 +351,7 @@ comment on function public.lot_terenuri_noi(timestamptz, integer, integer) is
 select nume, email, total_terenuri,
        jsonb_array_length(terenuri_lista) as terenuri_in_lista,
        terenuri_lista
-from public.lot_terenuri_noi(now() - interval '14 days', 20, 6)
+from public.lot_terenuri_noi(now() - interval '14 days', 20, 40)
 limit 5;
 
 
@@ -347,7 +363,7 @@ select count(*)                       as destinatari,
        sum(total_terenuri)            as suma_terenurilor,
        max(nr_zone_bifate)            as maxim_zone_bifate,
        count(*) filter (where terenuri_lista is null) as fara_lista
-from public.lot_terenuri_noi(now() - interval '14 days', 20, 6);
+from public.lot_terenuri_noi(now() - interval '14 days', 20, 40);
 -- Așteptat: destinatari 62 · maxim_zone_bifate 19 · fara_lista 0
 -- ⚠️ `fara_lista` diferit de 0 înseamnă că cineva are cifre dar n-are
 --    terenuri de arătat — imposibil logic, deci ar fi un semn de defecțiune.
@@ -357,7 +373,7 @@ from public.lot_terenuri_noi(now() - interval '14 days', 20, 6);
 select nume, email,
        jsonb_array_length(terenuri_lista)                                   as in_lista,
        (select count(distinct e ->> 'id') from jsonb_array_elements(terenuri_lista) e) as id_distincte
-from public.lot_terenuri_noi(now() - interval '14 days', 20, 6)
+from public.lot_terenuri_noi(now() - interval '14 days', 20, 40)
 where jsonb_array_length(terenuri_lista)
       <> (select count(distinct e ->> 'id') from jsonb_array_elements(terenuri_lista) e);
 -- Așteptat: ZERO rânduri. Orice rând aici = un teren dublat în email.
