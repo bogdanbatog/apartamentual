@@ -5,6 +5,12 @@
 Sesiunea s-a dus pe verificarea premisei (potrivirea teren↔zonă) și pe o curățenie
 neprevăzută în `zones`, care e ✅ **încheiată și comisă** (`cf60a4f`).
 
+**Ce e deja decis:** ✅ premisa verificată (potrivirea e sigură), ✅ măsurătorile rulate și
+interpretate, ✅ **pragul ridicat de la 12 la 20 de zone bifate** (decizia lui Lucian,
+12 august, pe baza distribuției).
+**Ce mai lipsește ca să se poată construi:** ziua și ora trimiterii, și cum o declanșează
+Lucian manual. Ambele sunt la finalul acestui fișier.
+
 ---
 
 ## De unde a pornit
@@ -98,7 +104,8 @@ Digestul de anunțuri e tiparul de copiat. Citește-l întâi:
 - tabela-jurnal `terenuri_digest_log` (user_id, trimis_la, fereastra_de_la, nr_terenuri,
   nr_zone), cu **RLS pornit și zero politici** — `service_role` ocolește RLS, restul nu văd
   nimic, iar tu citești ca `postgres` din SQL Editor;
-- funcția `lot_terenuri_noi(de_la, prag_zone)` — **mută interogarea deja validată** din
+- funcția `lot_terenuri_noi(de_la, prag_zone)` — **`prag_zone` = 20**, vezi decizia de mai
+  jos; **mută interogarea deja validată** din
   `db_schema/terenuri-noi/4-lot-destinatari.sql`, care întoarce un rând per persoană cu
   primele 3 zone și acordul gramatical rezolvat („1 teren nou" / „3 terenuri noi" /
   „21 de terenuri noi"). ⚠️ **NU o rescrie în JavaScript** — a fost verificată pe date
@@ -151,29 +158,104 @@ Subsolul emailului trimite la pagina de profil pentru dezabonare, **nu** „răs
 
 ---
 
-## 🔴 TREI DECIZII DE LUAT ÎNAINTE DE A CONSTRUI
+## 📊 MĂSURĂTORILE — scrise, rulate, interpretate (12 august)
 
-Lucian a cerut să le lămurim înainte de a alege. **Întrebarea lui deschisă:** vrea să vadă
-întâi cifre, nu să ghicească.
+Lucian a cerut cifre înainte de a decide. Ambele măsurători sunt scrise, rulate, iar
+rezultatele stau în `screenshots/20260812/`, CSV 88 și 89.
 
-1. **Ziua și ora.** Propuneri: luni 10:00 (recomandat — acoperă terenurile de weekend),
-   marți 10:00 (rată de deschidere mai bună, dar pierde „începutul de săptămână"),
-   luni 19:00 (ca digestul de anunțuri).
-   📊 **Măsurătoarea utilă înainte de a alege:** un SQL care se uită în urmă și arată,
-   săptămână cu săptămână, **câte emailuri ar fi plecat** dacă automatizarea ar fi existat.
-   Spune dacă avem material săptămânal sau doar în rafale. **Nescris încă.**
+### Ritmul: săptămânalul e viabil (`0c-cate-emailuri-pe-saptamana.sql`)
 
-2. **Cum o declanșează manual.** Comandă locală (curl cu `dry_run`/`force` — zero cod nou,
-   zero suprafață de atac) vs. buton în `/admin.html` (mai comod, dar cere ca funcția să
-   accepte și autentificare de superadmin pe lângă secretul de cron — **cod nou pe o poartă
-   de securitate**). Recomandarea mea: comanda locală întâi, butonul după 2-3 săptămâni de
-   funcționare, dacă mai e nevoie.
+⚠️ **Rezumatul spune „4 săptămâni cu material din 27" — cifra e înșelătoare.** Toate cele
+46 de terenuri au fost adăugate în ultimele 9 săptămâni; înainte de 8 iunie platforma
+n-avea niciun teren, deci săptămânile goale din februarie–mai nu spun nimic despre ritm.
 
-3. **Pragul de 12 zone bifate** (decizia lui Lucian din 2 august: cine a bifat mai multe nu
-   primește email, fiindcă „în zonele tale" n-ar mai însemna nimic — un om avea 58 de zone
-   bifate din 61). Se păstrează / se ridică / se scoate?
-   📊 **Măsurătoarea utilă:** distribuția reală — câți oameni au bifat 1-5 zone, câți 6-12,
-   câți peste. Fără ea, orice prag e ghicit. **Nescris încă.**
+**Semnalul real, ultimele 10 săptămâni — 6 din 10 au avut terenuri:**
+
+| Săptămâna | Terenuri | Emailuri |
+|---|---|---|
+| 8 iun | 1 | 0 ⚠️ |
+| 15 iun | 8 | 0 ⚠️ |
+| 22 iun – 29 iun | 0 | — |
+| 6 iul | 1 | 2 |
+| 13 iul | 0 | — |
+| 20 iul | 7 | 21 |
+| 27 iul | 19 | 39 |
+| 3 aug | 10 | 43 |
+| 10 aug | 0 | — |
+
+⚠️ **Cele două rânduri din iunie cu terenuri dar zero emailuri sunt un artefact al
+măsurătorii**, nu un defect: se numără doar oamenii al căror cont exista deja atunci, iar
+în iunie majoritatea celor 70 de utilizatori de azi încă nu se înscriseseră.
+
+✅ **Verificare de sănătate:** săptămâna lui 3 august dă 43 de emailuri, iar campania reală
+de atunci a trimis 38. Aceeași ordine de mărime, cu decupaj puțin diferit.
+
+**Observație pentru TON, nu pentru arhitectură:** într-o săptămână activă emailul ar pleca
+la **20–43 de oameni din 70**, și sunt cam aceiași de fiecare dată (27 iulie și 3 august au
+atins, în mare, aceeași listă). Un om activ ar primi emailul **două-trei săptămâni la rând**.
+Textul trebuie deci **să suporte repetiția**, nu să sune ca un anunț unic.
+
+### Distribuția zonelor (`0d-cate-zone-bifeaza-oamenii.sql`)
+
+70 de utilizatori reali, media 8,8 zone bifate, maximul 58.
+
+```
+ 1–2 zone    6 oameni
+ 3–5 zone   22 oameni   ← masa
+ 6–9 zone   20 oameni   ← masa
+10–12 zone   7 oameni
+14–19 zone  13 oameni
+─────────────────────  ruptură: nimeni între 20 și 29
+30 zone      1 om
+58 zone      1 om
+```
+
+**Zero oameni cu zero zone bifate** — toți cei 70 au bifat cel puțin una, probabil fiindcă
+zonele fac parte din „profil complet". ⚠️ Deci ideea unei campanii separate „spune-ne unde
+cauți" **pică: n-are destinatari.**
+
+---
+
+## ✅ DECIZIE LUATĂ (12 august): pragul se ridică de la 12 la **20**
+
+| Prag | Tăiați | Rămân |
+|---|---|---|
+| 10 | 20 | 50 |
+| 12 (vechi) | **15** | 55 |
+| 15 | 7 | 63 |
+| **20 (ales)** | **2** | **68** |
+| fără | 0 | 70 |
+
+**Ipoteza inițială era greșită și datele au corectat-o:** credeam că pragul de 12 e o regulă
+scrisă pentru cazul acela cu 58 de zone. Nu e — **tăia 15 din 70 de oameni, 21% din
+utilizatori**, adică era pus în mijlocul mulțimii, nu la marginea ei.
+
+Distribuția arată o ruptură foarte clară: **68 din 70 au cel mult 19 zone**, apoi e un gol,
+apoi doi oameni singuri la 30 și 58. Pragul 20 taie exact cei doi oameni pentru care regula
+a fost gândită și **pe nimeni altcineva**.
+
+*Contraargumentul, păstrat pentru cine reia discuția:* cine a bifat 15 din 61 de cartiere
+primește o potrivire aproape la orice teren. Dacă emailul trebuie să rămână un semnal
+puternic, nu doar frecvent, 15 ar fi compromisul (taie 7). **Nu s-a ales asta.**
+
+⚠️ **Pragul e despre ZONE bifate, nu despre terenuri** — confuzie ușor de făcut. Se uită la
+câte cartiere și-a bifat omul în profil, din cele 61 ale Bucureștiului. Și **nu-l scoate pe
+om de pe platformă**: doar nu-i trimite acest email anume, restul rămâne neschimbat.
+
+---
+
+## 🔴 DECIZII ÎNCĂ DESCHISE
+
+1. **Ziua și ora.** Propuneri: luni 10:00 (recomandat — acoperă terenurile apărute în
+   weekend), marți 10:00 (rată de deschidere mai bună, dar pierde senzația de „început de
+   săptămână"), luni 19:00 (ca digestul de anunțuri). Măsurătoarea de ritm arată că
+   săptămânalul e potrivit, deci rămâne doar alegerea momentului.
+
+2. **Cum o declanșează Lucian manual.** Comandă locală (curl cu `dry_run`/`force` — zero cod
+   nou, zero suprafață de atac) vs. buton în `/admin.html` (mai comod, dar cere ca funcția
+   să accepte și autentificare de superadmin pe lângă secretul de cron — **cod nou pe o
+   poartă de securitate**). Recomandarea mea: comanda locală întâi, butonul după 2–3
+   săptămâni de funcționare, dacă mai e nevoie.
 
 ---
 
@@ -202,7 +284,19 @@ db_schema/digest-terenuri/0b-diagnostic-zone-duble.sql  198  strict SELECT, rula
 db_schema/digest-terenuri/1-reparatie-zone-duble.sql    ~455 ✅ RULAT 12 aug, marcat ca atare
 ```
 
-Rezultatele rulărilor: `screenshots/20260812/`, CSV 82–87 (ignorate de git — `*.csv`).
+Adăugate după (măsurătorile), **strict SELECT, rulabile oricând**:
+
+```
+db_schema/digest-terenuri/0c-cate-emailuri-pe-saptamana.sql   ritmul, săptămână cu săptămână
+db_schema/digest-terenuri/0d-cate-zone-bifeaza-oamenii.sql    distribuția zonelor + praguri
+```
+
+⚠️ **Fișierele care încep cu `0` se rulează ÎNTREGI, dintr-un singur Run** — sunt scrise ca
+o singură interogare cu `UNION ALL` și o coloană `sectiune`, fiindcă editorul SQL din
+Supabase arată doar rezultatul ultimei instrucțiuni dintr-un script. Doar `1-reparatie`
+se rulează pe blocuri, fiindcă e singurul care scrie în bază.
+
+Rezultatele rulărilor: `screenshots/20260812/`, CSV 82–89 (ignorate de git — `*.csv`).
 
 **Zero atingeri** la plăți (Netopia/Oblio), la edge functions, la politicile RLS, sau la
 orice fișier din `frontend/`.
