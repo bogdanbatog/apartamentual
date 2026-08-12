@@ -1,13 +1,17 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026
-**Stadiu:** 🟡 **PLANIFICAT, NECONSTRUIT.** Zero cod scris pentru automatizare.
-Sesiunea s-a dus pe verificarea premisei (potrivirea teren↔zonă) și pe o curățenie
-neprevăzută în `zones`, care e ✅ **încheiată și comisă** (`cf60a4f`).
+**Data:** 12 august 2026 (actualizat seara)
+**Stadiu:** 🟡 **PLANIFICAT, NECONSTRUIT.** Zero cod scris pentru automatizarea propriu-zisă.
+Ziua s-a dus pe trei lucruri pregătitoare, toate ✅ **încheiate și comise**: verificarea
+premisei (potrivirea teren↔zonă), o curățenie neprevăzută în `zones` (`cf60a4f`), și
+steagul `cont_intern` (`c0c317d`).
 
-**Ce e deja decis:** ✅ premisa verificată (potrivirea e sigură), ✅ măsurătorile rulate și
-interpretate, ✅ **pragul ridicat de la 12 la 20 de zone bifate** (decizia lui Lucian,
-12 august, pe baza distribuției).
+**Ce e deja decis și făcut:**
+- ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
+- ✅ măsurătorile rulate și interpretate (ritmul + distribuția zonelor)
+- ✅ **pragul ridicat de la 12 la 20 de zone bifate** (decizia lui Lucian, pe baza distribuției)
+- ✅ **`profiles.cont_intern` există în bază** — lista de excluderi scrisă de mână a dispărut
+
 **Ce mai lipsește ca să se poată construi:** ziua și ora trimiterii, și cum o declanșează
 Lucian manual. Ambele sunt la finalul acestui fișier.
 
@@ -92,6 +96,74 @@ București 62 | Cluj-Napoca 20 | Timișoara 18 | Iași 18 | Brașov 19.
 
 ---
 
+## ✅ Steagul `cont_intern` — ÎNCHEIAT (12 august, `c0c317d`)
+
+Era trecut mai jos ca „de rezolvat la construire". S-a rezolvat.
+
+**Problema:** conturile noastre și ale prietenilor cu cont de test erau scoase din campanii
+printr-o **listă de emailuri scrisă de mână**, copiată din fișier în fișier
+(`terenuri-noi/4-lot-destinatari.sql:44-54`, `emailuri-profil-incomplet/1-lot-pentru-email.sql:42-53`).
+Într-o campanie pornită de mână e acceptabil — te uiți la lot înainte de trimitere. Într-o
+funcție care rulează singură în fiecare luni, e o bombă cu ceas.
+
+### ⚠️ De ce NU s-a folosit `is_demo`
+
+Cererea inițială a lui Lucian a fost „marchează-le mai bine cu demo". **`is_demo` e un marcaj
+PUBLIC**, nu unul intern — verificat în cod înainte de a răspunde:
+
+| Unde | Ce se vede |
+|---|---|
+| `js/utilizatori.js:440` | badge „Exemplu" lângă nume pe `/utilizatori` |
+| `js/profile-view-new.js:269` | „Exemplu" în loc de „Utilizator Activ" pe profil |
+| `grup-details.html:1839` | badge „Exemplu" în lista de membri |
+
+Și **nu scoate contul din listă, nici din numărătoare** — doar îl împinge la coadă
+(`utilizatori.js:230-234`). Deci n-ar fi curățat cifrele, doar ar fi pus o etichetă.
+Pe site „Exemplu" înseamnă *personaj inventat* — ar fi etichetat public **co-fondatorul**
+și oameni reali. Lucian a ales în schimb un steag nou, intern.
+
+### Ce s-a construit
+
+`profiles.cont_intern boolean not null default false`. **`not null` e deliberat:** cu NULL
+permis, un `WHERE cont_intern = false` ar fi sărit tăcut peste rândurile cu NULL — exact
+capcana lui `account_status`.
+
+**Nu primește niciun `GRANT`, dinadins.** Pe 1 august, `authenticated` a rămas cu SELECT pe
+o listă de exact 20 de coloane numite (`securitate-profiles/6-revoca-pentru-logati.sql:73-94`),
+iar dreptul pe toată tabela a fost revocat. Consecință: **o coloană nouă e invizibilă din
+naștere** — nu trebuie ascunsă. Și `profiles_visible` e înghețat la 31 de coloane, deci nici
+pe acolo. Trei porți, toate deja închise. Se scrie doar din SQL Editor sau cu `service_role`.
+
+> ⚠️ Dacă vreodată vrei bifa în `/admin.html`: ai nevoie de `GRANT UPDATE (cont_intern)`
+> **PLUS** o politică RLS care s-o restrângă la superadmini. Fără politică, grantul o
+> deschide pentru oricine e logat.
+
+**Rezultat: 23 de conturi marcate, 70 de utilizatori reali rămași** (CSV 90 = diagnosticul,
+CSV 91 = controlul de după).
+
+### Două lecții din diagnostic
+
+1. **Filtrul pe domeniul firmei nu prinde conturile făcute cu Gmail personal.**
+   `%@ltfbstudio.ro` rata `ltfb.studio@gmail.com` — contul studioului, înscris 5 august,
+   care apărea liniștit printre destinatarii reali. Găsit doar fiindcă diagnosticul are o
+   secțiune C cu **toți cei care rămân**, citită cu ochiul. Confirmat de Lucian, adăugat.
+2. **Regula „orice adresă cu `+` e cont de test" e singura care poate greși.** Există
+   oameni reali care se înscriu cu alias (`numele+apartamentual@gmail.com`) ca să vadă cine
+   le vinde adresa. ✅ Verificat pe 12 august: toate cele 14 adrese cu `+` din bază sunt
+   `luta.lucian.m+testN`. **De reverificat la fiecare rulare** — regula prinde acum orice
+   alias, al oricui, nu doar pe ale lui Lucian (lista veche prindea doar `luta.lucian.m+%`).
+
+### Ce NU s-a atins
+
+Blocurile `useri_exclusi` / `exclusi` din campaniile **deja rulate** au rămas neschimbate.
+Se înlocuiesc cu `cont_intern = false` când se scrie campania următoare — altfel rescriem
+istoria degeaba.
+
+Cele două adrese scoase cu mâna pe 10 august **nu se pot recupera**: `trimise-2026-08-10.json`
+notează doar ce a plecat, nu ce s-a scos.
+
+---
+
 ## 🟡 Planul automatizării — patru piese, pe modelul `digest-anunturi-grup`
 
 Digestul de anunțuri e tiparul de copiat. Citește-l întâi:
@@ -111,6 +183,9 @@ Digestul de anunțuri e tiparul de copiat. Citește-l întâi:
   „21 de terenuri noi"). ⚠️ **NU o rescrie în JavaScript** — a fost verificată pe date
   reale în august; o rescriere e cod nou, neprobat. `SECURITY DEFINER`, cu `EXECUTE`
   revocat de la `anon` și `authenticated`.
+  ✅ **O singură schimbare față de original:** blocul `useri_exclusi` (liniile 35-55, lista
+  de emailuri scrisă de mână) se înlocuiește cu `AND p.cont_intern = false`. Steagul există
+  deja în bază — vezi secțiunea de mai sus.
 
 ### Piesa 2 — edge function `digest-terenuri-zone`
 
@@ -261,11 +336,10 @@ om de pe platformă**: doar nu-i trimite acest email anume, restul rămâne nesc
 
 ## ⚠️ Alte lucruri de rezolvat la construire
 
-- **Conturile de test (Carmen, Tibs, aliasurile `+testN`) nu sunt marcate `is_demo`.** În
-  campania manuală erau excluse printr-o listă de emailuri **scrisă de mână** în SQL
-  (`4-lot-destinatari.sql`, blocul `useri_exclusi`). Într-o funcție care rulează singură
-  săptămânal, lista scrisă de mână e o bombă cu ceas. **Propunere: coloană
-  `profiles.email_exclus_campanii`**, pusă o dată pe conturile alea.
+- ~~Conturile de test nu sunt marcate.~~ ✅ **REZOLVAT 12 august** prin
+  `profiles.cont_intern` — vezi secțiunea dedicată de mai sus. (Numele propus atunci era
+  `email_exclus_campanii`; s-a ales `cont_intern`, fiindcă steagul spune *ce e contul*, nu
+  doar *ce nu-i trimitem* — se folosește și la statistici, nu numai la emailuri.)
 - **Digestul de anunțuri n-a fost încă confirmat că a trimis un email real** în producție —
   verificarea primei nopți (5 august) e tot nebifată în `HANDOFF.md`. Nu blochează, dar dacă
   tiparul are un defect, l-am moșteni în ambele. 2 minute de SQL la început.
@@ -290,6 +364,18 @@ Adăugate după (măsurătorile), **strict SELECT, rulabile oricând**:
 db_schema/digest-terenuri/0c-cate-emailuri-pe-saptamana.sql   ritmul, săptămână cu săptămână
 db_schema/digest-terenuri/0d-cate-zone-bifeaza-oamenii.sql    distribuția zonelor + praguri
 ```
+
+Comise în **`c0c317d`** (steagul `cont_intern`; tot fără deploy — doar SQL):
+
+```
+db_schema/conturi-interne/0-cine-ar-fi-marcat.sql   200  strict SELECT, rulabil oricând
+db_schema/conturi-interne/1-adauga-coloana.sql      195  ✅ RULAT 12 aug, marcat în antet
+```
+
+⚠️ `0-cine-ar-fi-marcat.sql` **se rulează din nou** înainte de orice campanie sau înainte de
+a construi funcția: arată cine s-a mai înscris între timp și, în secțiunea C, **toți cei care
+vor primi emailurile** — partea care se citește cu ochiul, fiindcă acolo s-a găsit
+`ltfb.studio@gmail.com`.
 
 ⚠️ **Fișierele care încep cu `0` se rulează ÎNTREGI, dintr-un singur Run** — sunt scrise ca
 o singură interogare cu `UNION ALL` și o coloană `sectiune`, fiindcă editorul SQL din
