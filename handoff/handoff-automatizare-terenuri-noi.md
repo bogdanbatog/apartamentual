@@ -12,9 +12,15 @@
 - ✅ **declanșare manuală: comandă locală** cu `dry_run`/`force` — zero cod nou (13 august)
 - 🟡 **Piesa 1 (SQL de bază) scrisă** — trei fișiere, ✋ **NERULATE de Lucian**
 
-**Următorul pas concret:** Piesa 2 — edge function `digest-terenuri-zone`. Cheamă
-`lot_terenuri_noi(now() - interval '14 days', 20)`, verifică singură că la București e
-**luni, ora 10**, și scrie în `terenuri_digest_log` după fiecare om servit.
+**Următorul pas concret: PIESA 3 — TEXTUL EMAILULUI.** Sesiune nouă, după `/clear`; e o
+lucrare de conținut, n-are nevoie de niciun rând din SQL. Parcursul pe care-l vrea Lucian și
+ce se poate promite din el (doi pași din trei nu existau cum au fost formulați) sunt mai jos,
+la „PARCURSUL DIN EMAIL". Abia după text se scrie Piesa 2 — edge function-ul are nevoie să
+știe ce trimite.
+
+Piesa 2, când se ajunge la ea: cheamă `lot_terenuri_noi(now() - interval '14 days', 20, 6)`,
+verifică singură că la București e **luni, ora 10**, și scrie în `terenuri_digest_log` după
+fiecare om servit.
 
 ---
 
@@ -208,6 +214,51 @@ Copie structurală a celei de anunțuri:
   de zero, semnalează pe Slack `#app_events`. Asta înlocuiește ochiul omenesc de la
   campania manuală.
 
+### 📝 PARCURSUL DIN EMAIL — formulat de Lucian pe 13 august
+
+Ce vrea Lucian să conțină emailul, după ce-i spune omului că au apărut terenuri noi:
+**(1)** intră pe pagina de terenuri și vede rapid terenurile noi din zonele lui;
+**(2)** ca să afle câte apartamente încap și la ce cost pe mp util, poate cere analiza
+de arhitect (99 RON); **(3)** poate adăuga un teren la grupul din care face parte, sau
+poate face un grup nou pe terenul acela ca să atragă alți oameni.
+
+⚠️ **VERIFICAT ÎN COD PE 13 AUGUST — doi pași din trei nu existau așa cum sunt formulați:**
+
+| Pasul | Realitatea din cod | Ce facem |
+|---|---|---|
+| 1. „filtrează cu zonele preferate" | ❌ **Nu există.** `terenuri.html` filtrează pe oraș + **UN singur** cartier, dintr-un dropdown. Nicio bifare multiplă, niciun filtru „zonele mele". Iar `js/terenuri.js` **nu citește deloc parametri din URL**, deci nici link gata filtrat nu se poate da. | ✅ **Rezolvat altfel** (decizia lui Lucian): emailul listează terenurile concrete, fiecare cu link direct. De aici versiunea 2 a funcției. |
+| 2. analiza de 99 RON | ✅ **Exact cum e formulat.** `analize.html` promite „câte apartamente se pot construi (mai multe variante)" și „preț estimat pe mp construit și util". Din pagina unui teren se comandă analiza pentru terenul acela. | Rămâne ca atare. |
+| 3a. „adaugă terenul la grupul tău" | ✅ Merge pentru **orice membru activ**, din pagina terenului. Dar scrie în `terenuri_likes_grupuri` — lista de **favorite** ale grupului. | Se poate spune în email. |
+| 3b. terenurile *oficiale* ale grupului | ⚠️ Alt mecanism (`grup_terenuri`), altă pagină, iar butonul e vizibil **doar fondatorului**. | Nu se promite membrilor simpli. |
+| 3c. „fac un grup nou și adaug acel teren" | ⚠️ **Nu e o singură acțiune.** Formularul de creare grup nu primește un teren; se creează grupul, apoi se intră pe pagina lui, apoi „Editează terenuri". Terenul nu se duce cu tine. | Textul nu poate spune „creează un grup pe terenul ăsta" ca pe un singur clic. |
+
+**Prețul de 99 RON:** e promoțional („PROMOȚIE PRIMA LUNĂ", 149 tăiat). Lucian a decis pe
+13 august că promoția devine **„primele 3 luni"**. ⚠️ Asta mută termenul, nu-l elimină:
+pe la **mijlocul lui noiembrie 2026** emailul automat ar începe să trimită un preț învechit
+la 62 de oameni. Prețul se scrie în șablon **într-un singur loc**, ca schimbarea să fie o linie.
+
+### 📊 Ce material are, de fapt, emailul (măsurat 13 august, CSV 98)
+
+Din 46 de terenuri publice: **46 au poză**, **46 au preț și suprafață** (deci și preț pe mp),
+**0 au `nr_apartamente_min` completat**.
+
+⚠️ **Ideea „arătăm 3–4 apartamente pe carduri" PICĂ** — coloanele există în tabelă, dar nu
+sunt populate niciodată. Bine că s-a măsurat înainte de a scrie textul.
+
+✅ **Și e o veste bună pentru mesaj:** dacă niciun teren de pe platformă nu arată ce se poate
+construi pe el, atunci „câte apartamente încap" nu e o informație pe care omul o are și pe
+care analiza o rafinează — e una pe care **nu o are deloc**. Emailul poate spune exact asta,
+cinstit: vezi terenul, prețul, suprafața; ce nu vezi nicăieri e ce se poate ridica acolo.
+
+✅ **`analiza_*_status` nu spune nimic despre email — închis pe 13 august.** Au ieșit
+„completate" la 46 din 46 fiindcă `terrain-form-v2.js:469-470` pune `'pending'` la **fiecare**
+teren creat: e valoarea implicită, nu un semnal. Iar textul analizei nu se afișează pe pagina
+terenului — analiza comandată ajunge ca PDF pe emailul celui care a plătit-o.
+
+⚠️ **Deci nu există „terenuri care au deja analiză" de ocolit în email.** Nimeni nu poate ști,
+uitându-se la un teren, dacă cineva a comandat vreodată o analiză pentru el. Omul o comandă ca
+să afle ce se poate construi, punct.
+
 ### Piesa 3 — șablon nou în `notify-admins`
 
 Un `case 'terenuri_noi_zone'`, pe modelul lui `anunturi_digest` (linia 510).
@@ -368,6 +419,19 @@ Toate în `db_schema/digest-terenuri/`. **Ordinea de rulare:**
 | `0e-control-digest-anunturi.sql` | verificarea de 2 minute: a trimis digestul de anunțuri ceva **singur**, de la proba manuală din 5 august? | nu — strict SELECT |
 | `2-baza.sql` | bifa `email_terenuri_noi`, jurnalul `terenuri_digest_log`, funcția `lot_terenuri_noi` | **da** — se rulează pe blocuri |
 | `2b-control-lot-vs-august.sql` | dovada că funcția dă aceleași cifre ca interogarea validată în august | nu — strict SELECT |
+| `2c-functie-cu-lista-terenuri.sql` | **versiunea 2** a funcției: întoarce și terenurile efective (`terenuri_lista jsonb`), pentru cardurile din email. ⚠️ Înlocuiește BLOC 5 din `2-baza.sql` — acela nu se mai rulează. | **da** — ✅ RULAT 13 aug |
+| `2c-doar-functia.sql` | același corp de funcție, extras singur, ca să poată fi rulat cu Ctrl+A fără selecție parțială | **da** — e o copie, nu ceva în plus |
+
+**Dovada versiunii 2 (13 august):** 62 de destinatari și **719** terenuri însumate — exact
+suma coloanei `total_terenuri` din CSV 94, adunată rând cu rând. Lista de terenuri s-a adăugat
+fără să miște nimic din ce era deja dovedit cu `2b`.
+
+⚠️ **Trei capcane plătite la rularea versiunii 2**, toate consemnate în antetul lui `2c`:
+`max()` nu există pe `jsonb` (coloana intră în `group by`); `terenuri` are **două** coloane de
+dată (`created_at`, folosită de noi, și `data_adaugat`) și **două** de zonă (`cartier`, folosită
+la potrivire, și `zona`, rămasă din schema veche); iar `pret_pe_mp` există în bază dar
+frontendul n-o citește — calculează din `pret_total / suprafata`, deci facem la fel, altfel
+emailul ar arăta alt preț decât pagina.
 
 ### ⚠️ Trei lucruri de știut înainte de a scrie Piesa 2
 
