@@ -259,6 +259,19 @@ terenului — analiza comandată ajunge ca PDF pe emailul celui care a plătit-o
 uitându-se la un teren, dacă cineva a comandat vreodată o analiză pentru el. Omul o comandă ca
 să afle ce se poate construi, punct.
 
+### 📐 Cât de lung e emailul (măsurat 13 august)
+
+Pe fereastra de 14 zile: **cel mai încărcat om are 27 de terenuri, media e 12, iar zero
+oameni sunt tăiați de plafon** — fiecare primește chiar toate terenurile lui. Săptămânal
+va fi cam jumătate (19 terenuri noi în săptămâna lui 27 iulie, 10 în cea a lui 3 august,
+pe toată platforma).
+
+⚠️ **Consecință pentru text:** cu 12 terenuri în medie, împărțirea pe două niveluri
+(dreptunghiuri cu poză + linii scurte) e **obligatorie**, nu o rafinare. Un email cu 12
+dreptunghiuri e un catalog, nu un mesaj. Iar distanța dintre un om cu 2 terenuri și unul cu
+27 e prea mare pentru un șablon rigid — **pragul se decide la scrierea textului și se mută
+oricând, fără SQL.**
+
 ### Piesa 3 — șablon nou în `notify-admins`
 
 Un `case 'terenuri_noi_zone'`, pe modelul lui `anunturi_digest` (linia 510).
