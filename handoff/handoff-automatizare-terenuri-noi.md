@@ -474,6 +474,53 @@ pică în întregime, pentru toți, tăcut.
 
 ---
 
+## 🆕 PIESA 5 — CELE TREI BUTOANE DIN PAGINA TERENULUI (cerere Lucian, 13 august)
+
+**Nu e parte din automatizarea emailului, dar e capătul ei.** Emailul duce omul pe pagina
+unui teren; degeaba îl ducem acolo dacă pagina nu-i spune ce poate face mai departe.
+🟡 **NEÎNCEPUTĂ.** Verificată doar starea actuală.
+
+### Principiul, formulat de Lucian
+
+> **Teoria (educarea) se face punctual, acolo unde a ajuns omul** — pe teren, pe grup —
+> nu într-o pagină separată pe care nimeni n-o citește.
+
+⚠️ De ținut minte la ORICE decizie viitoare de conținut: explicația merge lângă butonul care
+o cere, nu într-un ghid. Se aplică și emailului, și paginii de grup, nu doar aici.
+
+### Ce vrea: trei butoane mari, fiecare cu explicația lui
+
+| # | Buton | Ce explică | Stare azi |
+|---|---|---|---|
+| 1 | **Cere analiză** | că afli rapid **câte apartamente se pot construi** și **ce suprafețe utile** pot avea, **în mai multe variante**, plus **costul estimativ pe mp construit și util** — și că **e 99 RON** | ⚠️ **Butonul există, explicația NU.** `teren-details.html:193` scrie doar „Cere o analiză", atât. Omul n-are de unde ști ce primește. |
+| 2 | **Adaugă la unul din grupurile tale** | — | ⚠️ **Există** (`js/teren-details.js:299`), probat de Lucian cu un cont de test. **DAR apare doar dacă omul e deja într-un grup** — `fetchUserGroups()` întoarce gol și panoul nu se randează. Cine n-are niciun grup nu vede nimic despre grupuri pe pagina unui teren. |
+| 3 | **Fă un grup pe acest teren** | că îți poți face un grup în care terenul ăsta e favorit, iar alții ți se alătură dacă le place terenul — **un grup se poate forma și pornind de la un teren**, nu doar de la o zonă | ❌ **NU EXISTĂ.** |
+
+### Ce am aflat verificând, util la construire
+
+✅ **Butonul 3 e mai simplu decât pare.** Panoul existent (butonul 2) scrie în
+`terenuri_likes_grupuri` — **favoritele** grupului, nu lista oficială de terenuri
+(`grup_terenuri`, care e rezervată fondatorului, altă pagină). Deci „fă un grup pe acest
+teren" înseamnă: creezi grupul, iar terenul intră ca favorit al lui. Aceeași cale, deja
+funcțională — nu e nevoie de mecanismul restrâns.
+
+⚠️ **Formularul de creare grup nu primește azi un teren.** `grup-nou.html` / `js/grup-nou.js`
+nu citesc niciun `?teren=`. Butonul 3 cere deci: parametrul în URL, ducerea lui prin
+formular, și un `insert` în `terenuri_likes_grupuri` după crearea grupului. **Trei locuri, nu
+unul** — și e cod nou pe traseul de creare grup, care a fost reparat pe 7 august (poarta de
+profil complet). ⚠️ De verificat că nu se strică poarta aceea.
+
+⚠️ **Butonul 2 are o gaură de acoperire, nu de securitate:** omul fără niciun grup nu vede
+nimic. Pentru el, butonul 3 e singura cale — deci butonul 3 trebuie să apară **mai ales**
+când butonul 2 n-are ce arăta.
+
+⚠️ **Prețul de 99 RON ajunge într-un al doilea loc.** Va fi și în email, și pe butonul 1.
+Când promoția „primele 3 luni" expiră (mijlocul lui noiembrie 2026), sunt **două** locuri de
+schimbat, plus `analize.html` și `comanda-analiza.html`. Merită o listă scrisă a tuturor
+locurilor unde apare prețul, înainte de a-l mai adăuga într-unul nou.
+
+---
+
 ## ⚠️ Alte lucruri de rezolvat la construire
 
 - ~~Conturile de test nu sunt marcate.~~ ✅ **REZOLVAT 12 august** prin
