@@ -1,9 +1,14 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026 · actualizat **13 august, seara** (commit `33176c8`, împins)
-**Stadiu:** ✅ **PIESELE 1, 2 ȘI 3 SUNT GATA ȘI DEPLOYATE. Probate pe producție cu `dry_run`.**
-⛔ **NU SE POATE TRIMITE REAL** — două blocante, amândouă în frontend: **Piesa 4** (bifa din
-profil) și **Piesa 5** (butonul „Fă un grup pe terenul acesta").
+**Data:** 12 august 2026 · actualizat **13 august, noaptea** (până la commit `0a139b4`, împins)
+**Stadiu:** ✅ **PIESELE 1, 2, 3 ȘI 4 SUNT GATA ȘI DEPLOYATE.** Emailul a fost văzut randat de
+cinci ori.
+⛔ **NU SE POATE TRIMITE REAL** — a rămas **un singur blocant: Piesa 5** (butonul „Fă un grup
+pe terenul acesta"), pe care emailul îl promite în liniuța a cincea.
+
+🟡 **NEVERIFICAT:** proba bifei din profil (debifezi „Terenuri noi în zonele mele", salvezi,
+reîncarci, trebuie să rămână debifată). Fișierele sunt urcate, grantul e verificat, dar
+nimeni n-a apăsat butonul. **Prima treabă a sesiunii următoare.**
 
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
@@ -16,13 +21,17 @@ profil) și **Piesa 5** (butonul „Fă un grup pe terenul acesta").
 - ✅ **Piesa 2 (edge function) scrisă, deployată, probată** — vezi secțiunea dedicată
 - ✅ **Piesa 3 (text + șablon) deployată**, emailul văzut randat de trei ori
 
-**Următorul pas concret: PIESA 4 (bifa din profil) și PIESA 5 (butonul din pagina
-terenului).** Amândouă sunt în `frontend/`, amândouă blochează trimiterea reală. Piesa 4 e
-mai mică și are o capcană precisă (grantul de UPDATE se rulează ÎNAINTE de deploy, altfel
-pică tot formularul de profil, pentru toți, tăcut) — vezi secțiunea ei.
+**Următorul pas concret: PIESA 5**, butonul „Fă un grup pe terenul acesta" din pagina
+terenului. Lucian a zis pe 13 august că oricum urmează o **reorganizare a paginii de
+terenuri**, deci butonul intră acolo, nu separat.
 
-⚠️ **Înainte de prima trimitere reală se rulează `4-samanta-jurnal.sql`**, altfel primul
-email automat repetă campania manuală din 3 august pentru 35 de oameni. Vezi secțiunea.
+**Pașii de după, în ordine strictă:**
+1. proba bifei din profil (5 minute, nefăcută încă)
+2. Piesa 5
+3. `4-samanta-jurnal.sql` — ⚠️ altfel primul email repetă campania manuală din 3 august
+   pentru 35 de oameni
+4. o trimitere reală prudentă: `{"force": true, "limita": 2}`
+5. `3-programare.sql` — sarcina `pg_cron`, ultima
 
 ---
 
@@ -561,19 +570,49 @@ Se citește din sarcina programată: `select command from cron.job where jobname
 
 ---
 
-## ⛔ CELE DOUĂ BLOCANTE ALE PRIMEI TRIMITERI
+## ⛔ BLOCANTUL RĂMAS AL PRIMEI TRIMITERI
 
-Emailul e gata și arată bine. **Nu poate pleca**, fiindcă textul lui promite două lucruri care
-încă nu există în frontend:
+Emailul e gata și arată bine. **Nu poate pleca**, fiindcă textul lui promite un lucru care încă
+nu există în frontend:
 
 | Ce promite emailul | Unde | Ce lipsește |
 |---|---|---|
-| „debifează «Terenuri noi în zonele mele» în profilul tău" | subsol | **Piesa 4** — bifa nu e în pagina de profil. Omul ajunge acolo și nu găsește nimic |
-| „**Fă un grup pe terenul acesta**" | liniuța a 5-a | **Piesa 5** — butonul nu există. `grup-nou.html` nu citește `?teren=` |
+| ~~„debifează «Terenuri noi în zonele mele» în profilul tău"~~ | subsol | ✅ **REZOLVAT** — Piesa 4, commit `131dd2b`, urcată în cPanel |
+| „**Fă un grup pe terenul acesta**" | liniuța a 5-a | ⛔ **Piesa 5** — butonul nu există. `grup-nou.html` nu citește `?teren=` |
 
 ⚠️ **Liniuța a cincea e o decizie asumată de Lucian pe 13 august**, luată știind că butonul nu
 există: pagina de terenuri urmează să fie reorganizată și primește butonul. Deci **nu e o
 scăpare de verificat, e o datorie de plătit** — dar până se plătește, emailul stă pe loc.
+
+---
+
+## ✅ PIESA 4 — SCRISĂ ȘI URCATĂ (13 august, commit `131dd2b`)
+
+A doua căsuță la „Notificări pe email" din `profile-edit-new.html`, sora celei pentru anunțuri.
+Coloana `profiles.email_terenuri_noi` exista din 13 august dimineața și era deja citită de
+funcția SQL — **lipsea doar comutatorul la vedere**.
+
+Textul căsuței: *„Terenuri noi în zonele mele — Un email luni dimineața, doar în săptămânile în
+care apar terenuri noi în zonele bifate mai sus. În săptămânile fără terenuri nu primești nimic."*
+(Zonele preferate sunt chiar deasupra în pagină, la linia 168, deci „mai sus" e literal adevărat.)
+
+**Trei decizii din cod:**
+- se citește **separat din `profiles`**, nu din `profiles_visible` (view-ul e înghețat la 31 de
+  coloane din 31 iulie, deci o coloană nouă nu iese dintr-un `select('*')`);
+- **`!== false`, nu `=== true`** — dacă valoarea lipsește, căsuța apare **PORNITĂ**. O eroare de
+  rețea n-are voie să dezaboneze pe cineva fără să știe;
+- la salvare **`?.checked !== false`** — dacă HTML-ul și JS-ul ajung defazate pe server (deploy
+  manual din cPanel), se trimite „pornit" în loc să crape.
+
+✅ **Grantul era deja dat** (BLOC 2 din `2-baza.sql`, rulat pe 13 august), verificat înainte de
+deploy. ⚠️ **Capcană de citire, plătită pe loc:** interogarea de verificare a întors și `INSERT`,
+și `REFERENCES` pe lângă `SELECT` și `UPDATE`. Nu e o problemă — `information_schema.column_privileges`
+afișează un grant dat pe **toată tabela** ca și cum ar fi pe fiecare coloană. Doar `SELECT` și
+`UPDATE` vin de la BLOC 2. (Aceeași capcană ca pe 5 august, memoria `grant-pe-tabela-vs-pe-coloana`.)
+
+🟡 **RĂMASĂ DE FĂCUT: proba.** Debifezi, salvezi, reîncarci, trebuie să rămână debifată.
+⚠️ Dacă butonul „Salvează" nu face nimic vizibil, ăla e semnul că grantul lipsește — dar
+verdictul a zis că e acolo.
 
 ---
 
@@ -631,6 +670,37 @@ deci e primul care va rămâne în urmă.**
 ⚠️ Bulina e o **celulă cu `bgcolor`**, nu caracterul „•" — acela se randează la mărimi diferite
 de la un program de email la altul. `border-radius` e ignorat de Outlook pe Windows, deci acolo
 bulinele ies pătrate. Culoarea e strict decorativă: nimic nu se pierde în text simplu.
+
+### ✍️ REGULĂ NOUĂ, VALABILĂ PESTE TOT: fără liniuță de dialog în textul citit de oameni
+
+Decizia lui Lucian, 13 august. **Scrisă în `CLAUDE.md`, la „Voce editorială"**, deci se citește
+la începutul fiecărei sesiuni și nu mai trebuie repetată.
+
+Liniuța lungă „—" nu apare în emailuri, pagini de site, butoane, mesaje de eroare.
+⚠️ **Se rescrie fraza, nu se înlocuiește semnul mecanic** — o virgulă pusă unde era o liniuță
+dă adesea o frază proastă. Nu se aplică la comentariile din cod și la documentele interne
+(`db_schema/`, `handoff/`), unde liniuța ajută la citit și n-o vede niciun utilizator.
+
+**Aplicat deja pe emailul de terenuri** (două locuri: fraza de deschidere a secțiunii despre
+analiză și `PRET_MENTIUNE`). ✅ Zero liniuțe în textul care pleacă.
+
+🟡 **RĂMÂNE DE CURĂȚAT, sesiune separată** (măsurat 13 august):
+
+| Unde | Câte |
+|---|---|
+| paginile site-ului | **295** (cele mai multe: `ghid.html` 44, `grup-details.html` 30, `povestea-noastra.html` 23) |
+| celelalte șabloane din `notify-admins` | 19 |
+| funcțiile de newsletter | 8 |
+| scripturile campaniilor deja trimise | 57 — **NU se ating**, e istorie |
+
+⚠️ Nu se rezolvă cu găsit-și-înlocuit. Fiecare apariție cere rescrierea frazei.
+
+### O corectură de conținut, din aceeași rundă
+
+„Asta face analiza de arhitect, în mai multe variante de împărțire" a devenit **„…de împărțire
+ÎN APARTAMENTE"**. Într-un email despre terenuri, „variante de împărțire" se citește plauzibil
+ca **parcelare a terenului**, adică exact altceva. Pagina de analize nici nu folosește cuvântul:
+scrie „câte apartamente se pot construi (mai multe variante)". Commit `0a139b4`.
 
 ---
 
