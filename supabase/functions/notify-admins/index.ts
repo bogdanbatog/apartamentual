@@ -71,6 +71,17 @@ const SUPERADMIN_CC_ALWAYS = new Set<string>([
   // (admin_email), dar superadminul vrea să știe de fiecare dată când un grup
   // s-a umplut. Deci CC mereu.
   'group_full',
+  // Digestul de anunțuri pleacă membrilor grupului, iar superadminul nu e
+  // membru în grupurile oamenilor — deci până acum NU AFLA NICIODATĂ că s-a
+  // scris ceva pe un grup. Adăugat pe 13 august, după ce Alin (admin la „Rond
+  // Coșbuc" și „Bosianu") a scris un anunț despre care noi n-am știut nimic.
+  //
+  // ⚠️ E un eveniment de tip broadcast (`recipient_user_ids`), deci copia
+  // superadminului pleacă printr-o trimitere SEPARATĂ, o singură dată per grup,
+  // nu o dată per membru — vezi ramura `hasBroadcastRequest && shouldCcSuperadmin`
+  // de mai jos. Emailul e cel primit și de membri: numele grupului, câte mesaje
+  // s-au scris, autorul ultimului și primele ~90 de caractere din el.
+  'anunturi_digest',
 ])
 
 // Events that CC the superadmin ONLY if the frontend did not specify a recipient.
