@@ -322,21 +322,22 @@ async function loadProfile(userId) {
         if (error) throw error;
         profileData = profile;
 
-        // Bifa digestului de anunțuri NU e în `profiles_visible`: view-ul
-        // enumeră explicit cele 31 de coloane de pe 31 iulie, iar coloana a
-        // apărut abia acum. Se citește separat, de pe rândul propriu din
+        // Bifele de email NU sunt în `profiles_visible`: view-ul enumeră
+        // explicit cele 31 de coloane de pe 31 iulie, iar amândouă coloanele
+        // au apărut după. Se citesc separat, de pe rândul propriu din
         // `profiles` — acolo `authenticated` are drept de SELECT dat anume
-        // pe această coloană.
+        // pe fiecare dintre ele.
         // Dacă citirea eșuează, presupunem PORNIT, la fel ca valoarea
         // implicită din baza de date: o eroare de rețea n-are voie să arate
-        // căsuța nebifată și să dezaboneze omul fără să vrea.
+        // căsuțele nebifate și să dezaboneze omul fără să vrea.
         const { data: preferinteEmail } = await supabase
             .from('profiles')
-            .select('email_anunturi_grup')
+            .select('email_anunturi_grup, email_terenuri_noi')
             .eq('user_id', userId)
             .maybeSingle();
 
         profileData.email_anunturi_grup = preferinteEmail?.email_anunturi_grup !== false;
+        profileData.email_terenuri_noi = preferinteEmail?.email_terenuri_noi !== false;
 
         // Load user tags
         const { data: userTags } = await supabase
@@ -394,9 +395,14 @@ function populateActiveForm() {
     document.getElementById('is_email_public').checked = profileData.is_email_public || false;
     document.getElementById('is_age_public').checked = profileData.is_age_public || false;
 
-    // Digestul zilnic: bifat = primești. Implicit pornit, ca în baza de date.
+    // Rezumaturile pe email: bifat = primești. Implicit pornite, ca în baza
+    // de date. `!== false` (nu `=== true`) e deliberat: dacă valoarea lipsește
+    // — coloană necitită, eroare de rețea — căsuța rămâne bifată.
     const bifaAnunturi = document.getElementById('email_anunturi_grup');
     if (bifaAnunturi) bifaAnunturi.checked = profileData.email_anunturi_grup !== false;
+
+    const bifaTerenuri = document.getElementById('email_terenuri_noi');
+    if (bifaTerenuri) bifaTerenuri.checked = profileData.email_terenuri_noi !== false;
     
     // Preferences
     document.getElementById('preferred_rooms').value = profileData.preferred_rooms || '';
@@ -631,11 +637,18 @@ async function handleActiveFormSubmit(event) {
             age: parseInt(document.getElementById('age').value) || null,
             is_email_public: document.getElementById('is_email_public').checked,
             is_age_public: document.getElementById('is_age_public').checked,
-            // ⚠️ Coloana asta are nevoie de `grant update (email_anunturi_grup)`
-            // pe `profiles` (dat în db_schema/digest-anunturi/1-baza.sql). Fără
-            // grant, TOT update-ul e refuzat, nu doar câmpul ăsta — deci SQL-ul
-            // se rulează ÎNAINTE de deployul acestui fișier.
+            // ⚠️ Amândouă coloanele au nevoie de `grant update (...)` pe
+            // `profiles` (`db_schema/digest-anunturi/1-baza.sql`, BLOC 2, și
+            // `db_schema/digest-terenuri/2-baza.sql`, BLOC 2). Fără grant, TOT
+            // update-ul e refuzat, nu doar câmpul lipsă — adică formularul de
+            // profil pică în întregime, pentru toți, fără mesaj de eroare.
+            // De aceea SQL-ul se rulează ÎNAINTE de deployul acestui fișier.
             email_anunturi_grup: document.getElementById('email_anunturi_grup').checked,
+            // `?.checked !== false`, nu `.checked`: dacă dintr-un motiv oarecare
+            // căsuța lipsește din pagină (un deploy parțial din cPanel, de
+            // pildă), trimitem PORNIT. Un fișier rămas în urmă n-are voie să
+            // dezaboneze pe cineva fără să știe.
+            email_terenuri_noi: document.getElementById('email_terenuri_noi')?.checked !== false,
             preferred_rooms: document.getElementById('preferred_rooms').value,
             preferred_area_sqm: parseInt(document.getElementById('preferred_area_sqm').value),
             preferred_city_id: parseInt(document.getElementById('preferred_city').value),

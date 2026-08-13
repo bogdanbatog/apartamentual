@@ -200,7 +200,7 @@
                 <!-- Notificări pe email -->
                 <div class="card">
                     <h2 class="text-lg font-semibold mb-1">Notificări pe email</h2>
-                    <p class="text-sm text-gray-500 mb-4">Anunțurile importante despre grupurile tale (invitații, cereri, schimbări) ajung la tine oricum. Aici alegi doar rezumatul zilnic.</p>
+                    <p class="text-sm text-gray-500 mb-4">Anunțurile importante despre grupurile tale (invitații, cereri, schimbări) ajung la tine oricum. Aici alegi doar rezumatele.</p>
 
                     <label class="flex items-start gap-3 text-sm cursor-pointer">
                         <input type="checkbox" id="email_anunturi_grup" name="email_anunturi_grup" checked
@@ -208,6 +208,15 @@
                         <span>
                             <span class="font-medium text-gray-900">Rezumatul zilnic al anunțurilor din grupurile mele</span>
                             <span class="block text-gray-500 mt-0.5">Un singur email seara, la ora 19:00, și doar dacă a scris cineva ceva. În zilele fără anunțuri nu primești nimic.</span>
+                        </span>
+                    </label>
+
+                    <label class="flex items-start gap-3 text-sm cursor-pointer mt-4">
+                        <input type="checkbox" id="email_terenuri_noi" name="email_terenuri_noi" checked
+                            class="mt-1 rounded border-gray-300">
+                        <span>
+                            <span class="font-medium text-gray-900">Terenuri noi în zonele mele</span>
+                            <span class="block text-gray-500 mt-0.5">Un email luni dimineața, doar în săptămânile în care apar terenuri noi în zonele bifate mai sus. În săptămânile fără terenuri nu primești nimic.</span>
                         </span>
                     </label>
                 </div>
