@@ -212,13 +212,16 @@ care sunt note **private**, vizibile doar ție, pe propriul profil.
 o parte din cititori, un text despre un buton pe care nu-l văd. „Adaugă la profil" merge pentru
 toată lumea, deci stă primul, iar grupul vine ca treaptă a doua.
 
-⚠️ **UN LUCRU DIN EMAIL NU E ACOPERIT DE `analize.html`.** Emailul promite trei cifre:
-cost pe mp construit, cost pe mp util, și **cât te costă terenul pentru un apartament de o
-anumită suprafață**. Primele două sunt exact ce scrie pagina (`analize.html:507` — „un preț
-estimat pe metru pătrat construit și util"). **A treia nu apare nicăieri în lista de
-livrabile.** Formularea e cerută de Lucian pe 13 august, deci rămâne — dar atunci **pagina
-trebuie completată cu același rând**, altfel emailul promite mai mult decât pagina, iar omul
-care compară le găsește în contradicție. 🟡 **`analize.html` NEMODIFICAT deocamdată.**
+✅ **REZOLVAT (13 august).** Emailul promite trei cifre: cost pe mp construit, cost pe mp util,
+și **cât te costă terenul pentru un apartament de o anumită suprafață**. Primele două erau deja
+pe pagină (`analize.html:507`); **a treia nu apărea nicăieri în lista de livrabile**, deci
+emailul promitea mai mult decât pagina. Lucian a confirmat că analiza **chiar dă** cifra, iar
+`analize.html` a primit rândul lipsă. Cele două spun acum la fel.
+
+🟡 **RĂMÂNE: pagina de exemplu.** `analiza-simplificata.html` arată patru imagini ale paginilor
+PDF-ului real (`assets/analize-exemple/simpla-1..4.jpg`). Ca să apară și acolo costul terenului
+pe apartament, e nevoie de **PDF-ul nou, exportat din nou ca imagini** — nu e o schimbare de
+cod. Până atunci, exemplul arată un raport fără cifra pe care pagina o promite.
 
 ### 4. Semnat „Lucian", deși pleacă automat
 
