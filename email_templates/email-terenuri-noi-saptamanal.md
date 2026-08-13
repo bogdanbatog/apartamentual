@@ -248,11 +248,21 @@ nu găsește ce i se promite.
      preț", iar `comanda-analiza.html:387` „TVA inclus".
    - Două constante alăturate în șablon: `PRET_ANALIZA` și `PRET_MENTIUNE`.
 
-   ⚠️ **„Preț de lansare" e a treia formulare pentru aceeași reducere.** Pe site sunt deja
-   două: `analize.html` arată doar `149` tăiat → `99 RON`, fără etichetă, iar
-   `comanda-analiza.html:389` are badge-ul **„PROMOȚIE PRIMA LUNĂ"** — care e și învechit
-   (promoția a devenit „primele 3 luni" pe 13 august) și diferit de ce spune emailul.
-   🟡 **Niciuna dintre cele două pagini nu a fost modificată.**
+   ✅ **ALINIAT PE TOT SITE-UL (13 august).** Înainte erau trei formulări pentru aceeași
+   reducere. `servicii.html:292` spunea deja „99 RON este prețul de lansare, cu TVA inclus" —
+   deci „preț de lansare" nu e un termen nou, e cel care exista deja, iar restul erau
+   excepțiile. Schimbate:
+
+   | Fișier | Înainte | Acum |
+   |---|---|---|
+   | `analize.html:495` | „TVA 21% inclus în preț" | „TVA 21% inclus în preț · **preț de lansare**" |
+   | `comanda-analiza.html:389` | badge „PROMOȚIE PRIMA LUNĂ" | badge „**PREȚ DE LANSARE**" |
+   | `analiza-simplificata.html:335` | „Promoție: 99 RON prima lună" | „**Preț de lansare: 99 RON**" |
+   | `servicii.html:292` | — | neatins, spunea deja așa |
+
+   ⚠️ **Prețul propriu-zis (99 / 149 RON) rămâne scris de mână în 8 locuri** din frontend —
+   nu l-am centralizat, doar am unificat *eticheta*. La schimbarea prețului, caută `99 RON`
+   și `149` în `frontend/`, plus constantele din șablonul de email.
 3. **Rămâne butonul mare** „Vezi toate terenurile" → `/terenuri.html`.
 4. **Rămâne și linkul** „Vezi grupurile deschise" în paragraful despre grupuri.
 5. **Buton secundar „Vezi ce conține analiza"**, sub paragraful despre analiză (cerut de Lucian).
