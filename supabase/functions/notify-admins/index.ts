@@ -281,7 +281,9 @@ const CATE_CU_POZA = 3
 // ⚠️ Prețul mai trăiește în DOUĂ locuri din frontend, care se schimbă de mână:
 // `analize.html` (494-495) și `comanda-analiza.html` (385-389).
 const PRET_ANALIZA = '99 RON'
-const PRET_MENTIUNE = 'TVA inclus — preț de lansare'
+// ⚠️ Fără liniuță de dialog („—") în textul văzut de om. E o regulă generală
+// de voce, nu o preferință de moment: vezi „Semne de punctuație" în CLAUDE.md.
+const PRET_MENTIUNE = 'TVA inclus, preț de lansare'
 
 /** Scapă textul care vine din baza de date (titluri de teren, nume de zonă). */
 function escHtml(s: unknown): string {
@@ -806,7 +808,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
             ${cardsHtml}
             ${listaHtml}
             <p style="margin:28px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Ce nu scrie pe nicio pagină de teren</p>
-            ${p(`Vezi suprafața și prețul — și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire. Costă <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
+            ${p(`Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire. Costă <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
             <div style="margin:0 0 8px;">
               <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
             </div>

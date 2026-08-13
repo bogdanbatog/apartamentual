@@ -98,6 +98,20 @@ Costurile reale la Județului Housing au depășit estimările inițiale. Mesaj 
 - Audiență: 30-45 ani, București, oameni care vor apartament fără supliment de dezvoltator
 - Diacritice românești corecte peste tot
 
+### Semne de punctuație — FĂRĂ liniuță de dialog („—") în textul citit de oameni
+
+**Regulă permanentă (decizia mea, 13 august 2026).** Liniuța lungă „—" nu apare în niciun
+text pe care îl citește un utilizator: emailuri, pagini de site, butoane, mesaje de eroare,
+texte de newsletter. Se rescrie fraza cu virgulă, două puncte, paranteze, sau se taie în
+două propoziții. **Rescrii fraza, nu înlocuiești semnul mecanic** — o virgulă pusă unde era
+o liniuță dă adesea o frază proastă.
+
+**Unde NU se aplică:** comentariile din cod, fișierele din `db_schema/`, `handoff/` și restul
+documentelor interne. Acolo liniuța ajută la citit și nu o vede niciun utilizator.
+
+⚠️ **Se verifică înainte de fiecare trimitere de email sau publicare de pagină.** Într-un
+email automat, care pleacă singur săptămânal, un semn strecurat o dată rămâne acolo luni de zile.
+
 ---
 
 ## Cadrul juridic pentru grupurile de construcție

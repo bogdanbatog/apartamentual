@@ -1,6 +1,7 @@
 # Email automat: „terenuri noi în zonele tale" (săptămânal)
 
-**PIESA 3** din automatizare. Scris 13 august 2026. 🟡 **TEXT DE APROBAT — încă neturnat în cod.**
+**PIESA 3** din automatizare. Scris 13 august 2026. ✅ **APROBAT, TURNAT ÎN COD ȘI DEPLOYAT.**
+Ultima revizie: 13 august, seara (liniuțe, buline colorate, fără liniuță de dialog în text).
 
 ⚠️ **Nu confunda cu `email-terenuri-noi-in-zonele-tale.md`.** Acela e campania **manuală**
 din 3 august, trimisă o singură dată de la calculator. Aceasta e versiunea **recurentă**, care
@@ -91,7 +92,7 @@ Variante, dacă vrei altceva:
 >
 > ---
 >
-> **[PRIMELE 3 TERENURI — dreptunghiuri cu poză]**
+> **[PRIMELE 3 TERENURI: dreptunghiuri cu poză]**
 >
 > ```
 > ┌──────────────────────────────────────┐
@@ -107,23 +108,25 @@ Variante, dacă vrei altceva:
 > └──────────────────────────────────────┘
 > ```
 >
-> **[RESTUL — linii scurte, fiecare cu link propriu]**
+> **[RESTUL: linii scurte, fiecare cu link propriu]**
 >
 > Și restul, pe scurt:
 >
-> - **Teren 450 mp, Berceni** — Berceni · 450 mp · 121.000 € (269 €/mp)
-> - **Teren colț, Vitan** — Vitan · 780 mp · 265.000 € (340 €/mp)
+> - **Teren 450 mp, Berceni**
+>   Berceni · 450 mp · 121.000 € · 269 €/mp
+> - **Teren colț, Vitan**
+>   Vitan · 780 mp · 265.000 € · 340 €/mp
 > - *(…)*
 >
 > ---
 >
 > **Ce nu scrie pe nicio pagină de teren**
 >
-> Vezi suprafața și prețul — și la noi, și în anunțul original. Ce nu vezi nicăieri e
+> Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e
 > **câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela**:
 > cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o
 > anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire.
-> Costă **99 RON**, TVA inclus — preț de lansare. Se comandă din pagina terenului.
+> Costă **99 RON**, TVA inclus, preț de lansare. Se comandă din pagina terenului.
 >
 > [ Vezi ce conține analiza → ]  ← buton secundar, contur
 >
@@ -131,19 +134,19 @@ Variante, dacă vrei altceva:
 >
 > Toate pornesc din pagina terenului:
 >
-> — **Adaugă-l la profilul tău.** Nu te obligă la nimic, dar ceilalți văd că cineva e
+> ● **Adaugă-l la profilul tău.** Nu te obligă la nimic, dar ceilalți văd că cineva e
 >   interesat de el și te pot invita într-un grup.
 >
-> — **Vezi cine mai e interesat.** Pagina îți arată câți sunt. Intri pe profilul oricăruia
+> ● **Vezi cine mai e interesat.** Pagina îți arată câți sunt. Intri pe profilul oricăruia
 >   și de acolo poți face un grup și îl inviți.
 >
-> — **Vezi ce grupuri sunt interesate de el.** Dacă vreunul ți se potrivește, poți cere
+> ● **Vezi ce grupuri sunt interesate de el.** Dacă vreunul ți se potrivește, poți cere
 >   alăturarea; odată intrat, puteți comenta chiar sub teren, pe pagina grupului.
 >
-> — **Dacă ești deja într-un grup**, adaugă terenul la favoritele lui: îl vede toată lumea
+> ● **Dacă ești deja într-un grup**, adaugă terenul la favoritele lui: îl vede toată lumea
 >   și comentați pe el acolo.
 >
-> — **Fă un grup pe terenul acesta.** Majoritatea grupurilor pornesc exact așa, de la un
+> ● **Fă un grup pe terenul acesta.** Majoritatea grupurilor pornesc exact așa, de la un
 >   teren pe care l-a găsit cineva primul.
 >
 > ---
