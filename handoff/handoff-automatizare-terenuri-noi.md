@@ -1,8 +1,9 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026 (actualizat seara) · **13 august: Piesele 1 și 3 gata**
-**Stadiu:** ✅ **PIESA 1 RULATĂ ȘI DOVEDITĂ. PIESA 3 (text + șablon) SCRISĂ, NEDEPLOYATĂ.
-Piesele 2 și 4 nescrise.**
+**Data:** 12 august 2026 · actualizat **13 august, seara** (commit `33176c8`, împins)
+**Stadiu:** ✅ **PIESELE 1, 2 ȘI 3 SUNT GATA ȘI DEPLOYATE. Probate pe producție cu `dry_run`.**
+⛔ **NU SE POATE TRIMITE REAL** — două blocante, amândouă în frontend: **Piesa 4** (bifa din
+profil) și **Piesa 5** (butonul „Fă un grup pe terenul acesta").
 
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
@@ -11,21 +12,17 @@ Piesele 2 și 4 nescrise.**
 - ✅ **`profiles.cont_intern` există în bază** — lista de excluderi scrisă de mână a dispărut
 - ✅ **ziua și ora: LUNI 10:00** (decizia lui Lucian, 13 august)
 - ✅ **declanșare manuală: comandă locală** cu `dry_run`/`force` — zero cod nou (13 august)
-- 🟡 **Piesa 1 (SQL de bază) scrisă** — trei fișiere, ✋ **NERULATE de Lucian**
+- ✅ **Piesa 1 (SQL de bază) rulată și dovedită** pe date reale
+- ✅ **Piesa 2 (edge function) scrisă, deployată, probată** — vezi secțiunea dedicată
+- ✅ **Piesa 3 (text + șablon) deployată**, emailul văzut randat de trei ori
 
-**Următorul pas concret: PIESA 2 — EDGE FUNCTION-UL `digest-terenuri-zone`.** Textul există
-acum (Piesa 3), deci funcția știe ce trimite. Sesiune nouă, după `/clear`: cere citit
-`digest-anunturi-grup/index.ts` întreg, care e tiparul de copiat.
+**Următorul pas concret: PIESA 4 (bifa din profil) și PIESA 5 (butonul din pagina
+terenului).** Amândouă sunt în `frontend/`, amândouă blochează trimiterea reală. Piesa 4 e
+mai mică și are o capcană precisă (grantul de UPDATE se rulează ÎNAINTE de deploy, altfel
+pică tot formularul de profil, pentru toți, tăcut) — vezi secțiunea ei.
 
-Piesa 2, concret: cheamă `lot_terenuri_noi(now() - interval '14 days', 20, 40)`, verifică
-singură că la București e **luni, ora 10**, trimite câte un apel la `notify-admins` per om cu
-`event_type: 'terenuri_noi_zone'`, și scrie în `terenuri_digest_log` după fiecare om servit.
-⚠️ **Ea trimite rezumatul pe Slack**, o singură dată la final — `notify-admins` nu mai
-postează nimic pentru evenimentul ăsta (vezi `SKIP_SLACK`, în Piesa 3 de mai jos).
-
-⚠️ **`dry_run` din Piesa 2 e și prima privire vizuală asupra emailului.** Șablonul e scris,
-dar nimeni nu l-a văzut încă randat — `deno` nu e instalat local, deci nu s-a putut nici
-măcar verifica sintaxa. Prima probă reală e deploy + `dry_run`.
+⚠️ **Înainte de prima trimitere reală se rulează `4-samanta-jurnal.sql`**, altfel primul
+email automat repetă campania manuală din 3 august pentru 35 de oameni. Vezi secțiunea.
 
 ---
 
@@ -502,11 +499,138 @@ emailul ar arăta alt preț decât pagina.
 
 ### Ce rămâne nescris
 
-Piesa 2 (edge function `digest-terenuri-zone`), Piesa 3 (șablonul din `notify-admins`),
-Piesa 4 (bifa în pagina de profil) — toate descrise mai sus, niciuna începută.
+Piesa 4 (bifa în pagina de profil) și Piesa 5 (butonul din pagina terenului).
 ⚠️ **Granturile Piesei 4 sunt deja în `2-baza.sql`, BLOC 2** — deci SQL-ul e rulat
 înaintea deployului de frontend, cum trebuie. Fără grantul de UPDATE, formularul de profil
 pică în întregime, pentru toți, tăcut.
+
+---
+
+## ✅ PIESA 2 — SCRISĂ, DEPLOYATĂ ȘI PROBATĂ PE PRODUCȚIE (13 august, seara)
+
+`supabase/functions/digest-terenuri-zone/index.ts`, deployat cu `--no-verify-jwt`.
+Copie structurală a digestului de anunțuri. **Toată logica de „cine primește și ce" a rămas
+în SQL** — funcția doar cheamă `lot_terenuri_noi(now() - 14 zile, 20, 40)`.
+
+**Rezultatul probei `dry_run` (13 august, ora 21, București):**
+
+```
+61 de destinatari  ·  442 potriviri teren×om  ·  0 erori
+terenuri noi care nu s-au putut lega de nicio zonă:  0   ← potrivirea pe text ține
+maximul de zone bifate din lot:  19                      ← pragul de 20 lucrează
+ferestre distincte:  1                                   ← jurnalul e gol, toți pornesc de la podea
+nimeni tăiat de plafonul de 40 de terenuri
+distribuție: 22 de oameni cu 2–4 terenuri, 23 cu 5–9, 9 cu 10–14, 7 cu 15–19
+```
+
+✅ **Lista celor 61 a fost citită cu ochiul:** niciun cont de-al nostru, nicio adresă cu `+`,
+niciun `@ltfbstudio.ro`. Steagul `cont_intern` își face treaba.
+
+⚠️ **Cifrele se mișcă de la o oră la alta.** Pe 13 august dimineața, aceeași funcție dădea
+**62 de oameni și 719 potriviri**; seara, 61 și 442. Nu s-a stricat nimic — **podeaua ferestrei
+alunecă**: la ora 21, „acum minus 14 zile" înseamnă 30 iulie ora 18:55, deci terenurile
+adăugate pe 30 iulie în timpul zilei au ieșit din fereastră. De ținut minte când compari două
+rulări: **nu compara cifre luate la ore diferite.**
+
+### Ce are funcția în plus față de plan
+
+Două chei de intrare care nu erau prevăzute, adăugate fiindcă lipsea ceva real:
+
+- **`email_proba: "adresa@ta"`** — trimite **un singur** email, cu datele primului om din lot,
+  la adresa dată. Merge **numai** împreună cu `dry_run` și **nu atinge jurnalul**. Fără el,
+  `dry_run` întoarce doar JSON, iar emailul rămâne nevăzut. Folosit de trei ori pe 13 august.
+- **`limita: N`** — procesează doar primii N oameni din lot (lotul e ordonat descrescător după
+  câte terenuri are fiecare). Pentru prima trimitere reală, prudentă.
+
+### Comenzile de probă (PowerShell — ⚠️ NU `curl`, e alt lucru acolo)
+
+```powershell
+$secret = "..."   # CRON_SECRET, același ca la digestul de anunțuri
+$url = "https://glbvbbgmcobtswwlktic.supabase.co/functions/v1/digest-terenuri-zone"
+
+# ce AR trimite, fără să trimită
+Invoke-RestMethod -Method Post -Uri $url -Headers @{ "x-cron-secret" = $secret } -ContentType "application/json" -Body '{"force": true, "dry_run": true}' | ConvertTo-Json -Depth 6
+
+# cum ARATĂ emailul — unul singur, la tine
+Invoke-RestMethod -Method Post -Uri $url -Headers @{ "x-cron-secret" = $secret } -ContentType "application/json" -Body '{"force": true, "dry_run": true, "email_proba": "office@ltfbstudio.ro"}' | ConvertTo-Json -Depth 6
+```
+
+⚠️ **Secretul nu e nicăieri în repo** (bine așa). Supabase nu-l mai arată după ce l-ai pus.
+Se citește din sarcina programată: `select command from cron.job where jobname = 'digest-anunturi-grup';`
+— e textul dintre ultimele ghilimele de la `'x-cron-secret'`.
+
+---
+
+## ⛔ CELE DOUĂ BLOCANTE ALE PRIMEI TRIMITERI
+
+Emailul e gata și arată bine. **Nu poate pleca**, fiindcă textul lui promite două lucruri care
+încă nu există în frontend:
+
+| Ce promite emailul | Unde | Ce lipsește |
+|---|---|---|
+| „debifează «Terenuri noi în zonele mele» în profilul tău" | subsol | **Piesa 4** — bifa nu e în pagina de profil. Omul ajunge acolo și nu găsește nimic |
+| „**Fă un grup pe terenul acesta**" | liniuța a 5-a | **Piesa 5** — butonul nu există. `grup-nou.html` nu citește `?teren=` |
+
+⚠️ **Liniuța a cincea e o decizie asumată de Lucian pe 13 august**, luată știind că butonul nu
+există: pagina de terenuri urmează să fie reorganizată și primește butonul. Deci **nu e o
+scăpare de verificat, e o datorie de plătit** — dar până se plătește, emailul stă pe loc.
+
+---
+
+## ⚠️ `4-samanta-jurnal.sql` — DE RULAT ÎNAINTE DE PRIMA TRIMITERE
+
+**Problema, găsită pe 13 august:** jurnalul e gol, deci la prima rulare fiecare om primește tot
+ce s-a adăugat în 14 zile. Dar pe **3 august a plecat deja o campanie manuală** cu exact același
+subiect, către 38 de oameni. **35 dintre ei sunt în lotul de azi.** Fără sămânță, primul email
+automat le arată din nou terenuri despre care le-am scris acum zece zile, sub titlul „au apărut".
+
+**Ce face fișierul:** scrie câte un rând de jurnal datat 3 august, ora 16:42, pentru cei 38.
+Fereastra lor va porni de acolo. Ceilalți 26 rămân cu cele 14 zile — pentru ei nu se repetă
+nimic.
+
+- rândurile de sămânță se recunosc după **`nr_terenuri = 0`** (tabela n-are coloană de notă)
+- potrivirea se face **pe email**; BLOC 1 arată cine nu s-a potrivit, înainte să scrie ceva
+- e rulabil de două ori fără efect (`where not exists`)
+
+⚠️ **După rulare, cifrele TREBUIE să scadă** la următorul `dry_run`. Dacă lotul scade mult, nu
+e o defecțiune — e semnalul că săptămâna n-a avut material propriu.
+
+⚠️ **De ținut minte pentru totdeauna:** dacă se mai face vreodată o campanie manuală pe terenuri,
+trebuie scrisă și în `terenuri_digest_log`, altfel digestul automat o repetă. E prețul faptului
+că avem două căi către același email.
+
+---
+
+## 📐 Emailul, așa cum arată azi
+
+Textul aprobat: `email_templates/email-terenuri-noi-saptamanal.md`. Șablonul:
+`case 'terenuri_noi_zone'` din `notify-admins`. **Cele două se țin sincronizate manual.**
+
+**Blocul final a fost rescris pe 13 august**, la cererea lui Lucian: paragraful de patru fraze
+a devenit o frază de deschidere („Toate pornesc din pagina terenului:") plus cinci liniuțe.
+Fiecare a fost verificată în cod înainte de a fi scrisă — tabelul complet e în `.md`, secțiunea
+„3b". Trei formulări au fost corectate față de dictare:
+
+- **„poți cere alăturarea"**, nu „te alături" — butonul scrie literal „Cere alăturarea" și
+  fondatorul aprobă;
+- **„intri pe profilul oricăruia și de acolo faci un grup"** — butonul „Creează un grup și
+  invită" e pe profilul omului, **nu** în lista de utilizatori interesați;
+- fraza de deschidere e **„Toate pornesc"**, fără număr, ca să nu ceară corectură când se mai
+  adaugă sau se scoate o liniuță.
+
+### 🎨 Bulinele iau paleta „TU"-ului (ideea lui Lucian)
+
+Cele cinci buline folosesc primele cinci culori din paleta prin care se rotește „TU"-ul din
+`apartamenTUal` pe site: `#c2604a`, `#5e8a6c`, `#5a7196`, `#a76782`, `#b8965c` (a șasea,
+`#7a9a90`, rămâne nefolosită). În email culorile stau pe loc — un email n-are JavaScript.
+
+⚠️ **PALETA E ACUM ÎN TREI LOCURI:** `index.html:2044`, `js/footer.js:279` și constanta
+`PALETA_TU` din `notify-admins`. **Emailul e singurul care nu se vede la o privire pe site,
+deci e primul care va rămâne în urmă.**
+
+⚠️ Bulina e o **celulă cu `bgcolor`**, nu caracterul „•" — acela se randează la mărimi diferite
+de la un program de email la altul. `border-radius` e ignorat de Outlook pe Windows, deci acolo
+bulinele ies pătrate. Culoarea e strict decorativă: nimic nu se pierde în text simplu.
 
 ---
 
