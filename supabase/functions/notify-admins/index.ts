@@ -363,6 +363,48 @@ function cardTeren(t: TerenDinLot): string {
     </table>`
 }
 
+// Paleta semnăturii — aceleași șase culori prin care se rotește „TU"-ul din
+// `apartamenTUal` pe site (`index.html:2044` și `js/footer.js:279`).
+// ⚠️ DACĂ SE SCHIMBĂ ACOLO, SE SCHIMBĂ ȘI AICI. Sunt trei locuri, iar emailul
+// e singurul care nu se vede la o privire pe site.
+//
+// În email culorile stau pe loc: nu există JavaScript într-un email, deci
+// rotația e imposibilă. În schimb, fiecare bulină ia altă culoare din paletă,
+// în ordinea de acolo — semnătura oprită într-un cadru, în loc de animație.
+const PALETA_TU = ['#c2604a', '#5e8a6c', '#5a7196', '#a76782', '#b8965c', '#7a9a90']
+
+/**
+ * Listă cu buline colorate.
+ *
+ * ⚠️ NU `<ul><li>`: Outlook pe Windows ignoră `margin` pe listă și pune
+ * indentarea lui, deci lista ar ieși aliniată altfel decât restul emailului.
+ * Un tabel cu două coloane arată la fel peste tot.
+ *
+ * ⚠️ Bulina e o CELULĂ cu fundal, nu caracterul „•": caracterul se randează
+ * la mărimi diferite de la un program de email la altul, iar culoarea lui
+ * depinde de font. O celulă de 7×7 cu `bgcolor` e desenată identic peste tot.
+ * `border-radius` e ignorat de Outlook pe Windows, deci acolo bulina iese
+ * pătrată — arată tot deliberat, fiindcă e colorată și aliniată.
+ *
+ * ⚠️ Culoarea e strict decorativă. Nicio liniuță nu depinde de ea ca să se
+ * înțeleagă, deci nu se pierde nimic dacă cineva citește emailul în text simplu.
+ */
+function liniute(elemente: string[]): string {
+  const randuri = elemente.map((t, i) => {
+    const culoare = PALETA_TU[i % PALETA_TU.length]
+    return `
+    <tr>
+      <td width="20" style="width:20px;padding:8px 0 0;vertical-align:top;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+          <tr><td width="7" height="7" bgcolor="${culoare}" style="width:7px;height:7px;background:${culoare};border-radius:50%;font-size:0;line-height:0;">&nbsp;</td></tr>
+        </table>
+      </td>
+      <td style="padding:0 0 14px;font-size:15px;line-height:1.6;color:#555555;">${t}</td>
+    </tr>`
+  }).join('')
+  return `<table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 8px;">${randuri}</table>`
+}
+
 /** Linia scurtă, pentru restul terenurilor. Un rând, cu link propriu. */
 function linieTeren(t: TerenDinLot): string {
   const href = linkTeren(t)
@@ -769,7 +811,18 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
               <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
             </div>
             <p style="margin:24px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Dacă vreunul îți place</p>
-            ${p(`Din pagina terenului îl poți adăuga la profil — nu te obligă la nimic, iar acolo vezi și cine s-a mai arătat interesat, oameni și grupuri. Dacă ești într-un grup, îl poți adăuga și la favoritele grupului: îl vede toată lumea și puteți comenta pe el, chiar sub teren, pe pagina grupului. Iar dacă încă nu ești într-un grup: majoritatea pornesc exact așa, de la un teren pe care l-a găsit cineva primul. <a href="${PLATFORM_URL}/grupuri.html" style="color:#c2604a;">Vezi grupurile deschise →</a>`)}
+            ${p('Toate pornesc din pagina terenului:')}
+            ${liniute([
+              '<strong style="color:#1a1a1a;">Adaugă-l la profilul tău.</strong> Nu te obligă la nimic, dar ceilalți văd că cineva e interesat de el și te pot invita într-un grup.',
+              '<strong style="color:#1a1a1a;">Vezi cine mai e interesat.</strong> Pagina îți arată câți sunt. Intri pe profilul oricăruia și de acolo poți face un grup și îl inviți.',
+              '<strong style="color:#1a1a1a;">Vezi ce grupuri sunt interesate de el.</strong> Dacă vreunul ți se potrivește, poți cere alăturarea; odată intrat, puteți comenta chiar sub teren, pe pagina grupului.',
+              '<strong style="color:#1a1a1a;">Dacă ești deja într-un grup</strong>, adaugă terenul la favoritele lui: îl vede toată lumea și comentați pe el acolo.',
+              // ⚠️ BUTONUL ĂSTA NU EXISTĂ ÎNCĂ — e Piesa 5. Liniuța a fost
+              // cerută de Lucian pe 13 august, știind asta, fiindcă pagina
+              // terenului urmează să fie reorganizată și primește butonul.
+              // ⛔ EMAILUL NU POATE PLECA REAL PÂNĂ CÂND BUTONUL NU E PE PAGINĂ.
+              '<strong style="color:#1a1a1a;">Fă un grup pe terenul acesta.</strong> Majoritatea grupurilor pornesc exact așa, de la un teren pe care l-a găsit cineva primul.',
+            ])}
             <div style="text-align:center;margin:28px 0;">
               <a href="${PLATFORM_URL}/terenuri.html" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
                 Vezi toate terenurile

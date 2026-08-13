@@ -129,11 +129,22 @@ Variante, dacă vrei altceva:
 >
 > **Dacă vreunul îți place**
 >
-> Din pagina terenului îl poți adăuga la profil — nu te obligă la nimic, iar acolo vezi și
-> cine s-a mai arătat interesat, oameni și grupuri. Dacă ești într-un grup, îl poți adăuga și
-> la favoritele grupului: îl vede toată lumea și puteți comenta pe el, chiar sub teren, pe
-> pagina grupului. Iar dacă încă nu ești într-un grup: majoritatea pornesc exact așa, de la
-> un teren pe care l-a găsit cineva primul. [Vezi grupurile deschise →]
+> Toate pornesc din pagina terenului:
+>
+> — **Adaugă-l la profilul tău.** Nu te obligă la nimic, dar ceilalți văd că cineva e
+>   interesat de el și te pot invita într-un grup.
+>
+> — **Vezi cine mai e interesat.** Pagina îți arată câți sunt. Intri pe profilul oricăruia
+>   și de acolo poți face un grup și îl inviți.
+>
+> — **Vezi ce grupuri sunt interesate de el.** Dacă vreunul ți se potrivește, poți cere
+>   alăturarea; odată intrat, puteți comenta chiar sub teren, pe pagina grupului.
+>
+> — **Dacă ești deja într-un grup**, adaugă terenul la favoritele lui: îl vede toată lumea
+>   și comentați pe el acolo.
+>
+> — **Fă un grup pe terenul acesta.** Majoritatea grupurilor pornesc exact așa, de la un
+>   teren pe care l-a găsit cineva primul.
 >
 > ---
 >
@@ -186,9 +197,13 @@ scrisă a tuturor locurilor înainte de noiembrie** — altfel se schimbă trei 
 
 ⚠️ Verificat în cod pe 13 august, iar textul e scris să nu depășească realitatea:
 
-- **Nu spune „creează un grup pe terenul ăsta".** `grup-nou.html` nu primește niciun
-  `?teren=`; omul ar crea grupul și ar constata că terenul n-a venit cu el. De aceea fraza e
-  „grupurile pornesc de la un teren", care e adevărată, nu un buton care nu există.
+- ⛔ **SPUNE „Fă un grup pe terenul acesta" — ȘI BUTONUL NU EXISTĂ ÎNCĂ.** E singurul loc din
+  email care promite ceva neconstruit, și e o **decizie luată în cunoștință de cauză de Lucian
+  pe 13 august**: pagina terenului urmează să fie reorganizată și primește butonul (Piesa 5).
+  Azi, `grup-nou.html` nu citește niciun `?teren=`, deci terenul nu vine cu omul.
+  **CONSECINȚĂ DE ORDINE A LUCRĂRILOR, nu de text: emailul nu poate pleca real până când
+  butonul nu e pe pagină.** Blocantele primei trimiteri sunt deci DOUĂ: Piesa 4 (bifa din
+  profil, promisă în subsol) și Piesa 5 (butonul, promis aici).
 - **Nu spune „filtrează pagina de terenuri după zonele tale".** Filtrul acela nu există
   (oraș + un singur cartier), iar `js/terenuri.js` nu citește parametri din URL. De asta
   emailul listează terenurile concrete: omul n-are ce filtra, are linkuri.
@@ -206,11 +221,82 @@ care sunt note **private**, vizibile doar ție, pe propriul profil.
 în `terenuri_likes` (`teren-details.js:366`), iar pagina are și „Vezi utilizatorii interesați"
 / „Vezi grupurile interesate" (`teren-details.html:225`, `:235`).
 
-⚠️ **De ce paragraful începe cu profilul, nu cu grupul.** Panoul de grup din pagina terenului
-**nu se randează deloc** dacă omul nu e în niciun grup (`teren-details.js:299` —
-`fetchUserGroups()` întoarce gol). Un paragraf care începe cu „adaugă-l la grupul tău" e, pentru
+⚠️ **De ce lista începe cu profilul și lasă grupul la urmă.** Panoul de grup din pagina
+terenului **nu se randează deloc** dacă omul nu e în niciun grup (`teren-details.js:299` —
+`fetchUserGroups()` întoarce gol). O listă care începe cu „adaugă-l la grupul tău" e, pentru
 o parte din cititori, un text despre un buton pe care nu-l văd. „Adaugă la profil" merge pentru
-toată lumea, deci stă primul, iar grupul vine ca treaptă a doua.
+toată lumea, deci stă prima, iar grupul e ultima liniuță și e explicit condiționată
+(„dacă ești deja într-un grup").
+
+### 3b. Rescrierea în liniuțe (13 august, cererea lui Lucian)
+
+Paragraful de dinainte era un bloc de patru fraze în care se pierdea ce poți efectiv face.
+Lucian a cerut: **o frază de deschidere, apoi variantele pe liniuțe.**
+
+✅ **Toate pornesc din pagina terenului** — verificat, nu e o formulă de legătură: „Adaugă la
+profil", „Vezi utilizatorii interesați", „Vezi grupurile interesate" și panoul de grupuri sunt
+toate pe `teren-details.html`. De aceea fraza de deschidere poate spune exact asta, iar
+liniuțele nu mai trebuie să repete fiecare „din pagina terenului". ⚠️ **A cincea va fi
+adevărată abia după Piesa 5** — fraza de deschidere e scrisă la general („Toate pornesc"),
+nu cu un număr, tocmai ca să nu ceară o corectură când se adaugă sau se scoate o liniuță.
+
+✅ **„Ceilalți te pot invita într-un grup" e verificat** (13 august, adăugat la cererea lui
+Lucian): cine bifează „Adaugă la profil" apare în „Vezi utilizatorii interesați", iar de pe
+profilul lui oricine poate folosi „Invită într-un grup existent" / „Creează un grup și invită"
+(`profile-view-new.js:993-1012`). Liniuța 1 și liniuța 2 sunt deci **aceeași mecanică, văzută
+din cele două capete** — de asta stau una lângă alta.
+
+✅ **„Poți face un grup și îl inviți" e verificat** (13 august): butonul **„Creează un grup și
+invită"** există pe profilul altui utilizator (`profile-view-new.js:1012`), împreună cu invitarea
+într-un grup existent. ⚠️ **Nu e în lista de utilizatori interesați** — `utilizatori.js` n-are
+niciun buton de invitare (zero potriviri pe „invit"). Traseul real e: teren → „Vezi utilizatorii
+interesați" → profilul omului → invitație. De asta liniuța spune „intri pe profilul oricăruia",
+nu „îl inviți de acolo".
+
+⚠️ **„Poți cere alăturarea", nu „te alături".** Butonul scrie literal **„Cere alăturarea"**
+(`grupuri.js:488`, `grup-details.html:1773`) și fondatorul aprobă — grupurile sunt toate „cu
+aprobare". Un email care spune „te alături" ar promite un clic acolo unde e o cerere care poate
+fi refuzată.
+
+⚠️ **Lista folosește un tabel, nu `<ul><li>`.** Outlook pe Windows ignoră `margin` pe listă și
+pune indentarea lui, deci liniuțele ar fi ieșit aliniate altfel decât restul emailului.
+
+### 3c. Bulinele iau paleta „TU"-ului (13 august, ideea lui Lucian)
+
+Prima variantă avea em-dash-uri; a doua, buline cărămizii. Lucian a întrebat dacă pot fi
+**culorile prin care se colorează „TU"-ul din apartamenTUal**. Pot, și e mai bine.
+
+Paleta, identică în trei locuri: `index.html:2044`, `js/footer.js:279`, iar de acum și
+`notify-admins` (constanta `PALETA_TU`):
+
+```
+#c2604a  cărămiziu    #5e8a6c  verde salvie    #5a7196  albastru prăfuit
+#a76782  prun         #b8965c  ocru            #7a9a90  verde-cenușiu
+```
+
+Pe site culorile se rotesc la 2,2 secunde. **În email stau pe loc** — un email n-are
+JavaScript — deci fiecare bulină ia altă culoare din paletă, în ordinea de acolo. Semnătura
+casei, oprită într-un cadru.
+
+⚠️ **Nu iese copilăresc fiindcă paleta e stinsă.** Cinci buline de 7px în teracotă, salvie,
+albastru prăfuit, prun și ocru se citesc ca ceva gândit. Aceeași idee cu cinci culori
+saturate ar fi arătat ca un meniu de copii — deci **dacă paleta se schimbă vreodată spre
+tonuri vii, decizia asta trebuie recitită**.
+
+⚠️ **PALETA E ACUM ÎN TREI LOCURI.** Emailul e singurul care nu se vede la o privire pe site,
+deci e primul care rămâne în urmă.
+
+⚠️ **Bulina e o celulă cu `bgcolor`, nu caracterul „•"** — caracterul se randează la mărimi
+diferite de la un program de email la altul și își ia culoarea din font. `border-radius` e
+ignorat de Outlook pe Windows, deci acolo bulinele ies pătrate; arată tot deliberat.
+
+✅ **Culoarea e strict decorativă** — nicio liniuță nu depinde de ea ca să se înțeleagă, deci
+nu se pierde nimic în citirea pe text simplu sau la cine nu distinge culorile.
+
+⚠️ **Butoanele se văd doar logat**, iar cele două de „interesați" se ascund la conturile de
+agenție (`teren-details.js` — `account_type === 'profesional'`). Destinatarii emailului sunt
+oricum toți `account_type = 'activ'`, deci a doua parte nu ne atinge; prima e valabilă pentru
+orice link din orice email al platformei și nu se explică în text.
 
 ✅ **REZOLVAT (13 august).** Emailul promite trei cifre: cost pe mp construit, cost pe mp util,
 și **cât te costă terenul pentru un apartament de o anumită suprafață**. Primele două erau deja
