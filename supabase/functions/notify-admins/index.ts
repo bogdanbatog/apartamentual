@@ -106,6 +106,23 @@ const SUPERADMIN_CC_IF_NO_RECIPIENT = new Set<string>([
 
 const PLATFORM_URL = 'https://apartamentual.ro'
 
+// Evenimente care NU se anunță pe Slack.
+//
+// ⚠️ Regula generală a funcției e „Slack la fiecare apel", și e bună pentru
+// evenimente rare. `terenuri_noi_zone` e altfel: e personalizat per persoană,
+// deci digestul săptămânal face ~62 de apeluri într-o singură dimineață de
+// luni. Fără excepția asta, `#app_events` primește 62 de mesaje identice ca
+// formă și canalul devine inutilizabil exact în ziua în care ai vrea să te
+// uiți la el. Rezumatul (câți au primit, câte terenuri, ce n-a putut fi legat
+// de nicio zonă) îl trimite edge function-ul `digest-terenuri-zone`, o
+// singură dată, la final.
+//
+// Digestul de anunțuri nu are nevoie de asta fiindcă trimite întregului grup
+// dintr-un singur apel (`recipient_user_ids`), deci un singur mesaj pe Slack.
+const SKIP_SLACK = new Set<string>([
+  'terenuri_noi_zone',
+])
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Helper: rândul „teren" din emailul de comandă
 // ═══════════════════════════════════════════════════════════════════════════
@@ -228,6 +245,122 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
       </div>
     </div>
   `
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Emailul „terenuri noi în zonele tale" (digest săptămânal)
+// ═══════════════════════════════════════════════════════════════════════════
+// Textul aprobat stă în `email_templates/email-terenuri-noi-saptamanal.md`.
+// Dacă schimbi ceva aici, schimbă și acolo — altfel documentul de discutat
+// începe să descrie un email care nu mai există.
+
+// Câte terenuri apar ca dreptunghiuri cu poză, înainte ca restul să treacă în
+// linii scurte. ⚠️ E o decizie de TEXT, nu de date: funcția SQL întoarce tot
+// materialul, iar șablonul alege cât arată. Se mută de aici, fără migrație.
+// Media măsurată e 12 terenuri pe om — 12 dreptunghiuri ar fi un catalog.
+const CATE_CU_POZA = 3
+
+// ⚠️ Prețul analizei stă ÎNTR-UN SINGUR LOC, dinadins. E preț de lansare, deci
+// se va schimba, iar emailul ăsta pleacă singur în fiecare luni.
+//
+// Scrierea e „99 RON", nu „99 lei" — exact cum apare pe site
+// (`analize.html:494`, `comanda-analiza.html:386`). „TVA inclus" e verificat:
+// `analize.html:495` scrie „TVA 21% inclus în preț".
+//
+// ⚠️ Prețul mai trăiește în DOUĂ locuri din frontend, care se schimbă de mână:
+// `analize.html` (494-495) și `comanda-analiza.html` (385-389).
+const PRET_ANALIZA = '99 RON'
+const PRET_MENTIUNE = 'TVA inclus — preț de lansare'
+
+/** Scapă textul care vine din baza de date (titluri de teren, nume de zonă). */
+function escHtml(s: unknown): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/** 186000 -> „186.000" (separatorul românesc e punctul). */
+function numarRo(n: unknown): string {
+  const v = Number(n)
+  if (!isFinite(v)) return ''
+  return Math.round(v).toLocaleString('ro-RO')
+}
+
+/** Numeralul în românește: 1 teren nou / 3 terenuri noi / 21 DE terenuri noi. */
+function textTerenuri(n: number): string {
+  if (n === 1) return '1 teren nou'
+  if (n < 20) return `${n} terenuri noi`
+  return `${n} de terenuri noi`
+}
+
+interface TerenDinLot {
+  id?: string
+  titlu?: string
+  zona?: string
+  oras?: string
+  suprafata?: number | null
+  pret_total?: number | null
+  pret_mp?: number | null
+  imagine?: string | null
+}
+
+function linkTeren(t: TerenDinLot): string {
+  return t.id
+    ? `${PLATFORM_URL}/teren-details.html?id=${encodeURIComponent(String(t.id))}`
+    : `${PLATFORM_URL}/terenuri.html`
+}
+
+/**
+ * Rândul de cifre al unui teren: „620 mp · 186.000 € · 300 €/mp".
+ * Sare peste ce lipsește, în loc să scrie „— €" sau „NaN".
+ * ⚠️ Moneda e €, iar prețul pe mp vine calculat din SQL (`pret_total /
+ * suprafata`), fiindcă exact așa îl calculează și pagina (`terenuri.js:335`).
+ * Coloana `terenuri.pret_pe_mp` există în bază, dar frontendul n-o citește —
+ * dacă am folosi-o, emailul ar putea arăta alt preț decât pagina.
+ */
+function cifreTeren(t: TerenDinLot): string[] {
+  const out: string[] = []
+  if (t.suprafata) out.push(`${numarRo(t.suprafata)} mp`)
+  if (t.pret_total) out.push(`<strong style="color:#1a1a1a;">${numarRo(t.pret_total)} €</strong>`)
+  if (t.pret_mp) out.push(`${numarRo(t.pret_mp)} €/mp`)
+  return out
+}
+
+/** Dreptunghiul cu poză, pentru primele CATE_CU_POZA terenuri. */
+function cardTeren(t: TerenDinLot): string {
+  const href = linkTeren(t)
+  const locatie = [t.zona, t.oras].filter(Boolean).map(escHtml).join(' · ')
+  // Toate cele 46 de terenuri publice au poză (măsurat 13 august), dar un
+  // teren fără poză nu trebuie să lase un dreptunghi gol în email.
+  const poza = t.imagine
+    ? `<tr><td style="padding:0;">
+         <a href="${href}"><img src="${escHtml(t.imagine)}" alt="" width="544" style="display:block;width:100%;max-width:544px;height:auto;border:0;border-radius:8px 8px 0 0;"></a>
+       </td></tr>`
+    : ''
+
+  return `
+    <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 16px;background:#ffffff;border:1px solid #e8e3d8;border-radius:8px;overflow:hidden;">
+      ${poza}
+      <tr><td style="padding:16px;">
+        <p style="margin:0 0 4px;font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.3;">${escHtml(t.titlu || 'Teren')}</p>
+        ${locatie ? `<p style="margin:0 0 12px;font-size:13px;color:#8a8a8a;">${locatie}</p>` : ''}
+        <p style="margin:0 0 14px;font-size:14px;color:#555555;">${cifreTeren(t).join(' · ')}</p>
+        <a href="${href}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;">Vezi terenul →</a>
+      </td></tr>
+    </table>`
+}
+
+/** Linia scurtă, pentru restul terenurilor. Un rând, cu link propriu. */
+function linieTeren(t: TerenDinLot): string {
+  const href = linkTeren(t)
+  const detalii = [t.zona ? escHtml(t.zona) : null, ...cifreTeren(t)].filter(Boolean).join(' · ')
+  return `
+    <tr><td style="padding:11px 0;border-bottom:1px solid #e8e3d8;font-size:14px;line-height:1.5;">
+      <a href="${href}" style="color:#1a1a1a;text-decoration:none;font-weight:600;">${escHtml(t.titlu || 'Teren')}</a>
+      <br><span style="color:#8a8a8a;font-size:13px;">${detalii}</span>
+    </td></tr>`
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -548,6 +681,108 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           'Primești acest email o dată pe zi, seara, și doar în zilele în care cineva a scris ceva pe grupul tău. ' +
           `Dacă nu vrei să-l mai primești, debifează-l în <a href="${PLATFORM_URL}/profile-edit-new.html" style="color: #c2604a;">profilul tău</a>, la „Notificări pe email".`,
       })
+      return { title, body, html }
+    }
+
+    case 'terenuri_noi_zone': {
+      // Un apel per persoană — zonele lui, terenurile lui, cifrele lui.
+      // ⚠️ Spre deosebire de `anunturi_digest`, care trimite ACELAȘI text unui
+      // grup întreg dintr-un singur apel, aici fiecare om primește alt email.
+      // De aceea evenimentul e în SKIP_SLACK.
+      const nume = String(data.nume || '').trim()
+      const terenuri: TerenDinLot[] = Array.isArray(data.terenuri) ? data.terenuri : []
+      const zone = [data.zona_1, data.zona_2, data.zona_3].filter(Boolean).map(String)
+      const totalTerenuri = Number(data.total_terenuri) || terenuri.length
+      const totalZone = Number(data.total_zone_cu_terenuri) || zone.length
+      const textZona1 = String(data.terenuri_1_text || textTerenuri(totalTerenuri))
+
+      // Subiectul: „3 terenuri noi în Tineretului". Se schimbă singur de la o
+      // săptămână la alta (altă zonă, altă cifră), ceea ce contează la un email
+      // recurent — un subiect fix ajunge să arate ca un abonament nedorit.
+      const title = zone.length > 0
+        ? `${textZona1} în ${zone[0]}`
+        : 'Terenuri noi în zonele tale'
+
+      // ⚠️ NICIO mențiune de perioadă („săptămâna asta", „ultimele 7 zile").
+      // Fereastra e per persoană, de la ultima trimitere către el, cu plafon la
+      // 14 zile. Dacă o luni pică trimiterea, omul ar primi „săptămâna asta"
+      // pentru terenuri vechi de 12 zile.
+      const listaZone = zone.length > 1
+        ? `${zone.slice(0, -1).map(escHtml).join(', ')} și ${escHtml(zone[zone.length - 1])}`
+        : escHtml(zone[0] || '')
+      const zoneRamase = totalZone > zone.length ? totalZone - zone.length : 0
+
+      const intro = totalZone <= 1
+        ? `Au apărut <strong style="color:#1a1a1a;">${escHtml(textZona1)}</strong> în <strong style="color:#1a1a1a;">${listaZone}</strong>, una dintre zonele pe care le-ai bifat în profil.`
+        : `Au apărut <strong style="color:#1a1a1a;">${textTerenuri(totalTerenuri)}</strong> în ${totalZone} dintre zonele pe care le-ai bifat în profil: ${listaZone}${zoneRamase > 0 ? `, plus încă ${zoneRamase}` : ''}.`
+
+      const cuPoza = terenuri.slice(0, CATE_CU_POZA)
+      const restul = terenuri.slice(CATE_CU_POZA)
+
+      const cardsHtml = cuPoza.map(cardTeren).join('')
+      const listaHtml = restul.length > 0
+        ? `<p style="margin:24px 0 8px;font-size:15px;line-height:1.6;">Și restul, pe scurt:</p>
+           <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 8px;">
+             ${restul.map(linieTeren).join('')}
+           </table>`
+        : ''
+
+      const p = (t: string) =>
+        `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;">${t}</p>`
+
+      // ⚠️ Ce NU scrie textul, fiindcă nu există în cod (verificat 13 august):
+      //   • „creează un grup pe terenul ăsta" — `grup-nou.html` nu primește
+      //     `?teren=`, deci terenul n-ar veni cu omul;
+      //   • „filtrează pagina după zonele tale" — filtrul acela nu există, iar
+      //     `js/terenuri.js` nu citește parametri din URL. De asta emailul dă
+      //     linkuri directe, nu instrucțiuni de căutare;
+      //   • „terenul devine al grupului" — butonul din pagina terenului scrie
+      //     în `terenuri_likes_grupuri`, adică în FAVORITELE grupului.
+      const html = `
+        <div style="font-family:'Mona Sans',-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;max-width:560px;margin:0 auto;padding:20px;background:#faf8f3;color:#555555;">
+          <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Le-am adăugat pe platformă de la ultimul email încoace.</div>
+          <div style="text-align:center;padding:24px 0;border-bottom:1px solid #e8e3d8;">
+            <h1 style="margin:0;font-size:22px;color:#1a1a1a;font-weight:600;">
+              apartamen<span style="color:#c2604a;">TU</span>al
+            </h1>
+            <p style="margin:4px 0 0;font-size:12px;color:#8a8a8a;">by LTFB studio</p>
+          </div>
+          <div style="padding:32px 8px;">
+            ${p(nume ? `Bună, ${escHtml(nume)},` : 'Bună,')}
+            ${p(intro)}
+            ${cardsHtml}
+            ${listaHtml}
+            <p style="margin:28px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Ce nu scrie pe nicio pagină de teren</p>
+            ${p(`Vezi suprafața și prețul — și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire. Costă <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
+            <div style="margin:0 0 8px;">
+              <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
+            </div>
+            <p style="margin:24px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Dacă vreunul îți place</p>
+            ${p(`Din pagina terenului îl poți adăuga la profil — nu te obligă la nimic, iar acolo vezi și cine s-a mai arătat interesat, oameni și grupuri. Dacă ești într-un grup, îl poți adăuga și la favoritele grupului: îl vede toată lumea și puteți comenta pe el, chiar sub teren, pe pagina grupului. Iar dacă încă nu ești într-un grup: majoritatea pornesc exact așa, de la un teren pe care l-a găsit cineva primul. <a href="${PLATFORM_URL}/grupuri.html" style="color:#c2604a;">Vezi grupurile deschise →</a>`)}
+            <div style="text-align:center;margin:28px 0;">
+              <a href="${PLATFORM_URL}/terenuri.html" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+                Vezi toate terenurile
+              </a>
+            </div>
+            ${p('Dacă acum niciunul nu ți se potrivește, nu trebuie să faci nimic. Îți scriem din nou când mai apar terenuri în zonele tale.')}
+            <p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#1a1a1a;">
+              Lucian<br>ApartamenTUal / LTFB Studio
+            </p>
+          </div>
+          <div style="border-top:1px solid #e8e3d8;padding:20px 8px 0;">
+            <p style="margin:0 0 12px;font-size:12px;line-height:1.6;color:#8a8a8a;">
+              Primești acest email pentru că ai bifat în profil zonele în care ai vrea să locuiești, iar în ele au apărut terenuri noi. Îți scriem doar în săptămânile în care chiar apare ceva. Dacă nu vrei să-l mai primești, debifează „Terenuri noi în zonele mele" în <a href="${PLATFORM_URL}/profile-edit-new.html" style="color:#c2604a;">profilul tău</a>.
+            </p>
+            <p style="margin:0;font-size:13px;color:#8a8a8a;text-align:center;">
+              <a href="${PLATFORM_URL}" style="color:#c2604a;text-decoration:none;">apartamentual.ro</a>
+            </p>
+          </div>
+        </div>`
+
+      // Rezumatul care ajunge în `notification_log`. Slack e sărit la
+      // evenimentul ăsta, deci `body` e strict pentru jurnal și depanare.
+      const body = `${nume || 'destinatar'}: ${totalTerenuri} terenuri noi în ${totalZone} zone (${zone.join(', ')}), ${terenuri.length} în email.`
+
       return { title, body, html }
     }
 
@@ -1354,8 +1589,9 @@ serve(async (req) => {
     
     const results: { slack?: boolean; email?: boolean; recipients?: string[]; error?: string } = {}
     
-    // Send to Slack if configured
-    if (slackWebhookUrl) {
+    // Send to Slack if configured — mai puțin la evenimentele din SKIP_SLACK,
+    // care ar inunda canalul (vezi comentariul de la definiția listei).
+    if (slackWebhookUrl && !SKIP_SLACK.has(payload.event_type)) {
       try {
         const slackMessage: SlackMessage = {
           text: message.title,

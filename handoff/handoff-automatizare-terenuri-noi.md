@@ -1,7 +1,8 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026 (actualizat seara) · **13 august: Piesa 1 gata**
-**Stadiu:** ✅ **PIESA 1 SCRISĂ, RULATĂ ȘI DOVEDITĂ. Piesele 2–4 nescrise.**
+**Data:** 12 august 2026 (actualizat seara) · **13 august: Piesele 1 și 3 gata**
+**Stadiu:** ✅ **PIESA 1 RULATĂ ȘI DOVEDITĂ. PIESA 3 (text + șablon) SCRISĂ, NEDEPLOYATĂ.
+Piesele 2 și 4 nescrise.**
 
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
@@ -12,15 +13,19 @@
 - ✅ **declanșare manuală: comandă locală** cu `dry_run`/`force` — zero cod nou (13 august)
 - 🟡 **Piesa 1 (SQL de bază) scrisă** — trei fișiere, ✋ **NERULATE de Lucian**
 
-**Următorul pas concret: PIESA 3 — TEXTUL EMAILULUI.** Sesiune nouă, după `/clear`; e o
-lucrare de conținut, n-are nevoie de niciun rând din SQL. Parcursul pe care-l vrea Lucian și
-ce se poate promite din el (doi pași din trei nu existau cum au fost formulați) sunt mai jos,
-la „PARCURSUL DIN EMAIL". Abia după text se scrie Piesa 2 — edge function-ul are nevoie să
-știe ce trimite.
+**Următorul pas concret: PIESA 2 — EDGE FUNCTION-UL `digest-terenuri-zone`.** Textul există
+acum (Piesa 3), deci funcția știe ce trimite. Sesiune nouă, după `/clear`: cere citit
+`digest-anunturi-grup/index.ts` întreg, care e tiparul de copiat.
 
-Piesa 2, când se ajunge la ea: cheamă `lot_terenuri_noi(now() - interval '14 days', 20, 6)`,
-verifică singură că la București e **luni, ora 10**, și scrie în `terenuri_digest_log` după
-fiecare om servit.
+Piesa 2, concret: cheamă `lot_terenuri_noi(now() - interval '14 days', 20, 40)`, verifică
+singură că la București e **luni, ora 10**, trimite câte un apel la `notify-admins` per om cu
+`event_type: 'terenuri_noi_zone'`, și scrie în `terenuri_digest_log` după fiecare om servit.
+⚠️ **Ea trimite rezumatul pe Slack**, o singură dată la final — `notify-admins` nu mai
+postează nimic pentru evenimentul ăsta (vezi `SKIP_SLACK`, în Piesa 3 de mai jos).
+
+⚠️ **`dry_run` din Piesa 2 e și prima privire vizuală asupra emailului.** Șablonul e scris,
+dar nimeni nu l-a văzut încă randat — `deno` nu e instalat local, deci nu s-a putut nici
+măcar verifica sintaxa. Prima probă reală e deploy + `dry_run`.
 
 ---
 
@@ -272,15 +277,46 @@ dreptunghiuri e un catalog, nu un mesaj. Iar distanța dintre un om cu 2 terenur
 27 e prea mare pentru un șablon rigid — **pragul se decide la scrierea textului și se mută
 oricând, fără SQL.**
 
-### Piesa 3 — șablon nou în `notify-admins`
+### ✅ Piesa 3 — TEXT + ȘABLON, SCRISE 13 AUGUST (nedeployate)
 
-Un `case 'terenuri_noi_zone'`, pe modelul lui `anunturi_digest` (linia 510).
+**Textul aprobat:** `email_templates/email-terenuri-noi-saptamanal.md`.
+**Șablonul:** `case 'terenuri_noi_zone'` în `supabase/functions/notify-admins/index.ts`.
 
 ⚠️ **Singura diferență structurală față de digestul de anunțuri:** acela trimite
 **același** text unui grup întreg (un apel, `recipient_user_ids` → `recipient_emails`).
 Al nostru e **personalizat per om** (zonele lui, numerele lui), deci e **câte un apel per
 persoană**, secvențial, cu pauză mică între ele. `notify-admins` are deja reîncercare cu
 componentă aleatoare pentru 429-urile de la Resend.
+
+#### ⚠️ Găsit la scriere: Slack ar fi primit 62 de mesaje în fiecare luni
+
+`notify-admins` postează pe Slack **la fiecare apel**, necondiționat. Digestul de anunțuri
+scapă fiindcă face un singur apel pentru tot grupul; al nostru e per persoană, deci
+`#app_events` ar fi primit ~62 de mesaje identice ca formă într-o singură dimineață — adică
+ar fi devenit inutilizabil exact în ziua în care ai vrea să te uiți la el.
+
+**Reparat cu o listă nouă, `SKIP_SLACK`** (sus, lângă `PLATFORM_URL`), plus o condiție la
+trimitere. Deocamdată are un singur element. ⚠️ **E o atingere în logica comună de
+notificări** — orice eveniment adăugat acolo devine tăcut pe Slack, ceea ce e exact ce nu
+vrei la evenimentele rare și importante.
+
+#### Ce s-a decis la scrierea textului
+
+- **3 dreptunghiuri cu poză, restul linii scurte** (`CATE_CU_POZA = 3`). Media e 12 terenuri
+  pe om; 12 dreptunghiuri sunt un catalog, nu un mesaj. Se mută din constantă, fără SQL.
+- **`PRET_ANALIZA = '99 lei'`**, o singură constantă. Fără eticheta „preț promoțional" —
+  într-un email automat, o promoție anunțată e o promisiune care expiră fără ca cineva să
+  observe.
+- **Textul nu conține nicio mențiune de perioadă.** Fereastra e per persoană, cu plafon la
+  14 zile: dacă o luni pică trimiterea, „săptămâna asta" ar fi o minciună verificabilă.
+- **Textul e scris să suporte repetiția** — același om îl primește 2–3 săptămâni la rând.
+  Cel din august era scris ca eveniment („acum câteva zile îți scriam") și s-ar fi uzat la a
+  treia repetare. **Nu se refolosește.**
+- **Nu promite trei lucruri care nu există în cod** (creare grup cu teren atașat, filtrare
+  după zonele tale, teren „al grupului") — motivele, în tabelul de la „PARCURSUL DIN EMAIL".
+
+⚠️ **Subsolul trimite la bifa din profil, care e Piesa 4 și încă nu există.** Dacă emailul
+pleacă înaintea Piesei 4, omul ajunge pe o pagină unde nu găsește ce i s-a promis.
 
 ### Piesa 4 — bifa în profil
 
