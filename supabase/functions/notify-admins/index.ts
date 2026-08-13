@@ -808,7 +808,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
             ${cardsHtml}
             ${listaHtml}
             <p style="margin:28px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Ce nu scrie pe nicio pagină de teren</p>
-            ${p(`Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire. Costă <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
+            ${p(`Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în apartamente. Costă <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
             <div style="margin:0 0 8px;">
               <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
             </div>

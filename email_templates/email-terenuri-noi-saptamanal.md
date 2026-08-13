@@ -125,7 +125,8 @@ Variante, dacă vrei altceva:
 > Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e
 > **câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela**:
 > cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o
-> anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire.
+> anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în
+> apartamente.
 > Costă **99 RON**, TVA inclus, preț de lansare. Se comandă din pagina terenului.
 >
 > [ Vezi ce conține analiza → ]  ← buton secundar, contur
