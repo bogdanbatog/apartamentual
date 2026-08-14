@@ -64,6 +64,11 @@ paginii unui teren, după cele două arhive de design din `handoff/` (bundle-uri
 `apartamentual 03-handoff_*.zip`). Piesa 5 a fost scoasă din ele și făcută singură, ca să se
 deblocheze emailul; restul reorganizării e o sesiune separată, de fapt două.
 
+✅ **Prima jumătate e FĂCUTĂ (14 august, seara, commit `a0df9d1`, împins):** pagina generală
+`/terenuri.html`. Vezi **`handoff-reorganizare-pagina-terenuri.md`**, unde sunt și cele patru
+capcane găsite pe drum și deciziile de conținut (rămânem pe Mona Sans, pasul 3 rămâne lung).
+⚠️ **Nu e publicată** — deploy-ul din cPanel se face manual. Rămâne pagina unui teren.
+
 ⚠️ **Decizie de stil, luată pe 14 august, valabilă pentru amândouă paginile:** se preiau
 **structura și textele** din machete (panoul cu cei patru pași și CTA-ul de analiză pe fiecare
 card, la lista de terenuri; galeria, blocul de fapte și „Ce poți face cu terenul ăsta", la

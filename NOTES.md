@@ -40,9 +40,23 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **`terenuri` are două coloane de dată și nu se știe care e „adevărata"**
   `created_at` (după care se sortează lista și care se afișează pe card, `terenuri.js:218` și `343`) și `data_adaugat`, rămasă din schema veche. Cât timp coincid, nu se vede nimic. La un teren la care diferă, lista pare pusă în ordine greșită deși codul e corect. A ieșit la iveală pe 14 august, când Lucian a cerut „cele mai noi întâi" pe `/terenuri.html` — ordine care **există deja** ca implicită. ✅ **Întrebat Lucian pe 14 august: ordinea de pe site e cea așteptată, sortarea NU s-a atins.** Rămâne deschis doar: e `data_adaugat` folosită de ceva, sau se scoate? **Nu rescrie sortarea până nu se lămurește**, altfel repari ceva ce nu e stricat.
 
+- [ ] **Prețul de 99 RON e scris de mână în 10 locuri**
+  `analize.html`, `analiza-simplificata.html` (de trei ori), `comanda-analiza.html` (de două ori, plus `js/comanda-analiza.js`), `servicii.html` (de două ori, în preț și în FAQ), iar de pe 14 august și în panoul din `terenuri.html` plus constanta `PRET_ANALIZA` din `js/terenuri.js`. La expirarea prețului de lansare (mijlocul lui noiembrie 2026) sunt toate de schimbat. De făcut o listă scrisă **înainte** de a-l mai pune undeva, sau de mutat într-un singur loc citit de toate paginile.
+
+- [ ] **Bifa „doar terenurile din zonele mele" e invizibilă pentru nelogat**
+  Regula, stabilită la construirea ei pe 14 august: se arată doar celui logat cu cel puțin o zonă bifată în profil; nelogatului i se arată în locul ei rândul cu „Intră în cont", dar **numai** dacă a venit pe un link cu `?zonele_mele=1`. Rațiunea: să nu-i promitem ceva ce nu poate vedea. **Consecință:** un vizitator obișnuit nu află niciodată că funcția există, iar Lucian însuși a crezut că a dispărut când s-a uitat la pagină nelogat. De decis: o lăsăm așa, sau o arătăm oricui și cerem autentificarea la clic? Nu e o reparație, e o decizie de produs.
+
+- [ ] **Capcană de stil: `.hero-content p` bate orice selector cu o singură clasă**
+  Hero-ul paginii de terenuri are `.hero-content p { color: var(--slate-300); font-size: 1rem; }`. Orice `<p>` nou pus în hero primește culoarea și mărimea aia, oricât de explicit ai scris tu altceva într-o clasă. Pe 14 august eticheta panoului de analiză s-a randat gri deschis la 16px, cu contrast sub 1,5:1, deși în cod scria teracotă la 11px. Reparat cu selectori de două clase. **Tiparul de hero se repetă și pe alte pagini**, deci capcana nu e doar aici.
+
 ---
 
 ## Rezolvate
+
+- [x] **2026-08-14 — Reorganizarea paginii `/terenuri.html`** *(commit `a0df9d1`, împins; **nepublicat**, cPanel manual)*
+  Panoul „Analiză preliminară" în hero (cei patru pași, din macheta din `handoff/`), CTA de analiză pe fiecare card, cardul întreg clicabil, iconițele „vezi cine e interesat" scoase, faptele terenului pe două rânduri, pașii 3 și 4 pliați pe telefon, bara de filtre strânsă. Pe telefon, până la primul teren: 1.127 → 777 px. Detalii complete, capcane și decizii: **`handoff/handoff-reorganizare-pagina-terenuri.md`**.
+  ⚠️ Două capcane de ținut minte la orice atingere viitoare a fișierelor astea: **apostrofurile inverse într-un comentariu din interiorul unui template string** închid string-ul și pagina rămâne blocată pe „Se încarcă", fără eroare în consolă (se prinde cu `node --check js/terenuri.js`); și **orice element interactiv nou pus pe card are nevoie de `position: relative; z-index: 2`**, altfel intră sub folia linkului care face cardul clicabil și clicul pe el deschide terenul.
+  ✅ Decizie: **rămânem pe Mona Sans**, nu trecem pe Nunito ca în machetă.
 
 - [x] **2026-08-14 — Bifa „doar terenurile din zonele mele" pe `/terenuri.html`** *(commit `c984209`)*
   Cerută de Lucian în aceeași zi. `terenuri.js` citește acum zonele bifate din `user_preferred_zones` (plus numele orașului din `cities`) și filtrează lista după ele. Bifa se adună cu filtrele de oraș/cartier, are etichetă în „Filtre active", se stinge la „Resetează" și își schimbă mesajul stării goale.
