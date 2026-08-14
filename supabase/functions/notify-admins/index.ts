@@ -218,9 +218,14 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
        </table>`
     : ''
 
+  // ⚠️ Butonul comun al TUTUROR emailurilor platformei (invitații, cereri de
+  // alăturare, digestul de anunțuri, notificările de grup). Avea fundal aproape
+  // negru și text alb, iar în programele de mail care randează pe fundal
+  // întunecat dispărea: rămânea doar scrisul alb plutind, fără formă de buton.
+  // Trecut pe contur cărămiziu, ca butoanele din emailul de terenuri (14 august).
   const ctaHtml = (ctaLink && ctaLabel)
     ? `<div style="text-align: center; margin: 28px 0;">
-         <a href="${ctaLink}" style="display: inline-block; background: #1a1a1a; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
+         <a href="${ctaLink}" style="display: inline-block; border: 2px solid #c2604a; color: #c2604a; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px;">
            ${ctaLabel}
          </a>
        </div>`
@@ -353,6 +358,15 @@ function cardTeren(t: TerenDinLot): string {
        </td></tr>`
     : ''
 
+  // ⚠️ REGULĂ PENTRU TOATE BUTOANELE DIN EMAILURI (14 august, telefonul lui Lucian):
+  // un buton cu fundal aproape negru DISPARE în programele de mail care randează
+  // pe fundal întunecat. Fundalul butonului rămâne negru, fundalul paginii devine
+  // negru, și se vede doar scrisul alb plutind.
+  // Soluția aleasă: toate butoanele sunt cu CONTUR cărămiziu și text cărămiziu,
+  // fără fundal plin. Culoarea e aceeași în ambele moduri, deci butonul se vede
+  // și pe hârtie, și pe negru. Ierarhia se face din mărime, nu din umplere.
+  // ⚠️ Nu te baza pe `prefers-color-scheme` în email: multe programe îl ignoră și
+  // inversează culorile după capul lor.
   return `
     <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 16px;background:#ffffff;border:1px solid #e8e3d8;border-radius:8px;overflow:hidden;">
       ${poza}
@@ -360,7 +374,7 @@ function cardTeren(t: TerenDinLot): string {
         <p style="margin:0 0 4px;font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.3;">${escHtml(t.titlu || 'Teren')}</p>
         ${locatie ? `<p style="margin:0 0 12px;font-size:13px;color:#8a8a8a;">${locatie}</p>` : ''}
         <p style="margin:0 0 14px;font-size:14px;color:#555555;">${cifreTeren(t).join(' · ')}</p>
-        <a href="${href}" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;">Vezi terenul →</a>
+        <a href="${href}" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;">Vezi terenul →</a>
       </td></tr>
     </table>`
 }
@@ -771,12 +785,24 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         ? `Au apărut <strong style="color:#1a1a1a;">${escHtml(textZona1)}</strong> în <strong style="color:#1a1a1a;">${listaZone}</strong>, una dintre zonele pe care le-ai bifat în profil.`
         : `Au apărut <strong style="color:#1a1a1a;">${textTerenuri(totalTerenuri)}</strong> în ${totalZone} dintre zonele pe care le-ai bifat în profil: ${listaZone}${zoneRamase > 0 ? `, plus încă ${zoneRamase}` : ''}.`
 
+      // Cârligul: o frază, imediat sub „au apărut…", înainte de terenuri.
+      // ⚠️ Blocul mare despre analiză stă la mijlocul emailului, iar cine se
+      // oprește după primele trei terenuri nu ajunge la el. Fraza asta îi spune
+      // devreme că se poate afla ce se construiește pe teren, și trimite în jos.
+      // ⚠️ Prețul apare de două ori în email, decizia lui Lucian din 14 august.
+      // Ca să nu sune insistent, doar aici e anunțat („Costă X"); mai jos e o
+      // simplă linie de fapt, care adaugă TVA-ul și mențiunea de lansare.
+      // În cod rămâne o singură constantă, deci noiembrie e tot o linie.
+      const carlig = `Pe oricare dintre ele poți cere o analiză de arhitect, ca să afli câte apartamente se pot construi acolo și la ce cost estimativ pe mp. Costă ${PRET_ANALIZA}, TVA inclus.`
+
       const cuPoza = terenuri.slice(0, CATE_CU_POZA)
       const restul = terenuri.slice(CATE_CU_POZA)
 
       const cardsHtml = cuPoza.map(cardTeren).join('')
+      // ⚠️ „Restul terenurilor", nu „Și restul": lista vine acum după blocurile
+      // explicative, deci nu se mai lipește de cardurile de deasupra.
       const listaHtml = restul.length > 0
-        ? `<p style="margin:24px 0 8px;font-size:15px;line-height:1.6;">Și restul, pe scurt:</p>
+        ? `<p style="margin:24px 0 8px;font-size:15px;line-height:1.6;">Restul terenurilor noi, pe scurt:</p>
            <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 8px;">
              ${restul.map(linieTeren).join('')}
            </table>`
@@ -785,9 +811,12 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       const p = (t: string) =>
         `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;">${t}</p>`
 
+      // ✅ „Fă un grup pe terenul acesta" a devenit adevărat pe 14 august
+      // (Piesa 5, commit `2c560b1`): pagina terenului are butonul, iar
+      // `grup-nou.html` citește `?teren=` și pune terenul la favoritele
+      // grupului nou. Până atunci era singura promisiune neacoperită din email.
+      //
       // ⚠️ Ce NU scrie textul, fiindcă nu există în cod (verificat 13 august):
-      //   • „creează un grup pe terenul ăsta" — `grup-nou.html` nu primește
-      //     `?teren=`, deci terenul n-ar veni cu omul;
       //   • „filtrează pagina după zonele tale" — filtrul acela nu există, iar
       //     `js/terenuri.js` nu citește parametri din URL. De asta emailul dă
       //     linkuri directe, nu instrucțiuni de căutare;
@@ -805,13 +834,13 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
           <div style="padding:32px 8px;">
             ${p(nume ? `Bună, ${escHtml(nume)},` : 'Bună,')}
             ${p(intro)}
-            ${cardsHtml}
-            ${listaHtml}
-            <p style="margin:28px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Ce nu scrie pe nicio pagină de teren</p>
-            ${p(`Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în apartamente. Costă <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
-            <div style="margin:0 0 8px;">
-              <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:1px solid #1a1a1a;color:#1a1a1a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
+            ${p(carlig)}
+            <div style="margin:0 0 24px;">
+              <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
             </div>
+            ${cardsHtml}
+            <p style="margin:28px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Ce nu scrie pe nicio pagină de teren</p>
+            ${p(`Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în apartamente. <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
             <p style="margin:24px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Dacă vreunul îți place</p>
             ${p('Toate pornesc din pagina terenului:')}
             ${liniute([
@@ -819,14 +848,14 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
               '<strong style="color:#1a1a1a;">Vezi cine mai e interesat.</strong> Pagina îți arată câți sunt. Intri pe profilul oricăruia și de acolo poți face un grup și îl inviți.',
               '<strong style="color:#1a1a1a;">Vezi ce grupuri sunt interesate de el.</strong> Dacă vreunul ți se potrivește, poți cere alăturarea; odată intrat, puteți comenta chiar sub teren, pe pagina grupului.',
               '<strong style="color:#1a1a1a;">Dacă ești deja într-un grup</strong>, adaugă terenul la favoritele lui: îl vede toată lumea și comentați pe el acolo.',
-              // ⚠️ BUTONUL ĂSTA NU EXISTĂ ÎNCĂ — e Piesa 5. Liniuța a fost
-              // cerută de Lucian pe 13 august, știind asta, fiindcă pagina
-              // terenului urmează să fie reorganizată și primește butonul.
-              // ⛔ EMAILUL NU POATE PLECA REAL PÂNĂ CÂND BUTONUL NU E PE PAGINĂ.
+              // ✅ Butonul există din 14 august (Piesa 5), pe pagina terenului.
+              // Liniuța fusese scrisă pe 13 august, înaintea lui, ca decizie
+              // asumată; de atunci a devenit adevărată.
               '<strong style="color:#1a1a1a;">Fă un grup pe terenul acesta.</strong> Majoritatea grupurilor pornesc exact așa, de la un teren pe care l-a găsit cineva primul.',
             ])}
+            ${listaHtml}
             <div style="text-align:center;margin:28px 0;">
-              <a href="${PLATFORM_URL}/terenuri.html" style="display:inline-block;background:#1a1a1a;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+              <a href="${PLATFORM_URL}/terenuri.html" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
                 Vezi toate terenurile
               </a>
             </div>

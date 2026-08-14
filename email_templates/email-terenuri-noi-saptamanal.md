@@ -1,7 +1,10 @@
 # Email automat: „terenuri noi în zonele tale" (săptămânal)
 
 **PIESA 3** din automatizare. Scris 13 august 2026. ✅ **APROBAT, TURNAT ÎN COD ȘI DEPLOYAT.**
-Ultima revizie: 13 august, seara (liniuțe, buline colorate, fără liniuță de dialog în text).
+Ultima revizie: **14 august** (cârlig despre analiză sub intro; blocurile explicative mutate
+la mijloc, între carduri și lista lungă). Revizia dinainte: 13 august, seara (liniuțe, buline
+colorate, fără liniuță de dialog în text).
+⚠️ **Revizia din 14 august e în cod, dar funcția NU e încă redeployată** la scrierea acestui rând.
 
 ⚠️ **Nu confunda cu `email-terenuri-noi-in-zonele-tale.md`.** Acela e campania **manuală**
 din 3 august, trimisă o singură dată de la calculator. Aceasta e versiunea **recurentă**, care
@@ -90,6 +93,11 @@ Variante, dacă vrei altceva:
 > Au apărut **{total_terenuri_text}** în **{total_zone_cu_terenuri}** dintre zonele pe care
 > le-ai bifat în profil: {zona_1}, {zona_2} și {zona_3}.
 >
+> Pe oricare dintre ele poți cere o analiză de arhitect, ca să afli câte apartamente se pot
+> construi acolo și la ce cost estimativ pe mp. Costă 99 RON, TVA inclus.
+>
+> [ Vezi ce conține analiza → ]  ← buton cu contur, urcat aici pe 14 august
+>
 > ---
 >
 > **[PRIMELE 3 TERENURI: dreptunghiuri cu poză]**
@@ -108,16 +116,6 @@ Variante, dacă vrei altceva:
 > └──────────────────────────────────────┘
 > ```
 >
-> **[RESTUL: linii scurte, fiecare cu link propriu]**
->
-> Și restul, pe scurt:
->
-> - **Teren 450 mp, Berceni**
->   Berceni · 450 mp · 121.000 € · 269 €/mp
-> - **Teren colț, Vitan**
->   Vitan · 780 mp · 265.000 € · 340 €/mp
-> - *(…)*
->
 > ---
 >
 > **Ce nu scrie pe nicio pagină de teren**
@@ -127,9 +125,7 @@ Variante, dacă vrei altceva:
 > cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o
 > anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în
 > apartamente.
-> Costă **99 RON**, TVA inclus, preț de lansare. Se comandă din pagina terenului.
->
-> [ Vezi ce conține analiza → ]  ← buton secundar, contur
+> **99 RON**, TVA inclus, preț de lansare. Se comandă din pagina terenului.
 >
 > **Dacă vreunul îți place**
 >
@@ -149,6 +145,18 @@ Variante, dacă vrei altceva:
 >
 > ● **Fă un grup pe terenul acesta.** Majoritatea grupurilor pornesc exact așa, de la un
 >   teren pe care l-a găsit cineva primul.
+>
+> ---
+>
+> **[RESTUL TERENURILOR: linii scurte, fiecare cu link propriu]**
+>
+> Restul terenurilor noi, pe scurt:
+>
+> - **Teren 450 mp, Berceni**
+>   Berceni · 450 mp · 121.000 € · 269 €/mp
+> - **Teren colț, Vitan**
+>   Vitan · 780 mp · 265.000 € · 340 €/mp
+> - *(…)*
 >
 > ---
 >
@@ -312,6 +320,47 @@ emailul promitea mai mult decât pagina. Lucian a confirmat că analiza **chiar 
 PDF-ului real (`assets/analize-exemple/simpla-1..4.jpg`). Ca să apară și acolo costul terenului
 pe apartament, e nevoie de **PDF-ul nou, exportat din nou ca imagini** — nu e o schimbare de
 cod. Până atunci, exemplul arată un raport fără cifra pe care pagina o promite.
+
+### 3d. Ordinea blocurilor, schimbată pe 14 august (cererea lui Lucian)
+
+**Problema pusă de Lucian:** blocurile explicative stăteau la coada emailului, după toate
+terenurile. Cine are 27 de terenuri are înaintea lor trei carduri cu poză plus douăzeci și
+patru de rânduri de listă. Practic, partea care spune *ce poate face omul* era acolo unde nu
+ajunge nimeni.
+
+**Ce s-a schimbat, două lucruri:**
+
+1. **Cârlig sub intro**, o singură frază, înainte de terenuri: „Pe oricare dintre ele poți cere
+   o analiză de arhitect, ca să afli câte apartamente se pot construi acolo și la ce cost
+   estimativ pe mp. Scrie mai jos ce conține și cât costă."
+   **Prețul apare și în cârlig** (decizia lui Lucian, 14 august). Ca să nu sune insistent,
+   e anunțat o singură dată: în cârlig scrie „Costă 99 RON", iar mai jos e o linie de fapt,
+   „99 RON, TVA inclus, preț de lansare", care adaugă informație în loc să repete anunțul.
+   ⚠️ În șablon rămâne **o singură constantă** (`PRET_ANALIZA`), folosită în ambele locuri,
+   deci schimbarea din noiembrie e tot o linie, nu două.
+2. **Blocurile explicative au urcat la mijloc**, între carduri și lista lungă.
+3. **Butonul „Vezi ce conține analiza" a urcat lângă cârlig**, înaintea cardurilor (a doua
+   cerere a lui Lucian, tot pe 14 august). ⚠️ **Cârligul s-a rescris odată cu mutarea:**
+   se termina cu „scrie mai jos ce conține", ceea ce devenea o contradicție cu butonul pus
+   chiar sub el. Acum se termină cu „Costă 99 RON, TVA inclus."
+   ⚠️ **Butonul e unul singur, nu doi.** Blocul de la mijloc a rămas fără buton: explică în
+   detaliu și se încheie cu „Se comandă din pagina terenului", iar linkurile către terenuri
+   sunt chiar deasupra lui.
+
+**Ordinea de azi:** salut → intro → cârlig → butonul analizei → 3 carduri →
+„Ce nu scrie pe nicio pagină de teren" → „Dacă vreunul îți place" + cele 5 liniuțe →
+restul terenurilor, pe scurt → butonul mare → semnătură → subsol.
+
+**Consecințe de ținut minte:**
+
+- „Și restul, pe scurt:" a devenit **„Restul terenurilor noi, pe scurt:"**. „Și restul" se
+  sprijinea pe cardurile de deasupra, care acum sunt despărțite de două blocuri de text.
+- ⚠️ **La cine are 1–3 terenuri, lista lipsește cu totul**, deci emailul se termină cu blocurile
+  explicative, exact ca înainte. Schimbarea se vede doar la cei cu multe terenuri, adică fix la
+  cine avea problema.
+- Cardurile rămân **primele** după intro. Materialul e motivul pentru care omul deschide emailul;
+  dacă explicațiile ar urca deasupra terenurilor, ar deveni un email despre serviciile noastre,
+  cu terenurile la coadă.
 
 ### 4. Semnat „Lucian", deși pleacă automat
 
