@@ -1,14 +1,19 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026 · actualizat **13 august, noaptea** (până la commit `0a139b4`, împins)
-**Stadiu:** ✅ **PIESELE 1, 2, 3 ȘI 4 SUNT GATA ȘI DEPLOYATE.** Emailul a fost văzut randat de
-cinci ori.
-⛔ **NU SE POATE TRIMITE REAL** — a rămas **un singur blocant: Piesa 5** (butonul „Fă un grup
-pe terenul acesta"), pe care emailul îl promite în liniuța a cincea.
+**Data:** 12 august 2026 · actualizat **14 august** (până la commit `850b68a`, împins)
+**Stadiu:** ✅ **TOATE CELE CINCI PIESE SUNT SCRISE ȘI DEPLOYATE.** Blocantul a dispărut:
+butonul „Fă un grup pe terenul acesta" e pe site din 14 august, deci emailul nu mai promite
+nimic neconstruit. Emailul a fost văzut randat de opt ori, ultima oară cu ordinea nouă.
 
-🟡 **NEVERIFICAT:** proba bifei din profil (debifezi „Terenuri noi în zonele mele", salvezi,
-reîncarci, trebuie să rămână debifată). Fișierele sunt urcate, grantul e verificat, dar
-nimeni n-a apăsat butonul. **Prima treabă a sesiunii următoare.**
+⛔ **TOT NU SE TRIMITE ÎNCĂ**, dar din alt motiv decât ieri: `4-samanta-jurnal.sql` nu e rulat,
+iar fără el primul email repetă campania manuală din 3 august pentru 35 de oameni.
+
+🟡 **NEPROBAT: traseul Piesei 5.** S-a văzut doar că butonul apare. Nimeni n-a creat un grup
+pornind de la un teren, deci nu știm dacă terenul chiar ajunge la favoritele grupului nou.
+**Prima treabă a sesiunii următoare** — probele sunt scrise mai jos, în secțiunea Piesei 5.
+
+✅ **ÎNCHIS 14 august:** proba bifei din profil. Debifat, salvat, reîncărcat, a rămas debifată.
+Piesa 4 e completă.
 
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
@@ -21,17 +26,17 @@ nimeni n-a apăsat butonul. **Prima treabă a sesiunii următoare.**
 - ✅ **Piesa 2 (edge function) scrisă, deployată, probată** — vezi secțiunea dedicată
 - ✅ **Piesa 3 (text + șablon) deployată**, emailul văzut randat de trei ori
 
-**Următorul pas concret: PIESA 5**, butonul „Fă un grup pe terenul acesta" din pagina
-terenului. Lucian a zis pe 13 august că oricum urmează o **reorganizare a paginii de
-terenuri**, deci butonul intră acolo, nu separat.
-
-**Pașii de după, în ordine strictă:**
-1. proba bifei din profil (5 minute, nefăcută încă)
-2. Piesa 5
-3. `4-samanta-jurnal.sql` — ⚠️ altfel primul email repetă campania manuală din 3 august
+**Pașii rămași, în ordine strictă:**
+1. **probele Piesei 5** (mai ales cea cu profilul incomplet, vezi secțiunea ei)
+2. `4-samanta-jurnal.sql` — ⚠️ altfel primul email repetă campania manuală din 3 august
    pentru 35 de oameni
-4. o trimitere reală prudentă: `{"force": true, "limita": 2}`
-5. `3-programare.sql` — sarcina `pg_cron`, ultima
+3. o trimitere reală prudentă: `{"force": true, "limita": 2}`
+4. `3-programare.sql` — sarcina `pg_cron`, ultima
+
+**Separat de automatizare**, dar cerut de Lucian: reorganizarea paginii de terenuri și a
+paginii unui teren, după cele două arhive de design din `handoff/` (bundle-uri Claude Design,
+`apartamentual 03-handoff_*.zip`). Piesa 5 a fost scoasă din ele și făcută singură, ca să se
+deblocheze emailul; restul reorganizării e o sesiune separată.
 
 ---
 
@@ -570,19 +575,17 @@ Se citește din sarcina programată: `select command from cron.job where jobname
 
 ---
 
-## ⛔ BLOCANTUL RĂMAS AL PRIMEI TRIMITERI
+## ✅ BLOCANTELE PRIMEI TRIMITERI — AMÂNDOUĂ ÎNCHISE (14 august)
 
-Emailul e gata și arată bine. **Nu poate pleca**, fiindcă textul lui promite un lucru care încă
-nu există în frontend:
+Emailul promitea două lucruri care nu existau în frontend. Nu mai promite niciunul:
 
-| Ce promite emailul | Unde | Ce lipsește |
+| Ce promite emailul | Unde | Stare |
 |---|---|---|
-| ~~„debifează «Terenuri noi în zonele mele» în profilul tău"~~ | subsol | ✅ **REZOLVAT** — Piesa 4, commit `131dd2b`, urcată în cPanel |
-| „**Fă un grup pe terenul acesta**" | liniuța a 5-a | ⛔ **Piesa 5** — butonul nu există. `grup-nou.html` nu citește `?teren=` |
+| „debifează «Terenuri noi în zonele mele» în profilul tău" | subsol | ✅ Piesa 4, commit `131dd2b`, **probată 14 august** |
+| „**Fă un grup pe terenul acesta**" | liniuța a 5-a | ✅ Piesa 5, commit `2c560b1`, deployat din cPanel |
 
-⚠️ **Liniuța a cincea e o decizie asumată de Lucian pe 13 august**, luată știind că butonul nu
-există: pagina de terenuri urmează să fie reorganizată și primește butonul. Deci **nu e o
-scăpare de verificat, e o datorie de plătit** — dar până se plătește, emailul stă pe loc.
+⚠️ **Ce blochează acum trimiterea e altceva**, și e o problemă de date, nu de cod:
+`4-samanta-jurnal.sql` nu e rulat. Vezi secțiunea lui mai jos.
 
 ---
 
@@ -610,9 +613,8 @@ deploy. ⚠️ **Capcană de citire, plătită pe loc:** interogarea de verifica
 afișează un grant dat pe **toată tabela** ca și cum ar fi pe fiecare coloană. Doar `SELECT` și
 `UPDATE` vin de la BLOC 2. (Aceeași capcană ca pe 5 august, memoria `grant-pe-tabela-vs-pe-coloana`.)
 
-🟡 **RĂMASĂ DE FĂCUT: proba.** Debifezi, salvezi, reîncarci, trebuie să rămână debifată.
-⚠️ Dacă butonul „Salvează" nu face nimic vizibil, ăla e semnul că grantul lipsește — dar
-verdictul a zis că e acolo.
+✅ **PROBATĂ 14 august.** Debifat, salvat, reîncărcat, a rămas debifată. Grantul e bun, deci
+formularul de profil e întreg pentru toată lumea. **Piesa 4 e închisă complet.**
 
 ---
 
@@ -637,6 +639,74 @@ e o defecțiune — e semnalul că săptămâna n-a avut material propriu.
 ⚠️ **De ținut minte pentru totdeauna:** dacă se mai face vreodată o campanie manuală pe terenuri,
 trebuie scrisă și în `terenuri_digest_log`, altfel digestul automat o repetă. E prețul faptului
 că avem două căi către același email.
+
+---
+
+## 🔁 FORMA EMAILULUI, SCHIMBATĂ PE 14 AUGUST (commit `850b68a`, deployat)
+
+**Problema pusă de Lucian:** blocurile explicative stăteau la coada emailului. Cine are 27 de
+terenuri le are după trei carduri și douăzeci și patru de rânduri de listă, deci partea care
+spune *ce poate face omul* era exact acolo unde nu ajunge nimeni.
+
+**Ordinea de acum:** salut → intro („Au apărut N terenuri…") → **cârlig despre analiză, cu
+prețul** → **butonul „Vezi ce conține analiza"** → 3 carduri cu poză → „Ce nu scrie pe nicio
+pagină de teren" → „Dacă vreunul îți place" + cele 5 liniuțe → „Restul terenurilor noi, pe
+scurt" → butonul mare → semnătură → subsol.
+
+**Ce e de reținut din runda asta:**
+
+- **Cârligul:** *„Pe oricare dintre ele poți cere o analiză de arhitect, ca să afli câte
+  apartamente se pot construi acolo și la ce cost estimativ pe mp. Costă 99 RON, TVA inclus."*
+- ⚠️ **Prețul apare în două locuri, dar e anunțat o singură dată.** În cârlig e anunț („Costă
+  99 RON"); în blocul de la mijloc e o linie de fapt („99 RON, TVA inclus, preț de lansare"),
+  care adaugă informație în loc să repete vestea. Decizia lui Lucian: repetarea prețului nu e o
+  tragedie, agresivitatea e. **În cod rămâne o singură constantă**, deci noiembrie e tot o linie.
+- ⚠️ **Butonul analizei a urcat lângă cârlig și cârligul s-a rescris odată cu el.** Se termina
+  cu „scrie mai jos ce conține", ceea ce se contrazicea cu butonul pus imediat dedesubt.
+- **Butonul e unul singur, nu s-a dublat.** Blocul de la mijloc a rămas fără buton: explică în
+  detaliu, se încheie cu „Se comandă din pagina terenului", iar cardurile cu linkuri sunt
+  deasupra lui.
+- **„Și restul, pe scurt:" a devenit „Restul terenurilor noi, pe scurt:"** — „și restul" se
+  sprijinea pe cardurile de deasupra, care acum sunt despărțite de două blocuri de text.
+- ⚠️ **La cine are 1–3 terenuri lista lipsește cu totul**, deci pentru el emailul arată aproape
+  ca înainte. Schimbarea se vede fix la cei cu multe terenuri, adică la cine avea problema.
+
+### ⚠️ REGULĂ NOUĂ: butoanele negre dispar în emailurile citite pe fundal întunecat
+
+**Găsit pe telefonul lui Lucian, 14 august.** Butonul avea fundal `#1a1a1a` și text alb.
+Programul de mail randează pe fundal întunecat, fundalul butonului rămâne negru, și se vede
+**doar scrisul alb plutind**, fără formă de buton. Butonul secundar era și mai rău: contur
+negru și text negru, deci dispărea **de tot**.
+
+**Soluția aleasă:** toate butoanele au acum **contur de 2px cărămiziu (`#c2604a`) și text
+cărămiziu, fără fundal plin**. Culoarea e aceeași în ambele moduri. Ierarhia se face din
+mărime, nu din umplere. ⚠️ **Nu te baza pe `prefers-color-scheme` în email** — multe programe
+îl ignoră și inversează culorile după capul lor.
+
+⚠️ **S-a schimbat și butonul din `buildEmailHtml`** (aceeași funcție `notify-admins`), care e
+**comun TUTUROR emailurilor platformei**: invitații, cereri de alăturare, digestul de anunțuri,
+notificările de grup. Avea aceeași defecțiune. **De privit la primul email care pleacă din
+fiecare fel** — e singura schimbare din sesiune care atinge emailuri deja în funcțiune.
+
+### Proba din 14 august (după deploy)
+
+```
+57 în lot  ·  0 erori  ·  0 terenuri nelegate de vreo zonă
+maximul de zone bifate din lot: 19        ← pragul de 20 lucrează
+o singură fereastră distinctă             ← jurnalul e încă gol
+```
+
+⚠️ **57 față de 61 pe 13 august seara nu e o defecțiune**, e podeaua ferestrei care alunecă
+odată cu ora rulării. **Nu compara două rulări făcute la ore diferite.**
+
+⚠️ **Diacriticele sparte în PowerShell („AviaÈiei") sunt o problemă de consolă**, nu de date:
+pagina de cod veche afișează prost UTF-8. În bază și în email sunt corecte. Se repară pentru
+fereastra curentă cu `[Console]::OutputEncoding = [Text.Encoding]::UTF8`.
+
+⚠️ **Secretul de cron NU e în repo.** `HANDOFF.md` are literalmente `CRON_SECRET=...`, un loc
+gol — o căutare acolo întoarce trei puncte, iar cererea se întoarce cu `401`. Probele le
+rulează Lucian din PowerShell. Dacă vrei ca sesiunea următoare să le ruleze singură, pune
+secretul într-un fișier din folderul temporar al sesiunii, nu în repo.
 
 ---
 
@@ -704,50 +774,95 @@ scrie „câte apartamente se pot construi (mai multe variante)". Commit `0a139b
 
 ---
 
-## 🆕 PIESA 5 — CELE TREI BUTOANE DIN PAGINA TERENULUI (cerere Lucian, 13 august)
+## ✅ PIESA 5 — SCRISĂ ȘI DEPLOYATĂ (14 august, commit `2c560b1`)
 
-**Nu e parte din automatizarea emailului, dar e capătul ei.** Emailul duce omul pe pagina
-unui teren; degeaba îl ducem acolo dacă pagina nu-i spune ce poate face mai departe.
-🟡 **NEÎNCEPUTĂ.** Verificată doar starea actuală.
+Din cele trei butoane cerute pe 13 august s-a construit **doar al treilea**, cel care lipsea
+cu adevărat și care bloca emailul. Celelalte două există de mult, doar că fără explicație
+lângă ele; intră în reorganizarea paginii, nu s-au atins acum.
 
-### Principiul, formulat de Lucian
+### Ce s-a construit
+
+**`frontend/teren-details.html`** — buton „Fă un grup pe acest teren", între rândul de acțiuni
+și butoanele de distribuire, cu o frază de explicație sub el. **`frontend/js/teren-details.js`**
+— pune `?teren=<id>` pe buton. **`frontend/grup-nou.html`** — citește parametrul, arată o bandă
+cu numele terenului, iar după crearea grupului scrie terenul în `terenuri_likes_grupuri`.
+
+### Cinci decizii care nu se văd în cod
+
+1. **Butonul e vizibil ORICUI, inclusiv nelogaților.** `grup-nou.html` are deja panourile lui
+   pentru „nu ești logat" și „profil necompletat". Dacă butonul ar fi stat în
+   `#user-action-buttons` (rândul care apare doar logaților), omul venit din email pe un
+   browser în care nu e logat n-ar fi văzut fix lucrul promis de email.
+2. **Terenul supraviețuiește ocolurilor.** Linkul „Completează-ți profilul" și cel de
+   înregistrare primesc `?redirect=` cu terenul în el. ✅ Verificat că se păstrează query
+   string-ul: `profile-edit-new.js:822` acceptă căi relative cu parametri, iar
+   `register.js:477` duce mai departe `pathname + search`. ⚠️ **Fără asta, poarta de profil
+   complet reparată pe 7 august ar fi înghițit terenul în tăcere** — omul s-ar fi întors pe
+   un formular gol, exact defecțiunea din memoria `invitatii-traseu-profil-inainte-de-grup`.
+3. **Se preselectează DOAR orașul**, și numai dacă se potrivește exact cu o opțiune din listă.
+   Zonele nu se bifează automat: potrivirea cartierului se face pe text și un diacritic
+   diferit ar bifa altceva (memoria `potrivire-teren-zona-pe-text`).
+4. **Terenul se scrie DUPĂ rândul de membru**, fiindcă dreptul de a scrie în
+   `terenuri_likes_grupuri` ține de apartenența la grup. Pe eșec, grupul rămâne creat, omul
+   primește un mesaj clar și redirectul se amână la 4 secunde ca să apuce să-l citească.
+5. **Terenul intră la FAVORITE** (`terenuri_likes_grupuri`), nu în lista oficială
+   (`grup_terenuri`, rezervată fondatorului, altă pagină). Aceeași cale ca butonul „Adaugă la
+   unul din grupurile tale", deci nu s-a inventat niciun mecanism nou.
+
+Ascuns la conturile de agenție (nu pot crea grupuri) și la terenurile dezactivate.
+
+### 🟡 PROBELE — NEFĂCUTE, PRIMA TREABĂ A SESIUNII URMĂTOARE
+
+S-a văzut doar că butonul apare, pe un server local (`python -m http.server 8080` din
+`frontend/`). ⚠️ **Pagina locală vorbește cu baza de date REALĂ** — un grup creat de acolo e un
+grup adevărat.
+
+1. **Logat, profil complet:** deschizi un teren → buton → formularul de grup are banda cu
+   numele terenului și orașul preselectat → creezi grupul → terenul e la favoritele lui.
+   Șterge grupul după.
+2. **Fereastră privată, nelogat:** butonul se vede, `grup-nou.html` cere autentificare, iar
+   linkul „Creează-l în doi pași" trebuie să conțină `teren=`.
+3. **Profil incomplet, cont de test: PROBA CARE CONTEAZĂ.** După salvarea profilului trebuie
+   să te întorci pe formularul de grup **cu banda terenului încă acolo**.
+4. **Cont de agenție:** butonul nu apare deloc.
+
+⚠️ **O necunoscută:** politica de INSERT pe `terenuri_likes_grupuri` nu e nicăieri în
+`db_schema/` (există doar cea de ștergere pentru superadmini, în
+`securitate-profiles/7-...sql:156`). Inserarea o face fondatorul, care e și admin, și membru
+activ, deci ar trebui să treacă la fel ca din pagina terenului. **Dacă la proba 1 apare
+mesajul „terenul nu a putut fi adăugat la favorite", asta e cauza** și se citește din
+`pg_policies`.
+
+### Ce a rămas din cererea inițială (intră în reorganizarea paginii)
+
+| # | Buton | Stare |
+|---|---|---|
+| 1 | **Cere analiză** | butonul există (`teren-details.html:194`), dar scrie doar „Cere o analiză". ⚠️ Explicația lipsește: omul n-are de unde ști ce primește pentru cei 99 RON |
+| 2 | **Adaugă la unul din grupurile tale** | există, dar **panoul nu se randează deloc** dacă omul nu e în niciun grup (`teren-details.js:299`). Gaură de acoperire, nu de securitate |
+| 3 | **Fă un grup pe acest teren** | ✅ făcut |
+
+⚠️ Butonul 3 trebuie să rămână vizibil **mai ales** când butonul 2 n-are ce arăta: pentru
+omul fără niciun grup e singura cale. Azi e vizibil oricui, deci condiția e îndeplinită.
+
+---
+
+## Starea de dinaintea construirii (13 august, păstrată pentru context)
+
+**Principiul formulat de Lucian**, valabil la orice decizie viitoare de conținut:
 
 > **Teoria (educarea) se face punctual, acolo unde a ajuns omul** — pe teren, pe grup —
 > nu într-o pagină separată pe care nimeni n-o citește.
 
-⚠️ De ținut minte la ORICE decizie viitoare de conținut: explicația merge lângă butonul care
-o cere, nu într-un ghid. Se aplică și emailului, și paginii de grup, nu doar aici.
+⚠️ Explicația merge lângă butonul care o cere, nu într-un ghid. Se aplică și emailului, și
+paginii de grup, nu doar aici. (De aceea butonul nou are o frază sub el, iar emailul a fost
+rearanjat pe 14 august ca explicațiile să nu mai stea la coadă.)
 
-### Ce vrea: trei butoane mari, fiecare cu explicația lui
-
-| # | Buton | Ce explică | Stare azi |
-|---|---|---|---|
-| 1 | **Cere analiză** | că afli rapid **câte apartamente se pot construi** și **ce suprafețe utile** pot avea, **în mai multe variante**, plus **costul estimativ pe mp construit și util** — și că **e 99 RON** | ⚠️ **Butonul există, explicația NU.** `teren-details.html:193` scrie doar „Cere o analiză", atât. Omul n-are de unde ști ce primește. |
-| 2 | **Adaugă la unul din grupurile tale** | — | ⚠️ **Există** (`js/teren-details.js:299`), probat de Lucian cu un cont de test. **DAR apare doar dacă omul e deja într-un grup** — `fetchUserGroups()` întoarce gol și panoul nu se randează. Cine n-are niciun grup nu vede nimic despre grupuri pe pagina unui teren. |
-| 3 | **Fă un grup pe acest teren** | că îți poți face un grup în care terenul ăsta e favorit, iar alții ți se alătură dacă le place terenul — **un grup se poate forma și pornind de la un teren**, nu doar de la o zonă | ❌ **NU EXISTĂ.** |
-
-### Ce am aflat verificând, util la construire
-
-✅ **Butonul 3 e mai simplu decât pare.** Panoul existent (butonul 2) scrie în
-`terenuri_likes_grupuri` — **favoritele** grupului, nu lista oficială de terenuri
-(`grup_terenuri`, care e rezervată fondatorului, altă pagină). Deci „fă un grup pe acest
-teren" înseamnă: creezi grupul, iar terenul intră ca favorit al lui. Aceeași cale, deja
-funcțională — nu e nevoie de mecanismul restrâns.
-
-⚠️ **Formularul de creare grup nu primește azi un teren.** `grup-nou.html` / `js/grup-nou.js`
-nu citesc niciun `?teren=`. Butonul 3 cere deci: parametrul în URL, ducerea lui prin
-formular, și un `insert` în `terenuri_likes_grupuri` după crearea grupului. **Trei locuri, nu
-unul** — și e cod nou pe traseul de creare grup, care a fost reparat pe 7 august (poarta de
-profil complet). ⚠️ De verificat că nu se strică poarta aceea.
-
-⚠️ **Butonul 2 are o gaură de acoperire, nu de securitate:** omul fără niciun grup nu vede
-nimic. Pentru el, butonul 3 e singura cale — deci butonul 3 trebuie să apară **mai ales**
-când butonul 2 n-are ce arăta.
-
-⚠️ **Prețul de 99 RON ajunge într-un al doilea loc.** Va fi și în email, și pe butonul 1.
-Când promoția „primele 3 luni" expiră (mijlocul lui noiembrie 2026), sunt **două** locuri de
-schimbat, plus `analize.html` și `comanda-analiza.html`. Merită o listă scrisă a tuturor
-locurilor unde apare prețul, înainte de a-l mai adăuga într-unul nou.
+⚠️ **Prețul de 99 RON tot crește ca număr de locuri.** Azi: `analize.html`,
+`comanda-analiza.html`, `analiza-simplificata.html` (de trei ori), `servicii.html`, plus
+constanta din email. Când expiră prețul de lansare (mijlocul lui noiembrie 2026) sunt toate de
+schimbat. **Designurile mai adaugă unul** pe fiecare card din lista de terenuri. Merită o listă
+scrisă a tuturor locurilor **înainte** de a-l mai pune undeva: în frontend prețul e scris de
+mână în 8 locuri, doar eticheta e unificată.
 
 ---
 
