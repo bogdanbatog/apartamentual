@@ -38,6 +38,11 @@ sarcină care se întoarce cu `401` în fiecare luni, tăcut. Și se rulează **
 are un `select cron.schedule(...)` plus cinci interogări de verificare, iar editorul arată
 doar rezultatul ultimeia.
 
+⚠️ **Diacriticele din răspunsurile PowerShell vor fi sparte („AviaÅ£iei"). E normal, se
+ignoră.** Nu e nici consola, nici baza: `Invoke-RestMethod` decodează Latin-1. Explicația
+completă și comanda alternativă sunt mai jos, la „Diacriticele sparte din raport".
+**Nu porni nicio reparație de date pe baza a ce arată raportul.**
+
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
 - ✅ măsurătorile rulate și interpretate (ritmul + distribuția zonelor)
@@ -800,9 +805,32 @@ o singură fereastră distinctă             ← jurnalul e încă gol
 ⚠️ **57 față de 61 pe 13 august seara nu e o defecțiune**, e podeaua ferestrei care alunecă
 odată cu ora rulării. **Nu compara două rulări făcute la ore diferite.**
 
-⚠️ **Diacriticele sparte în PowerShell („AviaÈiei") sunt o problemă de consolă**, nu de date:
-pagina de cod veche afișează prost UTF-8. În bază și în email sunt corecte. Se repară pentru
-fereastra curentă cu `[Console]::OutputEncoding = [Text.Encoding]::UTF8`.
+### ⚠️ Diacriticele sparte din raport: explicația de aici era GREȘITĂ (corectat 14 aug, seara)
+
+**Scria mai devreme în handoff că e „o problemă de consolă", reparabilă cu
+`[Console]::OutputEncoding = [Text.Encoding]::UTF8`. Nu e, și linia aia nu ajută.**
+
+`Invoke-RestMethod` din PowerShell 5.1 decodează corpul răspunsului ca **ISO-8859-1** când
+`Content-Type` n-are `charset`, iar edge functions Supabase trimit `application/json` gol.
+Deci caracterele sunt deja greșite **în memorie**, înainte de orice afișare.
+
+**Dovada:** răspunsul scris cu `Out-File -Encoding utf8` conținea octeții `c3 85` (UTF-8
+pentru `Å`) acolo unde baza are `c5 a3` (`ţ`). Fișierul era dublu-codificat, deci stricăciunea
+se produsese înainte de scriere. `OutputEncoding` repară doar afișarea, nu asta.
+
+**În practică: ignoră diacriticele din raport.** Datele din bază și emailurile trimise sunt
+corecte; doar raportul se citește prost. Dacă vrei totuși raportul curat:
+
+```powershell
+$r = Invoke-WebRequest -Method Post -Uri $url `
+       -Headers @{ "x-cron-secret" = $secret } `
+       -ContentType "application/json" -Body '{"force":true,"dry_run":true}'
+$json = [Text.Encoding]::UTF8.GetString($r.RawContentStream.ToArray())
+```
+
+⚠️ **Nu conchide NICIODATĂ că o zonă sau un titlu e greșit în bază** uitându-te la un răspuns
+citit cu `Invoke-RestMethod`. Pe 14 august, capcana cu sedilele (secțiunea despre titluri) s-a
+putut citi corect **doar** comparând octeți, nu caractere.
 
 ⚠️ **Secretul de cron NU e în repo.** `HANDOFF.md` are literalmente `CRON_SECRET=...`, un loc
 gol — o căutare acolo întoarce trei puncte, iar cererea se întoarce cu `401`. Probele le
