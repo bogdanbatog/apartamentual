@@ -18,6 +18,13 @@ const DOM = {
     resultsCount:     document.getElementById('resultsCount'),
     loadingState:     document.getElementById('loadingState'),
     emptyState:       document.getElementById('emptyState'),
+    emptyStateTitle:  document.getElementById('emptyStateTitle'),
+    emptyStateText:   document.getElementById('emptyStateText'),
+    // Bifa „doar zonele mele"
+    zoneMineWrap:     document.getElementById('zoneMineWrap'),
+    zoneMineGuest:    document.getElementById('zoneMineGuest'),
+    btnZoneMineLogin: document.getElementById('btnZoneMineLogin'),
+    filterZoneleMele: document.getElementById('filterZoneleMele'),
     terenuriGrid:     document.getElementById('terenuriGrid'),
     // Modal
     modalAddToGroup:  document.getElementById('modalAddToGroup'),
@@ -36,10 +43,18 @@ const DOM = {
     toastContainer:   document.getElementById('toastContainer'),
 };
 
+// Textul implicit al stării goale, citit din pagină ca să nu fie scris în două
+// locuri: bifa „zonele mele" îl schimbă și trebuie să-l poată pune la loc.
+const EMPTY_STATE_IMPLICIT = {
+    titlu: DOM.emptyStateTitle ? DOM.emptyStateTitle.textContent : '',
+    text:  DOM.emptyStateText  ? DOM.emptyStateText.textContent  : '',
+};
+
 // ── STATE ─────────────────────────────────
 let currentUser = null;
 let allTerenuri = [];
 let userLikes = new Set();        // set of teren IDs the user liked
+let myZoneKeys = new Set();       // zonele bifate în profil, ca „oraș|cartier" normalizat
 let likesCountMap = {};           // { teren_id: count }
 let currentTerenForGroup = null;  // teren ID when opening "add to group" modal
 
@@ -52,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     bindFilterEvents();
     bindModalEvents();
     await checkAuth();
+    setupZoneMineFilter();   // după checkAuth: are nevoie de zonele omului
     await loadTerenuri();
 });
 
@@ -75,11 +91,16 @@ async function checkAuth() {
                 .single();
             
             userAccountType = profile?.account_type || 'activ';
-            
+
             // Load user's likes only for active users
             if (userAccountType === 'activ') {
                 await loadUserLikes(user.id);
             }
+
+            // Zonele bifate în profil, pentru bifa „doar zonele mele".
+            // Se cer pentru orice tip de cont: dacă omul n-are nicio zonă,
+            // mulțimea rămâne goală și bifa nu se mai arată deloc.
+            await loadMyZoneKeys(user.id);
         }
     } catch (e) {
         console.warn('Auth check failed:', e);
@@ -98,6 +119,117 @@ async function loadUserLikes(userId) {
         }
     } catch (e) {
         console.warn('Could not load user likes:', e);
+    }
+}
+
+// ══════════════════════════════════════════
+//  ZONELE MELE (bifa de pe bara de filtre)
+// ══════════════════════════════════════════
+
+// Terenurile țin cartierul ca TEXT (`terenuri.cartier` + `terenuri.oras`), iar
+// omul își bifează zonele ca legătură către tabela `zones` (`zones.city_id` →
+// `cities`). Nu există cheie străină între ele, deci potrivirea se face pe text.
+// ⚠️ Normalizarea de aici e aceeași cu a emailului săptămânal
+// (`db_schema/digest-terenuri/2c-functie-cu-lista-terenuri.sql`, care face
+// `lower(btrim(...))` pe ambele capete): fără scoaterea diacriticelor, fără
+// strângerea spațiilor din interior. Dacă se schimbă una, se schimbă amândouă,
+// altfel pagina și emailul încep să arate liste diferite.
+function normalizeazaText(valoare) {
+    return String(valoare == null ? '' : valoare).trim().toLowerCase();
+}
+
+function cheieZona(oras, cartier) {
+    return normalizeazaText(oras) + '|' + normalizeazaText(cartier);
+}
+
+async function loadMyZoneKeys(userId) {
+    try {
+        const { data: zoneRows, error } = await sb
+            .from('user_preferred_zones')
+            .select('zone_id, zones(id, name, city_id)')
+            .eq('user_id', userId);
+
+        if (error || !zoneRows) return;
+
+        const zone = zoneRows.map(r => r.zones).filter(Boolean);
+        const cityIds = [...new Set(zone.map(z => z.city_id).filter(Boolean))];
+        if (cityIds.length === 0) return;
+
+        // Numele orașului stă în altă tabelă, iar terenul îl ține ca text.
+        // Fără el, „Centru" din Cluj s-ar potrivi cu „Centru" din Brașov.
+        const { data: orase } = await sb
+            .from('cities')
+            .select('id, name')
+            .in('id', cityIds);
+
+        const numeOras = {};
+        (orase || []).forEach(c => { numeOras[c.id] = c.name; });
+
+        myZoneKeys = new Set(
+            zone
+                .filter(z => numeOras[z.city_id])
+                .map(z => cheieZona(numeOras[z.city_id], z.name))
+        );
+    } catch (e) {
+        console.warn('Could not load preferred zones:', e);
+    }
+}
+
+function esteInZoneleMele(teren) {
+    return myZoneKeys.has(cheieZona(teren.oras, teren.cartier));
+}
+
+function setupZoneMineFilter() {
+    if (!DOM.filterZoneleMele) return;
+
+    // Linkul din emailul săptămânal poate cere filtrul gata pus: ?zonele_mele=1
+    const cerutDinUrl = new URLSearchParams(window.location.search).get('zonele_mele') === '1';
+
+    if (myZoneKeys.size === 0) {
+        // Fără cont, sau cu cont dar fără nicio zonă bifată: bifa n-ar avea ce
+        // filtra, deci nu se arată. Rândul explicativ apare numai celui venit pe
+        // un link cu filtrul cerut, ca să înțeleagă de ce nu vede ce i s-a promis.
+        if (cerutDinUrl && DOM.zoneMineGuest) {
+            if (currentUser) {
+                DOM.zoneMineGuest.querySelector('span').textContent =
+                    'Nu ai nicio zonă bifată în profil, așa că nu putem filtra după zonele tale.';
+                DOM.btnZoneMineLogin.innerHTML = '<i class="fas fa-sliders-h"></i> Bifează-ți zonele';
+                DOM.btnZoneMineLogin.addEventListener('click', () => {
+                    window.location.href = 'profile-edit-new.html';
+                });
+            } else {
+                DOM.btnZoneMineLogin.addEventListener('click', () => {
+                    // După autentificare, login-modal.js reîncarcă pagina cu
+                    // același URL, deci ?zonele_mele=1 se păstrează și bifa apare.
+                    if (typeof window.openLoginModal === 'function') window.openLoginModal();
+                    else window.location.href = 'register.html';
+                });
+            }
+            DOM.zoneMineGuest.style.display = 'flex';
+        }
+        return;
+    }
+
+    DOM.zoneMineWrap.style.display = 'flex';
+    DOM.filterZoneleMele.checked = cerutDinUrl;
+
+    DOM.filterZoneleMele.addEventListener('change', () => {
+        scrieZoneleMeleInUrl(DOM.filterZoneleMele.checked);
+        applyFilters();
+    });
+}
+
+// URL-ul rămâne cinstit: bifa pusă din pagină se vede în adresă, deci linkul
+// se poate copia mai departe. `replaceState`, nu `pushState`: altfel fiecare
+// bifare ar adăuga un pas la butonul „înapoi" al browserului.
+function scrieZoneleMeleInUrl(activ) {
+    try {
+        const url = new URL(window.location.href);
+        if (activ) url.searchParams.set('zonele_mele', '1');
+        else url.searchParams.delete('zonele_mele');
+        window.history.replaceState({}, '', url);
+    } catch (e) {
+        // Un URL pe care browserul nu-l poate rescrie nu e motiv să pice filtrul.
     }
 }
 
@@ -162,6 +294,8 @@ function bindFilterEvents() {
         DOM.filterCartier.innerHTML = '<option value="">Alege mai întâi orașul</option>';
         DOM.filterCartier.disabled = true;
         DOM.filterSort.value = 'newest';
+        if (DOM.filterZoneleMele) DOM.filterZoneleMele.checked = false;
+        scrieZoneleMeleInUrl(false);
         applyFilters();
     });
 }
@@ -173,6 +307,9 @@ function updateActiveFilters() {
 
     if (oras) tags.push({ type: 'oras', label: oras });
     if (cartier) tags.push({ type: 'cartier', label: cartier });
+    if (DOM.filterZoneleMele && DOM.filterZoneleMele.checked) {
+        tags.push({ type: 'zonele_mele', label: 'Doar zonele mele' });
+    }
 
     if (tags.length === 0) {
         DOM.activeFilters.style.display = 'none';
@@ -198,6 +335,9 @@ window.removeFilter = function(type) {
         DOM.filterCartier.disabled = true;
     } else if (type === 'cartier') {
         DOM.filterCartier.value = '';
+    } else if (type === 'zonele_mele') {
+        if (DOM.filterZoneleMele) DOM.filterZoneleMele.checked = false;
+        scrieZoneleMeleInUrl(false);
     }
     applyFilters();
 };
@@ -266,11 +406,15 @@ function applyFilters() {
     const oras = DOM.filterOras.value;
     const cartier = DOM.filterCartier.value;
     const sortBy = DOM.filterSort.value;
+    const doarZoneleMele = !!(DOM.filterZoneleMele && DOM.filterZoneleMele.checked);
 
     // Filter
     let filtered = allTerenuri.filter(t => {
         if (oras && t.oras !== oras) return false;
         if (cartier && t.cartier !== cartier) return false;
+        // Se adună cu filtrele de deasupra, nu le înlocuiește: un oraș ales plus
+        // bifa înseamnă „zonele mele din orașul acela".
+        if (doarZoneleMele && !esteInZoneleMele(t)) return false;
         return true;
     });
 
@@ -312,6 +456,11 @@ function getLikesCount(terenId) {
 
 function renderTerenuri(terenuri) {
     showLoading(false);
+
+    // Se pune la fiecare randare, nu doar când lista iese goală: altfel textul
+    // despre zone ar rămâne agățat și l-ar vedea cine golește lista din alt
+    // filtru, mult mai târziu, când bifa nu mai e nici măcar pusă.
+    actualizeazaStareaGoala();
 
     if (terenuri.length === 0) {
         DOM.terenuriGrid.innerHTML = '';
@@ -436,6 +585,22 @@ function createTerenCard(teren, index) {
         </div>
     </article>
     `;
+}
+
+// Când lista iese goală din cauza bifei, mesajul implicit („schimbă filtrele")
+// nu ajută: omul n-a atins niciun dropdown. I se spune ce s-a întâmplat.
+function actualizeazaStareaGoala() {
+    if (!DOM.emptyStateTitle || !DOM.emptyStateText) return;
+
+    if (DOM.filterZoneleMele && DOM.filterZoneleMele.checked) {
+        DOM.emptyStateTitle.textContent = 'Niciun teren în zonele tale';
+        DOM.emptyStateText.textContent =
+            'Deocamdată nu e niciun teren în zonele bifate de tine în profil. ' +
+            'Debifează filtrul ca să le vezi pe toate, sau adaugă zone noi în profil.';
+    } else {
+        DOM.emptyStateTitle.textContent = EMPTY_STATE_IMPLICIT.titlu;
+        DOM.emptyStateText.textContent  = EMPTY_STATE_IMPLICIT.text;
+    }
 }
 
 function bindCardInteractions() {

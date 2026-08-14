@@ -357,6 +357,51 @@ img { max-width: 100%; display: block; }
     background: #fef2f2;
 }
 
+/* Bifa „doar zonele mele" (și rândul echivalent pentru nelogați) */
+.filter-zone-mine {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+.zone-mine-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--slate-800);
+    cursor: pointer;
+    user-select: none;
+}
+.zone-mine-check input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--coral);
+    cursor: pointer;
+    margin: 0;
+}
+.zone-mine-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--coral);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+.zone-mine-link:hover { color: var(--coral-dark); }
+.zone-mine-link i { font-size: 0.75rem; }
+.filter-zone-guest span {
+    font-size: 0.85rem;
+    color: var(--slate-500);
+}
+
 /* Active filter tags */
 .active-filters {
     display: flex;

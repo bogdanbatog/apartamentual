@@ -92,6 +92,28 @@
             </div>
         </div>
 
+        <!-- Bifa „doar zonele mele".
+             Rămâne ascunsă până când terenuri.js află cine e omul: o arată doar
+             celui logat care are cel puțin o zonă bifată în profil. Pentru
+             nelogatul venit pe un link cu ?zonele_mele=1 se arată în locul ei
+             rândul de mai jos, cu intrarea în cont. -->
+        <div class="filter-zone-mine" id="zoneMineWrap" style="display:none;">
+            <label class="zone-mine-check" for="filterZoneleMele">
+                <input type="checkbox" id="filterZoneleMele">
+                <span>Doar terenurile din zonele mele</span>
+            </label>
+            <a href="profile-edit-new.html" class="zone-mine-link">
+                <i class="fas fa-sliders-h"></i> Schimbă zonele din profil
+            </a>
+        </div>
+
+        <div class="filter-zone-mine filter-zone-guest" id="zoneMineGuest" style="display:none;">
+            <span>Zonele tale sunt în profil. Intră în cont ca să vezi doar terenurile de acolo.</span>
+            <button type="button" class="zone-mine-link" id="btnZoneMineLogin">
+                <i class="fas fa-right-to-bracket"></i> Intră în cont
+            </button>
+        </div>
+
         <!-- Active filters tags -->
         <div class="active-filters" id="activeFilters" style="display:none;">
             <span class="active-filters-label">Filtre active:</span>
@@ -121,8 +143,8 @@
         <!-- Empty state -->
         <div class="empty-state" id="emptyState" style="display:none;">
             <i class="fas fa-map-marked-alt"></i>
-            <h3>Niciun teren găsit</h3>
-            <p>Nu am găsit terenuri care să corespundă filtrelor selectate. Încearcă să schimbi filtrele sau propune un teren nou.</p>
+            <h3 id="emptyStateTitle">Niciun teren găsit</h3>
+            <p id="emptyStateText">Nu am găsit terenuri care să corespundă filtrelor selectate. Încearcă să schimbi filtrele sau propune un teren nou.</p>
             <a href="terenuri-propune.html" class="btn-primary">
                 <i class="fas fa-plus"></i> Propune un teren
             </a>
