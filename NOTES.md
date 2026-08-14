@@ -38,14 +38,17 @@ Nu acționa pe niciuna fără confirmare explicită.
   Homepage-ul v9 (Mona Sans, bej minimalist) afișează `faq.js` ca atare, care are stiluri proprii (carduri albe, accent portocaliu, DM Sans). Arată diferit de restul paginii. Decizie acceptată de Lucian la integrare; de armonizat dacă deranjează.
 
 - [ ] **`terenuri` are două coloane de dată și nu se știe care e „adevărata"**
-  `created_at` (după care se sortează lista și care se afișează pe card, `terenuri.js:218` și `343`) și `data_adaugat`, rămasă din schema veche. Cât timp coincid, nu se vede nimic. La un teren la care diferă, lista pare pusă în ordine greșită deși codul e corect. A ieșit la iveală pe 14 august, când Lucian a cerut „cele mai noi întâi" pe `/terenuri.html` — ordine care **există deja** ca implicită. De decis: e `data_adaugat` folosită de ceva, sau se scoate? **Nu rescrie sortarea până nu se lămurește**, altfel repari ceva ce nu e stricat.
-
-- [ ] **Bifa „doar terenurile din zonele mele" pe `/terenuri.html`** *(cerută de Lucian, 14 august)*
-  Nu există: `terenuri.js` nu atinge niciodată `user_preferred_zones` și nu citește niciun parametru din URL. Filtrarea de azi e pe oraș + UN singur cartier, dintr-un dropdown. Precedent de copiat: `grupuri.js:84`, care citește deja zonele preferate pe o pagină de listare. Detalii complete și capcanele (potrivirea pe text, ce trebuie în plus ca emailul să poată da un link gata filtrat) în `handoff/handoff-automatizare-terenuri-noi.md`.
+  `created_at` (după care se sortează lista și care se afișează pe card, `terenuri.js:218` și `343`) și `data_adaugat`, rămasă din schema veche. Cât timp coincid, nu se vede nimic. La un teren la care diferă, lista pare pusă în ordine greșită deși codul e corect. A ieșit la iveală pe 14 august, când Lucian a cerut „cele mai noi întâi" pe `/terenuri.html` — ordine care **există deja** ca implicită. ✅ **Întrebat Lucian pe 14 august: ordinea de pe site e cea așteptată, sortarea NU s-a atins.** Rămâne deschis doar: e `data_adaugat` folosită de ceva, sau se scoate? **Nu rescrie sortarea până nu se lămurește**, altfel repari ceva ce nu e stricat.
 
 ---
 
 ## Rezolvate
+
+- [x] **2026-08-14 — Bifa „doar terenurile din zonele mele" pe `/terenuri.html`** *(commit `c984209`)*
+  Cerută de Lucian în aceeași zi. `terenuri.js` citește acum zonele bifate din `user_preferred_zones` (plus numele orașului din `cities`) și filtrează lista după ele. Bifa se adună cu filtrele de oraș/cartier, are etichetă în „Filtre active", se stinge la „Resetează" și își schimbă mesajul stării goale.
+  **Potrivirea teren↔zonă e pe text, cu aceeași normalizare ca emailul săptămânal** (`lower(btrim(...))` pe ambele capete, fără scoaterea diacriticelor, ca în `db_schema/digest-terenuri/2c-functie-cu-lista-terenuri.sql`). Dacă se schimbă una, se schimbă amândouă, altfel pagina și emailul arată liste diferite. Se compară și orașul, nu doar cartierul: „Centru" există în mai multe orașe.
+  **`?zonele_mele=1` există tocmai ca emailul să poată da un link gata filtrat** — a doua jumătate a cerinței vechi, care bloca pasul 1 din email. Bifa apare doar celui logat cu cel puțin o zonă; pentru nelogatul venit pe acel link se arată în locul ei intrarea în cont, iar parametrul supraviețuiește reîncărcării de după autentificare.
+  ⚠️ **Neprobat: citirea efectivă din `user_preferred_zones`**, fiindcă cere cont. Filtrarea, eticheta, resetarea, combinația cu orașul, starea goală și traseul nelogatului au fost probate local pe baza reală (46 → 5 pe două zone).
 
 - [x] **2026-06-18 — Ștergere teren din admin nu se propaga pe platformă**
   Cauză: `terenuri` are RLS pornit fără politică DELETE → hard delete-ul era blocat tăcut, iar `deleteTeren` nu verifica eroarea (rândul dispărea doar local din admin, rămânea în DB). Schema avea `deleted_at` (soft delete) dar nefolosit corect.

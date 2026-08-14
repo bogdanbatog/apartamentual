@@ -9,6 +9,9 @@ Rămân doar trei comenzi de dat, toate **luni 17 august dimineața** — vezi s
 - **probele Piesei 5, toate patru** (două din cod, una din bază, una prin dovadă empirică)
 - **`4-samanta-jurnal.sql` RULAT** — 38 din 38 potriviți, `INSERT 0 38`
 - **titlurile terenurilor curățate** din admin (prețul scos dintr-un titlu)
+- **bifa „doar zonele mele" construită, probată și împinsă** (commit `c984209`) — vezi
+  secțiunea dedicată mai jos. Cu ea, emailul poate căpăta oricând un buton „vezi toate
+  terenurile din zonele tale", fiindcă `?zonele_mele=1` funcționează.
 
 ✅ **ÎNCHIS 14 august, dimineața:** proba bifei din profil. Debifat, salvat, reîncărcat, a
 rămas debifată. Piesa 4 e completă.
@@ -59,58 +62,113 @@ completă și comanda alternativă sunt mai jos, la „Diacriticele sparte din r
 **Separat de automatizare**, dar cerut de Lucian: reorganizarea paginii de terenuri și a
 paginii unui teren, după cele două arhive de design din `handoff/` (bundle-uri Claude Design,
 `apartamentual 03-handoff_*.zip`). Piesa 5 a fost scoasă din ele și făcută singură, ca să se
-deblocheze emailul; restul reorganizării e o sesiune separată.
+deblocheze emailul; restul reorganizării e o sesiune separată, de fapt două.
+
+⚠️ **Decizie de stil, luată pe 14 august, valabilă pentru amândouă paginile:** se preiau
+**structura și textele** din machete (panoul cu cei patru pași și CTA-ul de analiză pe fiecare
+card, la lista de terenuri; galeria, blocul de fapte și „Ce poți face cu terenul ăsta", la
+pagina unui teren), dar **se îmbracă în design system-ul v9** (Mona Sans, fără teracotă și
+fără salvie). Machetele sunt desenate în Nunito cu accente teracotă; copiate ca atare, ar face
+din `/terenuri.html` o insulă vizuală față de homepage și de restul paginilor migrate.
+Fundalul e oricum același în ambele (`#faf8f3`), deci diferența reală e la font și la accente.
+
+⚠️ **Fișierele de citit din arhive** (restul sunt machete de hero, nelegate de asta):
+`Terenuri - panou Analiza preliminara.html` pentru pagina generală și
+`Pagina Teren - reorganizata.html` pentru pagina unui teren. Variantele „(standalone)" sunt
+aceleași machete cu tot cu paginile din jur, de 227 KB, și nu aduc nimic în plus.
 
 ---
 
-## 🆕 CERUT DE LUCIAN PE 14 AUGUST — filtrul „doar zonele mele" pe `/terenuri.html`
+## ✅ FILTRUL „doar zonele mele" pe `/terenuri.html` — FĂCUT (14 august, commit `c984209`)
 
 **Cererea, în cuvintele lui:** *„aș vrea ca pentru un utilizator înregistrat să fie listate
 terenurile în ordinea datei de postare, cele mai noi mai întâi. Dar aș vrea să existe și o
 bifă pentru a se afișa doar terenurile din zonele preferate, în aceeași ordine."*
 
-### ⚠️ Prima jumătate EXISTĂ DEJA. Verificat în cod pe 14 august.
+### Ce s-a construit
+
+**`frontend/terenuri.html`** — bifa „Doar terenurile din zonele mele" sub rândul de filtre,
+plus un rând alternativ pentru cine nu e logat; starea goală a primit id-uri
+(`emptyStateTitle`, `emptyStateText`), ca să i se poată schimba textul.
+**`frontend/terenuri.css`** — 45 de linii, pe culorile existente ale paginii (coral/slate).
+**`frontend/js/terenuri.js`** — citirea zonelor, filtrarea, eticheta de filtru activ,
+resetarea, parametrul din adresă.
+
+### Cinci decizii care nu se văd în cod
+
+1. **Normalizarea e aceeași cu a emailului:** `lower(btrim(...))` pe ambele capete, **fără**
+   scoaterea diacriticelor și **fără** strângerea spațiilor din interior, exact ca
+   `2c-functie-cu-lista-terenuri.sql`. ⚠️ **Dacă se schimbă una, se schimbă amândouă**,
+   altfel pagina și emailul încep să arate liste diferite pentru același om. Avertismentul e
+   scris și în cod, deasupra funcției `normalizeazaText`.
+2. **Se compară și orașul, nu doar cartierul.** „Centru" există și în Cluj, și în Brașov.
+   Numele orașului nu e pe zonă, vine din `cities` printr-o a doua interogare mică.
+3. **Bifa se adună cu filtrele existente**, nu le înlocuiește: oraș ales plus bifă înseamnă
+   „zonele mele din orașul acela".
+4. **Nu se arată dacă n-are ce filtra** (fără cont, sau cont fără nicio zonă bifată). Rândul
+   explicativ apare **doar** celui venit pe un link cu `?zonele_mele=1`, ca să nu rămână cu
+   impresia că i s-a promis ceva ce nu vede. La intrarea în cont, `login-modal.js` reîncarcă
+   aceeași adresă, deci parametrul supraviețuiește și bifa apare pusă.
+5. **Adresa se rescrie cu `replaceState`, nu `pushState`** — altfel fiecare bifare ar adăuga
+   un pas la butonul „înapoi" al browserului.
+
+### Probele (local, pe baza de date REALĂ)
+
+| Probă | Rezultat |
+|---|---|
+| filtrarea propriu-zisă, două zone (Obor + Cotroceni) | 46 → 5, cât dădea și numărătoarea separată |
+| eticheta „Doar zonele mele" și scoaterea ei | înapoi la 46, adresa curățată |
+| bifă + oraș străin (Cluj) | 0 terenuri, deci filtrele chiar se adună |
+| butonul „Resetează" | debifează și curăță adresa |
+| starea goală | „Niciun teren în zonele tale", nu mesajul generic |
+| nelogat cu `?zonele_mele=1` | rândul cu intrarea în cont, bifa ascunsă, cele 46 intacte |
+| consola | curată (doar avertismentul obișnuit de la Plausible pe localhost) |
+
+⚠️ **Reparat pe drum:** textul stării goale rămânea agățat („Niciun teren în zonele tale") și
+după debifare, deci l-ar fi văzut cine golea lista din filtrul de oraș, mult mai târziu, când
+bifa nici măcar nu mai era pusă. Acum se pune la loc la fiecare randare, nu doar când lista
+iese goală.
+
+⚠️ **CE A RĂMAS NEPROBAT: citirea efectivă din `user_preferred_zones`**, fiindcă cere cont.
+Restul s-a probat punând de mână, în pagină, două zone luate din chiar terenurile listate.
+Proba care lipsește se face intrând în cont pe pagina locală (sau pe site după publicare) și
+verificând că bifa apare și că lista se strânge la zonele tale.
+
+### Ce NU s-a atins: ordinea listei
+
+Prima jumătate a cererii exista deja. Verificat în cod pe 14 august și **confirmat de Lucian
+în aceeași zi: ordinea de pe site e cea așteptată.** Sortarea nu s-a atins deloc.
+
+### Starea de dinaintea construirii (păstrată pentru context)
 
 `terenuri.html:79` are `<option value="newest" selected>Cele mai noi</option>`, iar butonul
 de resetare pune tot `'newest'` (`terenuri.js:164`). Interogarea vine deja ordonată
 descrescător după `created_at` (`terenuri.js:218`), iar sortarea din pagină face la fel
 (`terenuri.js:293`). **Ordinea implicită, pentru toată lumea, e deja „cele mai noi întâi".**
 
-⚠️ **Deci prima întrebare a sesiunii viitoare e pentru Lucian, nu pentru cod:** vezi altă
-ordine pe site? Dacă da, cauza probabilă e că `terenuri` are **două coloane de dată** —
-`created_at` (după care se sortează și care se afișează pe card, `terenuri.js:343`) și
-`data_adaugat`, rămasă din schema veche. Un teren cu cele două diferite pare pus în ordine
-greșită, deși codul e corect. **Nu rescrie sortarea până nu se lămurește asta** — altfel
-repari ceva ce nu e stricat.
+Întrebarea rămasă atunci era pentru Lucian, nu pentru cod: vezi altă ordine pe site?
+**Răspuns pe 14 august: nu, e în regulă.** Rămâne totuși de lămurit că `terenuri` are **două
+coloane de dată** — `created_at` (după care se sortează și care se afișează pe card,
+`terenuri.js:343`) și `data_adaugat`, rămasă din schema veche. Un teren cu cele două diferite
+ar părea pus în ordine greșită, deși codul e corect. Punct deschis în `NOTES.md`.
 
-### A doua jumătate e reală și nu există
+⚠️ **Capcana care rămâne valabilă și după construire:** potrivirea se face pe TEXT,
+`terenuri.cartier` față de `zones.name`, fără cheie străină. Vezi secțiunea „Două mine
+rămase" de mai sus și capcana cu sedilele de mai jos: două scrieri care arată identic nu se
+potrivesc. **Filtrul va părea că „pierde" terenuri**, și va fi din cauza asta, nu a codului
+de filtrare. Aceeași cauză face terenul invizibil și în email, deci cele două greșesc la fel,
+ceea ce e singura consolare.
 
-Bifa „doar din zonele mele" trebuie construită. Ce se știe deja:
-
-- **`terenuri.js` nu atinge niciodată `user_preferred_zones`** și **nu citește niciun
-  parametru din URL** (verificat: zero `URLSearchParams`, zero `location.search`).
-- **Precedent de copiat:** `js/grupuri.js:84` citește deja zonele preferate ale omului logat
-  pe o pagină de listare. Același tipar, altă listă.
-- **Filtrarea existentă e pe oraș + UN SINGUR cartier**, dintr-un dropdown. Bifa nouă e altă
-  logică (mulțime de zone), nu o valoare în plus în dropdown-ul actual.
-- ⚠️ **Potrivirea se face pe TEXT**, `terenuri.cartier` față de `zones.name`, fără cheie
-  străină. Vezi secțiunea „Două mine rămase" de mai sus și capcana cu sedilele de mai jos:
-  două scrieri care arată identic nu se potrivesc. **Filtrul va părea că „pierde" terenuri**,
-  și va fi din cauza asta, nu a codului de filtrare.
-- **Pentru cine nu e logat**, bifa n-are ce afișa: sau se ascunde, sau duce la autentificare.
-  Zero oameni au zero zone bifate (măsurat 12 august), deci pentru orice om logat filtrul
-  întoarce ceva.
-
-### 💡 De ce merită mai mult decât pare: deblochează pasul 1 din email
+### 💡 De ce a meritat mai mult decât pare: a deblocat pasul 1 din email
 
 Emailul săptămânal voia inițial să spună „intră pe pagina de terenuri și vezi terenurile noi
-din zonele tale". **A picat exact fiindcă filtrul ăsta nu există** (vezi tabelul de la
+din zonele tale". **A picat exact fiindcă filtrul ăsta nu exista** (vezi tabelul de la
 „PARCURSUL DIN EMAIL"), și s-a rezolvat altfel: emailul listează terenurile concrete, fiecare
 cu link direct.
 
-⚠️ Dacă se construiește bifa, emailul poate căpăta un buton „vezi toate terenurile din zonele
-tale". **Dar pentru asta e nevoie și de citirea parametrilor din URL** (ex. `?zonele_mele=1`),
-care azi nu există deloc în `terenuri.js`. Bifa singură nu ajunge pentru un link din email.
+✅ **Acum se poate.** `terenuri.js` citește `?zonele_mele=1`, deci emailul poate căpăta oricând
+un buton „vezi toate terenurile din zonele tale", cu link direct la lista gata filtrată.
+Nu s-a adăugat în email — e o decizie de conținut separată, luată când vrea Lucian.
 
 ---
 
