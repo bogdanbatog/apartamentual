@@ -195,6 +195,23 @@
                             </button>
                         </div>
 
+                        <!-- Fă un grup pe acest teren ──────────────────────────
+                             Vizibil oricui: grup-nou.html se ocupă singur de
+                             autentificare și de pragul „profil complet", iar terenul
+                             e păstrat pe tot traseul. Se ascunde din JS pentru
+                             conturile de agenție (nu pot crea grupuri) și pentru
+                             terenurile dezactivate. -->
+                        <div id="grup-nou-teren" class="mb-6">
+                            <a id="btn-grup-nou-teren" href="grup-nou.html"
+                               class="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-black rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Fă un grup pe acest teren
+                            </a>
+                            <p class="text-sm text-gray-600 mt-2 max-w-xl">Un grup se poate forma pornind de la un teren, nu doar de la o zonă. Terenul intră la favoritele grupului, iar cine îl vede îți poate cere alăturarea.</p>
+                        </div>
+
                         <!-- Distribuire teren (public, vizibil oricui) -->
                         <div id="share-buttons" class="flex flex-wrap items-center gap-3 mb-6">
                             <span class="text-sm text-gray-500 font-medium">Distribuie:</span>

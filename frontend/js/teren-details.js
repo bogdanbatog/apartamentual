@@ -674,7 +674,25 @@ async function displayTerenDetails(teren, userProfile) {
     if (btnCereAnaliza) {
         btnCereAnaliza.addEventListener('click', () => redirectToAnalize(teren));
     }
-    
+
+    // „Fă un grup pe acest teren" — duce terenul mai departe prin URL.
+    // Grupul se creează în grup-nou.html, iar terenul intră la favoritele lui
+    // (`terenuri_likes_grupuri`), aceeași listă pe care o scrie butonul
+    // „Adaugă la unul din grupurile tale" de mai jos.
+    const blocGrupNou = document.getElementById('grup-nou-teren');
+    const btnGrupNou = document.getElementById('btn-grup-nou-teren');
+    if (btnGrupNou) {
+        btnGrupNou.href = `grup-nou.html?teren=${encodeURIComponent(teren.id)}`;
+    }
+    if (blocGrupNou) {
+        // Agențiile nu pot crea grupuri (grup-nou.html le refuză oricum), iar pe
+        // un teren dezactivat n-are rost să pornească cineva un grup.
+        const contDeAgentie = userProfile && userProfile.account_type === 'profesional';
+        if (contDeAgentie || isDisabled) {
+            blocGrupNou.classList.add('hidden');
+        }
+    }
+
     // Action buttons
     const actionButtons = document.getElementById('action-buttons');
     const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';

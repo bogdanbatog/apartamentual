@@ -406,6 +406,40 @@
             font-weight: bold;
             margin-left: 0.25rem;
         }
+
+        /* Terenul de la care pornește grupul (venit cu ?teren=… din pagina lui) */
+        .teren-pornire {
+            background: #fdf6f3;
+            border: 1px solid #f0d9d1;
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .teren-pornire .eticheta {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #a84e3a;
+            margin: 0 0 0.25rem;
+        }
+
+        .teren-pornire .titlu {
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .teren-pornire .titlu:hover {
+            text-decoration: underline;
+        }
+
+        .teren-pornire .nota {
+            font-size: 0.875rem;
+            color: #555555;
+            margin: 0.375rem 0 0;
+        }
     </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -473,7 +507,15 @@
             <h1>Creează un grup nou</h1>
             <p>Completează informațiile de bază pentru a începe</p>
         </div>
-        
+
+        <!-- Terenul de pornire, dacă omul a venit din pagina unui teren.
+             Rămâne ascuns dacă nu e niciun `?teren=` în adresă. -->
+        <div id="terenPornire" class="teren-pornire" style="display: none;">
+            <p class="eticheta">Grupul pornește de la un teren</p>
+            <a id="terenPornireLink" class="titlu" href="#"></a>
+            <p class="nota">După ce creezi grupul, terenul intră la favoritele lui și îl vede toată lumea din grup.</p>
+        </div>
+
         <form id="createGroupForm">
             <div class="form-group">
                 <label for="nume">Numele grupului <span class="required">*</span></label>
@@ -587,6 +629,81 @@ let currentUser = null;
 let selectedZones = [];
 let selectedTags = [];
 let allTags = [];
+let terenPornire = null;   // terenul din `?teren=…`, dacă a venit din pagina lui
+
+// ── TERENUL DE PORNIRE (?teren=…) ──
+// Din pagina unui teren se poate porni direct un grup. Terenul călătorește prin
+// adresă, iar după crearea grupului intră la favoritele lui
+// (`terenuri_likes_grupuri`), aceeași listă pe care o scrie butonul „Adaugă la
+// unul din grupurile tale" din pagina terenului. Lista oficială de terenuri a
+// grupului (`grup_terenuri`) NU se atinge de aici.
+function idTerenDinUrl() {
+    return new URLSearchParams(window.location.search).get('teren');
+}
+
+// Terenul trebuie să supraviețuiască ocolurilor: profil necompletat și cont
+// inexistent. Fără asta, omul se întoarce pe formularul gol și terenul se pierde
+// pe drum, fără niciun mesaj.
+function pastreazaTerenulPeTrasee(terenId) {
+    const inapoiAici = encodeURIComponent('/grup-nou.html?teren=' + terenId);
+
+    const linkProfil = DOM.profileIncomplete
+        ? DOM.profileIncomplete.querySelector('.btn-login')
+        : null;
+    if (linkProfil) {
+        linkProfil.href = 'profile-edit-new.html?redirect=' + inapoiAici;
+    }
+
+    const linkInregistrare = DOM.authRequired
+        ? DOM.authRequired.querySelector('.auth-register-hint a')
+        : null;
+    if (linkInregistrare) {
+        linkInregistrare.href = '/register.html?redirect=' + inapoiAici;
+    }
+}
+
+async function incarcaTerenulDePornire() {
+    const terenId = idTerenDinUrl();
+    if (!terenId) return;
+
+    pastreazaTerenulPeTrasee(terenId);
+
+    try {
+        const { data, error } = await sb
+            .from('terenuri')
+            .select('id, titlu, oras')
+            .eq('id', terenId)
+            .maybeSingle();   // 0 rânduri → null, fără eroare
+
+        // Adresă greșită sau teren nevizibil (încă neaprobat): formularul rămâne
+        // cel obișnuit, fără să-i spunem omului despre un teren pe care nu-l are.
+        if (error || !data) {
+            console.warn('Terenul de pornire nu a putut fi încărcat:', error);
+            return;
+        }
+
+        terenPornire = data;
+
+        const link = document.getElementById('terenPornireLink');
+        if (link) {
+            link.textContent = data.titlu || 'Teren';
+            link.href = 'teren-details.html?id=' + encodeURIComponent(data.id);
+        }
+        const banner = document.getElementById('terenPornire');
+        if (banner) banner.style.display = 'block';
+
+        // Orașul terenului intră în formular doar dacă se potrivește exact cu o
+        // opțiune din listă. Zonele NU se bifează automat: potrivirea
+        // cartierului se face pe text, iar un diacritic diferit ar bifa altceva.
+        const areOrasul = Array.from(DOM.oras.options).some(o => o.value === data.oras);
+        if (data.oras && areOrasul) {
+            DOM.oras.value = data.oras;
+            await populateZoneCheckboxes(data.oras);
+        }
+    } catch (e) {
+        console.warn('Terenul de pornire nu a putut fi încărcat:', e);
+    }
+}
 
 // ── LOAD TAGS ──
 async function loadTags() {
@@ -736,6 +853,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     bindEvents();
     await loadTags();
     await checkAuth();
+    // După checkAuth: sesiunea e restaurată, deci terenul se citește ca om
+    // autentificat. Altfel un teren încă neaprobat n-ar fi vizibil (RLS).
+    await incarcaTerenulDePornire();
 });
 
 // ── AUTH ──
@@ -906,9 +1026,33 @@ async function handleSubmit(e) {
             user_id: currentUser.id,
             status: 'activ'
         });
-        
-        showToast('Grupul a fost creat cu succes!', 'success');
-        
+
+        // Terenul de pornire intră la favoritele grupului. Se scrie DUPĂ rândul
+        // de membru, fiindcă dreptul de a scrie ține de apartenența la grup.
+        // Dacă scrierea eșuează, grupul rămâne creat: îi spunem omului și îl
+        // lăsăm să adauge terenul din pagina lui.
+        let terenNeadaugat = false;
+        if (terenPornire) {
+            const { error: terenError } = await sb
+                .from('terenuri_likes_grupuri')
+                .insert({
+                    teren_id: terenPornire.id,
+                    grup_id: data.id,
+                    added_by: currentUser.id
+                });
+            if (terenError) {
+                console.error('Error adding teren to new group:', terenError);
+                terenNeadaugat = true;
+            }
+        }
+
+        showToast(
+            terenNeadaugat
+                ? 'Grupul a fost creat, dar terenul nu a putut fi adăugat la favorite. Îl poți adăuga din pagina terenului.'
+                : 'Grupul a fost creat cu succes!',
+            terenNeadaugat ? 'error' : 'success'
+        );
+
         // Notify admins
         if (typeof notifyAdmins === 'function') {
             notifyAdmins('group_created', {
@@ -920,10 +1064,12 @@ async function handleSubmit(e) {
             });
         }
         
-        // Redirect to group page
+        // Redirect to group page.
+        // Când terenul n-a intrat, lăsăm mesajul pe ecran mai mult: altfel omul
+        // ajunge pe pagina grupului fără să apuce să-l citească.
         setTimeout(() => {
             window.location.href = `grup-details.html?id=${data.id}`;
-        }, 1000);
+        }, terenNeadaugat ? 4000 : 1000);
         
     } catch (e) {
         console.error('Create group error:', e);
