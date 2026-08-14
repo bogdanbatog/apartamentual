@@ -43,8 +43,97 @@
 <!-- ═══════════════ HERO SECTION ═══════════════ -->
 <section class="terenuri-hero">
     <div class="hero-content">
-        <h1>Terenuri disponibile</h1>
-        <p>Descoperă terenuri potrivite pentru proiectul tău de construcție în grup. Filtrează după oraș și cartier, sau propune un teren nou.</p>
+        <!-- Titlul și subtitlul stau pe același rând, ca în machetă: panoul de
+             dedesubt e înalt, iar altfel filtrele ajung sub linia ecranului. -->
+        <div class="hero-top">
+            <h1>Terenuri disponibile</h1>
+            <p>Descoperă terenuri potrivite pentru proiectul tău de construcție în grup.</p>
+        </div>
+
+        <!-- ── Panoul „Analiză preliminară" ──────────────────────────────
+             Traseul întreg, de la filtru la grup, pus în capul paginii: cine
+             intră aici prima oară n-are de unde ști ce primește pentru cei
+             99 RON. Structura și textele vin din macheta din `handoff/`
+             („Terenuri - panou Analiza preliminara.html"), dar îmbrăcate în
+             tokenurile paginii (coral/slate, Mona Sans), nu în teracota și
+             Nunito ale machetei.
+             ⚠️ Prețul e scris aici de mână. Pe carduri vine din constanta
+             PRET_ANALIZA din js/terenuri.js. Dacă se schimbă unul, se schimbă
+             și celălalt (plus celelalte locuri din frontend: analize.html,
+             analiza-simplificata.html, comanda-analiza.html, servicii.html). -->
+        <div class="analiza-panel">
+            <div class="analiza-panel-main">
+                <p class="analiza-panel-tag"><span class="analiza-dot"></span> Analiză preliminară, făcută de arhitecți</p>
+                <ol class="analiza-steps">
+                    <!-- Pașii 1 și 2 sunt scurți, deci stau unul sub altul într-o
+                         singură celulă. Altfel grila i-ar depărta pe toată
+                         înălțimea pasului 3, care e cel mai lung. -->
+                    <li>
+                        <ol class="analiza-stack">
+                            <li>
+                                <span class="analiza-step-n">1</span>
+                                <span><b>Filtrează</b> după zonă</span>
+                            </li>
+                            <li>
+                                <span class="analiza-step-n">2</span>
+                                <span><b>Deschide</b> un teren</span>
+                            </li>
+                        </ol>
+                    </li>
+                    <!-- Pașii 3 și 4 se pliază pe telefon. Sunt scrise `open` în
+                         HTML, deci fără JavaScript rămân desfășurate ca azi;
+                         terenuri.js le închide la încărcare doar sub 768px
+                         (funcția plieazaPasiiPeTelefon). Pe desktop rândul nu
+                         reacționează la clic, ca să nu se închidă din greșeală. -->
+                    <li>
+                        <span class="analiza-step-n">3</span>
+                        <details class="analiza-fold" open>
+                            <summary>
+                                <b>Ceri analiza și vezi ce se poate construi și la ce costuri estimative:</b>
+                                <i class="fas fa-chevron-down analiza-fold-sageata"></i>
+                            </summary>
+                            <ul class="analiza-sub">
+                                <li>câte apartamente încap și câte camere are fiecare</li>
+                                <li>suprafețe utile și la ce etaje sunt</li>
+                                <li>costuri estimative pe mp construit și pe mp util</li>
+                                <li>cât te costă terenul, în funcție de apartamentul pe care îl vrei</li>
+                                <li><span class="analiza-pret">99 RON</span> pentru un teren, TVA inclus</li>
+                                <li>trebuie să știi adresa sau numărul cadastral</li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <span class="analiza-step-n">4</span>
+                        <details class="analiza-fold" open>
+                            <summary>
+                                <!-- Scurtat pe 14 august: „Ți-a plăcut terenul? Alegi ce
+                                     faci cu el:" se rupea pe telefon și lăsa „el:" singur
+                                     pe rândul al doilea. Rândul pliat are vreo 274px, din
+                                     care numărul și săgeata mănâncă 52. -->
+                                <b>Ți-a plăcut? Alegi ce faci cu el:</b>
+                                <i class="fas fa-chevron-down analiza-fold-sageata"></i>
+                            </summary>
+                            <!-- Ultimele două nu sunt acțiuni asupra terenului, sunt
+                                 lucruri de văzut, de aceea au bulina și scrisul mai
+                                 stinse. Amândouă se fac din pagina terenului. -->
+                            <ul class="analiza-sub">
+                                <li>îl adaugi la profilul tău</li>
+                                <li>faci un grup nou cu terenul</li>
+                                <li>îl adaugi la unul din grupurile tale</li>
+                                <li class="analiza-sub-secundar">vezi cine mai e interesat de el</li>
+                                <li class="analiza-sub-secundar">vezi ce grupuri sunt interesate</li>
+                            </ul>
+                        </details>
+                    </li>
+                </ol>
+            </div>
+            <div class="analiza-panel-side">
+                <a href="analiza-simplificata.html" class="btn-analiza-exemplu">
+                    Exemplu de analiză <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        <p class="analiza-panel-hint">O poți cere direct de pe cardul terenului sau din pagina lui.</p>
     </div>
     <div class="hero-decoration">
         <div class="hero-shape hero-shape-1"></div>
@@ -120,9 +209,13 @@
             <div class="active-filters-tags" id="activeFiltersTags"></div>
         </div>
 
-        <!-- Results count -->
+        <!-- Results count.
+             Atenționarea de lângă număr e singurul loc unde scrie că se dă
+             clic pe card: pe telefon nu există stare de hover, deci desprinsul
+             cardului la trecerea mausului nu spune nimic acolo. -->
         <div class="results-info">
             <span id="resultsCount">Se încarcă...</span>
+            <span class="results-hint"><i class="fas fa-hand-pointer"></i> Dă clic pe un card ca să deschizi terenul</span>
             <a href="terenuri-propune.html" class="btn-propune-inline">
                 <i class="fas fa-plus-circle"></i> Propune un teren
             </a>

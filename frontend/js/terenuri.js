@@ -16,6 +16,7 @@ const DOM = {
     activeFilters:    document.getElementById('activeFilters'),
     activeFiltersTags:document.getElementById('activeFiltersTags'),
     resultsCount:     document.getElementById('resultsCount'),
+    resultsHint:      document.querySelector('.results-hint'),
     loadingState:     document.getElementById('loadingState'),
     emptyState:       document.getElementById('emptyState'),
     emptyStateTitle:  document.getElementById('emptyStateTitle'),
@@ -50,6 +51,13 @@ const EMPTY_STATE_IMPLICIT = {
     text:  DOM.emptyStateText  ? DOM.emptyStateText.textContent  : '',
 };
 
+// Prețul analizei preliminare, scris o singură dată pentru toate cardurile.
+// ⚠️ Mai e scris de mână în panoul din capul paginii (terenuri.html) și în
+// restul frontendului: analize.html, analiza-simplificata.html,
+// comanda-analiza.html, servicii.html. La expirarea prețului de lansare se
+// schimbă în toate.
+const PRET_ANALIZA = '99 RON';
+
 // ── STATE ─────────────────────────────────
 let currentUser = null;
 let allTerenuri = [];
@@ -63,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Nav-ul (avatar, dropdown profil, logout, mobil) e gestionat integral de
     // nav.js. Nu mai atașăm handlere aici — duplicarea făcea dublu-toggle pe
     // dropdown și butonul „Profilul meu" nu se mai deschidea.
+    plieazaPasiiPeTelefon();
     populateOrasFilter();
     bindFilterEvents();
     bindModalEvents();
@@ -70,6 +79,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupZoneMineFilter();   // după checkAuth: are nevoie de zonele omului
     await loadTerenuri();
 });
+
+// ══════════════════════════════════════════
+//  PANOUL DE ANALIZĂ
+// ══════════════════════════════════════════
+
+// Pașii 3 și 4 sunt scriși `<details open>` în HTML, deci fără JavaScript
+// panoul rămâne desfășurat, ca înainte. Aici îi închidem doar pe ecran mic,
+// unde panoul ajungea la 576px și împingea primul teren dincolo de 1100px.
+//
+// ⚠️ Se ascultă `matchMedia`, NU `resize`. Pe telefon, ascunderea barei de
+// adresă a browserului declanșează un `resize`, iar cu el am fi închis pașii
+// exact în timp ce omul îi citea. `matchMedia` se aude o singură dată, când
+// se trece pragul de 768px, adică la rotirea telefonului.
+function plieazaPasiiPeTelefon() {
+    const ecranMic = window.matchMedia('(max-width: 768px)');
+
+    const aplica = () => {
+        document.querySelectorAll('.analiza-fold').forEach(pas => {
+            pas.open = !ecranMic.matches;
+        });
+    };
+
+    aplica();
+    ecranMic.addEventListener('change', aplica);
+}
 
 // ══════════════════════════════════════════
 //  AUTH
@@ -462,6 +496,12 @@ function renderTerenuri(terenuri) {
     // filtru, mult mai târziu, când bifa nu mai e nici măcar pusă.
     actualizeazaStareaGoala();
 
+    // Atenționarea „dă clic pe un card" n-are ce căuta deasupra unei liste
+    // goale: n-are pe ce da clic.
+    if (DOM.resultsHint) {
+        DOM.resultsHint.style.display = terenuri.length === 0 ? 'none' : '';
+    }
+
     if (terenuri.length === 0) {
         DOM.terenuriGrid.innerHTML = '';
         DOM.emptyState.style.display = 'block';
@@ -504,12 +544,40 @@ function createTerenCard(teren, index) {
     // Location string
     const location = [teren.oras, teren.cartier].filter(Boolean).join(', ');
 
+    // Adresa spre analize.html, cu terenul dus mai departe. Aceiași doi
+    // parametri ca redirectToAnalize() din teren-details.js — dacă acolo se
+    // schimbă numele, se schimbă și aici, altfel formularul de comandă nu se
+    // mai precompletează.
+    const analizaParams = new URLSearchParams();
+    if (teren.id) analizaParams.set('teren_id', teren.id);
+    if (teren.titlu) analizaParams.set('teren_titlu', teren.titlu);
+    const analizaQuery = analizaParams.toString();
+
     // Source link
     const sourceHtml = teren.link_sursa
         ? `<a href="${escapeHtml(teren.link_sursa)}" target="_blank" rel="noopener" class="teren-card-source">
              <i class="fas fa-external-link-alt"></i> Sursă
            </a>`
         : '';
+
+    // Faptele terenului, strânse pe două rânduri în loc de patru cutii cu
+    // etichete. Etichetele („SUPRAFAȚĂ", „PREȚ TOTAL") au ieșit fiindcă
+    // unitatea le spune oricum: „240 mp" și „184.000 €" nu se pot confunda.
+    // Cardul a scăzut cu vreo sută de puncte, ceea ce pe telefon înseamnă
+    // aproape un ecran la fiecare trei terenuri.
+    const fapteMari = [];
+    if (teren.suprafata) {
+        fapteMari.push(`<span class="teren-fact">${formatNumber(teren.suprafata)} mp</span>`);
+    }
+    if (teren.pret_total) {
+        fapteMari.push(`<span class="teren-fact teren-fact-pret">${formatPrice(teren.pret_total)} €</span>`);
+    }
+    const fapteMariHtml = fapteMari.join('<span class="teren-fact-sep">·</span>');
+
+    // Rândul mărunt: prețul pe mp, data și linkul către anunțul original.
+    const fapteMici = [];
+    if (pretMp !== null) fapteMici.push(`${formatNumber(pretMp)} €/mp`);
+    if (dateStr) fapteMici.push(`adăugat ${dateStr}`);
 
     // Groups associated (placeholder - will be functional with Grupuri phase)
     // For now we show nothing or mock data
@@ -524,65 +592,62 @@ function createTerenCard(teren, index) {
                 <span class="teren-badge teren-badge-city">${escapeHtml(teren.oras || 'România')}</span>
                 ${isNew ? '<span class="teren-badge teren-badge-new">Nou</span>' : ''}
             </div>
+
+            <!-- Inima, mutată peste poză. Înainte stătea într-un rând al ei
+                 în josul cardului, împreună cu două butoane rotunde care
+                 duceau la utilizatorii și grupurile interesate. Butoanele au
+                 fost scoase (nu se înțelegeau pe telefon, iar aceleași două
+                 drumuri există în pagina terenului), iar rândul întreg a
+                 dispărut odată cu ele: încă vreo 58 de puncte pe card.
+                 ⚠️ Învelișul .teren-likes trebuie păstrat: updateLikeCountDisplay
+                 îl caută cu closest(). -->
+            <div class="teren-likes">
+                <button class="teren-likes-btn ${isLiked ? 'liked' : ''}"
+                        data-teren-id="${teren.id}"
+                        onclick="handleLike('${teren.id}')"
+                        title="${isLiked ? 'Elimină din favorite' : 'Adaugă la profilul tău'}">
+                    <i class="like-icon ${isLiked ? 'fas' : 'far'} fa-heart"></i>
+                    <span class="like-count-text">${likes}</span>
+                </button>
+            </div>
         </div>
 
         <!-- Body -->
         <div class="teren-card-body">
-            <h3 class="teren-card-title">${escapeHtml(teren.titlu || 'Teren fără titlu')}</h3>
+            <!-- Titlul e singurul link „adevărat" al cardului. Prin ::after
+                 (vezi .teren-card-link din terenuri.css) el se întinde peste
+                 tot cardul, deci clicul oriunde deschide terenul. Butoanele și
+                 linkurile dinăuntru stau deasupra lui și își păstrează acțiunea.
+                 Tot el e și ținta tastaturii: un onclick pus pe articol n-ar
+                 fi fost accesibil cu Tab.
+                 ⚠️ Fără apostrofuri inverse în comentariul ăsta: e înăuntrul
+                 unui template string și l-ar închide la mijloc. -->
+            <h3 class="teren-card-title">
+                <a class="teren-card-link" href="teren-details.html?id=${teren.id}">${escapeHtml(teren.titlu || 'Teren fără titlu')}</a>
+            </h3>
             <div class="teren-card-location">
                 <i class="fas fa-map-marker-alt"></i>
                 ${escapeHtml(location || 'Locație nespecificată')}
             </div>
 
-            <!-- Stats -->
-            <div class="teren-card-stats">
-                <div class="teren-stat">
-                    <span class="teren-stat-label">Suprafață</span>
-                    <span class="teren-stat-value">${teren.suprafata ? formatNumber(teren.suprafata) + ' mp' : '—'}</span>
-                </div>
-                <div class="teren-stat">
-                    <span class="teren-stat-label">Preț total</span>
-                    <span class="teren-stat-value price-highlight">${teren.pret_total ? formatPrice(teren.pret_total) + ' €' : '—'}</span>
-                </div>
-                ${pretMp !== null ? `
-                <div class="teren-stat">
-                    <span class="teren-stat-label">Preț / mp</span>
-                    <span class="teren-stat-value">${formatNumber(pretMp)} €/mp</span>
-                </div>` : ''}
-                ${dateStr ? `
-                <div class="teren-stat">
-                    <span class="teren-stat-label">Adăugat</span>
-                    <span class="teren-stat-value">${dateStr}</span>
-                </div>` : ''}
-            </div>
-
-            ${sourceHtml}
-        </div>
-
-        <!-- Footer / Actions -->
-        <div class="teren-card-footer">
-            <div class="teren-likes">
-                <button class="teren-likes-btn ${isLiked ? 'liked' : ''}"
-                        data-teren-id="${teren.id}"
-                        onclick="handleLike('${teren.id}')"
-                        title="${isLiked ? 'Elimină din favorite' : 'Adaugă la profil'}">
-                    <i class="like-icon ${isLiked ? 'fas' : 'far'} fa-heart"></i>
-                    <span class="like-count-text">${likes}</span>
-                </button>
-                <span class="teren-likes-count">${likes === 1 ? 'interesat' : 'interesați'}</span>
-            </div>
-            <div class="teren-card-actions">
-                <button class="btn-view-interested" onclick="viewInterestedUsers('${teren.id}')" title="Vezi utilizatorii interesați">
-                    <i class="fas fa-user"></i>
-                </button>
-                <button class="btn-view-groups" onclick="viewInterestedGroups('${teren.id}')" title="Vezi grupurile interesate">
-                    <i class="fas fa-users"></i>
-                </button>
-                <a href="teren-details.html?id=${teren.id}" class="btn-vezi-detalii">
-                    Detalii <i class="fas fa-arrow-right"></i>
-                </a>
+            <!-- Faptele, pe două rânduri -->
+            ${fapteMariHtml ? `<div class="teren-card-facts">${fapteMariHtml}</div>` : ''}
+            <div class="teren-card-meta">
+                <span>${fapteMici.join(' · ')}</span>
+                ${sourceHtml}
             </div>
         </div>
+
+        <!-- CTA de analiză (din machetă). Duce în același loc ca butonul
+             „Cere o analiză" din pagina terenului: analize.html, cu terenul
+             dus mai departe prin adresă (vezi redirectToAnalize din
+             js/teren-details.js), ca formularul de comandă să vină
+             precompletat. -->
+        <a class="teren-card-cta" href="analize.html${analizaQuery ? '?' + analizaQuery : ''}">
+            <span>Cere analiza preliminară <i class="fas fa-arrow-right"></i></span>
+            <span class="teren-card-cta-pret">${PRET_ANALIZA}, TVA inclus</span>
+        </a>
+
     </article>
     `;
 }
@@ -691,49 +756,25 @@ function updateLikeCountDisplay(terenId) {
 
     const count = getLikesCount(terenId);
     const countText = btn.querySelector('.like-count-text');
-    const label = btn.closest('.teren-likes').querySelector('.teren-likes-count');
 
     if (countText) countText.textContent = count;
-    if (label) label.textContent = count === 1 ? 'interesat' : 'interesați';
+
+    // Eticheta „interesat / interesați" a dispărut odată cu rândul de jos al
+    // cardului; a rămas doar cifra de lângă inimă. Titlul butonului spune ce
+    // face apăsarea, iar numărul spune câți sunt.
+    btn.title = userLikes.has(terenId) ? 'Elimină din favorite' : 'Adaugă la profilul tău';
 }
 
 // ══════════════════════════════════════════
 //  VIEW INTERESTED USERS / GROUPS
 // ══════════════════════════════════════════
 
-window.viewInterestedUsers = function(terenId) {
-    if (!currentUser) {
-        showToast('Trebuie să fii conectat pentru a vedea utilizatorii.', 'info');
-        setTimeout(() => window.location.href = 'register.html', 1500);
-        return;
-    }
-    
-    // Block for professional accounts (agencies)
-    if (userAccountType === 'profesional') {
-        showToast('Conturile de agenție nu pot accesa lista de utilizatori.', 'info');
-        return;
-    }
-    
-    // Navigate to utilizatori page with teren filter
-    window.location.href = `utilizatori.html?teren=${terenId}`;
-};
+// Cele două funcții care duceau la utilizatorii și la grupurile interesate de
+// un teren (`viewInterestedUsers` / `viewInterestedGroups`) au fost scoase pe
+// 14 august, odată cu butoanele rotunde de pe card. Aceleași două drumuri
+// există în pagina terenului (`js/teren-details.js`, secțiunea „INTEREST
+// COUNTS & NAVIGATION"), deci nu s-a pierdut nicio funcționalitate.
 
-window.viewInterestedGroups = function(terenId) {
-    if (!currentUser) {
-        showToast('Trebuie să fii conectat pentru a vedea grupurile.', 'info');
-        setTimeout(() => window.location.href = 'register.html', 1500);
-        return;
-    }
-    
-    // Block for professional accounts (agencies)
-    if (userAccountType === 'profesional') {
-        showToast('Conturile de agenție nu pot accesa lista de grupuri.', 'info');
-        return;
-    }
-    
-    // Navigate to grupuri page with teren filter
-    window.location.href = `grupuri.html?teren=${terenId}`;
-};
 
 // Keep handleAddToGroup for backwards compatibility (teren-details page uses it)
 window.handleAddToGroup = function(terenId) {

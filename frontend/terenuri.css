@@ -220,7 +220,9 @@ img { max-width: 100%; display: block; }
 .terenuri-hero {
     position: relative;
     background: linear-gradient(135deg, var(--slate-800) 0%, var(--slate-700) 100%);
-    padding: 56px 24px 48px;
+    /* 56/48 inițial. Strânsă fiindcă banda ține acum și panoul de analiză
+       sub titlu, iar filtrele ajungeau sub linia ecranului. */
+    padding: 34px 24px 30px;
     overflow: hidden;
 }
 .hero-content {
@@ -229,18 +231,26 @@ img { max-width: 100%; display: block; }
     position: relative;
     z-index: 2;
 }
+/* Titlu și subtitlu pe același rând, aliniate pe linia de bază a textului.
+   Sub 768px se așază unul sub altul (vezi media query). */
+.hero-top {
+    display: flex;
+    align-items: baseline;
+    gap: 28px;
+    flex-wrap: wrap;
+}
 .hero-content h1 {
-    font-size: 2.25rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--white);
     letter-spacing: -0.03em;
-    margin-bottom: 10px;
+    margin-bottom: 0;
 }
 .hero-content p {
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: var(--slate-300);
     max-width: 560px;
-    line-height: 1.7;
+    line-height: 1.6;
 }
 
 .hero-decoration {
@@ -265,6 +275,209 @@ img { max-width: 100%; display: block; }
     bottom: -50px; right: 120px;
 }
 
+/* ── PANOUL „ANALIZĂ PRELIMINARĂ" (în hero) ─────────────────────
+   Bandă deschisă peste hero-ul închis, ca în machetă: pașii 1 și 2
+   stivuiți într-o coloană îngustă, 3 și 4 desfășurate alături, cu
+   despărțitor vertical. Butonul de exemplu stă în dreapta, pe toată
+   înălțimea. Culorile sunt cele ale paginii, nu cele ale machetei. */
+.analiza-panel {
+    margin-top: 18px;
+    background: var(--slate-50);
+    color: var(--slate-800);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.6);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: center;
+}
+.analiza-panel-main { min-width: 0; }
+
+/* ⚠️ Selectorul are DOUĂ clase dinadins. Eticheta și fraza de sub panou sunt
+   amândouă `<p>` în interiorul lui `.hero-content`, iar acolo există de mai
+   demult `.hero-content p { color: var(--slate-300); font-size: 1rem; }`,
+   care are specificitate mai mare decât o singură clasă. Cu un singur nume
+   de clasă, eticheta se randa gri deschis la 16px, deși aici scria teracotă
+   la 11px. Dacă adaugi alt `<p>` în panou, ține minte capcana. */
+.analiza-panel .analiza-panel-tag {
+    display: inline-flex;
+    /* flex-start, nu center: pe ecran îngust eticheta se rupe în două rânduri,
+       iar bulina ar rămâne la mijlocul lor. */
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--coral-dark);
+    margin-bottom: 10px;
+}
+.analiza-dot {
+    flex: none;
+    width: 7px; height: 7px;
+    margin-top: 0.42em;
+    border-radius: 50%;
+    background: var(--coral);
+}
+
+.analiza-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr) minmax(0, 0.85fr);
+    gap: 10px 22px;
+    align-items: start;
+}
+.analiza-steps > li {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--slate-600);
+}
+/* Pașii 3 și 4 (celulele 2 și 3) au numărul lipit de text, ca pașii din
+   stivă, plus despărțitor vertical la stânga. */
+.analiza-steps > li:nth-child(2),
+.analiza-steps > li:nth-child(3) {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding-left: 20px;
+    border-left: 1px solid var(--slate-200);
+}
+/* Stiva pașilor 1 și 2 */
+.analiza-stack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+.analiza-stack li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--slate-600);
+}
+.analiza-steps b {
+    color: var(--slate-800);
+    font-weight: 600;
+}
+
+/* ── PAȘII PLIABILI (3 și 4) ────────────────────────────────────
+   Pe desktop arată exact ca înainte și NU se pot închide: rândul nu
+   primește clicuri. Pe telefon devin două rânduri pe care dai clic,
+   cu săgeată, fiindcă acolo panoul avea 576px și împingea primul teren
+   la peste 1100px de sus. */
+.analiza-fold {
+    flex: 1;
+    min-width: 0;
+}
+.analiza-fold > summary {
+    list-style: none;
+    cursor: pointer;
+}
+.analiza-fold > summary::-webkit-details-marker { display: none; }
+.analiza-fold-sageata { display: none; }
+
+@media (min-width: 769px) {
+    .analiza-fold > summary {
+        pointer-events: none;
+        cursor: default;
+    }
+}
+.analiza-step-n {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--slate-100);
+    border: 1px solid var(--slate-300);
+    color: var(--slate-800);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+}
+
+.analiza-sub {
+    list-style: none;
+    margin: 5px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--slate-600);
+}
+.analiza-sub li {
+    position: relative;
+    padding-left: 13px;
+}
+.analiza-sub li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0.62em;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--coral);
+}
+.analiza-pret {
+    font-weight: 700;
+    color: var(--slate-800);
+}
+
+/* Rândurile „de văzut", nu „de făcut": scris și bulină mai stinse, ca ochiul
+   să nu le pună în același șir cu „adaugi", „faci", care schimbă ceva.
+   ⚠️ Selectorul are două clase fiindcă bulina coral vine din
+   `.analiza-sub li::before`, care altfel ar câștiga. */
+.analiza-sub li.analiza-sub-secundar {
+    /* slate-500, nu slate-400: la 400 contrastul pe fundalul panoului scădea
+       sub 3:1, adică erau stinse până la a nu se mai putea citi. Diferența
+       față de celelalte trei rânduri se vede oricum. */
+    color: var(--slate-500);
+}
+.analiza-sub li.analiza-sub-secundar::before {
+    background: var(--slate-400);
+}
+
+.analiza-panel-side {
+    display: flex;
+    align-items: center;
+    padding-left: 22px;
+    border-left: 1px solid var(--slate-200);
+}
+.btn-analiza-exemplu {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: var(--slate-800);
+    color: var(--white);
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+.btn-analiza-exemplu:hover {
+    background: var(--slate-700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+}
+.btn-analiza-exemplu i { font-size: 0.75rem; }
+
+/* Două clase, din același motiv ca la etichetă: altfel `.hero-content p`
+   îi impune 1rem și slate-300. */
+.hero-content .analiza-panel-hint {
+    margin-top: 10px;
+    margin-bottom: 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--slate-400);
+}
+
 /* ── FILTERS ──────────────────────────────── */
 .filters-section {
     background: var(--white);
@@ -277,30 +490,38 @@ img { max-width: 100%; display: block; }
 .filters-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 16px 24px;
+    padding: 10px 24px;
 }
 
 .filters-row {
     display: flex;
     gap: 16px;
-    align-items: flex-end;
+    align-items: center;
     flex-wrap: wrap;
 }
 
+/* Eticheta stă LÂNGĂ selector, nu deasupra lui. Deasupra, rândul de
+   etichete costa 25 de puncte din cele 147 ale barei, degeaba: bara e
+   lipicioasă și te urmărește prin toată lista. */
 .filter-group {
     flex: 1;
     min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
 }
 .filter-group label {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.75rem;
+    flex: none;
+    white-space: nowrap;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--slate-500);
-    margin-bottom: 6px;
+    margin-bottom: 0;
 }
 .filter-group label i {
     font-size: 0.7rem;
@@ -309,7 +530,9 @@ img { max-width: 100%; display: block; }
 
 .filter-select {
     width: 100%;
-    padding: 10px 36px 10px 14px;
+    flex: 1;
+    min-width: 0;
+    padding: 8px 34px 8px 13px;
     border: 1.5px solid var(--slate-200);
     border-radius: var(--radius-sm);
     font-size: 0.9rem;
@@ -450,14 +673,33 @@ img { max-width: 100%; display: block; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
     border-top: 1px solid var(--slate-100);
 }
 .results-info span {
     font-size: 0.85rem;
     color: var(--slate-500);
     font-weight: 500;
+}
+/* Trei elemente pe un rând: numărul, atenționarea, apoi „Propune un teren"
+   împins la dreapta. Pe telefon atenționarea coboară singură pe un rând
+   întreg (vezi media query), ca să nu se împletească cu linkul. */
+.results-info {
+    flex-wrap: wrap;
+    gap: 4px 14px;
+}
+.results-info .btn-propune-inline { margin-left: auto; }
+.results-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--slate-400);
+}
+.results-hint i {
+    color: var(--coral);
+    font-size: 0.75rem;
 }
 .btn-propune-inline {
     display: inline-flex;
@@ -559,11 +801,44 @@ img { max-width: 100%; display: block; }
     display: flex;
     flex-direction: column;
     animation: fadeInUp 0.4s var(--ease-out) both;
+    /* Reperul pentru linkul întins al titlului (.teren-card-link::after) */
+    position: relative;
+    cursor: pointer;
 }
 .teren-card:hover {
     box-shadow: var(--shadow-card-hover);
     transform: translateY(-4px);
 }
+
+/* ── CARDUL ÎNTREG E CLICABIL ──────────────────────────────────
+   Nu printr-un onclick pe articol, ci prin linkul titlului, întins
+   peste tot cardul cu un ::after transparent. Așa rămâne un link
+   adevărat: se vede în bara de stare, se deschide cu Ctrl+clic sau
+   pe tab nou, iar cu tastatura se ajunge la el cu Tab.
+   ⚠️ Orice element interactiv adăugat pe card de acum înainte are
+   nevoie de `position: relative; z-index: 2`, altfel intră sub
+   folia asta și clicul pe el deschide terenul în loc să-și facă
+   treaba. Lista de mai jos e exact asta. */
+.teren-card-link {
+    color: inherit;
+    transition: color var(--transition-fast);
+}
+.teren-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+.teren-card:hover .teren-card-link { color: var(--coral-dark); }
+
+.teren-card .teren-card-source,
+.teren-card .teren-card-cta,
+.teren-card .group-chip {
+    position: relative;
+    z-index: 2;
+}
+/* .teren-likes își are propriul z-index: 2 mai jos, e poziționat absolut
+   peste poză. */
 
 /* Stagger animation */
 .teren-card:nth-child(1) { animation-delay: 0.05s; }
@@ -578,10 +853,13 @@ img { max-width: 100%; display: block; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Card image */
+/* Card image.
+   200px inițial. Coborâtă la 168 (și la 150 pe telefon, în media query):
+   e tot destul cât să se vadă planul cadastral sau poza, dar pe telefon
+   scutește un sfert de ecran la fiecare teren. */
 .teren-card-image {
     position: relative;
-    height: 200px;
+    height: 168px;
     overflow: hidden;
     background: var(--slate-100);
 }
@@ -634,7 +912,7 @@ img { max-width: 100%; display: block; }
 
 /* Card body */
 .teren-card-body {
-    padding: 18px 20px 8px;
+    padding: 14px 20px 6px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -644,8 +922,8 @@ img { max-width: 100%; display: block; }
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--slate-800);
-    margin-bottom: 4px;
-    line-height: 1.35;
+    margin-bottom: 3px;
+    line-height: 1.28;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -658,42 +936,42 @@ img { max-width: 100%; display: block; }
     gap: 5px;
     font-size: 0.82rem;
     color: var(--slate-500);
-    margin-bottom: 14px;
+    margin-bottom: 9px;
 }
 .teren-card-location i {
     color: var(--coral);
     font-size: 0.75rem;
 }
 
-/* Stats row */
-.teren-card-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-}
-.teren-stat {
+/* ── FAPTELE TERENULUI ─────────────────────────────────────────
+   Înlocuiesc grila de patru cutii cu etichete („SUPRAFAȚĂ", „PREȚ
+   TOTAL", …), care ocupa singură vreo 110px pe fiecare card. Rândul
+   mare: suprafața și prețul. Rândul mărunt: prețul pe mp, data și
+   linkul spre anunțul original, care înainte stătea pe un rând al lui. */
+.teren-card-facts {
     display: flex;
-    flex-direction: column;
-    padding: 8px 10px;
-    background: var(--slate-100);
-    border-radius: var(--radius-sm);
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 5px;
 }
-.teren-stat-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--slate-400);
-    margin-bottom: 2px;
-}
-.teren-stat-value {
-    font-size: 0.92rem;
+.teren-fact {
+    font-size: 1rem;
     font-weight: 700;
     color: var(--slate-800);
 }
-.teren-stat-value.price-highlight {
-    color: var(--coral-dark);
+.teren-fact-pret { color: var(--coral-dark); }
+.teren-fact-sep { color: var(--slate-300); }
+
+.teren-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--slate-500);
+    margin-bottom: 10px;
 }
 
 /* Source link */
@@ -703,7 +981,6 @@ img { max-width: 100%; display: block; }
     gap: 5px;
     font-size: 0.78rem;
     color: var(--info);
-    margin-bottom: 12px;
     transition: color var(--transition-fast);
 }
 .teren-card-source:hover { color: #4a5f80; }
@@ -743,44 +1020,72 @@ img { max-width: 100%; display: block; }
     color: var(--coral-dark);
 }
 
-/* Card footer / actions */
-.teren-card-footer {
-    padding: 12px 20px 16px;
-    border-top: 1px solid var(--slate-100);
+/* CTA de analiză, repetat pe fiecare card (din machetă).
+   Stă între corpul cardului și rândul de acțiuni, cu linie deasupra.
+   Prețul e mic și în gri, ca să nu se confunde cu prețul terenului
+   afișat mai sus în „Preț total". */
+.teren-card-cta {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
+    /* Marginea de jos ține locul rândului de acțiuni, care nu mai există. */
+    margin: 4px 20px 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--slate-100);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--coral-dark);
+    transition: color var(--transition-fast);
+}
+.teren-card-cta:hover { color: var(--coral); }
+.teren-card-cta i {
+    font-size: 0.7rem;
+    margin-left: 4px;
+}
+.teren-card-cta-pret {
+    font-weight: 500;
+    font-size: 0.78rem;
+    color: var(--slate-400);
+    white-space: nowrap;
 }
 
-/* Like / popularity indicator */
+/* ── INIMA, PESTE POZĂ ─────────────────────────────────────────
+   Înainte stătea într-un rând propriu în josul cardului, cu bordură
+   deasupra, alături de două butoane rotunde („vezi cine e interesat")
+   care nu se înțelegeau pe telefon. Butoanele au fost scoase pe
+   14 august, iar rândul a dispărut cu totul: inima s-a mutat în colțul
+   pozei, unde nu costă nicio înălțime. */
 .teren-likes {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2;
 }
 .teren-likes-btn {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 6px 12px;
-    border: 1.5px solid var(--slate-200);
+    padding: 6px 11px;
+    border: none;
     border-radius: 100px;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: var(--slate-500);
+    color: var(--slate-600);
     transition: all var(--transition-fast);
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    /* Umbra e singurul lucru care ține inima vizibilă când poza e un plan
+       cadastral alb, adică la vreo treime din terenuri. */
+    box-shadow: 0 1px 4px rgba(26, 22, 15, 0.22);
 }
 .teren-likes-btn:hover {
-    border-color: var(--coral);
     color: var(--coral);
-    background: var(--coral-50);
+    background: var(--white);
 }
 .teren-likes-btn.liked {
-    border-color: var(--coral);
     color: var(--coral);
-    background: var(--coral-50);
+    background: rgba(255, 255, 255, 0.94);
 }
 .teren-likes-btn .like-icon {
     font-size: 0.85rem;
@@ -798,63 +1103,13 @@ img { max-width: 100%; display: block; }
     40% { transform: scale(1.3); }
     100% { transform: scale(1.15); }
 }
-.teren-likes-count {
-    font-size: 0.78rem;
-    color: var(--slate-400);
-    font-weight: 500;
-}
+/* Eticheta „interesat / interesați" (`.teren-likes-count`) și cele două
+   butoane rotunde (`.btn-view-interested`, `.btn-view-groups`) au fost
+   scoase pe 14 august odată cu rândul de jos al cardului. */
 
-/* Action buttons */
-.teren-card-actions {
-    display: flex;
-    gap: 6px;
-}
-
-.btn-view-interested,
-.btn-view-groups {
-    width: 36px;
-    height: 36px;
-    border: 1.5px solid var(--slate-200);
-    border-radius: 50%;
-    font-size: 0.85rem;
-    color: var(--slate-400);
-    transition: all var(--transition-fast);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--white);
-}
-
-.btn-view-interested:hover {
-    border-color: var(--coral-400);
-    color: var(--coral-500);
-    background: var(--coral-50, #fff7ed);
-}
-
-.btn-view-groups:hover {
-    border-color: var(--slate-400);
-    color: var(--slate-600);
-    background: var(--slate-50);
-}
-
-.btn-vezi-detalii {
-    padding: 6px 14px;
-    background: var(--slate-800);
-    color: var(--white);
-    border-radius: 100px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    transition: all var(--transition-fast);
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    white-space: nowrap;
-}
-.btn-vezi-detalii:hover {
-    background: var(--slate-700);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
-}
+/* Butonul „Detalii" a fost scos pe 14 august: cardul întreg e link acum,
+   iar un buton care duce unde duce și restul cardului doar aglomera rândul.
+   Stilul lui a plecat odată cu el; nu-l mai folosea nicio altă pagină. */
 
 /* ── CTA SECTION ──────────────────────────── */
 .cta-section {
@@ -1146,6 +1401,16 @@ img { max-width: 100%; display: block; }
     .terenuri-grid {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     }
+
+    /* Butonul de exemplu trece sub pași, cu linie deasupra în loc de linie
+       laterală, ca panoul să nu se strângă pe lățime. */
+    .analiza-panel { grid-template-columns: 1fr; gap: 16px; }
+    .analiza-panel-side {
+        padding-left: 0;
+        border-left: 0;
+        border-top: 1px solid var(--slate-200);
+        padding-top: 14px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1153,9 +1418,78 @@ img { max-width: 100%; display: block; }
     .btn-propune-nav { display: none; }
     .nav-mobile-toggle { display: flex; align-items: center; justify-content: center; }
 
-    .terenuri-hero { padding: 40px 20px 36px; }
-    .hero-content h1 { font-size: 1.7rem; }
-    .hero-content p { font-size: 0.95rem; }
+    .terenuri-hero { padding: 24px 20px 22px; }
+    .hero-top { gap: 4px; }
+    .hero-content h1 { font-size: 1.6rem; }
+    .hero-content p { font-size: 0.92rem; }
+
+    /* Poza scade și ea: pe telefon cardurile stau pe o singură coloană,
+       deci fiecare punct de înălțime se simte de 46 de ori. */
+    .teren-card-image { height: 150px; }
+
+    /* Pașii unul sub altul. Despărțitorul vertical devine orizontal, altfel
+       cele trei coloane ajung fiecare de un cuvânt pe rând. */
+    .analiza-panel {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: var(--radius-md);
+    }
+    /* Spațierea dintre litere scade ca eticheta să încapă pe un rând.
+       La 0.14em se rupea în două și costa 20 de puncte degeaba. */
+    .analiza-panel .analiza-panel-tag {
+        font-size: 0.62rem;
+        letter-spacing: 0.06em;
+        margin-bottom: 9px;
+    }
+    .analiza-steps { grid-template-columns: 1fr; gap: 9px; }
+    .analiza-steps > li:nth-child(2),
+    .analiza-steps > li:nth-child(3) {
+        padding-left: 0;
+        border-left: 0;
+        border-top: 1px solid var(--slate-200);
+        padding-top: 9px;
+    }
+    .analiza-steps > li,
+    .analiza-stack li { font-size: 0.88rem; }
+
+    /* Rândul pliabil: text la stânga, săgeată la dreapta, tot rândul e
+       suprafață de atins. */
+    .analiza-fold > summary {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 3px 0;
+    }
+    .analiza-fold-sageata {
+        display: inline-block;
+        flex: none;
+        margin-top: 0.3em;
+        font-size: 0.7rem;
+        color: var(--coral);
+        transition: transform var(--transition-fast);
+    }
+    .analiza-fold[open] .analiza-fold-sageata { transform: rotate(180deg); }
+    /* Pe telefon butonul plin devine link scris: e o acțiune secundară, iar
+       pastila neagră pe toată lățimea costa un rând întreg din panou. */
+    .analiza-panel-side {
+        padding-top: 10px;
+    }
+    .btn-analiza-exemplu {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0;
+        background: transparent;
+        color: var(--coral-dark);
+        font-size: 0.85rem;
+    }
+    .btn-analiza-exemplu:hover {
+        background: transparent;
+        color: var(--coral);
+        transform: none;
+        box-shadow: none;
+    }
+    .hero-content .analiza-panel-hint { font-size: 0.8rem; }
 
     /* Filtre compacte pe mobil — nu mai stau sticky ca să nu ocupe ecranul,
        padding redus, label-uri mai mici, gap mai mic între ele */
@@ -1164,35 +1498,63 @@ img { max-width: 100%; display: block; }
         top: auto;
     }
     .filters-container {
-        padding: 12px 16px;
+        padding: 8px 16px;
     }
-    .filters-row { flex-direction: column; gap: 8px; }
-    .filter-group { min-width: 100%; }
+    /* Patru filtre în două rânduri de câte două, nu patru rânduri unul sub
+       altul: oraș + cartier sus, sortare + resetare jos. */
+    /* Grilă de cinci coloane, nu două egale: textele au lungimi diferite și
+       la jumătate-jumătate se tăiau („Alege mai întâi ora:", „Cele m"). */
+    .filters-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 7px;
+    }
+    .filter-group { min-width: 0; }
+    .filter-group:nth-child(1) { grid-column: span 2; }  /* oraș */
+    .filter-group:nth-child(2) { grid-column: span 3; }  /* cartier, textul cel mai lung */
+    .filter-group:nth-child(3) { grid-column: span 3; }  /* sortare, cu eticheta ei */
+    .filter-group-actions      { grid-column: span 2; }  /* resetează */
     .filter-group label {
-        font-size: 0.7rem;
-        margin-bottom: 3px;
+        font-size: 0.62rem;
+        letter-spacing: 0.04em;
+        margin-bottom: 0;
     }
+    /* Orașul și cartierul rămân fără etichetă: selectorul spune singur ce e
+       („Toate orașele", „Alege mai întâi orașul"), iar pe jumătate de ecran
+       n-ar mai fi încăput și eticheta, și textul.
+       ⚠️ Sortarea ȘI-O PĂSTREAZĂ: „Cele mai noi" de unul singur nu spune
+       nimănui că e vorba de ordinea listei. */
+    .filter-group:nth-child(1) label,
+    .filter-group:nth-child(2) label { display: none; }
     .filter-select {
-        padding: 8px 32px 8px 12px;
-        font-size: 0.875rem;
+        padding: 7px 26px 7px 11px;
+        font-size: 0.85rem;
     }
-    .filter-group-actions { min-width: 100%; }
+    .filter-group { gap: 7px; }
+    /* Al patrulea din grilă, deci ajunge singur în dreapta sortării. */
+    .filter-group-actions { min-width: 0; }
     .btn-filter-reset {
         width: 100%;
         justify-content: center;
-        padding: 8px 14px;
+        padding: 7px 12px;
+        font-size: 0.8rem;
     }
     .results-info {
-        margin-top: 10px;
-        padding-top: 10px;
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+    /* Pe telefon numărul și „Propune un teren" rămân pe primul rând, iar
+       atenționarea cu clicul trece dedesubt, pe toată lățimea. Altfel se
+       împleteau pe trei rânduri strâmbe. */
+    .results-hint {
+        flex-basis: 100%;
+        order: 3;
     }
 
     .terenuri-grid {
         grid-template-columns: 1fr;
         gap: 16px;
     }
-
-    .teren-card-footer { flex-wrap: wrap; }
 
     .footer-container {
         grid-template-columns: 1fr;
@@ -1208,11 +1570,12 @@ img { max-width: 100%; display: block; }
 @media (max-width: 480px) {
     .nav-container { padding: 0 16px; }
     .hero-content h1 { font-size: 1.5rem; }
-    .teren-card-stats { grid-template-columns: 1fr; }
-    .teren-card-footer {
+
+    /* Pe ecran îngust eticheta și prețul nu încap pe un rând: săgeata sărea
+       singură pe rândul al doilea. Se așază unul sub altul. */
+    .teren-card-cta {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
+        gap: 2px;
     }
-    .teren-likes { justify-content: center; }
-    .teren-card-actions { justify-content: center; }
 }
