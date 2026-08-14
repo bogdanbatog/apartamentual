@@ -1,19 +1,42 @@
 # Handoff: automatizarea emailului „terenuri noi în zonele tale"
 
-**Data:** 12 august 2026 · actualizat **14 august** (până la commit `850b68a`, împins)
-**Stadiu:** ✅ **TOATE CELE CINCI PIESE SUNT SCRISE ȘI DEPLOYATE.** Blocantul a dispărut:
-butonul „Fă un grup pe terenul acesta" e pe site din 14 august, deci emailul nu mai promite
-nimic neconstruit. Emailul a fost văzut randat de opt ori, ultima oară cu ordinea nouă.
+**Data:** 12 august 2026 · actualizat **14 august, seara** (sesiunea de după commit `850b68a`)
+**Stadiu:** ✅ **TOTUL E SCRIS, DEPLOYAT ȘI PROBAT. Nu mai e nimic de construit.**
+Rămân doar trei comenzi de dat, toate **luni 17 august dimineața** — vezi secțiunea
+„CE SE FACE LUNI" imediat mai jos.
 
-⛔ **TOT NU SE TRIMITE ÎNCĂ**, dar din alt motiv decât ieri: `4-samanta-jurnal.sql` nu e rulat,
-iar fără el primul email repetă campania manuală din 3 august pentru 35 de oameni.
+✅ **ÎNCHIS 14 august, seara:**
+- **probele Piesei 5, toate patru** (două din cod, una din bază, una prin dovadă empirică)
+- **`4-samanta-jurnal.sql` RULAT** — 38 din 38 potriviți, `INSERT 0 38`
+- **titlurile terenurilor curățate** din admin (prețul scos dintr-un titlu)
 
-🟡 **NEPROBAT: traseul Piesei 5.** S-a văzut doar că butonul apare. Nimeni n-a creat un grup
-pornind de la un teren, deci nu știm dacă terenul chiar ajunge la favoritele grupului nou.
-**Prima treabă a sesiunii următoare** — probele sunt scrise mai jos, în secțiunea Piesei 5.
+✅ **ÎNCHIS 14 august, dimineața:** proba bifei din profil. Debifat, salvat, reîncărcat, a
+rămas debifată. Piesa 4 e completă.
 
-✅ **ÎNCHIS 14 august:** proba bifei din profil. Debifat, salvat, reîncărcat, a rămas debifată.
-Piesa 4 e completă.
+---
+
+## ▶️ CE SE FACE LUNI 17 AUGUST (singurul lucru rămas)
+
+**De ce luni și nu vineri:** bifa din profil promite literal „Un email **luni dimineața**".
+O trimitere de probă vineri seara către doi oameni reali ar contrazice fix propoziția pe
+care le-am arătat-o. Decizia lui Lucian, 14 august.
+
+**De ce NU s-a instalat cronul dinainte:** `3-programare.sql` spune în propriul antet să fie
+rulat abia după prima trimitere reală, și are dreptate. Instalat vineri, ar fi plecat singur
+luni la 10:07 către toți cei 55, **indiferent dacă apucăm verificarea de la 9:00** — adică
+exact scenariul nesupravegheat pe care îl evitam, mutat cu trei zile. Iar wiringul de cron e
+deja dovedit din 5 august, prin digestul de anunțuri, deci n-avem ce câștiga probându-l.
+
+| # | Când | Ce | Ce se verifică după |
+|---|---|---|---|
+| 1 | ~9:00 | `{"force": true, "limita": 2}` | au primit cei doi · s-a scris în jurnal (interogarea `3d` din `3-programare.sql`) · pe `#app_events` e liniște |
+| 2 | după ce ești mulțumit | `{"force": true}` (fără `limita`) | pleacă la restul; cei doi de la pasul 1 sunt săriți automat, au deja rând în jurnal |
+| 3 | la final | `3-programare.sql`, pe blocuri | de lunea viitoare merge singur |
+
+⚠️ La pasul 3, `PUNE_AICI_SECRETUL` se înlocuiește cu valoarea reală, altfel programezi o
+sarcină care se întoarce cu `401` în fiecare luni, tăcut. Și se rulează **pe blocuri**:
+are un `select cron.schedule(...)` plus cinci interogări de verificare, iar editorul arată
+doar rezultatul ultimeia.
 
 **Ce e deja decis și făcut:**
 - ✅ premisa verificată — potrivirea teren↔zonă e sigură (46 din 46)
@@ -26,17 +49,63 @@ Piesa 4 e completă.
 - ✅ **Piesa 2 (edge function) scrisă, deployată, probată** — vezi secțiunea dedicată
 - ✅ **Piesa 3 (text + șablon) deployată**, emailul văzut randat de trei ori
 
-**Pașii rămași, în ordine strictă:**
-1. **probele Piesei 5** (mai ales cea cu profilul incomplet, vezi secțiunea ei)
-2. `4-samanta-jurnal.sql` — ⚠️ altfel primul email repetă campania manuală din 3 august
-   pentru 35 de oameni
-3. o trimitere reală prudentă: `{"force": true, "limita": 2}`
-4. `3-programare.sql` — sarcina `pg_cron`, ultima
+**Pașii rămași:** doar cei trei din tabelul „CE SE FACE LUNI" de mai sus.
 
 **Separat de automatizare**, dar cerut de Lucian: reorganizarea paginii de terenuri și a
 paginii unui teren, după cele două arhive de design din `handoff/` (bundle-uri Claude Design,
 `apartamentual 03-handoff_*.zip`). Piesa 5 a fost scoasă din ele și făcută singură, ca să se
 deblocheze emailul; restul reorganizării e o sesiune separată.
+
+---
+
+## 🆕 CERUT DE LUCIAN PE 14 AUGUST — filtrul „doar zonele mele" pe `/terenuri.html`
+
+**Cererea, în cuvintele lui:** *„aș vrea ca pentru un utilizator înregistrat să fie listate
+terenurile în ordinea datei de postare, cele mai noi mai întâi. Dar aș vrea să existe și o
+bifă pentru a se afișa doar terenurile din zonele preferate, în aceeași ordine."*
+
+### ⚠️ Prima jumătate EXISTĂ DEJA. Verificat în cod pe 14 august.
+
+`terenuri.html:79` are `<option value="newest" selected>Cele mai noi</option>`, iar butonul
+de resetare pune tot `'newest'` (`terenuri.js:164`). Interogarea vine deja ordonată
+descrescător după `created_at` (`terenuri.js:218`), iar sortarea din pagină face la fel
+(`terenuri.js:293`). **Ordinea implicită, pentru toată lumea, e deja „cele mai noi întâi".**
+
+⚠️ **Deci prima întrebare a sesiunii viitoare e pentru Lucian, nu pentru cod:** vezi altă
+ordine pe site? Dacă da, cauza probabilă e că `terenuri` are **două coloane de dată** —
+`created_at` (după care se sortează și care se afișează pe card, `terenuri.js:343`) și
+`data_adaugat`, rămasă din schema veche. Un teren cu cele două diferite pare pus în ordine
+greșită, deși codul e corect. **Nu rescrie sortarea până nu se lămurește asta** — altfel
+repari ceva ce nu e stricat.
+
+### A doua jumătate e reală și nu există
+
+Bifa „doar din zonele mele" trebuie construită. Ce se știe deja:
+
+- **`terenuri.js` nu atinge niciodată `user_preferred_zones`** și **nu citește niciun
+  parametru din URL** (verificat: zero `URLSearchParams`, zero `location.search`).
+- **Precedent de copiat:** `js/grupuri.js:84` citește deja zonele preferate ale omului logat
+  pe o pagină de listare. Același tipar, altă listă.
+- **Filtrarea existentă e pe oraș + UN SINGUR cartier**, dintr-un dropdown. Bifa nouă e altă
+  logică (mulțime de zone), nu o valoare în plus în dropdown-ul actual.
+- ⚠️ **Potrivirea se face pe TEXT**, `terenuri.cartier` față de `zones.name`, fără cheie
+  străină. Vezi secțiunea „Două mine rămase" de mai sus și capcana cu sedilele de mai jos:
+  două scrieri care arată identic nu se potrivesc. **Filtrul va părea că „pierde" terenuri**,
+  și va fi din cauza asta, nu a codului de filtrare.
+- **Pentru cine nu e logat**, bifa n-are ce afișa: sau se ascunde, sau duce la autentificare.
+  Zero oameni au zero zone bifate (măsurat 12 august), deci pentru orice om logat filtrul
+  întoarce ceva.
+
+### 💡 De ce merită mai mult decât pare: deblochează pasul 1 din email
+
+Emailul săptămânal voia inițial să spună „intră pe pagina de terenuri și vezi terenurile noi
+din zonele tale". **A picat exact fiindcă filtrul ăsta nu există** (vezi tabelul de la
+„PARCURSUL DIN EMAIL"), și s-a rezolvat altfel: emailul listează terenurile concrete, fiecare
+cu link direct.
+
+⚠️ Dacă se construiește bifa, emailul poate căpăta un buton „vezi toate terenurile din zonele
+tale". **Dar pentru asta e nevoie și de citirea parametrilor din URL** (ex. `?zonele_mele=1`),
+care azi nu există deloc în `terenuri.js`. Bifa singură nu ajunge pentru un link din email.
 
 ---
 
@@ -618,7 +687,39 @@ formularul de profil e întreg pentru toată lumea. **Piesa 4 e închisă comple
 
 ---
 
-## ⚠️ `4-samanta-jurnal.sql` — DE RULAT ÎNAINTE DE PRIMA TRIMITERE
+## ✅ `4-samanta-jurnal.sql` — RULAT (14 august, seara)
+
+**Rezultatul:** BLOC 1 a dat **38 din 38 „găsit", zero negăsiți**, toți `active`, toți cu
+`email_terenuri_noi = true`. BLOC 2: `INSERT 0 38`.
+
+**Dovada că a intrat:** la `dry_run`-ul de după apar **două ferestre distincte** — `2026-08-03
+13:42 UTC` pentru cei 34 de semănați care mai sunt în lot, și `2026-07-31 15:21 UTC` (podeaua
+de 14 zile) pentru ceilalți 23. Patru dintre cei 38 au ieșit cu totul din lot: în zonele lor
+n-a apărut nimic după campanie, deci sunt la zi.
+
+### ⚠️ Lotul a rămas 57, NU a scăzut. E în regulă, și iată de ce
+
+Ne așteptam la scădere. Compară doi oameni cu exact aceleași zone, unul semănat și unul nu:
+
+| | fereastră | zone | terenuri |
+|---|---|---|---|
+| `mihaitudormare` | 3 aug | Aviației, Carol, Cotroceni | **7** |
+| `cernatcristi` | 31 iul | Aviației, Carol, Cotroceni | **7** |
+| `cristian.pelivan` | 3 aug | Aviației, Carol, Cotroceni | **6** |
+| `crstn.gherasim` | 31 iul | Aviației, Carol, Cotroceni | **6** |
+
+Cifre identice ⇒ **între 31 iulie 15:21 și 3 august 13:42 nu s-a adăugat niciun teren**.
+Bucata de suprapunere pe care sămânța o taie e goală, fiindcă podeaua de 14 zile a trecut
+oricum de campanie. **Sămânța a fost asigurare, nu muncă degeaba:** un singur teren adăugat
+pe 1 sau 2 august l-ar fi primit 34 de oameni a doua oară.
+
+⚠️ **Metoda de comparație de mai sus merită reținută.** Doi oameni cu aceleași zone și
+ferestre diferite sunt singurul mod de a citi efectul unei schimbări de fereastră, fiindcă
+totalurile pe lot se mișcă oricum cu ora rulării.
+
+---
+
+## Textul original al fișierului (păstrat pentru context)
 
 **Problema, găsită pe 13 august:** jurnalul e gol, deci la prima rulare fiecare om primește tot
 ce s-a adăugat în 14 zile. Dar pe **3 august a plecat deja o campanie manuală** cu exact același
@@ -811,11 +912,50 @@ cu numele terenului, iar după crearea grupului scrie terenul în `terenuri_like
 
 Ascuns la conturile de agenție (nu pot crea grupuri) și la terenurile dezactivate.
 
-### 🟡 PROBELE — NEFĂCUTE, PRIMA TREABĂ A SESIUNII URMĂTOARE
+### ✅ PROBELE — TOATE PATRU ÎNCHISE (14 august, seara)
 
-S-a văzut doar că butonul apare, pe un server local (`python -m http.server 8080` din
-`frontend/`). ⚠️ **Pagina locală vorbește cu baza de date REALĂ** — un grup creat de acolo e un
-grup adevărat.
+**Niciuna n-a cerut crearea unui grup real.** Trei s-au închis din cod, a patra din bază.
+
+| Probă | Cum s-a închis |
+|---|---|
+| **4. cont de agenție** | condiția e `account_type === 'profesional'` (`teren-details.js:690`), exact șirul folosit în alte 15 locuri, inclusiv la refuzul din `grup-nou.html:880` |
+| **2. nelogat** | `incarcaTerenulDePornire()` se cheamă la linia **858**, ÎNAINTE de verificarea de autentificare de la 867. Deci linkurile primesc `teren=` indiferent de starea de logare. Cei doi selectori (`.auth-register-hint a`, `.btn-login`) chiar există în marcaj |
+| **3. profil incomplet** | partea de linkuri, la fel ca mai sus. Ce se întâmplă DUPĂ salvarea profilului ține de `profile-edit-new.js:822`, verificat pe 14 august dimineața |
+| **1. scrierea la favorite** | `db_schema/digest-terenuri/5-control-politici-favorite-grup.sql`, vezi mai jos |
+
+#### ✅ Necunoscuta politicii de INSERT — REZOLVATĂ, era acolo
+
+Politica lipsea din `db_schema/` fiindcă n-a fost scrisă de noi, dar **există în bază**:
+
+```
+INSERT · "Group members can add likes"  (permisivă, rol public)
+WITH CHECK: exists (select 1 from grup_membri
+             where grup_id = ... and user_id = auth.uid() and status = 'activ')
+```
+
+⚠️ **Deci decizia 4 de mai sus („terenul se scrie DUPĂ rândul de membru") nu era o preferință
+de stil, era condiția care face inserarea să treacă.** Dacă cineva rearanjează vreodată ordinea
+din `grup-nou.html`, scrierea terenului începe să eșueze pentru toată lumea.
+
+**Dovada empirică, mai tare decât politica:** 11 rânduri în `terenuri_likes_grupuri`, **toate
+11 scrise de oameni care NU sunt superadmini**. Calea funcționează azi, în producție, pentru
+utilizatori obișnuiți. Coloanele confirmă și ele: cele trei pe care le trimite frontendul sunt
+fix cele `not null` fără valoare implicită.
+
+#### ⚠️ Găsit pe drum: `anon` are INSERT/UPDATE/DELETE/TRUNCATE pe tabelă
+
+E **grantul implicit Supabase**, același pe toate tabelele proiectului, și exact motivul
+pentru care RLS e obligatoriu. Operațiile pe care le poate emite API-ul sunt oprite de
+politici (`auth.uid()` e NULL pentru anonimi). `TRUNCATE` nu e supus RLS-ului, dar nu se poate
+trimite prin PostgREST, iar rolul `anon` n-are cum să se conecteze direct la Postgres.
+**Nu e de reparat, e de știut** — și e o observație despre toată platforma, nu despre tabela asta.
+
+#### Ce NU s-a probat, dinadins
+
+Traseul complet în browser (deschis teren → buton → creat grup → șters grupul). N-a mai fost
+nevoie: singura verigă necunoscută era scrierea la favorite, iar aia s-a dovedit din bază.
+⚠️ Dacă totuși se face vreodată, **pagina locală vorbește cu baza de date REALĂ** — un grup
+creat de acolo e un grup adevărat, chiar dacă l-ai pornit din `python -m http.server`.
 
 1. **Logat, profil complet:** deschizi un teren → buton → formularul de grup are banda cu
    numele terenului și orașul preselectat → creezi grupul → terenul e la favoritele lui.
@@ -885,6 +1025,48 @@ mână în 8 locuri, doar eticheta e unificată.
   bază, deci apare așa în emailurile către 16 oameni. De reparat din admin.
 - **Nu se preia „cele două deschideri"** din campania manuală (fraza de legătură pentru cine
   primise emailul din iulie). E un email recurent, n-are nevoie de cârlig la fiecare rundă.
+
+---
+
+## ⚠️ TITLURILE TERENURILOR AJUNG LITERAL ÎN EMAIL (14 august, seara)
+
+Titlurile sunt scrise de mână de cine adaugă terenul și **nu le validează nimeni**. Ajung pe
+carduri și pe liniile scurte exact așa cum sunt în bază. Găsite la citirea `dry_run`-ului:
+
+- **un titlu conținea prețul** — `Zona Eminescu (…) - 240mp - 184000 euro`. Cardul arată
+  oricum prețul și suprafața, deci apăreau de două ori, în două formate. ✅ Reparat: a rămas
+  `Zona Eminescu (Str. Radu de la Afumați nr. 25)`.
+  ⚠️ Acum e singurul titlu care nu se termină în „NNNmp". **E în regulă** — celelalte nouă
+  sunt scrise redundant, nu el greșit. Nu-l „îndrepta" înapoi.
+- **diacritice lipsă** (`Aviatiei`, `Dorobanti`). Parțial reparate; `rezidentiala` și
+  `Coanda` au rămas așa, **decizia lui Lucian: se lasă**.
+
+`db_schema/digest-terenuri/6-titluri-de-citit-cu-ochiul.sql` le listează pe toate cu linkul
+de editare gata format. Se repară din `/admin-terenuri.html` → creionul de pe rând, care duce
+la `/terenuri-propune.html?edit=<id>`.
+
+✅ **Editarea NU retrimite terenul la aprobare:** `status = 'pending'` se pune doar la creare
+(`terrain-form-v2.js:466-468`, în `if (!isEditMode)`). Verificat înainte de a atinge ceva,
+fiindcă altfel terenurile editate ar fi ieșit tăcut din emailul de luni.
+
+⚠️ **SE MODIFICĂ DOAR CÂMPUL „Titlu".** Cartierul rămâne neatins, **inclusiv cu diacriticele
+lui lipsă**. Acolo greșeala e „utilă": aceeași scriere e și în `orase-cartiere.js`, deci cele
+două se potrivesc între ele. Corectând-o într-un singur loc, terenul devine invizibil pentru
+toți cei care au bifat zona (memoria `potrivire-teren-zona-pe-text`).
+
+### 🆕 Capcană nouă: tastatura scrie sedile, nu virgule
+
+Diacriticele adăugate pe 14 august au ieșit cu **ţ cu SEDILĂ (U+0163, octeți `c5 a3`)**, în
+timp ce numele zonelor din bază folosesc **ț cu VIRGULĂ (U+021B, octeți `c8 9b`)**, care e
+standardul românesc. Deci același email conține acum „Aviației" în intro și „Aviaţiei" pe card.
+
+**Cauza:** aspectul de tastatură **„Romanian (Legacy)"** din Windows scrie sedile. „Romanian
+(Standard)" scrie virgule.
+
+⚠️ **Nu se vede cu ochiul, se vede doar la nivel de octeți.** Dacă vreodată o potrivire pe
+text pică inexplicabil pe un cuvânt care „arată identic", asta e prima ipoteză. E aceeași
+familie cu mina „Griviţa" din secțiunea de sus. Lucian a decis pe 14 august să lase titlurile
+așa: sunt text de afișare, nu se leagă nimic de ele.
 
 ---
 
