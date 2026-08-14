@@ -37,6 +37,12 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **FAQ pe homepage — insulă vizuală**
   Homepage-ul v9 (Mona Sans, bej minimalist) afișează `faq.js` ca atare, care are stiluri proprii (carduri albe, accent portocaliu, DM Sans). Arată diferit de restul paginii. Decizie acceptată de Lucian la integrare; de armonizat dacă deranjează.
 
+- [ ] **`terenuri` are două coloane de dată și nu se știe care e „adevărata"**
+  `created_at` (după care se sortează lista și care se afișează pe card, `terenuri.js:218` și `343`) și `data_adaugat`, rămasă din schema veche. Cât timp coincid, nu se vede nimic. La un teren la care diferă, lista pare pusă în ordine greșită deși codul e corect. A ieșit la iveală pe 14 august, când Lucian a cerut „cele mai noi întâi" pe `/terenuri.html` — ordine care **există deja** ca implicită. De decis: e `data_adaugat` folosită de ceva, sau se scoate? **Nu rescrie sortarea până nu se lămurește**, altfel repari ceva ce nu e stricat.
+
+- [ ] **Bifa „doar terenurile din zonele mele" pe `/terenuri.html`** *(cerută de Lucian, 14 august)*
+  Nu există: `terenuri.js` nu atinge niciodată `user_preferred_zones` și nu citește niciun parametru din URL. Filtrarea de azi e pe oraș + UN singur cartier, dintr-un dropdown. Precedent de copiat: `grupuri.js:84`, care citește deja zonele preferate pe o pagină de listare. Detalii complete și capcanele (potrivirea pe text, ce trebuie în plus ca emailul să poată da un link gata filtrat) în `handoff/handoff-automatizare-terenuri-noi.md`.
+
 ---
 
 ## Rezolvate
@@ -48,4 +54,4 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ---
 
-*Ultima actualizare: 2026-08-07*
+*Ultima actualizare: 2026-08-14*
