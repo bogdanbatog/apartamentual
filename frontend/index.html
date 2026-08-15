@@ -85,6 +85,12 @@
   }
   *, *::before, *::after{ box-sizing:border-box; }
   html, body{ margin:0; padding:0; }
+  /* Derulare lină la ancorele din pagină (butonul „Cum începi" din hero).
+     Se anulează pentru cine a cerut din sistem mai puțină mișcare. */
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto; }
+  }
   body{
     font-family:var(--font);
     background:var(--bg);
@@ -856,6 +862,71 @@
     color:var(--ink-3);
   }
 
+  /* ── CUM ÎNCEPI (două căi de intrare) ── */
+  #cum-incepi{ scroll-margin-top:88px; }
+  .cai{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:3rem;
+    margin-top:2.5rem;
+  }
+  .cale{
+    padding-top:1.5rem;
+    border-top:1px solid var(--rule);
+    display:flex;
+    flex-direction:column;
+  }
+  .cale h3{
+    font-size:20px;
+    font-weight:600;
+    line-height:1.3;
+    margin:0 0 1.25rem;
+    color:var(--ink);
+  }
+  .cale ol{
+    list-style:none;
+    counter-reset:cale;
+    margin:0 0 1.75rem;
+    padding:0;
+    flex:1;
+  }
+  .cale ol li{
+    counter-increment:cale;
+    position:relative;
+    padding-left:2rem;
+    font-size:14px;
+    line-height:1.6;
+    color:var(--ink-2);
+    margin-bottom:0.875rem;
+  }
+  .cale ol li:last-child{ margin-bottom:0; }
+  .cale ol li::before{
+    content:counter(cale);
+    position:absolute;
+    left:0;
+    top:0;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.85;
+    color:var(--terracotta, #c06a4f);
+  }
+  .cale .cta-secondary{ align-self:flex-start; }
+  .cai-subsol{
+    margin-top:2.5rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--rule);
+    font-size:13px;
+    line-height:1.6;
+    color:var(--ink-2);
+  }
+  .cai-subsol a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid var(--rule-2);
+    white-space:nowrap;
+  }
+  .cai-subsol a:hover{ border-bottom-color:var(--ink); }
+
   /* ── REAL IMAGES ── */
   .carousel-slide img{
     width:100%;
@@ -1484,6 +1555,8 @@
     .site-nav-links{ display:none; }
     .cta-punchy{ padding:2rem 1.5rem; }
     .steps{ grid-template-columns:1fr; }
+    .cai{ grid-template-columns:1fr; gap:2rem; }
+    .cale .cta-secondary{ align-self:stretch; }
     .avantaje{ grid-template-columns:1fr; }
     .video-layout{ grid-template-columns:1fr; gap:2rem; }
     .video-wrap{ max-width:320px; }
@@ -1518,19 +1591,19 @@
         Cauți un <span class="title-tau">apartament</span> în zona bună, la preț corect
       </h1>
       <p class="hero-sub">
-        5 familii din București s-au oprit din căutat și au construit propriul bloc, susținute de experți la fiecare pas. Și tu poți avea apartamentul dorit, fără dezvoltator.
+        Câteva familii din București s-au oprit din căutat și au construit propriul bloc, susținute de experți la fiecare pas. Și tu poți avea apartamentul dorit, fără dezvoltator.
       </p>
       <div class="cta-group">
         <div class="hero-ctas">
           <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=webinar">Înscrie-te la webinar <span class="arr">→</span></a>
-          <a href="/ce-este/cum-functioneaza.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=cum-functioneaza">Cum funcționează</a>
+          <a href="#cum-incepi" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=cum-incepi">Cum începi</a>
         </div>
         <p class="cta-note">Pune întrebări fondatorilor · Zoom · Gratuit</p>
       </div>
     </section>
 
     <!-- STARE 2/4 · LOGAT fără grup (sau în grup → fallback A) -->
-    <section class="hero" data-variant="a" hidden style="--accent:var(--terracotta);" aria-label="Hero — utilizator logat fără grup">
+    <section class="hero" data-variant="a" hidden style="--accent:var(--terracotta);" aria-label="Hero pentru utilizator logat fără grup">
       <p class="eyebrow"><span class="dot"></span>Bun venit înapoi</p>
       <h1 class="title">Hai să-ți găsești <span class="accent">grupul</span><span class="js-hero-name"></span>.</h1>
       <p class="lead">Terenuri filtrate de arhitecți și grupuri care se formează chiar acum, în zonele care te interesează.</p>
@@ -1543,7 +1616,7 @@
     </section>
 
     <!-- STARE 3 · CONT AGENȚIE (fără avataruri de utilizatori) -->
-    <section class="hero" data-variant="b" hidden style="--accent:var(--slate);" aria-label="Hero — cont agenție imobiliară">
+    <section class="hero" data-variant="b" hidden style="--accent:var(--slate);" aria-label="Hero pentru cont de agenție imobiliară">
       <p class="eyebrow"><span class="dot"></span>Cont agenție</p>
       <h1 class="title">Terenurile tale<span class="accent js-hero-agency"></span>.</h1>
       <p class="lead">Propunerile tale de teren, într-un singur loc. Urmărești statusul fiecăreia și adaugi unele noi.</p>
@@ -1605,9 +1678,40 @@
     </div>
   </section>
 
+  <!-- ── CUM ÎNCEPI (două căi de intrare) ── -->
+  <section class="section" id="cum-incepi">
+    <p class="section-eyebrow">Procesul</p>
+    <h2 class="section-title">Cum începi</h2>
+    <p class="section-body">Pornești de la un teren sau de la o zonă. Ambele duc într-un grup.</p>
+    <div class="cai">
+      <div class="cale">
+        <h3>Pornești de la un teren</h3>
+        <ol>
+          <li>Cauți terenuri în zonele tale și le adaugi la profil</li>
+          <li>Vezi cine mai e interesat de ele, oameni sau grupuri</li>
+          <li>Te alături grupului sau faci unul cu cei interesați</li>
+        </ol>
+        <a href="/terenuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=terenuri">Vezi terenurile</a>
+      </div>
+      <div class="cale">
+        <h3>Pornești de la o zonă</h3>
+        <ol>
+          <li>Creezi un grup pe zona ta, de exemplu „Grup Bucureștii Noi”</li>
+          <li>Adaugi terenurile care îți plac</li>
+          <li>Ceilalți le văd și se alătură</li>
+        </ol>
+        <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=grupuri">Vezi grupurile</a>
+      </div>
+    </div>
+    <p class="cai-subsol">
+      Din grup, drumul continuă în 7 etape până la recepție: analiza terenurilor, contractul de asociere, cumpărarea, proiectarea, construcția.
+      <a href="/ce-este/cum-functioneaza.html" class="plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=cum-functioneaza">Vezi tot drumul →</a>
+    </p>
+  </section>
+
   <!-- ── VIDEO TIMELAPSE STRADA JUDEȚULUI ── -->
   <div class="video-ph video-ph--live">
-    <iframe src="https://www.youtube.com/embed/bfW2DJ1_du4?rel=0&amp;modestbranding=1&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=bfW2DJ1_du4&amp;playsinline=1" title="Timelapse Județului Housing — ApartamenTUal" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+    <iframe src="https://www.youtube.com/embed/bfW2DJ1_du4?rel=0&amp;modestbranding=1&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=bfW2DJ1_du4&amp;playsinline=1" title="Timelapse Județului Housing, ApartamenTUal" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
   </div>
   <p class="carousel-note">Timelapse: construcția blocului de pe Strada Județului, 2024</p>
 
@@ -1643,7 +1747,7 @@
       <div class="punchy-text">
         <h2 class="section-title">Nu îți vine să crezi că se poate face asta și în România?</h2>
         <p class="section-body">
-          Blocul de pe Strada Județului există. Cele 5 familii care l-au construit au decis totul împreună, pe parcurs. În prima joi a fiecărei luni ne întâlnim online și povestim cu voi cum s-a întâmplat, ca tu să poți întreba tot ce vrei și să îți cunoști, poate, viitorii vecini.
+          Blocul de pe Strada Județului există. Familiile care l-au construit au decis totul împreună, pe parcurs. În prima joi a fiecărei luni ne întâlnim online și povestim cu voi cum s-a întâmplat, ca tu să poți întreba tot ce vrei și să îți cunoști, poate, viitorii vecini.
         </p>
         <div class="punchy-ctas">
           <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=bloc-webinar plausible-event-dest=webinar">Înscrie-te la webinar <span class="arr">→</span></a>
@@ -1667,42 +1771,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ── CUM FUNCȚIONEAZĂ ── -->
-  <section class="section" id="cum-functioneaza">
-    <p class="section-eyebrow">Procesul</p>
-    <h2 class="section-title">Cum funcționează</h2>
-    <p class="section-body">Patru etape mijlocite de platforma ApartamenTUal. Noi gestionăm complexitatea, voi dețineți controlul.</p>
-    <div class="steps">
-      <div class="step">
-        <span class="step-num">01</span>
-        <h3>Alegi un teren din zonele care te interesează</h3>
-        <p>Pe platformă găsești terenuri propuse și verificate în zonele care te interesează. Prin ApartamenTUal afli câte apartamente se pot construi și care e costul estimativ după experiența blocului din Strada Județului.</p>
-        <p class="step-avantaj">Știi ce poți construi pe el înainte să cumperi ceva.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">02</span>
-        <h3>Cunoști grupul și afli ce se poate construi</h3>
-        <p>Platforma te conectează cu familii interesate de aceeași zonă și primești consultanță completă: ce se poate construi pe terenul ales, cum arată apartamentul tău, cum să înaintați tehnic, legal, financiar.</p>
-        <p class="step-avantaj">Cunoști vecinii, îți croiești apartamentul și ai consultanța necesară pentru a înainta.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">03</span>
-        <h3>Cumpărați terenul și proiectați blocul</h3>
-        <p>Grupul achiziționează terenul împreună, fără marja unui dezvoltator. Apoi voi decideți materialele, izolația, finisajele și spațiile comune, alături de un arhitect.</p>
-        <p class="step-avantaj">Toți banii rămân în apartamentul tău. Construiți ce aveți nevoie.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">04</span>
-        <h3>Construiți și vă mutați</h3>
-        <p>Procesul e ghidat complet, de la achiziție teren, la autorizații până la finalizarea execuției. Juridic, financiar, arhitectural, fiecare etapă coordonată.</p>
-        <p class="step-avantaj">Sprijiniți la fiecare pas.</p>
-      </div>
-    </div>
-    <div class="steps-cta">
-      <a href="/register.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=pasi plausible-event-dest=register">Creează cont gratuit →</a>
-    </div>
-  </section>
 
   <!-- ── CAROUSEL ORIZONTAL — Strada Județului (4 imagini pătrate) ── -->
   <section class="section img-carousel" aria-label="Galerie Județului Housing">
@@ -1934,7 +2002,7 @@
     <!-- Logo plată Netopia + linkuri ANPC -->
     <div class="footer-payments" style="padding:20px 0; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px;">
       <a href="https://netopia-payments.com" target="_blank" rel="noopener" title="Plăți procesate de NETOPIA Payments" style="display:inline-flex; align-items:center; background:#1a1a1a; border-radius:6px; padding:8px 14px;">
-        <img src="https://mny.ro/np-white-0.svg" alt="NETOPIA Payments — Visa, Mastercard" loading="lazy" style="height:24px; width:auto; display:block;">
+        <img src="https://mny.ro/np-white-0.svg" alt="NETOPIA Payments: Visa, Mastercard" loading="lazy" style="height:24px; width:auto; display:block;">
       </a>
       <div style="display:flex; gap:18px; font-family:var(--mono); font-size:11px; letter-spacing:0.06em; text-transform:uppercase;">
         <a href="https://anpc.ro" target="_blank" rel="noopener" style="color:var(--ink-3); text-decoration:none;">ANPC</a>
@@ -2121,7 +2189,7 @@
     thumb.addEventListener('mouseleave', function(){ if(btn){ btn.style.transform='scale(1)'; btn.style.background='rgba(0,0,0,0.7)'; } });
     thumb.addEventListener('click', function(){
       var id = thumb.dataset.youtubeId;
-      thumb.parentNode.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="Ce este ApartamenTUal — Lucian Luța" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border:0; border-radius:12px;"></iframe>';
+      thumb.parentNode.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="Ce este ApartamenTUal, cu Lucian Luța" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border:0; border-radius:12px;"></iframe>';
     });
   })();
 </script>
@@ -2296,7 +2364,7 @@
 
           if(neighbors.length === 0){
             renderEmptyA(cluster, micro,
-              'Momentan nu găsim vecini cu interese comune cu tine. Revino curând — comunitatea crește.',
+              'Momentan nu găsim vecini cu interese comune cu tine. Comunitatea crește, așa că revino curând.',
               false);
             return;
           }
@@ -2369,7 +2437,7 @@
           if(micro && rows.length > 0){
             var last = rows[0];
             var when = relTime(last.created_at);
-            micro.innerHTML = 'Ultima propunere: <b>' + esc(when || '—') + '</b>' +
+            micro.innerHTML = 'Ultima propunere: <b>' + esc(when || 'niciuna') + '</b>' +
               (last.titlu ? ' · ' + esc(last.titlu) : '');
             micro.hidden = false;
           }
