@@ -24,6 +24,8 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 - [ ] **`frontend/js/faq.js` — fără diacritice**
   Tot conținutul FAQ (39 întrebări) e scris fără diacritice românești („fata", „pretul" etc.), contrar regulii din CLAUDE.md. La integrarea homepage v9 (28 mai) am corectat doar întrebarea cu procentul de economie, păstrând stilul fără diacritice ca să rămână diff-ul minimal. De curățat tot fișierul la o trecere dedicată.
+  ⚠️ **Tot acolo, găsit pe 15 august: 5 răspunsuri conțin em-dash** (liniile 18, 20, 24, 35, 46), contrar regulii permanente din CLAUDE.md. Se văd doar când deschizi întrebarea, de aceea au scăpat. **De făcut în aceeași trecere cu diacriticele** — e același fișier, altfel îl citești de două ori. Regula: se rescrie fraza, nu se înlocuiește semnul.
+  ⚠️ `js/footer.js` mai are unul, în alt-ul logoului Netopia, dar acela e pe **toate** paginile, nu doar pe homepage.
 
 - [ ] **Diacritice greșite în titlurile din `ce-este/cum-functioneaza.html`**
   Văzut pe 15 august, la capturi: „CǍUTAREA SI ACHIZIȚIA TERENULUI" (Ǎ greșit, plus „SI" în loc de „ȘI"), „4. CONSTRUCTIA", „4.1. Selectia constructorului". **Doar titlurile mari**, corpul textului e corect. E o trecere scurtă, nu s-a făcut ca să nu se amestece cu altă treabă.
@@ -62,12 +64,31 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **Niciun teren nu are `nr_apartamente_min/max` completat**
   Măsurat pe 15 august: 0 din 46 de terenuri aprobate. Faptul „Apartamente estimate" din antetul paginii unui teren e scris și merge, dar azi nu-l vede nimeni. Se umple abia când o analiză scrie înapoi în teren. De verificat dacă fluxul de analiză chiar scrie coloanele alea, sau dacă au rămas moarte din altă schemă.
 
+- [ ] **Homepage-ul uită că omul are cont (trei locuri)**
+  Măsurat pe 15 august, parcurgând pagina logat, cadru cu cadru (`screenshots/20260815/homepage-logat-01..14.jpg`). Hero-ul se schimbă corect (varianta A, cu numele și vecinii compatibili), **restul paginii nu știe nimic**: caseta webinar oferă butonul „Creează cont" cuiva logat, la două ecrane sub hero-ul care îi scrie numele; blocul final spune „fără cont, fără nimic de pregătit"; newsletterul cere adresa de email pe care platforma o are deja. Niciunul nu e stricat, toate sunt scrise pentru un străin. **Nu se rezolvă ascunzând blocurile** — webinarul e util și celor cu cont; se schimbă butonul și fraza. Mecanismul există deja în scriptul „HERO PE ROLURI" de la finalul lui `index.html`, nu se adaugă a doua verificare de sesiune în paralel. Detalii și capcane: `handoff/20260815 - handoff-2-resturi-homepage.md`, punctul A.
+
+- [ ] **Liniuța lungă are o poartă în baza de date, nu doar în cod**
+  Găsit pe 15 august, scanând pagina **live**: titlul unui articol din News, „Povestea noastra — Prototipul Judetului Housing", conține em-dash și e și fără diacritice. Vine din Supabase, deci **niciun grep prin repo nu-l putea găsi**. Consecința e mai mare decât titlul: regula permanentă despre liniuța lungă poate fi încălcată din admin, cu codul curat. Se repară din admin. 🔴 **Editarea titlului poate regenera slug-ul și rupe linkurile** (memoria `admin-slug-editare-articole`) — nu atinge câmpul slug, iar după salvare verifică pe homepage că articolul se mai deschide.
+
+- [ ] **Secțiunea News amestecă serialul cu articolele, și nu în ordine**
+  Văzut pe 15 august pe live: cardurile de serial apar numerotate 3, 2, 0, 1, cu un articol despre Bruxelles între ele. Cine vrea să citească povestea de la cap n-are de unde ști de unde începe. Nediscutat cu Lucian, deci nici măcar decis că e o problemă.
+
 - [ ] **Capcană de stil: `.hero-content p` bate orice selector cu o singură clasă**
   Hero-ul paginii de terenuri are `.hero-content p { color: var(--slate-300); font-size: 1rem; }`. Orice `<p>` nou pus în hero primește culoarea și mărimea aia, oricât de explicit ai scris tu altceva într-o clasă. Pe 14 august eticheta panoului de analiză s-a randat gri deschis la 16px, cu contrast sub 1,5:1, deși în cod scria teracotă la 11px. Reparat cu selectori de două clase. **Tiparul de hero se repetă și pe alte pagini**, deci capcana nu e doar aici.
 
 ---
 
 ## Rezolvate
+
+- [x] **2026-08-15 — Homepage: secțiunea „Cum începi", două căi de intrare** *(comituri `7df6e2d` + `2ff29e6`, împinse; **publicat** din cPanel și verificat pe live)*
+  Secțiunea „Cum funcționează" (4 pași) s-a **înlocuit** cu două căi concrete, de la teren sau de la zonă, și s-a **mutat** imediat sub blocul „Cum a devenit posibil", deasupra liniei de derulare a majorității vizitatorilor. Motivul din handoff: 52% rată de ieșire, 43% adâncime de derulare, iar cei 4 pași vechi descriau serviciul și includeau etape aflate la ani distanță de vizitator („Cumpărați terenul", „Construiți și vă mutați"). CTA-ul secundar din hero a devenit ancoră internă `#cum-incepi`, cu derulare lină și `scroll-margin-top:88px` (nav-ul e `sticky`, 64px, altfel titlul rămânea sub el).
+  **Derularea lină e anulată pe `prefers-reduced-motion`** — cine a cerut din sistem mai puțină mișcare primește saltul instant. Butonul „sus" din nav era deja lin prin JS, nu se bat cap în cap.
+  „5 familii" scos din hero („Câteva familii") și din caseta webinar („Familiile care l-au construit"), la cererea din handoff. **Restul termenilor semnalați acolo („mic bloc", „primul din România", „fără dezvoltator") au rămas NEATINȘI, prin decizia explicită a lui Lucian.**
+  ⚠️ **Un eveniment Plausible a dispărut**: „Creează cont gratuit" din secțiunea veche avea `loc=pasi dest=register`. Cele trei butoane noi folosesc convenția existentă (`CTA Click` + `loc=cum-incepi`), **nu** nume noi de evenimente — altfel ar fi ieșit din raportul în care se compară toate CTA-urile între ele. Butonul din hero raportează acum `dest=cum-incepi` în loc de `cum-functioneaza`, deci în grafic linia veche se oprește și începe una nouă.
+  ⚠️ **Handoff-ul se contrazicea singur pe em-dash** (faza 2C zicea să nu se atingă, faza 3 zicea să se verifice că n-au rămas). S-a urmat 2C, apoi Lucian a cerut explicit scoaterea lor: 7 texte și atribute din `index.html`, inclusiv două `aria-label`, două titluri de iframe, alt-ul Netopia, mesajul „niciun vecin găsit" și liniuța singură afișată agenției când n-are propuneri. Cele 9 rămase în fișier sunt toate în comentarii de cod, unde regula le permite.
+  ✅ Verificat pe live după deploy: secțiunea există, cea veche e ștearsă, „5 familii" nu mai apare nicăieri, cele trei linkuri întorc 200, Plausible e încărcat, **diacriticele au supraviețuit urcării în cPanel**.
+  📸 Referință vizuală comisă în `screenshots/20260815/`: `homepage-logat-01..14` (pagina întreagă, logat), `homepage-mobil-01..02` (secțiunea nouă la 375px), `homepage-dupa-nelogat-02`. Setul „înainte" (`homepage-nelogat-01..14`) a rămas netrackuit, ca restul folderului.
+  🟡 **Trei rămășițe, fiecare o sesiune scurtă separată: `handoff/20260815 - handoff-2-resturi-homepage.md`.**
 
 - [x] **2026-08-15 — Prețul standard tăiat (149 RON) scos de peste tot** *(commit `2ee22cb`; **publicat**)*
   Cerut de Lucian. Se afișează doar prețul de lansare: **99 RON, TVA inclus**. Opt locuri, în patru pagini: `analize.html` (cardul), `analiza-simplificata.html` (butonul din hero, rândul „Preț", paragraful de CTA, butonul de jos), `comanda-analiza.html` (rândul de preț din hero), `servicii.html` (cardul de serviciu și întrebarea din FAQ, care se numea „Analiza preliminară costă 99 sau 149 RON?" și acum e „Cât costă analiza preliminară?").
@@ -101,4 +122,4 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ---
 
-*Ultima actualizare: 2026-08-14*
+*Ultima actualizare: 2026-08-15*
