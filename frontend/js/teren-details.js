@@ -787,24 +787,44 @@ function setupDescriere(descriere) {
     // ⚠️ Măsurarea se face DUPĂ ce blocul cu detalii a ieșit din `hidden`.
     // Într-un element cu `display: none`, scrollHeight și clientHeight sunt
     // amândouă 0, deci „textul nu e tăiat" ieșea mereu adevărat și butonul nu
-    // apărea niciodată, oricât de lung ar fi fost anunțul. De aici și retrasul
-    // de mai jos: dacă la prima încercare înălțimea e încă 0, mai așteaptă un
-    // cadru.
-    const masoara = (incercare) => {
-        if (p.clientHeight === 0 && incercare < 5) {
-            requestAnimationFrame(() => masoara(incercare + 1));
-            return;
-        }
+    // apărea niciodată, oricât de lung ar fi fost anunțul.
+    //
+    // Măsurătoarea se repetă în trei momente, fiindcă fiecare are o hibă:
+    //   • requestAnimationFrame — cel mai devreme, dar ⚠️ NU se execută deloc
+    //     cât timp fila stă în fundal, fiindcă acolo browserul nu desenează
+    //     cadre. Cine deschide terenul cu Ctrl+clic din lista de terenuri ar
+    //     rămâne cu textul tăiat și fără butonul care îl desface.
+    //   • setTimeout — rulează și în fundal, deci acoperă exact cazul de sus.
+    //   • document.fonts.ready — până se încarcă Mona Sans, textul e așezat cu
+    //     fontul de rezervă, care are alte lățimi. La un anunț cât trei rânduri
+    //     și un pic, verdictul se poate schimba când intră fontul adevărat.
+    //
+    // ⚠️ Măsurarea se face MEREU cu textul strâns. Odată ce clasa e scoasă,
+    // înălțimea afișată e egală cu cea totală și întrebarea „e mai lung decât
+    // încape?" nu mai are răspuns. Și ⚠️ dacă omul a apăsat deja „Citește mai
+    // mult", nu se mai atinge nimic: altfel fontul, care intră mai târziu, i-ar
+    // strânge textul la loc sub degete, în timp ce citește.
+    const masoara = () => {
+        if (p.dataset.desfacutDeOm === '1') return;
+        p.classList.add('is-clamped');
+        if (p.clientHeight === 0) return; // încă nu e așezat în pagină
         const eTaiat = p.scrollHeight > p.clientHeight + 2; // 2px, pentru rotunjiri
         btn.classList.toggle('hidden', !eTaiat);
         if (!eTaiat) p.classList.remove('is-clamped');
     };
-    requestAnimationFrame(() => masoara(0));
+    requestAnimationFrame(masoara);
+    setTimeout(masoara, 60);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(masoara);
+    }
 
     if (!btn.dataset.legat) {
         btn.dataset.legat = '1'; // ca la o a doua încărcare să nu se lege de două ori
         btn.addEventListener('click', () => {
             const desfacut = !p.classList.toggle('is-clamped');
+            // Steagul stă pe element, nu într-o variabilă a funcției: măsurătorile
+            // întârziate trebuie să-l vadă oricând, indiferent din ce apel vin.
+            p.dataset.desfacutDeOm = desfacut ? '1' : '0';
             btn.textContent = desfacut ? 'Citește mai puțin' : 'Citește mai mult';
             btn.setAttribute('aria-expanded', String(desfacut));
         });
