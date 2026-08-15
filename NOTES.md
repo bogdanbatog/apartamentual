@@ -25,6 +25,12 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **`frontend/js/faq.js` — fără diacritice**
   Tot conținutul FAQ (39 întrebări) e scris fără diacritice românești („fata", „pretul" etc.), contrar regulii din CLAUDE.md. La integrarea homepage v9 (28 mai) am corectat doar întrebarea cu procentul de economie, păstrând stilul fără diacritice ca să rămână diff-ul minimal. De curățat tot fișierul la o trecere dedicată.
 
+- [ ] **Diacritice greșite în titlurile din `ce-este/cum-functioneaza.html`**
+  Văzut pe 15 august, la capturi: „CǍUTAREA SI ACHIZIȚIA TERENULUI" (Ǎ greșit, plus „SI" în loc de „ȘI"), „4. CONSTRUCTIA", „4.1. Selectia constructorului". **Doar titlurile mari**, corpul textului e corect. E o trecere scurtă, nu s-a făcut ca să nu se amestece cu altă treabă.
+
+- [ ] **FAQ-ul fără diacritice se vede pe HOMEPAGE, nu doar în `faq.js`**
+  Legat de punctul de mai sus despre `frontend/js/faq.js`: întrebările apar pe pagina principală („Cu cat e mai ieftin fata de un apartament de la dezvoltator?", „Cum se personalizeaza apartamentele?", „Exista proiecte Baugruppen realizate deja in Romania?"), adică exact la primul contact al unui vizitator nou, iar restul paginii are diacriticele corecte. Contrastul sare în ochi. ✅ Verificat pe 15 august: **răspunsul despre preț NU promite niciun procent** („Nu lucrăm cu un procent fix de economie… toți banii tăi rămân în apartamentul tău"), deci regula de conținut e respectată.
+
 - [ ] **Harta de cartiere e cod mort (`bucuresti-map.js` + `bucuresti-cartiere.js`)**
   `bucuresti-cartiere.js` (511 linii, poligoanele GeoJSON ale celor 61 de cartiere) e încărcat de `register.html`, dar singurul lui consumator, `bucuresti-map.js`, **nu e încărcat de nicio pagină** — deci se descarcă degeaba la fiecare înregistrare. De decis: reînviem harta (era o selecție de zone pe hartă, mai plăcută decât bifele) sau scoatem ambele fișiere? Descoperit pe 7 august, la adăugarea Corbeancăi. Consecință practică: o zonă nouă **nu** are nevoie de poligon.
 
@@ -63,17 +69,18 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## Rezolvate
 
-- [x] **2026-08-15 — Prețul standard tăiat (149 RON) scos de peste tot** *(**necomis**, **nepublicat**)*
+- [x] **2026-08-15 — Prețul standard tăiat (149 RON) scos de peste tot** *(commit `2ee22cb`; **publicat**)*
   Cerut de Lucian. Se afișează doar prețul de lansare: **99 RON, TVA inclus**. Opt locuri, în patru pagini: `analize.html` (cardul), `analiza-simplificata.html` (butonul din hero, rândul „Preț", paragraful de CTA, butonul de jos), `comanda-analiza.html` (rândul de preț din hero), `servicii.html` (cardul de serviciu și întrebarea din FAQ, care se numea „Analiza preliminară costă 99 sau 149 RON?" și acum e „Cât costă analiza preliminară?").
   Scoase și cele două reguli CSS rămase fără folos (`.price-old`, `.ord-price-old`), ca să nu ispitească pe cineva să pună prețul tăiat la loc.
   Butonul care duce la plată scrie acum **„Continuă la plată, 99 RON cu TVA inclus"** (era „Continuă la plată — 99 RON", fără TVA și cu liniuță lungă). ⚠️ Eticheta lui e scrisă în **două locuri**: `comanda-analiza.html` și `setSubmitting()` din `js/comanda-analiza.js`, care o pune la loc după starea „Se procesează…". Dacă se despart, butonul își schimbă singur textul după o încercare de plată eșuată.
   **Suma încasată nu s-a atins**: rămâne 99,00 în `creeaza-proforma-oblio`. S-a schimbat doar afișarea.
   ⚠️ Mențiunile la 149 rămase în `handoff/HANDOFF-pagina-servicii.md` și în nota din `email_templates/` sunt **înregistrări istorice, datate**, nu se rescriu.
 
-- [x] **2026-08-15 — Reorganizarea paginii unui teren (`/teren-details.html`)** *(**necomis**, **nepublicat**)*
+- [x] **2026-08-15 — Reorganizarea paginii unui teren (`/teren-details.html`)** *(comituri `74dea00`, `0efc0d1`, `ecd763b`, `9aaa62a`; **publicat** și verificat pe live)*
   Trei blocuri, după macheta din `handoff/apartamentual 03-handoff_pagina unui teren.zip`: antet (galerie + cele patru date), „Ce poți face cu terenul acesta" (cinci carduri), descrierea din anunț mutată la subsol și pliată la trei rânduri. Foaie nouă, `frontend/teren-details.css`, cu tokenurile din `terenuri.css`; clasele sunt prefixate `td-` fiindcă pagina încarcă și Tailwind, și `styles.css`, și v9. Până la primul pas de făcut: pe telefon 1.619 → 881 px, pe desktop 867 → 673 px. Detalii, capcane și decizii: **`handoff/handoff-pagina-unui-teren.md`**.
   ✅ Rezolvate pe drum și cele două rămășițe vechi: butonul „Cere o analiză" **are acum explicație** (cardul mare, cu ce primești și 99 RON), iar panoul de grupuri **nu mai dispare** pentru cine nu e în niciun grup (are trei stări: nelogat, logat fără grupuri, logat cu grupuri).
   ✅ Pozele în portret nu se mai taie: sub raportul 1,3, rama trece pe `object-fit: contain`. Priveau 13 din 46 de terenuri.
+  ⚠️ **Două defecte au ieșit abia DUPĂ publicare**, fiindcă proba locală s-a făcut nelogat și cu fila în față: rândul de acțiuni rapide are patru butoane când ești logat, nu trei, și se rupea la patru pixeli distanță (`ecd763b`); iar butonul „Citește mai mult" lipsea în fila deschisă în fundal, unde `requestAnimationFrame` nu rulează deloc (`9aaa62a`). **Regula de acum înainte: o pagină cu stări de autentificare se probează LOGAT, iar una care măsoară ceva la încărcare se probează și cu fila în fundal.** Detalii: `handoff/handoff-pagina-unui-teren.md`.
   ⚠️ Găsit și reparat un bug vechi: badge-ul de status scria **„approved", în engleză, pe fiecare pagină de teren**. `statusMapping` avea valori care nu există în bază (`active`, `under_review`, `reserved`, `sold`, `inactive`), iar codul afișa valoarea brută când nu găsea potrivire. Statusurile reale sunt `pending` / `approved` / `rejected`. Acum „approved" nu se mai arată deloc (toate terenurile publice sunt aprobate, deci semnul nu spunea nimic).
 
 - [x] **2026-08-14 — Reorganizarea paginii `/terenuri.html`** *(commit `a0df9d1`, împins; **nepublicat**, cPanel manual)*

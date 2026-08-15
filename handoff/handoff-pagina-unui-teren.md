@@ -1,13 +1,58 @@
 # Handoff: reorganizarea paginii unui teren (`/teren-details.html`)
 
 **Data:** 15 august 2026
-**Stadiu:** ✅ construită și probată local pe baza reală. **Necomisă, neîmpinsă, nepublicată.**
+**Stadiu:** ✅ **construită, comisă, împinsă și PUBLICATĂ.** Verificată pe live.
+
+Comituri, în ordine: `74dea00` (reorganizarea), `0efc0d1` („terenul acesta"),
+`ecd763b` (rândul de acțiuni rupt), `9aaa62a` (butonul „Citește mai mult").
 
 ⚠️ Deploy-ul se face manual din cPanel. Un push pe GitHub nu schimbă nimic pe
 apartamentual.ro. (CLAUDE.md spune încă „Render face deploy automat", e depășit.)
 
 Continuă sesiunea din 14 august, `handoff-reorganizare-pagina-terenuri.md`, punctul 2
 din „Ce urmează".
+
+---
+
+## ⚠️ Citește asta prima dată: două defecte au ieșit ABIA după publicare
+
+Amândouă existau și local, dar **nu se puteau vedea acolo**, fiindcă proba locală s-a
+făcut nelogat și cu fila în față. Lecția, pe scurt: **o pagină cu stări de autentificare
+nu e probată până nu e văzută logat, iar una care măsoară ceva la încărcare nu e probată
+până nu e deschisă într-o filă de fundal.**
+
+### 1. Rândul de acțiuni rapide se rupea (`ecd763b`)
+
+Rândul cu inima și distribuirea are **patru** butoane când ești logat, nu trei: inima se
+arată doar celui logat. La 1440 px erau nevoie de 585 px și existau 581. **Lipseau patru
+pixeli**, iar „Facebook" cădea singur pe rândul al doilea.
+
+Reparat cu marjă, nu la limită: butoanele rândului sunt mai strânse (spațiere 8→6, padding
+12→10, spațiu intern 7→6, marginea despărțitorului 4→2) și „Copiază link" a devenit
+**„Copiază"**, cu `title="Copiază linkul terenului"`. Măsurat în cel mai lat caz cu putință
+(inima apăsată, plus butonul în starea „Link copiat"): 548 din 581, un rând, 33 px marjă.
+
+⚠️ Scris și în `teren-details.css`, lângă regulă: **rândul ăsta se remăsoară LOGAT.**
+
+### 2. Butonul „Citește mai mult" lipsea în fila deschisă în fundal (`9aaa62a`)
+
+Măsurarea „e textul mai lung decât încape?" se făcea într-un singur
+`requestAnimationFrame`, iar acela **nu se execută cât timp fila stă în fundal**, fiindcă
+acolo browserul nu desenează cadre. Cine deschide un teren cu Ctrl+clic din listă rămânea
+cu textul ciuntit și fără butonul care îl desface.
+
+Măsurătoarea se face acum în trei momente, fiindcă fiecare are altă hibă:
+`requestAnimationFrame` (cel mai devreme, dar moare în fundal), `setTimeout` (rulează și în
+fundal), `document.fonts.ready` (până se încarcă Mona Sans, textul e așezat cu fontul de
+rezervă, care are alte lățimi).
+
+Două capcane, scrise și în cod:
+- **măsurarea se face MEREU cu textul strâns.** Odată scoasă clasa, înălțimea afișată e
+  egală cu cea totală și întrebarea nu mai are răspuns;
+- **dacă omul a apăsat deja „Citește mai mult", nu se mai atinge nimic.** Altfel fontul,
+  care intră mai târziu, i-ar strânge textul la loc sub degete. Steagul stă pe element
+  (`p.dataset.desfacutDeOm`), nu într-o variabilă a funcției, ca măsurătorile întârziate
+  să-l vadă oricând.
 
 ---
 
@@ -275,10 +320,12 @@ o reîncărcare obișnuită poate să ruleze tot codul vechi. Ctrl+Shift+R.
 
 ## Ce urmează
 
-1. **Aprobarea diff-ului**, apoi commit + push.
-2. **Deploy manual din cPanel** al celor trei fișiere: `frontend/teren-details.html`,
-   `frontend/teren-details.css` (**fișier nou**, se urcă neapărat, altfel pagina rămâne
-   fără stiluri), `frontend/js/teren-details.js`.
-3. **O trecere logat** prin inimă, adăugare în grup și contoare (vezi mai sus).
-4. **Emailul de luni 17 august**: altă treabă, e gata, vezi
+1. ✅ **Comis, împins, publicat.** Verificat pe live pe 15 august: cele patru butoane pe un
+   rând, contoarele de interes se încarcă, cardul de grupuri arată grupul „Investiție
+   Inteligentă", `teren-details.css` răspunde cu 200.
+2. ⏳ **O apăsare adevărată pe inimă și pe „Adaugă" într-un grup.** Singura parte
+   neprobată. Stările lor s-au văzut pe ecran, logat, dar **n-am apăsat**: ar fi scris în
+   grupul real al lui Lucian. Codul care vorbește cu baza de date nu s-a schimbat, deci e
+   o confirmare, nu o bănuială.
+3. **Emailul de luni 17 august**: altă treabă, e gata, vezi
    `handoff-automatizare-terenuri-noi.md`, secțiunea „CE SE FACE LUNI".
