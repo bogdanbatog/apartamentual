@@ -41,7 +41,7 @@ Trei blocuri:
 1. **Antet** — galerie în stânga, în dreapta titlu, cele patru date în grilă
    (suprafață, zonă, preț total, preț pe mp), rândul cu inima și distribuirea, apoi un
    rând mic: „Adăugat de X, data · Vezi anunțul original".
-2. **„Ce poți face cu terenul ăsta"** — cinci carduri: analiza preliminară (cardul mare,
+2. **„Ce poți face cu terenul acesta"** — cinci carduri: analiza preliminară (cardul mare,
    pe fundal plin), fă un grup, adaugă-l la grupurile tale, grupuri interesate,
    utilizatori interesați.
 3. **Descrierea din anunțul original** — la subsol, pliată la trei rânduri.

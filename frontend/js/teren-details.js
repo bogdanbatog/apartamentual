@@ -331,7 +331,7 @@ function renderGroupLikesSection() {
     // Logat, dar în niciun grup.
     if (userGroups.length === 0) {
         body.innerHTML = `
-            <p class="td-empty">Nu ești încă în niciun grup. Poți intra într-unul existent sau poți face tu unul, pornind chiar de la terenul ăsta.</p>
+            <p class="td-empty">Nu ești încă în niciun grup. Poți intra într-unul existent sau poți face tu unul, pornind chiar de la terenul acesta.</p>
             <a href="grupuri.html" class="td-btn td-btn--ghost">Vezi grupurile</a>
         `;
         return;
