@@ -1,0 +1,571 @@
+/* ═══════════════════════════════════════════
+   PAGINA UNUI TEREN — ApartamenTUal (design system v9)
+   Mona Sans · crem/ink · accent teracotă (#c2604a)
+
+   Structura, preluată din macheta din `handoff/apartamentual 03-handoff_pagina
+   unui teren.zip` (fișierul „Pagina Teren - reorganizata.html"), dar îmbrăcată
+   în tokenurile paginii de terenuri, nu în Nunito și teracota machetei.
+   Aceeași decizie ca la /terenuri.html pe 14 august.
+
+   ⚠️ Toate clasele sunt prefixate `td-` fiindcă pagina încarcă și Tailwind
+   (CDN), și `styles.css` (unde `.card`, `.badge`, `.subtitle` sunt deja luate),
+   și `css/apartamentual-v9.css`. Fără prefix, două fișiere s-ar bate pe același
+   nume și ar câștiga cine se încarcă ultimul.
+
+   ⚠️ Fișierul se încarcă ULTIMUL în <head>, după v9.
+   ═══════════════════════════════════════════ */
+
+:root {
+    /* Aceleași nume ca în terenuri.css, ca să se poată muta bucăți dintr-un
+       fișier în altul fără traducere. */
+    --slate-50:  #faf8f3;
+    --slate-100: #f3f0e7;
+    --slate-200: #e8e3d8;
+    --slate-300: #d6cfc1;
+    --slate-400: #a8a094;
+    --slate-500: #6f6a61;
+    --slate-600: #555555;
+    --slate-700: #333333;
+    --slate-800: #1a1a1a;
+
+    --coral:      #c2604a;
+    --coral-dark: #a84f3c;
+    --coral-50:   #f6ebe6;
+
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+}
+
+/* ⚠️ Tailwind ascunde cu `.hidden { display: none }`, o singură clasă.
+   Regulile mele de layout (`.td-strip { display: flex }`) au aceeași
+   specificitate, deci ar câștiga cine e scris ultimul în foaie. Aici, `hidden`
+   are două clase, deci bate orice `display` pus de mine. Toate ascunderile din
+   JavaScript trec pe aici: miniaturi, fapte fără valoare, carduri de interes. */
+.td-page .hidden { display: none; }
+
+/* ── SCHELET ─────────────────────────────── */
+.td-page {
+    font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--slate-800);
+}
+
+.td-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--slate-700);
+    text-decoration: none;
+    margin-bottom: 18px;
+}
+.td-back:hover { color: var(--slate-800); text-decoration: none; }
+
+/* ── BUTOANE ─────────────────────────────── */
+.td-page .td-btn {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    padding: 12px 18px;
+    min-height: 44px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.td-page .td-btn:hover { text-decoration: none; }
+.td-page .td-btn:active { transform: translateY(1px); }
+.td-page .td-btn:focus-visible {
+    outline: 3px solid rgba(194, 96, 74, 0.55);
+    outline-offset: 3px;
+}
+
+.td-page .td-btn--primary {
+    background: var(--slate-800);
+    color: #fff;
+    border-color: var(--slate-800);
+}
+.td-page .td-btn--primary:hover { background: #000; color: #fff; }
+
+.td-page .td-btn--ghost {
+    background: #fff;
+    color: var(--slate-800);
+    border-color: var(--slate-300);
+}
+.td-page .td-btn--ghost:hover { border-color: var(--slate-800); color: var(--slate-800); }
+
+.td-page .td-btn--sm {
+    font-size: 0.875rem;
+    padding: 8px 13px;
+    min-height: 38px;
+    border-radius: var(--radius-sm);
+}
+
+/* Butonul e lat cât cardul doar de la 640px în sus; pe telefon rămâne așa
+   oricum, fiindcă cardul e cât ecranul. */
+.td-act .td-btn { width: 100%; margin-top: auto; }
+
+/* ── 1. ANTET: galerie + esențialul ──────── */
+.td-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(20px, 3vw, 40px);
+    align-items: start;
+}
+
+.td-gal { display: grid; gap: 10px; min-width: 0; }
+
+.td-page .td-gal-main {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--slate-200);
+    background: var(--slate-100);
+    cursor: pointer;
+    display: block;
+    transition: opacity 0.18s;
+}
+.td-page .td-gal-main:hover { opacity: 0.92; }
+
+/* Poze mai înalte decât late (capturi de ecran de telefon, planuri, cadastrale)
+   se văd ÎNTREGI, pe fundal, nu tăiate. Cu `cover`, dintr-o poză de 1080x2340
+   rămâne o fâșie din mijloc, iar la o captură de telefon fâșia aia e adesea
+   bandă neagră. Măsurat pe 15 august: 4 din 46 de terenuri au poza principală
+   în portret, iar alte 9 sunt aproape pătrate.
+   Clasa o pune `potrivesteRama()` din JS, după ce se știe mărimea reală. */
+.td-page .td-gal-main.is-inalta {
+    object-fit: contain;
+    background: var(--slate-100);
+}
+
+/* Banda de miniaturi. Se derulează pe orizontală, nu se rupe pe mai multe
+   rânduri: un teren cu opt poze ar fi împins acțiunile în jos. */
+.td-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+}
+.td-page .td-thumb {
+    flex: none;
+    width: 88px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 9px;
+    border: 1px solid var(--slate-200);
+    cursor: pointer;
+    transition: opacity 0.15s, border-color 0.15s;
+}
+.td-page .td-thumb:hover { opacity: 0.85; }
+.td-page .td-thumb.is-on { border: 2px solid var(--coral); }
+
+.td-no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--slate-200);
+    background: var(--slate-100);
+    color: var(--slate-500);
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.td-esential { min-width: 0; }
+
+.td-head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+.td-page .td-title {
+    font-size: clamp(1.45rem, 2.6vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin: 0;
+    text-wrap: balance;
+}
+/* ⚠️ Pe ID, nu pe clasă: `displayTerenDetails` rescrie `className`-ul întreg al
+   badge-ului („badge bg-green-100 text-green-800"), deci orice clasă pusă aici
+   în HTML dispare la prima încărcare. */
+.td-page #teren-status { flex: none; }
+
+/* Datele care contează, imediat sub titlu. Grilă cu linii de un pixel,
+   făcute din fundalul care se vede prin `gap`. */
+.td-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--slate-200);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 18px 0 0;
+}
+.td-fact {
+    background: #fff;
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.td-page .td-fact dt {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--slate-500);
+}
+.td-page .td-fact dd {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--slate-800);
+}
+/* Al cincilea fapt („Apartamente estimate") ar lăsa jumătate de rând goală, iar
+   golul se vede: e chiar culoarea liniilor grilei. Așa se întinde pe tot rândul.
+   Când faptul e ascuns rămân patru, adică număr par, și regula nu se aplică. */
+.td-facts .td-fact:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.td-page .td-fact dd.td-price { color: var(--coral-dark); }
+.td-page .td-fact dd small {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--slate-500);
+    letter-spacing: 0;
+}
+
+/* Rândul cu inima și distribuirea. Stă între fapte și rândul de proveniență,
+   nu în blocul de acțiuni: sunt gesturi de o apăsare, nu pași de urmat. */
+.td-quick {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 0;
+}
+.td-quick-sep {
+    width: 1px;
+    align-self: stretch;
+    background: var(--slate-200);
+    margin: 0 4px;
+}
+/* Nelogatul nu vede inima, deci despărțitorul ar rămâne singur la începutul
+   rândului, ca o liniuță fără rost. */
+#user-action-buttons.hidden + .td-quick-sep { display: none; }
+.td-page .td-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    min-height: 38px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--slate-700);
+    background: #fff;
+    border: 1px solid var(--slate-300);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.td-page .td-icon-btn:hover {
+    border-color: var(--slate-400);
+    background: var(--slate-50);
+    text-decoration: none;
+}
+.td-page .td-icon-btn i, .td-page .td-icon-btn svg { color: var(--slate-500); }
+
+/* Inima apăsată: teracotă, ca pe cardul din listă. */
+.td-page .td-icon-btn.is-liked {
+    background: var(--coral-50);
+    border-color: var(--coral);
+    color: var(--coral-dark);
+}
+.td-page .td-icon-btn.is-liked svg { color: var(--coral); }
+
+.td-page .td-origin {
+    font-size: 0.86rem;
+    color: var(--slate-500);
+    line-height: 1.6;
+    margin: 14px 0 0;
+}
+.td-page .td-origin a {
+    color: var(--slate-700);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.td-page .td-origin a:hover { color: var(--coral-dark); }
+
+/* ── 2. CE POȚI FACE CU TERENUL ──────────── */
+.td-acts { margin: clamp(30px, 4vw, 52px) 0 0; }
+
+.td-acts-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.td-page .td-acts-head h2 {
+    font-size: clamp(1.2rem, 1.8vw, 1.45rem);
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    margin: 0;
+}
+.td-page .td-acts-head p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--slate-500);
+}
+
+.td-acts-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.td-act {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: clamp(15px, 1.6vw, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    height: 100%;
+}
+/* Cardul analizei e cel care aduce banii, deci e singurul pe fundal plin. */
+.td-act--lead {
+    background: var(--slate-100);
+    border-color: var(--slate-300);
+}
+
+.td-page .td-act-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--coral-dark);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.td-act-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--coral);
+    flex: none;
+}
+.td-page .td-act h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin: 0;
+}
+.td-page .td-act p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--slate-600);
+    text-wrap: pretty;
+}
+
+.td-bullets {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--slate-600);
+}
+.td-bullets li {
+    position: relative;
+    padding-left: 14px;
+    line-height: 1.45;
+}
+.td-bullets li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--coral);
+}
+.td-bullets b { color: var(--slate-800); font-weight: 700; }
+
+/* Contorul de pe cardurile de interes. */
+.td-count { display: flex; align-items: baseline; gap: 7px; }
+.td-count b {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--slate-800);
+}
+.td-count span { font-size: 0.9rem; color: var(--slate-500); font-weight: 500; }
+
+/* Partea de jos a cardului de grupuri, scrisă din JS. `margin-top: auto` o
+   lipește de fundul cardului, ca butoanele celorlalte carduri de pe rând. */
+#group-likes-body {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: auto;
+}
+
+/* Lista grupurilor mele, în cardul de adăugare.
+   ⚠️ `minmax(0, 1fr)` și `min-width: 0` nu sunt de decor. Fără ele, un nume lung
+   de grup întinde rândul cât ține numele: rândul iese din card, iar pagina
+   întreagă capătă bară de derulare pe orizontală. Numele se taie cu trei puncte
+   doar dacă i se dă voie celulei să fie mai îngustă decât conținutul ei. */
+.td-mygroups {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    margin: 0;
+}
+.td-mygroup {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+}
+.td-mygroup > span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.td-mygroup .td-btn { flex: none; width: auto; margin-top: 0; }
+/* Grup la care terenul e deja adăugat. */
+.td-mygroup.is-liked {
+    background: var(--coral-50);
+    border-color: var(--coral);
+}
+
+/* Starea goală din cardul de grupuri: nu e în niciun grup, sau nu e logat. */
+.td-page .td-empty {
+    font-size: 0.9rem;
+    color: var(--slate-500);
+    background: var(--slate-50);
+    border: 1px dashed var(--slate-300);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin: 0;
+}
+
+/* ── 3. DESCRIEREA DIN ANUNȚUL ORIGINAL ──── */
+.td-desc {
+    margin: clamp(28px, 3.5vw, 44px) 0 0;
+    border-top: 1px solid var(--slate-200);
+    padding-top: 22px;
+}
+.td-desc-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.td-page .td-desc-head h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin: 0;
+}
+.td-page .td-desc-head span { font-size: 0.85rem; color: var(--slate-400); }
+
+.td-page .td-desc-body {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--slate-600);
+    margin: 0;
+    max-width: 78ch;
+    text-wrap: pretty;
+    white-space: pre-line; /* păstrează rândurile din anunț, nu le lipește */
+}
+.td-desc-body.is-clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.td-desc-more { margin-top: 12px; }
+
+/* ── ADMIN (Modifică / Dezactivează) ─────── */
+.td-admin {
+    margin: 28px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--slate-200);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.td-page .td-admin-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    margin-right: 4px;
+}
+
+/* ── LĂȚIMI MICI ─────────────────────────── */
+@media (max-width: 960px) {
+    .td-top { grid-template-columns: 1fr; gap: 18px; }
+    .td-acts-grid { grid-template-columns: 1fr 1fr; }
+    .td-act--lead { grid-column: 1 / -1; }
+}
+
+@media (max-width: 700px) {
+    /* Pe telefon: galerie, esențial, acțiuni, apoi textul din anunț.
+       Aceeași ordine ca în document, deci nu e nevoie de `order`. */
+    .td-acts { margin-top: 26px; }
+    .td-acts-grid { grid-template-columns: 1fr; gap: 11px; }
+    .td-act--lead { grid-column: auto; }
+
+    .td-page .td-title { font-size: 1.3rem; }
+    .td-facts { grid-template-columns: 1fr 1fr; }
+    .td-fact { padding: 11px 13px; }
+    .td-page .td-fact dd { font-size: 1.02rem; }
+
+    .td-page .td-gal-main { aspect-ratio: 4 / 3; border-radius: 12px; }
+    .td-page .td-thumb { width: 72px; height: 52px; }
+
+    .td-back { margin-bottom: 12px; }
+    .td-desc { margin-top: 24px; padding-top: 18px; }
+
+    /* Distribuirea trece pe rândul ei, ca butoanele să nu se strivească. */
+    .td-quick-sep { display: none; }
+}

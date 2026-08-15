@@ -1,16 +1,29 @@
-// Status mapping for display
+// Statusurile reale din tabela `terenuri`, cu etichetele din admin
+// (`admin-terenuri.html`): pending / approved / rejected.
+//
+// ⚠️ Reparat pe 15 august 2026. Lista de mai jos avea valori care nu există în
+// bază („active", „under_review", „reserved", „sold", „inactive"), iar codul
+// scria pe ecran valoarea brută când nu găsea potrivire. Practic, pe FIECARE
+// pagină de teren public scria „approved", în engleză.
+//
+// „approved" nu se mai arată deloc: toate terenurile din listă sunt aprobate,
+// deci un semn care spune același lucru peste tot nu spune nimic. Rămân doar
+// stările care chiar înseamnă ceva pentru cine se uită: în așteptare, respins,
+// dezactivat.
 const statusMapping = {
-    'active': { text: 'Disponibil', class: 'bg-green-100 text-green-800' },
-    'under_review': { text: 'În analiză', class: 'bg-yellow-100 text-yellow-800' },
-    'reserved': { text: 'Rezervat', class: 'bg-blue-100 text-blue-800' },
-    'sold': { text: 'Vândut', class: 'bg-gray-100 text-gray-800' },
-    'inactive': { text: 'Inactiv', class: 'bg-red-100 text-red-800' }
+    'pending':  { text: 'În așteptarea aprobării', class: 'bg-yellow-100 text-yellow-800' },
+    'approved': null,
+    'rejected': { text: 'Respins', class: 'bg-red-100 text-red-800' }
 };
 
 // Global state for group likes
 let userGroups = [];
 let terenGroupLikes = [];
 let currentTerenId = null;
+// Profilul celui logat, sau null. Îl ține minte fiindcă `renderGroupLikesSection`
+// se apelează și după o apăsare pe „Adaugă", nu doar la încărcarea paginii, și
+// trebuie să știe dacă omul e logat ca să aleagă starea potrivită a cardului.
+let currentUserProfile = null;
 
 // Global state for image gallery
 let terenImages = [];      // array de URL-uri (din image_urls sau fallback image_url)
@@ -35,18 +48,32 @@ function getImageUrls(teren) {
     return [];
 }
 
+// Poza principală: tăiată (`cover`) doar dacă e mai lată decât înaltă. La una
+// în portret sau aproape pătrată, rama de 16/10 ar lăsa o fâșie din mijloc, iar
+// dintr-o captură de ecran de telefon fâșia aia e adesea bandă neagră. Acelea se
+// arată întregi, pe fundal crem.
+//
+// ⚠️ Se apelează după ce poza s-a încărcat: înainte de asta, naturalWidth e 0.
+function potrivesteRama(imageEl) {
+    if (!imageEl || !imageEl.naturalWidth || !imageEl.naturalHeight) return;
+    const raport = imageEl.naturalWidth / imageEl.naturalHeight;
+    imageEl.classList.toggle('is-inalta', raport < 1.3);
+}
+
 // Setează imaginea principală afișată + evidențiază miniatura activă.
 function setMainImage(index) {
     if (index < 0 || index >= terenImages.length) return;
     currentImageIndex = index;
     const imageEl = document.getElementById('teren-image');
-    if (imageEl) imageEl.src = terenImages[index];
-    document.querySelectorAll('#teren-thumbnails .teren-thumb').forEach((el, i) => {
-        if (i === index) {
-            el.classList.add('ring-2', 'ring-orange-500');
-        } else {
-            el.classList.remove('ring-2', 'ring-orange-500');
-        }
+    if (imageEl) {
+        imageEl.src = terenImages[index];
+        // Dacă poza e deja în memoria browserului, evenimentul `load` nu mai
+        // vine, deci se măsoară pe loc. Altfel o prinde ascultătorul legat la
+        // pornirea paginii.
+        if (imageEl.complete) potrivesteRama(imageEl);
+    }
+    document.querySelectorAll('#teren-thumbnails .td-thumb').forEach((el, i) => {
+        el.classList.toggle('is-on', i === index);
     });
 }
 
@@ -63,12 +90,10 @@ function renderThumbnails() {
 
     thumbsContainer.classList.remove('hidden');
     thumbsContainer.innerHTML = terenImages.map((url, i) => `
-        <img src="${url}" alt="Miniatură ${i + 1}"
-             class="teren-thumb w-full h-20 object-cover rounded-md border border-gray-200 cursor-pointer hover:opacity-80 transition"
-             data-index="${i}">
+        <img src="${url}" alt="Miniatură ${i + 1}" class="td-thumb" data-index="${i}">
     `).join('');
 
-    thumbsContainer.querySelectorAll('.teren-thumb').forEach(el => {
+    thumbsContainer.querySelectorAll('.td-thumb').forEach(el => {
         el.addEventListener('click', function() {
             setMainImage(parseInt(this.getAttribute('data-index'), 10));
         });
@@ -257,53 +282,74 @@ async function toggleGroupLike(grupId) {
     }
 }
 
-// Render group likes section
+// Cardul „Adaugă-l la unul din grupurile tale".
+//
+// Titlul și explicația stau în HTML, iar de aici se scrie doar partea de jos
+// (#group-likes-body), care are trei stări:
+//   • nelogat            → îndemn la cont
+//   • logat, fără grupuri → spune că nu e în niciun grup + duce la grupuri.html
+//   • logat, cu grupuri   → lista lor, cu adăugare / scoatere
+// ⚠️ Înainte, cardul întreg dispărea pentru primele două cazuri, deci tocmai
+// omul care n-are încă niciun grup nu afla că treaba asta se poate face.
+// Cardul se ascunde de tot doar pentru conturile de agenție (vezi
+// displayTerenDetails), fiindcă ele nu pot fi în grupuri.
 function renderGroupLikesSection() {
     const container = document.getElementById('group-likes-section');
-    if (!container) return;
+    const body = document.getElementById('group-likes-body');
+    if (!container || !body) return;
 
-    // No groups - hide section
-    if (userGroups.length === 0) {
+    // Conturile de agenție nu sunt membre în grupuri, deci cardul dispare de tot.
+    // ⚠️ Ascunderea stă aici, nu în displayTerenDetails: funcția asta se apelează
+    // și după fiecare apăsare pe „Adaugă", iar rândul de mai jos ar readuce
+    // cardul la viață dacă ascunderea ar fi scrisă în altă parte.
+    if (currentUserProfile && currentUserProfile.account_type === 'profesional') {
         container.classList.add('hidden');
         return;
     }
 
     container.classList.remove('hidden');
-    
+
+    // Nelogat: aceeași cale ca butonul „Intră în cont" din header (nav.js).
+    if (!currentUserProfile) {
+        body.innerHTML = `
+            <p class="td-empty">Ai nevoie de cont ca să adaugi terenul într-un grup.</p>
+            <button type="button" class="td-btn td-btn--ghost" id="btn-grup-likes-login">Intră în cont</button>
+        `;
+        const btnLogin = document.getElementById('btn-grup-likes-login');
+        if (btnLogin) {
+            btnLogin.addEventListener('click', function() {
+                if (typeof openLoginModal === 'function') {
+                    openLoginModal();
+                } else {
+                    window.location.href = '/index.html?login=1';
+                }
+            });
+        }
+        return;
+    }
+
+    // Logat, dar în niciun grup.
+    if (userGroups.length === 0) {
+        body.innerHTML = `
+            <p class="td-empty">Nu ești încă în niciun grup. Poți intra într-unul existent sau poți face tu unul, pornind chiar de la terenul ăsta.</p>
+            <a href="grupuri.html" class="td-btn td-btn--ghost">Vezi grupurile</a>
+        `;
+        return;
+    }
+
     const groupsHtml = userGroups.map(group => {
         const isLiked = terenGroupLikes.includes(group.id);
         return `
-            <button 
-                onclick="toggleGroupLike('${group.id}')"
-                class="flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                    isLiked 
-                        ? 'bg-orange-100 border-orange-300 text-orange-800' 
-                        : 'bg-white border-gray-200 text-gray-700 hover:border-orange-300 hover:bg-orange-50'
-                }"
-            >
-                <svg class="w-5 h-5 ${isLiked ? 'text-orange-500' : 'text-gray-400'}" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                </svg>
-                <span class="font-medium">${escapeHtml(group.nume)}</span>
-                ${isLiked ? '<span class="text-xs bg-orange-200 px-2 py-0.5 rounded">Adăugat</span>' : ''}
-            </button>
+            <div class="td-mygroup${isLiked ? ' is-liked' : ''}">
+                <span>${escapeHtml(group.nume)}</span>
+                <button type="button" class="td-btn td-btn--ghost td-btn--sm" onclick="toggleGroupLike('${group.id}')">
+                    ${isLiked ? 'Scoate' : 'Adaugă'}
+                </button>
+            </div>
         `;
     }).join('');
 
-    container.innerHTML = `
-        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                Adaugă la unul din grupurile tale
-            </h3>
-            <p class="text-sm text-gray-600 mb-3">Selectează grupurile tale care ar putea fi interesate de acest teren:</p>
-            <div class="flex flex-wrap gap-2">
-                ${groupsHtml}
-            </div>
-        </div>
-    `;
+    body.innerHTML = `<div class="td-mygroups">${groupsHtml}</div>`;
 }
 
 // Check if teren is already liked and update button state
@@ -328,38 +374,19 @@ async function checkTerenLikeState(terenId) {
     }
 }
 
-// Update like button appearance
+// Inima de sub titlu: umplută când terenul e la favoritele omului.
+// Textul stă într-un <span class="btn-like-text"> scris direct în HTML, deci nu
+// se mai umblă la innerHTML (varianta veche înlocuia bucăți de text cu
+// `replace`, iar dacă formularea din HTML se schimba, nu se mai potrivea nimic).
 function updateLikeButton(btn, isLiked) {
     const svg = btn.querySelector('svg');
-    // Get or create the text node
-    const textNodes = Array.from(btn.childNodes).filter(n => n.nodeType === Node.TEXT_NODE || (n.nodeType === Node.ELEMENT_NODE && !n.matches('svg')));
-    
-    if (isLiked) {
-        svg.setAttribute('fill', 'currentColor');
-        svg.classList.remove('text-gray-500');
-        svg.classList.add('text-orange-500');
-        btn.classList.add('bg-orange-50', 'border-orange-300');
-        btn.classList.remove('border-gray-300');
-        // Update text
-        const spanText = btn.querySelector('.btn-like-text');
-        if (spanText) {
-            spanText.textContent = 'Adăugat la profil';
-        } else {
-            // Replace raw text
-            btn.innerHTML = btn.innerHTML.replace('Adaugă la profil', '<span class="btn-like-text">Adăugat la profil</span>');
-        }
-    } else {
-        svg.setAttribute('fill', 'none');
-        svg.classList.remove('text-orange-500');
-        svg.classList.add('text-gray-500');
-        btn.classList.remove('bg-orange-50', 'border-orange-300');
-        btn.classList.add('border-gray-300');
-        const spanText = btn.querySelector('.btn-like-text');
-        if (spanText) {
-            spanText.textContent = 'Adaugă la profil';
-        } else {
-            btn.innerHTML = btn.innerHTML.replace('Adăugat la profil', '<span class="btn-like-text">Adaugă la profil</span>');
-        }
+    if (svg) svg.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+
+    btn.classList.toggle('is-liked', isLiked);
+
+    const spanText = btn.querySelector('.btn-like-text');
+    if (spanText) {
+        spanText.textContent = isLiked ? 'Adăugat la profilul tău' : 'Adaugă la profilul tău';
     }
 }
 
@@ -492,6 +519,7 @@ async function fetchTerenDetails() {
         // Store groups and likes in global state
         userGroups = groups;
         terenGroupLikes = groupLikes;
+        currentUserProfile = userProfile;
 
         await displayTerenDetails(terenData, userProfile);
         renderGroupLikesSection();
@@ -515,7 +543,10 @@ async function displayTerenDetails(teren, userProfile) {
     
     // Add disabled indicator to the page
     if (isDisabled) {
-        const backButton = document.querySelector('.mb-6');
+        // ⚠️ Ancora e linkul „Înapoi la terenuri", luat pe ID. Înainte se lua pe
+        // `.mb-6`, o clasă Tailwind care poate ajunge pe orice element din
+        // pagină: prima potrivire nu mai era neapărat linkul de întoarcere.
+        const backButton = document.getElementById('td-back');
         if (backButton && !document.getElementById('disabled-indicator')) {
             const disabledIndicator = document.createElement('div');
             disabledIndicator.id = 'disabled-indicator';
@@ -531,25 +562,32 @@ async function displayTerenDetails(teren, userProfile) {
             backButton.insertAdjacentElement('afterend', disabledIndicator);
         }
         
-        const mainContent = document.querySelector('.grid.lg\\:grid-cols-2');
+        const mainContent = document.querySelector('.td-top');
         if (mainContent) {
             mainContent.classList.add('opacity-75');
         }
     }
-    
+
     // Basic information
     document.getElementById('teren-title').textContent = teren.titlu || 'Teren fără titlu';
-    document.getElementById('teren-description').textContent = teren.descriere || 'Fără descriere disponibilă';
-    
-    // Status
-    let status = statusMapping[teren.status] || { text: teren.status, class: 'bg-gray-100 text-gray-800' };
+
+    // Status. Un status necunoscut nu se mai scrie pe ecran: ar ieși o valoare
+    // tehnică, în engleză, în fața vizitatorului.
+    let status = Object.prototype.hasOwnProperty.call(statusMapping, teren.status)
+        ? statusMapping[teren.status]
+        : null;
     if (isDisabled) {
         status = { text: 'Dezactivat', class: 'bg-red-100 text-red-800' };
     }
     const statusEl = document.getElementById('teren-status');
-    statusEl.textContent = status.text;
-    statusEl.className = `badge ${status.class}`;
-    
+    if (status) {
+        statusEl.textContent = status.text;
+        statusEl.className = `badge ${status.class}`;
+    } else {
+        statusEl.textContent = '';
+        statusEl.className = 'badge hidden';
+    }
+
     // Basic details
     document.getElementById('teren-suprafata').textContent = teren.suprafata ? `${teren.suprafata} mp` : 'N/A';
     document.getElementById('teren-zona').textContent = teren.zona || 'N/A';
@@ -565,24 +603,20 @@ async function displayTerenDetails(teren, userProfile) {
     // Preț pe mp
     document.getElementById('teren-pret').textContent = teren.pret_pe_mp ? `${teren.pret_pe_mp} €/mp` : 'N/A';
     
-    // Număr apartamente - cu link "cere o analiză" dacă N/A
+    // Apartamente estimate: rândul apare DOAR dacă terenul are deja o analiză.
+    // Înainte, când lipsea, în locul cifrei stătea un buton mic și negru „Cere o
+    // analiză", fără o vorbă despre ce e aia, cât costă sau ce primești. Acum
+    // cererea analizei o face cardul mare din blocul de acțiuni, care explică.
     const apartamenteEl = document.getElementById('teren-apartamente');
-    const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max 
-        ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}` 
+    const apartamenteFact = document.getElementById('teren-apartamente-fact');
+    const apartamenteRange = teren.nr_apartamente_min && teren.nr_apartamente_max
+        ? `${teren.nr_apartamente_min}-${teren.nr_apartamente_max}`
         : null;
-    if (apartamenteRange) {
+    if (apartamenteRange && apartamenteEl && apartamenteFact) {
         apartamenteEl.textContent = apartamenteRange;
-    } else {
-        apartamenteEl.innerHTML = '<a href="#" id="apartamente-cere-analiza" class="inline-flex items-center px-3 py-1 bg-black hover:bg-gray-800 text-white text-xs font-semibold rounded-md border-2 border-black shadow-sm transition">Cere o analiză</a>';
-        const apartLink = document.getElementById('apartamente-cere-analiza');
-        if (apartLink) {
-            apartLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                redirectToAnalize(teren);
-            });
-        }
+        apartamenteFact.classList.remove('hidden');
     }
-    
+
     document.getElementById('teren-data-adaugat').textContent = formatDate(teren.data_adaugat);
     
     // Sursă
@@ -625,50 +659,19 @@ async function displayTerenDetails(teren, userProfile) {
         }
     }
     
-    // User action buttons (show if logged in)
+    // Inima („Adaugă la profilul tău"), doar pentru cine e logat.
+    // Conturile de agenție n-o văd: terenurile lor apar oricum pe profil, ca
+    // anunțuri proprii, nu ca favorite.
     const userActionBtns = document.getElementById('user-action-buttons');
-    if (userProfile && userActionBtns) {
+    const btnLikeProfil = document.getElementById('btn-like-profil');
+    if (userProfile && userActionBtns && userProfile.account_type !== 'profesional') {
         userActionBtns.classList.remove('hidden');
-        
-        // Like to profile
-        const btnLikeProfil = document.getElementById('btn-like-profil');
         if (btnLikeProfil) {
-            // Hide button for agency accounts (they have posted terrains on profile, not favorites)
-            if (userProfile.account_type === 'profesional') {
-                btnLikeProfil.style.display = 'none';
-            } else {
-                btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
-                // Check initial like state
-                checkTerenLikeState(teren.id);
-            }
-        }
-        
-        // Like to group - toggle group likes section visibility
-        const btnLikeGrup = document.getElementById('btn-like-grup');
-        if (btnLikeGrup) {
-            btnLikeGrup.addEventListener('click', () => {
-                const groupSection = document.getElementById('group-likes-section');
-                if (groupSection) {
-                    groupSection.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        }
-        
-        // Share button
-        const btnShare = document.getElementById('btn-share');
-        if (btnShare) {
-            btnShare.addEventListener('click', () => {
-                const url = window.location.href;
-                if (navigator.share) {
-                    navigator.share({ title: teren.titlu, url: url });
-                } else if (navigator.clipboard) {
-                    navigator.clipboard.writeText(url);
-                    showToast('Link copiat în clipboard!', 'success');
-                }
-            });
+            btnLikeProfil.addEventListener('click', () => toggleTerenLike(teren.id));
+            checkTerenLikeState(teren.id);
         }
     }
-    
+
     // Cere o analiză button — redirect to /analize.html with teren context
     const btnCereAnaliza = document.getElementById('btn-cere-analiza');
     if (btnCereAnaliza) {
@@ -693,6 +696,7 @@ async function displayTerenDetails(teren, userProfile) {
         }
     }
 
+
     // Action buttons
     const actionButtons = document.getElementById('action-buttons');
     const hasPendingAnalysis = teren.analiza_generala_status === 'pending' || teren.analiza_specifica_status === 'pending';
@@ -702,7 +706,10 @@ async function displayTerenDetails(teren, userProfile) {
     );
     const canToggleStatus = userProfile && userProfile.is_super_admin;
     
-    if (hasPendingAnalysis || canModify || canToggleStatus) {
+    // ⚠️ `hasPendingAnalysis` nu mai deschide singur rândul. Nu punea niciun
+    // buton în el, iar acum rândul are linie despărțitoare deasupra: s-ar fi
+    // văzut o dungă orizontală fără nimic sub ea.
+    if (canModify || canToggleStatus) {
         actionButtons.classList.remove('hidden');
         updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren);
     } else {
@@ -740,29 +747,100 @@ async function displayTerenDetails(teren, userProfile) {
     
     // Show teren details section
     document.getElementById('teren-details').classList.remove('hidden');
+
+    // ⚠️ Abia acum, nu mai sus: descrierea are nevoie să fie vizibilă ca să se
+    // poată măsura dacă textul e mai lung decât cele trei rânduri.
+    setupDescriere(teren.descriere);
+}
+
+// Descrierea din anunțul original, la subsolul paginii.
+//
+// Trei lucruri deodată:
+//   • fără descriere, secțiunea nu se randează deloc (înainte scria „Fără
+//     descriere disponibilă", adică un titlu și o propoziție de umplutură);
+//   • textul e tăiat la trei rânduri;
+//   • butonul „Citește mai mult" apare DOAR dacă textul chiar e mai lung.
+// ⚠️ Măsurarea se face după ce browserul a așezat textul, într-un
+// requestAnimationFrame. Citit imediat după `textContent = ...`, scrollHeight ar
+// da valoarea de dinainte de așezare, iar la un anunț scurt ar apărea un buton
+// care nu face nimic.
+function setupDescriere(descriere) {
+    const sectiune = document.getElementById('teren-descriere-section');
+    const p = document.getElementById('teren-description');
+    const btn = document.getElementById('btn-desc-more');
+    if (!sectiune || !p || !btn) return;
+
+    // Rândurile din anunț se păstrează (CSS: `white-space: pre-line`), dar
+    // rândurile GOALE dintre ele se strâng. ⚠️ Altfel un rând gol mănâncă unul
+    // din cele trei rânduri ale textului tăiat, iar cele trei puncte rămân
+    // singure pe el, ca și cum pagina ar fi stricată.
+    const text = (descriere || '').replace(/\r/g, '').replace(/\n{2,}/g, '\n').trim();
+    if (!text) {
+        sectiune.classList.add('hidden');
+        return;
+    }
+
+    sectiune.classList.remove('hidden');
+    p.textContent = text;
+    p.classList.add('is-clamped');
+
+    // ⚠️ Măsurarea se face DUPĂ ce blocul cu detalii a ieșit din `hidden`.
+    // Într-un element cu `display: none`, scrollHeight și clientHeight sunt
+    // amândouă 0, deci „textul nu e tăiat" ieșea mereu adevărat și butonul nu
+    // apărea niciodată, oricât de lung ar fi fost anunțul. De aici și retrasul
+    // de mai jos: dacă la prima încercare înălțimea e încă 0, mai așteaptă un
+    // cadru.
+    const masoara = (incercare) => {
+        if (p.clientHeight === 0 && incercare < 5) {
+            requestAnimationFrame(() => masoara(incercare + 1));
+            return;
+        }
+        const eTaiat = p.scrollHeight > p.clientHeight + 2; // 2px, pentru rotunjiri
+        btn.classList.toggle('hidden', !eTaiat);
+        if (!eTaiat) p.classList.remove('is-clamped');
+    };
+    requestAnimationFrame(() => masoara(0));
+
+    if (!btn.dataset.legat) {
+        btn.dataset.legat = '1'; // ca la o a doua încărcare să nu se lege de două ori
+        btn.addEventListener('click', () => {
+            const desfacut = !p.classList.toggle('is-clamped');
+            btn.textContent = desfacut ? 'Citește mai puțin' : 'Citește mai mult';
+            btn.setAttribute('aria-expanded', String(desfacut));
+        });
+    }
 }
 
 // Update action buttons
 function updateActionButtons(hasPendingAnalysis, canModify, canToggleStatus, teren) {
     const actionButtons = document.getElementById('action-buttons');
     actionButtons.innerHTML = '';
-    
+
+    // Rândul e la subsolul paginii și îl vede foarte puțină lume (autorul
+    // terenului și superadminul), deci butoanele sunt discrete, nu colorate.
+    if (canModify || canToggleStatus) {
+        const eticheta = document.createElement('span');
+        eticheta.className = 'td-admin-label';
+        eticheta.textContent = 'Administrare';
+        actionButtons.appendChild(eticheta);
+    }
+
     // Add "Modifica" button if user can modify
     if (canModify) {
         const modificaBtn = document.createElement('button');
-        modificaBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
+        modificaBtn.type = 'button';
+        modificaBtn.className = 'td-btn td-btn--ghost td-btn--sm';
         modificaBtn.textContent = 'Modifică';
         modificaBtn.onclick = () => editTeren(teren.id);
         actionButtons.appendChild(modificaBtn);
     }
-    
+
     // Add "Dezactivează/Activează" button if user is super admin
     if (canToggleStatus) {
         const toggleBtn = document.createElement('button');
         const isDeleted = teren.deleted_at !== null;
-        toggleBtn.className = isDeleted 
-            ? 'bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors'
-            : 'bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors';
+        toggleBtn.type = 'button';
+        toggleBtn.className = 'td-btn td-btn--ghost td-btn--sm';
         toggleBtn.textContent = isDeleted ? 'Activează' : 'Dezactivează';
         toggleBtn.onclick = () => toggleTerenStatus(teren.id, isDeleted);
         actionButtons.appendChild(toggleBtn);
@@ -838,6 +916,13 @@ document.addEventListener('DOMContentLoaded', function() {
         retryBtn.addEventListener("click", fetchTerenDetails);
     }
 
+    // Fiecare poză nouă pusă în ramă se măsoară din nou: în aceeași galerie pot
+    // sta o fotografie orizontală și un plan cadastral vertical.
+    const imageEl = document.getElementById('teren-image');
+    if (imageEl) {
+        imageEl.addEventListener('load', () => potrivesteRama(imageEl));
+    }
+
     // Wait for Supabase to be initialized
     if (typeof supabase !== 'undefined') {
         fetchTerenDetails();
@@ -903,15 +988,16 @@ async function loadInterestCounts(terenId) {
             .select('id', { count: 'exact', head: true })
             .eq('teren_id', terenId);
         
-        // Update UI
-        const container = document.getElementById('interest-buttons');
+        // Cele două carduri de interes, fiecare celulă în grila de acțiuni.
+        // Erau un singur bloc cu două butoane; acum sunt carduri separate, deci
+        // se descoperă amândouă, nu unul singur.
+        const cardUsers = document.getElementById('card-interested-users');
+        const cardGroups = document.getElementById('card-interested-groups');
         const usersCountEl = document.getElementById('interested-users-count');
         const groupsCountEl = document.getElementById('interested-groups-count');
-        
-        if (container) {
-            container.style.display = 'block';
-            container.classList.remove('hidden');
-        }
+
+        if (cardUsers) cardUsers.classList.remove('hidden');
+        if (cardGroups) cardGroups.classList.remove('hidden');
         if (usersCountEl) usersCountEl.textContent = userLikesCount || 0;
         if (groupsCountEl) groupsCountEl.textContent = groupLikesCount || 0;
         

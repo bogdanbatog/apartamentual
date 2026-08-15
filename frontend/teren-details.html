@@ -29,6 +29,9 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <!-- Ultimul din listă dinadins: rescrie bucăți din Tailwind și din styles.css.
+         Vezi comentariul din capul fișierului. -->
+    <link rel="stylesheet" href="teren-details.css">
     <style>
         /* Reskin v9 scoped (.v9-page pe <main>) — accente Tailwind colorate → paletă v9.
            Specificitatea 0-2-0 bate utilitarele Tailwind (0-1-0). */
@@ -98,30 +101,34 @@
                 </div>
             </div>
 
-            <!-- Teren Details -->
-            <div id="teren-details" class="hidden">
-                <!-- Back Button -->
-                <div class="mb-6">
-                    <a href="/terenuri.html" class="inline-flex items-center text-blue-600 hover:text-blue-800">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                        Înapoi la terenuri
-                    </a>
-                </div>
+            <!-- ═══════════════════════════════════════════════════════════
+                 PAGINA UNUI TEREN, reorganizată 15 august 2026.
+                 Trei blocuri, în ordinea în care omul are nevoie de ele:
+                   1. antet: galerie + datele care contează (fără text lung)
+                   2. „Ce poți face cu terenul ăsta": cardurile de acțiune
+                   3. descrierea din anunțul original, pliată la trei rânduri
+                 Sursa: macheta din `handoff/apartamentual 03-handoff_pagina
+                 unui teren.zip`. Stilurile: `teren-details.css`.
+                 ═══════════════════════════════════════════════════════════ -->
+            <div id="teren-details" class="hidden td-page">
+                <a id="td-back" class="td-back" href="/terenuri.html">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Înapoi la terenuri
+                </a>
 
-                <!-- Main Content -->
-                <div class="grid lg:grid-cols-2 gap-8">
-                    <!-- Image Section -->
-                    <div>
-                        <div id="teren-image-container" class="mb-4">
-                            <img id="teren-image" src="" alt="Imagine teren" class="w-full h-64 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity teren-image-container" onclick="openImageModal()">
+                <!-- ── 1. ANTET: galerie + esențialul ────────────────────── -->
+                <section class="td-top">
+                    <div class="td-gal">
+                        <div id="teren-image-container">
+                            <img id="teren-image" src="" alt="Imagine teren" class="td-gal-main" onclick="openImageModal()">
                         </div>
                         <!-- Miniaturi galerie (afișate doar dacă terenul are mai multe imagini) -->
-                        <div id="teren-thumbnails" class="hidden grid grid-cols-4 sm:grid-cols-5 gap-2 mb-4"></div>
-                        <div id="no-image" class="hidden bg-gray-100 rounded-lg h-64 flex items-center justify-center">
-                            <div class="text-center text-gray-500">
-                                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div id="teren-thumbnails" class="td-strip hidden"></div>
+                        <div id="no-image" class="td-no-image hidden">
+                            <div>
+                                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                                 <p>Nu există imagine disponibilă</p>
@@ -129,71 +136,79 @@
                         </div>
                     </div>
 
-                    <!-- Details Section -->
-                    <div>
-                        <div class="flex justify-between items-start mb-4">
-                            <h1 id="teren-title" class="text-3xl font-bold"></h1>
+                    <div class="td-esential">
+                        <div class="td-head-row">
+                            <h1 id="teren-title" class="td-title"></h1>
                             <span id="teren-status" class="badge"></span>
                         </div>
 
-                        <p id="teren-description" class="subtitle mb-6"></p>
+                        <!-- Datele care contează. „Apartamente estimate" apare doar
+                             dacă terenul are deja o analiză; altfel rândul lipsește,
+                             iar cererea analizei o face cardul mare de mai jos. -->
+                        <dl class="td-facts">
+                            <div class="td-fact"><dt>Suprafață</dt><dd id="teren-suprafata"></dd></div>
+                            <div class="td-fact"><dt>Zonă</dt><dd id="teren-zona"></dd></div>
+                            <div class="td-fact"><dt>Preț total</dt><dd id="teren-pret-total" class="td-price"></dd></div>
+                            <div class="td-fact"><dt>Preț pe mp</dt><dd id="teren-pret"></dd></div>
+                            <div class="td-fact hidden" id="teren-apartamente-fact"><dt>Apartamente estimate</dt><dd id="teren-apartamente"></dd></div>
+                        </dl>
 
-                        <!-- Basic Information -->
-                        <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                            <h3 class="text-lg font-semibold mb-3">Informații de bază</h3>
-                            <div class="grid grid-cols-1 gap-3">
-                                <div class="flex justify-between">
-                                    <span class="font-medium">Suprafață:</span>
-                                    <span id="teren-suprafata"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="font-medium">Zonă:</span>
-                                    <span id="teren-zona"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="font-medium">Preț total:</span>
-                                    <span id="teren-pret-total" class="text-orange-600 font-semibold"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="font-medium">Preț pe mp:</span>
-                                    <span id="teren-pret"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="font-medium">Număr apartamente:</span>
-                                    <span id="teren-apartamente"></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="font-medium">Data adăugat:</span>
-                                    <span id="teren-data-adaugat"></span>
-                                </div>
-                                <div id="teren-sursa-row" class="flex justify-between hidden">
-                                    <span class="font-medium">Sursă:</span>
-                                    <a id="teren-sursa" href="#" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                        </svg>
-                                        <span>Vezi anunțul original</span>
-                                    </a>
-                                </div>
-                                <div id="teren-adaugat-de-row" class="flex justify-between hidden">
-                                    <span class="font-medium">Adăugat de:</span>
-                                    <a id="teren-adaugat-de" href="#" class="text-blue-600 hover:underline"></a>
-                                </div>
+                        <!-- Inima și distribuirea: gesturi de o apăsare, nu pași de
+                             urmat. Inima se arată doar celui logat (JS). -->
+                        <div class="td-quick">
+                            <div id="user-action-buttons" class="hidden">
+                                <button id="btn-like-profil" type="button" class="td-icon-btn">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                    <span class="btn-like-text">Adaugă la profilul tău</span>
+                                </button>
                             </div>
+                            <span class="td-quick-sep" aria-hidden="true"></span>
+                            <button type="button" id="btn-share-copy" class="td-icon-btn">
+                                <i class="fas fa-link"></i> Copiază link
+                            </button>
+                            <a id="btn-share-whatsapp" target="_blank" rel="noopener" class="td-icon-btn">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                            <a id="btn-share-facebook" target="_blank" rel="noopener" class="td-icon-btn">
+                                <i class="fab fa-facebook-f"></i> Facebook
+                            </a>
                         </div>
 
-                        <!-- User Action Buttons + Cere o analiză on same row -->
-                        <div id="user-action-buttons" class="flex flex-wrap items-center gap-3 mb-6 hidden">
-                            <button id="btn-like-profil" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
-                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                                Adaugă la profil
-                            </button>
-                            <button id="btn-cere-analiza" class="flex items-center gap-2 px-5 py-2.5 bg-black hover:bg-gray-800 text-white font-semibold rounded-lg border-2 border-black shadow-md transition text-sm ml-auto">
-                                Cere o analiză
-                            </button>
-                        </div>
+                        <p class="td-origin">
+                            <span id="teren-adaugat-de-row" class="hidden">Adăugat de <a id="teren-adaugat-de" href="#"></a>, </span>
+                            <span id="teren-data-adaugat"></span><span id="teren-sursa-row" class="hidden"> · <a id="teren-sursa" href="#" target="_blank" rel="noopener noreferrer">Vezi anunțul original</a></span>
+                        </p>
+                    </div>
+                </section>
+
+                <!-- ── 2. CE POȚI FACE CU TERENUL ────────────────────────── -->
+                <section class="td-acts">
+                    <div class="td-acts-head">
+                        <h2>Ce poți face cu terenul ăsta</h2>
+                        <p>Alege un pas, nu e nevoie să le faci pe toate.</p>
+                    </div>
+
+                    <div class="td-acts-grid">
+                        <!-- Cardul analizei. Vizibil oricui, ca și CTA-ul de pe
+                             cardul din /terenuri.html: analize.html se ocupă singur
+                             de autentificare. ⚠️ Prețul e scris și aici, și în
+                             terenuri.html, analize.html, analiza-simplificata.html,
+                             comanda-analiza.html, servicii.html. Vezi NOTES.md. -->
+                        <article class="td-act td-act--lead">
+                            <p class="td-act-tag"><span class="td-act-dot"></span>Analiză preliminară, făcută de arhitecți</p>
+                            <h3>Cere analiza și vezi ce se poate construi și la ce costuri estimative</h3>
+                            <ul class="td-bullets">
+                                <li>câte apartamente încap și câte camere are fiecare</li>
+                                <li>suprafețe utile și la ce etaje sunt</li>
+                                <li>costuri estimative pe mp construit și pe mp util</li>
+                                <li>cât te costă terenul, în funcție de apartamentul pe care îl vrei</li>
+                                <li><b>99 RON</b> pentru un teren, TVA inclus</li>
+                                <li>trebuie să știi adresa sau numărul cadastral</li>
+                            </ul>
+                            <button id="btn-cere-analiza" type="button" class="td-btn td-btn--primary">Cere analiza preliminară</button>
+                        </article>
 
                         <!-- Fă un grup pe acest teren ──────────────────────────
                              Vizibil oricui: grup-nou.html se ocupă singur de
@@ -201,67 +216,59 @@
                              e păstrat pe tot traseul. Se ascunde din JS pentru
                              conturile de agenție (nu pot crea grupuri) și pentru
                              terenurile dezactivate. -->
-                        <div id="grup-nou-teren" class="mb-6">
-                            <a id="btn-grup-nou-teren" href="grup-nou.html"
-                               class="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-black rounded-lg hover:bg-gray-50 transition text-sm font-semibold">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                Fă un grup pe acest teren
-                            </a>
-                            <p class="text-sm text-gray-600 mt-2 max-w-xl">Un grup se poate forma pornind de la un teren, nu doar de la o zonă. Terenul intră la favoritele grupului, iar cine îl vede îți poate cere alăturarea.</p>
-                        </div>
+                        <article class="td-act" id="grup-nou-teren">
+                            <h3>Fă un grup pe terenul acesta</h3>
+                            <p>Multe grupuri pornesc exact așa, de la un teren pe care l-a găsit cineva primul. Terenul intră la favoritele grupului, iar cine îl vede îți poate cere alăturarea.</p>
+                            <a id="btn-grup-nou-teren" href="grup-nou.html" class="td-btn td-btn--primary">Fă un grup pe acest teren</a>
+                        </article>
 
-                        <!-- Distribuire teren (public, vizibil oricui) -->
-                        <div id="share-buttons" class="flex flex-wrap items-center gap-3 mb-6">
-                            <span class="text-sm text-gray-500 font-medium">Distribuie:</span>
-                            <button type="button" id="btn-share-copy" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
-                                <i class="fas fa-link text-gray-500"></i> Copiază link
-                            </button>
-                            <a id="btn-share-whatsapp" target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
-                                <i class="fab fa-whatsapp text-gray-500"></i> WhatsApp
-                            </a>
-                            <a id="btn-share-facebook" target="_blank" rel="noopener" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
-                                <i class="fab fa-facebook-f text-gray-500"></i> Facebook
-                            </a>
-                        </div>
+                        <!-- Adaugă-l la unul din grupurile tale. Cardul există mereu
+                             (se ascunde doar pentru agenții); conținutul lui se scrie
+                             din JS, cu trei stări: nelogat, logat fără grupuri, logat
+                             cu grupuri. Înainte, panoul lipsea cu totul pentru cine
+                             nu era în niciun grup, deci nimeni nu afla că se poate. -->
+                        <article class="td-act" id="group-likes-section">
+                            <h3>Adaugă-l la unul din grupurile tale</h3>
+                            <p>Intră la favoritele grupului, îl vede toată lumea și puteți comenta pe el, chiar sub teren, pe pagina grupului.</p>
+                            <div id="group-likes-body"></div>
+                        </article>
 
-                        <!-- Group Likes Section (populated by JS if user has groups) -->
-                        <div id="group-likes-section" class="hidden mb-6"></div>
+                        <!-- Cele două carduri de interes se arată doar celui logat
+                             care nu e agenție (loadInterestCounts). Nelogatul nu le
+                             vede: paginile utilizatori.html și grupuri.html cer cont,
+                             deci l-am trimite într-o listă goală. -->
+                        <article class="td-act hidden" id="card-interested-groups">
+                            <h3>Vezi grupuri interesate de acest teren</h3>
+                            <div class="td-count"><b id="interested-groups-count">0</b><span>grupuri</span></div>
+                            <p>Te poți alătura, poți comenta terenul și intri în legătură cu grupul.</p>
+                            <button id="btn-view-interested-groups" type="button" class="td-btn td-btn--ghost" onclick="viewInterestedGroupsFromDetail()">Vezi grupurile interesate</button>
+                        </article>
 
-                        <!-- Interest buttons: see who's interested -->
-                        <div id="interest-buttons" class="hidden mb-6" style="display: none;">
-                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                                <button id="btn-view-interested-users" onclick="viewInterestedUsersFromDetail()"
-                                        style="display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #334155; transition: all 0.15s;"
-                                        onmouseover="this.style.borderColor='#c2604a';this.style.color='#c2604a'"
-                                        onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#334155'">
-                                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    <span>Vezi utilizatorii interesați</span>
-                                    <span id="interested-users-count" style="background: #c2604a; color: white; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 10px; min-width: 20px; text-align: center;">0</span>
-                                </button>
-                                <button id="btn-view-interested-groups" onclick="viewInterestedGroupsFromDetail()"
-                                        style="display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 0.875rem; color: #334155; transition: all 0.15s;"
-                                        onmouseover="this.style.borderColor='#c2604a';this.style.color='#c2604a'"
-                                        onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#334155'">
-                                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                                    <span>Vezi grupurile interesate</span>
-                                    <span id="interested-groups-count" style="background: #c2604a; color: white; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 10px; min-width: 20px; text-align: center;">0</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div id="action-buttons" class="flex gap-3 hidden">
-                        </div>
+                        <article class="td-act hidden" id="card-interested-users">
+                            <h3>Vezi utilizatori interesați de acest teren</h3>
+                            <div class="td-count"><b id="interested-users-count">0</b><span>utilizatori</span></div>
+                            <p>Puteți face împreună un grup pe acest teren.</p>
+                            <button id="btn-view-interested-users" type="button" class="td-btn td-btn--ghost" onclick="viewInterestedUsersFromDetail()">Vezi utilizatorii interesați</button>
+                        </article>
                     </div>
-                </div>
+                </section>
 
-                
+                <!-- ── 3. DESCRIEREA DIN ANUNȚUL ORIGINAL ────────────────── -->
+                <!-- Stă la subsol dinadins. E text de agent, adesea foarte lung, iar
+                     în capul paginii împingea sub linia ecranului tot ce contează.
+                     Butonul „Citește mai mult" apare doar dacă textul chiar e tăiat. -->
+                <section class="td-desc" id="teren-descriere-section">
+                    <div class="td-desc-head">
+                        <h2>Descrierea din anunțul original</h2>
+                        <span>text preluat, needitat</span>
+                    </div>
+                    <p id="teren-description" class="td-desc-body is-clamped"></p>
+                    <button type="button" id="btn-desc-more" class="td-btn td-btn--ghost td-btn--sm td-desc-more hidden" aria-expanded="false" aria-controls="teren-description">Citește mai mult</button>
+                </section>
+
+                <!-- Modifică / Dezactivează: doar autorul terenului și superadminul -->
+                <div id="action-buttons" class="td-admin hidden">
+                </div>
             </div>
         </div>
     </main>

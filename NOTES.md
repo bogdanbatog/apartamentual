@@ -46,12 +46,27 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **Bifa „doar terenurile din zonele mele" e invizibilă pentru nelogat**
   Regula, stabilită la construirea ei pe 14 august: se arată doar celui logat cu cel puțin o zonă bifată în profil; nelogatului i se arată în locul ei rândul cu „Intră în cont", dar **numai** dacă a venit pe un link cu `?zonele_mele=1`. Rațiunea: să nu-i promitem ceva ce nu poate vedea. **Consecință:** un vizitator obișnuit nu află niciodată că funcția există, iar Lucian însuși a crezut că a dispărut când s-a uitat la pagină nelogat. De decis: o lăsăm așa, sau o arătăm oricui și cerem autentificarea la clic? Nu e o reparație, e o decizie de produs.
 
+- [ ] **Datele de urbanism nu există nicăieri (POT, CUT, regim, deschidere, utilități)**
+  Macheta paginii unui teren avea un rând de chips cu „Regim: S+P+2+3 retras", „POT: 65%", „CUT: 1,8", „Deschidere: 12 ml", „Utilități: toate". Tabela `terenuri` **nu are coloanele astea**, iar formularul de propunere nu le cere: sunt doar titlu, descriere, oraș, cartier, suprafață, preț total, poze, link sursă. Pe 15 august s-a decis să sărim rândul, nu să-l inventăm. Dacă îl vrem: coloane noi + câmpuri în `terenuri-propune.html` + editare în admin + afișare. Informația **există** azi, dar înecată în textul agentului, de unde n-o poate citi nici filtrarea, nici o analiză.
+
+- [ ] **Unele terenuri au ca poză principală o captură de ecran, nu o fotografie**
+  Găsit pe 15 august la „Teren zona Rond Cosbuc, blvd Libertății, Unirii": poza principală e o captură de ecran de pe Storia, făcută cu telefonul, 1080×2340, cu tot cu ceasul, bara de stare, butoanele aplicației și „Contact prin Storia". Afișarea a fost reparată (pozele înalte nu se mai taie), dar **conținutul rămâne prost** și se repară din admin, nu din cod. Măsurat: 4 din 46 de terenuri au poza principală în portret, alte 9 sunt aproape pătrate. De trecut o dată prin ele cu ochiul.
+
+- [ ] **Niciun teren nu are `nr_apartamente_min/max` completat**
+  Măsurat pe 15 august: 0 din 46 de terenuri aprobate. Faptul „Apartamente estimate" din antetul paginii unui teren e scris și merge, dar azi nu-l vede nimeni. Se umple abia când o analiză scrie înapoi în teren. De verificat dacă fluxul de analiză chiar scrie coloanele alea, sau dacă au rămas moarte din altă schemă.
+
 - [ ] **Capcană de stil: `.hero-content p` bate orice selector cu o singură clasă**
   Hero-ul paginii de terenuri are `.hero-content p { color: var(--slate-300); font-size: 1rem; }`. Orice `<p>` nou pus în hero primește culoarea și mărimea aia, oricât de explicit ai scris tu altceva într-o clasă. Pe 14 august eticheta panoului de analiză s-a randat gri deschis la 16px, cu contrast sub 1,5:1, deși în cod scria teracotă la 11px. Reparat cu selectori de două clase. **Tiparul de hero se repetă și pe alte pagini**, deci capcana nu e doar aici.
 
 ---
 
 ## Rezolvate
+
+- [x] **2026-08-15 — Reorganizarea paginii unui teren (`/teren-details.html`)** *(**necomis**, **nepublicat**)*
+  Trei blocuri, după macheta din `handoff/apartamentual 03-handoff_pagina unui teren.zip`: antet (galerie + cele patru date), „Ce poți face cu terenul ăsta" (cinci carduri), descrierea din anunț mutată la subsol și pliată la trei rânduri. Foaie nouă, `frontend/teren-details.css`, cu tokenurile din `terenuri.css`; clasele sunt prefixate `td-` fiindcă pagina încarcă și Tailwind, și `styles.css`, și v9. Până la primul pas de făcut: pe telefon 1.619 → 881 px, pe desktop 867 → 673 px. Detalii, capcane și decizii: **`handoff/handoff-pagina-unui-teren.md`**.
+  ✅ Rezolvate pe drum și cele două rămășițe vechi: butonul „Cere o analiză" **are acum explicație** (cardul mare, cu ce primești și 99 RON), iar panoul de grupuri **nu mai dispare** pentru cine nu e în niciun grup (are trei stări: nelogat, logat fără grupuri, logat cu grupuri).
+  ✅ Pozele în portret nu se mai taie: sub raportul 1,3, rama trece pe `object-fit: contain`. Priveau 13 din 46 de terenuri.
+  ⚠️ Găsit și reparat un bug vechi: badge-ul de status scria **„approved", în engleză, pe fiecare pagină de teren**. `statusMapping` avea valori care nu există în bază (`active`, `under_review`, `reserved`, `sold`, `inactive`), iar codul afișa valoarea brută când nu găsea potrivire. Statusurile reale sunt `pending` / `approved` / `rejected`. Acum „approved" nu se mai arată deloc (toate terenurile publice sunt aprobate, deci semnul nu spunea nimic).
 
 - [x] **2026-08-14 — Reorganizarea paginii `/terenuri.html`** *(commit `a0df9d1`, împins; **nepublicat**, cPanel manual)*
   Panoul „Analiză preliminară" în hero (cei patru pași, din macheta din `handoff/`), CTA de analiză pe fiecare card, cardul întreg clicabil, iconițele „vezi cine e interesat" scoase, faptele terenului pe două rânduri, pașii 3 și 4 pliați pe telefon, bara de filtre strânsă. Pe telefon, până la primul teren: 1.127 → 777 px. Detalii complete, capcane și decizii: **`handoff/handoff-reorganizare-pagina-terenuri.md`**.
