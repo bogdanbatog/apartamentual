@@ -165,8 +165,13 @@
                                 </button>
                             </div>
                             <span class="td-quick-sep" aria-hidden="true"></span>
-                            <button type="button" id="btn-share-copy" class="td-icon-btn">
-                                <i class="fas fa-link"></i> Copiază link
+                            <!-- „Copiază", nu „Copiază link": patru butoane pe rând,
+                                 iar al patrulea cădea singur pe rândul al doilea.
+                                 Veriga de lângă cuvânt și vecinii (WhatsApp,
+                                 Facebook) spun despre ce e vorba; titlul o scrie
+                                 pe litere pentru cine se oprește cu mouse-ul. -->
+                            <button type="button" id="btn-share-copy" class="td-icon-btn" title="Copiază linkul terenului">
+                                <i class="fas fa-link"></i> Copiază
                             </button>
                             <a id="btn-share-whatsapp" target="_blank" rel="noopener" class="td-icon-btn">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
@@ -309,7 +314,10 @@
         copy.addEventListener('click', function() {
             navigator.clipboard.writeText(url).then(function() {
                 const orig = copy.innerHTML;
-                copy.innerHTML = '<i class="fas fa-check text-gray-500"></i> Link copiat';
+                // Fără clasă de culoare: iconițele rândului sunt colorate din
+                // `teren-details.css`. Cu `text-gray-500` de la Tailwind, bifa
+                // ieșea două secunde într-un gri care nu e al paginii.
+                copy.innerHTML = '<i class="fas fa-check"></i> Link copiat';
                 setTimeout(function() { copy.innerHTML = orig; }, 2000);
             });
         });

@@ -250,19 +250,24 @@
 }
 
 /* Rândul cu inima și distribuirea. Stă între fapte și rândul de proveniență,
-   nu în blocul de acțiuni: sunt gesturi de o apăsare, nu pași de urmat. */
+   nu în blocul de acțiuni: sunt gesturi de o apăsare, nu pași de urmat.
+   ⚠️ Patru butoane, nu trei: inima se arată doar celui logat, deci nelogat
+   rândul pare mai lejer decât e. Măsurat pe site, logat, la 1440 px lățime:
+   erau nevoie de 585 px și existau 581. Se rupea, iar „Facebook" rămânea
+   singur pe rândul al doilea. De aceea butoanele de aici sunt mai strânse
+   decât restul paginii. La orice buton nou pe rândul ăsta, remăsoară LOGAT. */
 .td-quick {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin: 14px 0 0;
 }
 .td-quick-sep {
     width: 1px;
     align-self: stretch;
     background: var(--slate-200);
-    margin: 0 4px;
+    margin: 0 2px;
 }
 /* Nelogatul nu vede inima, deci despărțitorul ar rămâne singur la începutul
    rândului, ca o liniuță fără rost. */
@@ -270,8 +275,8 @@
 .td-page .td-icon-btn {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 8px 12px;
+    gap: 6px;
+    padding: 8px 10px;
     min-height: 38px;
     font-size: 0.875rem;
     font-weight: 500;
