@@ -40,8 +40,9 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **`terenuri` are două coloane de dată și nu se știe care e „adevărata"**
   `created_at` (după care se sortează lista și care se afișează pe card, `terenuri.js:218` și `343`) și `data_adaugat`, rămasă din schema veche. Cât timp coincid, nu se vede nimic. La un teren la care diferă, lista pare pusă în ordine greșită deși codul e corect. A ieșit la iveală pe 14 august, când Lucian a cerut „cele mai noi întâi" pe `/terenuri.html` — ordine care **există deja** ca implicită. ✅ **Întrebat Lucian pe 14 august: ordinea de pe site e cea așteptată, sortarea NU s-a atins.** Rămâne deschis doar: e `data_adaugat` folosită de ceva, sau se scoate? **Nu rescrie sortarea până nu se lămurește**, altfel repari ceva ce nu e stricat.
 
-- [ ] **Prețul de 99 RON e scris de mână în 10 locuri**
-  `analize.html`, `analiza-simplificata.html` (de trei ori), `comanda-analiza.html` (de două ori, plus `js/comanda-analiza.js`), `servicii.html` (de două ori, în preț și în FAQ), iar de pe 14 august și în panoul din `terenuri.html` plus constanta `PRET_ANALIZA` din `js/terenuri.js`. La expirarea prețului de lansare (mijlocul lui noiembrie 2026) sunt toate de schimbat. De făcut o listă scrisă **înainte** de a-l mai pune undeva, sau de mutat într-un singur loc citit de toate paginile.
+- [ ] **Prețul de 99 RON e scris de mână în 11 locuri**
+  `analize.html`, `analiza-simplificata.html` (de trei ori), `comanda-analiza.html` (plus `js/comanda-analiza.js`), `servicii.html` (de două ori, în preț și în FAQ), panoul din `terenuri.html` plus constanta `PRET_ANALIZA` din `js/terenuri.js`, iar de pe 15 august și cardul de analiză din `teren-details.html`. La expirarea prețului de lansare (mijlocul lui noiembrie 2026) sunt toate de schimbat. De făcut o listă scrisă **înainte** de a-l mai pune undeva, sau de mutat într-un singur loc citit de toate paginile.
+  ⚠️ **Singura sursă de adevăr pentru suma încasată e `supabase/functions/creeaza-proforma-oblio/index.ts`** (`const pretTotal = 99.00`). Cifrele din frontend sunt doar afișare. Dacă se schimbă prețul, ăla e rândul care contează.
 
 - [ ] **Bifa „doar terenurile din zonele mele" e invizibilă pentru nelogat**
   Regula, stabilită la construirea ei pe 14 august: se arată doar celui logat cu cel puțin o zonă bifată în profil; nelogatului i se arată în locul ei rândul cu „Intră în cont", dar **numai** dacă a venit pe un link cu `?zonele_mele=1`. Rațiunea: să nu-i promitem ceva ce nu poate vedea. **Consecință:** un vizitator obișnuit nu află niciodată că funcția există, iar Lucian însuși a crezut că a dispărut când s-a uitat la pagină nelogat. De decis: o lăsăm așa, sau o arătăm oricui și cerem autentificarea la clic? Nu e o reparație, e o decizie de produs.
@@ -61,6 +62,13 @@ Nu acționa pe niciuna fără confirmare explicită.
 ---
 
 ## Rezolvate
+
+- [x] **2026-08-15 — Prețul standard tăiat (149 RON) scos de peste tot** *(**necomis**, **nepublicat**)*
+  Cerut de Lucian. Se afișează doar prețul de lansare: **99 RON, TVA inclus**. Opt locuri, în patru pagini: `analize.html` (cardul), `analiza-simplificata.html` (butonul din hero, rândul „Preț", paragraful de CTA, butonul de jos), `comanda-analiza.html` (rândul de preț din hero), `servicii.html` (cardul de serviciu și întrebarea din FAQ, care se numea „Analiza preliminară costă 99 sau 149 RON?" și acum e „Cât costă analiza preliminară?").
+  Scoase și cele două reguli CSS rămase fără folos (`.price-old`, `.ord-price-old`), ca să nu ispitească pe cineva să pună prețul tăiat la loc.
+  Butonul care duce la plată scrie acum **„Continuă la plată, 99 RON cu TVA inclus"** (era „Continuă la plată — 99 RON", fără TVA și cu liniuță lungă). ⚠️ Eticheta lui e scrisă în **două locuri**: `comanda-analiza.html` și `setSubmitting()` din `js/comanda-analiza.js`, care o pune la loc după starea „Se procesează…". Dacă se despart, butonul își schimbă singur textul după o încercare de plată eșuată.
+  **Suma încasată nu s-a atins**: rămâne 99,00 în `creeaza-proforma-oblio`. S-a schimbat doar afișarea.
+  ⚠️ Mențiunile la 149 rămase în `handoff/HANDOFF-pagina-servicii.md` și în nota din `email_templates/` sunt **înregistrări istorice, datate**, nu se rescriu.
 
 - [x] **2026-08-15 — Reorganizarea paginii unui teren (`/teren-details.html`)** *(**necomis**, **nepublicat**)*
   Trei blocuri, după macheta din `handoff/apartamentual 03-handoff_pagina unui teren.zip`: antet (galerie + cele patru date), „Ce poți face cu terenul acesta" (cinci carduri), descrierea din anunț mutată la subsol și pliată la trei rânduri. Foaie nouă, `frontend/teren-details.css`, cu tokenurile din `terenuri.css`; clasele sunt prefixate `td-` fiindcă pagina încarcă și Tailwind, și `styles.css`, și v9. Până la primul pas de făcut: pe telefon 1.619 → 881 px, pe desktop 867 → 673 px. Detalii, capcane și decizii: **`handoff/handoff-pagina-unui-teren.md`**.

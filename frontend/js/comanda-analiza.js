@@ -303,7 +303,16 @@
         if (loading) {
             submitText.innerHTML = '<span class="spin"></span> Se procesează...';
         } else {
-            submitText.textContent = 'Continuă la plată — 99 RON';
+            // ⚠️ Trebuie să fie EXACT textul din `comanda-analiza.html`
+            // (#ord-submit-text). Rândul ăsta pune eticheta la loc după starea
+            // „Se procesează…", deci dacă cele două se despart, butonul își
+            // schimbă textul singur după o încercare de plată eșuată.
+            // `.ord-nowrap` ține „99 RON cu TVA inclus" într-o bucată: pe telefon
+            // eticheta nu încape pe un rând, iar fără el se rupea între „99" și
+            // „RON". Se scrie cu innerHTML, ca rândul de deasupra, fiindcă e
+            // markup, nu doar text. Conținutul e scris aici în cod, nu vine de
+            // nicăieri din afară.
+            submitText.innerHTML = 'Continuă la plată, <span class="ord-nowrap">99 RON cu TVA inclus</span>';
         }
     }
 

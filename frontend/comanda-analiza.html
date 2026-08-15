@@ -59,11 +59,8 @@
             padding: 0.75rem 1.25rem;
             border-radius: 12px;
         }
-        .ord-price-old {
-            font-size: 1.05rem;
-            color: #a8a094;
-            text-decoration: line-through;
-        }
+        /* .ord-price-old (prețul vechi tăiat) a fost scos pe 15 august, odată cu
+           el. Se afișează doar prețul de lansare, 99 RON, TVA inclus. */
         .ord-price-new {
             font-size: 1.5rem;
             font-weight: 700;
@@ -236,6 +233,11 @@
             align-items: center;
             gap: 0.5rem;
         }
+        /* Pe telefon eticheta butonului nu încape pe un rând, oricum am scurta-o.
+           Aici se hotărăște UNDE se rupe: „99 RON cu TVA inclus" rămâne întreg,
+           deci ruperea cade după virgulă. Fără regula asta se rupea între „99" și
+           „RON", adică suma despărțită de moneda ei. */
+        .ord-nowrap { white-space: nowrap; }
         .ord-submit:hover:not(:disabled) {
             background: #000000;
         }
@@ -382,7 +384,6 @@
         <h1>Comandă analiza <span>preliminară</span></h1>
         <p>Primești în maxim 3-5 zile lucrătoare un raport tehnic PDF cu fezabilitatea construcției pe terenul ales.</p>
         <div class="ord-price-row">
-            <span class="ord-price-old">149 RON</span>
             <span class="ord-price-new">99 RON</span>
             <span class="ord-price-tva">TVA inclus</span>
         </div>
@@ -546,7 +547,11 @@
                 <!-- Submit -->
                 <button type="submit" id="ord-submit" class="ord-submit">
                     <i class="fas fa-credit-card"></i>
-                    <span id="ord-submit-text">Continuă la plată — 99 RON</span>
+                    <!-- ⚠️ Același markup e scris și în `js/comanda-analiza.js`,
+                         funcția setSubmitting, care pune eticheta la loc după
+                         starea „Se procesează…". Dacă se schimbă unul, se
+                         schimbă amândouă. -->
+                    <span id="ord-submit-text">Continuă la plată, <span class="ord-nowrap">99 RON cu TVA inclus</span></span>
                 </button>
             </form>
         </div>
