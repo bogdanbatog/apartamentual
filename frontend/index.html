@@ -9,6 +9,28 @@
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
+<!-- ── STAREA DE AUTENTIFICARE, CITITĂ SINCRON ──
+     Rulează ÎNAINTE ca pagina să se deseneze, ca secțiunile de marketing să nu
+     apară o clipă și apoi să dispară pentru cine e logat. Aici nu putem întreba
+     serverul (ar însemna să ținem pagina albă), așa că ne uităm în localStorage:
+       • cheia de sesiune Supabase spune DACĂ e cineva logat;
+       • `atu_hero_variant` (scrisă de scriptul de hero de la finalul paginii)
+         spune CE FEL de cont e. 'b' = agenție, iar agențiile rămân cu pagina
+         întreagă: „Cum începi" le explică cum să-și construiască apartamentul,
+         adică fix ce o agenție nu face.
+     E o presupunere, nu o certitudine: un token expirat arată tot ca „logat".
+     Scriptul blocului de stare o confirmă după getSession() și scoate clasa
+     dacă sesiunea nu e reală sau dacă e cont de agenție. -->
+<script>
+  (function(){
+    try{
+      if(!localStorage.getItem('sb-glbvbbgmcobtswwlktic-auth-token')) return;
+      if(localStorage.getItem('atu_hero_variant') === 'b') return;   // agenție
+      document.documentElement.classList.add('atu-logat');
+    }catch(e){ /* localStorage blocat => pagina rămâne întreagă */ }
+  })();
+</script>
+
 <!-- Open Graph / Twitter (previzualizare link la distribuire) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ApartamenTUal">
@@ -496,6 +518,9 @@
     .hero-stage .hero[data-variant] .lead{ order:4; }
     .hero-stage .hero[data-variant] .status{ order:4; }
     .hero-stage .hero[data-variant] .actions{ order:5; }
+    /* Blocul de stare a luat locul butoanelor, deci ia și ordinea lor.
+       Fără asta cade pe `order:0` implicit și pașii ajung DEASUPRA titlului. */
+    .hero-stage .hero[data-variant] #bloc-stare{ order:5; }
     .hero-stage .hero[data-variant] .micro{ order:6; }
     .hero-stage .cluster{
       position:static; width:100%; max-width:100%; display:flex; flex-wrap:wrap;
@@ -1568,6 +1593,101 @@
   @media (max-width:480px){
     body{ padding:1.25rem 1rem; }
   }
+
+  /* ══════════════════════════════════════════════════════════════════
+     HOMEPAGE PENTRU UTILIZATORI LOGAȚI
+     Clasa .atu-logat e pusă pe <html> de scriptul sincron din <head>.
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* Secțiunile de convingere: omul care are deja cont nu mai are nevoie de
+     ele. RĂMÂN vizibile galeria Județului, video-ul fondatorului și FAQ-ul,
+     fiindcă cine s-a înregistrat direct de pe o pagină de grup nu le-a văzut
+     niciodată (187 de intrări directe în site au fost pe pagini de grup).
+     `!important` fiindcă e o clasă-unealtă care trebuie să bată și regulile
+     de display din media query-urile de mai sus (.cai, .avantaje etc.). */
+  .atu-logat .js-marketing-only{ display:none !important; }
+
+  /* Linkul din subsolul galeriei: `.ic-foot` e flex cu align-items:center, iar
+     `.text-link` vine cu margin-top:1.25rem, care l-ar coborî față de legendă. */
+  .ic-foot .text-link{ margin-top:0; }
+
+  /* ── HERO STRÂNS PENTRU LOGAȚI ──
+     Hero-ul e dimensionat pentru vizitator: ocupă un ecran întreg ca să
+     convingă. Pentru cine are deja cont, ecranul ăla spune doar un nume, iar
+     lucrul folositor (pașii) rămâne sub linia de derulare. Îl strângem ca
+     hero + blocul de stare să încapă împreună în primul ecran.
+     ⚠️ Nu sub ~350px: clusterul de vecini e position:absolute întins pe
+     înălțimea hero-ului, iar pătratele încep să se suprapună.
+     Se aplică DOAR variantei A (cont personal). Agenția e neatinsă. */
+  .atu-logat #navigation{ margin-bottom:1.5rem; }
+  .atu-logat .hero-stage .hero[data-variant="a"]{
+    min-height:clamp(380px,44vh,460px);
+    padding-bottom:clamp(16px,3vh,32px);
+  }
+  /* Fraza de sub titlu („Terenuri filtrate de arhitecți și grupuri care se
+     formează chiar acum…") e text de convingere. Cine are cont nu mai are
+     nevoie de ea, iar rândul cu vecinii de dedesubt spune ceva concret. */
+  .atu-logat .hero-stage .hero[data-variant="a"] > .lead{ display:none; }
+
+  /* ── BLOCUL DE STARE, ÎN INTERIORUL HERO-ULUI ──
+     Măsurat pe un ecran de 731px: meniu 93 + hero 350 (deja la limita de jos,
+     sub 350 pătratele cu vecini se suprapun) + bara de apartamente 122 +
+     blocul 352 = 941px. Pe primul ecran încăpea hero-ul SAU blocul, nu
+     amândouă, oricât de mult am fi strâns spațiile. Așa că pașii au intrat
+     în hero, exact unde stăteau butoanele scoase: o singură zonă, fără
+     derulare, iar hero-ul nu mai e gol.
+     Fără card crem aici: în hero, pașii sunt text, iar fiecare pas e el
+     însuși linkul. Cardul ar fi arătat ca o casetă lipită peste hero. */
+  /* Marginea de jos separă blocul de rândul „N vecini cu interese comune",
+     care vine imediat după el. Fără ea se lipesc, mai ales pe telefon. */
+  #bloc-stare{ position:relative; z-index:1; max-width:560px; margin:22px 0 16px; }
+  #bloc-stare[hidden]{ display:none; }
+
+  /* starea 1 · onboarding */
+  .bs-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:15px; }
+  .bs-row{ display:flex; align-items:flex-start; gap:12px; }
+  .bs-mark{
+    flex:0 0 auto; width:20px; height:20px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; line-height:1; margin-top:3px;
+  }
+  .bs-mark--done{ background:var(--ink); color:var(--bg); }
+  .bs-mark--todo{ border:1px solid var(--rule-2); }
+  .bs-text{ min-width:0; }
+  .bs-link-pas{
+    font-size:16px; font-weight:500; color:var(--ink); text-decoration:none;
+    border-bottom:1px solid var(--rule-2); padding-bottom:2px;
+    transition:border-color .2s ease;
+  }
+  .bs-link-pas:hover{ border-bottom-color:var(--ink); }
+  .bs-gata{ font-size:16px; color:var(--ink-3); }
+  /* Explicația stă lângă linkul care o cere: „Vezi terenurile" singur nu spune
+     de ce ai vrea să te uiți acolo. Apare doar la pașii nebifați, pe unul
+     făcut n-are ce explica. */
+  .bs-hint{ display:block; font-size:13px; line-height:1.5; color:var(--ink-3); margin-top:5px; }
+
+  /* starea 2 · scurtături */
+  .bs-links{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+  .bs-link{
+    display:inline-flex; align-items:baseline; gap:8px;
+    font-size:16px; color:var(--ink); text-decoration:none;
+    border-bottom:1px solid var(--rule-2); padding-bottom:2px;
+    transition:border-color .2s ease;
+  }
+  .bs-link:hover{ border-bottom-color:var(--ink); }
+  .bs-link .arr{ flex:0 0 auto; color:var(--ink-3); }
+
+  /* subsolul comun celor două stări */
+  .bs-foot{ margin:20px 0 0; font-size:13px; line-height:1.6; color:var(--ink-3); }
+  .bs-foot a{ color:#c2604a; text-decoration:none; font-weight:500; }
+  .bs-foot a:hover{ text-decoration:underline; }
+
+  /* Bifa ✓ e aria-hidden, deci pasul făcut are nevoie de un cuvânt citit doar
+     de cititoarele de ecran. Pagina n-avea un `.sr-only`, îl definim aici. */
+  #bloc-stare .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
 </style>
 </head>
 <body>
@@ -1607,10 +1727,22 @@
       <p class="eyebrow"><span class="dot"></span>Bun venit înapoi</p>
       <h1 class="title">Hai să-ți găsești <span class="accent">grupul</span><span class="js-hero-name"></span>.</h1>
       <p class="lead">Terenuri filtrate de arhitecți și grupuri care se formează chiar acum, în zonele care te interesează.</p>
-      <div class="actions">
-        <a class="btn btn--primary" href="/terenuri.html">Vezi terenuri <span aria-hidden="true">→</span></a>
-        <a class="btn btn--ghost" href="/grupuri.html">Grupuri în formare</a>
-      </div>
+      <!-- Aici stăteau două butoane, „Vezi terenuri" și „Grupuri în formare".
+           Le-am scos: blocul de stare de imediat sub hero trimitea în exact
+           aceleași două pagini, la 56 de pixeli distanță, dar cu explicație.
+           Așa pagina are o singură zonă de acțiune, iar omul nu mai intră pe
+           /terenuri.html înainte să afle ce caută acolo. Nimic nu se pierde:
+           „Terenuri" și „Grupuri" sunt permanent în meniul de sus.
+           ⚠️ Doar varianta A (cont personal). Agenția (varianta B) e neatinsă. -->
+
+      <!-- ── BLOC DE STARE ──
+           Stă ÎN hero, fiindcă sub el n-ar mai fi încăput pe primul ecran
+           (vezi socoteala din CSS). Fiind copil al variantei A, nu ajunge
+           niciodată la nelogați (hero-ul e `hidden`) și nici la agenții
+           (ele văd varianta B). Se populează din scriptul de la finalul
+           paginii; rămâne `hidden` până când sesiunea e confirmată. -->
+      <div id="bloc-stare" hidden></div>
+
       <p class="micro js-hero-a-micro" hidden></p>
       <div class="cluster js-cluster-a" role="list" aria-label="Vecini compatibili"></div>
     </section>
@@ -1646,14 +1778,14 @@
   </div>
 
   <!-- ── CREDIBILITY BAND ── -->
-  <div class="cred-band">
+  <div class="cred-band js-marketing-only">
     <span>Modelul Baugruppen aplicat în România</span>
     <span>Tu deții decizia, noi coordonăm</span>
     <span>De la teren la apartamentul tău</span>
   </div>
 
   <!-- ── CE E MODELUL ── -->
-  <section class="section section--model">
+  <section class="section section--model js-marketing-only">
     <div class="model-layout">
       <div class="model-left">
         <p class="section-eyebrow">Platformă de construcție colaborativă</p>
@@ -1710,19 +1842,19 @@
   </section>
 
   <!-- ── VIDEO TIMELAPSE STRADA JUDEȚULUI ── -->
-  <div class="video-ph video-ph--live">
+  <div class="video-ph video-ph--live js-marketing-only">
     <iframe src="https://www.youtube.com/embed/bfW2DJ1_du4?rel=0&amp;modestbranding=1&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=bfW2DJ1_du4&amp;playsinline=1" title="Timelapse Județului Housing, ApartamenTUal" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
   </div>
-  <p class="carousel-note">Timelapse: construcția blocului de pe Strada Județului, 2024</p>
+  <p class="carousel-note js-marketing-only">Timelapse: construcția blocului de pe Strada Județului, 2024</p>
 
   <!-- ── QUOTE FAMILIE ── -->
-  <blockquote class="family-quote">
+  <blockquote class="family-quote js-marketing-only">
     <p class="quote-text">„După lungi căutări prin ofertele imobiliare clasice, am știut din prima că apartamen<b class="apt-tu">TU</b>al e ce căutam de fapt. Ne-a plăcut mult libertatea de a alege zona, posibilitatea de a ne croi interiorul exact după nevoile noastre, de a decide ce fel de spații comune includem și de a fi implicați în toate fazele, fără intermediari. Au fost și provocări, dar e mai ușor când împarți responsabilitățile cu ceilalți. Abia așteptăm să ne bucurăm de noua noastră casă, alături de viitorii vecini.”</p>
     <footer class="quote-attr">Tiberiu M. · familie participantă, Județului Housing</footer>
   </blockquote>
 
   <!-- ── AVANTAJE BAUGRUPPEN ── -->
-  <section class="section">
+  <section class="section js-marketing-only">
     <p class="section-eyebrow">De ce funcționează</p>
     <h2 class="section-title">Ce câștigi când construiești colaborativ?</h2>
     <div class="avantaje">
@@ -1793,6 +1925,12 @@
 
     <div class="ic-foot">
       <p class="ic-caption">Județului Housing · randări și etape de șantier</p>
+      <!-- Galeria era o fundătură: patru imagini și gata. „Povestea noastră"
+           nu e în meniul principal (vezi nav.js), iar singurele două linkuri
+           către ea de pe homepage stăteau în Echipa și în CTA-ul final, adică
+           exact în secțiunile ascunse pentru logați. Linkul ăsta o repune pe
+           hartă, fix unde se naște întrebarea „bun, și cum s-a făcut?". -->
+      <a href="/povestea-noastra.html" class="text-link plausible-event-name=CTA+Click plausible-event-loc=galerie plausible-event-dest=povestea">Vezi cum s-a construit, de la teren la recepție →</a>
     </div>
   </section>
 
@@ -1860,7 +1998,7 @@
   </section>
 
   <!-- ── ECHIPA ── -->
-  <section class="section">
+  <section class="section js-marketing-only">
     <p class="section-eyebrow">Echipa</p>
     <h2 class="section-title">Cine sunt oamenii din spatele apartamen<b class="apt-tu">TU</b>al</h2>
     <div class="team-layout">
@@ -1940,7 +2078,7 @@
   </section>
 
   <!-- ── CTA FINAL ── -->
-  <div class="cta-final">
+  <div class="cta-final js-marketing-only">
     <h2 class="section-title">Nu rata următoarea întâlnire.</h2>
     <p class="section-body">Vii, asculți, întrebi. Fără angajament, fără cont, fără nimic de pregătit.</p>
     <div class="hero-ctas">
@@ -2487,6 +2625,202 @@
         if(cv === 'a' || cv === 'b') showVariant(cv);
         decide(user);                // confirmă varianta + populează datele reale
       }).catch(function(e){ console.warn('hero auth:', e); });
+    }
+    init();
+  })();
+</script>
+
+<script>
+  // ════════════════════════════════════════════════════════════════════
+  //  BLOCUL DE STARE — homepage ca hub de acțiune pentru cine e logat
+  //
+  //  Pentru un cont personal logat, sub hero apare un bloc cu trei pași:
+  //    profil complet → cel puțin un teren la profil → cel puțin un grup.
+  //  Cât timp e ceva nebifat, blocul e o listă cu butoane („Primii tăi pași").
+  //  Când sunt toate trei bifate, devine scurtături către grupurile și
+  //  terenurile lui.
+  //
+  //  Cine NU vede blocul (și cui NU i se scurtează pagina):
+  //    • nelogații — pagina rămâne exact cum era;
+  //    • conturile de agenție (account_type = 'profesional') — nu pot adăuga
+  //      terenuri la favorite (terenuri.js) și nu intră în grupuri, deci cei
+  //      trei pași le-ar fi imposibil de bifat.
+  //
+  //  ⚠️ „Profil complet" se întreabă SERVERUL, prin RPC-ul `profil_complet`.
+  //  Bara de progres din pagina de profil numără altceva (are și telefon și
+  //  vârstă, opționale din 4 august). Poarta care chiar decide cine intră în
+  //  grupuri e funcția SQL, deci ea decide și bifa de aici — altfel i-am
+  //  scrie omului „profil incomplet" când de fapt poate intra în grupuri.
+  // ════════════════════════════════════════════════════════════════════
+  (function(){
+    var HTML = document.documentElement;
+    var ROOT = document.getElementById('bloc-stare');
+    if(!ROOT) return;
+
+    var URL_PROFIL   = '/profile-edit-new.html';
+    var URL_TERENURI = '/terenuri.html';
+    var URL_GRUPURI  = '/grupuri.html';
+
+    function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+
+    // Anulează presupunerea făcută sincron în <head>: pagina rămâne întreagă.
+    function paginaIntreaga(){ HTML.classList.remove('atu-logat'); }
+
+    // Măsurare Plausible. Site-ul are UN SINGUR nume de eveniment, `CTA Click`,
+    // cu proprietățile `loc` și `dest` (vezi butoanele din hero, „Cum începi",
+    // bannerul webinar). Un nume nou ar ieși din raportul în care se compară
+    // toate CTA-urile între ele. Apelul e explicit, nu prin clasele
+    // `plausible-event-*`, fiindcă butoanele astea sunt create din JS.
+    function track(dest){
+      if(typeof window.plausible === 'function'){
+        window.plausible('CTA Click', { props: { loc: 'bloc-stare', dest: dest } });
+      }
+    }
+    ROOT.addEventListener('click', function(ev){
+      var a = ev.target.closest ? ev.target.closest('[data-dest]') : null;
+      if(a && ROOT.contains(a)) track(a.getAttribute('data-dest'));
+    });
+
+    function afiseaza(html){
+      ROOT.innerHTML = html;
+      ROOT.hidden = false;
+    }
+
+    // ── STAREA 1 · onboarding (cel puțin un pas nebifat) ──
+    // Fără titlu de secțiune: titlul hero-ului („Hai să-ți găsești grupul,
+    // {nume}.") spune deja despre ce e vorba, iar un „Primii tăi pași" sub el
+    // ar fi al doilea titlu în același bloc de text.
+    function randeazaOnboarding(st){
+      var pasi = [
+        { ok:st.profil, text:'Completează-ți profilul',        gata:'Profilul tău e complet',       href:URL_PROFIL,   dest:'profil',
+          hint:'Zonele și preferințele tale de locuire. Fără ele nu te putem potrivi cu nimeni.' },
+        { ok:st.teren,  text:'Adaugă primul teren la profil',  gata:'Ai terenuri salvate pe profil', href:URL_TERENURI, dest:'terenuri',
+          hint:'Cauți în zonele tale și salvezi ce îți place. Așa vezi cine mai e interesat de același teren.' },
+        { ok:st.grup,   text:'Intră într-un grup sau fă unul', gata:'Ești într-un grup',             href:URL_GRUPURI,  dest:'grupuri',
+          hint:'Grupurile se formează pe zone. Ceri să intri într-unul sau pornești tu unul.' }
+      ];
+
+      var randuri = pasi.map(function(p){
+        return '<li class="bs-row' + (p.ok ? ' bs-row--done' : '') + '">' +
+                 '<span class="bs-mark ' + (p.ok ? 'bs-mark--done' : 'bs-mark--todo') + '" aria-hidden="true">' +
+                   (p.ok ? '✓' : '') +
+                 '</span>' +
+                 '<span class="bs-text">' +
+                   (p.ok
+                     ? '<span class="bs-gata">' + esc(p.gata) + '</span><span class="sr-only">, gata</span>'
+                     : '<a class="bs-link-pas" href="' + p.href + '" data-dest="' + p.dest + '">' + esc(p.text) +
+                         ' <span aria-hidden="true">→</span></a>' +
+                       '<span class="bs-hint">' + esc(p.hint) + '</span>') +
+                 '</span>' +
+               '</li>';
+      }).join('');
+
+      afiseaza(
+        '<ul class="bs-list">' + randuri + '</ul>' +
+        '<p class="bs-foot">Nu știi de unde să începi? ' +
+          '<a href="#cum-incepi" data-dest="cum-incepi">Vezi cum funcționează →</a></p>'
+      );
+    }
+
+    // ── STAREA 2 · scurtături (toate trei bifate) ──
+    function randeazaScurtaturi(userId, grupuri, nrTerenuri){
+      var linkuri = '';
+
+      grupuri.slice(0, 3).forEach(function(g){
+        linkuri += '<li><a class="bs-link" href="/grup-details.html?id=' + encodeURIComponent(g.id) + '" data-dest="grupul-meu">' +
+                     'Grupul tău: <b>' + esc(g.nume) + '</b><span class="arr" aria-hidden="true">→</span>' +
+                   '</a></li>';
+      });
+
+      if(grupuri.length > 3){
+        linkuri += '<li><a class="bs-link" href="' + URL_GRUPURI + '" data-dest="toate-grupurile">' +
+                     'Toate grupurile tale (' + grupuri.length + ')<span class="arr" aria-hidden="true">→</span>' +
+                   '</a></li>';
+      }
+
+      // Terenurile trimit în profilul propriu, la secțiunea de terenuri favorite.
+      linkuri += '<li><a class="bs-link" href="/profile-view-new.html?id=' + encodeURIComponent(userId) + '#favorite-terrains" data-dest="terenurile-mele">' +
+                   'Terenurile tale (' + nrTerenuri + ')<span class="arr" aria-hidden="true">→</span>' +
+                 '</a></li>';
+
+      afiseaza('<ul class="bs-links">' + linkuri + '</ul>');
+    }
+
+    // ── datele ──
+    function incarca(user){
+      // Cele trei stări + tipul de cont, într-o singură rundă de apeluri
+      // paralele. Numele grupurilor se cer abia după, și doar dacă ajungem
+      // în starea de scurtături — nimeni nu embed-uiește `grupuri` în
+      // `grup_membri` în tot codul, așa că nu experimentez cu RLS aici.
+      Promise.all([
+        sb.rpc('profil_complet', { p_user_id: user.id }),
+        sb.from('terenuri_likes').select('teren_id, terenuri(status)').eq('user_id', user.id),
+        sb.from('grup_membri').select('grup_id').eq('user_id', user.id).eq('status', 'activ'),
+        sb.from('profiles').select('account_type').eq('user_id', user.id).single()
+      ]).then(function(r){
+        var prof = (r[3] && r[3].data) ? r[3].data : {};
+        if(prof.account_type === 'profesional'){ paginaIntreaga(); return; }
+
+        // Confirmă presupunerea din <head> (ex: localStorage golit între timp).
+        HTML.classList.add('atu-logat');
+
+        // Timelapse-ul e ascuns cu display:none, dar iframe-ul are autoplay+loop
+        // și s-ar încărca oricum, invizibil. Îi golim src-ul ca să nu plătim un
+        // player YouTube degeaba. Elementul RĂMÂNE în DOM.
+        // ⚠️ Abia AICI, nu mai devreme: dacă am face-o pe baza clasei puse în
+        // <head>, o agenție aflată la prima vizită (fără `atu_hero_variant` în
+        // localStorage) ar rămâne cu pagina întreagă, dar cu timelapse-ul mort.
+        var frame = document.querySelector('.video-ph--live iframe');
+        if(frame) frame.removeAttribute('src');
+
+        // Doar terenurile aprobate se numără, ca pe pagina de profil
+        // (profile-view-new.js): un teren depublicat n-are ce căuta la socoteală.
+        var terenuri = ((r[1] && r[1].data) ? r[1].data : []).filter(function(t){
+          return t.terenuri && t.terenuri.status === 'approved';
+        });
+        var grupIds = ((r[2] && r[2].data) ? r[2].data : []).map(function(m){ return m.grup_id; });
+
+        var st = {
+          profil: (r[0] && r[0].data === true),
+          teren:  terenuri.length > 0,
+          grup:   grupIds.length > 0
+        };
+
+        if(!(st.profil && st.teren && st.grup)){ randeazaOnboarding(st); return; }
+
+        sb.from('grupuri').select('id, nume').in('id', grupIds).then(function(res){
+          var grupuri = (res && res.data) ? res.data : [];
+          // Dacă numele nu vin (RLS, grup șters), tot arătăm scurtăturile:
+          // mai bine „Grupurile tale" fără nume decât un bloc care dispare.
+          if(grupuri.length === 0){
+            grupuri = grupIds.map(function(id){ return { id:id, nume:'grupul tău' }; });
+          }
+          randeazaScurtaturi(user.id, grupuri, terenuri.length);
+        }).catch(function(e){
+          console.warn('bloc stare (grupuri):', e);
+          randeazaScurtaturi(user.id, grupIds.map(function(id){ return { id:id, nume:'grupul tău' }; }), terenuri.length);
+        });
+      }).catch(function(e){
+        // Orice pică → pagina rămâne întreagă și fără bloc. Niciodată o
+        // homepage ciuntită din cauza unei erori de rețea.
+        console.warn('bloc stare:', e);
+        paginaIntreaga();
+      });
+    }
+
+    function init(){
+      if(typeof sb === 'undefined' || !sb){
+        init._r = (init._r || 0) + 1;
+        if(init._r < 25){ setTimeout(init, 200); }
+        else paginaIntreaga();
+        return;
+      }
+      sb.auth.getSession().then(function(res){
+        var session = (res && res.data) ? res.data.session : null;
+        var user = session ? session.user : null;
+        if(!user){ paginaIntreaga(); return; }   // token expirat sau nelogat
+        incarca(user);
+      }).catch(function(e){ console.warn('bloc stare auth:', e); paginaIntreaga(); });
     }
     init();
   })();
