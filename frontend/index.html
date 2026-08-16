@@ -2775,9 +2775,11 @@
       // „Cum funcționează" are 4 faze, iar checklistul grupului are aceleași
       // 4 faze cu 26 de pași. Cei 7 vin din lista de intrare de pe homepage
       // (`#cum-incepi`), care descrie pașii de dinainte de grup, nu de după.
-      // ⏳ RĂMÂNE DE DECIS unde duce linkul: pagina „Cum funcționează" e un
-      // ghid lung, iar omul care are deja grup ar avea mai mult de câștigat
-      // din checklistul grupului lui.
+      // Subsolul acesta e provizoriu. Când homepage-ul logat devine spațiul de
+      // lucru, pașii până la recepție se afișează în pagină (aceleași bife din
+      // checklistul grupului, doar de citit pentru cine n-are grup), iar hero-ul
+      // nu mai trimite în afara paginii. Atunci linkul ori dispare, ori devine o
+      // săgeată în jos către categoria cu pași. Până atunci rămâne așa.
       var subsol = (st.teren && st.grup)
         ? '<p class="bs-foot">De aici drumul continuă până la recepție, în patru faze. ' +
             '<a href="/ce-este/cum-functioneaza.html" data-dest="cum-functioneaza">Vezi tot drumul →</a></p>'
