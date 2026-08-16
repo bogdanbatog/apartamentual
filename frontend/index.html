@@ -456,8 +456,11 @@
   .hero-stage .neighbor:focus-visible{ outline:3px solid var(--h-ink); outline-offset:4px; }
   .hero-stage .neighbor .pct{
     position:absolute; bottom:-7px; left:50%; transform:translateX(-50%);
-    background:var(--h-card); color:var(--h-ink); font-weight:700; font-size:.78rem;
-    padding:4px 9px; border-radius:999px; box-shadow:0 4px 12px -4px rgba(28,27,24,.35);
+    /* eticheta e „3 zone · 2 interese", mai lată decât fostul „2 interese"; textul nu se
+       micșorează odată cu pătratul (--k), deci ține font/padding strânse ca să nu se
+       ciocnească bulinele a două pătrate vecine pe tabletă */
+    background:var(--h-card); color:var(--h-ink); font-weight:700; font-size:.72rem;
+    padding:3px 8px; border-radius:999px; box-shadow:0 4px 12px -4px rgba(28,27,24,.35);
     border:1px solid var(--h-line); white-space:nowrap;
   }
   .hero-stage .neighbor .tip{
@@ -2489,20 +2492,24 @@
               var commonZones = zones.filter(function(id){ return myZones.indexOf(id) !== -1; }).length;
               return { id:r.user_id, name:r.pseudonym, commonTags:commonTags, commonZones:commonZones };
             })
-            .filter(function(n){ return n.commonTags > 0; })           // doar cu interese comune reale
-            .sort(function(a,b){ return (b.commonTags - a.commonTags) || (b.commonZones - a.commonZones); })
+            // Potrivirea se face ÎNTÂI pe zone, apoi pe interese, ca pe pagina Utilizatori
+            // (js/utilizatori.js, sortarea de la ~linia 238). Cine n-are nicio zonă comună
+            // rămâne totuși în listă, ca plasă de siguranță pe interese; eticheta lui spune
+            // cinstit „0 zone", ca să nu pară o potrivire mai bună decât e.
+            .filter(function(n){ return n.commonZones > 0 || n.commonTags > 0; })
+            .sort(function(a,b){ return (b.commonZones - a.commonZones) || (b.commonTags - a.commonTags); })
             .slice(0, 4);
 
           if(neighbors.length === 0){
             renderEmptyA(cluster, micro,
-              'Momentan nu găsim vecini cu interese comune cu tine. Comunitatea crește, așa că revino curând.',
+              'Momentan nu găsim vecini în zonele tale sau cu interese comune. Comunitatea crește, așa că revino curând.',
               false);
             return;
           }
 
           renderNeighbors(cluster, neighbors);
           if(micro){
-            micro.innerHTML = '<b>' + neighbors.length + (neighbors.length === 1 ? ' vecin</b> cu cele mai multe interese comune cu tine.' : ' vecini</b> cu cele mai multe interese comune cu tine.');
+            micro.innerHTML = '<b>' + neighbors.length + (neighbors.length === 1 ? ' vecin</b> potrivit' : ' vecini</b> potriviți') + ' cu zonele și interesele tale.';
             micro.hidden = false;
           }
         })
@@ -2517,6 +2524,10 @@
       if(micro) micro.hidden = true;
     }
 
+    // Eticheta de potrivire: „3 zone · 2 interese". Zona stă prima fiindcă ea decide ordinea.
+    function zoneLabel(n){ return n + (n === 1 ? ' zonă' : ' zone'); }
+    function tagLabel(n){  return n + (n === 1 ? ' interes' : ' interese'); }
+
     function renderNeighbors(cluster, neighbors){
       cluster.innerHTML = '';
       neighbors.forEach(function(n, i){
@@ -2525,18 +2536,17 @@
         a.className = 'floater neighbor';
         a.href = '/profile-view-new.html?id=' + encodeURIComponent(n.id);
         a.setAttribute('role', 'listitem');
-        var tagShort = n.commonTags === 1 ? 'interes' : 'interese';
-        var tagLong = n.commonTags === 1 ? 'interes comun' : 'interese comune';
-        a.setAttribute('aria-label', 'Profil ' + n.name + ', ' + n.commonTags + ' ' + tagLong);
+        var match = zoneLabel(n.commonZones) + ' · ' + tagLabel(n.commonTags);
+        a.setAttribute('aria-label', 'Profil ' + n.name + ', potrivire pe ' + match);
         a.style.cssText = '--bg-tile:' + TILE_BG[i % TILE_BG.length] +
           ';--size:' + t.size + 'px;--rot:' + t.rot +
           ';top:' + t.top + ';left:' + t.left +
           ';--amp:' + t.amp + ';--dur:' + t.dur + ';--delay:' + t.delay + ';';
         a.innerHTML =
           '<span class="ini" aria-hidden="true">' + esc(initials(n.name)) + '</span>' +
-          '<span class="pct" aria-hidden="true">' + n.commonTags + ' ' + tagShort + '</span>' +
+          '<span class="pct" aria-hidden="true">' + match + '</span>' +
           '<span class="tip' + (t.tipDown ? ' tip--down' : '') + '" aria-hidden="true"><b>' +
-            esc(n.name) + '</b> · ' + n.commonTags + ' ' + tagLong + '</span>';
+            esc(n.name) + '</b> · ' + match + ' în comun</span>';
         cluster.appendChild(a);
       });
     }
