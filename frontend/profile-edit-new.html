@@ -30,6 +30,18 @@
     <main class="flex-1 py-8">
         <div class="container max-w-2xl mx-auto px-4">
             
+            <!-- Banner „profil obligatoriu" (shown when ?obligatoriu=1).
+                 Îl pune `nav.js` când aduce înapoi un cont personal cu profilul
+                 necompletat. Ton: anunțăm de ce e nevoie, nu certăm pe nimeni. -->
+            <div id="obligatoriu-banner" class="hidden mb-6 p-5 bg-orange-50 border border-orange-200 rounded-xl">
+                <h3 class="font-bold text-gray-900 text-lg mb-1">Mai avem nevoie de câteva lucruri</h3>
+                <p class="text-sm text-gray-700">
+                    Platforma te potrivește cu oameni și terenuri după zonele și preferințele tale de locuire.
+                    Fără ele nu te putem arăta nimănui și nu poți intra în niciun grup, așa că te-am adus aici.
+                    Durează două minute, apoi mergi mai departe de unde ai rămas.
+                </p>
+            </div>
+
             <!-- Welcome banner (shown when ?welcome=1) -->
             <div id="welcome-banner" class="hidden mb-6 p-5 bg-orange-50 border border-orange-200 rounded-xl">
                 <div class="flex items-start gap-4">
@@ -428,6 +440,23 @@
         }
     };
     
+    // Profil obligatoriu: `nav.js` aduce aici conturile personale cu profilul
+    // necompletat. Ascundem ieșirile, ca la `?welcome=1`, altfel omul apasă
+    // „Înapoi" și intră într-o buclă cu redirectul din nav.js.
+    (function() {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get('obligatoriu') !== '1') return;
+
+        const banner = document.getElementById('obligatoriu-banner');
+        if (banner) banner.classList.remove('hidden');
+
+        const backLink = document.getElementById('back-link');
+        if (backLink) backLink.style.display = 'none';
+
+        const cancelBtn = document.getElementById('cancel-btn');
+        if (cancelBtn) cancelBtn.style.display = 'none';
+    })();
+
     // Welcome flow: detect ?welcome=1 and adapt UI + notify admin (only on first arrival after email confirmation)
     (function() {
         const urlParams = new URLSearchParams(window.location.search);

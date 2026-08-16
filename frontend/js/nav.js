@@ -633,7 +633,11 @@ async function checkAuthState() {
                 // Citire prin `profiles_visible`: pe rândul propriu view-ul întoarce
                 // exact ce întorcea tabela. `suspended_until` nu mai e citibil direct
                 // din `profiles` după revocarea drepturilor rolului `authenticated`.
-                var { data: prof } = await sb.from('profiles_visible').select('suspended_until, account_status').eq('user_id', user.id).single();
+                // Coloanele pentru „profil obligatoriu" (account_type, is_admin,
+                // is_super_admin) vin în ACEEAȘI interogare, ca să nu lovim
+                // baza de două ori pe fiecare încărcare de pagină. Toate trei
+                // există în view (vezi db_schema/securitate-profiles/4-…sql).
+                var { data: prof } = await sb.from('profiles_visible').select('suspended_until, account_status, account_type, is_admin, is_super_admin').eq('user_id', user.id).single();
                 if (prof) {
                     var isSuspended = prof.suspended_until && new Date(prof.suspended_until) > new Date();
                     var isDeleted = prof.account_status === 'deleted';
@@ -660,6 +664,73 @@ async function checkAuthState() {
                     }
                 }
             } catch(e) { console.warn('Suspension check failed:', e); }
+
+            // ═══════════════════════════════════════════════════════════
+            //  PROFIL OBLIGATORIU
+            //  Înregistrarea cere doar email și parolă (register.html), iar
+            //  pagina de profil de după confirmare nu obliga la nimic: omul
+            //  putea naviga oriunde cu profilul gol, fără să poată intra în
+            //  vreun grup. Măsurat pe 16 august: din 87 de conturi personale
+            //  vii, 11 erau în situația asta, toate cu profilul complet gol.
+            //  Aici îi ducem înapoi la profil până îl completează.
+            //
+            //  ⚠️ FAIL OPEN. Dacă interogarea pică sau întoarce ceva neclar,
+            //  NU redirectăm. Codul ăsta rulează pe fiecare pagină a site-ului;
+            //  o eroare de drepturi nu trebuie să blocheze pe nimeni afară.
+            //
+            //  Excepții:
+            //   • conturile de agenție — au alt formular de profil, fără
+            //     camere/suprafață/zone, deci `profil_complet()` le-ar da
+            //     mereu `false` și le-ar bloca definitiv, fără scăpare;
+            //   • adminii și superadminii — `profiles_visible` întoarce
+            //     flagurile reale doar pentru ei (vezi `is_platform_admin()`);
+            //     contul de superadmin al lui Lucian chiar pică testul azi;
+            //   • paginile de mai jos, altfel omul rămâne fără ieșire.
+            try {
+                var caleaAcum = window.location.pathname;
+                var PAGINI_LIBERE = [
+                    'profile-edit-new', 'profile-edit',   // chiar pagina unde completează
+                    'register', 'reset-parola',           // fluxuri de cont
+                    'termeni', 'gdpr', 'politica-',       // obligații legale
+                    'accept-invite'                       // își face profilul din traseul lui
+                ];
+                var ePaginaLibera = PAGINI_LIBERE.some(function(f){ return caleaAcum.indexOf(f) !== -1; });
+
+                // Odată complet, profilul rămâne complet. Ținem minte asta local
+                // ca să nu mai chemăm RPC-ul la fiecare pagină deschisă. Dacă
+                // memoria e greșită, greșeala e în direcția sigură: nu blocăm
+                // pe cineva care ar fi trebuit blocat, în loc să blocăm pe
+                // cineva care nu trebuia.
+                var CHEIE_PC = 'atu_profil_complet_' + user.id;
+                var stiutComplet = false;
+                try { stiutComplet = localStorage.getItem(CHEIE_PC) === '1'; } catch(e) {}
+
+                if (!ePaginaLibera && !stiutComplet) {
+                    var eAgentie = prof && prof.account_type === 'profesional';
+                    var eAdmin   = prof && (prof.is_admin === true || prof.is_super_admin === true);
+
+                    // Doar dacă știm sigur că e cont personal, neadmin, îl întrebăm
+                    // pe server dacă profilul e complet. Aceeași funcție care
+                    // păzește intrarea în grupuri, ca să nu apară a doua definiție.
+                    if (prof && !eAgentie && !eAdmin) {
+                        var pc = await sb.rpc('profil_complet', { p_user_id: user.id });
+                        if (pc && pc.error == null && pc.data === true) {
+                            try { localStorage.setItem(CHEIE_PC, '1'); } catch(e) {}
+                        }
+                        if (pc && pc.error == null && pc.data === false) {
+                            // `redirect=` e parametrul pe care îl citește deja
+                            // `destinatiaDupaSalvare()` din profile-edit-new.js,
+                            // cu verificarea că e o cale internă. Nu inventăm
+                            // un al doilea parametru pentru aceeași treabă.
+                            window.location.replace(
+                                '/profile-edit-new.html?obligatoriu=1&redirect=' +
+                                encodeURIComponent(caleaAcum + window.location.search)
+                            );
+                            return;
+                        }
+                    }
+                }
+            } catch(e) { console.warn('Verificarea profilului a esuat, nu blocam:', e); }
             } // end !isAdminPage
 
             if (navUser) navUser.style.display = 'flex';
