@@ -1654,7 +1654,6 @@
     display:inline-flex; align-items:center; justify-content:center;
     font-size:11px; line-height:1; margin-top:3px;
   }
-  .bs-mark--done{ background:var(--ink); color:var(--bg); }
   .bs-mark--todo{ border:1px solid var(--rule-2); }
   .bs-text{ min-width:0; }
   .bs-link-pas{
@@ -1663,26 +1662,113 @@
     transition:border-color .2s ease;
   }
   .bs-link-pas:hover{ border-bottom-color:var(--ink); }
-  .bs-gata{ font-size:16px; color:var(--ink-3); }
   /* Explicația stă lângă linkul care o cere: „Vezi terenurile" singur nu spune
-     de ce ai vrea să te uiți acolo. Apare doar la pașii nebifați, pe unul
-     făcut n-are ce explica. */
+     de ce ai vrea să te uiți acolo. */
   .bs-hint{ display:block; font-size:13px; line-height:1.5; color:var(--ink-3); margin-top:5px; }
-
-  /* Pe rândurile bifate, confirmarea și linkul stau pe aceeași linie, iar
-     numele grupurilor se despart printr-un punct. */
-  .bs-sep{ margin:0 8px; color:var(--ink-3); }
 
   /* subsolul comun celor două stări */
   .bs-foot{ margin:20px 0 0; font-size:13px; line-height:1.6; color:var(--ink-3); }
   .bs-foot a{ color:#c2604a; text-decoration:none; font-weight:500; }
   .bs-foot a:hover{ text-decoration:underline; }
 
-  /* Bifa ✓ e aria-hidden, deci pasul făcut are nevoie de un cuvânt citit doar
-     de cititoarele de ecran. Pagina n-avea un `.sr-only`, îl definim aici. */
-  #bloc-stare .sr-only{
-    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
-    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  /* ── REZUMATUL ȘI CUPRINSUL DIN HERO ──
+     Pentru cine are deja teren sau grup, lista de pași n-are ce bifa: în locul
+     ei stă o frază de stare și cuprinsul spațiului de lucru de mai jos.
+     Cuprinsul e subtitlul paginii: spune ce urmează și duce direct acolo. */
+  .bs-rezumat{ font-size:16px; line-height:1.6; color:var(--ink); margin:0; }
+  .bs-rezumat b{ font-weight:600; }
+  .bs-cuprins{ display:flex; flex-wrap:wrap; gap:8px 18px; margin:16px 0 0; }
+  .bs-cuprins a{
+    font-size:14px; color:var(--ink); text-decoration:none;
+    border-bottom:1px solid var(--rule-2); padding-bottom:2px;
+    transition:border-color .2s ease;
+  }
+  .bs-cuprins a:hover{ border-bottom-color:var(--ink); }
+
+  /* ══════════════════════════════════════════════════════════════════
+     SPAȚIUL DE LUCRU
+     Homepage-ul omului logat nu mai e o pagină de prezentare, ci locul din
+     care își vede terenurile, grupul și pașii. Secțiunea se randează din
+     JS (vezi scriptul „SPAȚIUL DE LUCRU" de la finalul paginii) și rămâne
+     `hidden` pentru nelogați, pentru conturile de agenție și pentru cine
+     n-are încă nici teren, nici grup.
+     Paleta se redefinește aici fiindcă în `.hero-stage` e scopată pe hero,
+     iar secțiunea asta stă în afara lui.
+     ══════════════════════════════════════════════════════════════════ */
+  #spatiul-tau{
+    --terracotta:#c06a4f;
+    --sage:#84a07f;
+    --slate:#6f80a4;
+    --mauve:#a96f84;
+    --ochre:#bf9a63;
+    margin-bottom:1rem;
+  }
+  #spatiul-tau[hidden]{ display:none; }
+
+  .sl-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; align-items:start; }
+  .sl-card{
+    background:var(--bg-soft); border:1px solid var(--rule);
+    border-radius:14px; padding:1.5rem;
+  }
+  .sl-card--wide{ grid-column:1 / -1; }
+  .sl-cap{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:1.125rem; }
+  .sl-titlu{ font-size:16px; font-weight:600; margin:0; }
+  .sl-mai{ font-size:13px; color:var(--terracotta); text-decoration:none; font-weight:500; white-space:nowrap; }
+  .sl-mai:hover{ text-decoration:underline; }
+  .sl-meta{ font-family:var(--mono); font-size:11.5px; color:var(--ink-3); letter-spacing:.04em; white-space:nowrap; }
+
+  /* ── CARDUL DE TEREN ──
+     Închis arată un rând: nume, suprafață, preț, plus starea pe scurt.
+     Deschis arată nota și ce poți face. Așa șase terenuri ocupă cât ocupau
+     două desfăcute, fără să se piardă ceva. Primul e deschis, restul nu:
+     intri pe pagină și vezi imediat despre ce e vorba. */
+  .sl-teren{
+    background:var(--bg); border:1px solid var(--rule); border-radius:10px;
+  }
+  .sl-teren + .sl-teren{ margin-top:.875rem; }
+  .sl-teren > summary{
+    list-style:none; cursor:pointer; padding:.875rem 1.125rem;
+    display:flex; flex-direction:column; gap:.375rem;
+  }
+  .sl-teren > summary::-webkit-details-marker{ display:none; }
+  .sl-teren > summary:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; border-radius:10px; }
+  .sl-teren-cap{ display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; }
+  .sl-teren-nume{ font-size:15px; font-weight:600; }
+  .sl-sageata{ display:inline-block; color:var(--ink-3); font-size:12px; transition:transform .2s ease; }
+  .sl-teren[open] .sl-sageata{ transform:rotate(180deg); }
+  .sl-teren-scurt{ display:flex; flex-wrap:wrap; gap:.375rem .75rem; align-items:center; font-size:13px; color:var(--ink-2); }
+  .sl-teren-corp{ padding:.875rem 1.125rem 1rem; border-top:1px dashed var(--rule); }
+
+  .sl-pill{ display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 9px; border-radius:100px; border:1px solid var(--rule-2); }
+  .sl-pill--ok{ background:rgba(132,160,127,.22); border-color:transparent; }
+  .sl-pill--todo{ background:transparent; color:var(--ink-3); }
+
+  .sl-nota{ font-size:13.5px; color:var(--ink-2); }
+  .sl-nota-eticheta{ font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3); display:block; margin-bottom:4px; }
+  .sl-nota-goala{ color:var(--ink-3); }
+  .sl-actiuni{ display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin-top:.75rem; }
+  .sl-mini{ font-size:13px; color:var(--terracotta); text-decoration:none; font-weight:500; }
+  .sl-mini:hover{ text-decoration:underline; }
+
+  /* ── CARDUL DE GRUP ── */
+  .sl-grup{ background:var(--bg); border:1px solid var(--rule); border-radius:10px; padding:1rem 1.125rem; }
+  .sl-grup + .sl-grup{ margin-top:.875rem; }
+  .sl-grup-cap{ display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; }
+  .sl-grup-nume{ font-size:15px; font-weight:600; color:var(--ink); text-decoration:none; }
+  .sl-grup-nume:hover{ text-decoration:underline; }
+  .sl-grup-faza{ font-size:13.5px; color:var(--ink-2); margin-top:.5rem; }
+  .sl-bara{ height:6px; background:var(--bg-placeholder); border-radius:100px; overflow:hidden; margin:.625rem 0 .5rem; }
+  .sl-bara span{ display:block; height:100%; background:var(--terracotta); border-radius:100px; }
+
+  @media (max-width:820px){
+    .sl-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:480px){
+    .sl-card{ padding:1.25rem 1rem; }
+    .sl-teren > summary{ padding:.875rem 1rem; }
+    .sl-teren-corp{ padding:.875rem 1rem 1rem; }
+    /* Pe telefon numele lung și metadatele nu încap pe un rând. */
+    .sl-teren-cap{ flex-direction:column; align-items:flex-start; gap:.25rem; }
   }
 </style>
 </head>
@@ -1720,8 +1806,12 @@
 
     <!-- STARE 2/4 · LOGAT fără grup (sau în grup → fallback A) -->
     <section class="hero" data-variant="a" hidden style="--accent:var(--terracotta);" aria-label="Hero pentru utilizator logat fără grup">
-      <p class="eyebrow"><span class="dot"></span>Bun venit înapoi</p>
-      <h1 class="title">Hai să-ți găsești <span class="accent">grupul</span><span class="js-hero-name"></span>.</h1>
+      <!-- ⚠️ Titlul nu mai e „Hai să-ți găsești grupul": homepage-ul logat a
+           devenit spațiul de lucru, iar titlul spune unde ai ajuns, nu ce
+           speră platforma de la tine. Eyebrow-ul „Bun venit înapoi" a ieșit
+           odată cu el: spuneau amândoi aceeași formulă de salut, iar niciunul
+           nu spunea unde ești. Numele vine din `populateVariantA`. -->
+      <h1 class="title">Spațiul tău<span class="js-hero-virgula" hidden>, </span><span class="accent js-hero-name"></span>.</h1>
       <p class="lead">Terenuri filtrate de arhitecți și grupuri care se formează chiar acum, în zonele care te interesează.</p>
       <!-- Aici stăteau două butoane, „Vezi terenuri" și „Grupuri în formare".
            Le-am scos: blocul de stare de imediat sub hero trimitea în exact
@@ -1772,6 +1862,16 @@
       <div class="aptbar__big"></div>
     </div>
   </div>
+
+  <!-- ── SPAȚIUL DE LUCRU ──
+       Fără titlu și fără eyebrow de secțiune: titlul hero-ului spune deja
+       „Spațiul tău", iar fiecare categorie își are propriul titlu.
+       Conținutul vine din scriptul „SPAȚIUL DE LUCRU" de la finalul paginii.
+       Rămâne `hidden` până când scriptul confirmă că e vorba de un cont
+       personal logat care are măcar un teren sau un grup. -->
+  <section id="spatiul-tau" hidden aria-label="Spațiul tău de lucru">
+    <div class="sl-grid"></div>
+  </section>
 
   <!-- ── CREDIBILITY BAND ── -->
   <div class="cred-band js-marketing-only">
@@ -1831,8 +1931,11 @@
         <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=grupuri">Vezi grupurile</a>
       </div>
     </div>
+    <!-- ⚠️ Fără cifra „7 etape". Nu există nicăieri: pagina „Cum funcționează"
+         are 4 faze, iar checklistul grupului aceleași 4. Enumerarea de aici
+         începe după formarea grupului, care e faza 1. -->
     <p class="cai-subsol">
-      Din grup, drumul continuă în 7 etape până la recepție: analiza terenurilor, contractul de asociere, cumpărarea, proiectarea, construcția.
+      Din grup, drumul continuă până la recepție: căutarea și achiziția terenului, proiectarea, construcția.
       <a href="/ce-este/cum-functioneaza.html" class="plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=cum-functioneaza">Vezi tot drumul →</a>
     </p>
   </section>
@@ -2454,9 +2557,14 @@
     var TILE_BG = ['var(--sage)','var(--terracotta)','var(--slate)','var(--mauve)'];
 
     function populateVariantA(user, prof){
-      // numele din titlu: pseudonim (fallback: fără nume, fără virgulă goală)
+      // numele din titlu: pseudonim (fallback: „Spațiul tău.", fără virgulă goală)
       var nameEl = STAGE.querySelector('.js-hero-name');
-      if(nameEl && prof && prof.pseudonym) nameEl.textContent = ', ' + prof.pseudonym;
+      var virgulaEl = STAGE.querySelector('.js-hero-virgula');
+      if(nameEl && prof && prof.pseudonym){
+        nameEl.textContent = prof.pseudonym;
+        // Virgula stă în afara `.accent` ca să nu se coloreze și ea.
+        if(virgulaEl) virgulaEl.hidden = false;
+      }
 
       var cluster = STAGE.querySelector('.js-cluster-a');
       var micro   = STAGE.querySelector('.js-hero-a-micro');
@@ -2635,13 +2743,18 @@
 
 <script>
   // ════════════════════════════════════════════════════════════════════
-  //  BLOCUL DE STARE — homepage ca hub de acțiune pentru cine e logat
+  //  SPAȚIUL DE LUCRU — homepage-ul omului logat
   //
-  //  Pentru un cont personal logat, sub hero apare un bloc cu trei pași:
-  //    profil complet → cel puțin un teren la profil → cel puțin un grup.
-  //  Cât timp e ceva nebifat, blocul e o listă cu butoane („Primii tăi pași").
-  //  Când sunt toate trei bifate, devine scurtături către grupurile și
-  //  terenurile lui.
+  //  Două bucăți, populate din aceleași date:
+  //
+  //  1. BLOCUL DIN HERO (`#bloc-stare`). Cine n-are încă nici teren, nici
+  //     grup, vede lista de pași de intrare, ca până acum. Cine are măcar
+  //     unul din ele vede o frază de stare, pasul care i-a mai rămas (dacă
+  //     a mai rămas vreunul) și cuprinsul spațiului de lucru.
+  //  2. SPAȚIUL DE LUCRU (`#spatiul-tau`), sub bara de apartamente:
+  //     categoriile lui, fiecare în cardul ei. Deocamdată sunt gata două,
+  //     „Terenurile tale" și „Grupurile tale"; restul se adaugă în lista
+  //     CATEGORII de mai jos, pe măsură ce se construiesc.
   //
   //  Cine NU vede blocul (și cui NU i se scurtează pagina):
   //    • nelogații — pagina rămâne exact cum era;
@@ -2658,12 +2771,14 @@
   (function(){
     var HTML = document.documentElement;
     var ROOT = document.getElementById('bloc-stare');
+    var SPATIU = document.getElementById('spatiul-tau');
     if(!ROOT) return;
 
     var URL_TERENURI = '/terenuri.html';
     var URL_GRUPURI  = '/grupuri.html';
 
     function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+    function nr(n){ return Number(n).toLocaleString('ro-RO'); }
 
     // Anulează presupunerea făcută sincron în <head>: pagina rămâne întreagă.
     function paginaIntreaga(){ HTML.classList.remove('atu-logat'); }
@@ -2673,15 +2788,20 @@
     // bannerul webinar). Un nume nou ar ieși din raportul în care se compară
     // toate CTA-urile între ele. Apelul e explicit, nu prin clasele
     // `plausible-event-*`, fiindcă butoanele astea sunt create din JS.
-    function track(dest){
+    function track(loc, dest){
       if(typeof window.plausible === 'function'){
-        window.plausible('CTA Click', { props: { loc: 'bloc-stare', dest: dest } });
+        window.plausible('CTA Click', { props: { loc: loc, dest: dest } });
       }
     }
-    ROOT.addEventListener('click', function(ev){
-      var a = ev.target.closest ? ev.target.closest('[data-dest]') : null;
-      if(a && ROOT.contains(a)) track(a.getAttribute('data-dest'));
-    });
+    function ascultaClicuri(el, loc){
+      if(!el) return;
+      el.addEventListener('click', function(ev){
+        var a = ev.target.closest ? ev.target.closest('[data-dest]') : null;
+        if(a && el.contains(a)) track(loc, a.getAttribute('data-dest'));
+      });
+    }
+    ascultaClicuri(ROOT, 'bloc-stare');
+    ascultaClicuri(SPATIU, 'spatiul-tau');
 
     function afiseaza(html){
       ROOT.innerHTML = html;
@@ -2689,107 +2809,320 @@
     }
 
     // ── LISTA DE PAȘI ──
-    // O singură listă, nu două stări. Fiecare rând e ori „fă asta", ori
-    // „gata, uite ce urmează": un pas bifat nu e o fundătură, ci trimite mai
-    // departe. Așa scurtăturile către terenurile și grupurile proprii au și
-    // un motiv scris lângă ele, nu doar o săgeată.
+    // Doar pașii NEFĂCUȚI. Un pas bifat nu mai are ce căuta aici: ce a făcut
+    // omul deja se vede în spațiul de lucru de mai jos, pe larg, cu tot cu
+    // nume, cifre și butoane.
     //
-    // Fără titlu de secțiune: titlul hero-ului („Hai să-ți găsești grupul,
-    // {nume}.") spune deja despre ce e vorba.
-    function rand(bifat, continut){
-      return '<li class="bs-row' + (bifat ? ' bs-row--done' : '') + '">' +
-               '<span class="bs-mark ' + (bifat ? 'bs-mark--done' : 'bs-mark--todo') + '" aria-hidden="true">' +
-                 (bifat ? '✓' : '') +
-               '</span>' +
+    // Fără titlu de secțiune: titlul hero-ului („Spațiul tău, {nume}.")
+    // spune deja despre ce e vorba.
+    function rand(continut){
+      return '<li class="bs-row">' +
+               '<span class="bs-mark bs-mark--todo" aria-hidden="true"></span>' +
                '<span class="bs-text">' + continut + '</span>' +
              '</li>';
     }
-    // `sageata` se pune doar când linkul e singur pe rând. La o listă de
-    // nume de grupuri, o săgeată după fiecare aglomerează degeaba.
-    function link(href, text, dest, sageata){
+    function link(href, text, dest){
       return '<a class="bs-link-pas" href="' + href + '" data-dest="' + dest + '">' +
-               esc(text) + (sageata === false ? '' : ' <span aria-hidden="true">→</span>') + '</a>';
+               esc(text) + ' <span aria-hidden="true">→</span></a>';
     }
     function hint(text){ return '<span class="bs-hint">' + esc(text) + '</span>'; }
 
-    function randeazaPasi(st, date){
-      var randuri = '';
+    // ── BLOCUL DIN HERO ──
+    // Două forme, după cum arată contul:
+    //
+    //   • n-are nici teren, nici grup → lista de pași de intrare, neschimbată.
+    //     Spațiul de lucru de mai jos nu se randează deloc: n-ar avea ce pune
+    //     în el, iar un card care spune „e gol" e mai rău decât nimic.
+    //   • are măcar unul din ele → o frază de stare, pasul care i-a mai rămas
+    //     (dacă a mai rămas vreunul) și cuprinsul spațiului de lucru.
+    //
+    // ⚠️ Rândul bifat NU se mai arată în hero când există spațiul de lucru:
+    // „Ai 6 terenuri pe profil. Deschide-le →" ar spune același lucru ca
+    // primul card de dedesubt, la 300 de pixeli distanță.
+    //
+    // ⚠️ NU există pas pentru profil, deși ar părea firesc să fie primul.
+    // Formularul de profil nu se poate salva parțial (toate cele șase câmpuri
+    // cerute de `profil_complet()` sunt obligatorii acolo), iar `nav.js` duce
+    // la profil pe oricine e logat fără el. Prin urmare, oricine ajunge să
+    // vadă blocul ăsta are deja profilul complet, iar un rând „Completează-ți
+    // profilul" n-ar fi afișat niciodată. Vezi zidul din `nav.js`.
+    function pasTeren(){
+      return rand(
+        link(URL_TERENURI, 'Adaugă primul teren la profil', 'terenuri') +
+        hint('Cauți în zonele tale și salvezi ce îți place. Așa vezi cine mai e interesat de același teren.'));
+    }
+    function pasGrup(){
+      return rand(
+        link(URL_GRUPURI, 'Intră într-un grup sau fă unul', 'grupuri') +
+        hint('Grupurile se formează pe zone. Ceri să intri într-unul sau pornești tu unul.'));
+    }
 
-      // ⚠️ NU există pas pentru profil, deși ar părea firesc să fie primul.
-      // Formularul de profil nu se poate salva parțial (toate cele șase câmpuri
-      // cerute de `profil_complet()` sunt obligatorii acolo), iar `nav.js` duce
-      // la profil pe oricine e logat fără el. Prin urmare, oricine ajunge să
-      // vadă blocul ăsta are deja profilul complet, iar un rând „Completează-ți
-      // profilul" n-ar fi afișat niciodată. Vezi zidul din `nav.js`.
+    // Subsolul e pentru cine n-a intrat încă într-un grup, și duce ÎN pagină.
+    //
+    // ⚠️ Cine e deja în grup nu mai primește niciun rând aici. Până acum îl
+    // trimitea la ghidul „Cum funcționează", adică îl scotea din spațiul lui
+    // ca să-i explice un drum pe care deja mersese. Harta lui e cardul
+    // grupului de mai jos, care spune faza și „4 din 10 pași", cu bifele puse
+    // chiar de membrii lui. Decizia lui Lucian, 17 august: hero-ul nu trimite
+    // pe nimeni în afara paginii.
+    function subsol(st){
+      if(st.grup) return '';
+      return '<p class="bs-foot">Nu știi de unde să începi? ' +
+               '<a href="#cum-incepi" data-dest="cum-incepi">Vezi cum funcționează →</a></p>';
+    }
 
-      // ── TEREN ──
-      if(!st.teren){
-        randuri += rand(false,
-          link(URL_TERENURI, 'Adaugă primul teren la profil', 'terenuri') +
-          hint('Cauți în zonele tale și salvezi ce îți place. Așa vezi cine mai e interesat de același teren.'));
-      } else {
-        var n = date.terenuri.length;
-        // Cu un singur teren îl deschidem direct; cu mai multe, prin profil.
-        var hrefT = (n === 1)
-          ? '/teren-details.html?id=' + encodeURIComponent(date.terenuri[0])
-          : '/profile-view-new.html?id=' + encodeURIComponent(date.userId) + '#favorite-terrains';
-        randuri += rand(true,
-          '<span class="bs-gata">' + (n === 1 ? 'Ai un teren pe profil.' : 'Ai ' + n + ' terenuri pe profil.') +
-            '</span><span class="sr-only">, gata</span> ' +
-          link(hrefT, (n === 1 ? 'Deschide-l' : 'Deschide-le'), 'terenurile-mele') +
-          hint(n === 1
-            ? 'Vezi cine mai e interesat, fă un grup pe el, sau cere o analiză: câte apartamente ies și la ce costuri.'
-            : 'Vezi cine mai e interesat de ele, fă un grup, sau cere o analiză: câte apartamente ies și la ce costuri.'));
+    // Fraza de stare. Fără faza grupului: se schimbă rar și apare oricum, cu
+    // bară de progres, în cardul grupului de mai jos.
+    function rezumat(date){
+      var bucati = [];
+      var n = date.terenuri.length;
+      if(n === 1) bucati.push('Ai <b>un teren</b> salvat');
+      else if(n > 1) bucati.push('Ai <b>' + n + ' terenuri</b> salvate');
+
+      var g = date.grupuri;
+      if(g.length === 1) bucati.push('ești în <b>' + esc(g[0].nume) + '</b>');
+      else if(g.length > 1) bucati.push('ești în <b>' + g.length + ' grupuri</b>');
+
+      if(bucati.length === 0) return '';
+      // „Ai 6 terenuri salvate și ești în Grup Bucureștii Noi."
+      // Litera mare se pune la final: cine n-are niciun teren începe fraza
+      // cu „ești în…", iar propoziția ar porni cu literă mică.
+      var fraza = bucati.join(' și ');
+      return '<p class="bs-rezumat">' + fraza.charAt(0).toUpperCase() + fraza.slice(1) + '.</p>';
+    }
+
+    // Cuprinsul: doar categoriile chiar randate mai jos, în ordinea lor.
+    function cuprins(categorii){
+      if(!categorii.length) return '';
+      return '<p class="bs-cuprins">' + categorii.map(function(c){
+        return '<a href="#' + c.id + '" data-dest="cuprins-' + c.id + '">' +
+                 esc(c.titluScurt || c.titlu) + ' ↓</a>';
+      }).join('') + '</p>';
+    }
+
+    function randeazaHero(st, date, categorii){
+      // Cine n-are nimic: exact blocul de până acum.
+      if(!st.teren && !st.grup){
+        afiseaza('<ul class="bs-list">' + pasTeren() + pasGrup() + '</ul>' + subsol(st));
+        return;
       }
+      var lipsa = '';
+      if(!st.teren) lipsa = pasTeren();
+      else if(!st.grup) lipsa = pasGrup();
 
-      // ── GRUP ──
-      if(!st.grup){
-        randuri += rand(false,
-          link(URL_GRUPURI, 'Intră într-un grup sau fă unul', 'grupuri') +
-          hint('Grupurile se formează pe zone. Ceri să intri într-unul sau pornești tu unul.'));
+      afiseaza(
+        rezumat(date) +
+        (lipsa ? '<ul class="bs-list" style="margin-top:16px">' + lipsa + '</ul>' : '') +
+        cuprins(categorii) +
+        subsol(st)
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  CARDURILE SPAȚIULUI DE LUCRU
+    // ════════════════════════════════════════════════════════════════
+
+    function capCard(titlu, dreapta){
+      return '<div class="sl-cap"><h2 class="sl-titlu">' + esc(titlu) + '</h2>' +
+             (dreapta || '') + '</div>';
+    }
+    function mini(href, text, dest){
+      return '<a class="sl-mini" href="' + href + '" data-dest="' + dest + '">' + esc(text) + ' →</a>';
+    }
+
+    // ── TERENURILE TALE ──
+    // Cardul închis spune un rând: nume, suprafață, preț, starea pe scurt.
+    // Deschis arată nota ta și ce poți face cu terenul. Primul e deschis,
+    // restul închise.
+    function randTeren(t, i){
+      var faptePret = [];
+      if(t.suprafata)  faptePret.push(nr(t.suprafata) + ' mp');
+      if(t.pret_total) faptePret.push(nr(t.pret_total) + ' €');
+
+      // „Are analiză" înseamnă că i s-a calculat câte apartamente încap —
+      // exact criteriul după care pagina terenului arată rândul cu apartamente
+      // (teren-details.js). Statusul cererii de analiză nu se folosește aici:
+      // o cerere în lucru nu e încă un răspuns.
+      var min = t.nr_apartamente_min, max = t.nr_apartamente_max;
+      var areAnaliza = !!(min && max);
+      var apart = areAnaliza ? (min === max ? min + ' apartamente' : min + '-' + max + ' apartamente') : '';
+
+      var scurt = areAnaliza
+        ? '<span class="sl-pill sl-pill--ok">✓ Analiză · ' + esc(apart) + '</span>'
+        : '<span class="sl-pill sl-pill--todo">Fără analiză</span>';
+      scurt += '<span>' + (t.interesati === 0
+        ? 'Nimeni interesat încă'
+        : (t.interesati === 1 ? 'o persoană interesată' : t.interesati + ' persoane interesate')) + '</span>';
+      if(t.grupuri === 1) scurt += '<span>un grup interesat</span>';
+      else if(t.grupuri > 1) scurt += '<span>' + t.grupuri + ' grupuri interesate</span>';
+
+      var hrefTeren = '/teren-details.html?id=' + encodeURIComponent(t.id);
+
+      // Nota se scrie deocamdată tot pe profil, unde era. Aici se citește.
+      var nota = t.nota
+        ? esc(t.nota)
+        : '<span class="sl-nota-goala">Nicio notă.</span> ' +
+          '<a class="sl-mini" href="/profile-view-new.html?id=' + encodeURIComponent(t.userId) +
+            '#favorite-terrains" data-dest="scrie-nota">Scrie una →</a>';
+
+      var actiuni = [];
+      if(!areAnaliza){
+        var q = 'teren_id=' + encodeURIComponent(t.id) + '&teren_titlu=' + encodeURIComponent(t.titlu || '');
+        actiuni.push(mini('/analize.html?' + q, 'Cere o analiză', 'cere-analiza'));
+      }
+      if(t.interesati > 0) actiuni.push(mini(hrefTeren, 'Vezi cine e interesat', 'interesati-teren'));
+      if(t.grupuri > 0){
+        actiuni.push(mini('/grupuri.html?teren=' + encodeURIComponent(t.id),
+          t.grupuri === 1 ? 'Vezi grupul interesat' : 'Vezi cele ' + t.grupuri + ' grupuri', 'grupuri-teren'));
       } else {
-        // Numele grupurilor, maximum trei, fiecare cu linkul lui: numele e
-        // lucrul pentru care omul dă clic, nu cuvântul „grup".
-        var g = date.grupuri;
-        var singur = (g.length === 1);
-        var linkuri = g.slice(0, 3).map(function(x){
-          return link('/grup-details.html?id=' + encodeURIComponent(x.id), x.nume, 'grupul-meu', singur);
-        }).join('<span class="bs-sep" aria-hidden="true">·</span>');
-        if(g.length > 3){
-          linkuri += '<span class="bs-sep" aria-hidden="true">·</span>' +
-                     link(URL_GRUPURI, 'toate cele ' + g.length, 'toate-grupurile', false);
+        actiuni.push(mini('/grup-nou.html?teren=' + encodeURIComponent(t.id), 'Fă un grup pe el', 'grup-nou-teren'));
+      }
+      actiuni.push(mini(hrefTeren, 'Deschide pagina terenului', 'pagina-terenului'));
+
+      return '<details class="sl-teren"' + (i === 0 ? ' open' : '') + '>' +
+               '<summary>' +
+                 '<span class="sl-teren-cap">' +
+                   '<span class="sl-teren-nume">' + esc(t.titlu || 'Teren fără titlu') + '</span>' +
+                   '<span class="sl-meta">' + esc(faptePret.join(' · ')) +
+                     ' <span class="sl-sageata" aria-hidden="true">▾</span></span>' +
+                 '</span>' +
+                 '<span class="sl-teren-scurt">' + scurt + '</span>' +
+               '</summary>' +
+               '<div class="sl-teren-corp">' +
+                 '<div class="sl-nota"><span class="sl-nota-eticheta">Nota ta</span>' + nota + '</div>' +
+                 '<div class="sl-actiuni">' + actiuni.join('') + '</div>' +
+               '</div>' +
+             '</details>';
+    }
+
+    function cardTerenuri(date, clase){
+      var t = date.terenuri;
+      return '<article class="sl-card' + clase + '" id="terenurile-tale">' +
+        capCard('Terenurile tale (' + t.length + ')',
+          '<a class="sl-mai" href="' + URL_TERENURI + '" data-dest="cauta-terenuri">Caută altele →</a>') +
+        t.map(randTeren).join('') +
+      '</article>';
+    }
+
+    // ── GRUPURILE TALE ──
+    // Fazele checklistului, doar cât trebuie ca să știm în ce fază e grupul
+    // și cât s-a bifat din ea.
+    // ⚠️ SURSA DE ADEVĂR e `CHECKLIST_PHASES` din grup-details.html (~1900).
+    // Aici stau doar cheile, ca textele să nu se scrie în două locuri. Pașii
+    // `*_alte_note` lipsesc dinadins: sunt o cutie de notițe, nu un pas care
+    // se face, și ar strica numărătoarea („4 din 11" în loc de „4 din 10").
+    var FAZE = [
+      { titlu:'Formarea grupului', pasi:[
+        'f1_in_formare','f1_regulament','f1_principii','f1_grup_format' ] },
+      { titlu:'Căutarea și achiziția terenului', pasi:[
+        'f2_identificare','f2_vizite','f2_extras_cf','f2_cert_urbanism','f2_analiza_generala',
+        'f2_istoric_notar','f2_studiu_geo','f2_analiza_complexa','f2_contract_asociere','f2_achizitionare' ] },
+      { titlu:'Proiectarea', pasi:[
+        'f3_echipa','f3_cert_construire','f3_concept','f3_avize','f3_proiect_tehnic','f3_dtac','f3_detalii_exec' ] },
+      { titlu:'Construcția', pasi:[
+        'f4_oferte','f4_constructor','f4_structura','f4_instalatii','f4_finisaje','f4_receptie' ] }
+    ];
+
+    // Faza curentă = prima care nu e terminată. Dacă toate sunt terminate,
+    // grupul e la recepție și n-are rost o bară de progres pe ultima fază.
+    function fazaGrupului(bife){
+      for(var i = 0; i < FAZE.length; i++){
+        var f = FAZE[i];
+        var facute = f.pasi.filter(function(k){ return bife[k]; }).length;
+        if(facute < f.pasi.length){
+          return { nr:i + 1, titlu:f.titlu, facute:facute, total:f.pasi.length };
         }
-        randuri += rand(true,
-          '<span class="bs-gata">' + (g.length === 1 ? 'Ești în grupul:' : 'Ești în ' + g.length + ' grupuri:') +
-            '</span><span class="sr-only">, gata</span> ' + linkuri +
-          hint('Adaugă terenuri la favoritele grupului, scrie un anunț sau invită pe cineva.'));
       }
+      return null;
+    }
 
-      // Subsolul nu dispare niciodată, doar își schimbă ținta. Cele trei bife
-      // nu înseamnă „gata": omul care are profil, teren și grup abia a ajuns
-      // la linia de start. De aici încolo urmează analiza terenurilor,
-      // contractul de asociere, cumpărarea, proiectarea, construcția. El are
-      // MAI MULTĂ nevoie de harta drumului decât cel care abia și-a făcut cont,
-      // așa că îl trimitem la cele 7 etape, nu la „cum începi".
-      // ⚠️ „Patru faze", nu „7 etape". Cifra 7 nu există nicăieri: pagina
-      // „Cum funcționează" are 4 faze, iar checklistul grupului are aceleași
-      // 4 faze cu 26 de pași. Cei 7 vin din lista de intrare de pe homepage
-      // (`#cum-incepi`), care descrie pașii de dinainte de grup, nu de după.
-      // Subsolul acesta e provizoriu. Când homepage-ul logat devine spațiul de
-      // lucru, pașii până la recepție se afișează în pagină (aceleași bife din
-      // checklistul grupului, doar de citit pentru cine n-are grup), iar hero-ul
-      // nu mai trimite în afara paginii. Atunci linkul ori dispare, ori devine o
-      // săgeată în jos către categoria cu pași. Până atunci rămâne așa.
-      var subsol = (st.teren && st.grup)
-        ? '<p class="bs-foot">De aici drumul continuă până la recepție, în patru faze. ' +
-            '<a href="/ce-este/cum-functioneaza.html" data-dest="cum-functioneaza">Vezi tot drumul →</a></p>'
-        : '<p class="bs-foot">Nu știi de unde să începi? ' +
-            '<a href="#cum-incepi" data-dest="cum-incepi">Vezi cum funcționează →</a></p>';
+    function randGrup(g){
+      var membri = (g.membri === 1) ? 'un membru' : g.membri + ' membri';
+      var corp = '';
+      if(g.faza){
+        var pct = Math.round((g.faza.facute / g.faza.total) * 100);
+        corp = '<p class="sl-grup-faza">Faza ' + g.faza.nr + ', ' + esc(g.faza.titlu) + '</p>' +
+               '<div class="sl-bara" role="img" aria-label="' + g.faza.facute + ' din ' + g.faza.total + ' pași">' +
+                 '<span style="width:' + pct + '%"></span></div>' +
+               '<p class="sl-meta">' + g.faza.facute + ' din ' + g.faza.total + ' pași</p>';
+      } else if(g.bifeCitite){
+        // Toate fazele bifate. Rar, dar e singurul caz în care nu e o eroare.
+        corp = '<p class="sl-grup-faza">Toți pașii sunt bifați, până la recepție.</p>';
+      }
+      // Dacă bifele n-au putut fi citite (drepturi, grup abia creat), nu
+      // scriem nimic despre faze. Mai bine un card mai scurt decât „Faza 1"
+      // pentru un grup care e de fapt mai departe.
 
-      afiseaza('<ul class="bs-list">' + randuri + '</ul>' + subsol);
+      return '<div class="sl-grup">' +
+               '<div class="sl-grup-cap">' +
+                 '<a class="sl-grup-nume" href="/grup-details.html?id=' + encodeURIComponent(g.id) +
+                   '" data-dest="grupul-meu">' + esc(g.nume) + '</a>' +
+                 '<span class="sl-meta">' + membri + '</span>' +
+               '</div>' + corp +
+               '<div class="sl-actiuni">' +
+                 mini('/grup-details.html?id=' + encodeURIComponent(g.id), 'Deschide grupul', 'deschide-grupul') +
+               '</div>' +
+             '</div>';
+    }
+
+    function cardGrupuri(date, clase){
+      var g = date.grupuri;
+      return '<article class="sl-card' + clase + '" id="grupurile-tale">' +
+        capCard('Grupurile tale (' + g.length + ')',
+          '<a class="sl-mai" href="' + URL_GRUPURI + '" data-dest="toate-grupurile">Vezi toate grupurile →</a>') +
+        g.map(randGrup).join('') +
+      '</article>';
+    }
+
+    // ── CATEGORIILE ──
+    // Lista crește pe măsură ce se construiesc. Fiecare intrare are `cere`,
+    // adică ce trebuie să aibă omul ca să merite cardul: fără terenuri, un
+    // card „Terenurile tale (0)" e doar zgomot.
+    //
+    // ⏳ Ce urmează, în ordinea din macheta aprobată:
+    //    • „Ce e nou pentru tine" (wide, prima) — fluxul de noutăți. Se poate
+    //      calcula la citire, fără migrație, în prima versiune.
+    //    • „Utilizatori compatibili cu tine" — aceeași potrivire pe zone ca
+    //      pătratele din hero (vezi `populateVariantA`).
+    //    • „Grupuri care caută în zonele tale".
+    //    • „Pașii până la recepție" (wide) — aceleași bife din checklistul
+    //      grupului; cine n-are grup îi vede doar de citit.
+    //    • „Notele tale" (wide) — nu există încă tabela.
+    var CATEGORII = [
+      { id:'terenurile-tale', titlu:'Terenurile tale', cere:'teren', randeaza:cardTerenuri },
+      { id:'grupurile-tale',  titlu:'Grupurile tale',  cere:'grup',  randeaza:cardGrupuri }
+    ];
+
+    function categoriiDePus(st){
+      return CATEGORII.filter(function(c){ return st[c.cere]; });
+    }
+
+    function randeazaSpatiu(date, categorii){
+      if(!SPATIU || !categorii.length) return;
+      var grid = SPATIU.querySelector('.sl-grid');
+      if(!grid) return;
+      // Un card singur nu stă pe jumătate de pagină cu gol în dreapta.
+      var clase = (categorii.length === 1) ? ' sl-card--wide' : '';
+      grid.innerHTML = categorii.map(function(c){ return c.randeaza(date, clase); }).join('');
+      SPATIU.hidden = false;
     }
 
     // ── datele ──
+    // Orice interogare de aici e „bună de pierdut": dacă pică, se pierde o
+    // informație de pe card, nu tot spațiul de lucru.
+    function bland(p){
+      return Promise.resolve(p).then(function(r){ return (r && r.data) ? r.data : []; })
+                               .catch(function(e){ console.warn('spațiul de lucru:', e); return []; });
+    }
+    // La fel, dar păstrează diferența dintre „n-am putut citi" (null) și „am
+    // citit și nu e nimic" ([]). Contează la bifele checklistului: un grup fără
+    // niciun rând chiar e la începutul fazei 1, dar o citire refuzată nu
+    // înseamnă asta și n-are voie să scrie „0 din 4 pași".
+    function blandNul(p){
+      return Promise.resolve(p).then(function(r){ return (r && r.data) ? r.data : null; })
+                               .catch(function(e){ console.warn('spațiul de lucru:', e); return null; });
+    }
+
     function incarca(user){
       // Cele două stări + tipul de cont, într-o singură rundă de apeluri
       // paralele. Numele grupurilor se cer abia după, și doar dacă e membru
@@ -2800,8 +3133,13 @@
       // aceeași încărcare de pagină, iar rezultatul lui e o certitudine: dacă
       // profilul ar fi incomplet, omul n-ar fi pe homepage, ar fi fost dus la
       // formularul de profil. Al doilea apel ar fi fost bani aruncați.
+      //
+      // ⚠️ Lista de coloane cerute din `terenuri` e explicită și scurtă
+      // dinadins: PostgREST pică TOATĂ interogarea dacă una singură nu există.
+      // Toate cele de aici apar deja în select-uri explicite din alte pagini
+      // (profile-view-new.js) sau în `db_schema/insert_sample_terenuri.sql`.
       Promise.all([
-        sb.from('terenuri_likes').select('teren_id, terenuri(status)').eq('user_id', user.id),
+        sb.from('terenuri_likes').select('teren_id, terenuri(id, titlu, status, suprafata, pret_total, nr_apartamente_min, nr_apartamente_max, created_by_user_id)').eq('user_id', user.id),
         sb.from('grup_membri').select('grup_id').eq('user_id', user.id).eq('status', 'activ'),
         sb.from('profiles').select('account_type').eq('user_id', user.id).single()
       ]).then(function(r){
@@ -2826,6 +3164,7 @@
           return t.terenuri && t.terenuri.status === 'approved';
         });
         var grupIds = ((r[1] && r[1].data) ? r[1].data : []).map(function(m){ return m.grup_id; });
+        var terenIds = terenuri.map(function(t){ return t.teren_id; });
 
         var st = {
           teren: terenuri.length > 0,
@@ -2834,27 +3173,95 @@
 
         var date = {
           userId: user.id,
-          terenuri: terenuri.map(function(t){ return t.teren_id; }),
+          terenuri: [],
           grupuri: []
         };
 
-        // Fără grupuri nu mai avem ce întreba: randăm direct.
-        if(grupIds.length === 0){ randeazaPasi(st, date); return; }
+        // Cine n-are nici teren, nici grup: doar pașii de intrare, ca până
+        // acum. Nicio interogare în plus, niciun spațiu de lucru gol.
+        if(!st.teren && !st.grup){ randeazaHero(st, date, []); return; }
 
-        // Numele grupurilor. Dacă nu vin (RLS, grup șters între timp), punem
-        // o etichetă neutră: mai bine un link fără nume decât un rând care
-        // dispare și îl lasă pe om fără scurtătura către grupul lui.
-        function cuNumeDeRezerva(){
-          return grupIds.map(function(id){ return { id:id, nume:'grupul tău' }; });
-        }
-        sb.from('grupuri').select('id, nume').in('id', grupIds).then(function(res){
-          var g = (res && res.data && res.data.length) ? res.data : cuNumeDeRezerva();
-          date.grupuri = g;
-          randeazaPasi(st, date);
-        }).catch(function(e){
-          console.warn('bloc stare (grupuri):', e);
-          date.grupuri = cuNumeDeRezerva();
-          randeazaPasi(st, date);
+        // Runda a doua: tot ce umple cardurile. Fiecare interogare e trecută
+        // prin `bland`, deci una căzută înseamnă un card mai sărac, nu o
+        // pagină ruptă. Numele grupurilor se cer separat, nu prin embed în
+        // `grup_membri` — nimeni nu face asta în tot codul, iar RLS-ul de pe
+        // grupuri nu e locul unde să experimentăm.
+        var nimic = Promise.resolve([]);
+        Promise.all([
+          terenIds.length ? bland(sb.from('terenuri_likes').select('teren_id, user_id').in('teren_id', terenIds)) : nimic,
+          terenIds.length ? bland(sb.from('terenuri_likes_grupuri').select('teren_id, grup_id').in('teren_id', terenIds)) : nimic,
+          terenIds.length ? bland(sb.from('user_teren_notes').select('teren_id, content').eq('user_id', user.id).in('teren_id', terenIds)) : nimic,
+          grupIds.length  ? bland(sb.from('grupuri').select('id, nume').in('id', grupIds)) : nimic,
+          grupIds.length  ? bland(sb.from('grup_membri_count').select('grup_id, membri_count').in('grup_id', grupIds)) : nimic,
+          grupIds.length  ? blandNul(sb.from('grup_checklist').select('grup_id, step_key, checked').in('grup_id', grupIds)) : nimic
+        ]).then(function(x){
+          // ── TERENURI ──
+          // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
+          // numărul ar începe mereu de la 1 și n-ar spune nimic. Se scoate și
+          // inima automată a agenției care a postat terenul (terenuri.js face
+          // la fel când numără inimile de pe carduri).
+          var alteInimi = {};
+          x[0].forEach(function(l){
+            if(l.user_id === user.id) return;
+            alteInimi[l.teren_id] = alteInimi[l.teren_id] || [];
+            alteInimi[l.teren_id].push(l.user_id);
+          });
+          var grupuriPeTeren = {};
+          x[1].forEach(function(l){ grupuriPeTeren[l.teren_id] = (grupuriPeTeren[l.teren_id] || 0) + 1; });
+          var noteTeren = {};
+          x[2].forEach(function(n){ if(n.content) noteTeren[n.teren_id] = n.content; });
+
+          date.terenuri = terenuri.map(function(l){
+            var t = l.terenuri;
+            var proprietar = t.created_by_user_id;
+            var interesati = (alteInimi[t.id] || []).filter(function(uid){ return uid !== proprietar; }).length;
+            return {
+              id: t.id, titlu: t.titlu, suprafata: t.suprafata, pret_total: t.pret_total,
+              nr_apartamente_min: t.nr_apartamente_min, nr_apartamente_max: t.nr_apartamente_max,
+              interesati: interesati,
+              grupuri: grupuriPeTeren[t.id] || 0,
+              nota: noteTeren[t.id] || '',
+              userId: user.id
+            };
+          // Sus stau terenurile la care se uită și alții: acolo se poate
+          // întâmpla ceva. La egalitate, ordine alfabetică, ca să nu sară
+          // rândurile de la o încărcare la alta.
+          }).sort(function(a, b){
+            return ((b.interesati + b.grupuri) - (a.interesati + a.grupuri)) ||
+                   String(a.titlu || '').localeCompare(String(b.titlu || ''), 'ro');
+          });
+
+          // ── GRUPURI ──
+          // Dacă numele nu vin (RLS, grup șters între timp), punem o etichetă
+          // neutră: mai bine un link fără nume decât un card care dispare și
+          // îl lasă pe om fără scurtătura către grupul lui.
+          var numeGrup = {}, membriGrup = {};
+          x[3].forEach(function(g){ numeGrup[g.id] = g.nume; });
+          x[4].forEach(function(c){ membriGrup[c.grup_id] = c.membri_count; });
+
+          var bifeCitite = (x[5] !== null);
+          var bifePeGrup = {};
+          (x[5] || []).forEach(function(row){
+            if(!row.checked) return;
+            bifePeGrup[row.grup_id] = bifePeGrup[row.grup_id] || {};
+            bifePeGrup[row.grup_id][row.step_key] = true;
+          });
+
+          date.grupuri = grupIds.map(function(id){
+            return {
+              id: id,
+              nume: numeGrup[id] || 'grupul tău',
+              // Grupurile fără niciun membru activ nu apar în view (așa
+              // lucrează GROUP BY), deci lipsa lor înseamnă 0 — vezi grupuri.js.
+              membri: membriGrup[id] || 0,
+              faza: bifeCitite ? fazaGrupului(bifePeGrup[id] || {}) : null,
+              bifeCitite: bifeCitite
+            };
+          });
+
+          var categorii = categoriiDePus(st);
+          randeazaHero(st, date, categorii);
+          randeazaSpatiu(date, categorii);
         });
       }).catch(function(e){
         // Orice pică → pagina rămâne întreagă și fără bloc. Niciodată o
