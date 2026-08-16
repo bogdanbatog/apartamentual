@@ -7,6 +7,15 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## TODO
 
+- [ ] **`_headers` nu setează nicio regulă de cache, iar `js/nav.js` n-are versiune în URL**
+  Găsit pe 16 august, după ce a dat o jumătate de oră de rezultate false la testare. Consecința nu e cosmetică: `nav.js` conține acum **zidul de profil obligatoriu** și verificarea de cont suspendat, deci o schimbare de comportament pentru utilizatori **nu se aplică până nu li se împrospătează cache-ul**. La orice publicare din cPanel care atinge `nav.js`, verificarea proprie se face cu `Ctrl+Shift+R`, altfel te uiți la fișierul vechi. De decis: parametru de versiune în URL (`nav.js?v=...`) sau reguli de cache în `_headers`.
+
+- [ ] **DTAC: platforma spune două lucruri diferite despre când se face**
+  `grup-details.html`, la pasul `f3_dtac`, scrie că „în mod uzual se elaborează înaintea fazei PTh"; cronologia din `ce-este/cum-functioneaza.html` pune PTh înaintea DTAC. **Decizia lui Lucian, 16 august: DTAC se recomandă DUPĂ proiectul tehnic.** De aliniat textul în ambele locuri. Nu s-a făcut ca să nu se amestece cu treaba de pe homepage.
+
+- [ ] **Linkul „în patru faze" din `#cum-incepi` duce la ghidul lung**
+  Acum trimite la `/ce-este/cum-functioneaza.html`. Pentru un vizitator nou e potrivit, dar pentru cine are deja grup, checklistul grupului lui ar fi mult mai util (are 4 faze și 26 de pași reali, cu bife). De decis dacă destinația se schimbă în funcție de starea omului. Semnul e lăsat în cod, lângă text. (Cifra „7 etape" era greșită și a fost corectată în „patru faze" pe 16 august: nu există nicăieri 7 faze, cei 7 veneau din lista de intrare de pe homepage, care descrie pașii de **dinainte** de grup.)
+
 - [ ] **Migrație profil incompletă (`*-new` vs versiuni vechi)**
   Există în paralel `profile-view.html` + `profile-view.js` și `profile-view-new.html` + `profile-view-new.js` (la fel pentru edit). De decis: migrația e completă și ștergem versiunile vechi, sau încă rulează ambele în paralel? Dacă e complet migrat, fișierele vechi sunt cod mort care creează confuzie la editări viitoare.
 

@@ -1,7 +1,8 @@
 # Handoff, 16 august 2026: homepage-ul utilizatorului logat, profil obligatoriu, spațiul de lucru
 
-**Sesiune lungă.** Două commituri făcute și netrimise, plus o machetă aprobată pentru
-ce urmează. Citește secțiunea „De unde continui" înainte de orice.
+**Sesiune lungă,** reluată a doua oară în aceeași zi. Trei commituri, toate trimise,
+plus o machetă aprobată pentru ce urmează. Citește secțiunea „De unde continui"
+înainte de orice.
 
 ---
 
@@ -9,9 +10,9 @@ ce urmează. Citește secțiunea „De unde continui" înainte de orice.
 
 | | |
 |---|---|
-| Commituri făcute | `888fc1d` (homepage logat), `f2424da` (profil obligatoriu) |
-| Push | **NU.** Nimic trimis pe GitHub |
-| Publicat pe site | **NU.** Publicarea se face manual din cPanel, push-ul nu deployează |
+| Commituri făcute | `888fc1d` (homepage logat), `f2424da` (profil obligatoriu), `542161e` (potrivire pe zone în hero) |
+| Push | ✅ **DA.** Toate trei pe `origin/main`, `main` sincron cu remote-ul |
+| Publicat pe site | **NU.** Publicarea se face manual din cPanel, push-ul nu deployează. De urcat: `frontend/index.html`, `frontend/js/nav.js` |
 | Machete pe disc, netrackuite | `frontend/_macheta-spatiu-lucru.html`, `frontend/_variante-hero.html` |
 
 Cele două machete **nu se comit**, dar **nu se șterg**: sunt singura descriere a formei
@@ -24,40 +25,32 @@ python -m http.server 8899 --bind 127.0.0.1
 
 - `http://127.0.0.1:8899/_macheta-spatiu-lucru.html` — forma aprobată, cu comutator
   între „utilizator nou" și „are teren și grup"
-- `http://127.0.0.1:8899/_variante-hero.html` — homepage-ul real cu date false, patru
-  variante de la 1 teren la 12 terenuri și 5 grupuri
+- `http://127.0.0.1:8899/_variante-hero.html` — **ramă cu iframe peste `index.html` real**,
+  patru variante de la 1 teren la 12 terenuri și 5 grupuri
+
+⚠️ **`_variante-hero.html` acoperă doar blocul de stare** (pașii cu teren și grup). Caută
+în `index.html` scriptul care conține `BLOCUL DE STARE` și doar aceluia îi injectează date
+false. **Restul hero-ului, inclusiv clusterul de vecini, rulează cu date reale din Supabase.**
+Deci pentru orice se schimbă în `populateVariantA` macheta nu ajută: trebuie logare reală.
+
+⚠️ **Serverul local nu scrie nimic în consolă și nu-ți dă promptul înapoi.** Asta e purtarea
+normală, nu o defecțiune. Verificarea că merge: `Get-NetTCPConnection -LocalPort 8899 -State Listen`.
+
+**Contul cu care se probează hero-ul logat: `luta.lucian.m@gmail.com`.** Nu cel de superadmin,
+care are profilul incomplet și primește mesajul „Completează-ți profilul" în loc de pătrate.
 
 ---
 
 ## De unde continui
 
-Două lucruri, în ordinea asta:
+### ✅ 1. Compatibilitatea pe zone în hero — ÎNCHIS, commit `542161e`
 
-### 1. Compatibilitatea pe zone în `index.html` (mic, se termină repede)
+Vezi „Ce s-a livrat azi" mai jos. Întrebarea rămasă deschisă a primit răspuns.
 
-**Decizia lui Lucian:** compatibilitatea se calculează **întâi pe zone comune**, apoi
-interesele se afișează doar informativ.
-
-Astăzi există o inconsecvență reală în platformă:
-
-| Unde | Cum ordonează |
-|---|---|
-| `js/utilizatori.js:238` | zone comune, apoi interese ✅ deja corect |
-| `index.html`, `populateVariantA` | **interese**, iar cine n-are niciun interes comun e **exclus complet** ❌ |
-
-Consecința azi: un om cu 5 zone comune și 0 interese comune nu apare deloc în pătratele
-din hero, deși e primul pe pagina Utilizatori.
-
-**De făcut:** în `populateVariantA` din `index.html`, scoate filtrul `commonTags > 0`,
-sortează după `commonZones` și abia apoi după `commonTags`, iar eticheta de pe pătrat
-devine „N zone · M interese" în loc de „N interese".
-
-**Întrebare rămasă deschisă:** ce arătăm cuiva cu **zero zone comune** cu oricine? Listă
-goală, sau coborâm pe interese ca plasă de siguranță? Lucian n-a răspuns.
-
-### 2. Spațiul de lucru pe homepage (mare, mai multe sesiuni)
+### 2. Spațiul de lucru pe homepage (mare, mai multe sesiuni) — SINGURUL LUCRU RĂMAS
 
 Forma e aprobată în machetă. Vezi „Ce s-a hotărât despre spațiul de lucru" mai jos.
+Merită `/clear` înainte, e mult.
 
 ---
 
@@ -100,6 +93,37 @@ Excepții, toate probate cu codul real rulat cu sesiuni simulate:
   cerute de `profil_complet`, deci ar fi blocate definitiv, fără scăpare)
 - **adminii și superadminii** (contul de superadmin al lui Lucian chiar pică testul azi)
 - paginile: profil, register, reset-parola, termeni, gdpr, politici, accept-invite
+
+### `542161e` — Vecinii din hero se potrivesc întâi pe zone
+
+Inconsecvența care se repara: `js/utilizatori.js:238` sorta deja pe zone, apoi pe interese,
+dar `populateVariantA` din `index.html` sorta pe interese **și excludea complet** pe oricine
+n-avea măcar un interes comun. Un om cu 5 zone comune și 0 interese comune nu apărea deloc
+în pătrate, deși pe pagina Utilizatori era primul.
+
+**Răspunsul lui Lucian la întrebarea rămasă deschisă: varianta (b), plasă de siguranță.**
+Cine are zero zone comune rămâne în listă pe baza intereselor, dar poartă eticheta cinstită
+„0 zone · 2 interese". Motivul: un hero gol pe primul ecran arată ca o platformă goală, iar
+omul n-are cum să ghicească că lipsa vine din zone, nu din lipsă de oameni.
+
+- filtrul `commonTags > 0` → `commonZones > 0 || commonTags > 0`
+- sortarea: zone descrescător, interesele departajează
+- eticheta de pe pătrat și din tooltip: „3 zone · 2 interese", cu singular corect
+  („1 zonă", „1 interes"), prin `zoneLabel()` / `tagLabel()`
+- textele din jur nu mai spun „cele mai multe interese comune" (devenise fals); la fel
+  mesajul de stare goală
+- CSS `.hero-stage .neighbor .pct`: `.78rem/4px 9px` → `.72rem/3px 8px`
+
+**De ce a trebuit atinsă și bulina:** eticheta e acum de peste două ori mai lungă, e
+`white-space:nowrap` și `position:absolute` centrată sub pătrat, deci iese în afara lui.
+Pe tabletă pătratele se micșorează cu `--k:.62` **dar textul nu se micșorează odată cu ele**,
+iar în layoutul flex de acolo distanța dintre pătrate e doar 26px. Cu mărimea veche, bulinele
+a două pătrate vecine ajungeau lipite. Lucian a confirmat cu ochiul că acum nu se ating.
+
+**Probat:** cele 8 blocuri de script inline din `index.html` trec `new Function()`; logica de
+filtrare/sortare rulată pe date false dă ordinea `3 zone·0 interese` → `2 zone·1 interes` →
+`1 zonă·1 interes` → `0 zone·2 interese`, cu cel fără nimic comun și cel fără pseudonim excluși.
+Verificat apoi în browser de Lucian, pe server local, logat.
 
 ---
 
