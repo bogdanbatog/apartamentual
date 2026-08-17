@@ -205,10 +205,6 @@ body {
     border-radius: 14px;
     padding: 16px 18px;
     box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.6);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 24px;
-    align-items: center;
 }
 .grup-panel-main { min-width: 0; }
 
@@ -241,27 +237,35 @@ body {
     background: #c2604a;
 }
 
+/* Trei casete, nu trei coloane despărțite de linii.
+   ⚠️ Prima variantă (18 august) avea linii verticale lipite de fiecare
+   coloană. Coloanele au text de lungimi diferite, deci și liniile ieșeau
+   inegale: cea din dreapta se oprea cu 102px mai sus decât cealaltă, iar sub
+   coloana din mijloc rămânea o gaură cât un sfert din panou. Se citea ca
+   „nefinisat", nu ca decizie.
+   `align-items: stretch` (implicit la grid, scris aici ca să nu se piardă
+   dintr-o editare viitoare) face casetele egale ca înălțime, iar golul de sub
+   textul mai scurt rămâne ÎNĂUNTRUL casetei, unde arată intenționat. */
 .grup-steps {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px 22px;
-    align-items: start;
+    gap: 12px;
+    align-items: stretch;
 }
 .grup-steps > li {
     display: flex;
     gap: 10px;
     align-items: flex-start;
+    background: #ffffff;
+    border: 1px solid #e8e3d8;
+    border-radius: 12px;
+    padding: 14px;
     font-size: 0.92rem;
     line-height: 1.45;
     color: #555555;
-}
-/* Despărțitor între cele trei coloane, nu și înaintea primeia. */
-.grup-steps > li + li {
-    padding-left: 20px;
-    border-left: 1px solid #e8e3d8;
 }
 .grup-steps b {
     color: #1a1a1a;
@@ -355,11 +359,13 @@ body {
     white-space: nowrap;
 }
 
+/* Butonul stă pe rândul lui, sub casete, aliniat la dreapta. Înainte plutea
+   la mijlocul unei coloane înalte de 316px, lângă o linie care mergea de sus
+   până jos, și arăta scăpat acolo. */
 .grup-panel-side {
     display: flex;
-    align-items: center;
-    padding-left: 22px;
-    border-left: 1px solid #e8e3d8;
+    justify-content: flex-end;
+    margin-top: 14px;
 }
 .btn-grup-panel {
     display: inline-flex;
@@ -398,29 +404,15 @@ body {
 }
 
 @media (max-width: 900px) {
-    /* Butonul trece sub pași, pe toată lățimea: la mijloc rămânea o coloană
-       de text de câteva cuvinte. */
-    .grup-panel { grid-template-columns: 1fr; gap: 16px; }
-    .grup-panel-side {
-        padding-left: 0;
-        border-left: none;
-        border-top: 1px solid #e8e3d8;
-        padding-top: 14px;
-    }
+    /* Pe ecran îngust butonul ia toată lățimea: la dreapta, singur, ar rămâne
+       o pastilă mică lângă un gol lat. */
     .btn-grup-panel { width: 100%; justify-content: center; }
 }
 
 @media (max-width: 768px) {
     .grup-panel { padding: 14px; }
     .grup-steps { grid-template-columns: 1fr; gap: 9px; }
-    /* Pe o coloană, linia verticală dintre pași n-are ce despărți. */
-    .grup-steps > li + li {
-        padding-left: 0;
-        border-left: none;
-        border-top: 1px dashed #e8e3d8;
-        padding-top: 9px;
-    }
-    .grup-steps > li { font-size: 0.88rem; }
+    .grup-steps > li { font-size: 0.88rem; padding: 12px; }
     /* Aici rândul devine clicabil, deci merită să arate ca atare. */
     .grup-fold > summary {
         display: flex;
