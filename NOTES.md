@@ -7,6 +7,9 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## TODO
 
+- [ ] **Macheta `frontend/_macheta-spatiu-lucru.html` a rămas în urmă și induce în eroare**
+  Găsit pe 17 august, după ce Lucian s-a uitat în ea și a văzut pasul „Completează-ți profilul", pe care îl scosesem. Macheta a fost desenată pe 16 august, **înainte** de decizia ca `nav.js` să-l ducă la formular pe oricine e logat fără profil complet; de atunci nu s-a mai atins. Are trei pași în hero, codul are doi, și n-are cum să se vadă că unul dintre fișiere e vechi. Nu se șterge (e singura descriere a formei aprobate), dar trebuie ori o notă în bara ei de sus („desen din 16 august, codul e altul unde diferă"), ori corectată pe măsură ce se construiesc pașii. **De decis care.** Aceeași capcană o să reapară la fiecare pas din spațiul de lucru, fiindcă macheta descrie toate cele șapte categorii, iar codul le are pe trei.
+
 - [ ] **`_headers` nu setează nicio regulă de cache, iar `js/nav.js` n-are versiune în URL**
   Găsit pe 16 august, după ce a dat o jumătate de oră de rezultate false la testare. Consecința nu e cosmetică: `nav.js` conține acum **zidul de profil obligatoriu** și verificarea de cont suspendat, deci o schimbare de comportament pentru utilizatori **nu se aplică până nu li se împrospătează cache-ul**. La orice publicare din cPanel care atinge `nav.js`, verificarea proprie se face cu `Ctrl+Shift+R`, altfel te uiți la fișierul vechi. De decis: parametru de versiune în URL (`nav.js?v=...`) sau reguli de cache în `_headers`.
 
