@@ -1690,8 +1690,8 @@
      Homepage-ul omului logat nu mai e o pagină de prezentare, ci locul din
      care își vede terenurile, grupul și pașii. Secțiunea se randează din
      JS (vezi scriptul „SPAȚIUL DE LUCRU" de la finalul paginii) și rămâne
-     `hidden` pentru nelogați, pentru conturile de agenție și pentru cine
-     n-are încă nici teren, nici grup.
+     `hidden` pentru nelogați, pentru conturile de agenție și pentru oricine
+     n-are nicio categorie de arătat.
      Paleta se redefinește aici fiindcă în `.hero-stage` e scopată pe hero,
      iar secțiunea asta stă în afara lui.
      ══════════════════════════════════════════════════════════════════ */
@@ -1760,11 +1760,25 @@
   .sl-bara{ height:6px; background:var(--bg-placeholder); border-radius:100px; overflow:hidden; margin:.625rem 0 .5rem; }
   .sl-bara span{ display:block; height:100%; background:var(--terracotta); border-radius:100px; }
 
+  /* ── CARDUL „CE E NOU" ──
+     O listă de rânduri, fiecare cu un punct colorat care spune din ce fel de
+     noutate face parte: teren, om, grup, articol. Culoarea nu poartă singură
+     informația (rândul o scrie oricum în cuvinte), e doar un reper vizual. */
+  .sl-flux{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.75rem; }
+  .sl-flux li{ display:flex; gap:.75rem; align-items:flex-start; font-size:14.5px; line-height:1.5; }
+  .sl-punct{ flex:0 0 auto; width:7px; height:7px; border-radius:50%; margin-top:8px; }
+  .sl-cand{ color:var(--ink-3); font-size:13px; white-space:nowrap; }
+  .sl-flux a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--rule-2); }
+  .sl-flux a:hover{ border-bottom-color:var(--ink); }
+
   @media (max-width:820px){
     .sl-grid{ grid-template-columns:1fr; }
   }
   @media (max-width:480px){
     .sl-card{ padding:1.25rem 1rem; }
+    /* Un titlu lung („Ce e nou pentru tine") nu se mai rupe în jurul
+       etichetei din dreapta; eticheta trece pe rândul ei. */
+    .sl-cap{ flex-wrap:wrap; gap:.25rem 1rem; }
     .sl-teren > summary{ padding:.875rem 1rem; }
     .sl-teren-corp{ padding:.875rem 1rem 1rem; }
     /* Pe telefon numele lung și metadatele nu încap pe un rând. */
@@ -2749,12 +2763,18 @@
   //
   //  1. BLOCUL DIN HERO (`#bloc-stare`). Cine n-are încă nici teren, nici
   //     grup, vede lista de pași de intrare, ca până acum. Cine are măcar
-  //     unul din ele vede o frază de stare, pasul care i-a mai rămas (dacă
-  //     a mai rămas vreunul) și cuprinsul spațiului de lucru.
+  //     unul din ele vede o frază de stare și pasul care i-a mai rămas (dacă
+  //     a mai rămas vreunul). Amândoi văd cuprinsul spațiului de lucru.
   //  2. SPAȚIUL DE LUCRU (`#spatiul-tau`), sub bara de apartamente:
-  //     categoriile lui, fiecare în cardul ei. Deocamdată sunt gata două,
-  //     „Terenurile tale" și „Grupurile tale"; restul se adaugă în lista
-  //     CATEGORII de mai jos, pe măsură ce se construiesc.
+  //     categoriile lui, fiecare în cardul ei. Deocamdată sunt gata trei,
+  //     „Ce e nou pentru tine", „Terenurile tale" și „Grupurile tale"; restul
+  //     se adaugă în lista CATEGORII de mai jos, pe măsură ce se construiesc.
+  //
+  //  ⚠️ DIN 17 AUGUST SE RANDEAZĂ ȘI PENTRU CONTUL NOU (fără teren, fără
+  //  grup). Decizia lui Lucian: el are profil complet, deci are zone bifate,
+  //  deci fluxul de noutăți are ce să-i arate — și e singurul lucru din pagină
+  //  care are, în prima lui zi. Categoriile care chiar cer un teren sau un
+  //  grup rămân închise pentru el; vezi `cere` din CATEGORII.
   //
   //  Cine NU vede blocul (și cui NU i se scurtează pagina):
   //    • nelogații — pagina rămâne exact cum era;
@@ -2901,9 +2921,15 @@
     }
 
     function randeazaHero(st, date, categorii){
-      // Cine n-are nimic: exact blocul de până acum.
+      // Cine n-are încă nici teren, nici grup: cei doi pași de intrare, ca
+      // până acum. ⚠️ Primește ȘI cuprinsul, fiindcă din 17 august spațiul de
+      // lucru se randează și pentru el (cardurile care nu cer teren sau grup:
+      // „Ce e nou", iar mai târziu utilizatorii compatibili, grupurile din
+      // zonele lui, pașii până la recepție). Fără cuprins, cardurile ar sta
+      // sub bara de apartamente fără nimic care să spună că sunt acolo.
       if(!st.teren && !st.grup){
-        afiseaza('<ul class="bs-list">' + pasTeren() + pasGrup() + '</ul>' + subsol(st));
+        afiseaza('<ul class="bs-list">' + pasTeren() + pasGrup() + '</ul>' +
+                 cuprins(categorii) + subsol(st));
         return;
       }
       var lipsa = '';
@@ -2928,6 +2954,168 @@
     }
     function mini(href, text, dest){
       return '<a class="sl-mini" href="' + href + '" data-dest="' + dest + '">' + esc(text) + ' →</a>';
+    }
+
+    // ── CE E NOU ──
+    // Fluxul de noutăți, calculat în întregime la citire: nu există nicio
+    // tabelă de „evenimente" și nu s-a făcut niciuna. Fiecare rând se naște
+    // dintr-un `created_at` mai nou decât fereastra de mai jos.
+    //
+    // ⚠️ Cardul se randează DOAR dacă are măcar un rând (vezi `are` din
+    // CATEGORII). Un card „Ce e nou" gol e mai rău decât lipsa lui: îi spune
+    // omului că platforma e moartă, când de fapt noi n-am avut ce număra.
+    //
+    // ⚠️ Fluxul e singura categorie care nu cere nici teren, nici grup. E și
+    // motivul pentru care spațiul de lucru se randează acum pentru contul nou:
+    // e singurul lucru din pagină care are ce să-i arate în prima zi.
+    var ZILE_FLUX = 14;
+
+    function deLaCand(){
+      var d = new Date();
+      d.setDate(d.getDate() - ZILE_FLUX);
+      return d.toISOString();
+    }
+
+    // „acum 3 zile". Aproximativ dinadins: ora exactă n-ajută pe nimeni, iar
+    // fereastra e oricum de două săptămâni.
+    function candva(iso){
+      if(!iso) return '';
+      var zile = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+      if(zile <= 0) return 'azi';
+      if(zile === 1) return 'ieri';
+      if(zile < 7)  return 'acum ' + zile + ' zile';
+      if(zile < 11) return 'acum o săptămână';
+      return 'acum două săptămâni';
+    }
+
+    // ⚠️ POTRIVIREA TEREN ↔ ZONĂ SE FACE PE TEXT, fiindcă nu există cheie
+    // străină: terenul ține cartierul ca text (`terenuri.cartier` + `.oras`),
+    // iar omul își bifează zonele ca legătură către `zones`. Normalizarea de
+    // aici e COPIATĂ din `js/terenuri.js` (`normalizeazaText` / `cheieZona`)
+    // și trebuie să rămână identică și cu a emailului săptămânal
+    // (`db_schema/digest-terenuri/2c-functie-cu-lista-terenuri.sql`, care face
+    // `lower(btrim(...))` pe ambele capete): fără scoaterea diacriticelor,
+    // fără strângerea spațiilor din interior. Dacă se schimbă una, se schimbă
+    // toate trei, altfel homepage-ul, pagina de terenuri și emailul încep să
+    // arate liste diferite pentru același om.
+    function normalizeazaText(v){ return String(v == null ? '' : v).trim().toLowerCase(); }
+    function cheieZona(oras, cartier){ return normalizeazaText(oras) + '|' + normalizeazaText(cartier); }
+
+    function randFlux(culoare, continut, cand){
+      return '<li><span class="sl-punct" style="background:var(--' + culoare + ')" aria-hidden="true"></span>' +
+               '<span>' + continut + (cand ? ' <span class="sl-cand">' + esc(cand) + '</span>' : '') + '</span></li>';
+    }
+    function legatura(href, text, dest){
+      return '<a href="' + href + '" data-dest="' + dest + '">' + esc(text) + '</a>';
+    }
+    // Enumerare cu „și" la coadă, tăiată la două nume: „Bucureștii Noi și
+    // Pajura", „Bucureștii Noi, Pajura și altele".
+    function insiruire(nume){
+      if(nume.length === 1) return esc(nume[0]);
+      if(nume.length === 2) return esc(nume[0]) + ' și ' + esc(nume[1]);
+      return esc(nume[0]) + ', ' + esc(nume[1]) + ' și altele';
+    }
+
+    // Construiește rândurile. Ordinea e cea din macheta aprobată, de la cel mai
+    // aproape de om (grupul lui) către cel mai departe (un articol nou).
+    function construiesteFluxul(f){
+      var randuri = [];
+
+      // 1. Cineva nou în grupul tău. Cel mai personal rând din flux.
+      f.grupuriCuMembriNoi.slice(0, 2).forEach(function(g){
+        var cine = g.nume_membri.length === 1
+          ? '<b>' + esc(g.nume_membri[0]) + '</b> s-a alăturat'
+          : (g.nume_membri.length
+              ? '<b>' + esc(g.nume_membri[0]) + '</b> și încă ' + (g.nume_membri.length - 1) + ' s-au alăturat'
+              // Pseudonimele n-au putut fi citite: spunem cinstit câți, fără nume.
+              : (g.cati === 1 ? 'Un membru nou s-a alăturat' : g.cati + ' membri noi s-au alăturat'));
+        randuri.push(randFlux('sage',
+          cine + ' grupului ' +
+          legatura('/grup-details.html?id=' + encodeURIComponent(g.id), g.nume, 'flux-grupul-meu') + '.',
+          candva(g.cand)));
+      });
+
+      // 2. Terenuri noi în zonele tale.
+      var t = f.terenuriInZonele;
+      if(t.length === 1){
+        var unul = t[0];
+        randuri.push(randFlux('terracotta',
+          'Teren nou în <b>' + esc(unul.cartier || 'una din zonele tale') + '</b>: ' +
+          legatura('/teren-details.html?id=' + encodeURIComponent(unul.id),
+                   unul.titlu || 'vezi terenul', 'flux-teren-nou') +
+          (unul.suprafata ? ', ' + nr(unul.suprafata) + ' mp' : '') + '.',
+          candva(unul.created_at)));
+      } else if(t.length > 1){
+        // Numărăm pe cartiere ca să putem spune unde s-au adunat.
+        var peCartier = {};
+        t.forEach(function(x){ var c = x.cartier || '—'; peCartier[c] = (peCartier[c] || 0) + 1; });
+        var cartiere = Object.keys(peCartier).sort(function(a, b){ return peCartier[b] - peCartier[a]; });
+        var coada = (cartiere.length === 1)
+          ? ', toate în <b>' + esc(cartiere[0]) + '</b>'
+          : ', dintre care <b>' + peCartier[cartiere[0]] + ' în ' + esc(cartiere[0]) + '</b>';
+        randuri.push(randFlux('terracotta',
+          '<b>' + t.length + ' terenuri noi</b> în zonele tale' + coada + '. ' +
+          legatura('/terenuri.html?zonele_mele=1', 'Vezi', 'flux-terenuri-zonele-mele') + ' →'));
+      } else if(f.terenuriNoiTotal > 0){
+        // Nimic în zonele lui, dar platforma s-a mișcat. Se spune cinstit, ca
+        // să nu pară că nu s-a întâmplat nimic. Contează mai ales la contul
+        // nou, care altfel ar rămâne cu un card gol în prima zi.
+        randuri.push(randFlux('terracotta',
+          '<b>' + f.terenuriNoiTotal + (f.terenuriNoiTotal === 1 ? ' teren nou</b> pe platformă' : ' terenuri noi</b> pe platformă') +
+          ', niciunul în zonele tale. ' +
+          legatura('/terenuri.html', 'Vezi', 'flux-terenuri-toate') + ' →'));
+      }
+
+      // 3. Utilizatori noi cu zone comune.
+      if(f.utilizatoriNoi.length){
+        var n = f.utilizatoriNoi.length;
+        var zoneLor = [];
+        f.utilizatoriNoi.forEach(function(u){
+          u.zoneComune.forEach(function(z){ if(zoneLor.indexOf(z) === -1) zoneLor.push(z); });
+        });
+        randuri.push(randFlux('slate',
+          legatura('/utilizatori.html',
+            n === 1 ? 'Un utilizator nou' : n + ' utilizatori noi', 'flux-utilizatori-noi') +
+          (n === 1 ? ' are' : ' au') + ' zone comune cu tine' +
+          (zoneLor.length ? ', în ' + insiruire(zoneLor) : '') + '.'));
+      }
+
+      // 4. Grupuri noi în zonele tale.
+      // Fără numărul de membri: ar cere încă o interogare înlănțuită (view-ul
+      // `grup_membri_count`, pe id-uri pe care le aflăm abia acum), iar un grup
+      // de câteva zile are oricum unul sau doi.
+      if(f.grupuriNoi.length === 1){
+        var g1 = f.grupuriNoi[0];
+        randuri.push(randFlux('mauve',
+          'Grup nou format în zona ta: ' +
+          legatura('/grup-details.html?id=' + encodeURIComponent(g1.id), g1.nume || 'vezi grupul', 'flux-grup-nou') + '.',
+          candva(g1.created_at)));
+      } else if(f.grupuriNoi.length > 1){
+        randuri.push(randFlux('mauve',
+          '<b>' + f.grupuriNoi.length + ' grupuri noi</b> s-au format în zonele tale. ' +
+          legatura('/grupuri.html', 'Vezi', 'flux-grupuri-noi') + ' →'));
+      }
+
+      // 5. Articol nou. Doar cel mai recent: fluxul nu e pagina de news.
+      if(f.articol){
+        var a = f.articol;
+        // Episoadele serialului se recunosc după slug, ca în `news.html`.
+        var ep = a.slug ? /judetului-housing-episodul-(\d+)/.exec(a.slug) : null;
+        randuri.push(randFlux('ochre',
+          (ep ? 'Episodul ' + ep[1] + ' din serialul Județului Housing: ' : 'Articol nou: ') +
+          legatura('/news.html#' + encodeURIComponent(a.slug || ''), a.title || 'citește', 'flux-articol') + '.',
+          candva(a.published_at)));
+      }
+
+      return randuri;
+    }
+
+    function cardCeENou(date, clase){
+      return '<article class="sl-card' + clase + '" id="ce-e-nou">' +
+        capCard('Ce e nou pentru tine',
+          '<span class="sl-meta">ULTIMELE ' + ZILE_FLUX + ' ZILE</span>') +
+        '<ul class="sl-flux">' + date.noutati.join('') + '</ul>' +
+      '</article>';
     }
 
     // ── TERENURILE TALE ──
@@ -3075,26 +3263,45 @@
     }
 
     // ── CATEGORIILE ──
-    // Lista crește pe măsură ce se construiesc. Fiecare intrare are `cere`,
-    // adică ce trebuie să aibă omul ca să merite cardul: fără terenuri, un
-    // card „Terenurile tale (0)" e doar zgomot.
+    // Lista crește pe măsură ce se construiesc. Câmpurile fiecărei intrări:
     //
-    // ⏳ Ce urmează, în ordinea din macheta aprobată:
-    //    • „Ce e nou pentru tine" (wide, prima) — fluxul de noutăți. Se poate
-    //      calcula la citire, fără migrație, în prima versiune.
+    //   `cere`      ce trebuie să AIBĂ omul ca să merite cardul: `'teren'` sau
+    //               `'grup'`. Fără terenuri, un card „Terenurile tale (0)" e
+    //               doar zgomot. `null` = se aplică oricui vede pagina.
+    //   `are`       ce trebuie să fi IEȘIT din interogări ca să aibă rost
+    //               cardul. Un flux fără nicio noutate nu se randează deloc.
+    //   `wide`      ocupă toată lățimea grilei, nu o coloană.
+    //   `titluScurt` cum apare în cuprinsul din hero, dacă titlul e prea lung.
+    //
+    // ⚠️ `cere` NU mai înseamnă „are teren sau grup". Din 17 august spațiul de
+    // lucru se randează și pentru contul nou (decizia lui Lucian): el are
+    // profil complet, deci are zone și interese, deci există categorii care au
+    // ce să-i arate. Categoriile care chiar depind de un teren sau un grup
+    // rămân închise pentru el, restul nu.
+    //
+    // ⏳ Ce urmează, în ordinea din macheta aprobată. Primele trei nu cer nici
+    //    teren, nici grup, deci se randează și pentru contul nou:
     //    • „Utilizatori compatibili cu tine" — aceeași potrivire pe zone ca
-    //      pătratele din hero (vezi `populateVariantA`).
+    //      pătratele din hero (vezi `populateVariantA`). Atunci se scoate și
+    //      rândul „N vecini potriviți" din hero.
     //    • „Grupuri care caută în zonele tale".
     //    • „Pașii până la recepție" (wide) — aceleași bife din checklistul
     //      grupului; cine n-are grup îi vede doar de citit.
-    //    • „Notele tale" (wide) — nu există încă tabela.
+    //    • „Notele tale" (wide) — nu există încă tabela, cere migrație.
     var CATEGORII = [
+      { id:'ce-e-nou', titlu:'Ce e nou pentru tine', titluScurt:'Ce e nou',
+        cere:null, wide:true, randeaza:cardCeENou,
+        are:function(date){ return date.noutati.length > 0; } },
       { id:'terenurile-tale', titlu:'Terenurile tale', cere:'teren', randeaza:cardTerenuri },
       { id:'grupurile-tale',  titlu:'Grupurile tale',  cere:'grup',  randeaza:cardGrupuri }
     ];
 
-    function categoriiDePus(st){
-      return CATEGORII.filter(function(c){ return st[c.cere]; });
+    function categoriiDePus(st, date){
+      return CATEGORII.filter(function(c){
+        if(c.cere && !st[c.cere]) return false;
+        if(c.are && !c.are(date)) return false;
+        return true;
+      });
     }
 
     function randeazaSpatiu(date, categorii){
@@ -3102,8 +3309,10 @@
       var grid = SPATIU.querySelector('.sl-grid');
       if(!grid) return;
       // Un card singur nu stă pe jumătate de pagină cu gol în dreapta.
-      var clase = (categorii.length === 1) ? ' sl-card--wide' : '';
-      grid.innerHTML = categorii.map(function(c){ return c.randeaza(date, clase); }).join('');
+      var singur = (categorii.length === 1);
+      grid.innerHTML = categorii.map(function(c){
+        return c.randeaza(date, (c.wide || singur) ? ' sl-card--wide' : '');
+      }).join('');
       SPATIU.hidden = false;
     }
 
@@ -3138,10 +3347,17 @@
       // dinadins: PostgREST pică TOATĂ interogarea dacă una singură nu există.
       // Toate cele de aici apar deja în select-uri explicite din alte pagini
       // (profile-view-new.js) sau în `db_schema/insert_sample_terenuri.sql`.
+      //
+      // ⚠️ Zonele bifate în profil se cer aici fiindcă de ele depinde tot
+      // fluxul de noutăți. Sunt trecute prin `bland`, spre deosebire de
+      // celelalte trei: dacă pică, se pierd rândurile de flux legate de zone,
+      // nu tot spațiul de lucru. Primele trei rămân „bune de pierdut TOTUL",
+      // fiindcă fără ele nu știm nici măcar dacă omul e cont de agenție.
       Promise.all([
         sb.from('terenuri_likes').select('teren_id, terenuri(id, titlu, status, suprafata, pret_total, nr_apartamente_min, nr_apartamente_max, created_by_user_id)').eq('user_id', user.id),
         sb.from('grup_membri').select('grup_id').eq('user_id', user.id).eq('status', 'activ'),
-        sb.from('profiles').select('account_type').eq('user_id', user.id).single()
+        sb.from('profiles').select('account_type').eq('user_id', user.id).single(),
+        bland(sb.from('user_preferred_zones').select('zone_id, zones(id, name, city_id)').eq('user_id', user.id))
       ]).then(function(r){
         var prof = (r[2] && r[2].data) ? r[2].data : {};
         if(prof.account_type === 'profesional'){ paginaIntreaga(); return; }
@@ -3166,6 +3382,14 @@
         var grupIds = ((r[1] && r[1].data) ? r[1].data : []).map(function(m){ return m.grup_id; });
         var terenIds = terenuri.map(function(t){ return t.teren_id; });
 
+        // Zonele bifate în profil, în cele două forme de care e nevoie:
+        // id-uri (ca să le compar cu ale altor oameni și ale grupurilor) și
+        // chei „oraș|cartier" (ca să le compar cu textul din terenuri).
+        var zoneRows  = (r[3] || []).map(function(z){ return z.zones; }).filter(Boolean);
+        var myZoneIds = zoneRows.map(function(z){ return z.id; });
+        var cityIds   = zoneRows.map(function(z){ return z.city_id; })
+                                .filter(function(v, i, a){ return v && a.indexOf(v) === i; });
+
         var st = {
           teren: terenuri.length > 0,
           grup:  grupIds.length > 0
@@ -3174,26 +3398,65 @@
         var date = {
           userId: user.id,
           terenuri: [],
-          grupuri: []
+          grupuri: [],
+          noutati: []
         };
-
-        // Cine n-are nici teren, nici grup: doar pașii de intrare, ca până
-        // acum. Nicio interogare în plus, niciun spațiu de lucru gol.
-        if(!st.teren && !st.grup){ randeazaHero(st, date, []); return; }
 
         // Runda a doua: tot ce umple cardurile. Fiecare interogare e trecută
         // prin `bland`, deci una căzută înseamnă un card mai sărac, nu o
         // pagină ruptă. Numele grupurilor se cer separat, nu prin embed în
         // `grup_membri` — nimeni nu face asta în tot codul, iar RLS-ul de pe
         // grupuri nu e locul unde să experimentăm.
+        //
+        // Interogările 6-11 sunt ale fluxului „Ce e nou" și rulează pentru
+        // ORICINE vede pagina, inclusiv pentru contul fără teren și fără grup.
+        // Sunt singurele care nu depind de ce are omul, ci doar de ce s-a
+        // întâmplat pe platformă în ultimele două săptămâni.
+        // ⚠️ Toate au `limit()`: fereastra e de 14 zile, dar dacă intră cineva
+        // cu un lot mare de terenuri într-o zi, homepage-ul n-are voie să
+        // tragă o mie de rânduri ca să scrie un rând de text.
         var nimic = Promise.resolve([]);
+        var deLa  = deLaCand();
         Promise.all([
           terenIds.length ? bland(sb.from('terenuri_likes').select('teren_id, user_id').in('teren_id', terenIds)) : nimic,
           terenIds.length ? bland(sb.from('terenuri_likes_grupuri').select('teren_id, grup_id').in('teren_id', terenIds)) : nimic,
           terenIds.length ? bland(sb.from('user_teren_notes').select('teren_id, content').eq('user_id', user.id).in('teren_id', terenIds)) : nimic,
           grupIds.length  ? bland(sb.from('grupuri').select('id, nume').in('id', grupIds)) : nimic,
           grupIds.length  ? bland(sb.from('grup_membri_count').select('grup_id, membri_count').in('grup_id', grupIds)) : nimic,
-          grupIds.length  ? blandNul(sb.from('grup_checklist').select('grup_id, step_key, checked').in('grup_id', grupIds)) : nimic
+          grupIds.length  ? blandNul(sb.from('grup_checklist').select('grup_id, step_key, checked').in('grup_id', grupIds)) : nimic,
+
+          // 6. Numele orașelor zonelor mele. Terenul ține orașul ca text, deci
+          //    fără ele „Centru" din Cluj s-ar potrivi cu „Centru" din Brașov.
+          cityIds.length ? bland(sb.from('cities').select('id, name').in('id', cityIds)) : nimic,
+
+          // 7. Terenurile noi. Doar cele aprobate, ca peste tot în platformă.
+          bland(sb.from('terenuri').select('id, titlu, oras, cartier, suprafata, created_at')
+                  .eq('status', 'approved').gte('created_at', deLa)
+                  .order('created_at', { ascending:false }).limit(60)),
+
+          // 8. Grupurile noi, cu zonele lor. Cele arhivate nu se numără, ca pe
+          //    pagina de grupuri (`js/grupuri.js`).
+          bland(sb.from('grupuri').select('id, nume, created_at, grup_preferred_zones(zone_id)')
+                  .neq('status', 'arhivat').gte('created_at', deLa)
+                  .order('created_at', { ascending:false }).limit(40)),
+
+          // 9. Utilizatorii noi, cu zonele lor. Aceleași filtre ca pătratele de
+          //    vecini din hero (`populateVariantA`): doar conturi personale
+          //    active. ⚠️ `account_status` poate fi NULL pentru conturile mai
+          //    vechi, iar un `.eq('active')` curat i-ar sări tăcut.
+          bland(sb.from('profiles').select('user_id, pseudonym, created_at, user_preferred_zones(zone_id)')
+                  .eq('account_type', 'activ').or('account_status.is.null,account_status.eq.active')
+                  .gte('created_at', deLa).limit(60)),
+
+          // 10. Cine s-a alăturat grupurilor mele. Doar membrii activi.
+          grupIds.length ? bland(sb.from('grup_membri').select('grup_id, user_id, joined_at')
+                                   .in('grup_id', grupIds).eq('status', 'activ')
+                                   .gte('joined_at', deLa).limit(40)) : nimic,
+
+          // 11. Cel mai recent articol publicat.
+          bland(sb.from('articles').select('title, slug, published_at')
+                  .eq('status', 'published').gte('published_at', deLa)
+                  .order('published_at', { ascending:false }).limit(1))
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -3259,9 +3522,92 @@
             };
           });
 
-          var categorii = categoriiDePus(st);
-          randeazaHero(st, date, categorii);
-          randeazaSpatiu(date, categorii);
+          // ── CE E NOU ──
+          // Zonele mele în cele două forme: chei „oraș|cartier" pentru
+          // terenuri (care țin zona ca text) și nume după id pentru oameni și
+          // grupuri (care o țin ca legătură).
+          var numeOras = {};
+          x[6].forEach(function(c){ numeOras[c.id] = c.name; });
+          var myZoneKeys = {}, numeZona = {};
+          zoneRows.forEach(function(z){
+            numeZona[z.id] = z.name;
+            if(numeOras[z.city_id]) myZoneKeys[cheieZona(numeOras[z.city_id], z.name)] = true;
+          });
+
+          var terenuriInZonele = x[7].filter(function(t){
+            return myZoneKeys[cheieZona(t.oras, t.cartier)];
+          });
+
+          // Utilizatorii noi: doar cei cu pseudonim (ca în hero, ceilalți n-au
+          // pagină de profil de arătat) și doar cei cu măcar o zonă comună.
+          var utilizatoriNoi = x[9].filter(function(p){
+            return p.user_id !== user.id && p.pseudonym;
+          }).map(function(p){
+            var comune = (p.user_preferred_zones || []).map(function(z){ return z.zone_id; })
+              .filter(function(id){ return myZoneIds.indexOf(id) !== -1; })
+              .map(function(id){ return numeZona[id]; }).filter(Boolean);
+            return { zoneComune: comune };
+          }).filter(function(u){ return u.zoneComune.length > 0; });
+
+          // Grupurile noi din zonele mele, fără cele în care sunt deja: pe ale
+          // mele le văd oricum în cardul „Grupurile tale", cu tot cu fază.
+          var grupuriNoi = x[8].filter(function(g){
+            if(grupIds.indexOf(g.id) !== -1) return false;
+            return (g.grup_preferred_zones || []).some(function(z){
+              return myZoneIds.indexOf(z.zone_id) !== -1;
+            });
+          });
+
+          // Cine s-a alăturat grupurilor mele, grupat pe grup. Eu nu mă
+          // număr: „te-ai alăturat grupului" nu e o noutate pentru mine.
+          var peGrup = {};
+          x[10].forEach(function(m){
+            if(m.user_id === user.id) return;
+            var g = peGrup[m.grup_id] || (peGrup[m.grup_id] = {
+              id: m.grup_id, nume: numeGrup[m.grup_id] || 'grupul tău',
+              cati: 0, cand: null, user_ids: [], nume_membri: []
+            });
+            g.cati++;
+            g.user_ids.push(m.user_id);
+            if(!g.cand || m.joined_at > g.cand) g.cand = m.joined_at;
+          });
+          var grupuriCuMembriNoi = Object.keys(peGrup).map(function(k){ return peGrup[k]; })
+            .sort(function(a, b){ return String(b.cand).localeCompare(String(a.cand)); });
+
+          // Runda a treia, și numai dacă are rost: pseudonimele celor care
+          // tocmai au intrat în grupurile mele. Nu se poate cere mai devreme,
+          // fiindcă abia acum le știm id-urile, și nu se face prin embed în
+          // `grup_membri` — nimeni în tot codul nu leagă tabelele astea două,
+          // iar RLS-ul de pe grupuri nu e locul unde să experimentăm. Dacă
+          // pică, rândul rămâne, dar spune „un membru nou" în loc de nume.
+          var idsNoi = [];
+          grupuriCuMembriNoi.slice(0, 2).forEach(function(g){
+            g.user_ids.forEach(function(id){ if(idsNoi.indexOf(id) === -1) idsNoi.push(id); });
+          });
+          var numeleLor = idsNoi.length
+            ? bland(sb.from('profiles').select('user_id, pseudonym').in('user_id', idsNoi))
+            : nimic;
+
+          numeleLor.then(function(profiluri){
+            var pseudo = {};
+            profiluri.forEach(function(p){ if(p.pseudonym) pseudo[p.user_id] = p.pseudonym; });
+            grupuriCuMembriNoi.forEach(function(g){
+              g.nume_membri = g.user_ids.map(function(id){ return pseudo[id]; }).filter(Boolean);
+            });
+
+            date.noutati = construiesteFluxul({
+              grupuriCuMembriNoi: grupuriCuMembriNoi,
+              terenuriInZonele:   terenuriInZonele,
+              terenuriNoiTotal:   x[7].length,
+              utilizatoriNoi:     utilizatoriNoi,
+              grupuriNoi:         grupuriNoi,
+              articol:            x[11][0] || null
+            });
+
+            var categorii = categoriiDePus(st, date);
+            randeazaHero(st, date, categorii);
+            randeazaSpatiu(date, categorii);
+          });
         });
       }).catch(function(e){
         // Orice pică → pagina rămâne întreagă și fără bloc. Niciodată o
