@@ -2102,9 +2102,16 @@
       </div>
       <div class="punchy-info">
         <p class="punchy-info-header">Următoarea întâlnire</p>
+        <!-- ⚠️ Data și ora de aici se REscriu din JavaScript, din aceeași
+             regulă ca rândul de webinar din fluxul „Ce e nou": prima joi a
+             lunii (vezi `urmatorulWebinar`, în scriptul de la finalul paginii).
+             Ce e scris aici e doar plasa de siguranță, pentru cazul în care
+             scriptul nu apucă să ruleze. Ca plasa să nu mintă, ține-o pe o
+             dată din viitor sau, cel mai simplu, las-o pe cea de la ultima
+             actualizare a paginii. -->
         <div class="punchy-info-row">
-          <p class="punchy-info-row-label">Joi · 3 septembrie 2026</p>
-          <p class="punchy-info-row-value">11:30 · Zoom</p>
+          <p class="punchy-info-row-label" id="webinarData">Joi · 3 septembrie 2026</p>
+          <p class="punchy-info-row-value" id="webinarOra">11:30 · Zoom</p>
         </div>
         <div class="punchy-info-row">
           <p class="punchy-info-row-label">Format</p>
@@ -3135,6 +3142,42 @@
       return 'acum două săptămâni';
     }
 
+    // ── WEBINARUL LUNAR ──
+    // Data NU e scrisă de mână aici, ci se calculează din regula pe care o
+    // spune deja pagina, în blocul de webinar: „În prima joi a fiecărei luni
+    // ne întâlnim online". Decizia lui Lucian, 18 august: calculată, ca să nu
+    // se învechească singură pe homepage-ul tuturor.
+    //
+    // ⚠️ Regula asta E promisiunea. Dacă vreodată săriți o lună sau mutați ora,
+    // rândul din flux va spune ceva neadevărat fără ca nimeni să afle. Atunci
+    // se schimbă AICI, nu în altă parte.
+    //
+    // ⚠️ Ora și linkul sunt scrise și în blocul de webinar din pagină (unde e
+    // și data, de mână: „Joi · 3 septembrie 2026") și pe Luma. Al treilea loc
+    // care poate să nu se potrivească; vezi NOTES.
+    var WEBINAR_URL = 'https://luma.com/00ig0k40';
+    var WEBINAR_ORA = '11:30';
+
+    // Prima joi a lunii, la ora webinarului. Dacă a trecut, cea din luna
+    // următoare. `new Date(an, luna + 1, 1)` trece singur în anul următor
+    // la decembrie, deci nu e nevoie de niciun caz special.
+    function urmatorulWebinar(acum){
+      acum = acum || new Date();
+      var ore = WEBINAR_ORA.split(':');
+      function primaJoi(an, luna){
+        var d = new Date(an, luna, 1, Number(ore[0]), Number(ore[1]), 0, 0);
+        while(d.getDay() !== 4) d.setDate(d.getDate() + 1);   // 4 = joi
+        return d;
+      }
+      var d = primaJoi(acum.getFullYear(), acum.getMonth());
+      // Comparația e pe ZI, nu pe oră: în ziua webinarului rândul trebuie să
+      // spună „azi", nu să sară deja la luna viitoare pentru cineva care
+      // deschide pagina la prânz.
+      var azi = new Date(acum.getFullYear(), acum.getMonth(), acum.getDate());
+      if(d < azi) d = primaJoi(acum.getFullYear(), acum.getMonth() + 1);
+      return d;
+    }
+
     // ⚠️ POTRIVIREA TEREN ↔ ZONĂ SE FACE PE TEXT, fiindcă nu există cheie
     // străină: terenul ține cartierul ca text (`terenuri.cartier` + `.oras`),
     // iar omul își bifează zonele ca legătură către `zones`. Normalizarea de
@@ -3266,13 +3309,50 @@
           candva(a.published_at)));
       }
 
+      // ── ULTIMELE DOUĂ RÂNDURI SUNT PERMANENTE ──
+      // Cererea lui Lucian, 18 august: episodul și webinarul se văd MEREU, nu
+      // doar când s-au întâmplat în ultimele două săptămâni. De aceea eticheta
+      // din colțul cardului nu mai spune „ultimele 14 zile": ar fi promis o
+      // fereastră pe care rândurile astea două n-o respectă.
+
+      // 6. Ultimul episod din serialul Județului Housing, oricât de vechi.
+      // ⚠️ Sărit dacă rândul 5 arată deja același articol: altfel același link
+      // ar apărea de două ori în același card, o dată cu „acum 3 zile" și o
+      // dată fără.
+      if(f.episod && (!f.articol || f.articol.slug !== f.episod.slug)){
+        var e = f.episod;
+        var nrEp = e.slug ? /judetului-housing-episodul-(\d+)/.exec(e.slug) : null;
+        randuri.push(randFlux('ochre',
+          (nrEp ? 'Episodul ' + nrEp[1] + ' din serialul Județului Housing: ' : 'Din serialul Județului Housing: ') +
+          legatura('/news.html#' + encodeURIComponent(e.slug || ''), e.title || 'citește', 'flux-episod') + '.'));
+      }
+
+      // 7. Următorul webinar. Data se calculează, nu se scrie de mână.
+      var w = urmatorulWebinar();
+      var azi = new Date();
+      var eAzi = w.getFullYear() === azi.getFullYear() && w.getMonth() === azi.getMonth() &&
+                 w.getDate() === azi.getDate();
+      var candW = eAzi
+        ? '<b>azi</b>, la ' + WEBINAR_ORA
+        : '<b>' + esc(w.toLocaleDateString('ro-RO', { weekday:'long', day:'numeric', month:'long' })) +
+          '</b>, la ' + WEBINAR_ORA;
+      // Link scris pe loc, nu prin `legatura`: e singurul din flux care duce
+      // în afara site-ului, deci are nevoie de `target` și `rel`.
+      randuri.push(randFlux('sage',
+        'Webinarul lunar despre blocul de pe Județului e ' + candW + '. ' +
+        '<a href="' + WEBINAR_URL + '" target="_blank" rel="noopener" data-dest="flux-webinar">Înscrie-te</a> →'));
+
       return randuri;
     }
 
     function cardCeENou(date, clase){
       return '<article class="sl-card' + clase + '" id="ce-e-nou">' +
+        // ⚠️ Eticheta NU mai spune „ULTIMELE 14 ZILE" (decizia lui Lucian,
+        // 18 august): ultimele două rânduri, episodul și webinarul, se arată
+        // mereu, deci fereastra nu le cuprinde. Restul rândurilor se nasc în
+        // continuare din `ZILE_FLUX`, doar că nu mai scrie în colț.
         capCard('Ce e nou pentru tine',
-          '<span class="sl-meta">ULTIMELE ' + ZILE_FLUX + ' ZILE</span>') +
+          '<span class="sl-meta">NOUTĂȚI ȘI ÎNTÂLNIRI</span>') +
         '<ul class="sl-flux">' + date.noutati.join('') + '</ul>' +
       '</article>';
     }
@@ -4131,7 +4211,19 @@
           //     `db_schema/note-personale/`), deci `.eq('user_id', ...)` e
           //     pentru limpezimea interogării, nu pentru securitate.
           blandNul(sb.from('user_notes').select('content, updated_at')
-                     .eq('user_id', user.id).limit(1))
+                     .eq('user_id', user.id).limit(1)),
+
+          // 16. Ultimul episod din serialul Județului Housing, FĂRĂ fereastră
+          //     de timp: rândul lui din flux se arată mereu, oricât de vechi
+          //     ar fi episodul.
+          //     ⚠️ Episoadele se recunosc după slug, ca în `news.html` și ca
+          //     în rândul de articol de mai sus. Nu există coloană de serial
+          //     în `articles`; dacă vreodată se schimbă tiparul slugului,
+          //     rândul dispare tăcut, fără eroare.
+          bland(sb.from('articles').select('title, slug, published_at')
+                  .eq('status', 'published')
+                  .like('slug', 'judetului-housing-episodul-%')
+                  .order('published_at', { ascending:false }).limit(1))
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -4432,7 +4524,8 @@
               terenuriNoiTotal:   x[7].length,
               utilizatoriNoi:     utilizatoriNoi,
               grupuriNoi:         grupuriNoi,
-              articol:            x[11][0] || null
+              articol:            x[11][0] || null,
+              episod:             x[16][0] || null
             });
 
             var categorii = categoriiDePus(st, date);
@@ -4462,6 +4555,42 @@
         incarca(user);
       }).catch(function(e){ console.warn('bloc stare auth:', e); paginaIntreaga(); });
     }
+
+    // ── DATA WEBINARULUI DIN BLOCUL DE PREZENTARE ──
+    // Scrie în panoul „Următoarea întâlnire" aceeași dată pe care o spune și
+    // rândul din fluxul „Ce e nou", din aceeași funcție. Altfel, după prima
+    // joi a lunii, fluxul ar sări la luna următoare, iar panoul de dedesubt ar
+    // rămâne pe data trecută, în aceeași pagină.
+    //
+    // ⚠️ Se cheamă ÎNAINTE de `init()` și în afara verificării de autentificare:
+    // panoul e văzut de oricine intră pe homepage, nu doar de cei logați.
+    //
+    // ⚠️ Din tot codul, data webinarului mai era scrisă de mână DOAR aici.
+    // După schimbarea asta, singurul loc rămas de actualizat cu mâna e Luma,
+    // care e în afara repo-ului. Linkul (`WEBINAR_URL`) apare în cinci locuri,
+    // dar e același eveniment recurent și nu se schimbă lunar.
+    function scrieDataWebinarului(){
+      try {
+        var w = urmatorulWebinar();
+        var elData = document.getElementById('webinarData');
+        var elOra  = document.getElementById('webinarOra');
+        if(elData){
+          // „Joi · 3 septembrie 2026”: ziua săptămânii cu majusculă, ca în
+          // textul scris de mână pe care îl înlocuiește.
+          var zi = w.toLocaleDateString('ro-RO', { weekday:'long' });
+          zi = zi.charAt(0).toUpperCase() + zi.slice(1);
+          elData.textContent = zi + ' · ' +
+            w.toLocaleDateString('ro-RO', { day:'numeric', month:'long', year:'numeric' });
+        }
+        if(elOra) elOra.textContent = WEBINAR_ORA + ' · Zoom';
+      } catch(e){
+        // Dacă pică, în pagină rămâne textul scris în HTML. Mai bine o dată
+        // veche decât un panou gol.
+        console.warn('data webinarului:', e);
+      }
+    }
+
+    scrieDataWebinarului();
     init();
   })();
 </script>
