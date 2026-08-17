@@ -31,6 +31,9 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **Titlurile pașilor sunt scrise în două fișiere**
   De pe 17 august, cardul „Pașii până la recepție" din `frontend/index.html` (lista `FAZE`) are titlurile celor 27 de pași, copiate cuvânt cu cuvânt din `CHECKLIST_PHASES` din `frontend/grup-details.html` (~1900), care rămâne **sursa de adevăr**: acolo se bifează efectiv. Dacă se schimbă un titlu doar într-un loc, același pas se citește diferit în două pagini, fără nicio eroare nicăieri. Avertismentul e scris lângă listă, în cod. Subtitlurile sunt dinadins **diferite** (în grup sunt lungi și au linkuri, pe homepage sunt scurtate), deci acelea nu se sincronizează. De rezolvat curat abia dacă lista se mai schimbă des: un `js/checklist-faze.js` citit de ambele pagini. Nu s-a făcut acum fiindcă deployul e manual din cPanel, iar un fișier nou uitat la urcare ar rupe checklistul grupului pentru membri reali.
 
+- [ ] **Limita notei personale e scrisă în două locuri**
+  De pe 17 august, cele 10.000 de caractere ale cardului „Notele tale" apar în `LIMITA_NOTA` din `frontend/index.html` (de unde ies în `maxlength`, deci oprește tastarea) și în regula `user_notes_content_max` din baza de date (`db_schema/note-personale/1-baza.sql`, care refuză scrierea). Sunt două porți pentru același număr, iar asta e intenția: omul e oprit înainte de salvare, nu printr-o eroare venită de la server. ⚠️ Dacă se schimbă doar unul dintre ele, în ordinea greșită, omul scrie liniștit și salvarea îi pică fără niciun motiv vizibil pe ecran. Se schimbă întâi în bază, apoi în pagină.
+
 - [ ] **Migrație profil incompletă (`*-new` vs versiuni vechi)**
   Există în paralel `profile-view.html` + `profile-view.js` și `profile-view-new.html` + `profile-view-new.js` (la fel pentru edit). De decis: migrația e completă și ștergem versiunile vechi, sau încă rulează ambele în paralel? Dacă e complet migrat, fișierele vechi sunt cod mort care creează confuzie la editări viitoare.
 
