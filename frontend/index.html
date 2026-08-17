@@ -3387,6 +3387,70 @@
       '</article>';
     }
 
+    // ── GRUPURI CARE CAUTĂ ÎN ZONELE TALE ──
+    // Aceeași formă de rând ca la utilizatori (`.sl-pers`), fiindcă e aceeași
+    // întrebare pusă altfel: „cine caută unde caut și eu". Clasele se
+    // refolosesc ca atare, nu se copiază: dacă se schimbă înălțimea rândului
+    // sau ținta de clic, se schimbă în amândouă cardurile deodată.
+    //
+    // Ce scrie pe rând, în ordinea în care contează: câte zone are în comun cu
+    // mine, cât de plin e, și dacă are deja un teren sau încă îl caută.
+    var CATE_GRUPURI = 5;
+
+    // ⚠️ Zero membri nu se scrie niciodată. Un grup are cel puțin fondatorul,
+    // deci un 0 înseamnă că nu s-a putut citi numărul (view căzut, drepturi),
+    // iar „0 din 6 membri" pe toate rândurile e mai rău decât tăcerea: arată
+    // ca o platformă pustie. Rândul rămâne, fără bucata asta.
+    function textMembri(g){
+      if(!g.membri) return '';
+      if(g.maxMembri) return g.membri + ' din ' + g.maxMembri + ' membri';
+      return g.membri === 1 ? 'un membru' : g.membri + ' membri';
+    }
+    // ⚠️ `null` înseamnă „n-am putut afla", și atunci nu se scrie nimic. Vezi
+    // motivul unde se construiește lista: o citire refuzată de RLS arată exact
+    // ca o platformă în care niciun grup n-a marcat vreun teren, iar
+    // „caută teren" scris pe un grup care are deja unul e o informație falsă
+    // pusă exact sub ochii omului care se hotărăște dacă să ceară intrarea.
+    function textTeren(g){
+      if(g.terenuri === null) return '';
+      if(g.terenuri === 0) return 'caută teren';
+      return g.terenuri === 1 ? 'are un teren' : 'are ' + g.terenuri + ' terenuri';
+    }
+
+    function randGrupSugerat(g, i){
+      // Fără ramura „nicio zonă comună" de la utilizatori: aici lista e deja
+      // curățată de ei, un grup fără zonă comună nu ajunge până aici.
+      // Bucățile se leagă cu „·" abia după ce se scot cele goale, altfel un
+      // număr de membri necitit ar lăsa două puncte lipite în frază.
+      var potrivire = [
+        '<b>' + textZone(g.nrZone) + '</b>' + (g.zone.length ? ': ' + insiruire(g.zone, 3) : ''),
+        textMembri(g),
+        textTeren(g)
+      ].filter(Boolean).join(' · ');
+
+      return '<a class="sl-pers" href="/grup-details.html?id=' + encodeURIComponent(g.id) +
+               '" data-dest="grup-sugerat">' +
+               // Inițialele ies din primele două cuvinte ale numelui, ca la
+               // pseudonime („Grup Bucureștii Noi" → „GB"). Nu merită o regulă
+               // mai deșteaptă: e un pătrat de culoare, nu o siglă.
+               '<span class="sl-pers-ini" style="background:var(--' + CULORI_PERS[i % CULORI_PERS.length] + ')"' +
+                 ' aria-hidden="true">' + esc(initiale(g.nume)) + '</span>' +
+               '<span class="sl-pers-corp">' +
+                 '<span class="sl-pers-nume">' + esc(g.nume) + '</span>' +
+                 '<span class="sl-pers-sub">' + potrivire + '</span>' +
+               '</span>' +
+             '</a>';
+    }
+
+    function cardGrupuriSugerate(date, clase){
+      return '<article class="sl-card' + clase + '" id="grupuri-in-zonele-tale">' +
+        capCard('Grupuri care caută în zonele tale',
+          '<a class="sl-mai" href="' + URL_GRUPURI + '" data-dest="toate-grupurile-sugerate">Vezi toate →</a>') +
+        '<p class="sl-sub">Grupuri în formare, ordonate după <b>zonele comune</b> cu ale tale.</p>' +
+        date.grupuriSugerate.map(randGrupSugerat).join('') +
+      '</article>';
+    }
+
     // ── CATEGORIILE ──
     // Lista crește pe măsură ce se construiesc. Câmpurile fiecărei intrări:
     //
@@ -3406,7 +3470,6 @@
     //
     // ⏳ Ce urmează, în ordinea din macheta aprobată. Niciuna nu cere teren sau
     //    grup, deci toate se randează și pentru contul nou:
-    //    • „Grupuri care caută în zonele tale".
     //    • „Pașii până la recepție" (wide) — aceleași bife din checklistul
     //      grupului; cine n-are grup îi vede doar de citit.
     //    • „Notele tale" (wide) — nu există încă tabela, cere migrație.
@@ -3422,7 +3485,14 @@
       // iar atunci lipsește și din cuprins.
       { id:'utilizatori-compatibili', titlu:'Utilizatori compatibili cu tine',
         titluScurt:'Utilizatori compatibili', cere:null, randeaza:cardUtilizatori,
-        are:function(date){ return date.utilizatori.length > 0; } }
+        are:function(date){ return date.utilizatori.length > 0; } },
+      // Stă imediat sub utilizatori, ca în machetă, și îi umple golul din
+      // dreapta: două carduri de oameni și de grupuri, una lângă alta.
+      // Lipsește cu totul dacă niciun grup nu caută în zonele lui — un card
+      // gol l-ar face să creadă că nu se formează nimic nicăieri.
+      { id:'grupuri-in-zonele-tale', titlu:'Grupuri care caută în zonele tale',
+        titluScurt:'Grupuri în zonele tale', cere:null, randeaza:cardGrupuriSugerate,
+        are:function(date){ return date.grupuriSugerate.length > 0; } }
     ];
 
     function categoriiDePus(st, date){
@@ -3482,9 +3552,15 @@
       // celelalte trei: dacă pică, se pierd rândurile de flux legate de zone,
       // nu tot spațiul de lucru. Primele trei rămân „bune de pierdut TOTUL",
       // fiindcă fără ele nu știm nici măcar dacă omul e cont de agenție.
+      //
+      // ⚠️ Interogarea de `grup_membri` cere din 17 august ȘI cererile în
+      // așteptare (`pending`), nu doar apartenențele active. NU ca să schimbe
+      // ceva la „Grupurile tale" — acolo intră mai jos strict cei `activ`, ca
+      // înainte — ci ca să nu-i propună cardul „Grupuri care caută în zonele
+      // tale" un grup la care a cerut deja să intre și așteaptă răspuns.
       Promise.all([
         sb.from('terenuri_likes').select('teren_id, terenuri(id, titlu, status, suprafata, pret_total, nr_apartamente_min, nr_apartamente_max, created_by_user_id)').eq('user_id', user.id),
-        sb.from('grup_membri').select('grup_id').eq('user_id', user.id).eq('status', 'activ'),
+        sb.from('grup_membri').select('grup_id, status').eq('user_id', user.id).in('status', ['activ', 'pending']),
         sb.from('profiles').select('account_type').eq('user_id', user.id).single(),
         bland(sb.from('user_preferred_zones').select('zone_id, zones(id, name, city_id)').eq('user_id', user.id))
       ]).then(function(r){
@@ -3508,7 +3584,17 @@
         var terenuri = ((r[0] && r[0].data) ? r[0].data : []).filter(function(t){
           return t.terenuri && t.terenuri.status === 'approved';
         });
-        var grupIds = ((r[1] && r[1].data) ? r[1].data : []).map(function(m){ return m.grup_id; });
+        // Două liste din același răspuns, și nu se confundă:
+        //   `grupIds`      grupurile MELE (membru activ). Din ele se face
+        //                  cardul „Grupurile tale" și tot ce depinde de el.
+        //   `grupIdsAtinse` alea plus cele unde am o cerere în așteptare.
+        //                  Se folosește O SINGURĂ DATĂ, ca listă de excluderi
+        //                  pentru grupurile sugerate: un grup la care aștept
+        //                  răspuns n-are ce căuta printre sugestii.
+        var membriiMei = ((r[1] && r[1].data) ? r[1].data : []);
+        var grupIds = membriiMei.filter(function(m){ return m.status === 'activ'; })
+                                .map(function(m){ return m.grup_id; });
+        var grupIdsAtinse = membriiMei.map(function(m){ return m.grup_id; });
         var terenIds = terenuri.map(function(t){ return t.teren_id; });
 
         // Zonele bifate în profil, în cele două forme de care e nevoie:
@@ -3529,7 +3615,8 @@
           terenuri: [],
           grupuri: [],
           noutati: [],
-          utilizatori: []
+          utilizatori: [],
+          grupuriSugerate: []
         };
 
         // Runda a doua: tot ce umple cardurile. Fiecare interogare e trecută
@@ -3564,11 +3651,18 @@
                   .eq('status', 'approved').gte('created_at', deLa)
                   .order('created_at', { ascending:false }).limit(60)),
 
-          // 8. Grupurile noi, cu zonele lor. Cele arhivate nu se numără, ca pe
-          //    pagina de grupuri (`js/grupuri.js`).
-          bland(sb.from('grupuri').select('id, nume, created_at, grup_preferred_zones(zone_id)')
-                  .neq('status', 'arhivat').gte('created_at', deLa)
-                  .order('created_at', { ascending:false }).limit(40)),
+          // 8. Grupurile nearhivate, cu zonele lor, ca pe pagina de grupuri
+          //    (`js/grupuri.js`, care filtrează la fel).
+          //    ⚠️ Din 17 august interogarea NU mai are fereastră de 14 zile.
+          //    Servește acum la două lucruri: rândul „grupuri noi" din flux
+          //    (care își pune singur filtrul de dată, în JS, mai jos) și
+          //    cardul „Grupuri care caută în zonele tale", care se uită la
+          //    toate grupurile în formare, nu doar la cele de săptămâna asta.
+          //    O singură citire pentru amândouă, în loc de două pe aceeași
+          //    tabelă. `max_membri` se cere pentru „2 din 6 membri".
+          bland(sb.from('grupuri').select('id, nume, max_membri, created_at, grup_preferred_zones(zone_id)')
+                  .neq('status', 'arhivat')
+                  .order('created_at', { ascending:false }).limit(200)),
 
           // 9. Utilizatorii noi, cu zonele lor. Aceleași filtre ca pătratele de
           //    vecini din hero (`populateVariantA`): doar conturi personale
@@ -3600,7 +3694,24 @@
             : bland(sb.from('profiles')
                       .select('user_id, pseudonym, user_tags(tag_id), user_preferred_zones(zone_id)')
                       .eq('account_type', 'activ')
-                      .or('account_status.is.null,account_status.eq.active'))
+                      .or('account_status.is.null,account_status.eq.active')),
+
+          // 13. Câți membri are fiecare grup de pe platformă. Se cer TOATE,
+          //     fără `.in(...)`, fiindcă abia după ce se filtrează grupurile
+          //     de la 8 pe zonele mele se știe care sunt candidatele, iar o
+          //     rundă în plus doar pentru asta ar întârzia tot cardul.
+          //     ⚠️ E un view public, cu două coloane și un rând pe grup
+          //     (`grup_membri_count`); identitățile membrilor nu ies din bază
+          //     prin el — vezi `db_schema/securitate-grupuri/1-view-numar-membri.sql`.
+          bland(sb.from('grup_membri_count').select('grup_id, membri_count').limit(500)),
+
+          // 14. Ce terenuri au marcat grupurile, pentru „caută teren" / „are
+          //     2 terenuri". Aceeași tabelă din care se numără, mai sus,
+          //     grupurile interesate de terenurile MELE, doar că fără filtru
+          //     pe teren. Un grup care s-a oprit deja la un teren se poartă
+          //     altfel decât unul care încă umblă după unul, și omul care se
+          //     gândește să ceară intrarea vrea să știe asta dinainte.
+          bland(sb.from('terenuri_likes_grupuri').select('grup_id, teren_id').limit(1000))
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -3734,14 +3845,86 @@
             return { zoneComune: comune };
           }).filter(function(u){ return u.zoneComune.length > 0; });
 
+          // Câte zone are un grup în comun cu mine. Se folosește de două ori:
+          // la rândul de flux (unde contează doar dacă e > 0) și la cardul de
+          // sugestii (unde contează și care sunt).
+          function zoneleComuneAle(g){
+            return (g.grup_preferred_zones || [])
+              .map(function(z){ return z.zone_id; })
+              .filter(function(id){ return myZoneIds.indexOf(id) !== -1; });
+          }
+
           // Grupurile noi din zonele mele, fără cele în care sunt deja: pe ale
           // mele le văd oricum în cardul „Grupurile tale", cu tot cu fază.
+          // ⚠️ Fereastra de 14 zile se pune AICI, nu în interogare: din 17
+          // august citirea 8 aduce toate grupurile în formare, fiindcă de ele
+          // are nevoie cardul de sugestii de mai jos.
           var grupuriNoi = x[8].filter(function(g){
             if(grupIds.indexOf(g.id) !== -1) return false;
-            return (g.grup_preferred_zones || []).some(function(z){
-              return myZoneIds.indexOf(z.zone_id) !== -1;
-            });
+            if(!(g.created_at && g.created_at >= deLa)) return false;
+            return zoneleComuneAle(g).length > 0;
           });
+
+          // ── GRUPURI CARE CAUTĂ ÎN ZONELE TALE ──
+          // Sugestii, deci lista e mai severă decât fluxul de sus:
+          //   • fără grupurile mele ȘI fără cele unde am cerere în așteptare
+          //     (`grupIdsAtinse`);
+          //   • fără plasă de siguranță pe „zero zone comune", spre deosebire
+          //     de cardul de utilizatori. Acolo interesele comune încă spun
+          //     ceva; aici un grup care caută în alt oraș nu-i folosește la
+          //     nimic omului, oricâte ar avea în comun cu el;
+          //   • fără grupurile pline. Cardul e o invitație, nu un catalog: un
+          //     rând pe care nu poți da clic cu folos e un rând pierdut.
+          //     ⚠️ `max_membri` lipsă (0/NULL) NU înseamnă plin, înseamnă că
+          //     grupul n-a spus câți vrea să fie.
+          var membriPeGrup = {};
+          x[13].forEach(function(c){ membriPeGrup[c.grup_id] = c.membri_count; });
+          var terenuriPeGrup = {};
+          x[14].forEach(function(l){
+            terenuriPeGrup[l.grup_id] = (terenuriPeGrup[l.grup_id] || 0) + 1;
+          });
+          // ⚠️ Zero legături teren ↔ grup pe TOATĂ platforma nu se ia drept
+          // adevăr, ci drept „n-am putut citi". Probat pe 17 august cu cheia
+          // anonimă: `terenuri_likes_grupuri` întoarce lista goală, și nu se
+          // poate spune din afară dacă tabela chiar e goală sau dacă o închide
+          // RLS-ul. Diferența contează: în al doilea caz am scrie „caută
+          // teren" pe fiecare grup, inclusiv pe cele care au deja unul. Când
+          // lista vine goală, bucata despre teren lipsește de pe toate
+          // rândurile; când vine cu ceva, un grup care lipsește din ea chiar
+          // n-are niciun teren.
+          var stiuTerenurile = x[14].length > 0;
+
+          date.grupuriSugerate = x[8]
+            .filter(function(g){ return grupIdsAtinse.indexOf(g.id) === -1; })
+            .map(function(g){
+              var comune = zoneleComuneAle(g);
+              return {
+                id: g.id,
+                nume: g.nume || 'grup fără nume',
+                nrZone: comune.length,
+                // Ca la utilizatori: numele lipsă (zonă ștearsă între timp) se
+                // taie din enumerare, dar numărul de mai sus rămâne adevărat.
+                zone: comune.map(function(id){ return numeZona[id]; }).filter(Boolean),
+                // Grupurile fără niciun membru activ nu apar în view (așa
+                // lucrează GROUP BY), deci lipsa lor înseamnă 0 — vezi grupuri.js.
+                membri: membriPeGrup[g.id] || 0,
+                maxMembri: g.max_membri || 0,
+                terenuri: stiuTerenurile ? (terenuriPeGrup[g.id] || 0) : null
+              };
+            })
+            .filter(function(g){
+              if(g.nrZone === 0) return false;
+              if(g.maxMembri && g.membri >= g.maxMembri) return false;
+              return true;
+            })
+            // Aceeași ordine ca la utilizatori, și din același motiv:
+            // departajarea alfabetică ține lista pe loc de la o încărcare la
+            // alta, când baza ar întoarce rândurile în ce ordine vrea.
+            .sort(function(a, b){
+              return (b.nrZone - a.nrZone) ||
+                     String(a.nume || '').localeCompare(String(b.nume || ''), 'ro');
+            })
+            .slice(0, CATE_GRUPURI);
 
           // Cine s-a alăturat grupurilor mele, grupat pe grup. Eu nu mă
           // număr: „te-ai alăturat grupului" nu e o noutate pentru mine.
