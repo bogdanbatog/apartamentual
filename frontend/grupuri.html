@@ -33,6 +33,95 @@
     <div class="hero-content">
         <h1>Grupuri de construcție</h1>
         <p>Găsește un grup care îți împărtășește viziunea sau creează-ți propriul grup și invită-ți prietenii.</p>
+
+        <!-- ── Panoul „Cum începi și cum comunicați" ─────────────────────
+             Același tipar cu panoul „Analiză preliminară" din capul paginii
+             de terenuri: traseul întreg, pus înainte de filtre, fiindcă cine
+             intră prima oară nu știe nici de unde se începe, nici ce se
+             întâmplă după ce ești într-un grup.
+             Textul e al lui Lucian (17 august), rearanjat pe două căi în loc
+             de o listă numerotată de la 1 la 7, fiindcă pașii lui 6 și 7 țin
+             de al doilea traseu, nu de continuarea primului.
+             ⚠️ Aceleași două căi apar și pe homepage, în secțiunea „Cum
+             începi" (`index.html`, blocul `.cai`), acolo scurtate la trei
+             rânduri. Dacă se schimbă traseul, se schimbă în ambele locuri. -->
+        <div class="grup-panel">
+            <div class="grup-panel-main">
+                <p class="grup-panel-tag"><span class="grup-dot"></span> Cum începi și cum comunicați</p>
+                <ol class="grup-steps">
+                    <li>
+                        <span class="grup-step-n">1</span>
+                        <!-- `open` în HTML, deci fără JavaScript panoul rămâne
+                             desfășurat. `grupuri.js` le închide doar sub 768px. -->
+                        <details class="grup-fold" open>
+                            <summary>
+                                <b>Pornești de la un teren:</b>
+                                <i class="fas fa-chevron-down grup-fold-sageata"></i>
+                            </summary>
+                            <ul class="grup-sub">
+                                <li>cauți terenuri în zonele tale și le adaugi la profil</li>
+                                <li>vezi cine mai e interesat de ele, oameni sau grupuri</li>
+                                <li>sunt oameni interesați? faci un grup cu ei</li>
+                                <li>e un grup interesat? ceri să intri, iar fondatorul aprobă</li>
+                                <li>nu e nimeni încă? faci tu grupul și adaugi terenurile, ceilalți le văd și vin</li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <span class="grup-step-n">2</span>
+                        <details class="grup-fold" open>
+                            <summary>
+                                <b>Sau pornești de la o zonă:</b>
+                                <i class="fas fa-chevron-down grup-fold-sageata"></i>
+                            </summary>
+                            <ul class="grup-sub">
+                                <li>creezi un grup pe zona ta, de exemplu „Grup Bucureștii Noi”</li>
+                                <li>adaugi în el terenurile care îți plac, din secțiunea de terenuri</li>
+                                <li>sau te alături unui grup care caută deja în zonele tale</li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <span class="grup-step-n">3</span>
+                        <details class="grup-fold" open>
+                            <summary>
+                                <b>Odată intrat, vorbiți:</b>
+                                <i class="fas fa-chevron-down grup-fold-sageata"></i>
+                            </summary>
+                            <ul class="grup-sub">
+                                <li>prin anunțuri, care ajung la toți membrii</li>
+                                <li>prin comentarii, sub fiecare teren al grupului</li>
+                                <!-- Ultimele două nu sunt funcții ale platformei, sunt
+                                     lucruri pe care le faceți voi. Scris și bulină mai
+                                     stinse, ca să nu fie căutate printre butoane. -->
+                                <li class="grup-sub-secundar">pe grupul vostru de WhatsApp, în afara platformei</li>
+                                <li class="grup-sub-secundar">la întâlniri față în față</li>
+                                <!-- ⚠️ NU EXISTĂ ÎNCĂ. Decizia lui Lucian, 17 august:
+                                     rămâne scris, dar cu eticheta „în curând" și cu
+                                     verbul la viitor, ca în macheta spațiului de lucru.
+                                     Dacă se construiește, se scoate eticheta ȘI se
+                                     schimbă verbele. -->
+                                <li class="grup-sub-viitor">
+                                    <span class="grup-eticheta-viitor">în curând</span>
+                                    un secretariat al grupului: va ține minte discuțiile,
+                                    întâlnirile online, deciziile luate și ce are de făcut
+                                    fiecare, până la recepție
+                                </li>
+                            </ul>
+                        </details>
+                    </li>
+                </ol>
+            </div>
+            <div class="grup-panel-side">
+                <a href="grup-nou.html" class="btn-grup-panel">
+                    Creează un grup <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        <p class="grup-panel-hint">
+            Pașii de după, până la recepție, sunt în patru faze și se bifează împreună, în pagina grupului.
+            <a href="/ce-este/cum-functioneaza.html">Vezi drumul întreg</a>
+        </p>
     </div>
 </section>
 

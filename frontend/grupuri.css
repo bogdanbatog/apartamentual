@@ -188,6 +188,256 @@ body {
     margin: 0 auto;
 }
 
+/* ═══════════════ PANOUL „CUM ÎNCEPI ȘI CUM COMUNICAȚI" ═══════════════
+   Fratele panoului „Analiză preliminară" din capul paginii de terenuri:
+   panou deschis la culoare, așezat peste hero-ul închis, cu pași numerotați
+   care se pliază pe telefon.
+   ⚠️ Fișierul ăsta e folosit de PATRU pagini (grupuri, grup-nou, grup-edit,
+   grup-details), deci toate clasele de aici sunt noi și încep cu `grup-`.
+   Nicio regulă existentă nu e atinsă.
+   ⚠️ Culorile sunt scrise în hex, ca tot fișierul, care n-are variabile. */
+.grup-panel {
+    max-width: 1200px;
+    margin: 20px auto 0;
+    text-align: left;          /* hero-ul e centrat, panoul nu */
+    background: #faf8f3;
+    color: #1a1a1a;
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.6);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: center;
+}
+.grup-panel-main { min-width: 0; }
+
+/* ⚠️ Selectorul are DOUĂ clase dinadins. Eticheta și fraza de sub panou sunt
+   amândouă `<p>` în interiorul lui `.hero-content`, unde există deja
+   `.hero-content p { font-size: 1.125rem; opacity: .9; max-width: 600px;
+   margin: 0 auto; }`, cu specificitate mai mare decât o singură clasă. Cu un
+   singur nume de clasă, eticheta ieșea mare, pe jumătate transparentă și
+   centrată pe 600px. Aceeași capcană ca pe pagina de terenuri. */
+.hero-content .grup-panel-tag {
+    display: inline-flex;
+    /* flex-start, nu center: pe ecran îngust eticheta se rupe pe două rânduri,
+       iar bulina ar rămâne la mijlocul lor. */
+    align-items: flex-start;
+    gap: 8px;
+    max-width: none;
+    margin: 0 0 10px;
+    opacity: 1;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #a84f3c;
+}
+.grup-dot {
+    flex: none;
+    width: 7px; height: 7px;
+    margin-top: 0.42em;
+    border-radius: 50%;
+    background: #c2604a;
+}
+
+.grup-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 22px;
+    align-items: start;
+}
+.grup-steps > li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: #555555;
+}
+/* Despărțitor între cele trei coloane, nu și înaintea primeia. */
+.grup-steps > li + li {
+    padding-left: 20px;
+    border-left: 1px solid #e8e3d8;
+}
+.grup-steps b {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.grup-step-n {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #f3f0e7;
+    border: 1px solid #d6cfc1;
+    color: #1a1a1a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+}
+
+/* ── PAȘII PLIABILI ──
+   Pe desktop arată desfășurați și NU se pot închide: rândul nu primește
+   clicuri, ca să nu se închidă din greșeală. Pe telefon devin trei rânduri
+   pe care dai clic, cu săgeată, altfel panoul ar împinge primul grup mult
+   sub linia ecranului. */
+.grup-fold {
+    flex: 1;
+    min-width: 0;
+}
+.grup-fold > summary {
+    list-style: none;
+    cursor: pointer;
+}
+.grup-fold > summary::-webkit-details-marker { display: none; }
+.grup-fold-sageata { display: none; }
+
+@media (min-width: 769px) {
+    .grup-fold > summary {
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+.grup-sub {
+    list-style: none;
+    margin: 5px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 3px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #555555;
+}
+.grup-sub li {
+    position: relative;
+    padding-left: 13px;
+}
+.grup-sub li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0.62em;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #c2604a;
+}
+/* Rândurile care NU sunt funcții ale platformei (WhatsApp, întâlniri):
+   scris și bulină mai stinse, ca ochiul să nu le caute printre butoane.
+   ⚠️ Selectorul are două clase fiindcă bulina teracotă vine din
+   `.grup-sub li::before`, care altfel ar câștiga. */
+.grup-sub li.grup-sub-secundar { color: #6f6a61; }
+.grup-sub li.grup-sub-secundar::before { background: #a8a094; }
+
+/* Rândul despre ceva ce NU EXISTĂ ÎNCĂ. Fără bulină: bulina l-ar așeza în
+   același șir cu lucrurile pe care le poți face azi. */
+.grup-sub li.grup-sub-viitor {
+    color: #6f6a61;
+    padding-left: 0;
+}
+.grup-sub li.grup-sub-viitor::before { display: none; }
+.grup-eticheta-viitor {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 7px;
+    border: 1px solid #d6cfc1;
+    border-radius: 100px;
+    background: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6f6a61;
+    white-space: nowrap;
+}
+
+.grup-panel-side {
+    display: flex;
+    align-items: center;
+    padding-left: 22px;
+    border-left: 1px solid #e8e3d8;
+}
+.btn-grup-panel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: #1a1a1a;
+    color: #ffffff;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+.btn-grup-panel:hover {
+    background: #333333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.btn-grup-panel i { font-size: 0.75rem; }
+
+/* Două clase, din același motiv ca la etichetă. */
+.hero-content .grup-panel-hint {
+    max-width: 1200px;
+    margin: 10px auto 0;
+    text-align: left;
+    opacity: 1;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: #a8a094;
+}
+.hero-content .grup-panel-hint a {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+    /* Butonul trece sub pași, pe toată lățimea: la mijloc rămânea o coloană
+       de text de câteva cuvinte. */
+    .grup-panel { grid-template-columns: 1fr; gap: 16px; }
+    .grup-panel-side {
+        padding-left: 0;
+        border-left: none;
+        border-top: 1px solid #e8e3d8;
+        padding-top: 14px;
+    }
+    .btn-grup-panel { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 768px) {
+    .grup-panel { padding: 14px; }
+    .grup-steps { grid-template-columns: 1fr; gap: 9px; }
+    /* Pe o coloană, linia verticală dintre pași n-are ce despărți. */
+    .grup-steps > li + li {
+        padding-left: 0;
+        border-left: none;
+        border-top: 1px dashed #e8e3d8;
+        padding-top: 9px;
+    }
+    .grup-steps > li { font-size: 0.88rem; }
+    /* Aici rândul devine clicabil, deci merită să arate ca atare. */
+    .grup-fold > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .grup-fold-sageata {
+        display: inline-block;
+        flex: none;
+        font-size: 0.7rem;
+        color: #a8a094;
+        transition: transform 0.2s;
+    }
+    .grup-fold[open] .grup-fold-sageata { transform: rotate(180deg); }
+}
+
 /* ═══════════════ FILTERS ═══════════════ */
 .filters-section {
     background: white;

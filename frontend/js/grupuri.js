@@ -53,11 +53,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Nav-ul (avatar, dropdown profil, logout, mobil) e gestionat integral de
     // nav.js. Nu mai atașăm handlere aici — duplicarea făcea dublu-toggle pe
     // dropdown și butonul „Profilul meu" nu se mai deschidea.
+    plieazaPasiiPeTelefon();
     populateOrasFilter();
     bindFilterEvents();
     await checkAuth();
     await loadGrupuri();
 });
+
+// ── PANOUL „CUM ÎNCEPI ȘI CUM COMUNICAȚI" ──
+// Cei trei pași sunt scriși `<details open>` în HTML, deci fără JavaScript
+// panoul rămâne desfășurat. Aici îi închidem doar pe ecran mic, unde altfel
+// ar împinge primul grup mult sub linia ecranului.
+//
+// ⚠️ Se ascultă `matchMedia`, NU `resize`. Pe telefon, ascunderea barei de
+// adresă a browserului declanșează un `resize`, iar cu el am fi închis pașii
+// exact în timp ce omul îi citea. `matchMedia` se aude o singură dată, la
+// trecerea pragului de 768px, adică la rotirea telefonului.
+// Aceeași soluție ca pe pagina de terenuri (`terenuri.js`).
+function plieazaPasiiPeTelefon() {
+    const ecranMic = window.matchMedia('(max-width: 768px)');
+
+    const aplica = () => {
+        document.querySelectorAll('.grup-fold').forEach(pas => {
+            pas.open = !ecranMic.matches;
+        });
+    };
+
+    aplica();
+    ecranMic.addEventListener('change', aplica);
+}
 
 // ── AUTH ──
 let myZones = [];
