@@ -3736,8 +3736,15 @@
         '<div class="sl-nota-jos">' +
           // `role="status"` ca schimbarea de stare să fie citită cu voce tare
           // de cititoarele de ecran; altfel „Salvat" ar fi doar un semn vizual.
+          //
+          // ⚠️ Ora se scrie DOAR dacă nota are text. Cine și-a golit nota
+          // ieri are în bază un rând salvat, cu oră cu tot, iar „Salvat pe
+          // 17 august" deasupra unui câmp gol se citește ca „era ceva aici și
+          // s-a pierdut". Golul e mai limpede. Se ascunde doar la deschiderea
+          // paginii: în timpul scrisului, confirmarea de după fiecare salvare
+          // rămâne, inclusiv când omul tocmai a șters tot.
           '<span class="sl-nota-stare" id="sl-nota-stare" role="status">' +
-            esc(candSalvat(n.cand)) +
+            (n.text ? esc(candSalvat(n.cand)) : '') +
           '</span>' +
           '<span class="sl-nota-cifre" id="sl-nota-cifre"></span>' +
         '</div>' +
