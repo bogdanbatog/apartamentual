@@ -1794,6 +1794,55 @@
   .sl-sub{ font-size:12.5px; color:var(--ink-3); margin:-.5rem 0 .75rem; }
   .sl-sub b{ color:var(--ink-2); font-weight:600; }
 
+  /* ── CARDUL „PAȘII PÂNĂ LA RECEPȚIE" ──
+     Cele patru faze din checklistul grupului, pliate: 27 de pași desfășurați
+     ar face cardul cât toată pagina. Deschisă rămâne faza în care e grupul.
+     Culorile numerelor sunt cele din `grup-details.html`. */
+  .sl-faza{ background:var(--bg); border:1px solid var(--rule); border-radius:10px; }
+  .sl-faza + .sl-faza{ margin-top:.625rem; }
+  .sl-faza > summary{
+    list-style:none; cursor:pointer; padding:.75rem 1rem;
+    display:flex; align-items:center; gap:.75rem;
+    font-size:14.5px; font-weight:600;
+  }
+  .sl-faza > summary::-webkit-details-marker{ display:none; }
+  .sl-faza > summary:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; border-radius:10px; }
+  .sl-faza[open] .sl-sageata{ transform:rotate(180deg); }
+  .sl-faza-nr{
+    flex:0 0 auto; width:22px; height:22px; border-radius:6px;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-size:12px; font-weight:600;
+  }
+  /* Titlul ia tot spațiul rămas și se rupe pe două rânduri pe telefon, ca
+     numărul, cifrele și săgeata să rămână pe locul lor. */
+  .sl-faza-titlu{ flex:1 1 auto; min-width:0; }
+  .sl-faza-progres{ font-family:var(--mono); font-size:11.5px; font-weight:400; color:var(--ink-3); white-space:nowrap; }
+
+  .sl-pasi{
+    list-style:none; margin:0; padding:.875rem 1rem 1rem;
+    border-top:1px dashed var(--rule);
+    display:flex; flex-direction:column; gap:.625rem;
+  }
+  .sl-pasi li{ display:flex; gap:.625rem; align-items:flex-start; font-size:14px; line-height:1.45; }
+  .sl-box{
+    flex:0 0 auto; width:16px; height:16px; border-radius:4px; margin-top:2px;
+    border:1px solid var(--rule-2);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:10px; line-height:1;
+  }
+  .sl-box--on{ background:var(--sage); border-color:transparent; color:#fff; }
+  /* Modul în care bifele n-au putut fi citite: un punct, nu o căsuță goală.
+     O căsuță goală ar spune că nu s-a făcut nimic. */
+  .sl-punct--pas{ margin-top:7px; background:var(--rule-2); }
+  .sl-pas-sub{ display:block; font-size:12.5px; color:var(--ink-3); margin-top:2px; }
+
+  /* Text doar pentru cititoarele de ecran: căsuța bifată e un semn vizual, iar
+     fără asta un pas făcut și unul nefăcut s-ar citi la fel cu voce tare. */
+  .sl-vh{
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap;
+  }
+
   @media (max-width:820px){
     .sl-grid{ grid-template-columns:1fr; }
   }
@@ -3267,37 +3316,89 @@
       '</article>';
     }
 
-    // ── GRUPURILE TALE ──
-    // Fazele checklistului, doar cât trebuie ca să știm în ce fază e grupul
-    // și cât s-a bifat din ea.
-    // ⚠️ SURSA DE ADEVĂR e `CHECKLIST_PHASES` din grup-details.html (~1900).
-    // Aici stau doar cheile, ca textele să nu se scrie în două locuri. Pașii
-    // `*_alte_note` lipsesc dinadins: sunt o cutie de notițe, nu un pas care
-    // se face, și ar strica numărătoarea („4 din 11" în loc de „4 din 10").
+    // ── FAZELE CHECKLISTULUI ──
+    // O singură listă, folosită de DOUĂ carduri: „Grupurile tale" (care are
+    // nevoie doar de chei, ca să știe în ce fază e grupul și cât s-a bifat din
+    // ea) și „Pașii până la recepție" (care le scrie pe toate).
+    //
+    // ⚠️ SURSA DE ADEVĂR pentru CHEI și TITLURI e `CHECKLIST_PHASES` din
+    // grup-details.html (~1900), unde se și bifează. Titlurile de aici sunt
+    // copiate de acolo cuvânt cu cuvânt: dacă se schimbă unul acolo, se schimbă
+    // și aici, altfel același pas se citește în două feluri în două pagini.
+    // Subtitlurile (`sub`) NU sunt copiate: în grup sunt lungi și au linkuri,
+    // aici sunt scurtate pentru un card de homepage. Cele care lipsesc lipsesc
+    // dinadins, pașii aceia se înțeleg din titlu.
+    //
+    // ⚠️ Pașii `*_alte_note` lipsesc dinadins: sunt o cutie de notițe, nu un
+    // pas care se face, și ar strica numărătoarea („4 din 11" în loc de
+    // „4 din 10"). Culorile sunt cele din grup-details.html, ca fazele să se
+    // citească drept același lucru în amândouă locurile.
     var FAZE = [
-      { titlu:'Formarea grupului', pasi:[
-        'f1_in_formare','f1_regulament','f1_principii','f1_grup_format' ] },
-      { titlu:'Căutarea și achiziția terenului', pasi:[
-        'f2_identificare','f2_vizite','f2_extras_cf','f2_cert_urbanism','f2_analiza_generala',
-        'f2_istoric_notar','f2_studiu_geo','f2_analiza_complexa','f2_contract_asociere','f2_achizitionare' ] },
-      { titlu:'Proiectarea', pasi:[
-        'f3_echipa','f3_cert_construire','f3_concept','f3_avize','f3_proiect_tehnic','f3_dtac','f3_detalii_exec' ] },
-      { titlu:'Construcția', pasi:[
-        'f4_oferte','f4_constructor','f4_structura','f4_instalatii','f4_finisaje','f4_receptie' ] }
+      { titlu:'Formarea grupului', culoare:'#5a7196', pasi:[
+        { k:'f1_in_formare', t:'În formare' },
+        { k:'f1_regulament', t:'Regulament de funcționare',
+          sub:'Reguli de comunicare, de luare a deciziilor și responsabilitățile fiecăruia' },
+        { k:'f1_principii', t:'Principii și scopuri comune agreate',
+          sub:'Calitatea construcției, eficiența termică și fonică, instalațiile, arhitectura' },
+        { k:'f1_grup_format', t:'Grup format' }
+      ] },
+      { titlu:'Căutarea și achiziția terenului', culoare:'#2f8f5b', pasi:[
+        { k:'f2_identificare', t:'Faza de identificare terenuri' },
+        { k:'f2_vizite', t:'Vizite terenuri' },
+        { k:'f2_extras_cf', t:'Extras carte funciară obținut', sub:'Se cere online, de la ANCPI' },
+        { k:'f2_cert_urbanism', t:'Certificat de urbanism informativ',
+          sub:'Oricine poate cere unul la primăria de sector sau la cea generală' },
+        { k:'f2_analiza_generala', t:'Analiză generală cerută pe platformă',
+          sub:'Câte apartamente încap pe teren și costurile estimative' },
+        { k:'f2_istoric_notar', t:'Istoric teren verificat la notar' },
+        { k:'f2_studiu_geo', t:'Studiu geotehnic preliminar realizat',
+          sub:'1-2 foraje, cost mic, care arată dacă solul de fundare cere costuri în plus' },
+        { k:'f2_analiza_complexa', t:'Analiză complexă cerută (1-2 terenuri finale)',
+          sub:'Suprafața utilă a fiecărui apartament și cota indiviză' },
+        { k:'f2_contract_asociere', t:'Contract asociere între membrii grupului',
+          sub:'Întocmit de avocat, legalizat la notar' },
+        { k:'f2_achizitionare', t:'Achiziționare teren' }
+      ] },
+      { titlu:'Proiectarea', culoare:'#c2604a', pasi:[
+        { k:'f3_echipa', t:'Echipă proiectanți selectată', sub:'Arhitectură, structură, instalații' },
+        { k:'f3_cert_construire', t:'Certificat de urbanism pt construire',
+          sub:'Se cere la primărie de proprietarii terenului, cu un plan de situație de la arhitect' },
+        { k:'f3_concept', t:'Faza concept', sub:'Planuri, suprafețe, randări' },
+        { k:'f3_avize', t:'Faza de obținere a avizelor cerute prin certificatul de urbanism' },
+        { k:'f3_proiect_tehnic', t:'Faza proiect tehnic PTh',
+          sub:'Recomandat înaintea DTAC: cu el puteți cere oferte de la constructori și ajusta proiectul după buget' },
+        { k:'f3_dtac', t:'DTAC',
+          sub:'Documentația pentru autorizația de construire. Recomandat după proiectul tehnic, ca să cunoașteți costurile reale înainte de a autoriza' },
+        { k:'f3_detalii_exec', t:'Faza detalii de execuție', sub:'Obligatorie pentru o execuție controlată' }
+      ] },
+      { titlu:'Construcția', culoare:'#8f5a48', pasi:[
+        { k:'f4_oferte', t:'Oferte execuție', sub:'Structură, instalații, arhitectură' },
+        { k:'f4_constructor', t:'Constructor selectat' },
+        { k:'f4_structura', t:'Execuție structură' },
+        { k:'f4_instalatii', t:'Execuție instalații' },
+        { k:'f4_finisaje', t:'Execuție finisaje' },
+        { k:'f4_receptie', t:'Recepție 🏠' }
+      ] }
     ];
+
+    function catiPasi(f){ return f.pasi.length; }
+    function cateBife(f, bife){
+      return f.pasi.filter(function(p){ return bife[p.k]; }).length;
+    }
 
     // Faza curentă = prima care nu e terminată. Dacă toate sunt terminate,
     // grupul e la recepție și n-are rost o bară de progres pe ultima fază.
     function fazaGrupului(bife){
       for(var i = 0; i < FAZE.length; i++){
-        var f = FAZE[i];
-        var facute = f.pasi.filter(function(k){ return bife[k]; }).length;
-        if(facute < f.pasi.length){
-          return { nr:i + 1, titlu:f.titlu, facute:facute, total:f.pasi.length };
+        var facute = cateBife(FAZE[i], bife);
+        if(facute < catiPasi(FAZE[i])){
+          return { nr:i + 1, titlu:FAZE[i].titlu, facute:facute, total:catiPasi(FAZE[i]) };
         }
       }
       return null;
     }
+
+    // ── GRUPURILE TALE ──
 
     function randGrup(g){
       var membri = (g.membri === 1) ? 'un membru' : g.membri + ' membri';
@@ -3451,6 +3552,95 @@
       '</article>';
     }
 
+    // ── PAȘII PÂNĂ LA RECEPȚIE ──
+    // Aceleași patru faze și aceiași pași din checklistul grupului, pliați:
+    // 27 de pași desfășurați ar face cardul cât toată pagina. Deschisă e faza
+    // în care se află grupul, ca omul să vadă din prima ce urmează.
+    //
+    // Cardul nu cere grup: cine n-are unul îi vede ca să știe ce-l așteaptă.
+    // De aceea are TREI feluri de a arăta, iar diferența dintre ele nu e
+    // cosmetică:
+    //
+    //   'grup'   are grup ȘI bifele s-au citit → căsuțe bifate și „4/10" pe
+    //            fiecare fază. Singurul caz în care cardul spune ceva despre
+    //            progresul lui.
+    //   'citire' are grup, dar bifele n-au putut fi citite → fără căsuțe și
+    //            fără cifre, doar lista pașilor. ⚠️ Aici stă capcana: căsuțe
+    //            goale i-ar spune că grupul lui n-a făcut nimic, ceea ce e o
+    //            minciună, nu o lipsă de informație. Aceeași grijă ca la
+    //            „0 din N membri" din cardul de grupuri sugerate.
+    //   'fara'   n-are grup → căsuțe goale, fără cifre. Aici sunt cinstite:
+    //            chiar n-a bifat nimeni nimic, fiindcă n-are cine.
+    function randPas(p, mod, bifat){
+      var marca;
+      if(mod === 'citire'){
+        // Un punct, nu o căsuță: o căsuță goală ar promite o stare pe care
+        // n-o știm.
+        marca = '<span class="sl-punct sl-punct--pas" aria-hidden="true"></span>';
+      } else {
+        marca = '<span class="sl-box' + (bifat ? ' sl-box--on' : '') + '" aria-hidden="true">' +
+                  (bifat ? '✓' : '') + '</span>';
+      }
+      return '<li>' + marca + '<span>' +
+               (bifat ? '<span class="sl-vh">Bifat: </span>' : '') +
+               esc(p.t) +
+               (p.sub ? '<span class="sl-pas-sub">' + esc(p.sub) + '</span>' : '') +
+             '</span></li>';
+    }
+
+    function randFaza(f, i, mod, bife, deschisa){
+      var progres = '';
+      if(mod === 'grup'){
+        progres = '<span class="sl-faza-progres">' + cateBife(f, bife) + '/' + catiPasi(f) + '</span>';
+      }
+      return '<details class="sl-faza"' + (deschisa ? ' open' : '') + '>' +
+               '<summary>' +
+                 '<span class="sl-faza-nr" style="background:' + f.culoare + '">' + (i + 1) + '</span>' +
+                 '<span class="sl-faza-titlu">' + esc(f.titlu) + '</span>' +
+                 progres +
+                 '<span class="sl-sageata" aria-hidden="true">▾</span>' +
+               '</summary>' +
+               '<ul class="sl-pasi">' +
+                 f.pasi.map(function(p){ return randPas(p, mod, mod === 'grup' && !!bife[p.k]); }).join('') +
+               '</ul>' +
+             '</details>';
+    }
+
+    function cardPasi(date, clase){
+      var p = date.pasi;
+      var bife = p.bife || {};
+      // Faza deschisă: cea în care e grupul. Fără grup sau fără bife, prima:
+      // acolo începe oricine citește lista ca să știe ce-l așteaptă.
+      var faza = (p.mod === 'grup') ? fazaGrupului(bife) : null;
+      // `fazaGrupului` întoarce null și când e TOTUL bifat. Atunci se deschide
+      // ultima, cea cu recepția, nu prima.
+      var deschisa = faza ? (faza.nr - 1) : (p.mod === 'grup' ? FAZE.length - 1 : 0);
+
+      var total = FAZE.reduce(function(s, f){ return s + catiPasi(f); }, 0);
+
+      var sub;
+      if(p.mod === 'grup'){
+        sub = 'Bifele grupului <b>' + esc(p.nume) + '</b>, puse de oricare membru. ' +
+              mini('/grup-details.html?id=' + encodeURIComponent(p.grupId) + '#journalSection',
+                   'Bifează în grup', 'bifeaza-in-grup');
+      } else if(p.mod === 'citire'){
+        sub = 'Pașii se bifează în grupul tău, de oricare membru. Bifele nu s-au putut citi acum, ' +
+              'deci mai jos e doar lista lor.';
+      } else {
+        sub = 'Pașii se bifează în grup, fiindcă sunt decizii ale grupului, nu ale unui singur om. ' +
+              'Până ai unul, îi vezi ca să știi ce te așteaptă.';
+      }
+
+      return '<article class="sl-card' + clase + '" id="pasii">' +
+        capCard('Pașii până la recepție',
+          '<span class="sl-meta">' + FAZE.length + ' FAZE · ' + total + ' DE PAȘI</span>') +
+        '<p class="sl-sub">' + sub + '</p>' +
+        '<div class="sl-faze">' +
+          FAZE.map(function(f, i){ return randFaza(f, i, p.mod, bife, i === deschisa); }).join('') +
+        '</div>' +
+      '</article>';
+    }
+
     // ── CATEGORIILE ──
     // Lista crește pe măsură ce se construiesc. Câmpurile fiecărei intrări:
     //
@@ -3468,10 +3658,7 @@
     // ce să-i arate. Categoriile care chiar depind de un teren sau un grup
     // rămân închise pentru el, restul nu.
     //
-    // ⏳ Ce urmează, în ordinea din macheta aprobată. Niciuna nu cere teren sau
-    //    grup, deci toate se randează și pentru contul nou:
-    //    • „Pașii până la recepție" (wide) — aceleași bife din checklistul
-    //      grupului; cine n-are grup îi vede doar de citit.
+    // ⏳ Ce urmează, în ordinea din macheta aprobată:
     //    • „Notele tale" (wide) — nu există încă tabela, cere migrație.
     var CATEGORII = [
       { id:'ce-e-nou', titlu:'Ce e nou pentru tine', titluScurt:'Ce e nou',
@@ -3492,7 +3679,13 @@
       // gol l-ar face să creadă că nu se formează nimic nicăieri.
       { id:'grupuri-in-zonele-tale', titlu:'Grupuri care caută în zonele tale',
         titluScurt:'Grupuri în zonele tale', cere:null, randeaza:cardGrupuriSugerate,
-        are:function(date){ return date.grupuriSugerate.length > 0; } }
+        are:function(date){ return date.grupuriSugerate.length > 0; } },
+      // Singura categorie fără `are`: se randează întotdeauna. Lista pașilor
+      // nu vine din baza de date, e scrisă în pagină, deci nu există starea
+      // „n-am ce arăta". Pentru cine n-are grup e harta drumului, pentru cine
+      // are e progresul lui.
+      { id:'pasii', titlu:'Pașii până la recepție', titluScurt:'Pașii',
+        cere:null, wide:true, randeaza:cardPasi }
     ];
 
     function categoriiDePus(st, date){
@@ -3616,7 +3809,10 @@
           grupuri: [],
           noutati: [],
           utilizatori: [],
-          grupuriSugerate: []
+          grupuriSugerate: [],
+          // Modul de afișare al cardului cu pașii. `'fara'` e și valoarea
+          // potrivită pentru contul fără grup, deci nu se mai atinge pentru el.
+          pasi: { mod:'fara', bife:{}, nume:'', grupId:'' }
         };
 
         // Runda a doua: tot ce umple cardurile. Fiecare interogare e trecută
@@ -3776,6 +3972,36 @@
               bifeCitite: bifeCitite
             };
           });
+
+          // ── PAȘII PÂNĂ LA RECEPȚIE ──
+          // Cardul arată bifele UNUI SINGUR grup, chiar dacă omul e în mai
+          // multe: patru faze înmulțite cu numărul de grupuri ar face un card
+          // cât o pagină, iar aproape nimeni nu e azi în două.
+          // Se alege cel mai avansat (cele mai multe bife), iar la egalitate
+          // alfabetic. ⚠️ Departajarea nu e o cochetărie: fără ea ordinea vine
+          // din baza de date și cardul ar putea arăta alt grup la fiecare
+          // încărcare, deși nu s-a schimbat nimic. Numele grupului se scrie pe
+          // card tocmai fiindcă alegerea asta nu e evidentă din afară.
+          if(grupIds.length){
+            if(!bifeCitite){
+              date.pasi.mod = 'citire';
+            } else {
+              var celMaiAvansat = date.grupuri.slice().sort(function(a, b){
+                var na = 0, nb = 0;
+                FAZE.forEach(function(f){
+                  na += cateBife(f, bifePeGrup[a.id] || {});
+                  nb += cateBife(f, bifePeGrup[b.id] || {});
+                });
+                return (nb - na) || String(a.nume || '').localeCompare(String(b.nume || ''), 'ro');
+              })[0];
+              date.pasi = {
+                mod: 'grup',
+                bife: bifePeGrup[celMaiAvansat.id] || {},
+                nume: celMaiAvansat.nume,
+                grupId: celMaiAvansat.id
+              };
+            }
+          }
 
           // ── CE E NOU ──
           // Zonele mele în cele două forme: chei „oraș|cartier" pentru
