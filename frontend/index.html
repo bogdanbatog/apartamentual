@@ -3226,8 +3226,14 @@
         f.utilizatoriNoi.forEach(function(u){
           u.zoneComune.forEach(function(z){ if(zoneLor.indexOf(z) === -1) zoneLor.push(z); });
         });
+        // ⚠️ Linkul duce la lista TĂIATĂ ca rândul: zone comune + înscriși în
+        // ultimele `ZILE_FLUX` zile, adică exact oamenii numărați aici. Fără
+        // parametri, omul dădea clic pe „12 utilizatori noi" și ateriza pe toată
+        // lista, unde nu mai regăsea nici numărul, nici oamenii.
+        // Fereastra e scrisă în două locuri: `ZILE_FLUX` aici și `ZILE_NOI` din
+        // `js/utilizatori.js`. Dacă una se schimbă, se schimbă amândouă.
         randuri.push(randFlux('slate',
-          legatura('/utilizatori.html',
+          legatura('/utilizatori.html?zone_comune=1&noi=1',
             n === 1 ? 'Un utilizator nou' : n + ' utilizatori noi', 'flux-utilizatori-noi') +
           (n === 1 ? ' are' : ' au') + ' zone comune cu tine' +
           (zoneLor.length ? ', în ' + insiruire(zoneLor) : '') + '.'));

@@ -31,8 +31,28 @@ const DOM = {
     terenFilterName: document.getElementById('teren-filter-name'),
     btnClearTerenFilter: document.getElementById('btn-clear-teren-filter'),
     navUser: document.getElementById('nav-user'),
-    btnLoginNav: document.getElementById('btn-login-nav')
+    btnLoginNav: document.getElementById('btn-login-nav'),
+    // Bifele de potrivire
+    potriviriWrap: document.getElementById('potriviri-wrap'),
+    wrapZoneComune: document.getElementById('wrap-zone-comune'),
+    wrapIntereseComune: document.getElementById('wrap-interese-comune'),
+    filterZoneComune: document.getElementById('filter-zone-comune'),
+    filterIntereseComune: document.getElementById('filter-interese-comune'),
+    filterNoi: document.getElementById('filter-noi'),
+    linkProfilPotriviri: document.getElementById('link-profil-potriviri')
 };
+
+// ── „ÎNSCRIȘI RECENT" ──
+// ⚠️ ACELAȘI NUMĂR CU `ZILE_FLUX` DIN `frontend/index.html`. Rândul de flux de
+// pe homepage („12 utilizatori noi au zone comune cu tine") numără pe fereastra
+// de acolo și trimite aici cu bifele puse. Dacă ferestrele se despart, omul dă
+// clic pe 12 și găsește alt număr, fără nicio eroare pe ecran care să explice.
+const ZILE_NOI = 14;
+
+function esteNou(u) {
+    if (!u.created_at) return false;
+    return (Date.now() - new Date(u.created_at).getTime()) <= ZILE_NOI * 86400000;
+}
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', async () => {
@@ -69,8 +89,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     populateFilters();
     bindEvents();
+    // ⚠️ După `checkAuth`, fiindcă se uită la zonele și interesele omului ca să
+    // decidă ce bife are rost să arate, și ÎNAINTE de `loadUsers`, care se
+    // termină cu `applyFilters` — altfel prima listă s-ar desena nefiltrată și
+    // ar sări sub ochii omului o clipă mai târziu.
+    setupBifePotrivire();
     await loadTags();
-    
+
     if (filterTerenId) {
         await loadTerenName(filterTerenId);
     }
@@ -128,6 +153,62 @@ function zoneMatchCount(u) {
 function tagMatchCount(u) {
     if (!currentUser) return 0;
     return (u.tags || []).filter(t => myTags.some(mt => mt.id === t.id)).length;
+}
+
+// ── BIFELE DE POTRIVIRE ──
+// Trei bife peste ceva ce se calculeaza oricum (`zoneMatchCount`, `tagMatchCount`
+// si `created_at`), deci nicio interogare noua. Se poarta ca bifa „doar zonele
+// mele" de pe /terenuri: starea lor se scrie in URL, ca linkul sa poata fi
+// copiat mai departe.
+//
+// PRIMELE DOUA VIN PUSE din fluxul de pe homepage (?zone_comune=1&noi=1), fiindca
+// randul de acolo promite un numar anume de oameni si numarul trebuie sa se
+// potriveasca. A TREIA nu se prebifeaza NICIODATA dintr-un link: e o largire pe
+// care o cere omul, nu una pe care i-o facem noi.
+//
+// ⚠️ Bifele pe zone si pe interese cer cont SI date in profil: fara zone bifate,
+//    „zone comune cu mine" n-ar avea ce filtra si ar intoarce mereu lista goala.
+//    Bifa „inscrisi recent" nu cere nimic, deci o vede si nelogatul.
+function setupBifePotrivire() {
+    if (!DOM.potriviriWrap) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const areZone = currentUser && myZones.length > 0;
+    const areInterese = currentUser && myTags.length > 0;
+
+    if (areZone) {
+        DOM.wrapZoneComune.style.display = 'inline-flex';
+        DOM.filterZoneComune.checked = params.get('zone_comune') === '1';
+    }
+    if (areInterese) {
+        DOM.wrapIntereseComune.style.display = 'inline-flex';
+        // Fara `params`: bifa asta nu se pune din link, doar cu mana.
+        DOM.filterIntereseComune.checked = false;
+    }
+    if (areZone || areInterese) {
+        DOM.linkProfilPotriviri.style.display = 'inline-flex';
+    }
+    DOM.filterNoi.checked = params.get('noi') === '1';
+
+    DOM.potriviriWrap.style.display = 'flex';
+}
+
+// URL-ul ramane cinstit: bifa pusa din pagina se vede in adresa. `replaceState`,
+// nu `pushState`, ca fiecare bifare sa nu adauge un pas la butonul „inapoi".
+function scrieBifeleInUrl() {
+    try {
+        const url = new URL(window.location.href);
+        const pune = (nume, activ) => {
+            if (activ) url.searchParams.set(nume, '1');
+            else url.searchParams.delete(nume);
+        };
+        pune('zone_comune', DOM.filterZoneComune && DOM.filterZoneComune.checked);
+        pune('interese_comune', DOM.filterIntereseComune && DOM.filterIntereseComune.checked);
+        pune('noi', DOM.filterNoi && DOM.filterNoi.checked);
+        window.history.replaceState({}, '', url);
+    } catch (e) {
+        // Un URL pe care browserul nu-l poate rescrie nu e motiv sa pice filtrul.
+    }
 }
 
 // ── LOAD DATA ──
@@ -290,10 +371,33 @@ function applyFilters() {
     const filters = {
         oras: DOM.filterOras.value,
         zona: DOM.filterZona.value,
-        interes: DOM.filterInteres.value
+        interes: DOM.filterInteres.value,
+        // Bifele lipsesc din DOM doar daca marcajul e mai vechi decat scriptul;
+        // `?.` tine pagina intreaga in cazul acela, cu filtrele de sus lucrand.
+        zoneComune: !!DOM.filterZoneComune?.checked,
+        intereseComune: !!DOM.filterIntereseComune?.checked,
+        noi: !!DOM.filterNoi?.checked
     };
-    
+
     let filtered = [...allUsers];
+
+    // Bifele de potrivire. Se aplica inaintea filtrelor cu meniuri fiindca taie
+    // cel mai mult, dar ordinea nu schimba rezultatul, doar cate randuri trec
+    // prin filtrele urmatoare.
+    //
+    // ⚠️ Pentru nelogat, `zoneMatchCount` si `tagMatchCount` intorc 0, deci
+    //    bifele astea ar goli lista. Nu se poate ajunge acolo: bifele nu se
+    //    arata nelogatului si nici nu se pun din link fara cont — dar daca
+    //    vreodata se schimba asta, aici e locul unde s-ar vedea.
+    if (filters.zoneComune) {
+        filtered = filtered.filter(u => zoneMatchCount(u) > 0);
+    }
+    if (filters.intereseComune) {
+        filtered = filtered.filter(u => tagMatchCount(u) > 0);
+    }
+    if (filters.noi) {
+        filtered = filtered.filter(esteNou);
+    }
     
     // Filter by city: userul are cel puțin o zonă care aparține orașului ales,
     // folosind maparea oraș→zone (ORASE_CARTIERE). Înainte se compara GREȘIT
@@ -344,7 +448,18 @@ function updateActiveFilters(filters) {
             tags.push({ type: 'interes', label: tag.name, value: filters.interes });
         }
     }
-    
+    // Si bifele: altfel omul venit de pe homepage cu doua filtre puse din link
+    // n-are de unde sti ca lista e taiata, si crede ca atatia oameni sunt.
+    if (filters.zoneComune) {
+        tags.push({ type: 'zone_comune', label: 'Zone comune cu mine' });
+    }
+    if (filters.intereseComune) {
+        tags.push({ type: 'interese_comune', label: 'Interese comune cu mine' });
+    }
+    if (filters.noi) {
+        tags.push({ type: 'noi', label: 'Înscriși în ultimele ' + ZILE_NOI + ' zile' });
+    }
+
     if (tags.length > 0) {
         DOM.activeFilters.style.display = 'flex';
         DOM.activeFiltersTags.innerHTML = tags.map(t => `
@@ -366,6 +481,15 @@ window.clearFilter = function(type) {
         DOM.filterZona.value = '';
     } else if (type === 'interes') {
         DOM.filterInteres.value = '';
+    } else if (type === 'zone_comune') {
+        DOM.filterZoneComune.checked = false;
+        scrieBifeleInUrl();
+    } else if (type === 'interese_comune') {
+        DOM.filterIntereseComune.checked = false;
+        scrieBifeleInUrl();
+    } else if (type === 'noi') {
+        DOM.filterNoi.checked = false;
+        scrieBifeleInUrl();
     }
     applyFilters();
 };
@@ -374,6 +498,13 @@ function resetFilters() {
     DOM.filterOras.value = '';
     DOM.filterZona.value = '';
     DOM.filterInteres.value = '';
+    // „Resetează" curăță tot ce taie lista, inclusiv bifele venite din link:
+    // altfel omul apasă butonul, vede filtrele de sus golite și lista tot
+    // scurtă, fără să înțeleagă de ce.
+    if (DOM.filterZoneComune) DOM.filterZoneComune.checked = false;
+    if (DOM.filterIntereseComune) DOM.filterIntereseComune.checked = false;
+    if (DOM.filterNoi) DOM.filterNoi.checked = false;
+    scrieBifeleInUrl();
     populateZoneFilter('');
     applyFilters();
 }
@@ -389,6 +520,22 @@ function clearTerenFilter() {
     window.history.replaceState({}, '', url);
     
     loadUsers();
+}
+
+// „1 utilizator găsit", „3 utilizatori găsiți", „21 de utilizatori găsiți".
+//
+// Înlocuiește o construcție care lipea un „i" la coadă și scotea „utilizatori
+// găsiti", fără diacritic, la ORICE număr diferit de 1 — adică aproape mereu.
+// Se vedea de la prima încărcare a paginii.
+//
+// „De" intră când ultimele două cifre NU sunt între 1 și 19: 20 de utilizatori,
+// 100 de utilizatori, dar 101 utilizatori. Aceeași regulă ca în emailul
+// săptămânal de terenuri, unde acordul se face în SQL.
+function textRezultate(n) {
+    if (n === 1) return '1 utilizator găsit';
+    const ultimele = n % 100;
+    const de = (n === 0 || (ultimele >= 1 && ultimele <= 19)) ? '' : ' de';
+    return n + de + ' utilizatori găsiți';
 }
 
 // ── RENDER ──
@@ -410,7 +557,7 @@ function renderUsers(users = allUsers) {
     
     DOM.emptyState.style.display = 'none';
     DOM.usersGrid.style.display = 'grid';
-    DOM.resultsCount.textContent = `${users.length} utilizator${users.length !== 1 ? 'i' : ''} găsit${users.length !== 1 ? 'i' : ''}`;
+    DOM.resultsCount.textContent = textRezultate(users.length);
     
     // Card de recrutare "Locul tău aici" — doar pentru vizitatori nelogați, ca prim card
     const recruitCard = !currentUser ? renderRecruitCard() : '';
@@ -562,4 +709,11 @@ function bindEvents() {
     DOM.filterInteres.addEventListener('change', applyFilters);
     DOM.btnReset.addEventListener('click', resetFilters);
     DOM.btnClearTerenFilter?.addEventListener('click', clearTerenFilter);
+
+    [DOM.filterZoneComune, DOM.filterIntereseComune, DOM.filterNoi].forEach(bifa => {
+        bifa?.addEventListener('change', () => {
+            scrieBifeleInUrl();
+            applyFilters();
+        });
+    });
 }

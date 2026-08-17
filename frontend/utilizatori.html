@@ -88,6 +88,33 @@
                 </button>
             </div>
 
+            <!-- Bifele de potrivire.
+                 Vin din fluxul de pe homepage: rândul „12 utilizatori noi au zone
+                 comune cu tine" trimite aici cu ?zone_comune=1&noi=1, deci omul
+                 găsește primele două bife puse și numărul de sus e chiar cel din
+                 rând. A treia rămâne mereu nebifată: e o lărgire pe care o cere el.
+
+                 Primele două se arată doar celui logat, și doar dacă are după ce
+                 filtra (zone bifate în profil, respectiv interese). Bifa „înscriși
+                 recent" nu cere cont, deci o vede oricine. -->
+            <div class="filter-potriviri" id="potriviri-wrap" style="display: none;">
+                <label class="potrivire-check" id="wrap-zone-comune" style="display: none;">
+                    <input type="checkbox" id="filter-zone-comune">
+                    <span>Doar cei cu zone comune cu mine</span>
+                </label>
+                <label class="potrivire-check" id="wrap-noi">
+                    <input type="checkbox" id="filter-noi">
+                    <span>Doar cei înscriși în ultimele 14 zile</span>
+                </label>
+                <label class="potrivire-check" id="wrap-interese-comune" style="display: none;">
+                    <input type="checkbox" id="filter-interese-comune">
+                    <span>Doar cei cu interese comune cu mine</span>
+                </label>
+                <a href="profile-edit-new.html" class="potrivire-link" id="link-profil-potriviri" style="display: none;">
+                    <i class="fas fa-sliders-h"></i> Schimbă zonele și interesele din profil
+                </a>
+            </div>
+
             <!-- Active filters display -->
             <div class="active-filters" id="active-filters" style="display: none;">
                 <span class="active-filters-label">Filtre active:</span>
