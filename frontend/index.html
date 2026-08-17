@@ -1771,6 +1771,29 @@
   .sl-flux a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--rule-2); }
   .sl-flux a:hover{ border-bottom-color:var(--ink); }
 
+  /* ── CARDUL „UTILIZATORI COMPATIBILI" ──
+     Un rând pe om: inițialele într-un pătrat colorat (aceleași patru culori ca
+     pătratele plutitoare din hero, ca să se citească drept același fel de
+     lucru), numele, și potrivirea scrisă în cuvinte. Rândul întreg e link
+     către profil, nu doar numele: pe telefon o țintă de 38px se nimerește,
+     un cuvânt de 14px nu. */
+  .sl-pers{ display:flex; align-items:center; gap:.875rem; padding:.75rem 0; text-decoration:none; color:inherit; }
+  .sl-pers + .sl-pers{ border-top:1px solid var(--rule); }
+  .sl-pers:hover .sl-pers-nume{ text-decoration:underline; }
+  .sl-pers-ini{
+    flex:0 0 auto; width:38px; height:38px; border-radius:8px;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:600; font-size:14px;
+  }
+  .sl-pers-corp{ flex:1 1 auto; min-width:0; }
+  .sl-pers-nume{ display:block; font-size:14.5px; font-weight:600; }
+  .sl-pers-sub{ display:block; font-size:12.5px; color:var(--ink-3); margin-top:2px; }
+  .sl-pers-sub b{ color:var(--ink-2); font-weight:600; }
+  /* Rândul de sub titlu care spune după ce s-a făcut ordinea. Marginea de sus
+     e negativă fiindcă `.sl-cap` lasă deja 1.125rem sub el. */
+  .sl-sub{ font-size:12.5px; color:var(--ink-3); margin:-.5rem 0 .75rem; }
+  .sl-sub b{ color:var(--ink-2); font-weight:600; }
+
   @media (max-width:820px){
     .sl-grid{ grid-template-columns:1fr; }
   }
@@ -2545,6 +2568,37 @@
       var parts = String(name).trim().split(/\s+/).slice(0,2);
       return parts.map(function(p){ return p.charAt(0).toUpperCase(); }).join('') || '··';
     }
+
+    // ── LISTA DE PROFILURI ACTIVE, CERUTĂ O SINGURĂ DATĂ PE ÎNCĂRCARE ──
+    // Două locuri au nevoie de exact aceeași listă: pătratele de vecini din
+    // hero (`populateVariantA`, mai jos) și cardul „Utilizatori compatibili"
+    // din spațiul de lucru (blocul de script următor). E cea mai grea citire
+    // din pagină — toate profilurile active, cu interesele și zonele lor — și
+    // n-are rost să plece de două ori.
+    //
+    // ⚠️ Se memorează PROMISIUNEA, nu interogarea. Un constructor PostgREST
+    // trimite o cerere nouă la fiecare `.then()`, deci reutilizarea lui n-ar
+    // fi economisit nimic.
+    //
+    // ⚠️ Nu respinge niciodată: cine o cheamă primește `[]` dacă citirea pică.
+    // Rezultatul e o listă lipsă, nu o pagină ruptă.
+    //
+    // ⚠️ Filtrele sunt sursa de adevăr pentru „cine se poate potrivi cu cine":
+    // doar conturi personale (`account_type = 'activ'`), doar active. Un
+    // `.eq('account_status','active')` curat ar sări tăcut peste conturile
+    // mai vechi, care au coloana NULL.
+    window.atuProfiluriActive = function(){
+      if(!window.__atuProfiluriActive){
+        window.__atuProfiluriActive = Promise.resolve(
+          sb.from('profiles')
+            .select('user_id, pseudonym, account_type, account_status, user_tags(tag_id), user_preferred_zones(zone_id)')
+            .eq('account_type', 'activ')
+            .or('account_status.is.null,account_status.eq.active')
+        ).then(function(res){ return (res && res.data) ? res.data : []; })
+         .catch(function(e){ console.warn('profiluri active:', e); return []; });
+      }
+      return window.__atuProfiluriActive;
+    };
     function relTime(iso){
       if(!iso) return '';
       var then = new Date(iso).getTime();
@@ -2584,13 +2638,10 @@
       var micro   = STAGE.querySelector('.js-hero-a-micro');
       if(!cluster) return;
 
-      sb.from('profiles')
-        .select('user_id, pseudonym, account_type, account_status, user_tags(tag_id), user_preferred_zones(zone_id)')
-        .eq('account_type', 'activ')
-        .or('account_status.is.null,account_status.eq.active')
-        .then(function(res){
-          var rows = (res && res.data) ? res.data : [];
-
+      // Aceeași listă pe care o folosește și cardul „Utilizatori compatibili"
+      // din spațiul de lucru; se cere o singură dată (vezi `atuProfiluriActive`).
+      window.atuProfiluriActive()
+        .then(function(rows){
           // interesele/zonele MELE (mă găsesc în listă; dacă nu sunt, rămân goale)
           var me = rows.find(function(r){ return r.user_id === user.id; }) || {};
           var myTags  = (me.user_tags || []).map(function(t){ return t.tag_id; });
@@ -2619,7 +2670,15 @@
             // rămâne totuși în listă, ca plasă de siguranță pe interese; eticheta lui spune
             // cinstit „0 zone", ca să nu pară o potrivire mai bună decât e.
             .filter(function(n){ return n.commonZones > 0 || n.commonTags > 0; })
-            .sort(function(a,b){ return (b.commonZones - a.commonZones) || (b.commonTags - a.commonTags); })
+            // ⚠️ Departajarea la egalitate perfectă e alfabetică, și e scrisă
+            // la fel în cardul „Utilizatori compatibili" din spațiul de lucru.
+            // Fără ea, ordinea vine din baza de date și se poate schimba de la
+            // o încărcare la alta: în hero ar apărea patru oameni, iar în card
+            // alți patru, deși potrivirea e identică.
+            .sort(function(a,b){
+              return (b.commonZones - a.commonZones) || (b.commonTags - a.commonTags) ||
+                     String(a.name || '').localeCompare(String(b.name || ''), 'ro');
+            })
             .slice(0, 4);
 
           if(neighbors.length === 0){
@@ -2630,10 +2689,12 @@
           }
 
           renderNeighbors(cluster, neighbors);
-          if(micro){
-            micro.innerHTML = '<b>' + neighbors.length + (neighbors.length === 1 ? ' vecin</b> potrivit' : ' vecini</b> potriviți') + ' cu zonele și interesele tale.';
-            micro.hidden = false;
-          }
+          // ⚠️ Rândul „N vecini potriviți cu zonele și interesele tale" NU se
+          // mai scrie aici. Din 17 august spațiul de lucru are cardul
+          // „Utilizatori compatibili cu tine", care spune același lucru cu
+          // nume, zone comune și linkuri către profiluri. Un contor deasupra
+          // unui card care oricum îi enumeră e doar zgomot în hero.
+          // `micro` rămâne folosit de starea goală de mai sus (`renderEmptyA`).
         })
         .catch(function(e){ console.warn('hero A:', e); });
     }
@@ -2794,11 +2855,19 @@
     var SPATIU = document.getElementById('spatiul-tau');
     if(!ROOT) return;
 
-    var URL_TERENURI = '/terenuri.html';
-    var URL_GRUPURI  = '/grupuri.html';
+    var URL_TERENURI    = '/terenuri.html';
+    var URL_GRUPURI     = '/grupuri.html';
+    var URL_UTILIZATORI = '/utilizatori.html';
 
     function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
     function nr(n){ return Number(n).toLocaleString('ro-RO'); }
+    // Inițialele din pseudonim, scrise la fel ca pe pătratele din hero. Blocul
+    // de acolo e alt IIFE, deci funcția se repetă; sunt patru rânduri.
+    function initiale(nume){
+      if(!nume) return '··';
+      var parti = String(nume).trim().split(/\s+/).slice(0, 2);
+      return parti.map(function(p){ return p.charAt(0).toUpperCase(); }).join('') || '··';
+    }
 
     // Anulează presupunerea făcută sincron în <head>: pagina rămâne întreagă.
     function paginaIntreaga(){ HTML.classList.remove('atu-logat'); }
@@ -3008,12 +3077,18 @@
     function legatura(href, text, dest){
       return '<a href="' + href + '" data-dest="' + dest + '">' + esc(text) + '</a>';
     }
-    // Enumerare cu „și" la coadă, tăiată la două nume: „Bucureștii Noi și
-    // Pajura", „Bucureștii Noi, Pajura și altele".
-    function insiruire(nume){
+    // Enumerare cu „și" la coadă: „Bucureștii Noi și Pajura", „Bucureștii Noi,
+    // Pajura și altele". Se taie la două nume în rândurile fluxului, care sunt
+    // fraze citite în viteză, și la trei în cardul de utilizatori, unde tocmai
+    // zonele sunt informația căutată și cardul are loc pentru ele.
+    function insiruire(nume, maxim){
+      var m = maxim || 2;
       if(nume.length === 1) return esc(nume[0]);
-      if(nume.length === 2) return esc(nume[0]) + ' și ' + esc(nume[1]);
-      return esc(nume[0]) + ', ' + esc(nume[1]) + ' și altele';
+      if(nume.length <= m){
+        var toate = nume.map(esc);
+        return toate.slice(0, -1).join(', ') + ' și ' + toate[toate.length - 1];
+      }
+      return nume.slice(0, m).map(esc).join(', ') + ' și altele';
     }
 
     // Construiește rândurile. Ordinea e cea din macheta aprobată, de la cel mai
@@ -3262,6 +3337,56 @@
       '</article>';
     }
 
+    // ── UTILIZATORI COMPATIBILI ──
+    // Aceeași potrivire ca pătratele plutitoare din hero și ca pagina
+    // Utilizatori: ÎNTÂI zonele comune, apoi interesele. Aici sunt scrise pe
+    // larg — nume, zonele care se suprapun, câte interese — fiindcă e un card
+    // în care omul se uită, nu o decorațiune de hero.
+    //
+    // ⚠️ Cine n-are nicio zonă comună rămâne în listă, ca plasă de siguranță
+    // pe interese, exact ca în hero. Eticheta lui spune cinstit „nicio zonă
+    // comună", ca să nu pară o potrivire mai bună decât e.
+    //
+    // ⚠️ Numele zonelor NU se cer separat. Zonele comune sunt, prin definiție,
+    // un subset al zonelor MELE, iar acelea vin cu nume cu tot din runda întâi.
+    var CULORI_PERS = ['sage','terracotta','slate','mauve','ochre'];
+    var CATI_UTILIZATORI = 5;
+
+    function textZone(n){ return n === 1 ? 'o zonă comună' : n + ' zone comune'; }
+    function textInterese(n){
+      if(n === 0) return 'niciun interes comun';
+      return n === 1 ? 'un interes comun' : n + ' interese comune';
+    }
+
+    function randPersoana(u, i){
+      var potrivire = (u.nrZone > 0
+            ? '<b>' + textZone(u.nrZone) + '</b>' + (u.zone.length ? ': ' + insiruire(u.zone, 3) : '')
+            : '<b>nicio zonă comună</b>') +
+          ' · ' + textInterese(u.interese);
+
+      return '<a class="sl-pers" href="/profile-view-new.html?id=' + encodeURIComponent(u.id) +
+               '" data-dest="utilizator-compatibil">' +
+               '<span class="sl-pers-ini" style="background:var(--' + CULORI_PERS[i % CULORI_PERS.length] + ')"' +
+                 ' aria-hidden="true">' + esc(initiale(u.nume)) + '</span>' +
+               '<span class="sl-pers-corp">' +
+                 '<span class="sl-pers-nume">' + esc(u.nume) + '</span>' +
+                 '<span class="sl-pers-sub">' + potrivire + '</span>' +
+               '</span>' +
+             '</a>';
+    }
+
+    function cardUtilizatori(date, clase){
+      return '<article class="sl-card' + clase + '" id="utilizatori-compatibili">' +
+        capCard('Utilizatori compatibili cu tine',
+          '<a class="sl-mai" href="' + URL_UTILIZATORI + '" data-dest="toti-utilizatorii">Vezi toți →</a>') +
+        // Explicația stă lângă lista pe care o explică, nu în vreun ghid:
+        // altfel omul se întreabă de ce e cineva cu 2 zone comune deasupra
+        // cuiva cu 9 interese comune.
+        '<p class="sl-sub">Ordonați după <b>zonele comune</b> cu tine. Interesele comune sunt informative.</p>' +
+        date.utilizatori.map(randPersoana).join('') +
+      '</article>';
+    }
+
     // ── CATEGORIILE ──
     // Lista crește pe măsură ce se construiesc. Câmpurile fiecărei intrări:
     //
@@ -3279,11 +3404,8 @@
     // ce să-i arate. Categoriile care chiar depind de un teren sau un grup
     // rămân închise pentru el, restul nu.
     //
-    // ⏳ Ce urmează, în ordinea din macheta aprobată. Primele trei nu cer nici
-    //    teren, nici grup, deci se randează și pentru contul nou:
-    //    • „Utilizatori compatibili cu tine" — aceeași potrivire pe zone ca
-    //      pătratele din hero (vezi `populateVariantA`). Atunci se scoate și
-    //      rândul „N vecini potriviți" din hero.
+    // ⏳ Ce urmează, în ordinea din macheta aprobată. Niciuna nu cere teren sau
+    //    grup, deci toate se randează și pentru contul nou:
     //    • „Grupuri care caută în zonele tale".
     //    • „Pașii până la recepție" (wide) — aceleași bife din checklistul
     //      grupului; cine n-are grup îi vede doar de citit.
@@ -3293,7 +3415,14 @@
         cere:null, wide:true, randeaza:cardCeENou,
         are:function(date){ return date.noutati.length > 0; } },
       { id:'terenurile-tale', titlu:'Terenurile tale', cere:'teren', randeaza:cardTerenuri },
-      { id:'grupurile-tale',  titlu:'Grupurile tale',  cere:'grup',  randeaza:cardGrupuri }
+      { id:'grupurile-tale',  titlu:'Grupurile tale',  cere:'grup',  randeaza:cardGrupuri },
+      // Nu cere nici teren, nici grup: se sprijină doar pe zonele și interesele
+      // din profil, pe care le are oricine ajunge pe homepage (vezi zidul de
+      // profil din `nav.js`). Cardul lipsește doar dacă nu s-a potrivit nimeni,
+      // iar atunci lipsește și din cuprins.
+      { id:'utilizatori-compatibili', titlu:'Utilizatori compatibili cu tine',
+        titluScurt:'Utilizatori compatibili', cere:null, randeaza:cardUtilizatori,
+        are:function(date){ return date.utilizatori.length > 0; } }
     ];
 
     function categoriiDePus(st, date){
@@ -3399,7 +3528,8 @@
           userId: user.id,
           terenuri: [],
           grupuri: [],
-          noutati: []
+          noutati: [],
+          utilizatori: []
         };
 
         // Runda a doua: tot ce umple cardurile. Fiecare interogare e trecută
@@ -3456,7 +3586,21 @@
           // 11. Cel mai recent articol publicat.
           bland(sb.from('articles').select('title, slug, published_at')
                   .eq('status', 'published').gte('published_at', deLa)
-                  .order('published_at', { ascending:false }).limit(1))
+                  .order('published_at', { ascending:false }).limit(1)),
+
+          // 12. Toate profilurile active, cu interesele și zonele lor, pentru
+          //     cardul „Utilizatori compatibili". ⚠️ Nu e o interogare nouă:
+          //     e exact lista pe care o cer și pătratele de vecini din hero,
+          //     cerută o singură dată pe încărcare (`atuProfiluriActive`, în
+          //     blocul de script de deasupra). Dacă blocul acela lipsește
+          //     vreodată, se cade pe o citire proprie, ca să nu depindă un
+          //     card de ordinea în care se execută două blocuri de script.
+          (typeof window.atuProfiluriActive === 'function')
+            ? window.atuProfiluriActive()
+            : bland(sb.from('profiles')
+                      .select('user_id, pseudonym, user_tags(tag_id), user_preferred_zones(zone_id)')
+                      .eq('account_type', 'activ')
+                      .or('account_status.is.null,account_status.eq.active'))
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -3537,6 +3681,47 @@
           var terenuriInZonele = x[7].filter(function(t){
             return myZoneKeys[cheieZona(t.oras, t.cartier)];
           });
+
+          // ── UTILIZATORI COMPATIBILI ──
+          // Interesele MELE se află tot din lista asta, găsindu-mă pe mine în
+          // ea; nu se cer separat. Zonele mele le am deja din runda întâi, cu
+          // nume cu tot, iar zonele comune sunt un subset al lor.
+          // ⚠️ Dacă nu mă găsesc în listă (rar: cont abia creat, listă căzută),
+          // rămân cu zero interese. Potrivirea pe zone lucrează mai departe,
+          // fiindcă ea nu depinde de rândul meu.
+          var eu = x[12].filter(function(p){ return p.user_id === user.id; })[0];
+          var myTagIds = ((eu && eu.user_tags) || []).map(function(t){ return t.tag_id; });
+
+          date.utilizatori = x[12]
+            // Fără mine și fără cei fără pseudonim: n-au pagină de profil de
+            // arătat, ca în hero.
+            .filter(function(p){ return p.user_id !== user.id && p.pseudonym; })
+            .map(function(p){
+              var zoneComune = (p.user_preferred_zones || [])
+                .map(function(z){ return z.zone_id; })
+                .filter(function(id){ return myZoneIds.indexOf(id) !== -1; });
+              var intereseComune = (p.user_tags || [])
+                .map(function(t){ return t.tag_id; })
+                .filter(function(id){ return myTagIds.indexOf(id) !== -1; }).length;
+              return {
+                id: p.user_id,
+                nume: p.pseudonym,
+                nrZone: zoneComune.length,
+                // Numele lipsă (zonă ștearsă între timp) se taie, dar numărul
+                // de mai sus rămâne cel adevărat.
+                zone: zoneComune.map(function(id){ return numeZona[id]; }).filter(Boolean),
+                interese: intereseComune
+              };
+            })
+            .filter(function(u){ return u.nrZone > 0 || u.interese > 0; })
+            // Aceeași ordine ca în hero, până la departajarea alfabetică:
+            // altfel cele două liste ar arăta oameni diferiți la potrivire
+            // identică. Dacă se schimbă una, se schimbă amândouă.
+            .sort(function(a, b){
+              return (b.nrZone - a.nrZone) || (b.interese - a.interese) ||
+                     String(a.nume || '').localeCompare(String(b.nume || ''), 'ro');
+            })
+            .slice(0, CATI_UTILIZATORI);
 
           // Utilizatorii noi: doar cei cu pseudonim (ca în hero, ceilalți n-au
           // pagină de profil de arătat) și doar cei cu măcar o zonă comună.
