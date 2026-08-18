@@ -536,7 +536,7 @@
                     <p>Această analiză se bazează pe interpretarea PUG și îți oferă un plus semnificativ de informații despre teren și potențialul lui de construcție. <strong>Ulterior, pentru orice proiect concret de construcție, proprietarul trebuie să solicite un certificat de urbanism cu o propunere de construcție</strong> — pentru a confirma toate condițiile specifice ale autorității locale.</p>
                 </div>
                 <div class="analize-card-actions">
-                    <a href="analiza-simplificata.html" class="btn-card btn-card-secondary">
+                    <a id="exSimplaBtn" href="analiza-simplificata.html" class="btn-card btn-card-secondary">
                         <i class="fas fa-eye"></i> Vezi exemplu
                     </a>
                     <a id="cmdSimplaBtn" href="comanda-analiza.html" class="btn-card btn-card-primary">
@@ -573,7 +573,7 @@
                     </ul>
                 </div>
                 <div class="analize-card-actions">
-                    <a href="analiza-detaliata.html" class="btn-card btn-card-secondary">
+                    <a id="exDetaliataBtn" href="analiza-detaliata.html" class="btn-card btn-card-secondary">
                         <i class="fas fa-eye"></i> Vezi exemplu
                     </a>
                     <button type="button" class="btn-card btn-card-primary" onclick="openComandaModal('detaliata')">
@@ -665,6 +665,24 @@
 
             const a = document.getElementById('cmdSimplaBtn');
             if (a) a.setAttribute('href', 'comanda-analiza.html?' + orderParams.toString());
+
+            // Și cele două butoane „Vezi exemplu" duc terenul mai departe
+            // (18 august). ⚠️ Fără asta, traseul care vine din emailul de
+            // terenuri noi se rupea exact la mijloc: omul intra aici cu terenul
+            // lui, dădea clic pe exemplu ca să vadă ce primește, iar de acolo
+            // ajungea la o comandă goală. Amândouă paginile de exemplu preiau
+            // parametrii mai departe: `analiza-simplificata.html` în butoanele
+            // de comandă, `analiza-detaliata.html` în mailtoul de ofertă.
+            // ⚠️ Acolo, rândurile „Teren:" și „Link:" se scriu doar dacă există
+            // `teren_titlu`, deci nu e de ajuns să trimitem id-ul.
+            const exemple = [
+              ['exSimplaBtn', 'analiza-simplificata.html'],
+              ['exDetaliataBtn', 'analiza-detaliata.html'],
+            ];
+            exemple.forEach(function(pereche) {
+                const el = document.getElementById(pereche[0]);
+                if (el) el.setAttribute('href', pereche[1] + '?' + orderParams.toString());
+            });
         })();
 
         // The modal composes a mailto: link with subject + body pre-filled

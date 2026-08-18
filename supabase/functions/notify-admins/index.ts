@@ -274,7 +274,12 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
 // linii scurte. ⚠️ E o decizie de TEXT, nu de date: funcția SQL întoarce tot
 // materialul, iar șablonul alege cât arată. Se mută de aici, fără migrație.
 // Media măsurată e 12 terenuri pe om — 12 dreptunghiuri ar fi un catalog.
-const CATE_CU_POZA = 3
+//
+// 3 → 2 pe 18 august, după ce Lucian a văzut emailul randat: cu trei poze,
+// blocurile explicative de la mijloc („Ce nu scrie pe nicio pagină de teren",
+// „Dacă vreunul îți place") ajungeau prea jos, iar cine se oprea din derulat
+// nu ajungea niciodată la ele. Terenurile nu se pierd, trec în linii scurte.
+const CATE_CU_POZA = 2
 
 // ⚠️ Prețul analizei stă ÎNTR-UN SINGUR LOC, dinadins. E preț de lansare, deci
 // se va schimba, iar emailul ăsta pleacă singur în fiecare luni.
@@ -289,6 +294,49 @@ const PRET_ANALIZA = '99 RON'
 // ⚠️ Fără liniuță de dialog („—") în textul văzut de om. E o regulă generală
 // de voce, nu o preferință de moment: vezi „Semne de punctuație" în CLAUDE.md.
 const PRET_MENTIUNE = 'TVA inclus, preț de lansare'
+
+// Blocul „Ce s-a schimbat pe platformă", pus la finalul emailului de terenuri.
+//
+// ⚠️ E TEMPORAR, DINADINS, și de-aia stă pe o constantă. Restul emailului e
+// scris să suporte repetiția (constată, arată, se dă la o parte, nicio
+// mențiune de perioadă), fiindcă același om îl primește două-trei săptămâni
+// la rând. Un bloc de noutăți e opusul: e un anunț, iar un anunț repetat de
+// patru ori devine zgomot. Se stinge de aici, pe `false`, după două-trei
+// trimiteri, fără să atingă nimic altceva.
+//
+// ⚠️ CE PROMITE BLOCUL EXISTĂ DOAR DACĂ `frontend/index.html` E PUBLICAT din
+// cPanel. Cardurile „Grupuri care caută în zonele tale", „Pașii până la
+// recepție" și „Notele tale" erau, la scrierea acestui rând (18 august),
+// împinse pe `main` dar nepublicate. Un email care le descrie înainte de
+// publicare trimite omul pe o pagină unde nu găsește ce i s-a promis.
+const ARATA_NOUTATI = true
+
+// Webinarul lunar, anunțat în emailul de terenuri începând cu 18 august.
+//
+// ⚠️ ORA MAI TRĂIEȘTE ÎN DOUĂ LOCURI, iar linkul în CINCI. Ora: `index.html`
+// (blocul de webinar, `#webinarOra`) și pagina Luma, care e singura sursă
+// adevărată fiindcă ea trimite invitațiile. Linkul: trei butoane în
+// `index.html`, două în `servicii.html`. Emailul e al treilea loc pentru oră
+// și al șaselea pentru link. ⚠️ Se schimbă TOATE odată, iar linkul e altul la
+// fiecare eveniment (august `iwbly27g` → septembrie `00ig0k40`).
+//
+// ⚠️ DE CE DATA NU SE CALCULEAZĂ, deși homepage-ul o calculează („prima joi a
+// lunii", `urmatorulWebinar`): acolo data e singurul lucru care se schimbă,
+// linkul fiind același element din pagină. Aici, o dată calculată corect
+// lipită de un link Luma vechi ar trimite oamenii la evenimentul de luna
+// trecută, cu ziua cea nouă scrisă lângă. O dată scrisă de mână, când e
+// greșită, e greșită vizibil.
+//
+// `expira` e plasa de siguranță: emailul pleacă singur în fiecare luni, iar un
+// anunț pentru un webinar care a trecut e mai rău decât niciun anunț. După
+// clipa asta blocul dispare de la sine, chiar dacă nimeni n-a actualizat nimic.
+const WEBINAR = {
+  arata: true,
+  zi: 'joi, 3 septembrie',
+  ora: '11:30',
+  link: 'https://luma.com/00ig0k40',
+  expira: '2026-09-03T21:00:00Z', // finalul zilei evenimentului, ora României
+}
 
 /** Scapă textul care vine din baza de date (titluri de teren, nume de zonă). */
 function escHtml(s: unknown): string {
@@ -331,6 +379,38 @@ function linkTeren(t: TerenDinLot): string {
 }
 
 /**
+ * Ce se poate afla despre TERENUL ĂSTA: pagina de analize, cu terenul în URL.
+ *
+ * ⚠️ DUCE LA `analize.html`, NU direct la formularul de comandă (decizia lui
+ * Lucian, 18 august). Din email, un om care n-a mai auzit de analiză ar fi
+ * ajuns dintr-un clic la un formular de plată fără să știe ce cumpără. Pe
+ * pagina de analize citește ce conține, vede exemplul, și comandă de acolo
+ * dacă vrea. Terenul îl urmează pe tot traseul: `analize.html:657` propagă
+ * `teren_id` mai departe către comandă, la fel `analiza-simplificata.html:382`.
+ *
+ * ⚠️ SE TRIMIT AMÂNDOI PARAMETRII, și fiecare e citit de altcineva:
+ *   • `teren_id` umple și blochează câmpul „Teren de pe platformă" din
+ *     formularul analizei preliminare (`comanda-analiza.js:66`).
+ *     ✅ Probat pe live, 18 august.
+ *   • `teren_titlu` e singurul care duce terenul pe traseul analizei
+ *     DETALIATE. Aceea nu are formular, ci un mailto compus în
+ *     `openComandaModal`, iar rândurile „Teren:" și „Link:" se adaugă doar
+ *     `if (terenTitlu)` (`analize.html`, `analiza-detaliata.html:571`). Fără
+ *     titlu, cererea de ofertă ne-ar ajunge FĂRĂ teren, iar omul n-ar avea
+ *     cum să observe: partea de detalii e oricum un loc gol de completat.
+ *
+ * Fără id, linkul nu se randează deloc: o întrebare despre „terenul acesta"
+ * care duce la o pagină fără niciun teren e mai rău decât niciun link.
+ */
+function linkAnaliza(t: TerenDinLot): string | null {
+  if (!t.id) return null
+  const q = new URLSearchParams()
+  if (t.titlu) q.set('teren_titlu', String(t.titlu))
+  q.set('teren_id', String(t.id))
+  return `${PLATFORM_URL}/analize.html?${q.toString()}`
+}
+
+/**
  * Rândul de cifre al unui teren: „620 mp · 186.000 € · 300 €/mp".
  * Sare peste ce lipsește, în loc să scrie „— €" sau „NaN".
  * ⚠️ Moneda e €, iar prețul pe mp vine calculat din SQL (`pret_total /
@@ -349,6 +429,12 @@ function cifreTeren(t: TerenDinLot): string[] {
 /** Dreptunghiul cu poză, pentru primele CATE_CU_POZA terenuri. */
 function cardTeren(t: TerenDinLot): string {
   const href = linkTeren(t)
+  // Al doilea link, sub buton: oferta de analiză stă lângă terenul care a
+  // stârnit-o, nu doar în blocul explicativ de la mijlocul emailului.
+  // ⚠️ E link, nu buton, dinadins: două butoane pe același card ar cere omului
+  // să aleagă înainte să se fi uitat la teren, iar cel important e „Vezi
+  // terenul". Ierarhia se face din formă (chenar vs. text), nu din mărime.
+  const hrefAnaliza = linkAnaliza(t)
   const locatie = [t.zona, t.oras].filter(Boolean).map(escHtml).join(' · ')
   // Toate cele 46 de terenuri publice au poză (măsurat 13 august), dar un
   // teren fără poză nu trebuie să lase un dreptunghi gol în email.
@@ -375,6 +461,9 @@ function cardTeren(t: TerenDinLot): string {
         ${locatie ? `<p style="margin:0 0 12px;font-size:13px;color:#8a8a8a;">${locatie}</p>` : ''}
         <p style="margin:0 0 14px;font-size:14px;color:#555555;">${cifreTeren(t).join(' · ')}</p>
         <a href="${href}" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;">Vezi terenul →</a>
+        ${hrefAnaliza ? `<p style="margin:12px 0 0;font-size:14px;line-height:1.5;">
+          <a href="${hrefAnaliza}" style="color:#c2604a;text-decoration:underline;">Câte apartamente ies aici și la ce costuri estimative? →</a>
+        </p>` : ''}
       </td></tr>
     </table>`
 }
@@ -787,13 +876,15 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
 
       // Cârligul: o frază, imediat sub „au apărut…", înainte de terenuri.
       // ⚠️ Blocul mare despre analiză stă la mijlocul emailului, iar cine se
-      // oprește după primele trei terenuri nu ajunge la el. Fraza asta îi spune
+      // oprește după primele terenuri nu ajunge la el. Fraza asta îi spune
       // devreme că se poate afla ce se construiește pe teren, și trimite în jos.
-      // ⚠️ Prețul apare de două ori în email, decizia lui Lucian din 14 august.
-      // Ca să nu sune insistent, doar aici e anunțat („Costă X"); mai jos e o
-      // simplă linie de fapt, care adaugă TVA-ul și mențiunea de lansare.
-      // În cod rămâne o singură constantă, deci noiembrie e tot o linie.
-      const carlig = `Pe oricare dintre ele poți cere o analiză de arhitect, ca să afli câte apartamente se pot construi acolo și la ce cost estimativ pe mp. Costă ${PRET_ANALIZA}, TVA inclus.`
+      //
+      // ⚠️ PREȚUL A IEȘIT DE AICI pe 18 august, decizia lui Lucian. Rămâne o
+      // singură dată în email, în blocul de la mijloc. Motivul e de ordine a
+      // citirii: un preț în a treia frază a emailului ajunge la om înainte să
+      // fi înțeles ce cumpără, iar atunci singurul lucru de făcut cu el e să-l
+      // compare cu nimic. Mai jos, aceeași cifră vine după explicație.
+      const carlig = 'Pe oricare dintre ele poți cere o analiză de arhitect, ca să afli câte apartamente se pot construi acolo și la ce cost estimativ pe mp. Vezi imediat mai jos ce conține.'
 
       const cuPoza = terenuri.slice(0, CATE_CU_POZA)
       const restul = terenuri.slice(CATE_CU_POZA)
@@ -810,6 +901,56 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
 
       const p = (t: string) =>
         `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;">${t}</p>`
+
+      // ── Coada emailului: trei blocuri care nu țin de terenuri ─────────────
+      // Stau DUPĂ concluzia despre terenuri, fiindcă cine a venit pentru
+      // terenuri și-a terminat treaba mai sus. O SINGURĂ linie de despărțire,
+      // pusă de primul bloc care apare: trei linii ar fi făcut din coadă trei
+      // emailuri lipite.
+      // ⚠️ Butoanele au contur, nu fundal plin. Regula din 14 august: un buton
+      // negru plin dispare în clienții care citesc pe fundal întunecat.
+      let primulDinCoada = true
+      const capDeBloc = (titlu: string) => {
+        const sus = primulDinCoada
+          ? 'border-top:1px solid #e8e3d8;margin:28px 0 0;padding:24px 0 0;'
+          : 'margin:24px 0 0;'
+        primulDinCoada = false
+        return `<div style="${sus}">
+             <p style="margin:0 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">${titlu}</p>`
+      }
+      const buton = (href: string, eticheta: string) =>
+        `<div style="margin:0 0 4px;">
+               <a href="${href}" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">${eticheta}</a>
+             </div>`
+
+      const blocNoutati = ARATA_NOUTATI
+        ? `${capDeBloc('Ce s-a schimbat pe platformă')}
+             ${p('Homepage-ul a devenit spațiul tău de lucru. Când intri logat, găsești într-un singur loc terenurile pe care le-ai salvat, cu nota ta pe fiecare, cine s-a înscris de curând în zonele tale, grupurile care caută unde cauți și tu, și pașii până la recepția blocului, bifați de grupul tău.')}
+             ${buton(PLATFORM_URL, 'Intră pe platformă →')}
+           </div>`
+        : ''
+
+      // ⚠️ Blocul dispare singur după `WEBINAR.expira`. Vezi motivul la
+      // constantă: emailul pleacă în fiecare luni, iar noi nu suntem acolo să-l
+      // oprim în dimineața în care anunțul devine o invitație la trecut.
+      const webinarValid =
+        WEBINAR.arata && new Date() < new Date(WEBINAR.expira)
+      const blocWebinar = webinarValid
+        ? `${capDeBloc(`Ne vedem online, ${WEBINAR.zi}`)}
+             ${p(`În prima joi a fiecărei luni ne întâlnim pe Zoom și răspundem la întrebări despre construcția în grup: cum se cumpără terenul în comun, cum se împart costurile, ce se semnează și când. Data viitoare, ${escHtml(WEBINAR.zi)}, de la ${escHtml(WEBINAR.ora)}. Dacă ai un teren în cap dintre cele de mai sus, adu-l cu tine.`)}
+             ${buton(WEBINAR.link, 'Înscrie-te la webinar →')}
+           </div>`
+        : ''
+
+      // Feedbackul stă ultimul, lipit de semnătură, dinadins: cine a ajuns
+      // până aici a citit tot, iar întrebarea vine de la omul care semnează,
+      // nu de la platformă. `from` e apartamentual@ltfbstudio.ro, deci un
+      // răspuns chiar ajunge la noi, fără formular și fără cont.
+      const blocFeedback = `${capDeBloc('Și dacă tot ai ajuns până aici')}
+             ${p('Spune-mi ce ți se pare greoi pe platformă și ce ți-ar trebui ca să faci pasul următor. Răspunde direct la emailul ăsta, ajunge la mine și îl citesc pe tot.')}
+           </div>`
+
+      const coada = `${blocNoutati}${blocWebinar}${blocFeedback}`
 
       // ✅ „Fă un grup pe terenul acesta" a devenit adevărat pe 14 august
       // (Piesa 5, commit `2c560b1`): pagina terenului are butonul, iar
@@ -835,12 +976,12 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
             ${p(nume ? `Bună, ${escHtml(nume)},` : 'Bună,')}
             ${p(intro)}
             ${p(carlig)}
-            <div style="margin:0 0 24px;">
-              <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
-            </div>
             ${cardsHtml}
             <p style="margin:28px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Ce nu scrie pe nicio pagină de teren</p>
             ${p(`Suprafața și prețul le vezi și la noi, și în anunțul original. Ce nu vezi nicăieri e <strong style="color:#1a1a1a;">câte apartamente se pot construi acolo și cât ar costa un apartament pe terenul acela</strong>: cost pe mp construit, cost pe mp util și cât te costă terenul pentru un apartament de o anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în apartamente. <strong style="color:#1a1a1a;">${PRET_ANALIZA}</strong>, ${PRET_MENTIUNE}. Se comandă din pagina terenului.`)}
+            <div style="margin:0 0 24px;">
+              <a href="${PLATFORM_URL}/analize.html" style="display:inline-block;border:2px solid #c2604a;color:#c2604a;text-decoration:none;padding:11px 22px;border-radius:6px;font-weight:600;font-size:14px;">Vezi ce conține analiza →</a>
+            </div>
             <p style="margin:24px 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;">Dacă vreunul îți place</p>
             ${p('Toate pornesc din pagina terenului:')}
             ${liniute([
@@ -860,6 +1001,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
               </a>
             </div>
             ${p('Dacă acum niciunul nu ți se potrivește, nu trebuie să faci nimic. Îți scriem din nou când mai apar terenuri în zonele tale.')}
+            ${coada}
             <p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#1a1a1a;">
               Lucian<br>ApartamenTUal / LTFB Studio
             </p>

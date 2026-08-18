@@ -94,13 +94,20 @@ Variante, dacă vrei altceva:
 > le-ai bifat în profil: {zona_1}, {zona_2} și {zona_3}.
 >
 > Pe oricare dintre ele poți cere o analiză de arhitect, ca să afli câte apartamente se pot
-> construi acolo și la ce cost estimativ pe mp. Costă 99 RON, TVA inclus.
+> construi acolo și la ce cost estimativ pe mp. Vezi imediat mai jos ce conține.
 >
-> [ Vezi ce conține analiza → ]  ← buton cu contur, urcat aici pe 14 august
+> ⚠️ Prețul a ieșit de aici pe **18 august**, iar butonul a coborât lângă explicație.
+>
+> **De ce blocul despre analiză NU s-a mutat sus**, deși s-a pus întrebarea (18 august):
+> subiectul emailului promite terenuri, iar între salut și primul teren ar fi stat cinci
+> rânduri despre un serviciu plătit. Emailul ajunge la același om două-trei săptămâni la
+> rând; unul care începe cu vânzare nu se mai deschide a treia oară. În plus, fraza centrală
+> a blocului („cât ar costa un apartament pe terenul acela") n-are obiect înaintea cardurilor.
+> **Ce s-a făcut în loc:** oferta a coborât pe fiecare card, ca link propriu.
 >
 > ---
 >
-> **[PRIMELE 3 TERENURI: dreptunghiuri cu poză]**
+> **[PRIMELE 2 TERENURI: dreptunghiuri cu poză]**
 >
 > ```
 > ┌──────────────────────────────────────┐
@@ -113,8 +120,33 @@ Variante, dacă vrei altceva:
 > │  300 €/mp                            │
 > │                                      │
 > │  [ Vezi terenul → ]                  │
+> │  Câte apartamente ies aici și la    │  ← link, adăugat 18 august
+> │  ce costuri estimative? →            │
 > └──────────────────────────────────────┘
 > ```
+>
+Al doilea link duce la `analize.html?teren_titlu=…&teren_id=…`, cu terenul în URL.
+>
+> ⚠️ **NU duce direct la formularul de comandă**, deși prima variantă așa făcea (decizia lui
+> Lucian, 18 august): din email, un om care n-a mai auzit de analiză ar fi ajuns dintr-un
+> singur clic la o plată, fără să știe ce cumpără. Pe pagina de analize citește ce conține,
+> vede exemplul, și comandă de acolo dacă vrea.
+>
+> ⚠️ **Se trimit AMÂNDOI parametrii**, fiindcă fiecare e citit de altcineva: `teren_id` umple
+> și blochează câmpul „Teren de pe platformă" din formularul analizei preliminare
+> (`comanda-analiza.js:66`), iar `teren_titlu` e **singurul** care duce terenul pe traseul
+> analizei **detaliate**, unde nu există formular, ci un mailto ale cărui rânduri „Teren:" și
+> „Link:" se scriu doar `if (terenTitlu)`. Fără titlu, cererea de ofertă ne-ar fi ajuns fără
+> teren, iar omul n-ar fi avut cum să observe.
+>
+> 🔧 **Găsit și reparat pe drum** (`frontend/analize.html`, cere deploy cPanel): cele două
+> butoane **„Vezi exemplu" nu duceau terenul mai departe**, doar „Comandă" o făcea. Dovedit pe
+> live înainte de reparație. Traseul cerut de Lucian („vede textul, poate vedea exemplu și
+> comanda") se rupea exact la mijloc.
+>
+> **E link, nu buton, dinadins.** Două butoane pe același card i-ar cere omului să aleagă
+> înainte să se fi uitat la teren, iar cel important rămâne „Vezi terenul". Ierarhia se face
+> din formă (chenar față de text), nu din mărime.
 >
 > ---
 >
@@ -126,6 +158,8 @@ Variante, dacă vrei altceva:
 > anumită suprafață. Asta face analiza de arhitect, în mai multe variante de împărțire în
 > apartamente.
 > **99 RON**, TVA inclus, preț de lansare. Se comandă din pagina terenului.
+>
+> [ Vezi ce conține analiza → ]  ← buton cu contur, coborât aici pe 18 august
 >
 > **Dacă vreunul îți place**
 >
@@ -165,6 +199,35 @@ Variante, dacă vrei altceva:
 > Dacă acum niciunul nu ți se potrivește, nu trebuie să faci nimic. Îți scriem din nou
 > când mai apar terenuri în zonele tale.
 >
+> ---
+>
+> **[COADA: trei blocuri care nu țin de terenuri, adăugate 18 august]**
+> *O singură linie de despărțire, pusă de primul bloc care apare. Trei linii ar fi făcut din
+> coadă trei emailuri lipite.*
+>
+> **Ce s-a schimbat pe platformă**  ← bloc TEMPORAR (`ARATA_NOUTATI`)
+>
+> Homepage-ul a devenit spațiul tău de lucru. Când intri logat, găsești într-un singur loc
+> terenurile pe care le-ai salvat, cu nota ta pe fiecare, cine s-a înscris de curând în
+> zonele tale, grupurile care caută unde cauți și tu, și pașii până la recepția blocului,
+> bifați de grupul tău.
+>
+> [ Intră pe platformă → ]
+>
+> **Ne vedem online, joi, 3 septembrie**  ← bloc cu AUTOEXPIRARE (`WEBINAR.expira`)
+>
+> În prima joi a fiecărei luni ne întâlnim pe Zoom și răspundem la întrebări despre
+> construcția în grup: cum se cumpără terenul în comun, cum se împart costurile, ce se
+> semnează și când. Data viitoare, joi, 3 septembrie, de la 11:30. Dacă ai un teren în cap
+> dintre cele de mai sus, adu-l cu tine.
+>
+> [ Înscrie-te la webinar → ]
+>
+> **Și dacă tot ai ajuns până aici**
+>
+> Spune-mi ce ți se pare greoi pe platformă și ce ți-ar trebui ca să faci pasul următor.
+> Răspunde direct la emailul ăsta, ajunge la mine și îl citesc pe tot.
+>
 > Lucian
 > ApartamenTUal / LTFB Studio
 >
@@ -179,21 +242,70 @@ Variante, dacă vrei altceva:
 
 ## Deciziile luate la scrierea textului
 
-### 1. Trei dreptunghiuri cu poză, restul linii scurte
+### 0. Blocul „Ce s-a schimbat pe platformă" e temporar, și de-aia stă pe o constantă
+
+Adăugat **18 august**, la cererea lui Lucian: între timp homepage-ul logat a devenit spațiul
+de lucru al omului, iar cine n-a mai intrat de câteva săptămâni nu are de unde ști.
+
+⚠️ **Intră în contradicție cu tot restul textului, și asta e conștient.** Emailul e scris să
+suporte repetiția: constată, arată, se dă la o parte, fără nicio mențiune de perioadă, fiindcă
+același om îl primește două-trei săptămâni la rând. Un bloc de noutăți e opusul, e un anunț.
+La a patra repetare devine zgomot, exact ce am evitat în rest.
+
+**Soluția: `ARATA_NOUTATI` în șablon.** Se pune pe `false` după două-trei trimiteri și blocul
+dispare, fără să atingă nimic altceva. Variantele respinse: un text atemporal („Când intri pe
+platformă, homepage-ul e spațiul tău de lucru"), care ar fi putut rămâne la nesfârșit dar nu
+spune nimănui că e nou; și o campanie separată doar cu noutățile, care ar fi însemnat încă un
+email scris și trimis pentru un lucru care încape în cinci rânduri.
+
+⚠️ **Blocul e adevărat doar dacă `frontend/index.html` e publicat din cPanel.** La data
+scrierii, cardurile „Grupuri care caută în zonele tale", „Pașii până la recepție" și
+„Notele tale" erau împinse pe `main` dar nepublicate. Emailul le descrie pe toate.
+
+### 0b. Webinarul și întrebarea de la final (18 august)
+
+**Webinarul** are propria plasă de siguranță: `WEBINAR.expira`. Emailul pleacă singur în
+fiecare luni, iar noi nu suntem acolo în dimineața în care anunțul devine o invitație la
+trecut. După data trecută în constantă, blocul dispare de la sine.
+
+⚠️ **Data NU se calculează**, deși homepage-ul o calculează („prima joi a lunii",
+`urmatorulWebinar`). Acolo data e singurul lucru care se schimbă, linkul fiind același element
+din pagină. Aici, o dată calculată corect lipită de un link Luma vechi ar trimite oamenii la
+evenimentul de luna trecută, cu ziua cea nouă scrisă alături. **O dată scrisă de mână, când e
+greșită, e greșită vizibil.**
+
+⚠️ **Ora mai trăiește în două locuri** (`index.html`, `#webinarOra`, și pagina Luma, care e
+sursa adevărată fiindcă ea trimite invitațiile), **iar linkul în cinci** (trei butoane în
+`index.html`, două în `servicii.html`). Emailul e al treilea loc pentru oră și al șaselea
+pentru link. **Se schimbă toate odată**, iar linkul e altul la fiecare eveniment.
+
+**Întrebarea de la final** stă lipită de semnătură, dinadins: cine a ajuns până acolo a citit
+tot, iar întrebarea vine de la omul care semnează, nu de la platformă. Fără formular și fără
+cont: `from` e `apartamentual@ltfbstudio.ro`, deci un răspuns obișnuit chiar ajunge la noi.
+
+### 1. Două dreptunghiuri cu poză, restul linii scurte
 
 Handoff-ul lăsa pragul deschis („se decide la scrierea textului, se mută oricând, fără SQL").
-**Aleg 3.**
+Am ales întâi **3**; **de pe 18 august sunt 2**, după ce Lucian a văzut emailul randat cu
+terenuri adevărate: cu trei poze, blocurile explicative de la mijloc ajungeau prea jos, iar
+cine se oprea din derulat nu ajungea niciodată la ele. **Terenurile nu se pierd**, trec în
+lista de linii scurte.
 
 Media e **12 terenuri pe om**, maximul măsurat 27. Douăsprezece dreptunghiuri cu poză nu mai
-sunt un mesaj, sunt un catalog pe care omul îl derulează fără să-l citească. Trei încap pe un
-ecran de telefon fără derulare lungă, iar restul, ca linii de câte un rând, se citesc dintr-o
-privire — omul vede **tot** ce a apărut, nu un eșantion.
+sunt un mesaj, sunt un catalog pe care omul îl derulează fără să-l citească. Restul, ca linii
+de câte un rând, se citesc dintr-o privire — omul vede **tot** ce a apărut, nu un eșantion.
 
-⚠️ **La cei cu 1–3 terenuri nu apare deloc secțiunea de linii scurte**, iar emailul devine
+**De ce 2 și nu 3:** argumentul dintâi era că trei poze încap pe un ecran de telefon. Măsurat
+pe emailul randat, ce nu mai încăpea era **restul emailului**: blocul „Ce nu scrie pe nicio
+pagină de teren" și cele cinci lucruri de făcut cu un teren coborau sub trei poze mari, adică
+sub pragul până la care derulează majoritatea. Pozele vând un teren anume; blocurile de sub
+ele explică de ce merită deschis oricare.
+
+⚠️ **La cei cu 1–2 terenuri nu apare deloc secțiunea de linii scurte**, iar emailul devine
 foarte scurt. E în regulă și e chiar de dorit: cine caută într-o singură zonă primește un
 mesaj de zece secunde.
 
-Se schimbă dintr-o constantă în șablon (`CATE_CU_POZA = 3`). Fără SQL, fără migrație.
+Se schimbă dintr-o constantă în șablon (`CATE_CU_POZA = 2`). Fără SQL, fără migrație.
 
 ### 2. Prețul analizei stă într-o singură constantă
 
