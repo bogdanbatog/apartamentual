@@ -1760,6 +1760,19 @@
   .sl-bara{ height:6px; background:var(--bg-placeholder); border-radius:100px; overflow:hidden; margin:.625rem 0 .5rem; }
   .sl-bara span{ display:block; height:100%; background:var(--terracotta); border-radius:100px; }
 
+  /* Ce s-a schimbat de când n-ai mai intrat în grup: cereri de aprobat, oameni
+     noi. Punctul din fața rândului e reperul vizual, dar nu poartă singur
+     informația — rândul o scrie oricum în cuvinte, iar cine nu deosebește
+     culorile citește exact același lucru. */
+  .sl-grup-semn{ font-size:13px; color:var(--ink-2); margin-top:.5rem; display:flex; gap:.5rem; align-items:baseline; }
+  .sl-grup-semn::before{ content:""; flex:0 0 auto; width:6px; height:6px; border-radius:50%; background:var(--sage); }
+  .sl-grup-semn--cerere{ color:var(--ink); font-weight:500; }
+  .sl-grup-semn--cerere::before{ background:var(--terracotta); }
+  /* Grupul cu cereri neaprobate se deosebește de celelalte carduri și fără
+     culoare, prin chenar. Nimeni nu trebuie să compare două nuanțe ca să vadă
+     că are ceva de făcut. */
+  .sl-grup--atentie{ border-color:var(--terracotta); }
+
   /* ── CARDUL „CE E NOU" ──
      O listă de rânduri, fiecare cu un punct colorat care spune din ce fel de
      noutate face parte: teren, om, grup, articol. Culoarea nu poartă singură
@@ -3212,23 +3225,65 @@
       return nume.slice(0, m).map(esc).join(', ') + ' și altele';
     }
 
+    // „și încă o persoană" / „și încă 2 persoane". Scris cu „persoană", nu cu
+    // „unul", fiindcă nu știm cine sunt: pseudonimele nu spun genul, iar „încă
+    // unul" ar fi ghicit-o pentru toată lumea.
+    function incaAtatia(n){
+      return 'și încă ' + (n === 1 ? 'o persoană' : n + ' persoane');
+    }
+
     // Construiește rândurile. Ordinea e cea din macheta aprobată, de la cel mai
     // aproape de om (grupul lui) către cel mai departe (un articol nou).
     function construiesteFluxul(f){
       var randuri = [];
 
+      // 0. CINEVA CERE SĂ INTRE ÎNTR-UN GRUP PE CARE ÎL ADMINISTREZ.
+      // Primul rând din flux, înaintea membrilor noi: e singurul care cere o
+      // faptă de la om, restul doar îi spun ce s-a întâmplat. Cineva stă și
+      // așteaptă un răspuns de la el.
+      //
+      // ⚠️ Vine numai la administratorul grupului; cernerea s-a făcut la
+      // citire (vezi interogarea 17). Un membru obișnuit n-are butonul de
+      // aprobare nici în pagina grupului, deci rândul l-ar trimite degeaba.
+      //
+      // Data e a CELEI MAI VECHI cereri: „acum 6 zile" spune de cât timp
+      // așteaptă omul, care e chiar informația ce mișcă pe cineva.
+      f.grupuriCuCereri.slice(0, 2).forEach(function(g){
+        // ⚠️ Numărul vine din `g.cati`, nu din câte pseudonime am apucat să
+        // citesc: dacă profilul unuia nu se citește, el tot există și tot
+        // așteaptă. Un rând care spune „Ana cere să intre" când de fapt sunt
+        // trei l-ar face pe admin să intre, să aprobe una și să plece.
+        var cere = (g.cati === 1)
+          ? (g.nume_membri.length ? '<b>' + esc(g.nume_membri[0]) + '</b> cere să intre'
+                                  : 'Cineva cere să intre')
+          : (g.nume_membri.length ? '<b>' + esc(g.nume_membri[0]) + '</b> ' + incaAtatia(g.cati - 1) + ' cer să intre'
+                                  : g.cati + ' oameni cer să intre');
+        randuri.push(randFlux('terracotta',
+          cere + ' în grupul ' +
+          legatura('/grup-details.html?id=' + encodeURIComponent(g.id), g.nume, 'flux-cerere-alaturare') +
+          '. Tu aprobi.',
+          candva(g.cand)));
+      });
+
       // 1. Cineva nou în grupul tău. Cel mai personal rând din flux.
+      // ⚠️ Din 18 august „nou" înseamnă „de la ultima ta vizită în grupul
+      // acela", nu „în ultimele 14 zile" (vezi `pragGrup`, la citire). De aceea
+      // rândul nu mai poartă mereu un „acum 3 zile": pentru cine a mai fost pe
+      // acolo, fraza care spune adevărul e „de la ultima ta vizită".
       f.grupuriCuMembriNoi.slice(0, 2).forEach(function(g){
-        var cine = g.nume_membri.length === 1
-          ? '<b>' + esc(g.nume_membri[0]) + '</b> s-a alăturat'
-          : (g.nume_membri.length
-              ? '<b>' + esc(g.nume_membri[0]) + '</b> și încă ' + (g.nume_membri.length - 1) + ' s-au alăturat'
-              // Pseudonimele n-au putut fi citite: spunem cinstit câți, fără nume.
-              : (g.cati === 1 ? 'Un membru nou s-a alăturat' : g.cati + ' membri noi s-au alăturat'));
+        // Numărul vine din `g.cati`, ca la rândul de mai sus și din același
+        // motiv: pseudonimele pot lipsi, oamenii nu.
+        var cine = (g.cati === 1)
+          ? (g.nume_membri.length ? '<b>' + esc(g.nume_membri[0]) + '</b> s-a alăturat'
+                                  : 'Un membru nou s-a alăturat')
+          : (g.nume_membri.length ? '<b>' + esc(g.nume_membri[0]) + '</b> ' + incaAtatia(g.cati - 1) + ' s-au alăturat'
+                                  : g.cati + ' membri noi s-au alăturat');
+        var vazut = !!(f.vizite && f.vizite[g.id]);
         randuri.push(randFlux('sage',
           cine + ' grupului ' +
-          legatura('/grup-details.html?id=' + encodeURIComponent(g.id), g.nume, 'flux-grupul-meu') + '.',
-          candva(g.cand)));
+          legatura('/grup-details.html?id=' + encodeURIComponent(g.id), g.nume, 'flux-grupul-meu') +
+          (vazut ? ', de la ultima ta vizită.' : '.'),
+          vazut ? '' : candva(g.cand)));
       });
 
       // 2. Terenuri noi în zonele tale.
@@ -3532,15 +3587,45 @@
       // scriem nimic despre faze. Mai bine un card mai scurt decât „Faza 1"
       // pentru un grup care e de fapt mai departe.
 
-      return '<div class="sl-grup">' +
+      // ── CE S-A SCHIMBAT DE CÂND N-AI MAI INTRAT ──
+      // Două rânduri, amândouă adăugate pe 18 august, la cererea lui Lucian.
+      // Stau pe card, nu doar în flux, fiindcă fluxul anunță o dată, iar cardul
+      // rămâne acolo până se rezolvă: o cerere neaprobată n-are voie să dispară
+      // de pe homepage doar fiindcă a trecut o săptămână.
+      //
+      // ⚠️ Ordinea nu e întâmplătoare: întâi cererea (are nevoie de o faptă de
+      // la el), apoi membrii noi (doar îl pun la zi).
+      var semne = '';
+      if(g.cereri > 0){
+        semne += '<p class="sl-grup-semn sl-grup-semn--cerere">' +
+                   (g.cereri === 1 ? 'O cerere de intrare așteaptă răspunsul tău'
+                                   : g.cereri + ' cereri de intrare așteaptă răspunsul tău') +
+                 '</p>';
+      }
+      if(g.membriNoi > 0){
+        // „De la ultima ta vizită" se scrie DOAR dacă a fost vreodată acolo.
+        // Pentru cine n-a deschis niciodată pagina grupului, pragul e ziua în
+        // care a intrat el în grup, deci fraza aceea ar fi fost o minciună mică.
+        var coada = g.vazutVreodata ? ' de la ultima ta vizită' : ' de când ai intrat în grup';
+        semne += '<p class="sl-grup-semn">' +
+                   (g.membriNoi === 1 ? 'Un membru nou' : g.membriNoi + ' membri noi') + coada +
+                 '</p>';
+      }
+
+      // Butonul își schimbă textul când e ceva de rezolvat: „Deschide grupul"
+      // nu spune de ce merită deschis chiar acum.
+      var buton = g.cereri > 0
+        ? mini('/grup-details.html?id=' + encodeURIComponent(g.id),
+               g.cereri === 1 ? 'Vezi cererea' : 'Vezi cererile', 'vezi-cererile')
+        : mini('/grup-details.html?id=' + encodeURIComponent(g.id), 'Deschide grupul', 'deschide-grupul');
+
+      return '<div class="sl-grup' + (g.cereri > 0 ? ' sl-grup--atentie' : '') + '">' +
                '<div class="sl-grup-cap">' +
                  '<a class="sl-grup-nume" href="/grup-details.html?id=' + encodeURIComponent(g.id) +
                    '" data-dest="grupul-meu">' + esc(g.nume) + '</a>' +
                  '<span class="sl-meta">' + membri + '</span>' +
-               '</div>' + corp +
-               '<div class="sl-actiuni">' +
-                 mini('/grup-details.html?id=' + encodeURIComponent(g.id), 'Deschide grupul', 'deschide-grupul') +
-               '</div>' +
+               '</div>' + corp + semne +
+               '<div class="sl-actiuni">' + buton + '</div>' +
              '</div>';
     }
 
@@ -4038,11 +4123,27 @@
       // ceva la „Grupurile tale" — acolo intră mai jos strict cei `activ`, ca
       // înainte — ci ca să nu-i propună cardul „Grupuri care caută în zonele
       // tale" un grup la care a cerut deja să intre și așteaptă răspuns.
+      //
+      // ⚠️ `joined_at` din interogarea a doua e ora la care am intrat EU în
+      // fiecare grup. E plasa de siguranță a socotelii de vizite: cine n-a
+      // deschis niciodată pagina unui grup n-are rând în `grup_vizite`, iar
+      // atunci „nou" înseamnă „de când sunt eu membru", nu „din totdeauna".
       Promise.all([
         sb.from('terenuri_likes').select('teren_id, terenuri(id, titlu, status, suprafata, pret_total, nr_apartamente_min, nr_apartamente_max, created_by_user_id)').eq('user_id', user.id),
-        sb.from('grup_membri').select('grup_id, status').eq('user_id', user.id).in('status', ['activ', 'pending']),
+        sb.from('grup_membri').select('grup_id, status, joined_at').eq('user_id', user.id).in('status', ['activ', 'pending']),
         sb.from('profiles').select('account_type').eq('user_id', user.id).single(),
-        bland(sb.from('user_preferred_zones').select('zone_id, zones(id, name, city_id)').eq('user_id', user.id))
+        bland(sb.from('user_preferred_zones').select('zone_id, zones(id, name, city_id)').eq('user_id', user.id)),
+
+        // Când am deschis ultima oară pagina fiecărui grup. Se cer TOATE
+        // rândurile mele, fără `.in(grupIds)`: sunt câteva, iar aici încă nu
+        // știu în ce grupuri sunt. Tabela e închisă la sânge (fiecare doar
+        // rândurile lui, vezi `db_schema/vizite-grupuri/`), deci
+        // `.eq('user_id', ...)` e pentru limpezimea interogării, nu pentru
+        // securitate.
+        // ⚠️ Prin `bland`: dacă tabela încă nu există în bază (SQL nerulat) sau
+        // citirea pică, socoteala cade singură pe fereastra de 14 zile. Nu se
+        // pierde niciun card.
+        bland(sb.from('grup_vizite').select('grup_id, vazut_la').eq('user_id', user.id))
       ]).then(function(r){
         var prof = (r[2] && r[2].data) ? r[2].data : {};
         if(prof.account_type === 'profesional'){ paginaIntreaga(); return; }
@@ -4076,6 +4177,45 @@
                                 .map(function(m){ return m.grup_id; });
         var grupIdsAtinse = membriiMei.map(function(m){ return m.grup_id; });
         var terenIds = terenuri.map(function(t){ return t.teren_id; });
+
+        // ── DE CÂND E „NOU" PENTRU MINE, ÎN FIECARE GRUP ──
+        // Un prag per grup, în ordinea asta:
+        //   1. ora la care am deschis ultima oară pagina grupului
+        //      (`grup_vizite`) — răspunsul cerut de Lucian, 18 august;
+        //   2. dacă n-am deschis-o niciodată: ora la care am intrat eu în grup.
+        //      Altfel i-aș arăta unui om abia intrat toți membrii de dinaintea
+        //      lui ca pe niște „nou-veniți";
+        //   3. dacă nici asta nu se știe: fereastra obișnuită de 14 zile.
+        //
+        // ⚠️ Pragul e MEREU cel mai recent dintre vizită și propria intrare.
+        // Fără `Math.max`, un om care s-a alăturat ieri unui grup pe care îl
+        // urmărea de o lună ar fi primit pragul vechi al vizitei și ar fi văzut
+        // ca „noi" oameni intrați înainte de el.
+        var vizite = {};
+        (r[4] || []).forEach(function(v){ if(v.vazut_la) vizite[v.grup_id] = v.vazut_la; });
+        var intrarea = {};
+        membriiMei.forEach(function(m){ if(m.joined_at) intrarea[m.grup_id] = m.joined_at; });
+
+        var deLaFereastra = deLaCand();
+        var pragGrup = {};      // grup_id → ISO. Din ce moment încolo e „nou".
+        grupIds.forEach(function(id){
+          var candidati = [vizite[id], intrarea[id]].filter(Boolean);
+          pragGrup[id] = candidati.length
+            ? candidati.sort()[candidati.length - 1]   // ISO se compară ca text
+            : deLaFereastra;
+        });
+        // Cel mai vechi prag dintre toate grupurile: doar el se trimite bazei,
+        // fiindcă o interogare nu poate avea un filtru de dată diferit pe
+        // fiecare grup. Tăierea fină, per grup, se face în JS mai jos.
+        var pragMinim = grupIds.length
+          ? grupIds.map(function(id){ return pragGrup[id]; }).sort()[0]
+          : deLaFereastra;
+        // Cine e membru de ani și n-a intrat niciodată în pagina grupului ar
+        // trage altfel toată istoria grupului. Trei luni e destul de mult cât
+        // să nu piardă nimic real și destul de puțin cât să nu aducă sute de
+        // rânduri.
+        var celMaiVechiPrag = new Date(Date.now() - 90 * 86400000).toISOString();
+        if(pragMinim < celMaiVechiPrag) pragMinim = celMaiVechiPrag;
 
         // Zonele bifate în profil, în cele două forme de care e nevoie:
         // id-uri (ca să le compar cu ale altor oameni și ale grupurilor) și
@@ -4121,12 +4261,18 @@
         // cu un lot mare de terenuri într-o zi, homepage-ul n-are voie să
         // tragă o mie de rânduri ca să scrie un rând de text.
         var nimic = Promise.resolve([]);
-        var deLa  = deLaCand();
+        // Aceeași fereastră de 14 zile, calculată o singură dată mai sus (o
+        // folosește și socoteala pragurilor pe grup, ca ultimă plasă). Numele
+        // scurt e păstrat fiindcă apare de patru ori în interogările de mai jos.
+        var deLa  = deLaFereastra;
         Promise.all([
           terenIds.length ? bland(sb.from('terenuri_likes').select('teren_id, user_id').in('teren_id', terenIds)) : nimic,
           terenIds.length ? bland(sb.from('terenuri_likes_grupuri').select('teren_id, grup_id').in('teren_id', terenIds)) : nimic,
           terenIds.length ? bland(sb.from('user_teren_notes').select('teren_id, content').eq('user_id', user.id).in('teren_id', terenIds)) : nimic,
-          grupIds.length  ? bland(sb.from('grupuri').select('id, nume').in('id', grupIds)) : nimic,
+          // ⚠️ `admin_id` se cere din 18 august: din el se știe la care dintre
+          // grupurile mele sunt EU cel care aprobă cererile de intrare. Nu e
+          // mereu fondatorul — administrarea se poate transfera.
+          grupIds.length  ? bland(sb.from('grupuri').select('id, nume, admin_id').in('id', grupIds)) : nimic,
           grupIds.length  ? bland(sb.from('grup_membri_count').select('grup_id, membri_count').in('grup_id', grupIds)) : nimic,
           grupIds.length  ? blandNul(sb.from('grup_checklist').select('grup_id, step_key, checked').in('grup_id', grupIds)) : nimic,
 
@@ -4161,9 +4307,16 @@
                   .gte('created_at', deLa).limit(60)),
 
           // 10. Cine s-a alăturat grupurilor mele. Doar membrii activi.
+          //     ⚠️ Din 18 august filtrul de dată NU mai e fereastra de 14 zile,
+          //     ci `pragMinim`: cel mai vechi prag dintre toate grupurile mele
+          //     (ultima mea vizită acolo, ori intrarea mea). O interogare nu
+          //     poate avea alt filtru pe fiecare grup, deci baza taie larg și
+          //     JS-ul taie fin, cu `pragGrup[id]`.
+          //     Limita a crescut de la 40 la 200: pragul poate fi acum mult mai
+          //     vechi de două săptămâni, la un grup în care n-am mai intrat.
           grupIds.length ? bland(sb.from('grup_membri').select('grup_id, user_id, joined_at')
                                    .in('grup_id', grupIds).eq('status', 'activ')
-                                   .gte('joined_at', deLa).limit(40)) : nimic,
+                                   .gte('joined_at', pragMinim).limit(200)) : nimic,
 
           // 11. Cel mai recent articol publicat.
           bland(sb.from('articles').select('title, slug, published_at')
@@ -4223,7 +4376,26 @@
           bland(sb.from('articles').select('title, slug, published_at')
                   .eq('status', 'published')
                   .like('slug', 'judetului-housing-episodul-%')
-                  .order('published_at', { ascending:false }).limit(1))
+                  .order('published_at', { ascending:false }).limit(1)),
+
+          // 17. CERERILE DE INTRARE ÎN GRUPURILE MELE (18 august).
+          //     O cerere e un rând `pending` în `grup_membri`, scris de
+          //     `requestJoinGroup` din pagina grupului. Până acum se vedea
+          //     într-un singur loc: în secțiunea de admin a acelei pagini. Cine
+          //     nu intra acolo nu afla că cineva îl așteaptă.
+          //
+          //     ⚠️ Se cer pentru TOATE grupurile mele, nu doar pentru cele unde
+          //     sunt admin: `admin_id` vine din interogarea 4, în aceeași rundă,
+          //     deci încă nu-l știu. Cernerea se face în JS, imediat mai jos —
+          //     un membru obișnuit NU vede rândurile astea pe homepage.
+          //     Sunt câteva rânduri, nu merită o rundă în plus.
+          //
+          //     ⚠️ FĂRĂ filtru de dată. O cerere neaprobată nu se învechește:
+          //     dacă cineva așteaptă răspuns de trei săptămâni, cu atât mai mult
+          //     trebuie să scrie pe homepage.
+          grupIds.length ? bland(sb.from('grup_membri').select('grup_id, user_id, joined_at')
+                                   .in('grup_id', grupIds).eq('status', 'pending')
+                                   .order('joined_at', { ascending:true }).limit(60)) : nimic
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -4265,9 +4437,37 @@
           // Dacă numele nu vin (RLS, grup șters între timp), punem o etichetă
           // neutră: mai bine un link fără nume decât un card care dispare și
           // îl lasă pe om fără scurtătura către grupul lui.
-          var numeGrup = {}, membriGrup = {};
-          x[3].forEach(function(g){ numeGrup[g.id] = g.nume; });
+          var numeGrup = {}, membriGrup = {}, euSuntAdmin = {};
+          x[3].forEach(function(g){
+            numeGrup[g.id] = g.nume;
+            if(g.admin_id === user.id) euSuntAdmin[g.id] = true;
+          });
           x[4].forEach(function(c){ membriGrup[c.grup_id] = c.membri_count; });
+
+          // ── CERERILE DE INTRARE, DOAR PE GRUPURILE PE CARE LE ADMINISTREZ ──
+          // Cernerea promisă la interogarea 17. Un membru obișnuit nu are ce
+          // face cu ele: butonul de aprobare nu i se arată nici în pagina
+          // grupului, deci un rând pe homepage l-ar trimite într-un loc unde
+          // n-are ce apăsa.
+          // ⚠️ Dacă `x[3]` n-a putut fi citit, `euSuntAdmin` e gol și nu se
+          // arată nicio cerere. Tăcerea e răspunsul bun: mai bine nu-i spunem
+          // decât să-i spunem tuturor membrilor.
+          var cereriPeGrup = {};
+          (x[17] || []).forEach(function(c){
+            if(!euSuntAdmin[c.grup_id]) return;
+            if(c.user_id === user.id) return;      // cererea mea într-un grup pe care îl administrez: n-are sens
+            var g = cereriPeGrup[c.grup_id] || (cereriPeGrup[c.grup_id] = {
+              id: c.grup_id, nume: numeGrup[c.grup_id] || 'grupul tău',
+              cati: 0, cand: null, user_ids: [], nume_membri: []
+            });
+            g.cati++;
+            g.user_ids.push(c.user_id);
+            // Cea mai VECHE cerere, nu cea mai nouă: „așteaptă de 6 zile" e
+            // informația care mișcă pe cineva, nu „ultima a venit ieri".
+            if(!g.cand || c.joined_at < g.cand) g.cand = c.joined_at;
+          });
+          var grupuriCuCereri = Object.keys(cereriPeGrup).map(function(k){ return cereriPeGrup[k]; })
+            .sort(function(a, b){ return String(a.cand).localeCompare(String(b.cand)); });
 
           var bifeCitite = (x[5] !== null);
           var bifePeGrup = {};
@@ -4285,7 +4485,13 @@
               // lucrează GROUP BY), deci lipsa lor înseamnă 0 — vezi grupuri.js.
               membri: membriGrup[id] || 0,
               faza: bifeCitite ? fazaGrupului(bifePeGrup[id] || {}) : null,
-              bifeCitite: bifeCitite
+              bifeCitite: bifeCitite,
+              // Câți așteaptă răspuns de la mine. Zero pentru grupurile pe care
+              // nu le administrez, fiindcă acolo nici nu s-au numărat.
+              cereri: cereriPeGrup[id] ? cereriPeGrup[id].cati : 0,
+              // Câți au intrat de la ultima mea vizită. Se completează câteva
+              // rânduri mai jos, după ce se taie pe pragul fiecărui grup.
+              membriNoi: 0
             };
           });
 
@@ -4483,9 +4689,17 @@
 
           // Cine s-a alăturat grupurilor mele, grupat pe grup. Eu nu mă
           // număr: „te-ai alăturat grupului" nu e o noutate pentru mine.
+          //
+          // ⚠️ TĂIEREA FINĂ, pe pragul fiecărui grup (18 august). Baza a tăiat
+          // larg, pe cel mai vechi prag dintre toate (`pragMinim`), fiindcă o
+          // interogare nu poate avea alt filtru de dată pe fiecare grup. Aici
+          // se aplică pragul care contează cu adevărat: ultima mea vizită în
+          // grupul ACELA. Fără rândul de mai jos, un grup în care am intrat azi
+          // ar arăta membri pe care tocmai i-am văzut.
           var peGrup = {};
           x[10].forEach(function(m){
             if(m.user_id === user.id) return;
+            if(pragGrup[m.grup_id] && m.joined_at <= pragGrup[m.grup_id]) return;
             var g = peGrup[m.grup_id] || (peGrup[m.grup_id] = {
               id: m.grup_id, nume: numeGrup[m.grup_id] || 'grupul tău',
               cati: 0, cand: null, user_ids: [], nume_membri: []
@@ -4497,16 +4711,41 @@
           var grupuriCuMembriNoi = Object.keys(peGrup).map(function(k){ return peGrup[k]; })
             .sort(function(a, b){ return String(b.cand).localeCompare(String(a.cand)); });
 
+          // Aceleași numere, duse și pe cardurile din „Grupurile tale": fluxul
+          // anunță, cardul rămâne. `vazutVreodata` deosebește „doi oameni noi
+          // de la ultima ta vizită" de „doi oameni noi de când ai intrat în
+          // grup" — a doua frază ar fi fost o minciună mică pentru cine n-a
+          // deschis niciodată pagina grupului.
+          date.grupuri.forEach(function(g){
+            g.membriNoi = peGrup[g.id] ? peGrup[g.id].cati : 0;
+            g.vazutVreodata = !!vizite[g.id];
+          });
+          // Sus stă grupul care are nevoie de el: întâi cererile de aprobat,
+          // apoi cele cu oameni noi. La egalitate, alfabetic — altfel ordinea
+          // ar veni din baza de date și cardurile s-ar rearanja de la o
+          // încărcare la alta, deși nu s-a schimbat nimic.
+          date.grupuri.sort(function(a, b){
+            return (b.cereri - a.cereri) || (b.membriNoi - a.membriNoi) ||
+                   String(a.nume || '').localeCompare(String(b.nume || ''), 'ro');
+          });
+
           // Runda a treia, și numai dacă are rost: pseudonimele celor care
           // tocmai au intrat în grupurile mele. Nu se poate cere mai devreme,
           // fiindcă abia acum le știm id-urile, și nu se face prin embed în
           // `grup_membri` — nimeni în tot codul nu leagă tabelele astea două,
           // iar RLS-ul de pe grupuri nu e locul unde să experimentăm. Dacă
           // pică, rândul rămâne, dar spune „un membru nou" în loc de nume.
+          // ⚠️ În aceeași citire intră și cei care AȘTEAPTĂ să fie primiți: e
+          // exact aceeași nevoie (un nume în locul unui id), iar două
+          // interogări pe `profiles` în aceeași rundă ar fi fost risipă.
           var idsNoi = [];
-          grupuriCuMembriNoi.slice(0, 2).forEach(function(g){
-            g.user_ids.forEach(function(id){ if(idsNoi.indexOf(id) === -1) idsNoi.push(id); });
-          });
+          function strangeIds(lista){
+            lista.slice(0, 2).forEach(function(g){
+              g.user_ids.forEach(function(id){ if(idsNoi.indexOf(id) === -1) idsNoi.push(id); });
+            });
+          }
+          strangeIds(grupuriCuMembriNoi);
+          strangeIds(grupuriCuCereri);
           var numeleLor = idsNoi.length
             ? bland(sb.from('profiles').select('user_id, pseudonym').in('user_id', idsNoi))
             : nimic;
@@ -4514,12 +4753,16 @@
           numeleLor.then(function(profiluri){
             var pseudo = {};
             profiluri.forEach(function(p){ if(p.pseudonym) pseudo[p.user_id] = p.pseudonym; });
-            grupuriCuMembriNoi.forEach(function(g){
+            function puneNumele(g){
               g.nume_membri = g.user_ids.map(function(id){ return pseudo[id]; }).filter(Boolean);
-            });
+            }
+            grupuriCuMembriNoi.forEach(puneNumele);
+            grupuriCuCereri.forEach(puneNumele);
 
             date.noutati = construiesteFluxul({
+              grupuriCuCereri:    grupuriCuCereri,
               grupuriCuMembriNoi: grupuriCuMembriNoi,
+              vizite:             vizite,
               terenuriInZonele:   terenuriInZonele,
               terenuriNoiTotal:   x[7].length,
               utilizatoriNoi:     utilizatoriNoi,
@@ -4592,6 +4835,27 @@
 
     scrieDataWebinarului();
     init();
+
+    // ── ÎNTOARCEREA CU BUTONUL „ÎNAPOI" ──
+    // Traseul obișnuit al cererilor de intrare e: homepage → „Vezi cererile" →
+    // aprobi în pagina grupului → înapoi. La întoarcere, browserul poate scoate
+    // homepage-ul din memorie exact așa cum l-a lăsat (bfcache), fără să mai
+    // ruleze niciun script — deci cu aceeași cerere scrisă pe card, deși omul
+    // tocmai a rezolvat-o. Ar părea că platforma n-a înțeles ce a făcut.
+    //
+    // `pageshow` cu `persisted` e singurul semn că s-a întâmplat asta. Se
+    // recitește tot spațiul de lucru: cererile aprobate dispar, iar oamenii
+    // intrați între timp apar.
+    //
+    // ⚠️ NUMAI pe `persisted`, dinadins, și NU pe `visibilitychange`. Cardul
+    // „Notele tale" are un câmp în care omul scrie, salvat la 1,5 secunde după
+    // ultima tastă și la ieșirea din câmp. Întoarcerea din bfcache înseamnă că
+    // omul a fost între timp pe altă pagină, deci nota s-a salvat demult. O
+    // recitire la fiecare revenire în tab i-ar putea rescrie câmpul peste
+    // degete, în timp ce scrie.
+    window.addEventListener('pageshow', function(ev){
+      if(ev.persisted) init();
+    });
   })();
 </script>
 

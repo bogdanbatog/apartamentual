@@ -1451,6 +1451,37 @@ async function loadGroupDetails() {
             // Typical case: user joined via invitation from an admin and clicked
             // Accept without going through the profile edit flow first.
             updateCompleteProfileBanner();
+
+            // ── ORA ACESTEI VIZITE ──
+            // Din ea se calculează pe homepage „2 membri noi de la ultima ta
+            // vizită" (cardul „Grupurile tale" și fluxul „Ce e nou"). Fără
+            // rândul ăsta, homepage-ul ar repeta aceleași nume două săptămâni,
+            // chiar dacă omul intră în grup în fiecare zi.
+            //
+            // Se scrie doar pentru MEMBRI: un curios care deschide pagina unui
+            // grup străin n-are ce socoteală să-și strice.
+            //
+            // ⚠️ Fără `await` și fără să oprească nimic dacă pică: e o socoteală
+            // de pe altă pagină, n-are voie să întârzie pagina asta cu nimic și
+            // n-are voie s-o rupă. Dacă scrierea eșuează, homepage-ul cade
+            // singur pe fereastra de 14 zile, care e răspunsul de dinainte.
+            //
+            // ⚠️ `onConflict` e obligatoriu și trebuie să numească AMBELE
+            // coloane: cheia primară e compusă (user_id, grup_id), iar
+            // PostgREST nu o ghicește. Fără el, upsert-ul e refuzat.
+            //
+            // ⚠️ `vazut_la` NU se trimite dinadins: ora o pune baza, prin
+            // trigger (`db_schema/vizite-grupuri/1-tabela-vizite.sql`). Un
+            // calculator rămas în urmă ar scrie o oră din trecut, iar omul ar
+            // vedea la nesfârșit aceiași „membri noi".
+            if (isMember) {
+                sb.from('grup_vizite')
+                  .upsert({ user_id: currentUser.id, grup_id: groupId },
+                          { onConflict: 'user_id,grup_id' })
+                  .then(({ error }) => {
+                      if (error) console.warn('vizita pe grup:', error);
+                  }, e => console.warn('vizita pe grup:', e));
+            }
         }
         
         // Load terenuri favorite (visible to everyone)
