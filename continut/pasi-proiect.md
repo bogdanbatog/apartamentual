@@ -1,4 +1,4 @@
-# Pașii unui proiect ApartamenTUal — textul complet
+# Pașii unui proiect ApartamenTUal: textul complet
 
 **Sursa unică de text pentru cei 40 de pași.** Din fișierul ăsta se alimentează, în
 final, `frontend/js/pasi-proiect.js`, care va fi citit de toate cele trei pagini:
