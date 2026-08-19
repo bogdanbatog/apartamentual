@@ -178,11 +178,22 @@ body {
     color: white;
 }
 
+/* Titlu și subtitlu pe același rând, aliniate pe linia de bază a textului,
+   ca pe /terenuri. Aici hero-ul e centrat, deci rândul se centrează și el.
+   Sub 768px se așază unul sub altul (vezi media query). */
+.hero-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
 .hero-content h1 {
     font-size: 2rem;
     font-weight: 700;
     letter-spacing: -0.03em;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
 }
 
 .hero-content p {
@@ -191,6 +202,14 @@ body {
     opacity: 0.9;
     max-width: 600px;
     margin: 0 auto;
+}
+
+/* În rândul de sus subtitlul nu se mai centrează pe 600px cu margin auto:
+   într-un container flex marginile auto ar înghiți spațiul liber și l-ar
+   lipi de titlu. */
+.hero-top p {
+    margin: 0;
+    max-width: 560px;
 }
 
 /* ═══════════════ PANOUL „CUM ÎNCEPI ȘI CUM COMUNICAȚI" ═══════════════
@@ -1015,6 +1034,10 @@ body {
     
     .grupuri-hero {
         padding: 24px 20px 22px;
+    }
+
+    .hero-top {
+        gap: 6px;
     }
 
     .hero-content h1 {
