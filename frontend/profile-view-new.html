@@ -223,48 +223,12 @@
                         <p id="user-description" class="text-gray-700 whitespace-pre-wrap"></p>
                     </div>
 
-                    <!-- Personal Notes (only for own profile) -->
-                    <div id="notes-section" class="card hidden">
-                        <div class="flex items-center justify-between mb-1">
-                            <h2 class="text-lg font-semibold flex items-center gap-2">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                                Notițele mele
-                            </h2>
-                            <button id="notes-edit-btn" onclick="toggleNotesEdit()" 
-                                class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                </svg>
-                                Editează
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-3">Vizibile doar pentru tine</p>
-                        
-                        <!-- View mode -->
-                        <div id="notes-view-mode">
-                            <div id="user-notes" class="text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-4 min-h-[140px] text-sm leading-relaxed border border-gray-100"></div>
-                        </div>
-                        
-                        <!-- Edit mode -->
-                        <div id="notes-edit-mode" class="hidden">
-                            <textarea id="notes-textarea" rows="7"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm leading-relaxed resize-y"
-                                placeholder="Scrie aici notițele tale..."></textarea>
-                            <div class="flex items-center gap-3 mt-3">
-                                <button onclick="saveNotes()" 
-                                    class="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-black transition">
-                                    Salvează
-                                </button>
-                                <button onclick="cancelNotesEdit()" 
-                                    class="px-4 py-2 border border-gray-300 text-sm rounded-lg hover:bg-gray-50 transition">
-                                    Anulează
-                                </button>
-                                <span id="notes-save-status" class="text-xs text-green-600 hidden">✓ Salvat</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- ⚠️ Aici stătea „Notițele mele", scoasă în 19 august 2026.
+                         Carnetul personal e acum pe homepage-ul logat, cu salvare
+                         automată, și se ține în tabela `user_notes`. Cel de aici scria
+                         în cu totul altă parte, coloana `profiles.notes`, care rămâne
+                         în bază, neatinsă. Dacă vreodată se mută textele vechi, se
+                         mută de acolo în `user_notes`. -->
 
                     <!-- Quick Actions -->
                     <div class="card">
