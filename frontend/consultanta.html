@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cere consultanță - ApartamenTUal</title>
+    <title>Ai o întrebare? - ApartamenTUal</title>
 <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
 <script>
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
-    <meta name="description" content="Adresează întrebări biroului de arhitectură LTFB Studio despre platforma ApartamenTUal sau despre proiecte de construcție colaborativă.">
+    <meta name="description" content="Scrie-ne orice întrebare despre platforma ApartamenTUal sau despre construcția în grup. Răspunde un arhitect din LTFB Studio, iar răspunsul nu costă nimic.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="styles.css">
@@ -135,6 +135,41 @@
         .success-state .icon { font-size: 3rem; margin-bottom: 1rem; }
         .success-state h2 { font-size: 1.5rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--ink); }
         .success-state p { color: var(--ink-2); font-size: 0.9rem; }
+
+        /* Cele două casete de sub formular: contact direct și consultanța plătită. */
+        .consult-after {
+            max-width: 640px;
+            margin: 0 auto 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .consult-after-box {
+            background: var(--bg-soft);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .consult-after-box h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+        .consult-after-box p {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--ink-2);
+        }
+        .consult-after-box a { color: var(--ink); font-weight: 600; }
+        .consult-after-note {
+            margin-top: 0.625rem;
+            padding-top: 0.625rem;
+            border-top: 1px solid var(--rule);
+        }
+        @media (max-width: 640px) {
+            .consult-after { grid-template-columns: 1fr; margin-bottom: 2.5rem; }
+        }
     </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -148,19 +183,24 @@
     <div id="navigation"></div>
 
     <main class="flex-1">
+        <!-- ⚠️ Prețurile stăteau aici, sub titlu, până în 19 august 2026. Erau
+             primul lucru pe care îl citea cineva venit cu o întrebare simplă,
+             așa că nu întreba nimeni nimic, suna sau scria pe email. Acum sunt
+             sub formular, într-un bloc separat, pentru cine vrea mai mult decât
+             un răspuns. Nu le urca înapoi. -->
         <div class="consult-hero">
-            <h1>Cere consultanță</h1>
-            <p>Întrebări despre construcție colaborativă sau despre funcționarea platformei</p>
-            <p style="margin-top: 1rem; font-size: 0.95rem; opacity: 1; color: rgba(255,255,255,0.92);">
-                <strong>Primele 30 de minute sunt gratuite.</strong> Apoi: consultanță online 299 RON/oră, sau la birou 499 RON/oră (cu deplasarea la teren inclusă).
-            </p>
+            <h1>Ai o întrebare?</h1>
+            <p>Scrie-o aici. Răspunde un arhitect din echipă, nu un robot, iar răspunsul nu costă nimic.</p>
         </div>
 
         <div class="consult-form-card">
             <!-- Info box -->
             <div class="consult-info">
-                <strong>LTFB Studio</strong> este biroul de arhitectură care a creat platforma ApartamenTUal.
-                Poți adresa întrebări unui <strong>arhitect din birou</strong> (despre proiecte de construcție colaborativă, consultanță de proiect, fezabilitate) sau întrebări legate de <strong>funcționarea platformei</strong> (cum creez un grup, cum funcționează procesul etc).
+                Nu există întrebare prea mică. Dacă un pas din proces nu se înțelege sau
+                un buton de pe platformă nu face ce te așteptai, scrie-ne. Așa aflăm ce
+                trebuie explicat mai bine, iar tu primești răspunsul de la
+                <strong>LTFB Studio</strong>, biroul de arhitectură care a creat platforma
+                și care a proiectat și coordonat blocul-pilot Județului Housing.
             </div>
 
             <!-- Form -->
@@ -175,20 +215,28 @@
                     <input type="email" id="formEmail" placeholder="adresa@email.com" required>
                 </div>
 
+                <!-- ⚠️ Etichetele sunt scrise din perspectiva omului care întreabă
+                     („nu înțeleg"), nu a serviciului pe care îl vindem noi. Valorile
+                     salvate în bază au rămas cele vechi (arhitectura / platforma /
+                     proiect / general), fiindcă nu știm dacă tabela
+                     `consultation_requests` are o constrângere pe coloana asta.
+                     Atenție la citit rapoartele vechi: `arhitectura` însemna
+                     „consultanță arhitectură", acum stă sub „am un teren sau o
+                     situație concretă". -->
                 <div class="form-group">
-                    <label>Subiect</label>
+                    <label>Despre ce e vorba</label>
                     <div class="category-pills">
-                        <div class="category-pill active" data-value="arhitectura">🏗️ Consultanță arhitectură</div>
-                        <div class="category-pill" data-value="platforma">💻 Funcționare platformă</div>
-                        <div class="category-pill" data-value="proiect">📋 Cum pornești un proiect colaborativ</div>
-                        <div class="category-pill" data-value="general">💬 Altele</div>
+                        <div class="category-pill active" data-value="platforma">💻 Nu înțeleg ceva de pe platformă</div>
+                        <div class="category-pill" data-value="proiect">🧭 Nu înțeleg procesul de construcție în grup</div>
+                        <div class="category-pill" data-value="arhitectura">🏗️ Am un teren sau o situație concretă</div>
+                        <div class="category-pill" data-value="general">💬 O propunere sau o problemă găsită</div>
                     </div>
-                    <input type="hidden" id="formCategory" value="arhitectura">
+                    <input type="hidden" id="formCategory" value="platforma">
                 </div>
 
                 <div class="form-group">
-                    <label>Mesajul tău *</label>
-                    <textarea id="formMessage" placeholder="Descrie pe scurt întrebarea sau situația ta..." required></textarea>
+                    <label>Întrebarea ta *</label>
+                    <textarea id="formMessage" placeholder="Scrie cu cuvintele tale. Dacă te-ai blocat pe o pagină anume, spune-ne care." required></textarea>
                 </div>
 
                 <button type="submit" class="btn-submit" id="btnSubmit">
@@ -199,9 +247,38 @@
             <!-- Success state -->
             <div class="success-state" id="successState">
                 <div class="icon">✅</div>
-                <h2>Mesajul a fost trimis!</h2>
-                <p>Echipa LTFB Studio va reveni cu un răspuns în cel mai scurt timp posibil, de regulă în 1-2 zile lucrătoare.</p>
+                <h2>Am primit întrebarea</h2>
+                <p>Răspunsul vine pe email, de regulă în 1-2 zile lucrătoare. Dacă e ceva urgent, sună-ne la <a href="tel:+40723870834" style="color: var(--ink); font-weight: 600;">+40 723 870 834</a>.</p>
+                <p style="margin-top: 0.75rem;">Ne ajută mult: din întrebările primite vedem ce trebuie explicat mai bine pe platformă.</p>
                 <a href="/index.html" style="display: inline-block; margin-top: 1.5rem; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; font-weight: 600;">← Înapoi la pagina principală</a>
+            </div>
+        </div>
+
+        <!-- ── Ce se întâmplă după ─────────────────────────────────────────
+             Cele două lucruri pe care omul le caută după ce a scris: pe unde
+             mai poate da de noi și cât costă, dacă vrea mai mult decât un
+             răspuns. Amândouă SUB formular, nu deasupra lui. -->
+        <div class="consult-after">
+            <div class="consult-after-box">
+                <h2>Preferi să vorbim direct?</h2>
+                <p>
+                    Telefon: <a href="tel:+40723870834">+40 723 870 834</a><br>
+                    Email: <a href="mailto:office@ltfbstudio.ro">office@ltfbstudio.ro</a>
+                </p>
+                <p class="consult-after-note">Răspundem la fel, indiferent pe unde scrii. Formularul de sus ne ajută doar să ținem întrebările la un loc.</p>
+            </div>
+
+            <div class="consult-after-box">
+                <h2>Dacă vrei mai mult decât un răspuns</h2>
+                <p>
+                    Pentru o situație concretă, un teren pe care îl ai în vedere sau un
+                    grup care vrea să pornească, urmează o discuție de consultanță cu un
+                    arhitect din birou.
+                </p>
+                <p class="consult-after-note">
+                    <strong>Primele 30 de minute sunt gratuite.</strong> Apoi, online 299 RON/oră,
+                    sau la birou 499 RON/oră, cu deplasarea la teren inclusă.
+                </p>
             </div>
         </div>
     </main>

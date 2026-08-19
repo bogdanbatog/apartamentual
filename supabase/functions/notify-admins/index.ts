@@ -1369,18 +1369,29 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
     }
 
     case 'consultation_request': {
-      const title = `💬 Cerere nouă de consultanță`
-      const body = `O nouă cerere de consultanță de la ${data.name || data.email || 'un vizitator'}`
+      // ⚠️ Reparat 19 august 2026. Scria `data.subject`, dar formularul trimite
+      // `category`, deci subiectul era mereu „N/A" în email. Tocmai categoria e
+      // semnalul care ne interesează: unde se împotmolesc oamenii. Rândul de
+      // telefon a fost scos, formularul n-a cerut niciodată telefon.
+      const CATEGORII: Record<string, string> = {
+        platforma: 'Nu înțelege ceva de pe platformă',
+        proiect: 'Nu înțelege procesul de construcție în grup',
+        arhitectura: 'Are un teren sau o situație concretă',
+        general: 'O propunere sau o problemă găsită',
+      }
+      const categorie = CATEGORII[data.category] || data.category || 'N/A'
+      const title = `💬 Întrebare nouă de pe site`
+      const body = `Întrebare nouă de la ${data.name || data.email || 'un vizitator'}: ${categorie}`
       const html = buildEmailHtml({
         headerEmoji: '💬',
-        headerTitle: 'Cerere nouă de consultanță',
-        intro: 'Un vizitator a solicitat consultanță prin formularul de pe platformă.',
+        headerTitle: 'Întrebare nouă de pe site',
+        intro: 'Un vizitator a scris prin formularul de întrebări de pe platformă.',
         detailsList: [
           { label: 'Nume', value: data.name || 'N/A' },
           { label: 'Email', value: data.email || 'N/A' },
-          { label: 'Telefon', value: data.phone || 'N/A' },
-          { label: 'Subiect', value: data.subject || 'N/A' },
-          { label: 'Mesaj', value: data.message || 'N/A' },
+          { label: 'Despre ce e vorba', value: categorie },
+          { label: 'Întrebarea', value: data.message || 'N/A' },
+          { label: 'De pe ce pagină', value: data.page_url || 'N/A' },
         ],
       })
       return { title, body, html }
