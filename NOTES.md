@@ -7,8 +7,14 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## TODO
 
-- [ ] **`notify-admins` reparat în repo, nedeployat**
-  Pe 19 august, la redenumirea butonului „Cere consultanță" în „Ai o întrebare?", s-a găsit că emailul de admin scria mereu „Subiect: N/A": formularul trimite `category`, funcția citea `data.subject`. Reparat în `supabase/functions/notify-admins/index.ts` (plus pagina de proveniență în email, minus rândul de telefon, pe care formularul nu l-a cerut niciodată), **dar nu deployat**. Până la deploy, întrebările ajung la noi fără categorie, adică fără fix semnalul pentru care s-a făcut schimbarea. Comanda e în CLAUDE.md, secțiunea de edge functions.
+- [x] ✅ **`notify-admins` deployat pe 20 august, cu tot cu fixul de „Subiect: N/A"**
+  Pe 19 august, la redenumirea butonului „Cere consultanță" în „Ai o întrebare?", s-a găsit că emailul de admin scria mereu „Subiect: N/A": formularul trimite `category`, funcția citea `data.subject`. Reparat în `supabase/functions/notify-admins/index.ts` (plus pagina de proveniență în email, minus rândul de telefon, pe care formularul nu l-a cerut niciodată), dar rămăsese nedeployat. **A urcat pe 20 august**, la deploy-ul făcut pentru semnătura emailurilor, fiindcă e același fișier. ⏭️ Rămâne de văzut la prima întrebare reală: categoria trebuie să apară în email, nu „N/A".
+
+- [ ] **Liniuța lungă a mai rămas în corpul emailurilor, nu doar în semnătură**
+  Pe 20 august s-a scos „—" din semnătura de subsol, din toate cele patru locuri (`notify-admins`, `newsletter-subscribe`, `email_templates/sign_up.html`, `reset_password.html`) — commit `277ac19`, deployat și lipit în Supabase în aceeași zi. Semnătura era singura reparabilă prin ștergerea semnului. **Restul cer rescriere de frază**, deci s-au lăsat: subsolul din `oblio-webhook` („ApartamenTUal — locuințe colaborative"), intro-ul din `newsletter-subscribe` („newsletterul ApartamenTUal — povestea reală..."), și vreo opt locuri din `notify-admins` (textul de invitație, cererea de alăturare, linkul WhatsApp actualizat, subiectele de tip „Comandă nouă — {id}"). ⚠️ Nu se face cu găsește-și-înlocuiește: o virgulă pusă unde era o liniuță dă adesea o frază proastă. **Se lasă neatinse** liniuțele folosite ca valoare lipsă în tabelele din emailurile de admin (`value: '—'`), care nu sunt text citit ca frază. Grepul care le găsește pe toate: `grep -rn '—' supabase/functions/ email_templates/`.
+
+- [ ] **`email_templates/magic_link.html` scrie „Echipa Apartamentual", fără TU**
+  Văzut pe 20 august, la trecerea peste semnături. Singurul șablon care nu respectă scrierea brandului, și singurul care semnează „Cu respect,". Nu se știe dacă mai e activ în Supabase (magic link-ul nu e un traseu pe care îl folosim). **De verificat întâi în dashboard dacă mai e pornit**, și abia apoi de aliniat sau de șters.
 
 - [ ] **`profiles.notes` a rămas populată, deși n-o mai citește nimeni**
   Secțiunea „Notițele mele" a fost scoasă din pagina de profil pe 19 august (carnetul e acum pe homepage-ul logat), iar cele trei notițe reale s-au mutat în `user_notes` cu `db_schema/note-personale/3-mutare-note-din-profiles.sql`. Coloana veche a rămas cu textul în ea, dinadins, ca plasă de siguranță. BLOC 3 din același fișier o golește. **De rulat peste câteva zile**, nu imediat: e text scris de oameni reali.
