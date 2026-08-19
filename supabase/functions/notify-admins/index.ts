@@ -255,7 +255,7 @@ function buildEmailHtml(opts: EmailTemplateOptions): string {
       </div>
       <div style="border-top: 1px solid #e8e3d8; padding: 20px 8px 0; text-align: center;">
         <p style="margin: 0; font-size: 13px; color: #8a8a8a;">
-          — Echipa ApartamenTUal<br>
+          Echipa ApartamenTUal<br>
           <a href="${PLATFORM_URL}" style="color: #c2604a; text-decoration: none;">apartamentual.ro</a>
         </p>
       </div>

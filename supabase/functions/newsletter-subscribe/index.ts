@@ -62,7 +62,7 @@ function buildConfirmEmailHtml(confirmUrl: string): string {
       <p style="margin:20px 0 0;font-size:13px;line-height:1.6;color:#8a8a8a;">Dacă nu te-ai abonat tu, poți ignora liniștit acest email.<br><br>Dacă butonul nu funcționează, copiază acest link în browser:<br><a href="${confirmUrl}" style="color:#c2604a;word-break:break-all;">${confirmUrl}</a></p>
     </div>
     <div style="border-top:1px solid #e8e3d8;padding:20px 8px 0;text-align:center;">
-      <p style="margin:0;font-size:13px;color:#8a8a8a;">— Echipa <span translate="no" class="notranslate">ApartamenTUal</span><br><a href="https://apartamentual.ro" style="color:#c2604a;text-decoration:none;">apartamentual.ro</a></p>
+      <p style="margin:0;font-size:13px;color:#8a8a8a;">Echipa <span translate="no" class="notranslate">ApartamenTUal</span><br><a href="https://apartamentual.ro" style="color:#c2604a;text-decoration:none;">apartamentual.ro</a></p>
     </div>
   </div>
   `
