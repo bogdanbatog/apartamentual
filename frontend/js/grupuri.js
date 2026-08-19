@@ -366,21 +366,9 @@ function renderGrupuri(grupuri) {
         DOM.myGroupsSection.style.display = 'none';
     }
     
-    // Render other groups (card de recrutare ca prim card, doar vizitatori nelogați)
-    const recruitCard = !currentUser ? renderRecruitCard() : '';
-    DOM.grupuriGrid.innerHTML = recruitCard + otherGroups.map(g => renderGrupCard(g, false)).join('');
-}
-
-// Card de recrutare afișat ca prim card în grilă (doar vizitatori nelogați)
-function renderRecruitCard() {
-    return `
-        <div class="grup-card recruit-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:12px; padding:24px; border:2px dashed #c2604a; background:#faf6f2;">
-            <div style="font-size:26px; color:#c2604a;"><i class="fas fa-users"></i></div>
-            <h3 style="margin:0; font-size:1.1rem; color:#1a1a1a;">Fii primul grup real</h3>
-            <p style="margin:0; font-size:0.9rem; line-height:1.5; color:#6f6a61; max-width:260px;">Creează un grup și invită-ți prietenii, sau lasă oameni cu aceeași viziune să ți se alăture.</p>
-            <a href="register.html" style="display:inline-block; background:#1a1a1a; color:#fff; padding:9px 18px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.85rem;">Creează un grup</a>
-        </div>
-    `;
+    // Render other groups (fără card de recrutare: butonul „Creează un grup" e deja
+    // în antetul listei și în banda de jos, cardul dubla mesajul în grilă)
+    DOM.grupuriGrid.innerHTML = otherGroups.map(g => renderGrupCard(g, false)).join('');
 }
 
 // ── RENDER GRUP CARD ──
