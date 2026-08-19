@@ -212,10 +212,13 @@ body {
 
 /* În rândul de sus subtitlul nu se mai centrează pe 600px cu margin auto:
    într-un container flex marginile auto ar înghiți spațiul liber și l-ar
-   lipi de titlu. */
+   lipi de titlu.
+   ⚠️ Fără limită de lățime, dinadins: la 560px ultimul cuvânt cădea singur pe
+   rândul al doilea. Rândul e oricum mărginit la 1200px, iar pe ecran îngust
+   subtitlul se rupe normal, pe cuvinte. */
 .hero-top p {
     margin: 0;
-    max-width: 560px;
+    max-width: none;
 }
 
 /* ═══════════════ PANOUL „CUM ÎNCEPI ȘI CUM COMUNICAȚI" ═══════════════
