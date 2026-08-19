@@ -168,21 +168,26 @@ body {
 }
 
 /* ═══════════════ HERO ═══════════════ */
+/* Titlul, subtitlul și banda au aceleași dimensiuni ca pe /terenuri
+   (2rem / 1rem, bandă 34-30px). Erau mai mari aici și împingeau panoul
+   și filtrele sub linia ecranului. */
 .grupuri-hero {
     background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    padding: 3rem 1.5rem;
+    padding: 34px 24px 30px;
     text-align: center;
     color: white;
 }
 
 .hero-content h1 {
-    font-size: 2.25rem;
+    font-size: 2rem;
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
 }
 
 .hero-content p {
-    font-size: 1.125rem;
+    font-size: 1rem;
+    line-height: 1.6;
     opacity: 0.9;
     max-width: 600px;
     margin: 0 auto;
@@ -210,7 +215,7 @@ body {
 
 /* ⚠️ Selectorul are DOUĂ clase dinadins. Eticheta și fraza de sub panou sunt
    amândouă `<p>` în interiorul lui `.hero-content`, unde există deja
-   `.hero-content p { font-size: 1.125rem; opacity: .9; max-width: 600px;
+   `.hero-content p { font-size: 1rem; opacity: .9; max-width: 600px;
    margin: 0 auto; }`, cu specificitate mai mare decât o singură clasă. Cu un
    singur nume de clasă, eticheta ieșea mare, pe jumătate transparentă și
    centrată pe 600px. Aceeași capcană ca pe pagina de terenuri. */
@@ -1008,8 +1013,16 @@ body {
         display: none;
     }
     
+    .grupuri-hero {
+        padding: 24px 20px 22px;
+    }
+
     .hero-content h1 {
-        font-size: 1.75rem;
+        font-size: 1.6rem;
+    }
+
+    .hero-content p {
+        font-size: 0.92rem;
     }
     
     .filters-container {
