@@ -1709,6 +1709,10 @@
   .sl-card{
     background:var(--bg-soft); border:1px solid var(--rule);
     border-radius:14px; padding:1.5rem;
+    /* Cuprinsul din hero și linkurile dintre carduri sunt ancore în pagină, iar
+       nav-ul e `sticky` la 64px: fără marginea asta, cardul spre care sari
+       rămâne cu antetul ascuns sub el. Aceeași valoare ca la `#cum-incepi`. */
+    scroll-margin-top:88px;
   }
   .sl-card--wide{ grid-column:1 / -1; }
   .sl-cap{ display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:1.125rem; }
@@ -3010,9 +3014,20 @@
                '<span class="bs-text">' + continut + '</span>' +
              '</li>';
     }
+    // ⚠️ Spațiu neîntrerupt înaintea săgeții, nu unul obișnuit. Îndemnurile s-au
+    // lungit pe 21 august („Pornește tu un grup într-o zonă preferată și
+    // adaugă-i terenuri de acolo"), se rup pe două rânduri, iar cu spațiu
+    // normal săgeata rămânea singură pe rândul al doilea, subliniată, arătând
+    // ca o greșeală.
+    //
+    // ⚠️ Săgeata spune unde ajunge omul, ca peste tot în pagină: „↓" derulează
+    // aici, la un card de mai jos (aceeași convenție ca în cuprins), „→" îl
+    // scoate în altă pagină. Până pe 21 august toate rândurile ieșeau din
+    // pagină și săgeata era mereu „→".
     function link(href, text, dest){
+      var sageata = (String(href).charAt(0) === '#') ? '↓' : '→';
       return '<a class="bs-link-pas" href="' + href + '" data-dest="' + dest + '">' +
-               esc(text) + ' <span aria-hidden="true">→</span></a>';
+               esc(text) + '&nbsp;<span aria-hidden="true">' + sageata + '</span></a>';
     }
     function hint(text){ return '<span class="bs-hint">' + esc(text) + '</span>'; }
 
@@ -3040,10 +3055,166 @@
         link(URL_TERENURI, 'Adaugă primul teren la profil', 'terenuri') +
         hint('Cauți în zonele tale și salvezi ce îți place. Așa vezi cine mai e interesat de același teren.'));
     }
-    function pasGrup(){
-      return rand(
-        link(URL_GRUPURI, 'Intră într-un grup sau fă unul', 'grupuri') +
-        hint('Grupurile se formează pe zone. Ceri să intri într-unul sau pornești tu unul.'));
+    // ── PASUL CĂTRE GRUP, ALES DUPĂ CE E ÎN ZONELE LUI ──
+    // În ghidul „Cum funcționează" ăsta e scris ca trei pași, 3, 4 și 5, dar
+    // sunt trei VARIANTE ale aceluiași lucru, formulate acolo condiționat:
+    // „dacă sunt utilizatori interesați, faci un grup cu ei", „dacă există
+    // deja grupuri, alătură-te lor", „dacă deocamdată nu e nimeni, pornești
+    // tu grupul". Ghidul e citit de un străin și trebuie să le pună pe toate
+    // trei. Aici nu: `date.grupuriSugerate` și `date.utilizatori` sunt
+    // calculate oricum, pentru cardurile de mai jos, deci știm în care caz e
+    // omul și îi arătăm varianta lui. Celelalte două ar fi instrucțiuni
+    // pentru altcineva.
+    //
+    // ⚠️ Ordinea NU e cea din ghid. Acolo „fă un grup cu ei" e pasul 3 și
+    // „alătură-te" e 4, fiindcă ghidul se citește de sus în jos. Aici se
+    // întreabă întâi dacă există un grup: dacă în zona lui caută deja cineva,
+    // răspunsul e să intre acolo, nu să fondeze al doilea grup pe aceeași zonă.
+    //
+    // ⚠️ Cele patru câmpuri întoarse sunt TEXT SIMPLU, neescapat. Escaparea o
+    // fac `link` și `hint`, amândouă prin `esc`. Dacă vreunul ajunge să conțină
+    // HTML gata făcut, se dublează escaparea și omul citește `&amp;`.
+    //
+    //   titlu   ce scrie pe link
+    //   hint    fraza de sub link: de ce merge varianta asta
+    //   href    unde duce
+    //   dest    numele destinației în Plausible, sub același `CTA Click`
+    //
+    // „Alătură-te grupului Grup Bucureștii Noi" — numele de grupuri încep
+    // aproape toate cu „Grup", fiindcă așa le scriu oamenii la creare, iar
+    // fraza ar spune cuvântul de două ori. Se taie doar dacă rămâne ceva după:
+    // un grup numit chiar „Grup" își păstrează numele întreg.
+    function numeGrupInFraza(nume){
+      var scurt = String(nume || '').replace(/^grup(ul)?\s+/i, '').trim();
+      return scurt || nume;
+    }
+
+    function situatiaGrupului(date){
+      var g = date.grupuriSugerate || [];
+      var u = date.utilizatori || [];
+      var zone = date.zone || [];
+
+      // Varianta ghidului, pasul 4: există deja grupuri pe zonele lui.
+      if(g.length){
+        // ⚠️ Nicio variantă nu duce la `/grupuri.html`. Un grup potrivit → direct
+        // pagina lui; mai multe → cardul de mai jos, care le are pe toate cu
+        // zonele comune scrise pe ele. Lista generală l-ar pune să caute din nou
+        // ce i-am găsit deja, printre grupuri din alte orașe. Cardul e sigur în
+        // pagină: se randează pe `date.grupuriSugerate.length > 0`, adică exact
+        // condiția în care ajungem aici.
+        //
+        // ⚠️ De ce aici cardul, iar la utilizatori pagina: `/utilizatori.html`
+        // ȘTIE să se filtreze pe zonele mele (`?zone_comune=1`), `/grupuri.html`
+        // NU are niciun filtru de zonă. Cardul e singurul loc din platformă care
+        // arată grupurile alese pe zonele lui. Dacă pagina de grupuri primește
+        // vreodată filtrul, rândul ăsta poate trece pe el, ca celălalt.
+        var unul = (g.length === 1);
+        return {
+          titlu: unul ? ('Alătură-te grupului ' + numeGrupInFraza(g[0].nume))
+                      : 'Alătură-te unui grup din zonele tale',
+          hint:  (unul ? 'Caută în aceleași zone ca tine.'
+                       : g.length + ' grupuri caută în zonele tale.') +
+                 ' Vezi întâi profilurile membrilor, apoi ceri accesul, iar fondatorul aprobă cererea.',
+          href:  unul ? ('/grup-details.html?id=' + encodeURIComponent(g[0].id))
+                      : '#grupuri-in-zonele-tale',
+          dest:  unul ? 'grup-alaturare' : 'grupuri-in-zonele-tale'
+        };
+      }
+
+      // Varianta ghidului, pasul 3: nu s-a format încă niciun grup, dar sunt
+      // oameni care caută unde caută și el.
+      //
+      // ⚠️ NU se numără toată lista `date.utilizatori`. Ea intră și cu oameni
+      // care au ZERO zone comune, doar interese comune (vezi filtrul
+      // `nrZone > 0 || interese > 0` de unde se construiește). Cardul de mai jos
+      // are dreptul să-i arate, fiindcă scrie negru pe alb „ordonați după zonele
+      // comune, interesele sunt informative". Pasul de aici n-are: „caută unde
+      // cauți și tu" ar fi pur și simplu neadevărat despre cineva care caută în
+      // alt oraș, dar vrea și el curte.
+      var uZona = u.filter(function(x){ return x.nrZone > 0; });
+      if(uZona.length){
+        // ⚠️ Lista vine tăiată la `CATI_UTILIZATORI`. Sortarea pune întâi
+        // zonele comune, deci dacă există măcar unul cu zonă comună el e sigur
+        // în listă și întrebarea „există?" are răspuns corect. Dar NUMĂRUL nu:
+        // la 30 de potriviri am scrie 5. De aceea, când lista e plină, se scrie
+        // „mai mulți" în loc de o cifră care subestimează platforma.
+        var plina = (uZona.length >= CATI_UTILIZATORI);
+        var cati;
+        if(plina)                    cati = 'Mai mulți utilizatori caută';
+        else if(uZona.length === 1)  cati = 'Un utilizator caută';
+        else                         cati = uZona.length + ' utilizatori caută';
+
+        // ⚠️ `?zone_comune=1` NU e decorativ. Regula e scrisă în `js/utilizatori.js`,
+        // la comentariul de deasupra filtrelor: bifa se pune din link „fiindcă
+        // rândul de acolo promite un număr anume de oameni și numărul trebuie să
+        // se potrivească". Rândul ăsta promite exact așa ceva. Fără parametru,
+        // omul dă clic pe „4 utilizatori" și aterizează pe toată lista, unde nu
+        // mai regăsește nici numărul, nici oamenii. Fluxul de noutăți folosește
+        // deja același traseu, cu `&noi=1` în plus.
+        //
+        // ⚠️ NU duce la `/grupuri.html`. Pasul cerut aici e „vezi cine sunt", nu
+        // „fă grupul": grupul se face oricum din profilul unuia dintre ei, cu
+        // butonul „Creează un grup și invită".
+        //
+        // ⚠️ Fraza NU mai spune „le scrii, vă auziți", cum spune ghidul.
+        // Platforma n-are mesagerie: nu există tabelă de mesaje și niciun buton
+        // de scris către cineva. Singurul drum către un om e profilul lui și, de
+        // acolo, invitația. În ghid „le scrii" e corect, fiindcă ghidul descrie
+        // viața reală; aici, lângă un buton, ar fi o promisiune fără acoperire.
+        return {
+          titlu: 'Fă un grup cu cine mai caută în zonele tale',
+          hint:  cati + ' în aceleași zone ca tine, dar încă nu s-a format niciun grup acolo. ' +
+                 (uZona.length === 1 && !plina
+                    ? 'Din profilul lui poți crea grupul și să-l inviți.'
+                    : 'Din profilul oricăruia poți crea grupul și să-l inviți.'),
+          href:  URL_UTILIZATORI + '?zone_comune=1',
+          dest:  'utilizatori-zone-comune'
+        };
+      }
+
+      // Varianta ghidului, pasul 5: deocamdată nu e nimeni acolo.
+      //
+      // ⚠️ „Nu caută nimeni în zonele tale" se referă strict la ZONE, iar aici
+      // chiar așa e: `uZona` de mai sus e goală. Se poate totuși ca dedesubt să
+      // apară cardul „Utilizatori compatibili" cu câțiva oameni, potriviți doar
+      // pe interese. Nu e o contrazicere, cardul își scrie singur criteriul, dar
+      // e bine de știut înainte de a „repara" ce nu e stricat.
+      //
+      // ⚠️ Zona se numește doar dacă are UNA singură. Cu mai multe n-avem de
+      // unde alege, iar una scoasă la întâmplare din listă i-ar suna ca o
+      // recomandare pe care nu i-a făcut-o nimeni. În practică textul fără nume
+      // se vede mai des, fiindcă oamenii bifează de obicei mai multe zone.
+      //
+      // ⚠️ Îndemnul nu se oprește la „pornește un grup". Cuprinde și pasul
+      // următor, adăugarea terenurilor, fiindcă un grup gol nu atrage pe nimeni:
+      // ceilalți se uită la ce terenuri are înainte să ceară să intre. Formularea
+      // e a lui Lucian, 21 august.
+      if(zone.length){
+        return {
+          titlu: zone.length === 1
+                   ? ('Pornește tu un grup în ' + zone[0] + ' și adaugă-i terenurile care îți plac')
+                   : 'Pornește tu un grup într-o zonă preferată și adaugă-i terenuri de acolo',
+          hint:  'Deocamdată nu caută nimeni în zonele tale, și nu e un semn prost. Grupul apare la ' +
+                 'toți cei care au bifat zona, iar oamenii vin la el în loc să îi cauți tu.',
+          href:  URL_GRUPURI,
+          dest:  'grup-pornire'
+        };
+      }
+
+      // Fără nicio zonă bifată. Teoretic nu se ajunge aici: `profil_complet()`
+      // cere zone, iar `nav.js` nu lasă pe homepage un profil incomplet. E
+      // plasa de siguranță, cu textul dinainte de 21 august.
+      return {
+        titlu: 'Intră într-un grup sau fă unul',
+        hint:  'Grupurile se formează pe zone. Ceri să intri într-unul sau pornești tu unul.',
+        href:  URL_GRUPURI,
+        dest:  'grupuri'
+      };
+    }
+
+    function pasGrup(date){
+      var s = situatiaGrupului(date);
+      return rand(link(s.href, s.titlu, s.dest) + hint(s.hint));
     }
 
     // Subsolul e pentru cine n-a intrat încă într-un grup, și duce ÎN pagină.
@@ -3097,13 +3268,13 @@
       // zonele lui, pașii până la recepție). Fără cuprins, cardurile ar sta
       // sub bara de apartamente fără nimic care să spună că sunt acolo.
       if(!st.teren && !st.grup){
-        afiseaza('<ul class="bs-list">' + pasTeren() + pasGrup() + '</ul>' +
+        afiseaza('<ul class="bs-list">' + pasTeren() + pasGrup(date) + '</ul>' +
                  cuprins(categorii) + subsol(st));
         return;
       }
       var lipsa = '';
       if(!st.teren) lipsa = pasTeren();
-      else if(!st.grup) lipsa = pasGrup();
+      else if(!st.grup) lipsa = pasGrup(date);
 
       afiseaza(
         rezumat(date) +
@@ -4234,6 +4405,11 @@
 
         var date = {
           userId: user.id,
+          // Numele zonelor bifate în profil. Se folosesc într-un singur loc,
+          // `situatiaGrupului`, ca să-i putem scrie „Pornește tu un grup în
+          // Bucureștii Noi" în loc de „într-una din zonele tale". Vin din
+          // aceeași interogare ca `myZoneIds`, deci nu costă nimic în plus.
+          zone: zoneRows.map(function(z){ return z.name; }).filter(Boolean),
           terenuri: [],
           grupuri: [],
           noutati: [],
