@@ -25,3 +25,10 @@ scripts/*/local/
 # CSV-ul e doar rezultatul de moment.
 # Dacă vreodată chiar trebuie comis un CSV fără date personale: git add -f <fișier>
 *.csv
+
+# Fișierele temporare pe care le face Word cât ține un document deschis.
+# `~$…docx` e fișierul de blocare (are 162 de octeți și numele proprietarului
+# în el), `~WRL….tmp` e o copie de recuperare. Amândouă au ajuns o dată în
+# `git add` pe folderul serialului, pe 22 august, și n-au ce căuta în repo.
+~$*
+~WRL*.tmp
