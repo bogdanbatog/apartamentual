@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cum Funcționează - Ghid pentru Grupuri de Construcție</title>
+    <title>Cum funcționează, ghidul complet | ApartamenTUal</title>
 <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
 <script>
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
-    <meta name="description" content="Ghid pas cu pas pentru organizarea unui grup de construcție Baugruppen în România.">
+    <meta name="description" content="Ghidul complet al unui proiect de construcție colaborativă în România: cum îi găsești pe ceilalți, cum verifici un teren, contractul de asociere, proiectarea, șantierul și apartamentarea.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="../styles.css">
@@ -138,6 +138,147 @@
             .arrow-down-row { display: none; }
             .diagram-arrow-h1, .diagram-arrow-h2 { display: flex; justify-content: center; }
         }
+        /* ── BULINE ÎN LISTE ──
+           `.ce-section ul` din ce-este.css e fără marcaj, iar versiunea veche
+           a paginii punea „•" de mână în textul fiecărui rând. Aici bulina vine
+           din CSS, ca să nu ajungă în textul copiat de cineva din pagină. */
+        .ce-content .ce-section ul > li {
+            position: relative;
+            padding-left: 1.05rem;
+        }
+        .ce-content .ce-section ul > li::before {
+            content: "";
+            position: absolute;
+            left: 0.15rem;
+            top: 0.72em;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #b9b0a0;
+        }
+        .ce-content .ce-section h4 + ul { margin-top: 0.25rem; }
+        .ce-content .ce-section ul + h4 { margin-top: 1.4rem; }
+
+        /* ── CUPRINS ── */
+        .ghid-cuprins {
+            background: #f3f0e7;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .ghid-cuprins h2 {
+            font-size: 0.78rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #555555;
+            margin-bottom: 0.85rem !important;
+            font-weight: 700;
+        }
+        .ghid-cuprins ol {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            columns: 2;
+            column-gap: 2rem;
+        }
+        .ghid-cuprins li {
+            break-inside: avoid;
+            padding: 0.18rem 0;
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+        .ghid-cuprins li::before { content: none; }
+        .ghid-cuprins a { text-decoration: none; color: #333333; }
+        .ghid-cuprins a:hover { color: #1a1a1a; text-decoration: underline; }
+        .ghid-cuprins .cuprins-parte {
+            font-weight: 700;
+            color: #1a1a1a;
+            padding-top: 0.7rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .ghid-cuprins .cuprins-parte:first-child { padding-top: 0; }
+        @media (max-width: 700px) {
+            .ghid-cuprins ol { columns: 1; }
+        }
+
+        /* ── BLOC DE PAS ── */
+        .pas-bloc { margin-bottom: 2.5rem; }
+        .pas-cap {
+            display: flex;
+            align-items: baseline;
+            gap: 0.7rem;
+            margin-bottom: 0.9rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 2px solid #1a1a1a;
+        }
+        .pas-num {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #c9c2b0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .pas-cap h2,
+        .pas-cap h3 {
+            margin: 0 !important;
+            font-size: 1.15rem !important;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+        .pas-bloc h4 {
+            margin-top: 1.3rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.97rem;
+        }
+        .pas-bloc > p:first-of-type { margin-top: 0; }
+
+        /* ── ETICHETA „ÎN CURÂND" ── */
+        .eticheta-curand {
+            display: inline-block;
+            font-size: 0.66rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: #f5efe1;
+            border: 1px solid rgba(0,0,0,0.12);
+            color: #6b5b3a;
+            border-radius: 999px;
+            padding: 0.1rem 0.5rem;
+            vertical-align: middle;
+            margin-left: 0.35rem;
+        }
+
+        /* ── TITLU DE PARTE ── */
+        .parte-titlu {
+            margin: 3rem 0 1.5rem;
+            padding: 1.1rem 1.4rem;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-radius: 0.75rem;
+        }
+        .parte-titlu .parte-eyebrow {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.7;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .parte-titlu h2 {
+            margin: 0 !important;
+            color: #ffffff !important;
+            font-size: 1.35rem !important;
+            line-height: 1.25;
+        }
+        .parte-titlu p {
+            margin: 0.5rem 0 0 !important;
+            font-size: 0.88rem;
+            opacity: 0.85;
+            color: #ffffff !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -150,491 +291,847 @@
             <a href="index.html">Ce este</a><span class="sep">›</span>
             Cum funcționează
         </nav>
-        <h1>Cum Funcționează — Ghid Complet</h1>
-        <p>Pașii concreti pentru organizarea unui grup de construcție de succes</p>
+        <h1>Cum funcționează, ghidul complet</h1>
+        <p>De la primul teren salvat pe profil până la ziua în care te muți. Tot drumul, scris pas cu pas.</p>
     </div>
 
     <div class="ce-content">
         <div class="ce-content-inner">
 
-                    <!-- Interactive Process Diagram -->
-                    <section class="ce-section" style="overflow-x: auto;">
-                        <h2 class="text-2xl mb-6">Cronologia unui Proiect</h2>
-                        <p class="text-sm text-gray-500 mb-6">Click pe orice etapă pentru a naviga direct la secțiunea relevantă</p>
-                        
-                        <div class="process-diagram">
-                            <!-- Row 1: Phase 1 → Phase 2 -->
-                            <div class="diagram-cell-1 phase-block">
-                                <div class="phase-header" style="background: #e9eef3;">
-                                    <span class="phase-number">1</span>
-                                    <div>
-                                        <h3>Formarea Grupului</h3>
-                                        <span class="phase-duration">2–6 luni</span>
-                                    </div>
-                                </div>
-                                <div class="phase-steps">
-                                    <a href="/grupuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #5a7196;"></span>
-                                        <span>Găsirea membrilor → <b style="color:#1a1a1a;">Grupuri</b></span>
-                                    </a>
-                                    <a href="/grupuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #5a7196;"></span>
-                                        <span>Stabilirea compatibilității — matching platformă</span>
-                                    </a>
-                                    <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #5a7196;"></span>
-                                        <span>Acțiune în paralel cu căutarea terenurilor ↓</span>
-                                    </a>
-                                </div>
-                            </div>
+            <!-- ══════════════ CUPRINS ══════════════ -->
+            <nav class="ghid-cuprins" aria-label="Cuprinsul ghidului">
+                <h2>Ce găsești în pagina asta</h2>
+                <ol>
+                    <li class="cuprins-parte"><a href="#cronologie">Cronologia unui proiect</a></li>
+                    <li class="cuprins-parte"><a href="#cum-incepi">Partea întâi: cum începi</a></li>
+                    <li><a href="#cum-incepi-pasi">Cei cinci pași până la un grup</a></li>
+                    <li><a href="#cat-de-mare">Cât de mare să fie grupul</a></li>
+                    <li><a href="#de-acord">Ce vă puneți de acord de la început</a></li>
+                    <li class="cuprins-parte"><a href="#pasii-in-grup">Partea a doua: pașii într-un grup</a></li>
+                    <li><a href="#comunicarea">1. Comunicarea cu cei din grup</a></li>
+                    <li><a href="#organizarea">2. Organizarea pe terenuri și apartamente</a></li>
+                    <li><a href="#verificarea-terenului">3. Verificarea terenului</a></li>
+                    <li><a href="#analiza-detaliata">4. Analiza detaliată</a></li>
+                    <li><a href="#contract-asociere">5. Contractul de asociere</a></li>
+                    <li><a href="#cumpararea-terenului">6. Cumpărarea terenului</a></li>
+                    <li><a href="#proiectarea">7. Proiectarea</a></li>
+                    <li><a href="#santierul">8. Șantierul</a></li>
+                    <li><a href="#iesirea">9. Dacă cineva vrea să iasă din asociere</a></li>
+                    <li><a href="#receptia">10. Recepția și apartamentarea</a></li>
+                    <li><a href="#mutarea">11. Mutarea</a></li>
+                </ol>
+            </nav>
 
-                            <div class="diagram-cell-2 phase-block">
-                                <div class="phase-header" style="background: #e7f0e8;">
-                                    <span class="phase-number">2</span>
-                                    <div>
-                                        <h3>Căutarea și Achiziția Terenului</h3>
-                                        <span class="phase-duration">3–12 luni</span>
-                                    </div>
-                                </div>
-                                <div class="phase-steps">
-                                    <a href="/terenuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Căutare terenuri – filtrare pe → <b style="color:#1a1a1a;">Terenuri</b></span>
-                                    </a>
-                                    <a href="/terenuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Cere analiză teren pe platformă (nr. apartamente estimat)</span>
-                                    </a>
-                                    <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Verifică situație juridică – extras carte funciară online</span>
-                                    </a>
-                                    <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Vizitare teren + verificare vecini (posibil acord vecini)</span>
-                                    </a>
-                                    <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Verifică acte teren — notar</span>
-                                    </a>
-                                    <a href="#faza2" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Studiu geotehnic preliminar</span>
-                                    </a>
-                                    <a href="/terenuri.html" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Cere analiză detaliată pe platformă (1-2 terenuri finale)</span>
-                                    </a>
-                                    <a href="#faza2-complex" class="step-item">
-                                        <span class="step-dot" style="background: #5f8266;"></span>
-                                        <span>Achiziția terenului (asociere sau SRL)</span>
-                                    </a>
-                                </div>
-                            </div>
+            <!-- ══════════════ CRONOLOGIA ══════════════
+                 ⚠️ Pașii din diagramă trebuie să rămână aceiași cu titlurile
+                 secțiunilor de mai jos. Până în august 2026 diagrama și textul
+                 de pe pagina asta spuneau lucruri diferite; de aceea fiecare
+                 rând de aici trimite acum la ancora secțiunii lui.
+            -->
+            <section class="ce-section" id="cronologie" style="overflow-x: auto;">
+                <h2 class="text-2xl mb-6">Cronologia unui proiect</h2>
+                <p class="text-sm text-gray-500 mb-6">Click pe orice rând ca să sari la secțiunea care îl explică.</p>
 
-                            <!-- Row 2: Phase 3 → Phase 4 -->
-                            <div class="diagram-cell-3 phase-block">
-                                <div class="phase-header" style="background: #f5efda;">
-                                    <span class="phase-number">3</span>
-                                    <div>
-                                        <h3>Proiectarea</h3>
-                                        <span class="phase-duration">6–12 luni</span>
-                                    </div>
-                                </div>
-                                <div class="phase-steps">
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>Selectare echipă proiectanți (arhitectură-structură-instalații)</span>
-                                    </a>
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>Concept (planuri, suprafețe, randări)</span>
-                                    </a>
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>Certificat de urbanism pt construire</span>
-                                    </a>
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>Avize</span>
-                                    </a>
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>Proiect tehnic + oferte constructori</span>
-                                    </a>
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>DTAC (autorizația de construire)</span>
-                                    </a>
-                                    <a href="#faza3" class="step-item">
-                                        <span class="step-dot" style="background: #b8965c;"></span>
-                                        <span>Detalii de execuție</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="diagram-cell-4 phase-block">
-                                <div class="phase-header" style="background: #f3e3dc;">
-                                    <span class="phase-number">4</span>
-                                    <div>
-                                        <h3>Construcția</h3>
-                                        <span class="phase-duration">12–24 luni</span>
-                                    </div>
-                                </div>
-                                <div class="phase-steps">
-                                    <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #c2604a;"></span>
-                                        <span>Compară oferte constructori (cere consultanță)</span>
-                                    </a>
-                                    <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #c2604a;"></span>
-                                        <span>Selectează constructor – structură, instalații, arhitectură</span>
-                                    </a>
-                                    <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #c2604a;"></span>
-                                        <span>Centralizați-vă structurat cheltuielile</span>
-                                    </a>
-                                    <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #c2604a;"></span>
-                                        <span>Regulament comunicare grup / decizii</span>
-                                    </a>
-                                    <a href="#faza4" class="step-item">
-                                        <span class="step-dot" style="background: #c2604a;"></span>
-                                        <span>Monitorizează îndeaproape execuția / eventual project manager</span>
-                                    </a>
-                                </div>
-                                <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #f3e3dc; border: 1px solid rgba(0,0,0,0.10); border-radius: 0.5rem; text-align: center;">
-                                    <span style="color: #1a1a1a; font-weight: 700; font-size: 0.85rem;">🏠 Te muți în casa ta!</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Total timeline bar -->
-                        <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                <span style="font-weight: 600; font-size: 0.85rem; color: #1a1a1a;">Durată totală estimată:</span>
-                                <span style="font-weight: 700; font-size: 0.85rem; color: #555555;">23–54 luni (2–4.5 ani)</span>
-                            </div>
-                            <div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #e2e8f0;">
-                                <div style="width: 15%; background: #5a7196;" title="Formarea Grupului"></div>
-                                <div style="width: 25%; background: #5f8266;" title="Căutarea Terenului"></div>
-                                <div style="width: 28%; background: #b8965c;" title="Proiectarea"></div>
-                                <div style="width: 32%; background: #c2604a;" title="Construcția"></div>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-top: 0.35rem; font-size: 0.7rem; color: #64748b;">
-                                <span>2–6 luni</span>
-                                <span>3–12 luni</span>
-                                <span>6–12 luni</span>
-                                <span>12–24 luni</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Phase 1: Group Formation -->
-                    <section class="ce-section" id="faza1">
-                        <h2 class="text-2xl mb-4">FAZA 1. FORMAREA GRUPULUI</h2>
-                        
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">Găsirea membrilor</h3>
-                            
-                            <div class="bg-blue-50 p-4 rounded-lg mb-4">
-                                <h4 class="font-semibold mb-2">Platforma ApartamenTUal</h4>
-                                <ul class="space-y-1 text-sm">
-                                    <li>• Ai deja un grup de prieteni/colegi și vrei să construiești împreună un imobil – <a class="text-blue-600" href="/grupuri.html">înscrie grupul tău aici</a> și caută alți parteneri dacă mai ai nevoie</li>
-                                    <li>• Nu ai niciun grup dar ești interesat de acest proces de construire – <a class="text-blue-600" href="/grupuri.html">înscrie un grup aici</a> (chiar dacă ești doar tu momentan), descrie ce îți dorești și caută alți parteneri</li>
-                                </ul>
-                            </div>
-
-                            <div class="bg-green-50 p-4 rounded-lg mb-4">
-                                <h4 class="font-semibold mb-2">Alte modalități:</h4>
-                                <ul class="space-y-1 text-sm">
-                                    <li>• Rețele sociale și grupuri locale de interes</li>
-                                    <li>• Recomandări din cercul de prieteni și familie</li>
-                                    <li>• Evenimente și workshopuri despre locuire alternativă</li>
-                                </ul>
-                            </div>
-
-                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                                <h4 class="font-semibold mb-2">💡 Recomandare:</h4>
-                                <p class="text-sm">Un grup de construcție eficient este de cca 4-8 familii, în funcție de gabaritul proiectului. Într-adevăr, cu cât grupul este mai mare, costul general (teren+construcție) al fiecărui apartament este mai mic deoarece scade ponderea terenului în cadrul costului final, însă este necesară o coordonare și un control foarte bun al grupului pe tot parcursul procesului.</p>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">Stabilirea compatibilității</h3>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div class="border border-gray-200 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">Regulament de funcționare</h4>
-                                    <ul class="text-sm space-y-1">
-                                        <li>• Reguli de comunicare online</li>
-                                        <li>• Reguli de luare a deciziilor</li>
-                                        <li>• Responsabilități și disponibilitate</li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="border border-gray-200 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">Principii și scopuri comune</h4>
-                                    <ul class="text-sm space-y-1">
-                                        <li>• Calitatea construcției</li>
-                                        <li>• Eficiența termică și fonică</li>
-                                        <li>• Instalații de calitate superioară</li>
-                                        <li>• Arhitectură contemporană</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Phase 2: Land Acquisition -->
-                    <section class="ce-section" id="faza2">
-                        <h2 class="text-2xl mb-4">CǍUTAREA SI ACHIZIȚIA TERENULUI</h2>
-                        
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">Pașii principali:</h3>
-                            
-                            <div class="space-y-4">
-                                <div class="border-l-4 border-blue-500 pl-4">
-                                    <h4 class="font-semibold mb-1">1. Caută terenuri disponibile în zona dorită</h4>
-                                    <p class="text-sm">Filtrează terenurile în funcție de suprafață – este un criteriu important pentru că prețul terenului afectează bugetul destul de mult. Suprafața terenului este legată de numărul de apartamente dorit de grup. De exemplu, proiectul Judetului are 5 apartamente de cca 90mp iar terenul are 460mp. Deschiderea la stradă a terenului ar trebui să fie minim 12m.</p>
-                                </div>
-
-                                <div class="border-l-4 border-green-500 pl-4">
-                                    <h4 class="font-semibold mb-1">2. Certificat de urbanism de informare</h4>
-                                    <p class="text-sm">Cere proprietarului un certificat de urbanism de informare valabil. Dacă nu are, îl poți cere de la primărie (durează maxim 30 zile) pentru a vedea situația terenului din punct de vedere urbanistic și juridic.</p>
-                                </div>
-
-                                <div class="border-l-4 border-orange-500 pl-4">
-                                    <h4 class="font-semibold mb-1">3. Verificări juridice</h4>
-                                    <p class="text-sm">Dacă știi numărul cadastral poți descărca de pe <a class="text-blue-600" href="https://epay.ancpi.ro/epay/SelectProd.action?prodId=1420">site-ul ANCPI</a> extrasul de carte funciară al terenului pentru a vedea situația juridică actuală.</p>
-                                </div>
-
-                                <div class="border-l-4 border-purple-500 pl-4">
-                                    <h4 class="font-semibold mb-1">4. Vizitează terenul</h4>
-                                    <p class="text-sm">Vezi care sunt vecinii. Sunt multe situații, mai ales dacă există un calcan pe terenul vecin, în care primăria să ceară acordul vecinilor pentru autorizația de construire.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">5. Analiza preliminară a terenului în vederea potențialului construibil</h3>
-                            
-                            <div class="bg-blue-50 p-4 rounded-lg mb-4">
-                                <h4 class="font-semibold mb-2">Analiza preliminară de la arhitect/urbanist</h4>
-                                <p class="text-sm mb-2">O abordare profesionistă pentru a analiza rapid un teren și a căuta un grup cu care să construiești pe el. Primești un plan de situație cu terenul, amprenta posibilă a construcției, și informațiile esențiale despre ce se poate ridica acolo:</p>
-                                <ul class="text-sm space-y-1">
-                                    <li>• Câte apartamente se pot construi (mai multe variante) și intervalul de suprafață pentru fiecare tip, conform legii</li>
-                                    <li>• Un preț estimat pe metru pătrat construit și util, calibrat realist din experiența prototipului „Județului"</li>
-                                    <li>• Numărul de parcări necesare (în funcție de numărul și suprafețele apartamentelor) și suprafața de carosabil necesară</li>
-                                    <li>• Retragerile minime obligatorii față de limitele de proprietate și eventualele alipiri la calcanele vecinilor</li>
-                                    <li>• Regimul de înălțime permis — număr de niveluri, înălțime maximă</li>
-                                    <li>• Suprafața minimă de spațiu verde acceptată</li>
-                                    <li>• Suprafețe maxime construite și utile, pe nivel și totale</li>
-                                </ul>
-                                <p class="text-sm mt-2">
-                                    Vezi <a class="text-blue-600" href="/terenuri.html">terenuri</a> sau <a class="text-blue-600" href="/terenuri-propune.html">propune un teren</a>, apoi cere o <a class="text-blue-600" href="/analize.html">analiză preliminară</a>.
-                                </p>
-                                <p class="text-sm mt-2">Este recomandată o discuție (recomandat împreună cu un arhitect) la departamentul de urbanism din primărie pentru clarificări asupra configurației propuse în analiză.</p>
-                            </div>
-
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div class="bg-green-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">6. Istoricul terenului</h4>
-                                    <p class="text-sm">Dacă în urma analizei preliminare ai restrâns selecția și urmărești îndeaproape 1-2 terenuri, cere proprietarului și un istoric al terenului și consultă apoi un notar.</p>
-                                </div>
-
-                                <div class="bg-yellow-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">7. Studiu geotehnic preliminar</h4>
-                                    <p class="text-sm">Este recomandat să ceri un studiu geotehnic preliminar – 1-2 foraje (cost minimal) pentru a elimina riscul unui teren slab de fundare.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3" id="faza2-complex">Analiza detaliată și achiziția</h3>
-                            
-                            <div class="bg-purple-50 p-4 rounded-lg mb-4">
-                                <h4 class="font-semibold mb-2">8. Analiza detaliată de la arhitect</h4>
-                                <p class="text-sm">Dacă te-ai hotărât la 1-2 terenuri și ai deja un nucleu de grup format poți rezerva terenul pentru o perioadă și cere o analiză detaliată de la un arhitect. Veți discuta ceea ce doriți să construiți și vei primi 1-2 propuneri de concept cu planuri, suprafețe, randări 3D.</p>
-                            </div>
-
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-semibold mb-2">9. Cumpărarea terenului</h4>
-                                <p class="text-sm mb-3">Prețul terenului va fi împărțit între membri proporțional cu suprafețele utile ale apartamentelor fiecăruia.</p>
-                                <p class="text-sm mb-3">Grupul poate achiziționa terenul prin diferite forme de asociere, descrise pe larg în capitolul <a class="text-blue-600" href="/ce-este/legislatia-romania.html">Legislația română în vigoare</a>:</p>
-                                <ol class="text-sm space-y-2 ml-4 mb-3" style="list-style-type: decimal;">
-                                    <li><strong>Contract de asociere între membri</strong> — terenul este achiziționat direct de către membrii asocierii, în cote indivize, urmând ca după finalizarea construcției să se realizeze apartamentarea și fiecare membru să devină proprietar exclusiv pe apartamentul său.</li>
-                                    <li><strong>SRL</strong> — membrii se asociază într-un SRL înființat în acest scop. Toate costurile (teren, construcție) trec prin societate, iar la finalizarea proiectului societatea se dizolvă, apartamentele revenind asociaților conform actului constitutiv.</li>
-                                    <li><strong>Cooperativă de locuințe</strong> — există legislație în vigoare care reglementează această formă de asociere, însă în practică nu există încă o metodologie clară de lucru aplicată cu regularitate de notari și instituții, motiv pentru care această variantă este mai puțin utilizată momentan.</li>
-                                </ol>
-                                <p class="text-sm">Vezi <a class="text-blue-600" href="/ce-este/legislatia-romania.html">legislația română relevantă</a> pentru detalii despre fiecare formă de asociere.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Phase 3: Design -->
-                    <section class="ce-section" id="faza3">
-                        <h2 class="text-2xl mb-4">3. PROIECTAREA</h2>
-                        
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">3.1. Echipa de proiectare</h3>
-                            <p class="mb-4">Selectarea unei echipe de arhitecți și ingineri cu experiență în proiecte collaborative – vezi link aici lista birouri de arhitectură partenere</p>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">3.2. Etapele proiectării</h3>
-                            
-                            <div class="space-y-4">
-                                <div class="bg-blue-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">3.2.1. Concept</h4>
-                                    <p class="text-sm">Detalierea planurilor, stabilirea exactă a suprafețelor fiecărui apartament și a spațiilor comune, detalierea volumetriei, randări, stabilirea de principiu a tipurilor de instalații și echipamente, stabilirea de principiu a finisajelor.</p>
-                                </div>
-
-                                <div class="bg-green-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">3.2.2. Certificat de urbanism pentru construire</h4>
-                                    <p class="text-sm mb-2">Cere de la primărie un certificat de urbanism pentru construire (nu doar informativ). Arhitectul va anexa și un plan de situație cu amplasamentul propus în urma discuțiilor din faza de concept.</p>
-                                    <p class="text-sm">- în paralel poți demara studiile topometrice și geotehnice legate de teren</p>
-                                </div>
-
-                                <div class="bg-yellow-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">3.2.3. AVIZE</h4>
-                                    <p class="text-sm">După eliberarea certificatului de urbanism (maxim 30 zile) arhitectul va elabora documentațiile pentru avize.</p>
-                                </div>
-
-                                <div class="bg-purple-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">3.2.4. PROIECT TEHNIC</h4>
-                                    <p class="text-sm mb-2">Deși în practica uzuală următoarea fază de proiectare după avize este DTAC (documentație tehnică pentru autorizație), este recomandat să demarezi un proiect tehnic astfel încât proiectanții tuturor specialităților (rezistență, instalații, arhitectură) să poată elabora liste de cantități estimative iar tu să poți cere oferte estimative de preț către constructori, distribuitori de echipamente de instalații, executanți de instalații.</p>
-                                    <p class="text-sm">Este de preferat să aveți oferte mai detaliate de preț pentru ceea ce vă doriți și să aveți posibilitatea de a ajusta proiectul în funcție de bugetul vostru înainte de a obține autorizația de construire. După eliberarea autorizației de construire, orice modificare (mai ales de fațadă, volumetrie) presupune o modificare de temă (reautorizare) și un timp/cost pierdut.</p>
-                                </div>
-
-                                <div class="bg-orange-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">3.2.5. DTAC – documentația pentru autorizația de construire</h4>
-                                    <p class="text-sm">După ce ați ajuns la o concluzie mai detaliată asupra proiectului și costurilor, este momentul să depuneți la primărie documentația pentru autorizația de construire (maxim 30 zile).</p>
-                                </div>
-
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold mb-2">3.2.6. DETALII DE EXECUȚIE</h4>
-                                    <p class="text-sm">Este faza de proiectare în care proiectanții elaborează detaliile de execuție ale construcției. Este posibil ca aceste detalii (mai ales pe specialitatea de arhitectură) să mai fie ajustate în funcție de discuțiile cu executanții.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Phase 4: Construction -->
-                    <section class="ce-section" id="faza4">
-                        <h2 class="text-2xl mb-4">4. CONSTRUCTIA</h2>
-                        
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">4.1. Selectia constructorului</h3>
-                            
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                                    <h4 class="font-semibold mb-2 text-green-700">Varianta 1 (ideala): Project manager/constructor</h4>
-                                    <p class="text-sm mb-2">Care va superviza construcția până la final și va contracta echipe specializate pentru toate tipurile de lucrări (structură rezistentă, zidării, instalații, finisaje). Lucrările se pot contracta pe parcursul execuției.</p>
-                                    
-                                    <div class="mt-3">
-                                        <h5 class="font-semibold text-sm mb-1">Avantaje:</h5>
-                                        <ul class="text-xs space-y-1">
-                                            <li>• Lucrările se pot contracta pe parcursul execuției</li>
-                                            <li>• Timp personal câștigat, nu trebuie să te duci zilnic pe șantier</li>
-                                            <li>• Control bun asupra evoluției lucrărilor pe etape și a costurilor</li>
-                                            <li>• Comunicare eficientă cu șantierul (se discută centralizat cu project managerul)</li>
-                                            <li>• Project managerul cunoaște proiectul în integralitate și gestionează eficient posibilele erori de execuție/proiectare</li>
-                                            <li>• Implicare ridicată din partea project managerului datorită gestionării întregii lucrări până la finalizare</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="mt-3">
-                                        <h5 class="font-semibold text-sm mb-1">Dezavantaje:</h5>
-                                        <ul class="text-xs space-y-1">
-                                            <li>• Costuri mai mari legate de project management însă eficiența pe care o aduce în șantier este posibil să vină cu reduceri de costuri</li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                                    <h4 class="font-semibold mb-2 text-yellow-700">Varianta 2: Contractare separată</h4>
-                                    <p class="text-sm mb-2">Se contractează executanți diferiți pe fiecare tip de lucrare.</p>
-                                    
-                                    <div class="mt-3">
-                                        <h5 class="font-semibold text-sm mb-1">Avantaje:</h5>
-                                        <ul class="text-xs space-y-1">
-                                            <li>• Costuri ceva mai reduse fără project manager</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="mt-3">
-                                        <h5 class="font-semibold text-sm mb-1">Dezavantaje:</h5>
-                                        <ul class="text-xs space-y-1">
-                                            <li>• Implicare ridicată a grupului în gestionarea etapelor de execuție</li>
-                                            <li>• Consum de timp personal ridicat – va trebui ca grupul să verifice constant șantierul, ce echipe lucrează, cum lucrează</li>
-                                            <li>• Posibile conflicte între echipele de execuție care trebuie gestionate de grup (care ar trebui să aibă cunoștințe tehnice pentru a gestiona situațiile)</li>
-                                            <li>• Probabilitate mare de pierdere a controlului costurilor (aparent mai scăzute fără project manager) și calității execuției</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold mb-3">Note importante</h3>
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <ul class="space-y-2 text-sm">
-                                    <li>• Alege un constructor/project manager cu experiență în construcții de grup</li>
-                                    <li>• Desemnează un reprezentant al grupului pentru comunicarea cu constructorul/project manager</li>
-                                    <li>• Împărțiți-vă responsabilitățile pentru task-urile care țin de beneficiar de-a lungul întregului proces, este un timp pe care va trebui să îl alocați dar va merita într-un final</li>
-                                    <li>• Va trebui să existe o comunicare constantă între membrii grupului despre progresul întregului proces</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Success Factors -->
-                    <section class="ce-section">
-                        <h2 class="text-2xl mb-4">Factori Critici de Succes</h2>
-                        <div class="grid md:grid-cols-2 gap-6">
+                <div class="process-diagram">
+                    <div class="diagram-cell-1 phase-block">
+                        <div class="phase-header" style="background: #e9eef3;">
+                            <span class="phase-number">1</span>
                             <div>
-                                <h3 class="text-lg font-semibold mb-3 text-green-600">✅ Ce să faci:</h3>
-                                <ul class="space-y-2 text-sm">
-                                    <li>• Stabilește obiective clare și realiste de la început</li>
-                                    <li>• Investește în comunicare și procese transparente</li>
-                                    <li>• Lucrează cu profesioniști cu experiență relevanți</li>
-                                    <li>• Creează rezerve financiare pentru neprevăzut (10-15%)</li>
-                                    <li>• Documentează toate deciziile și acordurile</li>
-                                    <li>• Planifică pentru scenarii de ieșire din grup</li>
-                                </ul>
-                            </div>
-
-                            <div>
-                                <h3 class="text-lg font-semibold mb-3 text-red-600">❌ Ce să eviți:</h3>
-                                <ul class="space-y-2 text-sm">
-                                    <li>• Să fii prea optimist cu bugetele și termenele</li>
-                                    <li>• Să ignori diferențele de opinie între membri</li>
-                                    <li>• Să economisești la consultanță juridică și tehnică</li>
-                                    <li>• Să iei decizii importante fără consultarea grupului</li>
-                                    <li>• Să amâni rezolvarea conflictelor</li>
-                                    <li>• Să nu ai planuri de backup pentru problemele majore</li>
-                                </ul>
+                                <h3>Grupul se formează</h3>
+                                <span class="phase-duration">2 până la 6 luni</span>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- Next Steps -->
-                    <div class="mt-8 p-6 bg-gray-50 rounded-lg">
-                        <h3 class="text-lg font-semibold mb-4">Următorii pași:</h3>
-                        <div class="grid-2">
-                            <a href="exemple-europa.html" class="card hover:shadow-soft transition">
-                                <h4 class="font-semibold mb-2">Exemple din Europa →</h4>
-                                <p class="text-sm subtitle">Vezi cum funcționează în practică proiectele de succes</p>
+                        <div class="phase-steps">
+                            <a href="#cum-incepi-pasi" class="step-item">
+                                <span class="step-dot" style="background: #5a7196;"></span>
+                                <span>Cauți terenuri în zonele tale și le salvezi pe profil</span>
                             </a>
-                            <a href="legislatia-romania.html" class="card hover:shadow-soft transition">
-                                <h4 class="font-semibold mb-2">Legislația din România →</h4>
-                                <p class="text-sm subtitle">Înțelege cadrul legal pentru grupurile de construcție</p>
+                            <a href="#cum-incepi-pasi" class="step-item">
+                                <span class="step-dot" style="background: #5a7196;"></span>
+                                <span>Vezi cine mai e interesat, oameni sau grupuri</span>
+                            </a>
+                            <a href="#cum-incepi-pasi" class="step-item">
+                                <span class="step-dot" style="background: #5a7196;"></span>
+                                <span>Te alături unui grup sau pornești tu unul</span>
+                            </a>
+                            <a href="#comunicarea" class="step-item">
+                                <span class="step-dot" style="background: #5a7196;"></span>
+                                <span>Vă cunoașteți și stabiliți cum comunicați</span>
+                            </a>
+                            <a href="#de-acord" class="step-item">
+                                <span class="step-dot" style="background: #5a7196;"></span>
+                                <span>Principii comune și bugetul fiecăruia, discutate</span>
                             </a>
                         </div>
                     </div>
+
+                    <div class="diagram-cell-2 phase-block">
+                        <div class="phase-header" style="background: #e7f0e8;">
+                            <span class="phase-number">2</span>
+                            <div>
+                                <h3>Terenul</h3>
+                                <span class="phase-duration">3 până la 12 luni</span>
+                            </div>
+                        </div>
+                        <div class="phase-steps">
+                            <a href="#organizarea" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Analiză preliminară pe fiecare teren candidat</span>
+                            </a>
+                            <a href="#organizarea" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Vă organizați pe apartamente, pe variantele din analiză</span>
+                            </a>
+                            <a href="#verificarea-terenului" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Vizită, extras de carte funciară, verificare la notar</span>
+                            </a>
+                            <a href="#verificarea-terenului" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Certificat de urbanism pentru construire, cerut de proprietar</span>
+                            </a>
+                            <a href="#verificarea-terenului" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Studiu geotehnic sumar și acordul vecinilor de la calcan</span>
+                            </a>
+                            <a href="#analiza-detaliata" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Analiză detaliată, suprafețe exacte și cote</span>
+                            </a>
+                            <a href="#contract-asociere" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Contract de asociere, legalizat la notar</span>
+                            </a>
+                            <a href="#cumpararea-terenului" class="step-item">
+                                <span class="step-dot" style="background: #5f8266;"></span>
+                                <span>Cumpărarea terenului</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="diagram-cell-3 phase-block">
+                        <div class="phase-header" style="background: #f5efda;">
+                            <span class="phase-number">3</span>
+                            <div>
+                                <h3>Proiectarea</h3>
+                                <span class="phase-duration">6 până la 12 luni</span>
+                            </div>
+                        </div>
+                        <div class="phase-steps">
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Echipa de proiectare, arhitectură, structură, instalații</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Concept: planuri, suprafețe finale, randări</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Certificat de urbanism pentru construire</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Studii de teren, topografic și geotehnic complet</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Avizele cerute prin certificatul de urbanism</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Proiect tehnic și oferte reale de la constructori</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>DTAC și autorizația de construire</span>
+                            </a>
+                            <a href="#proiectarea" class="step-item">
+                                <span class="step-dot" style="background: #b8965c;"></span>
+                                <span>Detalii de execuție</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="diagram-cell-4 phase-block">
+                        <div class="phase-header" style="background: #f3e3dc;">
+                            <span class="phase-number">4</span>
+                            <div>
+                                <h3>Șantierul și mutarea</h3>
+                                <span class="phase-duration">12 până la 24 de luni</span>
+                            </div>
+                        </div>
+                        <div class="phase-steps">
+                            <a href="#santierul" class="step-item">
+                                <span class="step-dot" style="background: #c2604a;"></span>
+                                <span>Coordonator de proces și diriginte de șantier</span>
+                            </a>
+                            <a href="#santierul" class="step-item">
+                                <span class="step-dot" style="background: #c2604a;"></span>
+                                <span>Alegerea constructorului și modul de contractare</span>
+                            </a>
+                            <a href="#santierul" class="step-item">
+                                <span class="step-dot" style="background: #c2604a;"></span>
+                                <span>Execuție: structură, instalații, finisaje</span>
+                            </a>
+                            <a href="#receptia" class="step-item">
+                                <span class="step-dot" style="background: #c2604a;"></span>
+                                <span>Recepția la terminarea lucrărilor</span>
+                            </a>
+                            <a href="#receptia" class="step-item">
+                                <span class="step-dot" style="background: #c2604a;"></span>
+                                <span>Apartamentarea și intabularea</span>
+                            </a>
+                        </div>
+                        <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #f3e3dc; border: 1px solid rgba(0,0,0,0.10); border-radius: 0.5rem; text-align: center;">
+                            <a href="#mutarea" style="color: #1a1a1a; font-weight: 700; font-size: 0.85rem; text-decoration: none;">🏠 Te muți în casa ta</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                        <span style="font-weight: 600; font-size: 0.85rem; color: #1a1a1a;">Durată totală estimată:</span>
+                        <span style="font-weight: 700; font-size: 0.85rem; color: #555555;">23 până la 54 de luni, adică 2 până la 4 ani și jumătate</span>
+                    </div>
+                    <div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #e2e8f0;">
+                        <div style="width: 15%; background: #5a7196;" title="Grupul se formează"></div>
+                        <div style="width: 25%; background: #5f8266;" title="Terenul"></div>
+                        <div style="width: 28%; background: #b8965c;" title="Proiectarea"></div>
+                        <div style="width: 32%; background: #c2604a;" title="Șantierul și mutarea"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.35rem; font-size: 0.7rem; color: #64748b;">
+                        <span>2 la 6 luni</span>
+                        <span>3 la 12 luni</span>
+                        <span>6 la 12 luni</span>
+                        <span>12 la 24 luni</span>
+                    </div>
+                </div>
+                <p class="text-sm" style="margin-top: 1rem; color: #555555;">
+                    Fazele nu vin strict una după alta. Grupul se poate forma în timp ce căutați terenuri, iar
+                    verificarea unui teren se face în paralel cu discuțiile despre cine ia ce apartament. Ce nu
+                    se poate inversa este ordinea din interiorul fiecărei faze.
+                </p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PARTEA ÎNTÂI: CUM ÎNCEPI
+                 ══════════════════════════════════════════════════════════ -->
+            <div class="parte-titlu" id="cum-incepi">
+                <span class="parte-eyebrow">Partea întâi</span>
+                <h2>Cum începi</h2>
+                <p>Pașii pentru găsirea grupului potrivit pe terenul potrivit.</p>
+            </div>
+
+            <section class="ce-section" id="cum-incepi-pasi">
+                <h2 class="text-2xl mb-4">Cei cinci pași până la un grup</h2>
+                <p>
+                    Nu e nevoie să ai grupul dinainte și nu e nevoie să ai terenul dinainte. Începi de la ce ai:
+                    o zonă în care ți-ar plăcea să locuiești. Restul se adună în jurul ei.
+                </p>
+
+                <div class="pas-bloc">
+                    <div class="pas-cap"><span class="pas-num">1</span><h3>Cauți terenuri în zonele preferate și le adaugi la profil</h3></div>
+                    <p>
+                        Primul lucru pe care îl faci pe platformă este să îți bifezi zonele în care ai vrea să
+                        stai, în profil. Apoi intri în <a href="/terenuri.html">terenuri</a> și salvezi ce îți place.
+                        Un teren salvat nu te obligă la nimic, dar face două lucruri: te ține la curent cu ce mai
+                        apare în zona aceea și, mai important, te face vizibil pentru ceilalți care s-au uitat la
+                        același teren.
+                    </p>
+                    <p class="text-sm">
+                        Suprafața este importantă. Ca să îți faci o idee despre câte apartamente intră pe o
+                        suprafață, deși diferă de la un caz la altul, proiectul Județului Housing are cinci
+                        apartamente de circa 90 mp pe un teren de 460 mp. Deschiderea la stradă ar fi bine să fie
+                        de minimum 12 metri.
+                    </p>
+                    <p class="text-sm">
+                        Dacă ai găsit un teren bun în altă parte, îl poți
+                        <a href="/terenuri-propune.html">propune aici</a> și îl analizăm noi înainte să apară în listă.
+                    </p>
+                </div>
+
+                <div class="pas-bloc">
+                    <div class="pas-cap"><span class="pas-num">2</span><h3>Vezi cine mai e interesat de aceleași zone și terenuri</h3></div>
+                    <p>
+                        Din momentul în care ai zone bifate și terenuri salvate, platforma începe să îți arate
+                        <a href="/utilizatori.html">utilizatorii</a> care caută în aceleași zone ca tine și
+                        <a href="/grupuri.html">grupurile</a> care s-au format deja acolo. Le vezi în spațiul tău,
+                        pe prima pagină, după ce te-ai logat.
+                    </p>
+                    <p class="text-sm">
+                        Nimeni nu îți vede numele real, adresa sau telefonul. Se văd pseudonimul, zonele preferate și
+                        preferințele de locuire. Restul îl decideți voi, când vorbiți.
+                    </p>
+                </div>
+
+                <div class="pas-bloc">
+                    <div class="pas-cap"><span class="pas-num">3</span><h3>Dacă sunt utilizatori interesați de aceeași zonă, faci un grup cu ei</h3></div>
+                    <p>
+                        Asta e calea cea mai directă. Ai găsit două sau trei persoane care caută unde cauți și tu,
+                        le scrii, vă auziți, iar dacă vă potriviți creezi un grup și îi inviți. Grupul este locul
+                        în care discutați, salvați terenurile care vă interesează și țineți evidența pașilor.
+                        Angajamentul juridic vine mult mai târziu, la contractul de asociere.
+                    </p>
+                </div>
+
+                <div class="pas-bloc">
+                    <div class="pas-cap"><span class="pas-num">4</span><h3>Dacă există deja grupuri pe zonele tale, alătură-te lor</h3></div>
+                    <p>
+                        Înainte să ceri să intri, poți vedea profilurile membrilor. Uită-te la ele: îți dau o idee
+                        despre cine sunt oamenii aceia, ce zone caută și cum vor să locuiască. Dacă ți se pare că
+                        v-ați potrivi, ceri accesul, iar fondatorul grupului aprobă cererea.
+                    </p>
+                    <p class="text-sm">
+                        Ca să poți cere accesul, ai nevoie de profilul completat, și merită scris în detaliu. Este
+                        cartea ta de vizită la intrarea în grup, singurul lucru pe care îl știu ceilalți despre tine
+                        înainte să te cunoască.
+                    </p>
+                    <p class="text-sm">
+                        Nu ești legat de un singur grup. Dacă te înțelegi bine cu câțiva dintre membri, puteți face
+                        oricând un grup separat, al vostru. Ai libertate totală.
+                    </p>
+                </div>
+
+                <div class="pas-bloc">
+                    <div class="pas-cap"><span class="pas-num">5</span><h3>Dacă deocamdată nu e nimeni, pornești tu grupul</h3></div>
+                    <p>
+                        Este situația cea mai des întâlnită acum, la începutul platformei, și nu e un semn prost.
+                        Creezi un grup pornind de la o zonă preferată, de exemplu „Grup Bucureștii Noi”, scrii în
+                        descriere ce vrei să construiești și adaugi terenurile care ți se par bune din secțiunea de
+                        terenuri. Din clipa aceea grupul tău apare la toți cei care au bifat zona respectivă, iar
+                        oamenii vin la el în loc să îi cauți tu.
+                    </p>
+                    <p class="text-sm">
+                        Un grup cu un singur membru este perfect valabil. Ceilalți văd că zona aceea are deja pe
+                        cineva care caută și ți se pot alătura.
+                    </p>
+                </div>
+            </section>
+
+            <section class="ce-section" id="cat-de-mare">
+                <h2 class="text-2xl mb-4">Cât de mare să fie grupul</h2>
+                <p>
+                    Un grup de construcție funcționează bine la circa 5 până la 10 familii, în funcție de gabaritul
+                    proiectului. Cu cât grupul e mai mare, cu atât ponderea terenului în costul final al fiecărui
+                    apartament scade, deci costul general pe apartament scade. În schimb, crește nevoia de
+                    coordonare: mai mulți oameni înseamnă mai multe decizii de luat împreună, pe tot parcursul, iar
+                    asta cere un control bun al grupului.
+                </p>
+                <div class="ce-tip">
+                    <strong>Unde mai găsești oameni, în afara platformei:</strong> rețelele sociale și grupurile
+                    locale de interes, recomandările din cercul de prieteni și de familie, evenimentele și
+                    atelierele despre locuire alternativă. Dacă ai deja un nucleu de prieteni sau de colegi,
+                    <a href="/grupuri.html">înscrieți grupul aici</a> și căutați restul membrilor pe platformă.
+                </div>
+            </section>
+
+            <section class="ce-section" id="de-acord">
+                <h2 class="text-2xl mb-4">Ce vă puneți de acord de la început</h2>
+                <p>
+                    Nu vă apucați acum să scrieți un regulament, nu e momentul. E bine însă să stabiliți câteva
+                    lucruri simple de la început, cât e ușor de făcut.
+                </p>
+                <ul class="text-sm space-y-1">
+                    <li>Câteva reguli de comunicare: pe ce canal vorbiți și în cât timp e normal să primiți un răspuns</li>
+                    <li>Cum vă doriți să locuiți și cum vă doriți să fie vecinii</li>
+                    <li>Dacă aveți timp să vă implicați sau preferați mai degrabă să delegați</li>
+                    <li>Ce așteptați de la construcție: calitatea execuției, eficiența termică și fonică, instalațiile, arhitectura</li>
+                </ul>
+                <p class="text-sm" style="margin-top: 1rem;">
+                    Nu sunt multe de spus aici. Scopul nu e să vă împrieteniți, ci să porniți căutarea terenului cu
+                    așteptări asemănătoare.
+                </p>
+                <p class="text-sm">
+                    Bugetul fiecăruia se discută puțin mai târziu, când aveți un preț de teren și o analiză
+                    preliminară. Atunci discuția are cifre în ea. Vezi
+                    <a href="#organizarea">Organizarea pe terenuri și apartamente</a>.
+                </p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+                 PARTEA A DOUA: PAȘII ÎNTR-UN GRUP
+                 ══════════════════════════════════════════════════════════ -->
+            <div class="parte-titlu" id="pasii-in-grup">
+                <span class="parte-eyebrow">Partea a doua</span>
+                <h2>Pașii într-un grup</h2>
+                <p>De la prima discuție până la mutare. Aceștia sunt și pașii pe care îi bifați în pagina grupului vostru.</p>
+            </div>
+
+            <!-- 1 ── COMUNICAREA ── -->
+            <section class="ce-section" id="comunicarea">
+                <div class="pas-cap"><span class="pas-num">1</span><h2>Comunicarea cu cei din grup</h2></div>
+                <p>
+                    Cel mai frecvent mod în care se blochează un grup nu e o problemă tehnică, ci doi oameni care
+                    au discutat ceva pe telefon și un al treilea care nu a aflat niciodată. De aceea merită stabilit
+                    de la început pe ce canal se discută ce.
+                </p>
+
+                <h4>Canalele pe care le aveți la îndemână</h4>
+                <ul class="text-sm space-y-1">
+                    <li><strong>WhatsApp</strong>, pentru discuția de zi cu zi. Grupul are un câmp în care fondatorul grupului salvează linkul, ca să îl găsească și cine intră mai târziu.</li>
+                    <li><strong>Anunțurile generale</strong>, în pagina grupului, pentru ce trebuie să afle toată lumea. Sunt trimise seara și pe email, o dată pe zi, către membrii activi.</li>
+                    <li><strong>Comentariile pe terenuri</strong>, pentru ce ține de un teren anume. Așa nu se amestecă discuția despre trei terenuri diferite într-un singur fir.</li>
+                    <li><strong>Întâlnirea live</strong>, cu un poll de întâlnire ca să găsiți ora la care puteți toți. La un moment dat trebuie să vă vedeți la față, nu se poate altfel.</li>
+                </ul>
+
+                <h4>Prima discuție serioasă</h4>
+                <p class="text-sm">
+                    Discutați generic ce vă doriți de la blocul acesta. Bugetul este elefantul din cameră, dar el
+                    se discută cu folos abia când știți prețul unui teren și aveți o analiză preliminară pe el,
+                    fiindcă atunci apar costuri estimative pe apartament și planificatorul de plăți. Până atunci,
+                    discuția despre bani rămâne o discuție despre temeri.
+                </p>
+
+                <div class="ce-tip">
+                    <strong>Secretariatul grupului <span class="eticheta-curand">în curând</span></strong><br>
+                    Un instrument care rezumă conversațiile, adună informațiile și clarifică cine ce task are și în
+                    ce stadiu este. Îi dai conversațiile și înregistrările întâlnirilor, iar el scoate un document
+                    care spune ce s-a discutat, ce terenuri ați văzut și ce așteaptă fiecare ca să poată merge mai
+                    departe. Este exact ceea ce ne-a lipsit nouă la Județului.
+                </div>
+            </section>
+
+            <!-- 2 ── ORGANIZAREA ── -->
+            <section class="ce-section" id="organizarea">
+                <div class="pas-cap"><span class="pas-num">2</span><h2>Organizarea pe terenuri și apartamente</h2></div>
+                <p>
+                    Pentru fiecare teren care vă interesează puteți cere o
+                    <a href="/analize.html">analiză preliminară</a>. Este pasul care transformă un anunț imobiliar
+                    într-o decizie pe care o puteți lua în cunoștință de cauză, și costă foarte puțin față de ce
+                    urmează.
+                </p>
+
+                <h4>Ce primiți în analiza preliminară</h4>
+                <ul class="text-sm space-y-1">
+                    <li>Mai multe variante de împărțire pe apartamente, cu intervalul de suprafață pentru fiecare tip, conform legii</li>
+                    <li>Costuri estimative pe metru pătrat util, calibrate din experiența reală a prototipului Județului</li>
+                    <li>Costul estimativ teren plus construcție pentru fiecare apartament în parte</li>
+                    <li>Dispunerea parcărilor și suprafața de carosabil necesară</li>
+                    <li>Retragerile minime obligatorii față de limitele de proprietate și eventualele alipiri la calcanele vecinilor</li>
+                    <li>Regimul de înălțime permis, adică numărul de niveluri și înălțimea maximă</li>
+                    <li>Suprafața minimă de spațiu verde și suprafețele maxime construite și utile, pe nivel și total</li>
+                </ul>
+
+                <h4>Organizatorul pe apartamente <span class="eticheta-curand">în curând</span></h4>
+                <p class="text-sm">
+                    Când analiza preliminară e atașată la un teren, în pagina grupului se deschide un organizator
+                    al membrilor pe apartamente, construit pe variantele din analiză. Acolo vedeți cine ia ce, ce
+                    suprafață revine fiecăruia și cum se schimbă cotele dacă schimbați varianta. Este prima dată
+                    când discuția „cine unde stă” are un desen în spate, nu o presupunere.
+                </p>
+
+                <h4>Planificatorul de plăți <span class="eticheta-curand">în curând</span></h4>
+                <p class="text-sm">
+                    Tot acolo, procentele de plată eșalonate pe fazele de construcție, după modelul folosit la
+                    Județului. Nu vă spune cât aveți, vă spune când trebuie să aveți, ceea ce este cu totul altă
+                    întrebare și mult mai ușor de rezolvat din timp.
+                </p>
+
+            </section>
+
+            <!-- 3 ── VERIFICAREA TERENULUI ── -->
+            <section class="ce-section" id="verificarea-terenului">
+                <div class="pas-cap"><span class="pas-num">3</span><h2>Verificarea terenului, dacă e atractiv ca preț și ca analiză</h2></div>
+                <p>
+                    Pașii de mai jos se fac pe fiecare teren candidat în parte, nu o dată pentru grup. Sunt puși în
+                    ordinea în care cheltuiala crește: întâi ce e gratis, la urmă ce costă.
+                </p>
+
+                <h4>Vizita la teren și întâlnirea cu agentul sau proprietarul</h4>
+                <p class="text-sm">
+                    Mergeți pe teren și vedeți vecinii. Notați ce ați aflat, în grup, ca să nu rămână informația la
+                    cei doi care s-au dus. Tot atunci purtați discuția despre preț, marja de negociere și
+                    posibilitatea unei rezervări, fiindcă pașii care urmează au nevoie de timp.
+                </p>
+
+                <h4>Extrasul de carte funciară</h4>
+                <p class="text-sm">
+                    Dacă știți numărul cadastral, îl descărcați singuri de pe
+                    <a href="https://epay.ancpi.ro/epay/SelectCat.action?catId=1" target="_blank" rel="noopener">site-ul ANCPI</a>,
+                    online, și vedeți situația juridică actuală. Dacă nu se poate obține online, îl cereți
+                    proprietarului.
+                </p>
+
+                <h4>Istoricul terenului, verificat la notar</h4>
+                <p class="text-sm">
+                    Cereți proprietarului istoricul terenului și mergeți cu el la un notar. Este pasul pe care
+                    grupurile îl sar cel mai des, fiindcă extrasul de carte funciară pare să spună tot. Nu spune
+                    tot: spune situația de azi, nu cum s-a ajuns la ea.
+                </p>
+
+                <h4>Certificatul de urbanism pentru construire, depus de proprietar</h4>
+                <p class="text-sm">
+                    Cereți ca proprietarul să depună un certificat de urbanism pentru construire, cu propunerea
+                    voastră de bloc. Pentru asta apelați la un arhitect, care anexează un plan de situație cu
+                    amplasamentul propus, pe baza analizei preliminare. Cererea o face proprietarul, fiindcă voi încă
+                    nu sunteți proprietari, deci e o discuție de purtat cu el și încă un motiv bun să cereți o
+                    rezervare.
+                </p>
+                <p class="text-sm">
+                    Legal, eliberarea ar trebui să dureze cel mult 30 de zile. Între timp, cu numărul de înregistrare
+                    al depunerii, puteți cere o întrevedere la departamentul de urbanism sau puteți cere pe email
+                    clarificări despre propunerea voastră. Mergeți acolo, de preferință, împreună cu arhitectul. Așa
+                    obțineți un punct de vedere al autorității care vă va autoriza în final, ceea ce este un element
+                    de siguranță pentru ce veți putea construi pe terenul acela.
+                </p>
+
+                <h4>Studiul geotehnic sumar</h4>
+                <p class="text-sm">
+                    Dacă totul e în regulă până aici, faceți și un studiu geotehnic sumar, unul sau două foraje și,
+                    dacă e cazul, o dezvelire la fundație. Costurile sunt mici și eliminați riscul unui teren de
+                    fundare slab, unde fundația va costa mult.
+                </p>
+
+                <h4>Acordul vecinilor de la calcan</h4>
+                <p class="text-sm">
+                    În cele mai multe cazuri veți avea nevoie de acordul vecinilor de la calcan. Nu e o sperietoare.
+                    Discutați cu ei, explicați ce vreți să construiți și veniți, ideal, cu un arhitect care poate da
+                    și detalii tehnice sau legislative, fiindcă în domeniul ăsta sunt multe confuzii. În cazul unui
+                    refuz nejustificat, instanța poate suplini acordul unui vecin, dar nimeni nu își dorește asta.
+                </p>
+            </section>
+
+            <!-- 4 ── ANALIZA DETALIATĂ ── -->
+            <section class="ce-section" id="analiza-detaliata">
+                <div class="pas-cap"><span class="pas-num">4</span><h2>Analiza detaliată</h2></div>
+                <p>
+                    După ce terenul este verificat, actele sunt în regulă și prețul e acceptabil, faceți o
+                    <a href="/analize.html">analiză detaliată</a>. Rolul ei este să stabilească suprafața utilă
+                    exactă a apartamentului fiecăruia, fiindcă din ea rezultă cota fiecăruia din investiție și,
+                    implicit, din teren.
+                </p>
+                <p class="text-sm">
+                    Împreună cu arhitectul stabiliți configurația apartamentului, a spațiilor comune și ce loc de
+                    parcare îi revine fiecăruia. Este încă o fază de concept, nu faceți un proiect pentru
+                    autorizație. Trebuie însă să fie îndeajuns de detaliată încât să poată face parte integrantă din
+                    contractul vostru de asociere.
+                </p>
+                <div class="ce-tip">
+                    În funcție de durata analizei detaliate, poate e bine să rezervați terenul pe perioada aceasta.
+                    Un teren bun pe care ați cheltuit deja bani de verificare și care se vinde altcuiva între timp
+                    este cea mai scumpă lecție din tot procesul.
+                </div>
+            </section>
+
+            <!-- 5 ── CONTRACTUL DE ASOCIERE ── -->
+            <section class="ce-section" id="contract-asociere">
+                <div class="pas-cap"><span class="pas-num">5</span><h2>Contractul de asociere</h2></div>
+                <p>
+                    Dacă tot ați rezervat terenul, elaborați împreună cu un avocat contractul de asociere. El
+                    trebuie să cuprindă toate datele tehnice stabilite în analiza detaliată, modul de organizare al
+                    grupului, modalitățile de plată și procedurile de soluționare a oricărei situații care poate
+                    apărea. Contractul se legalizează apoi la notar.
+                </p>
+                <p class="text-sm">
+                    Acesta este modul în care ne-am organizat noi ca grup la Județului Housing. Nu este lipsit de
+                    riscuri și de greutăți, în lipsa unor instrumente legislative clare și detaliate pentru acest
+                    tip de construire colaborativă. Noi am reușit cu răbdare, cu implicare și cu scopul de a locui
+                    așa cum ne-am dorit.
+                </p>
+
+                <h4>Varianta cu SRL</h4>
+                <p class="text-sm">
+                    Există și varianta înființării unui SRL cu scopul unic de a cumpăra un teren și a construi un
+                    bloc cu apartamente pentru asociați, cu un act constitutiv asemănător contractului de asociere.
+                    Este de verificat cu un expert contabil dacă dizolvarea SRL-ului după recepție, în scopul
+                    transferării apartamentelor către asociați, se consideră un proces de vânzare la care se adaugă
+                    TVA. Este singurul lucru care poate face varianta aceasta scumpă, și merită lămurit înainte, nu
+                    după.
+                </p>
+                <p class="text-sm">
+                    Ambele forme, plus cooperativa de locuințe, sunt descrise pe larg în
+                    <a href="/ce-este/legislatia-romania.html">Legislația din România</a>.
+                </p>
+            </section>
+
+            <!-- 6 ── CUMPĂRAREA TERENULUI ── -->
+            <section class="ce-section" id="cumpararea-terenului">
+                <div class="pas-cap"><span class="pas-num">6</span><h2>Cumpărați terenul</h2></div>
+                <p>
+                    Prețul terenului se împarte între membri proporțional cu suprafețele utile ale apartamentelor
+                    fiecăruia, așa cum au fost stabilite în analiza detaliată și scrise în contractul de asociere.
+                    Terenul se cumpără în cote indivize, iar fiecare membru devine proprietar exclusiv pe
+                    apartamentul lui abia la final, prin apartamentare.
+                </p>
+                <p class="text-sm">
+                    Este momentul în care grupul devine ireversibil. Tot ce a fost înainte se putea desface fără
+                    costuri. De aici înainte, ieșirea din grup are o procedură, iar procedura aceea trebuie să fie
+                    deja scrisă în contract. Vezi <a href="#iesirea">Dacă cineva vrea să iasă din asociere</a>.
+                </p>
+            </section>
+
+            <!-- 7 ── PROIECTAREA ── -->
+            <section class="ce-section" id="proiectarea">
+                <div class="pas-cap"><span class="pas-num">7</span><h2>Începeți proiectarea</h2></div>
+                <p>
+                    Aveți nevoie de o echipă de arhitecți și de ingineri cu experiență în proiecte colaborative:
+                    arhitectură, structură și instalații. Fazele de mai jos sunt cele reale, în ordinea în care se
+                    fac, cu o singură abatere de la practica obișnuită, explicată la proiectul tehnic.
+                </p>
+
+                <h4>7.1. Concept</h4>
+                <p class="text-sm">
+                    Detalierea planurilor, stabilirea exactă a suprafețelor fiecărui apartament și a spațiilor
+                    comune, detalierea volumetriei, randări, stabilirea de principiu a tipurilor de instalații și
+                    echipamente și a finisajelor. Este faza în care grupul mai poate schimba lucruri ieftin.
+                </p>
+
+                <h4>7.2. Certificat de urbanism pentru construire</h4>
+                <p class="text-sm">
+                    Cereți de la primărie un certificat de urbanism pentru construire, nu doar informativ.
+                    Arhitectul anexează un plan de situație cu amplasamentul propus în urma discuțiilor din faza de
+                    concept. Dacă ați obținut deja unul înainte de cumpărare, verificați dacă mai e valabil: un
+                    certificat de urbanism ține între 12 și 24 de luni. În paralel puteți demara studiile
+                    topometrice și geotehnice complete legate de teren.
+                </p>
+
+                <h4>7.3. Avize</h4>
+                <p class="text-sm">
+                    După eliberarea certificatului de urbanism, care legal ar trebui să dureze cel mult 30 de zile,
+                    arhitectul elaborează documentațiile pentru avizele cerute prin el. Numărul lor și timpul necesar depind de
+                    zonă, iar lista completă o aflați abia din certificat. De aceea merită obținut devreme.
+                </p>
+
+                <h4>7.4. Proiect tehnic</h4>
+                <p class="text-sm">
+                    În practica obișnuită, faza următoare după avize este DTAC. Noi vă recomandăm invers: demarați
+                    întâi proiectul tehnic, astfel încât proiectanții tuturor specialităților, rezistență,
+                    instalații, arhitectură, să poată elabora liste de cantități, iar voi să puteți cere oferte
+                    reale de preț de la constructori, de la distribuitorii de echipamente și de la executanții de
+                    instalații.
+                </p>
+                <p class="text-sm">
+                    Motivul e simplu. Cu ofertele în mână puteți ajusta proiectul după bugetul vostru cât încă e
+                    ieftin de ajustat. După eliberarea autorizației de construire, orice modificare, mai ales de
+                    fațadă sau de volumetrie, înseamnă modificare de temă, deci reautorizare, deci timp și bani
+                    pierduți.
+                </p>
+
+                <h4>7.5. DTAC și autorizația de construire</h4>
+                <p class="text-sm">
+                    După ce ați ajuns la o concluzie detaliată asupra proiectului și a costurilor, depuneți la
+                    primărie documentația tehnică pentru autorizația de construire. Legal, emiterea ar trebui să
+                    dureze cel mult 30 de zile. Autorizația este valabilă 12 luni pentru începerea lucrărilor și se
+                    poate prelungi o singură dată.
+                </p>
+
+                <h4>7.6. Detalii de execuție</h4>
+                <p class="text-sm">
+                    Faza în care proiectanții elaborează detaliile de execuție ale construcției. Este posibil ca
+                    ele, mai ales pe specialitatea de arhitectură, să mai fie ajustate în funcție de discuțiile cu
+                    executanții. Este obligatorie pentru o execuție controlată a proiectului.
+                </p>
+            </section>
+
+            <!-- 8 ── ȘANTIERUL ── -->
+            <section class="ce-section" id="santierul">
+                <div class="pas-cap"><span class="pas-num">8</span><h2>Șantierul</h2></div>
+
+                <h4>Coordonatorul de proces</h4>
+                <p class="text-sm">
+                    Este bine să existe un coordonator al acestui proces, preferabil arhitectul care a făcut
+                    proiectul, dar nu obligatoriu. Va fi nevoie de o coordonare a pașilor pe care trebuie să îi facă
+                    grupul în timpul șantierului, de un pivot de comunicare între grup și șantier, dar și în
+                    interiorul grupului, pentru luarea deciziilor.
+                </p>
+
+                <h4>Dirigintele de șantier</h4>
+                <p class="text-sm">
+                    Alegeți un diriginte de șantier cu experiență și implicat, nu doar pentru semnături. Cereți-i să
+                    verifice suplimentar execuția, nu doar fazele determinante obligatorii. Sunt costuri mici cu
+                    beneficii mari.
+                </p>
+
+                <h4>Cum începeți să căutați un constructor</h4>
+                <ul class="text-sm space-y-1">
+                    <li>
+                        <strong>Concursurile de arhitectură</strong>, adică Anualele Regionale de Arhitectură și
+                        Bienala de Arhitectură. Căutați la categoria rezidențiale colective și vedeți cine a
+                        construit blocurile acelea frumoase. Deseori sunt și destul de scumpi, așa că luați mai
+                        multe oferte.
+                    </li>
+                    <li>
+                        <strong>Recomandările</strong>, dar cu experiență pe ceva similar cu ce construiți voi.
+                        Uitați-vă ce a mai construit, cum comunicați cu el și cât a costat.
+                    </li>
+                    <li>
+                        Constructorii nu sunt obișnuiți cu grupurile colaborative și probabil li se pare complicat.
+                        Coordonatorul de care vorbeam mai sus poate facilita comunicarea.
+                    </li>
+                </ul>
+
+                <h4>Modalitatea de contractare</h4>
+                <div class="ce-grid-2">
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h4 class="font-semibold mb-2" style="margin-top:0;">Antrepriză generală, varianta ideală</h4>
+                        <p class="text-sm mb-2">
+                            Același constructor pentru toate specialitățile: structură, instalații, arhitectură. E
+                            cel mai comod, dar probabil și varianta mai scumpă.
+                        </p>
+                        <h5 class="font-semibold text-sm mb-1">Avantaje</h5>
+                        <ul class="text-xs space-y-1">
+                            <li>Lucrările se pot contracta pe parcursul execuției</li>
+                            <li>Timp personal câștigat, nu trebuie să mergeți zilnic pe șantier</li>
+                            <li>Control bun asupra evoluției lucrărilor pe etape și a costurilor</li>
+                            <li>Comunicare eficientă, se discută centralizat cu un singur interlocutor</li>
+                            <li>Cine conduce execuția cunoaște proiectul în întregime și gestionează mai bine erorile de execuție sau de proiectare</li>
+                            <li>Implicare ridicată, fiindcă răspunde de toată lucrarea până la finalizare</li>
+                        </ul>
+                        <h5 class="font-semibold text-sm mb-1" style="margin-top:0.75rem;">Dezavantaje</h5>
+                        <ul class="text-xs space-y-1">
+                            <li>Costuri mai mari, deși eficiența adusă în șantier poate aduce și reduceri de costuri în alte părți</li>
+                        </ul>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                        <h4 class="font-semibold mb-2" style="margin-top:0;">Contractare pe specialități</h4>
+                        <p class="text-sm mb-2">
+                            Structura cu cineva, instalațiile cu altcineva, finisajele cu altcineva. Aici trebuie
+                            însă ca cineva să coordoneze echipele de execuție, pentru că lucrările lor se suprapun.
+                            Intervine din nou coordonatorul, dar și grupul trebuie să fie implicat: sunt multe
+                            task-uri de rezolvat.
+                        </p>
+                        <h5 class="font-semibold text-sm mb-1">Avantaje</h5>
+                        <ul class="text-xs space-y-1">
+                            <li>Costuri ceva mai reduse la contractare</li>
+                        </ul>
+                        <h5 class="font-semibold text-sm mb-1" style="margin-top:0.75rem;">Dezavantaje</h5>
+                        <ul class="text-xs space-y-1">
+                            <li>Implicare ridicată a grupului în gestionarea etapelor de execuție</li>
+                            <li>Consum mare de timp personal, grupul trebuie să verifice constant cine lucrează și cum lucrează</li>
+                            <li>Posibile conflicte între echipele de execuție, pe care grupul trebuie să le gestioneze, ideal cu cunoștințe tehnice</li>
+                            <li>Probabilitate mare de pierdere a controlului asupra costurilor, aparent mai scăzute, și asupra calității execuției</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4>Organizarea și deciziile grupului în șantier</h4>
+                <ul class="text-sm space-y-2">
+                    <li>
+                        <strong>Verificați branșamentele și racordurile.</strong> Poate trebuie mutate sau
+                        redimensionate, iar tot procesul, cu proiectare, avize și autorizație, poate dura spre un an.
+                        Verificați cu furnizorii, pe baza proiectului.
+                    </li>
+                    <li>
+                        <strong>Faceți vizite periodice pe șantier și rotiți-vă în cadrul grupului.</strong> Din
+                        experiență, fiecare se duce doar la apartamentul lui când încep instalațiile sau finisajele.
+                        Puteți avea surprize dacă vă duceți prea târziu.
+                    </li>
+                    <li>
+                        <strong>Instalați cel puțin o cameră de supraveghere</strong> sau apelați la un serviciu de
+                        pază.
+                    </li>
+                    <li>
+                        <strong>Organizați-vă pe task-uri</strong> și faceți call-uri săptămânale ca să actualizați
+                        statusul lor. Apelați la coordonator când ceva nu merge. Veți putea apela în curând și la
+                        secretariatul ApartamenTUal pentru organizare.
+                    </li>
+                    <li>
+                        <strong>Căutați alternative la aproape tot ce vi se ofertează.</strong> Nu e ușor atunci
+                        când șantierul merge, dar fără verificarea ofertelor în piață puteți ajunge la costuri mari.
+                        Arhitectul coordonator vă poate consilia, la fel proiectanții de specialitate, structură,
+                        instalații, arhitectură. Întâlniți-vă cu furnizorii împreună cu coordonatorul, ca să
+                        înțelegeți mai bine ce alegeți.
+                    </li>
+                </ul>
+
+                <div class="ce-tip">
+                    <strong>Patru lucruri care nu se văd în grafic, dar se simt tot timpul:</strong> alegeți oameni
+                    cu experiență pe construcții de grup; desemnați un reprezentant al grupului pentru comunicarea
+                    cu constructorul; împărțiți-vă responsabilitățile care țin de beneficiar pe tot parcursul, e
+                    timp pe care va trebui să îl alocați și va merita; și țineți o comunicare constantă în grup
+                    despre progresul întregului proces.
+                </div>
+            </section>
+
+            <!-- 9 ── IEȘIREA DIN ASOCIERE ── -->
+            <section class="ce-section" id="iesirea">
+                <div class="pas-cap"><span class="pas-num">9</span><h2>Ce faceți dacă cineva vrea să iasă din asociere</h2></div>
+                <p>
+                    Se întâmplă, și nu e o catastrofă dacă v-ați pregătit. Procedura de ieșire trebuie să fie deja
+                    scrisă în contractul de asociere, cu toate elementele ei: anunțul de ieșire din grup, căutarea
+                    unui înlocuitor, plafonarea prețului de vânzare a cotei indivize, dreptul de preempțiune al
+                    grupului și acordul grupului pentru un nou asociat.
+                </p>
+                <p class="text-sm">
+                    În principiu, tot grupul va căuta un înlocuitor, nu doar cel care dorește să iasă. Cel care
+                    dorește să iasă va avea oricum tot interesul să găsească pe cineva, ca să nu își țină banii
+                    blocați.
+                </p>
+                <p class="text-sm">
+                    Noi am găsit un înlocuitor cam în patru luni. Aveam și posibilitatea de a vinde terenul cu
+                    autorizație, fiindcă urma să începem construcția, ceea ce a fost o plasă de siguranță bună de
+                    avut.
+                </p>
+            </section>
+
+            <!-- 10 ── RECEPȚIA ── -->
+            <section class="ce-section" id="receptia">
+                <div class="pas-cap"><span class="pas-num">10</span><h2>Recepția și apartamentarea</h2></div>
+                <p>
+                    Recepția la terminarea lucrărilor se face cu o comisie și se încheie cu un proces-verbal. Ea
+                    atestă că blocul e construit conform proiectului autorizat. Nu vă face încă proprietari pe
+                    apartamente.
+                </p>
+                <p class="text-sm">
+                    Până în acest punct ați deținut cote indivize dintr-un teren și dintr-o construcție. Prin
+                    apartamentare, fiecare unitate, apartament, loc de parcare, boxă, primește numărul ei cadastral,
+                    iar prin intabulare trece în cartea funciară pe numele membrului căruia îi revine, conform
+                    contractului de asociere sau actului constitutiv al firmei.
+                </p>
+                <p class="text-sm">
+                    Este ultimul pas juridic al proiectului și cel care închide promisiunea de la care ați pornit.
+                    Fără el aveți un bloc terminat și niciun apartament al nimănui.
+                </p>
+            </section>
+
+            <!-- 11 ── MUTAREA ── -->
+            <section class="ce-section" id="mutarea">
+                <div class="pas-cap"><span class="pas-num">11</span><h2>Mutarea</h2></div>
+                <p>
+                    Rămân lucrurile mărunte, care se rezolvă mai ușor împreună decât separat: contractele cu
+                    furnizorii de utilități pe numele fiecăruia, forma de administrare a părților comune, fondul de
+                    reparații și regulile de folosire a spațiilor comune, pe care le-ați discutat, de fapt, încă din
+                    prima lună.
+                </p>
+                <p class="text-sm">
+                    Constructorul rămâne răspunzător pentru viciile ascunse și pentru garanțiile de bună execuție,
+                    conform contractului. Notați în primele luni tot ce observați și transmiteți centralizat, prin
+                    coordonator, nu fiecare separat.
+                </p>
+                <p class="text-sm">
+                    Vă mutați într-un bloc pe care l-ați decis voi, cu vecini pe care i-ați ales, în care toți banii
+                    voștri au rămas în apartamentele voastre.
+                </p>
+            </section>
+
+            <!-- ══════════════ URMĂTORII PAȘI ══════════════ -->
+            <div class="mt-8 p-6 bg-gray-50 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Următorii pași</h3>
+                <div class="grid-2">
+                    <a href="legislatia-romania.html" class="card hover:shadow-soft transition">
+                        <h4 class="font-semibold mb-2">Legislația din România →</h4>
+                        <p class="text-sm subtitle">Formele de asociere, finanțarea, autorizarea și ce se întâmplă după finalizare</p>
+                    </a>
+                    <a href="exemple-europa.html" class="card hover:shadow-soft transition">
+                        <h4 class="font-semibold mb-2">Exemple din Europa →</h4>
+                        <p class="text-sm subtitle">Cum funcționează în practică proiectele care au reușit</p>
+                    </a>
+                </div>
+                <div class="grid-2" style="margin-top: 1rem;">
+                    <a href="/grupuri.html" class="card hover:shadow-soft transition">
+                        <h4 class="font-semibold mb-2">Vezi grupurile →</h4>
+                        <p class="text-sm subtitle">Alătură-te unuia din zona ta sau pornește tu unul</p>
+                    </a>
+                    <a href="/terenuri.html" class="card hover:shadow-soft transition">
+                        <h4 class="font-semibold mb-2">Vezi terenurile →</h4>
+                        <p class="text-sm subtitle">Salvează-le pe cele care îți plac și vezi cine mai e interesat</p>
+                    </a>
                 </div>
             </div>
+
         </div>
+    </div>
     </main>
 
     <div id="footer"></div>

@@ -241,11 +241,42 @@
    paginile „Ce este". Folosim !important ca să batem utilitarele
    Tailwind și stilurile inline neimportante.
    ══════════════════════════════════════════════════════════════ */
-.ce-content .text-blue-600,
-.ce-content .text-orange-600,
-.ce-content .text-orange-800,
-.ce-content .text-green-600,
-.ce-content .text-red-600 { color:#1a1a1a !important; }
+/* ⚠️ `a` e exclus din neutralizare: din 21 august linkurile din text au
+   propria culoare, regula de mai jos. Fără excludere, `!important`-ul de
+   aici i-ar face negri la loc. Pentru <div> și <span> neutralizarea rămâne. */
+.ce-content .text-blue-600:not(a),
+.ce-content .text-orange-600:not(a),
+.ce-content .text-orange-800:not(a),
+.ce-content .text-green-600:not(a),
+.ce-content .text-red-600:not(a) { color:#1a1a1a !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   LINKURI DIN TEXT
+   Până pe 21 august linkurile din conținut erau negre, ca restul
+   textului, cu subliniere doar la hover: în mijlocul unui paragraf
+   nu se vedea că sunt linkuri. Acum au culoarea caldă a mărcii
+   (#a94a35, teracota din paleta logoului, întunecată cât să treacă
+   pragul de contrast pe fundalul crem) și subliniere permanentă.
+
+   ⚠️ Se exclud linkurile care sunt BLOCURI clicabile: cardurile,
+   butoanele de acțiune și rândurile din cronologia paginii „Cum
+   funcționează". Ele au deja chenar și fundal la hover, iar o
+   subliniere le-ar strica. Dacă apare un tip nou de card-link,
+   adaugă-i clasa în ambele liste de mai jos.
+   ══════════════════════════════════════════════════════════════ */
+.ce-content a:not(.card):not(.hub-card):not(.ce-nav-link):not(.cta-primary):not(.cta-secondary):not(.step-item) {
+    color:#a94a35;
+    text-decoration:underline;
+    text-decoration-thickness:1px;
+    text-underline-offset:3px;
+    text-decoration-color:rgba(169,74,53,0.4);
+    transition:color .15s, text-decoration-color .15s;
+}
+.ce-content a:not(.card):not(.hub-card):not(.ce-nav-link):not(.cta-primary):not(.cta-secondary):not(.step-item):hover {
+    color:#8c3c2b;
+    text-decoration-thickness:2px;
+    text-decoration-color:#8c3c2b;
+}
 
 /* Carduri info: pasteluri soft derivate din paleta de accent v9
    (teracotă, salvie, ardezie, mov, ocru). Tente foarte deschise →
