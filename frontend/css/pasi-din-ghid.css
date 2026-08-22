@@ -1,0 +1,84 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TEXTUL PAȘILOR, ADUS DIN GHID
+   ══════════════════════════════════════════════════════════════════════
+
+   Se folosește în pagina grupului și în Spațiul tău din homepage, acolo
+   unde se injectează HTML-ul unei secțiuni din `ce-este/cum-functioneaza.html`.
+
+   ⚠️ Ghidul rulează cu Tailwind, celelalte două pagini nu. Mai jos sunt
+   reproduse, scopat sub `.pasi-ghid-text`, doar utilitarele pe care le
+   folosesc cele 11 secțiuni, plus regulile din `ce-este/ce-este.css` de care
+   au nevoie. Dacă în ghid apare o clasă nouă, ea NU se vede în celelalte
+   pagini până nu e adăugată și aici.
+
+   Nu se pune nimic din astea pe `:root` și nu se folosesc variabile de
+   paletă: fișierul e inclus în pagini cu palete scopate diferit.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.pasi-ghid-text {
+    font-size: 0.95rem;
+    color: #555555;
+    line-height: 1.7;
+}
+
+.pasi-ghid-text p { margin: 0 0 0.75rem; }
+
+.pasi-ghid-text h4 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 1.3rem 0 0.4rem;
+}
+
+.pasi-ghid-text ul { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+.pasi-ghid-text li { font-size: 0.9rem; color: #555555; line-height: 1.6; padding: 0.2rem 0; }
+.pasi-ghid-text strong { color: #1a1a1a; font-weight: 600; }
+.pasi-ghid-text a { color: #a94a35; text-decoration: underline; }
+
+/* Caseta de sfat, cu bandă neagră în stânga */
+.pasi-ghid-text .ce-tip {
+    padding: 1rem 1.25rem;
+    border-radius: 0 8px 8px 0;
+    background: #faf8f3;
+    border-left: 3px solid #1a1a1a;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #1a1a1a;
+}
+
+/* Eticheta „în curând", pentru ce e descris dar încă neconstruit */
+.pasi-ghid-text .eticheta-curand {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f5efe1;
+    border: 1px solid rgba(0,0,0,0.12);
+    color: #6b5b3a;
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+}
+
+.pasi-ghid-text .ce-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) {
+    .pasi-ghid-text .ce-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── utilitarele Tailwind folosite de cele 11 secțiuni ── */
+.pasi-ghid-text .text-sm { font-size: 0.875rem; }
+.pasi-ghid-text .text-xs { font-size: 0.78rem; }
+.pasi-ghid-text .font-semibold { font-weight: 600; }
+.pasi-ghid-text .mb-1 { margin-bottom: 0.25rem; }
+.pasi-ghid-text .mb-2 { margin-bottom: 0.5rem; }
+.pasi-ghid-text .mb-4 { margin-bottom: 1rem; }
+.pasi-ghid-text .space-y-1 > * + * { margin-top: 0.25rem; }
+.pasi-ghid-text .space-y-2 > * + * { margin-top: 0.5rem; }
+.pasi-ghid-text .p-4 { padding: 1rem; }
+.pasi-ghid-text .border { border: 1px solid #e8e3d8; }
+.pasi-ghid-text .rounded-lg { border-radius: 0.5rem; }
+.pasi-ghid-text .bg-yellow-50 { background: #fffbeb; }
+.pasi-ghid-text .border-yellow-200 { border-color: #fde68a; }
+.pasi-ghid-text .bg-green-50 { background: #f0f7f2; }
+.pasi-ghid-text .border-green-200 { border-color: #bfdcc9; }

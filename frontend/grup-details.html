@@ -14,6 +14,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/apartamentual-v9.css">
     <link rel="stylesheet" href="grupuri.css">
+    <!-- Stilul textului adus din ghid, în casetele cronologiei -->
+    <link rel="stylesheet" href="css/pasi-din-ghid.css">
+    <!-- Cele 11 casete și citirea lor din ghid. Aceleași ca în Spațiul tău. -->
+    <script src="js/pasi-din-ghid.js"></script>
     <style>
         /* Additional styles for details page */
         .page-content {
@@ -778,48 +782,6 @@
         .cl-box-done.sters:hover { border-color: #e8e3d8; }
         .cl-box-done-meta { margin-left: auto; font-size: 0.72rem; font-weight: 500; color: #8a8a8a; }
         .cl-box-tools { margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #e8e3d8; }
-
-        /* ── Textul pașilor, adus din ghid ──
-           Ghidul rulează cu Tailwind, pagina asta nu. Aici sunt reproduse, scopat, doar
-           utilitarele pe care le folosesc cele 11 secțiuni, plus regulile din ce-este.css
-           de care au nevoie. Dacă în ghid apare o clasă nouă, ea nu se vede aici până nu
-           e adăugată mai jos. */
-        .cl-ghid-text { font-size: 0.95rem; color: #555555; line-height: 1.7; }
-        .cl-ghid-text p { margin: 0 0 0.75rem; }
-        .cl-ghid-text h4 { font-size: 0.92rem; font-weight: 600; color: #1a1a1a; margin: 1.3rem 0 0.4rem; }
-        .cl-ghid-text ul { list-style: none; padding: 0; margin: 0 0 0.75rem; }
-        .cl-ghid-text li { font-size: 0.9rem; color: #555555; line-height: 1.6; padding: 0.2rem 0; }
-        .cl-ghid-text strong { color: #1a1a1a; font-weight: 600; }
-        .cl-ghid-text a { color: #a94a35; text-decoration: underline; }
-        .cl-ghid-text .ce-tip {
-            padding: 1rem 1.25rem; border-radius: 0 8px 8px 0;
-            background: #faf8f3; border-left: 3px solid #1a1a1a;
-            margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.6; color: #1a1a1a;
-        }
-        .cl-ghid-text .eticheta-curand {
-            display: inline-block; font-size: 0.66rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.05em;
-            background: #f5efe1; border: 1px solid rgba(0,0,0,0.12); color: #6b5b3a;
-            border-radius: 999px; padding: 0.1rem 0.5rem;
-        }
-        .cl-ghid-text .ce-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        @media (max-width: 640px) { .cl-ghid-text .ce-grid-2 { grid-template-columns: 1fr; } }
-        /* utilitare Tailwind folosite în cele 11 secțiuni */
-        .cl-ghid-text .text-sm { font-size: 0.875rem; }
-        .cl-ghid-text .text-xs { font-size: 0.78rem; }
-        .cl-ghid-text .font-semibold { font-weight: 600; }
-        .cl-ghid-text .mb-1 { margin-bottom: 0.25rem; }
-        .cl-ghid-text .mb-2 { margin-bottom: 0.5rem; }
-        .cl-ghid-text .mb-4 { margin-bottom: 1rem; }
-        .cl-ghid-text .space-y-1 > * + * { margin-top: 0.25rem; }
-        .cl-ghid-text .space-y-2 > * + * { margin-top: 0.5rem; }
-        .cl-ghid-text .p-4 { padding: 1rem; }
-        .cl-ghid-text .border { border: 1px solid #e8e3d8; }
-        .cl-ghid-text .rounded-lg { border-radius: 0.5rem; }
-        .cl-ghid-text .bg-yellow-50 { background: #fffbeb; }
-        .cl-ghid-text .border-yellow-200 { border-color: #fde68a; }
-        .cl-ghid-text .bg-green-50 { background: #f0f7f2; }
-        .cl-ghid-text .border-green-200 { border-color: #bfdcc9; }
 
         .cl-step {
             display: flex; align-items: flex-start; gap: 0.75rem;
@@ -2023,77 +1985,12 @@ function renderTerenuri(terenuri) {
     });
 }
 
-// ── CRONOLOGIA PAȘILOR: cele 11 casete ──
-// Casetele sunt exact cele din ghidul public „Pașii într-un grup"
-// (ce-este/cum-functioneaza.html). Textul NU e copiat aici: pagina citește ghidul la
-// încărcare și scoate din el secțiunea fiecărei casete, după `ghid`, care e id-ul
-// secțiunii din ghid. Așa există o singură sursă, iar ghidul rămâne HTML static,
-// deci indexabil. Dacă redenumești un id acolo, caseta de aici rămâne fără text și
-// arată în loc un link către ghid.
-//
-// ⚠️ `key` se scrie în grup_checklist.step_key, la fel pentru note și atașamente.
-// O bifă pe casetă, nu pe fiecare pas: „grupul a trecut de aici".
-// Cheile vechi (f1_/f2_/f3_/f4_) rămân în bază, nemaifolosite. Vezi scriptul de mutare
-// din db_schema/cronologia-pasilor/.
-const CHECKLIST_BOXES = [
-    { key: 'c1',  title: 'Comunicarea cu cei din grup',            color: '#5a7196', ghid: 'comunicarea' },
-    { key: 'c2',  title: 'Organizarea pe terenuri și apartamente', color: '#2f8f5b', ghid: 'organizarea' },
-    { key: 'c3',  title: 'Verificarea terenului',                  color: '#2f8f5b', ghid: 'verificarea-terenului' },
-    { key: 'c4',  title: 'Analiza detaliată',                      color: '#2f8f5b', ghid: 'analiza-detaliata' },
-    { key: 'c5',  title: 'Contractul de asociere',                 color: '#2f8f5b', ghid: 'contract-asociere' },
-    { key: 'c6',  title: 'Cumpărați terenul',                      color: '#2f8f5b', ghid: 'cumpararea-terenului' },
-    { key: 'c7',  title: 'Începeți proiectarea',                   color: '#c2604a', ghid: 'proiectarea' },
-    { key: 'c8',  title: 'Șantierul',                              color: '#8f5a48', ghid: 'santierul' },
-    // Fără bifă: nu e un pas prin care treci, e ce faci dacă se întâmplă.
-    { key: 'c9',  title: 'Dacă cineva vrea să iasă din asociere',  color: '#8a8a8a', ghid: 'iesirea', faraBifa: true },
-    { key: 'c10', title: 'Recepția și apartamentarea',             color: '#8f5a48', ghid: 'receptia' },
-    { key: 'c11', title: 'Mutarea',                                color: '#8f5a48', ghid: 'mutarea' },
-];
-
-// Textul celor 11 secțiuni, citit o singură dată din ghid. ancoră -> HTML
+// ── CRONOLOGIA PAȘILOR ──
+// Casetele și citirea textului din ghid stau în `js/pasi-din-ghid.js`, ca să
+// fie aceleași și aici, și în Spațiul tău din homepage. Aici rămâne doar ce e
+// specific paginii de grup: bifele, notele și atașamentele.
+const CHECKLIST_BOXES = PASI_CASETE;
 let ghidSectiuni = null;
-
-async function loadGhidPasi() {
-    if (ghidSectiuni) return ghidSectiuni;
-    ghidSectiuni = {};
-    try {
-        const res = await fetch('ce-este/cum-functioneaza.html');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-
-        CHECKLIST_BOXES.forEach(box => {
-            const sectiune = doc.getElementById(box.ghid);
-            if (!sectiune) return;
-            const copie = sectiune.cloneNode(true);
-
-            // Capul de secțiune (numărul mare și titlul) îl punem noi, în antetul casetei
-            const cap = copie.querySelector('.pas-cap');
-            if (cap) cap.remove();
-
-            // Linkurile din ghid sunt scrise față de folderul /ce-este/, pagina asta stă
-            // la rădăcină. Ancorele interne trimit la caseta corespunzătoare de aici.
-            copie.querySelectorAll('a[href]').forEach(a => {
-                const href = a.getAttribute('href') || '';
-                if (href.startsWith('#')) {
-                    const tinta = CHECKLIST_BOXES.find(b => b.ghid === href.slice(1));
-                    a.setAttribute('href', tinta ? '#phase-' + tinta.key : 'ce-este/cum-functioneaza.html' + href);
-                    return;
-                }
-                if (/^(https?:|mailto:|tel:|\/)/.test(href)) {
-                    a.setAttribute('target', '_blank');
-                    return;
-                }
-                a.setAttribute('href', 'ce-este/' + href);
-                a.setAttribute('target', '_blank');
-            });
-
-            ghidSectiuni[box.ghid] = copie.innerHTML;
-        });
-    } catch (err) {
-        console.error('Nu am putut citi pașii din ghid:', err);
-    }
-    return ghidSectiuni;
-}
 
 let checklistData = {}; // step_key -> { checked, checked_at, checked_by, notes }
 let profilesCache = {};
@@ -2127,7 +2024,7 @@ async function loadChecklist() {
         }
         
         // Textul pașilor vine din ghid, o singură dată pe încărcarea paginii
-        await loadGhidPasi();
+        ghidSectiuni = await incarcaPasiDinGhid({ prefixAncora: 'phase-' });
 
         renderChecklist();
     } catch (err) {
@@ -2140,7 +2037,7 @@ function renderChecklist() {
     const container = document.getElementById('checklistTimeline');
 
     // Casetele care se bifează (a noua e informativă, nu se bifează)
-    const cuBifa = CHECKLIST_BOXES.filter(b => !b.faraBifa);
+    const cuBifa = PASI_CU_BIFA;
     const done = cuBifa.filter(b => checklistData[b.key]?.checked).length;
 
     // Caseta „de lucru": prima nebifată. Ea stă deschisă, restul se închid.
@@ -2154,17 +2051,17 @@ function renderChecklist() {
         // Antetul: cerc cu numărul pasului, verde cu bifă dacă grupul a trecut de el
         const cerc = isChecked
             ? `<div class="cl-phase-number" style="background: #2f8f5b;"><i class="fas fa-check"></i></div>`
-            : `<div class="cl-phase-number" style="background: ${box.color};">${bi + 1}</div>`;
+            : `<div class="cl-phase-number" style="background: ${box.culoare};">${bi + 1}</div>`;
 
         return `
             <div class="cl-phase ${isOpen ? 'open' : ''} ${isChecked ? 'gata' : ''}" id="phase-${box.key}">
                 <div class="cl-phase-header" onclick="toggleBox('${box.key}')">
                     ${cerc}
-                    <span class="cl-phase-title">${box.title}</span>
+                    <span class="cl-phase-title">${box.titlu}</span>
                     <i class="fas fa-chevron-down cl-phase-chevron"></i>
                 </div>
                 <div class="cl-phase-body">
-                    <div class="cl-ghid-text">${text || textLipsa(box)}</div>
+                    <div class="pasi-ghid-text">${text || textLipsaDinGhid(box)}</div>
                     ${box.faraBifa ? '' : renderBoxDone(box, isChecked)}
                     ${renderBoxTools(box.key)}
                 </div>
@@ -2184,12 +2081,6 @@ function renderChecklist() {
             loadStepFiles(box.key);
         }
     });
-}
-
-// Dacă ghidul n-a putut fi citit, sau i s-a redenumit o ancoră
-function textLipsa(box) {
-    return `<p>Textul acestui pas se citește din ghid, iar acum nu a putut fi încărcat.
-        <a href="ce-este/cum-functioneaza.html#${box.ghid}" target="_blank">Deschide-l în ghid</a>.</p>`;
 }
 
 // Bifa de casetă: „grupul a trecut de aici", cu explicație lângă ea
