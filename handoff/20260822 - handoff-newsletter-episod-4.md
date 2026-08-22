@@ -1,11 +1,40 @@
 # Handoff, 22 august 2026: trimiterea newsletterului cu episodul 4
 
-**Primul lucru de dimineață.** Articolul e deja publicat. Mai sunt **două reparații**
-și apoi trimiterea.
+## ✅ ÎNCHIS: newsletterul a plecat pe 22 august
+
+Trimis din Resend → Broadcasts, către cei 31 de abonați confirmați. Restul documentului
+descrie cum s-a ajuns aici și rămâne util ca tipar pentru episodul 5.
+
+**Titlul s-a schimbat în ziua trimiterii**, la cererea lui Lucian. Vechiul titlu,
+„Spațiile comune: cum au apărut, deși nu le doream la început", a fost înlocuit
+peste tot cu:
+
+```
+Cum am ajuns la spații comune fără să le căutăm
+```
+
+Adică: în articolul de pe platformă (din admin, **fără** să se atingă Slug-ul, care
+a rămas `judetului-housing-episodul-4-spatiile-comune`), în șablonul de email
+(`<title>` și titlul din corp) și în subiectul din Resend, care a devenit
+`Episodul 4: cum am ajuns la spații comune fără să le căutăm`.
+
+**Rezumatul de trei paragrafe din email a fost rescris de Lucian** înainte de trimitere.
+Formulările „o cameră în care nu locuiește nimeni" și „pe o singură ușă", scrise pentru
+email și care nu existau în articol, au ieșit. Textul trimis se termină cu „pentru astfel
+de spații", „ar fi dus la destrămarea grupului" și „pe o ușă spectaculoasă".
+
+**Cum s-a pus HTML-ul în Resend:** clic în corpul emailului, `Ctrl+A`, `Delete`, apoi
+**upload de fișier** direct din `email_templates/`. Nu copy-paste. Merită ținut minte
+pentru episodul 5, fiindcă lipirea HTML-ului brut într-un editor vizual dă cod vizibil,
+iar editarea peste conținutul episodului anterior lasă resturi (poza veche, linkul vechi).
+
+**Cele două reparații descrise mai jos erau deja făcute** când s-a reluat lucrul:
+în bază E4 stă la `22:01:15` și E3 la `22:01:07`, deci ordinea e corectă, iar teaserul
+din E3 e ultimul paragraf al conținutului, nu al patrulea bloc.
 
 ---
 
-## Starea la închiderea sesiunii
+## Starea la închiderea sesiunii de aseară (istoric)
 
 | | |
 |---|---|
@@ -89,7 +118,9 @@ la construirea newsletterului: nu s-a făcut editor de campanii (`handoff/HANDOF
    **Linkul pozei e deja completat**, nu mai e nimic de înlocuit.
 2. Resend → Broadcasts → duplici broadcast-ul de la episodul 3 sau faci unul nou.
 3. Expeditor: `ApartamenTUal <apartamentual@ltfbstudio.ro>`
-4. Subiect: `Episodul 4: spațiile comune pe care nu le doream`
+4. Subiect: `Episodul 4: cum am ajuns la spații comune fără să le căutăm`
+   (varianta scrisă aseară, `Episodul 4: spațiile comune pe care nu le doream`, a fost
+   înlocuită odată cu titlul)
 5. Preheader: `La început nu voia nimeni un spațiu comun. Au apărut din două probleme pe care trebuia oricum să le rezolvăm.`
 6. Dezabonarea e automată, prin `List-Unsubscribe`. Șablonul are deja
    `{{{RESEND_UNSUBSCRIBE_URL}}}` în subsol, nu-l scoate.
