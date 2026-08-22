@@ -30,8 +30,11 @@ var PASI_CASETE = [
     sub: 'Pe ce canal se discută ce, și prima discuție serioasă despre ce vreți' },
 
   { key: 'c2',  ghid: 'organizarea',           culoare: '#2f8f5b',
-    titlu: 'Organizarea pe terenuri și apartamente',
-    sub: 'Analiza preliminară, apoi cine ia ce apartament și cu ce cotă indiviză' },
+    // Titlul s-a schimbat pe 22 august (cererea lui Lucian): pasul începe cu
+    // analiza preliminară a terenului, nu cu împărțirea. Ancora din ghid
+    // (`organizarea`) a rămas aceeași, deci nu se rupe niciun link.
+    titlu: 'Analiza preliminară și organizarea pe apartamente',
+    sub: 'Ce încape pe teren, apoi cine ia ce apartament și cu ce cotă indiviză' },
 
   { key: 'c3',  ghid: 'verificarea-terenului', culoare: '#2f8f5b',
     titlu: 'Verificarea terenului',
@@ -73,6 +76,58 @@ var PASI_CASETE = [
 
 // Doar casetele care se bifează. A noua nu intră în numărătoare.
 var PASI_CU_BIFA = PASI_CASETE.filter(function(c){ return !c.faraBifa; });
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   PAȘII CARE SE FAC PE FIECARE TEREN ÎN PARTE
+   ══════════════════════════════════════════════════════════════════════
+
+   Astea NU sunt pașii grupului, sunt pașii unui TEREN candidat. Un grup se
+   uită la trei terenuri și le face pe toate trei, separat. De aceea se
+   bifează pe teren, nu pe grup: „am extrasul de carte funciară" e adevărat
+   despre un teren anume, nu despre grup în general.
+
+   Ordinea e cea din ghid, iar ghidul o alege după cât costă: întâi ce e
+   gratis, la urmă ce se plătește. Primul pas e analiza preliminară, fiindcă
+   fără ea nu știi dacă terenul merită restul drumului.
+
+   ⚠️ `key` ajunge în `grup_teren_checklist.step_key` și, împreună cu id-ul
+   terenului, în `step_key` din `grup_checklist_notes` și `grup_checklist_files`
+   (vezi `cheiaPasTeren()` din grup-details.html). Nu se redenumesc fără
+   migrare.
+
+   ⚠️ `ghid` e ancora secțiunii din care e luat pasul, ca omul să poată citi
+   despre el pe larg.
+   ══════════════════════════════════════════════════════════════════════ */
+var PASI_TEREN = [
+  { key: 'analiza-prelim',      ghid: 'organizarea',           cereAnaliza: true,
+    titlu: 'Analiza preliminară',
+    sub: 'Câte apartamente încap și cu ce costuri, înainte de orice cheltuială' },
+
+  { key: 'vizita',              ghid: 'verificarea-terenului',
+    titlu: 'Vizita la teren și întâlnirea cu proprietarul',
+    sub: 'Mergeți pe teren, vedeți vecinii, discutați prețul. Notați ce ați aflat' },
+
+  { key: 'carte-funciara',      ghid: 'verificarea-terenului',
+    titlu: 'Extrasul de carte funciară',
+    sub: 'Situația juridică de azi, luată online sau cerută proprietarului' },
+
+  { key: 'notar',               ghid: 'verificarea-terenului',
+    titlu: 'Istoricul terenului, verificat la notar',
+    sub: 'Pasul sărit cel mai des. Extrasul spune cum e acum, nu cum s-a ajuns aici' },
+
+  { key: 'certificat-urbanism', ghid: 'verificarea-terenului',
+    titlu: 'Certificatul de urbanism pentru construire',
+    sub: 'Îl depune proprietarul, cu propunerea voastră de bloc' },
+
+  { key: 'geotehnic',           ghid: 'verificarea-terenului',
+    titlu: 'Studiul geotehnic sumar',
+    sub: 'Unul sau două foraje, ca să știți pe ce construiți' },
+
+  { key: 'vecini-calcan',       ghid: 'verificarea-terenului',
+    titlu: 'Acordul vecinilor de la calcan',
+    sub: 'Dacă blocul se lipește de o construcție existentă' }
+];
 
 // Textul secțiunilor, citit o singură dată. ancoră -> HTML
 var _pasiGhidCache = null;

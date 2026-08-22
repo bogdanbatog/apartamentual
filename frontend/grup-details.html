@@ -57,8 +57,13 @@
             margin-bottom: 1rem;
         }
         
+        /* 1.75rem, cât era, se rupea pe două rânduri de când coloana din
+           dreapta ține starea și butoanele. Numele de grupuri sunt lungi
+           („Boutique, 4-8 ap, parcare, 10 min metrou M1/M2"), deci titlul se
+           potrivește lățimii rămase, nu invers. */
         .grup-header h1 {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
+            line-height: 1.25;
             color: #1a1a1a;
             margin: 0 0 0.5rem 0;
         }
@@ -77,16 +82,33 @@
             gap: 0.375rem;
         }
         
+        /* Coloana din dreapta capului de pagină: starea sus, butoanele sub ea,
+           amândouă lipite la dreapta. */
+        .grup-header-dreapta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+
         .grup-header-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
+            justify-content: flex-end;
         }
-        
+
+        /* Rândul lat de sub titlu: mesajele pentru cine nu e în grup („Cere
+           alăturarea", „Cererea ta a fost trimisă", explicația grupului
+           exemplu). Sunt fraze întregi, n-au ce căuta într-o coloană îngustă. */
+        .grup-header-lat { margin-top: 1rem; }
+        .grup-header-lat:empty { display: none; }
+
         .btn-action {
-            padding: 0.625rem 1rem;
+            padding: 0.45rem 0.8rem;
             border-radius: 8px;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 500;
             cursor: pointer;
             display: inline-flex;
@@ -137,12 +159,15 @@
             background: #20bd5a;
         }
         
-        /* Status badge large */
+        /* Starea grupului. Era cât un buton (0.875rem, padding de 1rem) și, în
+           coloana din dreapta, „Cu aprobare" se rupea pe două rânduri și ținea
+           singură cât trei butoane. Acum e o pastilă mică, dintr-o bucată. */
         .status-badge-lg {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.875rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            font-size: 0.72rem;
             font-weight: 600;
+            white-space: nowrap;
         }
         
         /* Sections */
@@ -194,14 +219,24 @@
             display: block;
         }
 
-        /* Description */
+        /* Descrierea grupului.
+           ⚠️ Avea o fereastră proprie de derulare, de 200 de pixeli. Aceeași
+           poveste ca la terenuri: o bară de derulare într-o pagină care oricum
+           se derulează ascunde mai mult decât arată, iar omul nici nu știe că
+           mai e text. Acum se taie la trei rânduri, cu „Arată tot" dedesubt. */
         .grup-description {
             color: #1a1a1a;
             line-height: 1.7;
             white-space: pre-wrap;
-            max-height: 200px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+        }
+        .grup-description.tot {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
         }
         
         .no-description {
@@ -209,18 +244,21 @@
             font-style: italic;
         }
         
-        /* Members */
+        /* Members
+           Mai strânși decât până pe 22 august: erau carduri de 200px cu avatar
+           de 40 și un rând de dată, adică jumătate de ecran pentru cinci oameni
+           pe care oricum îi știi. Rămân aceleași informații, pe mai puțin loc. */
         .members-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            gap: 0.5rem;
         }
-        
+
         .member-card {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
+            gap: 0.5rem;
+            padding: 0.5rem;
             background: #faf8f3;
             border-radius: 8px;
             text-decoration: none;
@@ -233,8 +271,9 @@
         }
         
         .member-avatar {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
             border-radius: 50%;
             background: #1a1a1a;
             color: white;
@@ -242,7 +281,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.8rem;
         }
         
         .member-info {
@@ -252,30 +291,53 @@
         
         .member-name {
             font-weight: 500;
+            font-size: 0.875rem;
             color: #1a1a1a;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
+        /* Pe un card îngust, cu badge-ul „Admin" lângă el, rândul cu data se
+           rupea în două și cardul acela creștea cu 20 de pixeli față de vecinii
+           lui. Se taie, nu se rupe: data e oricum informația cea mai puțin
+           importantă de pe card. */
         .member-role {
-            font-size: 0.75rem;
-            color: #555555;
+            font-size: 0.7rem;
+            color: #8a8a8a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .member-role--admin { color: #c2604a; font-weight: 600; }
+
+        /* Cele două jumătăți ale rândului pliat cu zonele și interesele */
+        .pref-bloc + .pref-bloc { margin-top: 1rem; }
+        .pref-eticheta {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #8a8a8a;
+        }
+
+        /* Marcajul „Exemplu" de pe un membru al unui grup demonstrativ */
+        .member-exemplu {
+            display: inline-block;
+            background: #f0ece3; color: #6f6a61;
+            font-size: 9px; font-weight: 600; letter-spacing: 0.3px;
+            padding: 1px 5px; border-radius: 10px; margin-left: 5px;
+            vertical-align: middle;
         }
         
-        .member-badge {
-            font-size: 0.6875rem;
-            padding: 0.125rem 0.5rem;
-            border-radius: 10px;
-            background: #dbeafe;
-            color: #4a5f80;
-        }
-        
-        .admin-badge {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
+        /* ⚠️ Aici erau `.member-badge` și `.admin-badge`, pastila galbenă
+           „Admin" de lângă numele membrului. A ieșit pe 23 august: pe un card
+           strâns mânca jumătate din rândul numelui. Rolul se scrie acum pe
+           rândul de dedesubt, cu `.member-role--admin`. */
+
         /* Terenuri favorite */
         .terenuri-grid {
             display: grid;
@@ -357,27 +419,132 @@
             color: #555555;
             margin: 2px 0 0;
         }
-        .btn-cere-analiza {
-            margin-left: auto;
-            padding: 0.4rem 0.75rem;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: #fff;
-            background: #1a1a1a;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            white-space: nowrap;
+        /* ⚠️ Aici erau `.btn-cere-analiza` (butonul negru din capul cardului) și
+           `.teren-comments-area`. Butonul a coborât în lista de pași, la pasul
+           care îl cere („Analiza preliminară"), iar comentariile au intrat
+           într-o casetă pliată. */
+
+        /* ── CASETELE PLIATE DIN CARDUL UNUI TEREN ──
+           Comentariile și pașii de verificare. Amândouă închise: un grup se
+           uită la mai multe terenuri deodată și n-are nevoie de tot conținutul
+           fiecăruia deschis pe ecran. */
+        .tv-fold { border-top: 1px solid #e8e3d8; }
+        .tv-fold-cap {
             display: flex;
             align-items: center;
-            gap: 0.3rem;
-            align-self: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #1a1a1a;
         }
-        .btn-cere-analiza:hover {
-            background: #333333;
+        .tv-fold-cap:hover { background: #f3f0e7; }
+        .tv-fold-cap > i:first-child { color: #8a8a8a; font-size: 0.8rem; }
+        .tv-nr { font-weight: 500; color: #8a8a8a; font-size: 0.75rem; }
+        .tv-fold-sageata { margin-left: auto; color: #8a8a8a; font-size: 0.75rem; transition: transform 0.2s; }
+        .tv-fold.open .tv-fold-sageata { transform: rotate(180deg); }
+        .tv-fold-corp { display: none; padding: 0 1rem 1rem; }
+        .tv-fold.open .tv-fold-corp { display: block; }
+
+        /* ── ANUNȚURILE GRUPULUI, STRÂNSE ── */
+        .h2-numar { font-size: 0.875rem; font-weight: 500; color: #8a8a8a; }
+
+        /* Câmpul de scris e un rând. Crește când scrii în el, deci nu ține un
+           dreptunghi gol pe ecran pentru un anunț care poate nu vine azi. */
+        .anunt-scriere { display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 0.9rem; }
+        .anunt-scriere textarea {
+            flex: 1;
+            padding: 0.5rem 0.7rem;
+            border: 1px solid #e8e3d8;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            line-height: 1.45;
+            resize: vertical;
+            min-height: 36px;
+            transition: min-height 0.15s;
         }
-        .teren-comments-area {
-            padding: 12px 16px;
+        .anunt-scriere textarea:focus { min-height: 72px; outline: 2px solid #1a1a1a; outline-offset: 1px; }
+        .anunt-scriere button {
+            padding: 0.5rem 0.8rem;
+            background: #1a1a1a; color: white; border: none; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap;
         }
+
+        /* Un anunț e un rând, nu un card. Fără avatar rotund: numele scrie deja
+           cine a postat, iar inițialele nu adăugau nimic în plus. */
+        .anunt { padding: 0.5rem 0; border-bottom: 1px solid #f3f0e7; }
+        .anunt:last-child { border-bottom: none; }
+        .anunt-cap { display: flex; align-items: baseline; gap: 0.5rem; }
+        .anunt-autor { font-weight: 600; font-size: 0.78rem; color: #1a1a1a; }
+        .anunt-cand { font-size: 0.7rem; color: #8a8a8a; }
+        .anunt-sterge {
+            margin-left: auto; background: none; border: none; cursor: pointer;
+            color: #ddd5c6; font-size: 0.7rem; padding: 0 2px;
+        }
+        .anunt-sterge:hover { color: #ef4444; }
+        .anunt-text {
+            font-size: 0.85rem; color: #2a2a2a; line-height: 1.5;
+            white-space: pre-wrap; margin: 0.1rem 0 0;
+        }
+        .anunt-mai {
+            display: block; width: 100%; margin-top: 0.6rem;
+            background: none; border: none; cursor: pointer;
+            font-size: 0.78rem; font-weight: 600; color: #a94a35;
+        }
+        .anunt-mai:hover { text-decoration: underline; }
+
+        /* ── UN PAS DE VERIFICARE ── */
+        .tv-pas {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f0e7;
+        }
+        .tv-check {
+            width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px;
+            border: 2px solid #ddd5c6; border-radius: 5px; background: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .tv-check:hover { border-color: #c2604a; }
+        .tv-check.checked { background: #2f8f5b; border-color: #2f8f5b; }
+        .tv-check.checked::after { content: '✓'; color: white; font-size: 0.7rem; font-weight: 700; }
+        .tv-check.blocat { cursor: default; }
+        .tv-check.blocat:hover { border-color: #ddd5c6; }
+        .tv-pas-text { flex: 1; min-width: 0; cursor: pointer; }
+        .tv-pas-titlu { display: block; font-size: 0.85rem; color: #1a1a1a; line-height: 1.35; }
+        .tv-pas-sub { display: block; font-size: 0.75rem; color: #8a8a8a; line-height: 1.4; margin-top: 1px; }
+        .tv-pas.bifat .tv-pas-titlu { color: #555555; }
+        .tv-actiune {
+            flex-shrink: 0; align-self: center; white-space: nowrap;
+            font-size: 0.78rem; font-weight: 600; color: #a94a35; text-decoration: none;
+        }
+        .tv-actiune:hover { text-decoration: underline; }
+        /* Butonul care deschide notele și fișierele pasului. Are trei semne
+           dinadins: agrafa spune CE se deschide, cuvântul „note" o confirmă în
+           limbaj, iar săgeata spune că se deschide DEDESUBT. Cu agrafa singură
+           părea un buton de atașat un fișier pe loc. */
+        .tv-pas-buton {
+            flex-shrink: 0; align-self: center;
+            display: flex; align-items: center; gap: 0.3rem;
+            background: none; border: none; cursor: pointer;
+            color: #8a8a8a; font-size: 0.75rem; padding: 0.25rem 0.4rem;
+        }
+        .tv-pas-buton:hover { color: #c2604a; }
+        .tv-pas-eticheta { font-weight: 600; }
+        .tv-pas-sageata { font-size: 0.65rem; transition: transform 0.2s; }
+        .tv-pas-buton.deschis .tv-pas-sageata { transform: rotate(180deg); }
+        .tv-pas-buton.deschis { color: #c2604a; }
+        /* Notele și fișierele pasului. `.cl-box-tools` de mai jos aduce chenarul
+           de sus și spațiile; aici rămâne doar retragerea, ca să se vadă că țin
+           de pasul de deasupra. */
+        .tv-pas-corp { display: none; padding: 0 0 0.75rem 2.1rem; }
+        .tv-pas-corp.open { display: block; }
+
         .teren-comments-list {
             max-height: 300px;
             overflow-y: auto;
@@ -745,8 +912,132 @@
             display: block;
         }
 
-        /* ── CHECKLIST TIMELINE ── */
-        .checklist-timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+        /* ⚠️ Rândul de deasupra pune `display:block` pe orice element devenit
+           vizibil, iar titlurile de capitol și șirurile de casete sunt `flex`.
+           Cu două clase, regulile astea câștigă și își păstrează așezarea:
+           altfel titlul rămâne fără linia din dreapta lui, iar casetele fără
+           spațiul dintre ele. */
+        .member-only.visible.cap-pasi,
+        .member-only.visible.linie-unealta { display: flex; }
+
+        /* ── CAPITOLELE PAGINII ──
+           ⚠️ Refăcut pe 22 august, a doua oară. Prima variantă avea capitolele
+           ca un simplu rând gri cu o linie după el, iar sub el pluteau mai
+           multe carduri albe. Lucian: „mi se pare dezlânat, sunt foarte multe
+           casete albe și nu vezi grupările pe categorii."
+           Acum UN CAPITOL = UN CARD. Tot ce ține de el stă înăuntru: casetele
+           cu explicația pasului și locul unde se lucrează la el. Pagina are
+           cinci carduri mari (grupul, plus patru capitole), nu douăsprezece
+           mici. */
+        .capitol {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .capitol-titlu {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin: 0 0 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f0ebe0;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        /* Pătratul cărămiziu dinaintea titlului: semnul că începe alt capitol,
+           văzut din colțul ochiului la derulare rapidă. */
+        .capitol-titlu::before {
+            content: '';
+            width: 10px; height: 10px; flex-shrink: 0;
+            background: #c2604a;
+            border-radius: 3px;
+        }
+
+        /* O bucată dintr-un capitol: anunțurile, terenurile grupului. N-are
+           fundal propriu, doar un titlu mic și o linie deasupra. Aici erau,
+           până pe 22 august, carduri albe de sine stătătoare. */
+        .capitol-sub {
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #f0ebe0;
+        }
+        .capitol-sub h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .capitol-sub h3 i { color: #c2604a; font-size: 0.9rem; }
+
+        /* Casetele de pași stau pe un card alb, deci nu mai pot fi și ele albe:
+           s-ar topi în el. Cremul le desparte fără să adauge încă un chenar. */
+        .capitol .cl-phase, .grup-header .cl-phase { background: #faf8f3; }
+
+        /* Fraza dintre cardul grupului și primul capitol. Stă ÎNTRE ele, pe
+           fundalul paginii, fiindcă vorbește despre ce urmează, nu despre grup
+           (cerut de Lucian, 22 august). */
+        .grup-header-intro {
+            margin: -0.5rem 0 1.5rem;
+            padding: 0 0.25rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #8a8a8a;
+        }
+
+        /* Trimiterile din capul paginii: una coboară în pagină, una iese la ghid */
+        .grup-header-trimiteri {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.25rem;
+            margin-top: 1rem;
+            font-size: 0.8125rem;
+        }
+        .grup-header-trimiteri a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #555555;
+            text-decoration: none;
+        }
+        .grup-header-trimiteri a:hover { color: #1a1a1a; text-decoration: underline; }
+        .grup-header-trimiteri i { color: #c2604a; }
+
+        /* Casetele de pași dintr-un capitol: aceleași `.cl-phase`, dar fără cardul
+           alb din jur. Stau direct pe fundalul paginii, deasupra secțiunii în care
+           se lucrează, ca să se vadă că sunt însoțitorul ei, nu o secțiune nouă. */
+        /* Șirul de casete al unui capitol. Fără margine jos: distanțele le dau
+           frații de dedesubt (`.linie-unealta`, `.capitol-sub`), ca să nu se
+           adune două margini una peste alta. */
+        .cap-pasi { display: flex; flex-direction: column; gap: 0.6rem; }
+
+        /* Un rând de unealtă, nu un card: pentru lucrurile care se spun într-o
+           propoziție și au un singur link (deocamdată, WhatsApp). Un card alb
+           cu titlu și explicație pentru un singur link mânca un sfert de ecran. */
+        .linie-unealta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding: 0.6rem 0.9rem;
+            background: #faf8f3;
+            border: 1px solid #e8e3d8;
+            border-radius: 0.6rem;
+            font-size: 0.85rem;
+            color: #555555;
+        }
+        .linie-unealta a { color: #a94a35; text-decoration: none; font-weight: 600; }
+        .linie-unealta a:hover { text-decoration: underline; }
+
+        /* ── CASETELE UNUI PAS ──
+           Se folosesc acum în interiorul capitolelor (`.cap-pasi`). Numele
+           claselor a rămas `cl-`, ca notele și atașamentele să nu se rescrie. */
         .cl-phase {
             border: 1px solid #e8e3d8; border-radius: 0.75rem; overflow: hidden; background: white;
         }
@@ -761,45 +1052,21 @@
             font-weight: 800; font-size: 0.8rem; color: white; flex-shrink: 0;
         }
         .cl-phase-title { font-weight: 700; font-size: 0.92rem; color: #1a1a1a; flex: 1; }
-        .cl-phase-progress { font-size: 0.75rem; color: #8a8a8a; font-weight: 600; margin-right: 0.5rem; }
+        /* Subtitlul casetei: ce scrie în `js/pasi-din-ghid.js` la câmpul `sub`.
+           Se vede cu caseta închisă, ca omul să știe ce găsește înăuntru fără
+           să o deschidă. */
+        .cl-phase-sub { display: block; font-weight: 400; font-size: 0.78rem; color: #8a8a8a; margin-top: 2px; line-height: 1.4; }
         .cl-phase-chevron { color: #8a8a8a; transition: transform 0.2s; font-size: 0.8rem; }
         .cl-phase.open .cl-phase-chevron { transform: rotate(180deg); }
         .cl-phase-body { display: none; padding: 0 1.25rem 1rem; }
         .cl-phase.open .cl-phase-body { display: block; }
-        .cl-phase.gata .cl-phase-title { color: #555555; }
-
-        /* Bifa de casetă: „grupul a trecut de aici" */
-        .cl-box-done {
-            display: flex; align-items: center; gap: 0.6rem;
-            margin-top: 1.1rem; padding: 0.6rem 0.8rem;
-            border: 1px solid #e8e3d8; border-radius: 0.5rem; background: #faf8f3;
-            font-size: 0.85rem; font-weight: 600; color: #1a1a1a;
-            cursor: pointer; user-select: none; transition: border-color 0.15s;
-        }
-        .cl-box-done:hover { border-color: #c2604a; }
-        .cl-box-done.bifat { background: #f0f7f2; border-color: #bfdcc9; }
-        .cl-box-done.sters { cursor: default; }
-        .cl-box-done.sters:hover { border-color: #e8e3d8; }
-        .cl-box-done-meta { margin-left: auto; font-size: 0.72rem; font-weight: 500; color: #8a8a8a; }
+        /* ⚠️ Aici erau regulile bifelor (`.cl-box-done`, `.cl-check`) și ale
+           pașilor mărunți dinăuntrul unei casete (`.cl-step`, `.cl-step-title`).
+           Bifele de grup au ieșit din pagină pe 22 august, iar pașii mărunți
+           dispăruseră deja pe 21, când cele 27 de rânduri au devenit 11 casete.
+           Ce a rămas mai jos ține de note și atașamente, care se folosesc. */
         .cl-box-tools { margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #e8e3d8; }
 
-        .cl-step {
-            display: flex; align-items: flex-start; gap: 0.75rem;
-            padding: 0.65rem 0; border-bottom: 1px solid #f3f0e7;
-        }
-        .cl-step:last-child { border-bottom: none; }
-        .cl-check {
-            width: 22px; height: 22px; border: 2px solid #ddd5c6; border-radius: 5px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; background: white;
-        }
-        .cl-check:hover { border-color: #c2604a; }
-        .cl-check.checked { background: #2f8f5b; border-color: #2f8f5b; }
-        .cl-check.checked::after { content: '✓'; color: white; font-size: 0.75rem; font-weight: 700; }
-        .cl-step-content { flex: 1; min-width: 0; }
-        .cl-step-title { font-size: 0.88rem; font-weight: 500; color: #1a1a1a; line-height: 1.3; }
-        .cl-step-subtitle { font-size: 0.78rem; color: #8a8a8a; margin-top: 2px; line-height: 1.4; }
-        .cl-step.done .cl-step-title { color: #555555; text-decoration: line-through; text-decoration-color: #ddd5c6; }
         .cl-step-meta {
             display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
             font-size: 0.72rem; color: #8a8a8a; flex-wrap: wrap;
@@ -909,11 +1176,11 @@
                 width: 100%;
                 height: 140px;
             }
-            .btn-cere-analiza {
-                margin-left: 0;
-                align-self: flex-start;
-            }
-            
+            /* Pe telefon, acțiunea unui pas (de exemplu „Cere o analiză") trece
+               sub titlul lui, nu îl înghesuie. */
+            .tv-pas { flex-wrap: wrap; }
+            .tv-pas .tv-actiune { margin-left: 42px; }
+
             /* Spațiu de jos pe body ca butonul "Cere consultanță" flotant
                să nu acopere conținutul de jos pe mobil */
             body {
@@ -1017,18 +1284,86 @@
                         <span><i class="fas fa-calendar"></i> Creat <span id="grupCreatedAt">azi</span></span>
                     </div>
                 </div>
-                <span id="grupStatus" class="status-badge-lg status-explorare">🟡 În explorare</span>
-            </div>
-            
-            <div class="grup-header-actions" id="headerActions">
-                <!-- Actions will be populated by JS -->
+                <!-- Starea grupului și butoanele lui, împreună, în dreapta.
+                     ⚠️ Butoanele stăteau pe un rând propriu sub titlu și mâncau
+                     o bandă întreagă din capul paginii (cerut de Lucian,
+                     23 august). Aici intră DOAR butoanele scurte de membru;
+                     mesajele lungi pentru cei din afara grupului („Cererea ta a
+                     fost trimisă...") merg în `#headerActionsLat`, care are
+                     toată lățimea. -->
+                <div class="grup-header-dreapta">
+                    <span id="grupStatus" class="status-badge-lg status-explorare">🟡 În explorare</span>
+                    <div class="grup-header-actions" id="headerActions">
+                        <!-- Actions will be populated by JS -->
+                    </div>
+                </div>
             </div>
 
-            <!-- Link către ghid: „ce poți face în grup" — vizibil tuturor -->
-            <a href="ghid.html#grupuri" style="display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 1rem; font-size: 0.8125rem; color: #555555; text-decoration: none;">
-                <i class="fas fa-circle-info" style="color: #c2604a;"></i>
-                Ce poți face într-un grup? Vezi ghidul
-            </a>
+            <div id="headerActionsLat" class="grup-header-lat"></div>
+
+            <!-- Trimiterile din capul paginii.
+                 „↓" coboară în pagină, „→" iese din ea: aceeași convenție ca în
+                 cuprinsul din homepage.
+                 ⚠️ Aici stătea linkul „Ce poți face într-un grup? Vezi ghidul",
+                 către `ghid.html#grupuri`. A ieșit pe 22 august, la cererea lui
+                 Lucian: pagina își explică acum singură capitolele, iar ghidul
+                 lung e cel de la „Toți pașii". `ghid.html` rămâne linkat din
+                 subsolul site-ului, nu s-a șters. -->
+            <div class="grup-header-trimiteri">
+                <a href="#terenuriSection">
+                    <i class="fas fa-map-location-dot"></i>
+                    Terenurile grupului <span aria-hidden="true">↓</span>
+                </a>
+                <a href="ce-este/cum-functioneaza.html" target="_blank" rel="noopener">
+                    <i class="fas fa-list-check"></i>
+                    Toți pașii într-un grup <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <!-- Descrierea și membrii sunt PARTEA CARDULUI ĂSTUIA, nu carduri
+                 separate (cerut de Lucian, 22 august): țin de identitatea
+                 grupului, nu de vreun pas al lui. -->
+            <div class="capitol-sub">
+                <h3><i class="fas fa-info-circle"></i> Descriere</h3>
+                <p id="grupDescriere" class="grup-description">Fără descriere.</p>
+                <button id="descriereMai" class="anunt-mai" onclick="toggleDescriere()" style="display:none;">Arată tot ↓</button>
+            </div>
+
+            <div class="capitol-sub">
+                <h3><i class="fas fa-users"></i> Membri <span class="h2-numar">(<span id="membriCountTitle">0</span>)</span></h3>
+                <div id="membersGrid" class="members-grid">
+                    <!-- Members will be populated by JS -->
+                </div>
+                <!-- La 20 de membri, grila ar fi cinci rânduri de carduri
+                     înainte de primul lucru de făcut. Se văd opt, restul la
+                     cerere. -->
+                <button id="membriMai" class="anunt-mai" onclick="toggleTotiMembrii()" style="display:none;"></button>
+            </div>
+
+            <!-- Zonele și interesele grupului. Stăteau la finalul paginii, ca
+                 două carduri albe singure după ultimul capitol; țin de
+                 identitatea grupului, deci au urcat aici, la descriere și
+                 membri. Din 23 august sunt UN SINGUR rând pliat, nu două.
+                 ⚠️ Titlul spune pe șleau ce e înăuntru („zonele și interesele"),
+                 nu ceva de ghicit gen „ce caută grupul": cererea lui Lucian.
+                 ⚠️ `display:none` inline e pus de JS pe `block` doar dacă grupul
+                 chiar are zone sau interese; la fel, fiecare bloc dinăuntru. -->
+            <div id="preferinteSection" class="capitol-sub section-fold" style="display: none;">
+                <h3 class="section-fold-head" onclick="toggleFold('preferinteSection')">
+                    <i class="fas fa-map-marker-alt"></i> Zonele și interesele grupului
+                    <i class="fas fa-chevron-down section-fold-chevron"></i>
+                </h3>
+                <div class="section-fold-body">
+                    <div id="zoneBloc" class="pref-bloc" style="display: none;">
+                        <span class="pref-eticheta">Zone preferate</span>
+                        <div id="grupZones" class="tags-display"></div>
+                    </div>
+                    <div id="tagsBloc" class="pref-bloc" style="display: none;">
+                        <span class="pref-eticheta">Interese și preferințe</span>
+                        <div id="grupTags" class="tags-display"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Invitation banner (shown if current user has a pending invitation to this group) -->
@@ -1084,19 +1419,14 @@
             </div>
         </div>
         
-        <!-- Description -->
-        <div class="section-card">
-            <h2><i class="fas fa-info-circle"></i> Descriere</h2>
-            <p id="grupDescriere" class="grup-description">Fără descriere.</p>
-        </div>
-        
-        <!-- Members -->
-        <div class="section-card">
-            <h2><i class="fas fa-users"></i> Membri (<span id="membriCountTitle">0</span>)</h2>
-            <div id="membersGrid" class="members-grid">
-                <!-- Members will be populated by JS -->
-            </div>
-        </div>
+        <!-- Fraza stă ÎNTRE cardul grupului și primul capitol, pe fundalul
+             paginii: vorbește despre ce urmează, nu despre grup.
+             `member-only`: capitolele despre care vorbește se văd doar din
+             interiorul grupului. -->
+        <p class="grup-header-intro member-only">
+            Mai jos ai pașii în ordine cronologică: comunicarea, terenurile,
+            analiza și contractul, restul drumului.
+        </p>
 
         <!-- Active Kick Votes - Member only -->
         <div id="kickVotesSection" class="section-card member-only" style="display: none;">
@@ -1104,85 +1434,94 @@
             <div id="kickVotesList"></div>
         </div>
 
-        <!-- Terenuri favorite - Visible to all logged-in users -->
-        <div id="terenuriSection" class="section-card">
-            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului <span id="terenuriGrupNume"></span></h2>
-            <div id="terenuriGrid" class="terenuri-grid" style="max-height: 400px; overflow-y: auto;">
-                <div class="empty-section">
-                    <i class="fas fa-map"></i>
-                    <p>Niciun teren adăugat încă.</p>
-                    <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
-                        <i class="fas fa-search"></i> Explorează terenuri
-                    </a>
-                </div>
-            </div>
-        </div>
+        <!-- ══════════════════ CAPITOLUL 1 · COMUNICAREA ══════════════════
+             Capitolul întreg e `member-only`: un om din afara grupului vede
+             cardul grupului (cu descrierea și membrii) și terenurile, atât. -->
+        <section class="capitol member-only">
+            <h2 class="capitol-titlu">Comunicarea</h2>
 
-        <!-- Anunțuri generale grup - Member only -->
-        <div id="anunturiSection" class="section-card member-only">
-            <h2><i class="fas fa-bullhorn"></i> Anunțuri generale grup</h2>
-            
-            <!-- Post new announcement -->
-            <div id="anuntFormContainer" style="margin-bottom: 1.25rem;">
-                <div style="display: flex; gap: 0.5rem;">
-                    <textarea id="anuntInput" placeholder="Scrie un anunț pentru grup..." 
-                              style="flex: 1; padding: 0.625rem 0.75rem; border: 1px solid #e8e3d8; border-radius: 8px; font-size: 0.875rem; font-family: inherit; resize: vertical; min-height: 60px;"></textarea>
-                    <button onclick="postAnunt()" style="padding: 0.625rem 1rem; background: #1a1a1a; color: white; border: none; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: flex-end;">
-                        <i class="fas fa-paper-plane"></i> Postează
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Announcements list -->
-            <div id="anunturiList" style="max-height: 280px; overflow-y: auto;">
-                <p style="color: #8a8a8a; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun anunț încă. Fii primul care postează!</p>
-            </div>
-        </div>
-        
-        <!-- Journal & Checklist - Member only (Coming soon) -->
-        <div id="journalSection" class="section-card member-only">
-            <h2><i class="fas fa-tasks"></i> Cronologia pașilor de urmat într-un grup</h2>
-            <p id="checklistSubtitle" style="font-size: 0.82rem; color: #8a8a8a; margin-bottom: 1.25rem;">Cei 11 pași ai unui proiect, de la prima discuție până la mutare. Caseta deschisă e cea la care ați ajuns.</p>
-            <div id="checklistReadonly" style="display: none; padding: 0.6rem 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.82rem; color: #92400e;">
-                <i class="fas fa-info-circle"></i> Doar membrii grupului pot edita jurnalul de progres. Contactează adminul pentru modificări.
-            </div>
-            
-            <!-- Progress bar -->
-            <div style="margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                    <span style="font-size: 0.82rem; font-weight: 600; color: #1a1a1a;">Pași parcurși</span>
-                    <span id="progressPercent" style="font-size: 0.82rem; font-weight: 700; color: #c2604a;">0 din 10</span>
-                </div>
-                <div style="height: 8px; background: #e8e3d8; border-radius: 4px; overflow: hidden;">
-                    <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #c2604a, #dda88f); border-radius: 4px; transition: width 0.5s;"></div>
-                </div>
-            </div>
-            
-            <!-- Timeline phases -->
-            <div id="checklistTimeline" class="checklist-timeline"></div>
-        </div>
+            <!-- Casetele de teorie ale capitolului. Se umplu din
+                 `renderCasetePasi()`, care citește cheile din `data-pasi`.
+                 Cheile sunt cele din `js/pasi-din-ghid.js` și se scriu la fel în
+                 `grup_checklist_notes` și `grup_checklist_files`, deci nu se
+                 redenumesc aici. -->
+            <div class="cap-pasi" id="pasiComunicarea" data-pasi="c1"></div>
 
-        <!-- Zone preferate - casetă pliabilă, închisă implicit -->
-        <div id="zoneSection" class="section-card section-fold" style="display: none;">
-            <h2 class="section-fold-head" onclick="toggleFold('zoneSection')">
-                <i class="fas fa-map-marker-alt"></i> Zone preferate
-                <i class="fas fa-chevron-down section-fold-chevron"></i>
-            </h2>
-            <div class="section-fold-body">
-                <div id="grupZones" class="tags-display"></div>
-            </div>
-        </div>
+            <!-- Linkul de WhatsApp, mutat aici din Administrare pe 22 august.
+                 Îl vede orice membru; îl EDITEAZĂ tot numai fondatorul, din
+                 secțiunea Administrare de la finalul paginii.
+                 ⚠️ Un singur rând, nu un card cu explicații. Prima variantă avea
+                 o casetă întreagă care povestea de ce se discută pe WhatsApp și
+                 ce rămâne în pagină. Lucian a scos-o: pagina e un loc de lucru,
+                 nu un manual, iar explicațiile lungi stau în casetele pașilor. -->
+            <div id="whatsappBox" class="linie-unealta"></div>
 
-        <!-- Tag-uri / Interese - casetă pliabilă, închisă implicit -->
-        <div id="tagsSection" class="section-card section-fold" style="display: none;">
-            <h2 class="section-fold-head" onclick="toggleFold('tagsSection')">
-                <i class="fas fa-tags"></i> Interese și preferințe
-                <i class="fas fa-chevron-down section-fold-chevron"></i>
-            </h2>
-            <div class="section-fold-body">
-                <div id="grupTags" class="tags-display"></div>
+            <!-- ⚠️ Anunțurile, strânse pe 22 august. Înainte era un card alb de
+                 sine stătător, cu titlu mare, o casetă de scris de 60 de pixeli
+                 și fiecare anunț într-un dreptunghi colorat cu avatar rotund.
+                 Trei anunțuri ocupau un ecran. -->
+            <div id="anunturiSection" class="capitol-sub">
+                <h3><i class="fas fa-bullhorn"></i> Anunțuri <span id="anunturiCount" class="h2-numar"></span></h3>
+
+                <div id="anuntFormContainer" class="anunt-scriere">
+                    <textarea id="anuntInput" rows="1" placeholder="Scrie un anunț pentru grup..."></textarea>
+                    <button onclick="postAnunt()"><i class="fas fa-paper-plane"></i> Postează</button>
+                </div>
+
+                <div id="anunturiList"></div>
+                <button id="anunturiMai" class="anunt-mai" onclick="toggleToateAnunturile()" style="display:none;"></button>
             </div>
-        </div>
+        </section>
+
+        <!-- ══════════════════ CAPITOLUL 2 · TERENURILE ══════════════════
+             Singurul capitol care NU e `member-only`: terenurile unui grup se
+             văd de orice om logat, ca înainte. Doar casetele cu explicații
+             dinăuntru sunt pentru membri.
+             ⚠️ `id="terenuriSection"` stă pe capitol, nu pe lista de terenuri:
+             e ținta linkului „Terenurile grupului ↓" din capul paginii, iar
+             omul trebuie să aterizeze pe titlul capitolului. -->
+        <section id="terenuriSection" class="capitol">
+            <h2 class="capitol-titlu">Terenurile</h2>
+
+            <div class="cap-pasi member-only" id="pasiTerenurile" data-pasi="c2,c3"></div>
+
+            <div class="capitol-sub">
+                <!-- Fără numele grupului aici: scrie cu litere mari în capul
+                     paginii, iar capitolul se numește deja „Terenurile". -->
+                <h3><i class="fas fa-map-location-dot"></i> Terenurile salvate de grup</h3>
+                <!-- ⚠️ Fără `max-height` și fără scroll interior. Erau 400 de
+                     pixeli cu bară de derulare proprie, dinainte ca terenurile
+                     să aibă în ele comentarii și pași: cu casetele deschise,
+                     tot ce e sub primul teren ajungea într-o fereastră de
+                     scroll dintr-o pagină care oricum se derulează. Două bare
+                     de derulare una în alta e cel mai sigur fel de a ascunde
+                     ceva de om. -->
+                <div id="terenuriGrid" class="terenuri-grid">
+                    <div class="empty-section">
+                        <i class="fas fa-map"></i>
+                        <p>Niciun teren adăugat încă.</p>
+                        <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
+                            <i class="fas fa-search"></i> Explorează terenuri
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═════════════ CAPITOLUL 3 · ANALIZA ȘI CONTRACTUL ═════════════ -->
+        <section class="capitol member-only">
+            <h2 class="capitol-titlu">Analiza și contractul</h2>
+            <div class="cap-pasi" id="pasiAnaliza" data-pasi="c4,c5,c6"></div>
+        </section>
+
+        <!-- ═════════════ CAPITOLUL 4 · RESTUL DRUMULUI ═════════════
+             De la proiectare până la mutare. Aici nu e (încă) nimic de lucrat în
+             pagină, doar explicațiile; uneltele lor se construiesc pe măsură ce
+             ajung grupurile reale acolo. -->
+        <section class="capitol member-only">
+            <h2 class="capitol-titlu">Restul drumului</h2>
+            <div class="cap-pasi" id="pasiRestul" data-pasi="c7,c8,c9,c10,c11"></div>
+        </section>
 
         <!-- Admin Section - Admin only -->
         <div id="adminSection" class="section-card" style="display: none;">
@@ -1193,10 +1532,16 @@
                 <div id="pendingRequestsList"></div>
             </div>
             
+            <!-- Editarea linkului rămâne aici, la fondator. Afișarea lui s-a mutat
+                 sus, în capitolul Comunicarea, unde o vede orice membru. -->
             <div class="admin-section">
                 <h3>Link WhatsApp</h3>
+                <p style="font-size: 0.8125rem; color: #8a8a8a; margin: 0 0 0.5rem;">
+                    Odată salvat, apare tuturor membrilor în capitolul Comunicarea, la începutul paginii.
+                    Când îl schimbi, membrii primesc un email.
+                </p>
                 <div style="display: flex; gap: 0.5rem;">
-                    <input type="url" id="whatsappInput" placeholder="https://chat.whatsapp.com/..." 
+                    <input type="url" id="whatsappInput" placeholder="https://chat.whatsapp.com/..."
                            style="flex: 1; padding: 0.5rem; border: 1px solid #e8e3d8; border-radius: 6px;">
                     <button class="btn-action btn-secondary" onclick="saveWhatsApp()">
                         <i class="fas fa-save"></i> Salvează
@@ -1552,9 +1897,13 @@ async function loadGroupDetails() {
             
             if (likesData && likesData.length > 0) {
                 const terenIds = likesData.map(l => l.teren_id);
+                // `nr_apartamente_min/max` spun dacă terenul are deja o analiză:
+                // e același criteriu ca pe pagina terenului și ca pe homepage.
+                // Din el se decide dacă primul pas de verificare arată butonul
+                // „Cere o analiză" sau rezultatul ei.
                 const { data: terenuriData } = await sb
                     .from('terenuri')
-                    .select('id, titlu, zona, image_url')
+                    .select('id, titlu, zona, image_url, suprafata, nr_apartamente_min, nr_apartamente_max')
                     .in('id', terenIds);
                 
                 terenuri = (terenuriData || []).map(t => ({ teren: t }));
@@ -1635,15 +1984,25 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         descEl.textContent = 'Acest grup nu are încă o descriere.';
         descEl.classList.add('no-description');
     }
-    
+
+    // „Arată tot" apare doar dacă textul chiar se taie. Se măsoară după ce a
+    // fost pus în pagină: la trei rânduri tăiate, `scrollHeight` e mai mare
+    // decât înălțimea vizibilă. Cele două zecimi de toleranță sunt pentru
+    // rotunjirile de subpixel, care altfel aprind butonul degeaba.
+    const descBtn = document.getElementById('descriereMai');
+    if (descBtn) {
+        descBtn.style.display = (descEl.scrollHeight > descEl.clientHeight + 2) ? 'block' : 'none';
+    }
+
     // Actions
     renderActions(group);
     
     // Zones
     if (groupZones && groupZones.length > 0) {
-        const zoneSection = document.getElementById('zoneSection');
         const zoneContainer = document.getElementById('grupZones');
-        zoneSection.style.display = 'block';
+        // Rândul pliat se aprinde dacă grupul are măcar unul din cele două
+        document.getElementById('preferinteSection').style.display = 'block';
+        document.getElementById('zoneBloc').style.display = 'block';
         
         // Load user zones for matching
         let userZoneIds = [];
@@ -1685,9 +2044,9 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     
     // Tags
     if (groupTags && groupTags.length > 0) {
-        const tagSection = document.getElementById('tagsSection');
         const tagContainer = document.getElementById('grupTags');
-        tagSection.style.display = 'block';
+        document.getElementById('preferinteSection').style.display = 'block';
+        document.getElementById('tagsBloc').style.display = 'block';
         
         // Check matching with current user's tags
         let userTagIds = [];
@@ -1739,22 +2098,16 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     if (isMember || isSuperAdmin) {
         document.querySelectorAll('.member-only').forEach(el => el.classList.add('visible'));
         loadKickVotes();
-        loadChecklist();
+        incarcaCasetePasi();
         loadAnunturi();
-        
-        // Show readonly notice if member can't edit
-        if (!canEditChecklist) {
-            document.getElementById('checklistReadonly').style.display = 'block';
-            document.getElementById('checklistSubtitle').textContent = 'Cei 11 pași ai unui proiect, de la prima discuție până la mutare. Vezi unde a ajuns grupul.';
-        }
+        renderWhatsApp(group);
+        // ⚠️ Aici se aprindea și avertismentul „doar membrii pot edita jurnalul",
+        // legat de bifele de grup. A plecat odată cu ele. `canEditChecklist`
+        // rămâne folosit pentru note și atașamente, care se editează mai departe.
     }
     
-    // Terenuri favorite - visible to all logged-in users
+    // Terenurile grupului, vizibile oricui e logat
     if (currentUser) {
-        const terenuriGrupNume = document.getElementById('terenuriGrupNume');
-        if (terenuriGrupNume && group.nume) {
-            terenuriGrupNume.textContent = group.nume;
-        }
         renderTerenuri(terenuri);
     }
     
@@ -1779,20 +2132,26 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
 }
 
 // ── RENDER ACTIONS ──
+// ── BUTOANELE ȘI MESAJELE DIN CAPUL PAGINII ──
+// Două locuri, nu unul:
+//   `#headerActions`    coloana îngustă din dreapta, lângă starea grupului.
+//                       Doar butoane scurte, pentru cine e deja în grup.
+//   `#headerActionsLat` rândul lat de sub titlu. Frazele întregi pentru cine
+//                       nu e în grup, care într-o coloană de 200 de pixeli ar
+//                       ieși pe șapte rânduri.
 function renderActions(group) {
     const actionsEl = document.getElementById('headerActions');
+    const latEl = document.getElementById('headerActionsLat');
     let html = '';
-    
+    let lat = '';
+
     if (isMember || isSuperAdmin) {
-        // WhatsApp link
-        if (group.link_whatsapp) {
-            html += `
-                <a href="${escapeHtml(group.link_whatsapp)}" target="_blank" class="btn-action btn-whatsapp">
-                    <i class="fab fa-whatsapp"></i> Grup WhatsApp
-                </a>
-            `;
-        }
-        
+        // ⚠️ Butonul „Grup WhatsApp" a plecat de aici pe 22 august. Linkul se
+        // vede acum în capitolul Comunicarea (`renderWhatsApp`), unde stă lângă
+        // explicația lui: în capul paginii era un buton fără context, iar
+        // capitolul Comunicarea ar fi rămas cu o casetă de teorie și nimic de
+        // făcut sub ea.
+
         // Invite
         html += `
             <button class="btn-action btn-secondary" onclick="inviteMember()">
@@ -1820,7 +2179,7 @@ function renderActions(group) {
     } else if (group.is_demo) {
         // Grup exemplu: nu se cere alăturarea (nu are oameni reali în spate).
         // Îl îndrumăm pe utilizator spre crearea propriului grup.
-        html += `
+        lat += `
             <a href="grup-nou.html" class="btn-action btn-primary">
                 <i class="fas fa-plus"></i> Pornește un grup ca acesta
             </a>
@@ -1840,14 +2199,14 @@ function renderActions(group) {
         const isAgency = currentUserProfile && currentUserProfile.account_type === 'profesional';
         
         if (isAgency) {
-            html += `<span style="color: #8a8a8a; font-size: 0.875rem;"><i class="fas fa-info-circle"></i> Conturile de agenție nu pot intra în grupuri.</span>`;
+            lat += `<span style="color: #8a8a8a; font-size: 0.875rem;"><i class="fas fa-info-circle"></i> Conturile de agenție nu pot intra în grupuri.</span>`;
         } else if (hasPending) {
-            html += `<span style="color: #c2604a; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
+            lat += `<span style="color: #c2604a; font-weight: 500;"><i class="fas fa-clock"></i> Cererea ta de alăturare a fost trimisă. Așteptăm aprobarea adminului.</span>`;
         } else if (!currentUserProfileComplete && hasRoom) {
             // Cine nu și-a completat profilul nu poate intra în grup — regula
             // e aplicată în bază (politica de INSERT pe `grup_membri`), iar
             // aici doar o explicăm, ca omul să nu primească o eroare seacă.
-            html += `
+            lat += `
                 <a href="profile-edit-new.html" class="btn-action btn-primary">
                     <i class="fas fa-user-edit"></i> Completează-ți profilul ca să te poți alătura
                 </a>
@@ -1857,26 +2216,62 @@ function renderActions(group) {
             // există ca decizie de produs, iar baza refuză de acum inserarea
             // directă ca `activ`. Ambele stări duc în același loc: o cerere
             // pe care o aprobă adminul grupului.
-            html += `
+            lat += `
                 <button class="btn-action btn-primary" onclick="requestJoinGroup()">
                     <i class="fas fa-user-plus"></i> Cere alăturarea
                 </button>
             `;
         } else {
-            html += `<span style="color: #8a8a8a;">Grupul este plin.</span>`;
+            lat += `<span style="color: #8a8a8a;">Grupul este plin.</span>`;
         }
     } else {
-        html += `
+        lat += `
             <a href="#" class="btn-action btn-primary" onclick="event.preventDefault(); openLoginModal();">
                 <i class="fas fa-sign-in-alt"></i> Conectează-te pentru a te alătura
             </a>
         `;
     }
-    
+
     actionsEl.innerHTML = html;
+    if (latEl) latEl.innerHTML = lat;
+}
+
+// ── LINKUL DE WHATSAPP, ÎN CAPITOLUL COMUNICAREA ──
+// Un singur rând. Se vede de orice membru; se EDITEAZĂ mai jos, în
+// Administrare, și numai de fondator.
+function renderWhatsApp(group) {
+    const box = document.getElementById('whatsappBox');
+    if (!box) return;
+
+    if (group.link_whatsapp) {
+        box.innerHTML = `
+            <i class="fab fa-whatsapp" style="color: #25d366;"></i>
+            <span>Discuțiile zilnice se poartă pe WhatsApp.</span>
+            <a href="${escapeHtml(group.link_whatsapp)}" target="_blank" rel="noopener">Deschide grupul →</a>`;
+        return;
+    }
+
+    // Fără link. Fondatorului i se spune unde îl pune, celorlalți cine îl pune.
+    box.innerHTML = (isAdmin || isSuperAdmin)
+        ? `<i class="fab fa-whatsapp" style="color: #8a8a8a;"></i>
+           <span>Grupul n-are încă un link de WhatsApp.</span>
+           <a href="#adminSection">Adaugă-l în Administrare ↓</a>`
+        : `<i class="fab fa-whatsapp" style="color: #8a8a8a;"></i>
+           <span>Grupul n-are încă un link de WhatsApp. Îl adaugă fondatorul.</span>`;
 }
 
 // ── RENDER MEMBERS ──
+// Câți membri se văd fără să ceri restul. Opt umple două rânduri pe ecran lat
+// și patru pe telefon; un grup plin (până la 20) ar fi împins tot restul
+// paginii sub fold.
+const MEMBRI_VIZIBILI = 8;
+let membriToti = false;
+
+function toggleTotiMembrii() {
+    membriToti = !membriToti;
+    renderMembers(members, currentGroup ? currentGroup.admin_id : null);
+}
+
 function renderMembers(members, adminId) {
     const grid = document.getElementById('membersGrid');
 
@@ -1911,7 +2306,24 @@ function renderMembers(members, adminId) {
     }
 
     const isAgencyUser = currentUserProfile && currentUserProfile.account_type === 'profesional';
-    grid.innerHTML = members.map(m => {
+
+    // Butonul „încă N membri" se aprinde doar dacă sunt mai mulți decât încap
+    const butonMai = document.getElementById('membriMai');
+    const ascunsi = members.length - MEMBRI_VIZIBILI;
+    if (butonMai) {
+        if (ascunsi > 0) {
+            butonMai.style.display = 'block';
+            butonMai.textContent = membriToti
+                ? 'Arată mai puțini ↑'
+                : (ascunsi === 1 ? 'Încă un membru ↓' : 'Încă ' + ascunsi + ' membri ↓');
+        } else {
+            butonMai.style.display = 'none';
+        }
+    }
+
+    const deAratat = membriToti ? members : members.slice(0, MEMBRI_VIZIBILI);
+
+    grid.innerHTML = deAratat.map(m => {
         const name = displayName(m.profile);
         const initial = name.charAt(0).toUpperCase();
         const isAdminMember = m.user_id === adminId;
@@ -1921,14 +2333,18 @@ function renderMembers(members, adminId) {
         const linkExtra = isAgencyUser ? 'pointer-events:none; cursor:default;' : '';
         
         return `
-            <div class="member-card" style="display: flex; align-items: center; gap: 0;">
-                <a href="${profileHref}" style="display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; color: inherit; padding: 12px; ${linkExtra}">
+            <div class="member-card" style="display: flex; align-items: center; gap: 0; padding: 0;">
+                <a href="${profileHref}" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; text-decoration: none; color: inherit; padding: 8px; ${linkExtra}">
                     <div class="member-avatar">${initial}</div>
+                    <!-- ⚠️ Badge-ul „Admin" nu mai stă lângă nume, ci în locul
+                         datei, pe rândul de dedesubt. Pe un card de 190 de
+                         pixeli mânca jumătate din rândul numelui, iar numele
+                         ieșea „Bogd...". Data intrării adminului oricum se știe:
+                         e ziua în care s-a făcut grupul, scrisă în capul paginii. -->
                     <div class="member-info">
-                        <div class="member-name">${escapeHtml(name)}${m.profile?.is_demo ? '<span style="display:inline-block; background:#f0ece3; color:#6f6a61; font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; margin-left:6px; letter-spacing:0.3px; vertical-align:middle;">Exemplu</span>' : ''}</div>
-                        <div class="member-role">Membru din ${formatDate(m.joined_at)}</div>
+                        <div class="member-name">${escapeHtml(name)}${m.profile?.is_demo ? '<span class="member-exemplu">Exemplu</span>' : ''}</div>
+                        <div class="member-role${isAdminMember ? ' member-role--admin' : ''}">${isAdminMember ? 'Administrator' : 'Membru din ' + formatDate(m.joined_at)}</div>
                     </div>
-                    ${isAdminMember ? '<span class="member-badge admin-badge">Admin</span>' : ''}
                 </a>
                 ${canKick ? `<button class="btn-kick-member" onclick="event.stopPropagation(); openKickModal('${m.user_id}', '${escapeHtml(name)}')" title="Propune excludere"><i class="fas fa-user-slash"></i></button>` : ''}
             </div>
@@ -1937,9 +2353,15 @@ function renderMembers(members, adminId) {
 }
 
 // ── RENDER TERENURI ──
+// Terenurile grupului, ținute minte ca să se poată redesena lista de pași a
+// unui singur teren după o bifă, fără să se reîncarce pagina.
+let currentTerenuri = [];
+
 function renderTerenuri(terenuri) {
     const grid = document.getElementById('terenuriGrid');
-    
+
+    currentTerenuri = terenuri || [];
+
     if (!terenuri || terenuri.length === 0) {
         return; // Keep default empty state
     }
@@ -1952,161 +2374,292 @@ function renderTerenuri(terenuri) {
     grid.innerHTML = terenuri.map(t => {
         const teren = t.teren;
         if (!teren) return '';
-        
+
+        const fapte = [];
+        if (teren.zona) fapte.push(escapeHtml(teren.zona));
+        if (teren.suprafata) fapte.push(Number(teren.suprafata).toLocaleString('ro-RO') + ' mp');
+
+        // ⚠️ Comentariile și pașii sunt AMÂNDOUĂ pliate, închise. Un grup se
+        // uită la trei-patru terenuri deodată; dacă fiecare card s-ar deschide
+        // cu lista lui de șapte pași și cu firul de comentarii, pagina ar avea
+        // trei ecrane înainte de primul lucru de făcut.
         return `
             <div class="teren-with-comments">
                 <div class="teren-header">
                     <img src="${teren.image_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
                     <div>
                         <h4><a href="teren-details.html?id=${teren.id}">${escapeHtml(teren.titlu)}</a></h4>
-                        <p><i class="fas fa-map-marker-alt"></i> ${escapeHtml(teren.zona || 'Zona nespecificata')}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> ${fapte.join(' · ') || 'Zonă nespecificată'}</p>
                     </div>
-                    <a href="teren-details.html?id=${teren.id}#analiza" class="btn-cere-analiza" title="Cere o analiză">
-                        <i class="fas fa-chart-bar"></i> Cere o analiză
-                    </a>
                 </div>
-                <div class="teren-comments-area">
-                    <div class="teren-comments-list" id="comments-${teren.id}">
-                        <div class="no-comments"><i class="fas fa-spinner fa-spin"></i> Se incarca...</div>
+
+                <div class="tv-fold" id="fold-com-${teren.id}">
+                    <div class="tv-fold-cap" onclick="toggleFoldTeren('fold-com-${teren.id}')">
+                        <i class="fas fa-comments"></i>
+                        <span>Comentarii despre teren</span>
+                        <span class="tv-nr" id="com-nr-${teren.id}"></span>
+                        <i class="fas fa-chevron-down tv-fold-sageata"></i>
                     </div>
-                    <div class="comment-input-row">
-                        <input type="text" id="input-${teren.id}" placeholder="Scrie un comentariu..." maxlength="2000"
-                            onkeydown="if(event.key==='Enter')addComment('${teren.id}')">
-                        <button onclick="addComment('${teren.id}')">Trimite</button>
+                    <div class="tv-fold-corp">
+                        <div class="teren-comments-list" id="comments-${teren.id}"></div>
+                        <div class="comment-input-row">
+                            <input type="text" id="input-${teren.id}" placeholder="Scrie un comentariu..." maxlength="2000"
+                                onkeydown="if(event.key==='Enter')addComment('${teren.id}')">
+                            <button onclick="addComment('${teren.id}')">Trimite</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tv-fold" id="fold-pasi-${teren.id}">
+                    <div class="tv-fold-cap" onclick="toggleFoldTeren('fold-pasi-${teren.id}')">
+                        <i class="fas fa-list-check"></i>
+                        <span>Pașii de verificare</span>
+                        <span class="tv-nr" id="pasi-nr-${teren.id}"></span>
+                        <i class="fas fa-chevron-down tv-fold-sageata"></i>
+                    </div>
+                    <div class="tv-fold-corp">
+                        <div class="tv-pasi" id="pasi-teren-${teren.id}"></div>
                     </div>
                 </div>
             </div>
         `;
     }).join('');
-    
-    // Load comments for each teren
+
+    // Comentariile și bifele se citesc pentru toate terenurile deodată: numărul
+    // lor se scrie pe capul casetei pliate, deci trebuie știut chiar și când
+    // caseta e închisă.
     terenuri.forEach(t => {
         if (t.teren) loadComments(t.teren.id);
     });
+    loadTerenChecklist(terenuri);
 }
 
-// ── CRONOLOGIA PAȘILOR ──
-// Casetele și citirea textului din ghid stau în `js/pasi-din-ghid.js`, ca să
-// fie aceleași și aici, și în Spațiul tău din homepage. Aici rămâne doar ce e
-// specific paginii de grup: bifele, notele și atașamentele.
-const CHECKLIST_BOXES = PASI_CASETE;
-let ghidSectiuni = null;
+// Casetele pliate din cardul unui teren (comentarii, pași)
+function toggleFoldTeren(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+}
 
-let checklistData = {}; // step_key -> { checked, checked_at, checked_by, notes }
-let profilesCache = {};
 
-async function loadChecklist() {
-    const container = document.getElementById('checklistTimeline');
-    if (!container) return;
-    
+// ══════════════════════════════════════════════════════════════════════
+// PAȘII DE VERIFICARE, PE FIECARE TEREN
+// ══════════════════════════════════════════════════════════════════════
+//
+// Lista pașilor stă în `PASI_TEREN`, din `js/pasi-din-ghid.js`. Bifele stau în
+// tabela `grup_teren_checklist`, pe (grup, teren, pas): același pas bifat pe un
+// teren nu spune nimic despre celălalt teren la care se uită grupul.
+//
+// ⚠️ Notele și fișierele NU au tabelă nouă. Se scriu în `grup_checklist_notes`
+// și `grup_checklist_files`, cele care există deja, cu o cheie compusă
+// (`cheiaPasTeren`). Așa moștenesc politicile RLS care le închid pe membrii
+// grupului, iar funcțiile de note și atașamente rămân neschimbate.
+let terenChecklist = {};   // terenId -> { step_key: rândul din bază }
+
+function cheiaPasTeren(terenId, pas) { return 't-' + terenId + '-' + pas; }
+
+async function loadTerenChecklist(terenuri) {
+    const ids = (terenuri || []).map(t => t.teren && t.teren.id).filter(Boolean);
+    if (!ids.length) return;
+
+    terenChecklist = {};
     try {
-        // Load existing checklist data for this group
         const { data, error } = await sb
-            .from('grup_checklist')
-            .select('*')
-            .eq('grup_id', currentGroup.id);
-        
-        if (error) throw error;
-        
-        checklistData = {};
-        (data || []).forEach(row => {
-            checklistData[row.step_key] = row;
-        });
-        
-        // Load profile names for checked_by
-        const userIds = [...new Set((data || []).filter(r => r.checked_by).map(r => r.checked_by))];
-        if (userIds.length > 0) {
-            const { data: profiles } = await sb
-                .from('profiles_visible')
-                .select('user_id, pseudonym')
-                .in('user_id', userIds);
-            (profiles || []).forEach(p => { profilesCache[p.user_id] = p.pseudonym || 'Anonim'; });
-        }
-        
-        // Textul pașilor vine din ghid, o singură dată pe încărcarea paginii
-        ghidSectiuni = await incarcaPasiDinGhid({ prefixAncora: 'phase-' });
+            .from('grup_teren_checklist')
+            .select('teren_id, step_key, checked, checked_at, checked_by')
+            .eq('grup_id', currentGroup.id)
+            .in('teren_id', ids);
 
-        renderChecklist();
+        if (error) throw error;
+
+        (data || []).forEach(r => {
+            terenChecklist[r.teren_id] = terenChecklist[r.teren_id] || {};
+            terenChecklist[r.teren_id][r.step_key] = r;
+        });
     } catch (err) {
-        console.error('Error loading checklist:', err);
-        container.innerHTML = '<p style="color: #ef4444; font-size: 0.85rem;">Eroare la încărcare.</p>';
+        // Lista de pași se arată oricum, nebifată: e utilă și doar citită.
+        console.warn('Bifele pe teren nu s-au putut citi:', err.message || err);
+    }
+
+    terenuri.forEach(t => { if (t.teren) renderPasiTeren(t.teren); });
+}
+
+function renderPasiTeren(teren) {
+    const container = document.getElementById('pasi-teren-' + teren.id);
+    if (!container) return;
+
+    const bife = terenChecklist[teren.id] || {};
+    const facute = PASI_TEREN.filter(p => bife[p.key] && bife[p.key].checked).length;
+
+    const nr = document.getElementById('pasi-nr-' + teren.id);
+    if (nr) nr.textContent = facute + ' din ' + PASI_TEREN.length;
+
+    // Analiza există dacă terenului i s-a calculat câte apartamente încap. E
+    // același criteriu ca pe pagina terenului și în Spațiul tău din homepage.
+    const min = teren.nr_apartamente_min, max = teren.nr_apartamente_max;
+    const areAnaliza = !!(min && max);
+    const catApart = areAnaliza ? (min === max ? min + ' apartamente' : min + '-' + max + ' apartamente') : '';
+
+    container.innerHTML = PASI_TEREN.map(pas => {
+        const bifat = !!(bife[pas.key] && bife[pas.key].checked);
+        const cheie = cheiaPasTeren(teren.id, pas.key);
+
+        // Primul pas e singurul cu o acțiune proprie: fără analiză, butonul
+        // care o cere; cu analiză, rezultatul ei, ca să se vadă de ce e bifat.
+        let actiune = '';
+        if (pas.cereAnaliza) {
+            actiune = areAnaliza
+                ? `<a class="tv-actiune" href="teren-details.html?id=${teren.id}">${escapeHtml(catApart)} →</a>`
+                : `<a class="tv-actiune" href="analize.html?teren_id=${encodeURIComponent(teren.id)}&teren_titlu=${encodeURIComponent(teren.titlu || '')}">Cere o analiză →</a>`;
+        }
+
+        const bifa = canEditChecklist
+            ? `<div class="tv-check ${bifat ? 'checked' : ''}" onclick="toggleTerenStep('${teren.id}', '${pas.key}')"></div>`
+            : `<div class="tv-check ${bifat ? 'checked' : ''} blocat"></div>`;
+
+        return `
+            <div class="tv-pas ${bifat ? 'bifat' : ''}">
+                ${bifa}
+                <div class="tv-pas-text" onclick="toggleDetaliiPas('${cheie}')">
+                    <span class="tv-pas-titlu">${pas.titlu}</span>
+                    <span class="tv-pas-sub">${pas.sub}</span>
+                </div>
+                ${actiune}
+                <button class="tv-pas-buton" id="buton-${cheie}" onclick="toggleDetaliiPas('${cheie}')"
+                        title="Note și fișiere pentru pasul ăsta">
+                    <i class="fas fa-paperclip"></i>
+                    <span class="tv-pas-eticheta">note</span>
+                    <i class="fas fa-chevron-down tv-pas-sageata"></i>
+                </button>
+            </div>
+            <div class="tv-pas-corp" id="corp-${cheie}">${renderBoxTools(cheie)}</div>`;
+    }).join('');
+}
+
+// Notele și fișierele unui pas de teren. Se citesc la prima deschidere, nu la
+// randare: șapte pași × patru terenuri ar însemna 28 de perechi de interogări
+// pentru ceva ce nu se uită nimeni.
+function toggleDetaliiPas(cheie) {
+    const corp = document.getElementById('corp-' + cheie);
+    if (!corp) return;
+    const seDeschide = !corp.classList.contains('open');
+    corp.classList.toggle('open');
+
+    // Săgeata se întoarce, ca să se vadă că butonul deschide ceva dedesubt, nu
+    // atașează un fișier pe loc.
+    const buton = document.getElementById('buton-' + cheie);
+    if (buton) buton.classList.toggle('deschis', seDeschide);
+
+    if (seDeschide) {
+        loadStepNotes(cheie);
+        loadStepFiles(cheie);
     }
 }
 
-function renderChecklist() {
-    const container = document.getElementById('checklistTimeline');
+// Bifa unui pas, pe un teren anume.
+async function toggleTerenStep(terenId, pasKey) {
+    if (!canEditChecklist || !currentUser || !currentGroup) return;
 
-    // Casetele care se bifează (a noua e informativă, nu se bifează)
-    const cuBifa = PASI_CU_BIFA;
-    const done = cuBifa.filter(b => checklistData[b.key]?.checked).length;
+    const existent = (terenChecklist[terenId] || {})[pasKey];
+    const nou = !(existent && existent.checked);
 
-    // Caseta „de lucru": prima nebifată. Ea stă deschisă, restul se închid.
-    const frontier = cuBifa.find(b => !checklistData[b.key]?.checked);
+    try {
+        const { error } = await sb
+            .from('grup_teren_checklist')
+            .upsert({
+                grup_id: currentGroup.id,
+                teren_id: terenId,
+                step_key: pasKey,
+                checked: nou,
+                checked_at: nou ? new Date().toISOString() : null,
+                checked_by: nou ? currentUser.id : null,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'grup_id,teren_id,step_key' });
 
-    container.innerHTML = CHECKLIST_BOXES.map((box, bi) => {
-        const isChecked = !!checklistData[box.key]?.checked;
-        const isOpen = box === frontier;
-        const text = ghidSectiuni && ghidSectiuni[box.ghid];
+        if (error) throw error;
 
-        // Antetul: cerc cu numărul pasului, verde cu bifă dacă grupul a trecut de el
-        const cerc = isChecked
-            ? `<div class="cl-phase-number" style="background: #2f8f5b;"><i class="fas fa-check"></i></div>`
-            : `<div class="cl-phase-number" style="background: ${box.culoare};">${bi + 1}</div>`;
+        terenChecklist[terenId] = terenChecklist[terenId] || {};
+        terenChecklist[terenId][pasKey] = { checked: nou, checked_by: currentUser.id };
 
-        return `
-            <div class="cl-phase ${isOpen ? 'open' : ''} ${isChecked ? 'gata' : ''}" id="phase-${box.key}">
+        // Se redesenează doar terenul atins, ca să nu se închidă la loc casetele
+        // deschise pe celelalte terenuri.
+        const teren = (currentTerenuri.find(t => t.teren && t.teren.id === terenId) || {}).teren;
+        if (teren) renderPasiTeren(teren);
+
+    } catch (err) {
+        console.error('Eroare la bifarea pasului de teren:', err);
+        showToast('Nu am putut salva bifa.', 'error');
+    }
+}
+
+// ── CASETELE PAȘILOR, ÎMPRĂȘTIATE PE CAPITOLE ──
+// Lista celor 11 casete și citirea textului lor din ghid stau în
+// `js/pasi-din-ghid.js`, ca să fie aceleași și aici, și în Spațiul tău din
+// homepage. Aici rămâne doar ce e specific paginii de grup: notele și
+// atașamentele fiecărei casete.
+//
+// ⚠️ Din 22 august casetele NU mai stau toate într-o singură listă. Fiecare
+// capitol al paginii își are șirul lui de casete, iar cheile lui sunt scrise
+// în `data-pasi` pe `<div class="cap-pasi">`. Ca să muți o casetă dintr-un
+// capitol în altul se schimbă acel atribut, nimic altceva.
+//
+// ⚠️ BIFELE DE GRUP AU IEȘIT DIN INTERFAȚĂ (decizia lui Lucian, 22 august:
+// „ăștia sunt pași informativi, nu bifezi doar ca să știi pe unde ești").
+// Tabela `grup_checklist` NU s-a atins: rândurile bifate până acum sunt încă
+// acolo, nefolosite, iar homepage-ul le citește în continuare ca să spună la
+// ce pas e un grup. Bifele reale se mută pe fiecare teren în parte, în tabela
+// `grup_teren_checklist`, care încă nu există.
+const CHECKLIST_BOXES = PASI_CASETE;
+let ghidSectiuni = null;
+
+let profilesCache = {};
+
+async function incarcaCasetePasi() {
+    const capitole = document.querySelectorAll('.cap-pasi');
+    if (!capitole.length) return;
+
+    try {
+        // Textul pașilor vine din ghid, o singură dată pe încărcarea paginii
+        ghidSectiuni = await incarcaPasiDinGhid({ prefixAncora: 'phase-' });
+        renderCasetePasi();
+    } catch (err) {
+        console.error('Eroare la încărcarea casetelor:', err);
+        capitole.forEach(c => {
+            c.innerHTML = '<p style="color: #ef4444; font-size: 0.85rem;">Eroare la încărcare.</p>';
+        });
+    }
+}
+
+function renderCasetePasi() {
+    document.querySelectorAll('.cap-pasi').forEach(container => {
+        const chei = (container.dataset.pasi || '').split(',').map(s => s.trim()).filter(Boolean);
+
+        container.innerHTML = chei.map(cheie => {
+            const box = CHECKLIST_BOXES.find(b => b.key === cheie);
+            // O cheie scrisă greșit în HTML n-are voie să rupă capitolul întreg
+            if (!box) { console.warn('Cheie de pas necunoscută:', cheie); return ''; }
+
+            // Numărul din cerc e poziția pasului în drumul întreg, nu în capitol:
+            // omul trebuie să vadă că „Verificarea terenului" e al treilea din
+            // unsprezece, la fel ca în ghid.
+            const nr = CHECKLIST_BOXES.indexOf(box) + 1;
+            const text = ghidSectiuni && ghidSectiuni[box.ghid];
+
+            // Nicio casetă nu se deschide singură. Regula veche („prima nebifată
+            // stă deschisă") a plecat odată cu bifele.
+            return `
+            <div class="cl-phase" id="phase-${box.key}">
                 <div class="cl-phase-header" onclick="toggleBox('${box.key}')">
-                    ${cerc}
-                    <span class="cl-phase-title">${box.titlu}</span>
+                    <div class="cl-phase-number" style="background: ${box.culoare};">${nr}</div>
+                    <span class="cl-phase-title">${box.titlu}<span class="cl-phase-sub">${box.sub}</span></span>
                     <i class="fas fa-chevron-down cl-phase-chevron"></i>
                 </div>
                 <div class="cl-phase-body">
                     <div class="pasi-ghid-text">${text || textLipsaDinGhid(box)}</div>
-                    ${box.faraBifa ? '' : renderBoxDone(box, isChecked)}
                     ${renderBoxTools(box.key)}
                 </div>
             </div>`;
-    }).join('');
-
-    // Bara de progres numără casetele, nu pașii mărunți dinăuntru
-    const pct = cuBifa.length > 0 ? Math.round((done / cuBifa.length) * 100) : 0;
-    document.getElementById('progressBar').style.width = pct + '%';
-    document.getElementById('progressPercent').textContent = `${done} din ${cuBifa.length}`;
-
-    // Notele și atașamentele se încarcă doar pentru caseta deschisă
-    CHECKLIST_BOXES.forEach(box => {
-        const el = document.getElementById('phase-' + box.key);
-        if (el && el.classList.contains('open')) {
-            loadStepNotes(box.key);
-            loadStepFiles(box.key);
-        }
+        }).join('');
     });
-}
-
-// Bifa de casetă: „grupul a trecut de aici", cu explicație lângă ea
-function renderBoxDone(box, isChecked) {
-    const data = checklistData[box.key];
-    const cand = data?.checked_at
-        ? new Date(data.checked_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' })
-        : '';
-    const cine = data?.checked_by ? (profilesCache[data.checked_by] || '') : '';
-    const meta = isChecked && cand
-        ? `<span class="cl-box-done-meta">${cand}${cine ? ', de ' + cine : ''}</span>`
-        : '';
-
-    if (!canEditChecklist) {
-        return isChecked
-            ? `<div class="cl-box-done sters"><div class="cl-check checked"></div>
-                   <span>Grupul este la acest pas</span>${meta}</div>`
-            : '';
-    }
-
-    return `
-        <div class="cl-box-done ${isChecked ? 'bifat' : ''}" onclick="toggleBoxCheck('${box.key}')">
-            <div class="cl-check ${isChecked ? 'checked' : ''}"></div>
-            <span>Grupul este la acest pas</span>
-            ${meta}
-        </div>`;
 }
 
 // Notele și fișierele grupului, la nivel de casetă
@@ -2137,7 +2690,16 @@ function renderBoxTools(boxKey) {
 }
 
 
-// Casetele pliabile de la finalul paginii (zone, interese)
+// Descrierea grupului, tăiată la trei rânduri
+function toggleDescriere() {
+    const el = document.getElementById('grupDescriere');
+    const btn = document.getElementById('descriereMai');
+    if (!el || !btn) return;
+    const tot = el.classList.toggle('tot');
+    btn.textContent = tot ? 'Arată mai puțin ↑' : 'Arată tot ↓';
+}
+
+// Casetele pliabile din cardul grupului (zonele și interesele)
 function toggleFold(sectionId) {
     const el = document.getElementById(sectionId);
     if (el) el.classList.toggle('open');
@@ -2290,50 +2852,10 @@ async function deleteStepNote(noteId, stepKey) {
     }
 }
 
-// Bifa unei casete. `stepKey` e cheia casetei (c1...c11), scrisă în grup_checklist.
-async function toggleBoxCheck(stepKey) {
-    const existing = checklistData[stepKey];
-    const newChecked = !(existing?.checked);
-    
-    try {
-        if (existing?.id) {
-            // Update
-            const { error } = await sb
-                .from('grup_checklist')
-                .update({
-                    checked: newChecked,
-                    checked_at: newChecked ? new Date().toISOString() : null,
-                    checked_by: newChecked ? currentUser.id : null,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', existing.id);
-            if (error) throw error;
-        } else {
-            // Insert
-            const { error } = await sb
-                .from('grup_checklist')
-                .insert({
-                    grup_id: currentGroup.id,
-                    step_key: stepKey,
-                    checked: newChecked,
-                    checked_at: newChecked ? new Date().toISOString() : null,
-                    checked_by: newChecked ? currentUser.id : null
-                });
-            if (error) throw error;
-        }
-        
-        // Add current user to cache
-        if (!profilesCache[currentUser.id]) {
-            const { data: p } = await sb.from('profiles_visible').select('pseudonym').eq('user_id', currentUser.id).single();
-            if (p) profilesCache[currentUser.id] = p.pseudonym || 'Anonim';
-        }
-        
-        await loadChecklist();
-    } catch (err) {
-        console.error('Error toggling step:', err);
-        alert('Eroare la salvare: ' + err.message);
-    }
-}
+// ⚠️ Aici stătea `toggleBoxCheck(stepKey)`, singurul loc din platformă care
+// scria în `grup_checklist`. A ieșit pe 22 august, odată cu bifele de grup.
+// Tabela și rândurile ei au rămas neatinse; se recuperează din git dacă
+// vreodată se răzgândește cineva (commit `2b85040` și mai devreme).
 
 // ── COMMENTS ──
 async function loadComments(terenId) {
@@ -2349,12 +2871,20 @@ async function loadComments(terenId) {
             .order('created_at', { ascending: true });
         
         if (error) throw error;
-        
+
+        // Numărul de pe capul casetei pliate. Gol când nu e niciunul: „(0)" e
+        // tot un lucru de citit, degeaba.
+        const nr = document.getElementById('com-nr-' + terenId);
+        if (nr) nr.textContent = (data && data.length) ? data.length : '';
+
+        // ⚠️ Fără „Niciun comentariu încă. Fii primul!". Ocupa un rând întreg pe
+        // fiecare teren ca să spună că nu e nimic de citit. Rămâne doar câmpul
+        // de scris, care spune același lucru și mai e și de folos.
         if (!data || data.length === 0) {
-            container.innerHTML = '<div class="no-comments">Niciun comentariu inca. Fii primul!</div>';
+            container.innerHTML = '';
             return;
         }
-        
+
         // Get profile names for comment authors
         const userIds = [...new Set(data.map(c => c.user_id))];
         const { data: profiles } = await sb
@@ -4054,7 +4584,7 @@ window.castKickBallot = async function(voteId, voteYes) {
     
     const confirmMsg = voteYes 
         ? 'Votezi DA pentru excluderea membrului?' 
-        : 'Votezi NU — membrul rămâne în grup?';
+        : 'Votezi NU, iar membrul rămâne în grup?';
     if (!confirm(confirmMsg)) return;
     
     try {
@@ -4434,33 +4964,59 @@ async function loadAnunturi() {
     }
 }
 
+// Câte anunțuri se văd fără să ceri restul. Trei e cât ține un om minte din ce
+// s-a spus în grup săptămâna asta; restul e arhivă și stă după un clic.
+const ANUNTURI_VIZIBILE = 3;
+let anunturiToate = false;
+
+function toggleToateAnunturile() {
+    anunturiToate = !anunturiToate;
+    renderAnunturi();
+}
+
 function renderAnunturi() {
     const list = document.getElementById('anunturiList');
-    
+    const buton = document.getElementById('anunturiMai');
+
+    const numar = document.getElementById('anunturiCount');
+    if (numar) numar.textContent = anunturiData.length ? '(' + anunturiData.length + ')' : '';
+
+    // Fără „Niciun anunț încă. Fii primul care postează!". Câmpul de scris de
+    // deasupra spune același lucru, și e și de folos.
     if (anunturiData.length === 0) {
-        list.innerHTML = '<p style="color: #8a8a8a; font-size: 0.875rem; text-align: center; padding: 1rem;">Niciun anunț încă. Fii primul care postează!</p>';
+        list.innerHTML = '';
+        if (buton) buton.style.display = 'none';
         return;
     }
-    
-    list.innerHTML = anunturiData.map(a => {
-        const timeAgo = formatDate(a.created_at);
-        const initials = (a.author_name || 'U').substring(0, 2).toUpperCase();
-        const canDelete = currentUser && (a.user_id === currentUser.id || isAdmin || isSuperAdmin);
-        
+
+    const vizibile = anunturiToate ? anunturiData : anunturiData.slice(0, ANUNTURI_VIZIBILE);
+
+    list.innerHTML = vizibile.map(a => {
+        const cand = formatDate(a.created_at);
+        const potSterge = currentUser && (a.user_id === currentUser.id || isAdmin || isSuperAdmin);
+
         return `
-            <div style="display: flex; gap: 0.75rem; padding: 0.875rem; background: #faf8f3; border-radius: 10px; margin-bottom: 0.5rem;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; flex-shrink: 0;">${initials}</div>
-                <div style="flex: 1; min-width: 0;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                        <span style="font-weight: 600; font-size: 0.8125rem; color: #1a1a1a;">${escapeHtml(a.author_name)}</span>
-                        <span style="font-size: 0.75rem; color: #8a8a8a;">${timeAgo}</span>
-                        ${canDelete ? `<button onclick="deleteAnunt('${a.id}')" style="margin-left: auto; background: none; border: none; color: #ddd5c6; cursor: pointer; font-size: 0.75rem; padding: 2px 6px;" title="Șterge"><i class="fas fa-trash"></i></button>` : ''}
-                    </div>
-                    <p style="font-size: 0.875rem; color: #2a2a2a; line-height: 1.5; white-space: pre-wrap; margin: 0;">${escapeHtml(a.content)}</p>
+            <div class="anunt">
+                <div class="anunt-cap">
+                    <span class="anunt-autor">${escapeHtml(a.author_name)}</span>
+                    <span class="anunt-cand">${cand}</span>
+                    ${potSterge ? `<button class="anunt-sterge" onclick="deleteAnunt('${a.id}')" title="Șterge"><i class="fas fa-trash"></i></button>` : ''}
                 </div>
-            </div>
-        `;
+                <p class="anunt-text">${escapeHtml(a.content)}</p>
+            </div>`;
     }).join('');
+
+    if (buton) {
+        const ascunse = anunturiData.length - ANUNTURI_VIZIBILE;
+        if (ascunse > 0) {
+            buton.style.display = 'block';
+            buton.textContent = anunturiToate
+                ? 'Arată mai puține ↑'
+                : (ascunse === 1 ? 'Încă un anunț ↓' : 'Încă ' + ascunse + ' anunțuri ↓');
+        } else {
+            buton.style.display = 'none';
+        }
+    }
 }
 
 window.postAnunt = async function() {
