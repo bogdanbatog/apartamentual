@@ -1741,10 +1741,15 @@
   .sl-teren > summary::-webkit-details-marker{ display:none; }
   .sl-teren > summary:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; border-radius:10px; }
   .sl-teren-cap{ display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; }
-  .sl-teren-nume{ font-size:15px; font-weight:600; }
+  .sl-teren-nume{ font-size:15px; font-weight:600; color:var(--ink); text-decoration:none; }
+  .sl-teren-nume:hover{ text-decoration:underline; }
   .sl-sageata{ display:inline-block; color:var(--ink-3); font-size:12px; transition:transform .2s ease; }
   .sl-teren[open] .sl-sageata{ transform:rotate(180deg); }
   .sl-teren-scurt{ display:flex; flex-wrap:wrap; gap:.375rem .75rem; align-items:center; font-size:13px; color:var(--ink-2); }
+  /* Faptele din rândul de sub titlu sunt linkuri, nu text: se duc direct la
+     cei interesați, la grupuri, sau la crearea unui grup pe teren. */
+  .sl-teren-scurt a{ color:var(--terracotta); text-decoration:none; font-weight:500; }
+  .sl-teren-scurt a:hover{ text-decoration:underline; }
   .sl-teren-corp{ padding:.875rem 1.125rem 1rem; border-top:1px dashed var(--rule); }
 
   .sl-pill{ display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 9px; border-radius:100px; border:1px solid var(--rule-2); }
@@ -1752,6 +1757,14 @@
   .sl-pill--todo{ background:transparent; color:var(--ink-3); }
 
   .sl-nota{ font-size:13.5px; color:var(--ink-2); }
+  /* Nota se taie la două rânduri: în card e un memento, nu locul unde o
+     citești pe toată. Cine vrea tot textul o are pe profil, unde o și scrie.
+     ⚠️ Tăierea stă pe textul notei, nu pe `.sl-nota`: eticheta „NOTA TA" e
+     `display:block`, deci ar fi mâncat ea unul din cele două rânduri. */
+  .sl-nota-text{
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+    overflow:hidden;
+  }
   .sl-nota-eticheta{ font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3); display:block; margin-bottom:4px; }
   .sl-nota-goala{ color:var(--ink-3); }
   .sl-actiuni{ display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin-top:.75rem; }
@@ -1952,7 +1965,7 @@
       <div id="bloc-stare" hidden></div>
 
       <p class="micro js-hero-a-micro" hidden></p>
-      <div class="cluster js-cluster-a" role="list" aria-label="Vecini compatibili"></div>
+      <div class="cluster js-cluster-a" role="list" aria-label="Utilizatori în zonele tale"></div>
     </section>
 
     <!-- STARE 3 · CONT AGENȚIE (fără avataruri de utilizatori) -->
@@ -2095,7 +2108,10 @@
   </section>
 
   <!-- ── CTA PUNCHY WEBINAR ── -->
-  <div class="cta-punchy" id="webinar">
+  <!-- ⚠️ `js-marketing-only`: caseta asta e o pledoarie, nu o unealtă. Cine e
+       logat a trecut deja de convingere, iar în Spațiul lui data webinarului
+       apare oricum, în fluxul „Ce e nou". Ascunsă pentru el din 22 august. -->
+  <div class="cta-punchy js-marketing-only" id="webinar">
     <div class="punchy-inner">
       <div class="punchy-text">
         <h2 class="section-title">Nu îți vine să crezi că se poate face asta și în România?</h2>
@@ -2163,7 +2179,10 @@
   </section>
 
   <!-- ── NEWSLETTER (bandă ușoară, double opt-in) ── -->
-  <section class="section nl-band" id="newsletter" aria-label="Abonare newsletter">
+  <!-- ⚠️ `js-marketing-only`: pentru cine e logat, banda asta cerea a doua oară
+       o adresă de email pe care o avem deja. Înscrierea la newsletter și
+       serialul îi apar în „Ce e nou", pe un rând permanent. -->
+  <section class="section nl-band js-marketing-only" id="newsletter" aria-label="Abonare newsletter">
     <style>
       .nl-band .nl-inner{
         max-width:720px; margin:0 auto; text-align:center;
@@ -2744,7 +2763,7 @@
           // profilul incomplet → stare goală blândă (NU inventăm date)
           if(myTags.length === 0 && myZones.length === 0){
             renderEmptyA(cluster, micro,
-              'Completează-ți profilul (interese și zone preferate) ca să-ți găsim vecini compatibili.',
+              'Completează-ți profilul (zone preferate și interese) ca să-ți arătăm cine mai caută în zonele tale.',
               true);
             return;
           }
@@ -3537,12 +3556,19 @@
       // ⚠️ Sărit dacă rândul 5 arată deja același articol: altfel același link
       // ar apărea de două ori în același card, o dată cu „acum 3 zile" și o
       // dată fără.
+      // ⚠️ Rândul ăsta ține acum locul benzii de newsletter de mai jos din
+      // pagină, care e ascunsă pentru cine e logat (`js-marketing-only`). De
+      // aceea are DOUĂ linkuri: episodul în sine, și lista tuturor episoadelor,
+      // unde stă și formularul de abonare. Fără al doilea, omul logat n-ar mai
+      // avea de unde să se aboneze.
       if(f.episod && (!f.articol || f.articol.slug !== f.episod.slug)){
         var e = f.episod;
         var nrEp = e.slug ? /judetului-housing-episodul-(\d+)/.exec(e.slug) : null;
         randuri.push(randFlux('ochre',
           (nrEp ? 'Episodul ' + nrEp[1] + ' din serialul Județului Housing: ' : 'Din serialul Județului Housing: ') +
-          legatura('/news.html#' + encodeURIComponent(e.slug || ''), e.title || 'citește', 'flux-episod') + '.'));
+          legatura('/news.html#' + encodeURIComponent(e.slug || ''), e.title || 'citește', 'flux-episod') + '. ' +
+          legatura('/news.html', 'Toate episoadele', 'flux-serial') +
+          ', unde te poți abona ca să le primești pe email.'));
       }
 
       // 7. Următorul webinar. Data se calculează, nu se scrie de mână.
@@ -3592,52 +3618,79 @@
       var areAnaliza = !!(min && max);
       var apart = areAnaliza ? (min === max ? min + ' apartamente' : min + '-' + max + ' apartamente') : '';
 
+      var hrefTeren = '/teren-details.html?id=' + encodeURIComponent(t.id);
+
+      // ⚠️ Rândul de sub titlu e CLICABIL, nu descriptiv (decizia lui Lucian,
+      // 22 august). Înainte scria „3 persoane interesate", iar butonul care te
+      // ducea la ele era mai jos, în cardul desfăcut: citeai un lucru într-un
+      // loc și îl apăsai în altul. Acum fiecare fapt e chiar linkul lui, iar
+      // lista de acțiuni de dedesubt a rămas cu un singur rând.
       var scurt = areAnaliza
         ? '<span class="sl-pill sl-pill--ok">✓ Analiză · ' + esc(apart) + '</span>'
         : '<span class="sl-pill sl-pill--todo">Fără analiză</span>';
-      scurt += '<span>' + (t.interesati === 0
-        ? 'Nimeni interesat încă'
-        : (t.interesati === 1 ? 'o persoană interesată' : t.interesati + ' persoane interesate')) + '</span>';
-      if(t.grupuri === 1) scurt += '<span>un grup interesat</span>';
-      else if(t.grupuri > 1) scurt += '<span>' + t.grupuri + ' grupuri interesate</span>';
 
-      var hrefTeren = '/teren-details.html?id=' + encodeURIComponent(t.id);
+      if(t.interesati > 0){
+        scurt += legatura(hrefTeren,
+          t.interesati === 1 ? 'o persoană interesată' : t.interesati + ' persoane interesate',
+          'interesati-teren');
+      } else {
+        scurt += '<span>Nimeni interesat încă</span>';
+      }
 
-      // Nota se scrie deocamdată tot pe profil, unde era. Aici se citește.
+      if(t.grupuri > 0){
+        scurt += legatura('/grupuri.html?teren=' + encodeURIComponent(t.id),
+          t.grupuri === 1 ? 'un grup interesat' : t.grupuri + ' grupuri interesate',
+          'grupuri-teren');
+      } else {
+        // Fără niciun grup pe teren, rândul ar fi rămas gol. În locul unei
+        // constatări („niciun grup") stă singura faptă utilă de aici.
+        scurt += legatura('/grup-nou.html?teren=' + encodeURIComponent(t.id),
+          'Fă un grup pe el', 'grup-nou-teren');
+      }
+
+      // Nota se scrie tot pe profil, unde era. Aici se citește, tăiată la două
+      // rânduri (`.sl-nota`): în card e un memento, nu locul unde o citești pe toată.
       var nota = t.nota
         ? esc(t.nota)
         : '<span class="sl-nota-goala">Nicio notă.</span> ' +
           '<a class="sl-mini" href="/profile-view-new.html?id=' + encodeURIComponent(t.userId) +
             '#favorite-terrains" data-dest="scrie-nota">Scrie una →</a>';
 
-      var actiuni = [];
+      // O singură acțiune rămasă, și doar când lipsește. Restul au urcat în
+      // rândul de sus, ca linkuri.
+      var actiuni = '';
       if(!areAnaliza){
         var q = 'teren_id=' + encodeURIComponent(t.id) + '&teren_titlu=' + encodeURIComponent(t.titlu || '');
-        actiuni.push(mini('/analize.html?' + q, 'Cere o analiză', 'cere-analiza'));
+        actiuni = '<div class="sl-actiuni">' + mini('/analize.html?' + q, 'Cere o analiză', 'cere-analiza') + '</div>';
       }
-      if(t.interesati > 0) actiuni.push(mini(hrefTeren, 'Vezi cine e interesat', 'interesati-teren'));
-      if(t.grupuri > 0){
-        actiuni.push(mini('/grupuri.html?teren=' + encodeURIComponent(t.id),
-          t.grupuri === 1 ? 'Vezi grupul interesat' : 'Vezi cele ' + t.grupuri + ' grupuri', 'grupuri-teren'));
-      } else {
-        actiuni.push(mini('/grup-nou.html?teren=' + encodeURIComponent(t.id), 'Fă un grup pe el', 'grup-nou-teren'));
-      }
-      actiuni.push(mini(hrefTeren, 'Deschide pagina terenului', 'pagina-terenului'));
 
       return '<details class="sl-teren"' + (i === 0 ? ' open' : '') + '>' +
                '<summary>' +
                  '<span class="sl-teren-cap">' +
-                   '<span class="sl-teren-nume">' + esc(t.titlu || 'Teren fără titlu') + '</span>' +
+                   '<a class="sl-teren-nume" href="' + hrefTeren + '" data-dest="pagina-terenului">' +
+                     esc(t.titlu || 'Teren fără titlu') + '</a>' +
                    '<span class="sl-meta">' + esc(faptePret.join(' · ')) +
                      ' <span class="sl-sageata" aria-hidden="true">▾</span></span>' +
                  '</span>' +
                  '<span class="sl-teren-scurt">' + scurt + '</span>' +
                '</summary>' +
                '<div class="sl-teren-corp">' +
-                 '<div class="sl-nota"><span class="sl-nota-eticheta">Nota ta</span>' + nota + '</div>' +
-                 '<div class="sl-actiuni">' + actiuni.join('') + '</div>' +
+                 '<div class="sl-nota"><span class="sl-nota-eticheta">Nota ta</span>' +
+                   '<span class="sl-nota-text">' + nota + '</span></div>' +
+                 actiuni +
                '</div>' +
              '</details>';
+    }
+
+    // ⚠️ Un link în interiorul unui `<summary>` face două lucruri deodată:
+    // navighează ȘI pliază caseta. Oprirea propagării lasă doar navigarea.
+    // Se cheamă din `dupa`, ca `legCasetePasi`, fiindcă tot spațiul de lucru
+    // trăiește într-un IIFE și atributele inline din HTML nu i-ar vedea funcțiile.
+    function legLinkuriTeren(){
+      var linkuri = SPATIU.querySelectorAll('#terenurile-tale summary a');
+      Array.prototype.forEach.call(linkuri, function(a){
+        a.addEventListener('click', function(ev){ ev.stopPropagation(); });
+      });
     }
 
     function cardTerenuri(date, clase){
@@ -3682,15 +3735,15 @@
     function randGrup(g){
       var membri = (g.membri === 1) ? 'un membru' : g.membri + ' membri';
       var corp = '';
+      // ⚠️ Fără bară de progres și fără „3 din 10 pași" (decizia lui Lucian,
+      // 22 august). Pașii nu sunt egali între ei și nimeni nu știe cât durează
+      // fiecare, deci o bară umplută pe sfert sugerează un sfert de drum, ceea
+      // ce nu e adevărat. Rămâne doar unde e grupul acum.
       if(g.faza){
-        var pct = Math.round((g.faza.facute / g.faza.total) * 100);
-        corp = '<p class="sl-grup-faza">Pasul ' + g.faza.nr + ', ' + esc(g.faza.titlu) + '</p>' +
-               '<div class="sl-bara" role="img" aria-label="' + g.faza.facute + ' din ' + g.faza.total + ' pași">' +
-                 '<span style="width:' + pct + '%"></span></div>' +
-               '<p class="sl-meta">' + g.faza.facute + ' din ' + g.faza.total + ' pași</p>';
+        corp = '<p class="sl-grup-faza">La pasul ' + g.faza.nr + ', ' + esc(g.faza.titlu) + '</p>';
       } else if(g.bifeCitite){
         // Toate casetele bifate. Rar, dar e singurul caz în care nu e o eroare.
-        corp = '<p class="sl-grup-faza">Toți pașii sunt bifați, până la mutare.</p>';
+        corp = '<p class="sl-grup-faza">Au trecut prin toți pașii, până la mutare.</p>';
       }
       // Dacă bifele n-au putut fi citite (drepturi, grup abia creat), nu
       // scriem nimic despre pași. Mai bine un card mai scurt decât „Pasul 1"
@@ -3787,12 +3840,14 @@
 
     function cardUtilizatori(date, clase){
       return '<article class="sl-card' + clase + '" id="utilizatori-compatibili">' +
-        capCard('Utilizatori compatibili cu tine',
+        capCard('Utilizatori în zonele tale',
           '<a class="sl-mai" href="' + URL_UTILIZATORI + '" data-dest="toti-utilizatorii">Vezi toți →</a>') +
         // Explicația stă lângă lista pe care o explică, nu în vreun ghid:
         // altfel omul se întreabă de ce e cineva cu 2 zone comune deasupra
-        // cuiva cu 9 interese comune.
-        '<p class="sl-sub">Ordonați după <b>zonele comune</b> cu tine. Interesele comune sunt informative.</p>' +
+        // cuiva cu 9 interese comune. Al doilea rând îi spune ce poate FACE cu
+        // lista, fiindcă altfel e doar o listă de nume.
+        '<p class="sl-sub">Ordonați după <b>zonele comune</b> cu tine. Interesele comune sunt informative.<br>' +
+          'Deschide un profil ca să vezi în ce grupuri e, sau invită-l într-un grup nou, făcut de tine.</p>' +
         date.utilizatori.map(randPersoana).join('') +
       '</article>';
     }
@@ -3872,7 +3927,7 @@
     // majoritatea oamenilor nu deschid nicio casetă.
     function cardPasi(date, clase){
       return '<article class="sl-card' + clase + '" id="pasii">' +
-        capCard('Pașii până la mutare',
+        capCard('Pașii de urmat după ce intri într-un grup',
           '<span class="sl-meta">' + PASI_CU_BIFA.length + ' PAȘI</span>') +
         '<p class="sl-sub">Așa arată un proiect, de la prima discuție până la mutare. ' +
           'Deschide oricare pas ca să vezi ce presupune. ' +
@@ -3885,8 +3940,7 @@
     }
 
     function randCaseta(c, i){
-      return '<details class="sl-caseta" id="pas-' + c.key + '" ' +
-                 'ontoggle="deschideCaseta(this, \'' + c.key + '\')">' +
+      return '<details class="sl-caseta" id="pas-' + c.key + '" data-cheie="' + c.key + '">' +
                '<summary>' +
                  '<span class="sl-caseta-nr" style="background:' + c.culoare + '">' + (i + 1) + '</span>' +
                  '<span class="sl-caseta-titlu">' + esc(c.titlu) +
@@ -3900,14 +3954,27 @@
              '</details>';
     }
 
+    // ⚠️ Ascultătorii se leagă din JavaScript, nu cu `ontoggle` în HTML. Tot
+    // spațiul de lucru trăiește într-un IIFE, deci funcțiile lui NU sunt
+    // globale, iar un atribut inline le caută pe `window` și crapă tăcut, cu
+    // ReferenceError în consolă și o casetă care rămâne pe „Se încarcă…".
+    // Se cheamă din `dupa`, după ce cardurile au ajuns în pagină.
+    function legCasetePasi(){
+      var casete = SPATIU.querySelectorAll('#pasii .sl-caseta');
+      Array.prototype.forEach.call(casete, function(el){
+        el.addEventListener('toggle', function(){ deschideCaseta(el); });
+      });
+    }
+
     // La prima deschidere a oricărei casete se citește ghidul, o singură dată
-    // pentru toate. `ontoggle` se declanșează și la închidere, de aceea `open`.
-    function deschideCaseta(el, cheie){
+    // pentru toate. Evenimentul vine și la închidere, de aceea `open`.
+    function deschideCaseta(el){
       if(!el.open) return;
       var corp = el.querySelector('.sl-caseta-corp');
       if(!corp || corp.dataset.gata) return;
       corp.dataset.gata = '1';
 
+      var cheie = el.dataset.cheie;
       incarcaPasiDinGhid({ prefixAncora: 'pas-' }).then(function(sectiuni){
         var caseta = PASI_CASETE.filter(function(c){ return c.key === cheie; })[0];
         corp.innerHTML = sectiuni[corp.dataset.ghid] || textLipsaDinGhid(caseta);
@@ -4100,14 +4167,15 @@
       { id:'ce-e-nou', titlu:'Ce e nou pentru tine', titluScurt:'Ce e nou',
         cere:null, wide:true, randeaza:cardCeENou,
         are:function(date){ return date.noutati.length > 0; } },
-      { id:'terenurile-tale', titlu:'Terenurile tale', cere:'teren', randeaza:cardTerenuri },
+      { id:'terenurile-tale', titlu:'Terenurile tale', cere:'teren',
+        randeaza:cardTerenuri, dupa:legLinkuriTeren },
       { id:'grupurile-tale',  titlu:'Grupurile tale',  cere:'grup',  randeaza:cardGrupuri },
       // Nu cere nici teren, nici grup: se sprijină doar pe zonele și interesele
       // din profil, pe care le are oricine ajunge pe homepage (vezi zidul de
       // profil din `nav.js`). Cardul lipsește doar dacă nu s-a potrivit nimeni,
       // iar atunci lipsește și din cuprins.
-      { id:'utilizatori-compatibili', titlu:'Utilizatori compatibili cu tine',
-        titluScurt:'Utilizatori compatibili', cere:null, randeaza:cardUtilizatori,
+      { id:'utilizatori-compatibili', titlu:'Utilizatori în zonele tale',
+        titluScurt:'Utilizatori', cere:null, randeaza:cardUtilizatori,
         are:function(date){ return date.utilizatori.length > 0; } },
       // Stă imediat sub utilizatori, ca în machetă, și îi umple golul din
       // dreapta: două carduri de oameni și de grupuri, una lângă alta.
@@ -4120,8 +4188,8 @@
       // nu vine din baza de date, e scrisă în pagină, deci nu există starea
       // „n-am ce arăta". Pentru cine n-are grup e harta drumului, pentru cine
       // are e progresul lui.
-      { id:'pasii', titlu:'Pașii până la mutare', titluScurt:'Pașii',
-        cere:null, wide:true, randeaza:cardPasi },
+      { id:'pasii', titlu:'Pașii de urmat după ce intri într-un grup', titluScurt:'Pașii',
+        cere:null, wide:true, randeaza:cardPasi, dupa:legCasetePasi },
       // Ultima, ca în machetă, și fără `are`: se randează întotdeauna, fiindcă
       // un carnet gol nu e o lipsă de informație, e un carnet gol. Chiar și
       // când nota nu s-a putut citi, cardul rămâne — dar fără câmp de scris,

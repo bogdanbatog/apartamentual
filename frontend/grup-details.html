@@ -1104,6 +1104,20 @@
             <div id="kickVotesList"></div>
         </div>
 
+        <!-- Terenuri favorite - Visible to all logged-in users -->
+        <div id="terenuriSection" class="section-card">
+            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului <span id="terenuriGrupNume"></span></h2>
+            <div id="terenuriGrid" class="terenuri-grid" style="max-height: 400px; overflow-y: auto;">
+                <div class="empty-section">
+                    <i class="fas fa-map"></i>
+                    <p>Niciun teren adăugat încă.</p>
+                    <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
+                        <i class="fas fa-search"></i> Explorează terenuri
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Anunțuri generale grup - Member only -->
         <div id="anunturiSection" class="section-card member-only">
             <h2><i class="fas fa-bullhorn"></i> Anunțuri generale grup</h2>
@@ -1127,7 +1141,7 @@
         
         <!-- Journal & Checklist - Member only (Coming soon) -->
         <div id="journalSection" class="section-card member-only">
-            <h2><i class="fas fa-tasks"></i> Cronologia pașilor</h2>
+            <h2><i class="fas fa-tasks"></i> Cronologia pașilor de urmat într-un grup</h2>
             <p id="checklistSubtitle" style="font-size: 0.82rem; color: #8a8a8a; margin-bottom: 1.25rem;">Cei 11 pași ai unui proiect, de la prima discuție până la mutare. Caseta deschisă e cea la care ați ajuns.</p>
             <div id="checklistReadonly" style="display: none; padding: 0.6rem 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.82rem; color: #92400e;">
                 <i class="fas fa-info-circle"></i> Doar membrii grupului pot edita jurnalul de progres. Contactează adminul pentru modificări.
@@ -1146,20 +1160,6 @@
             
             <!-- Timeline phases -->
             <div id="checklistTimeline" class="checklist-timeline"></div>
-        </div>
-
-        <!-- Terenuri favorite - Visible to all logged-in users -->
-        <div id="terenuriSection" class="section-card">
-            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului <span id="terenuriGrupNume"></span></h2>
-            <div id="terenuriGrid" class="terenuri-grid" style="max-height: 400px; overflow-y: auto;">
-                <div class="empty-section">
-                    <i class="fas fa-map"></i>
-                    <p>Niciun teren adăugat încă.</p>
-                    <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
-                        <i class="fas fa-search"></i> Explorează terenuri
-                    </a>
-                </div>
-            </div>
         </div>
 
         <!-- Zone preferate - casetă pliabilă, închisă implicit -->
@@ -2097,14 +2097,14 @@ function renderBoxDone(box, isChecked) {
     if (!canEditChecklist) {
         return isChecked
             ? `<div class="cl-box-done sters"><div class="cl-check checked"></div>
-                   <span>Grupul a trecut de acest pas</span>${meta}</div>`
+                   <span>Grupul este la acest pas</span>${meta}</div>`
             : '';
     }
 
     return `
         <div class="cl-box-done ${isChecked ? 'bifat' : ''}" onclick="toggleBoxCheck('${box.key}')">
             <div class="cl-check ${isChecked ? 'checked' : ''}"></div>
-            <span>Grupul a trecut de acest pas</span>
+            <span>Grupul este la acest pas</span>
             ${meta}
         </div>`;
 }
