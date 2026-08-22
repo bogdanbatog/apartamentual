@@ -1756,10 +1756,15 @@
   .sl-pill--ok{ background:rgba(132,160,127,.22); border-color:transparent; }
   .sl-pill--todo{ background:transparent; color:var(--ink-3); }
 
-  .sl-nota{ font-size:13.5px; color:var(--ink-2); }
+  /* ⚠️ Clasa se numește `.sl-teren-nota`, nu `.sl-nota`. Cardul „Notele tale"
+     de mai jos are un câmp de scris pe care scrie tot `.sl-nota`, iar acela e
+     definit MAI JOS în foaia asta: cu același nume, câștiga el, și nota de aici
+     primea chenar, fundal și `min-height:132px`. De aceea zona asta rămăsese o
+     casetă mare și goală, deși e doar un rând de citit. */
+  .sl-teren-nota{ font-size:13.5px; color:var(--ink-2); }
   /* Nota se taie la două rânduri: în card e un memento, nu locul unde o
      citești pe toată. Cine vrea tot textul o are pe profil, unde o și scrie.
-     ⚠️ Tăierea stă pe textul notei, nu pe `.sl-nota`: eticheta „NOTA TA" e
+     ⚠️ Tăierea stă pe textul notei, nu pe casetă: eticheta „NOTA TA" e
      `display:block`, deci ar fi mâncat ea unul din cele două rânduri. */
   .sl-nota-text{
     display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
@@ -1777,9 +1782,9 @@
   .sl-grup-cap{ display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; }
   .sl-grup-nume{ font-size:15px; font-weight:600; color:var(--ink); text-decoration:none; }
   .sl-grup-nume:hover{ text-decoration:underline; }
-  .sl-grup-faza{ font-size:13.5px; color:var(--ink-2); margin-top:.5rem; }
-  .sl-bara{ height:6px; background:var(--bg-placeholder); border-radius:100px; overflow:hidden; margin:.625rem 0 .5rem; }
-  .sl-bara span{ display:block; height:100%; background:var(--terracotta); border-radius:100px; }
+  /* ⚠️ Aici erau `.sl-grup-faza` (rândul „La pasul 3, ...") și `.sl-bara`
+     (bara de progres a grupului). Amândouă au ieșit pe 22 august, odată cu
+     bifele de grup. */
 
   /* Ce s-a schimbat de când n-ai mai intrat în grup: cereri de aprobat, oameni
      noi. Punctul din fața rândului e reperul vizual, dar nu poartă singur
@@ -3230,18 +3235,17 @@
     //
     // ⚠️ Cine e deja în grup nu mai primește niciun rând aici. Până acum îl
     // trimitea la ghidul „Cum funcționează", adică îl scotea din spațiul lui
-    // ca să-i explice un drum pe care deja mersese. Harta lui e cardul
-    // grupului de mai jos, care spune faza și „4 din 10 pași", cu bifele puse
-    // chiar de membrii lui. Decizia lui Lucian, 17 august: hero-ul nu trimite
-    // pe nimeni în afara paginii.
+    // ca să-i explice un drum pe care deja mersese. Harta lui e pagina
+    // grupului, unde pașii sunt chiar capitolele. Decizia lui Lucian,
+    // 17 august: hero-ul nu trimite pe nimeni în afara paginii.
     function subsol(st){
       if(st.grup) return '';
       return '<p class="bs-foot">Nu știi de unde să începi? ' +
                '<a href="#cum-incepi" data-dest="cum-incepi">Vezi cum funcționează →</a></p>';
     }
 
-    // Fraza de stare. Fără faza grupului: se schimbă rar și apare oricum, cu
-    // bară de progres, în cardul grupului de mai jos.
+    // Fraza de stare. Fără pasul la care a ajuns grupul: se schimbă rar, iar
+    // din 22 august nu se mai măsoară nicăieri.
     function rezumat(date){
       var bucati = [];
       var n = date.terenuri.length;
@@ -3649,7 +3653,7 @@
       }
 
       // Nota se scrie tot pe profil, unde era. Aici se citește, tăiată la două
-      // rânduri (`.sl-nota`): în card e un memento, nu locul unde o citești pe toată.
+      // rânduri (`.sl-teren-nota`): în card e un memento, nu locul unde o citești pe toată.
       var nota = t.nota
         ? esc(t.nota)
         : '<span class="sl-nota-goala">Nicio notă.</span> ' +
@@ -3675,7 +3679,7 @@
                  '<span class="sl-teren-scurt">' + scurt + '</span>' +
                '</summary>' +
                '<div class="sl-teren-corp">' +
-                 '<div class="sl-nota"><span class="sl-nota-eticheta">Nota ta</span>' +
+                 '<div class="sl-teren-nota"><span class="sl-nota-eticheta">Nota ta</span>' +
                    '<span class="sl-nota-text">' + nota + '</span></div>' +
                  actiuni +
                '</div>' +
@@ -3705,49 +3709,25 @@
     // ── CASETELE CRONOLOGIEI ──
     // Lista celor 11 casete și citirea textului lor din ghid stau în
     // `js/pasi-din-ghid.js`, ca să fie aceleași și aici, și în pagina grupului.
-    // Aici se folosesc în două locuri:
-    //   · „Grupurile tale", care are nevoie doar de chei, ca să spună la ce pas
-    //     a ajuns fiecare grup;
-    //   · „Pașii până la mutare", care le scrie pe toate, fără nicio bifă.
-
-    function cateBife(bife){
-      return PASI_CU_BIFA.filter(function(c){ return bife[c.key]; }).length;
-    }
-
-    // Pasul curent al UNUI GRUP = prima casetă nebifată. Dacă toate sunt
-    // bifate, grupul s-a mutat deja și n-are rost o bară de progres.
-    function pasulGrupului(bife){
-      for(var i = 0; i < PASI_CU_BIFA.length; i++){
-        if(!bife[PASI_CU_BIFA[i].key]){
-          return {
-            nr: i + 1,
-            titlu: PASI_CU_BIFA[i].titlu,
-            facute: cateBife(bife),
-            total: PASI_CU_BIFA.length
-          };
-        }
-      }
-      return null;
-    }
+    // Se folosesc într-un singur loc: cardul „Pașii până la mutare", care le
+    // scrie pe toate, fără nicio bifă.
+    //
+    // ⚠️ Aici erau `cateBife()` și `pasulGrupului()`, care spuneau la ce pas a
+    // ajuns un grup. Au ieșit pe 22 august, odată cu bifele din pagina
+    // grupului: fără cineva care să le pună, răspunsul era mereu „pasul 1".
 
     // ── GRUPURILE TALE ──
 
     function randGrup(g){
       var membri = (g.membri === 1) ? 'un membru' : g.membri + ' membri';
-      var corp = '';
-      // ⚠️ Fără bară de progres și fără „3 din 10 pași" (decizia lui Lucian,
-      // 22 august). Pașii nu sunt egali între ei și nimeni nu știe cât durează
-      // fiecare, deci o bară umplută pe sfert sugerează un sfert de drum, ceea
-      // ce nu e adevărat. Rămâne doar unde e grupul acum.
-      if(g.faza){
-        corp = '<p class="sl-grup-faza">La pasul ' + g.faza.nr + ', ' + esc(g.faza.titlu) + '</p>';
-      } else if(g.bifeCitite){
-        // Toate casetele bifate. Rar, dar e singurul caz în care nu e o eroare.
-        corp = '<p class="sl-grup-faza">Au trecut prin toți pașii, până la mutare.</p>';
-      }
-      // Dacă bifele n-au putut fi citite (drepturi, grup abia creat), nu
-      // scriem nimic despre pași. Mai bine un card mai scurt decât „Pasul 1"
-      // pentru un grup care e de fapt mai departe.
+      // ⚠️ Cardul NU mai spune la ce pas e grupul. Rândul „La pasul 3,
+      // Verificarea terenului" se scria din bifele de grup, iar acelea au ieșit
+      // din pagina grupului pe 22 august: nimeni nu le mai poate schimba, deci
+      // rândul ar fi înghețat pe „La pasul 1" pentru toate grupurile noi.
+      // Bara de progres plecase deja, în aceeași zi, dintr-un alt motiv (pașii
+      // nu sunt egali între ei, deci un sfert de bară nu e un sfert de drum).
+      // Când bifele se mută pe fiecare teren, în `grup_teren_checklist`, se
+      // poate scrie iar ceva adevărat aici.
 
       // ── CE S-A SCHIMBAT DE CÂND N-AI MAI INTRAT ──
       // Două rânduri, amândouă adăugate pe 18 august, la cererea lui Lucian.
@@ -3786,7 +3766,7 @@
                  '<a class="sl-grup-nume" href="/grup-details.html?id=' + encodeURIComponent(g.id) +
                    '" data-dest="grupul-meu">' + esc(g.nume) + '</a>' +
                  '<span class="sl-meta">' + membri + '</span>' +
-               '</div>' + corp + semne +
+               '</div>' + semne +
                '<div class="sl-actiuni">' + buton + '</div>' +
              '</div>';
     }
@@ -4174,8 +4154,11 @@
       // din profil, pe care le are oricine ajunge pe homepage (vezi zidul de
       // profil din `nav.js`). Cardul lipsește doar dacă nu s-a potrivit nimeni,
       // iar atunci lipsește și din cuprins.
+      // Fără `titluScurt`: în cuprinsul din hero scria doar „Utilizatori", lângă
+      // „Grupuri în zonele tale". Cele două carduri sunt perechea aceleiași
+      // idei, deci se scriu la fel, întreg.
       { id:'utilizatori-compatibili', titlu:'Utilizatori în zonele tale',
-        titluScurt:'Utilizatori', cere:null, randeaza:cardUtilizatori,
+        cere:null, randeaza:cardUtilizatori,
         are:function(date){ return date.utilizatori.length > 0; } },
       // Stă imediat sub utilizatori, ca în machetă, și îi umple golul din
       // dreapta: două carduri de oameni și de grupuri, una lângă alta.
@@ -4419,7 +4402,13 @@
           // mereu fondatorul — administrarea se poate transfera.
           grupIds.length  ? bland(sb.from('grupuri').select('id, nume, admin_id').in('id', grupIds)) : nimic,
           grupIds.length  ? bland(sb.from('grup_membri_count').select('grup_id, membri_count').in('grup_id', grupIds)) : nimic,
-          grupIds.length  ? blandNul(sb.from('grup_checklist').select('grup_id, step_key, checked').in('grup_id', grupIds)) : nimic,
+          // 5. LOCUL RĂMAS GOL. Aici se citea `grup_checklist`, ca să scrie pe
+          //    cardul grupului la ce pas a ajuns. Bifele au ieșit din pagina
+          //    grupului pe 22 august, deci interogarea n-ar mai avea ce spune.
+          //    ⚠️ Slotul rămâne, cu o promisiune goală: tot ce vine după se
+          //    citește prin numărul lui (`x[6]`, `x[7]`...), iar scoaterea
+          //    rândului le-ar muta pe toate cu unul.
+          nimic,
 
           // 6. Numele orașelor zonelor mele. Terenul ține orașul ca text, deci
           //    fără ele „Centru" din Cluj s-ar potrivi cu „Centru" din Brașov.
@@ -4614,14 +4603,6 @@
           var grupuriCuCereri = Object.keys(cereriPeGrup).map(function(k){ return cereriPeGrup[k]; })
             .sort(function(a, b){ return String(a.cand).localeCompare(String(b.cand)); });
 
-          var bifeCitite = (x[5] !== null);
-          var bifePeGrup = {};
-          (x[5] || []).forEach(function(row){
-            if(!row.checked) return;
-            bifePeGrup[row.grup_id] = bifePeGrup[row.grup_id] || {};
-            bifePeGrup[row.grup_id][row.step_key] = true;
-          });
-
           date.grupuri = grupIds.map(function(id){
             return {
               id: id,
@@ -4629,8 +4610,6 @@
               // Grupurile fără niciun membru activ nu apar în view (așa
               // lucrează GROUP BY), deci lipsa lor înseamnă 0 — vezi grupuri.js.
               membri: membriGrup[id] || 0,
-              faza: bifeCitite ? pasulGrupului(bifePeGrup[id] || {}) : null,
-              bifeCitite: bifeCitite,
               // Câți așteaptă răspuns de la mine. Zero pentru grupurile pe care
               // nu le administrez, fiindcă acolo nici nu s-au numărat.
               cereri: cereriPeGrup[id] ? cereriPeGrup[id].cati : 0,
