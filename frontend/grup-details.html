@@ -162,7 +162,34 @@
         .section-card h2 i {
             color: #c2604a;
         }
-        
+
+        /* Casete pliabile (zone, interese): închise implicit, deschise la clic */
+        .section-fold .section-fold-head {
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+        }
+
+        .section-fold .section-fold-chevron {
+            margin-left: auto;
+            font-size: 0.8rem;
+            color: #8a8a8a;
+            transition: transform 0.2s;
+        }
+
+        .section-fold.open .section-fold-chevron {
+            transform: rotate(180deg);
+        }
+
+        .section-fold .section-fold-body {
+            display: none;
+            padding-top: 1rem;
+        }
+
+        .section-fold.open .section-fold-body {
+            display: block;
+        }
+
         /* Description */
         .grup-description {
             color: #1a1a1a;
@@ -735,6 +762,65 @@
         .cl-phase.open .cl-phase-chevron { transform: rotate(180deg); }
         .cl-phase-body { display: none; padding: 0 1.25rem 1rem; }
         .cl-phase.open .cl-phase-body { display: block; }
+        .cl-phase.gata .cl-phase-title { color: #555555; }
+
+        /* Bifa de casetă: „grupul a trecut de aici" */
+        .cl-box-done {
+            display: flex; align-items: center; gap: 0.6rem;
+            margin-top: 1.1rem; padding: 0.6rem 0.8rem;
+            border: 1px solid #e8e3d8; border-radius: 0.5rem; background: #faf8f3;
+            font-size: 0.85rem; font-weight: 600; color: #1a1a1a;
+            cursor: pointer; user-select: none; transition: border-color 0.15s;
+        }
+        .cl-box-done:hover { border-color: #c2604a; }
+        .cl-box-done.bifat { background: #f0f7f2; border-color: #bfdcc9; }
+        .cl-box-done.sters { cursor: default; }
+        .cl-box-done.sters:hover { border-color: #e8e3d8; }
+        .cl-box-done-meta { margin-left: auto; font-size: 0.72rem; font-weight: 500; color: #8a8a8a; }
+        .cl-box-tools { margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #e8e3d8; }
+
+        /* ── Textul pașilor, adus din ghid ──
+           Ghidul rulează cu Tailwind, pagina asta nu. Aici sunt reproduse, scopat, doar
+           utilitarele pe care le folosesc cele 11 secțiuni, plus regulile din ce-este.css
+           de care au nevoie. Dacă în ghid apare o clasă nouă, ea nu se vede aici până nu
+           e adăugată mai jos. */
+        .cl-ghid-text { font-size: 0.95rem; color: #555555; line-height: 1.7; }
+        .cl-ghid-text p { margin: 0 0 0.75rem; }
+        .cl-ghid-text h4 { font-size: 0.92rem; font-weight: 600; color: #1a1a1a; margin: 1.3rem 0 0.4rem; }
+        .cl-ghid-text ul { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+        .cl-ghid-text li { font-size: 0.9rem; color: #555555; line-height: 1.6; padding: 0.2rem 0; }
+        .cl-ghid-text strong { color: #1a1a1a; font-weight: 600; }
+        .cl-ghid-text a { color: #a94a35; text-decoration: underline; }
+        .cl-ghid-text .ce-tip {
+            padding: 1rem 1.25rem; border-radius: 0 8px 8px 0;
+            background: #faf8f3; border-left: 3px solid #1a1a1a;
+            margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.6; color: #1a1a1a;
+        }
+        .cl-ghid-text .eticheta-curand {
+            display: inline-block; font-size: 0.66rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            background: #f5efe1; border: 1px solid rgba(0,0,0,0.12); color: #6b5b3a;
+            border-radius: 999px; padding: 0.1rem 0.5rem;
+        }
+        .cl-ghid-text .ce-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 640px) { .cl-ghid-text .ce-grid-2 { grid-template-columns: 1fr; } }
+        /* utilitare Tailwind folosite în cele 11 secțiuni */
+        .cl-ghid-text .text-sm { font-size: 0.875rem; }
+        .cl-ghid-text .text-xs { font-size: 0.78rem; }
+        .cl-ghid-text .font-semibold { font-weight: 600; }
+        .cl-ghid-text .mb-1 { margin-bottom: 0.25rem; }
+        .cl-ghid-text .mb-2 { margin-bottom: 0.5rem; }
+        .cl-ghid-text .mb-4 { margin-bottom: 1rem; }
+        .cl-ghid-text .space-y-1 > * + * { margin-top: 0.25rem; }
+        .cl-ghid-text .space-y-2 > * + * { margin-top: 0.5rem; }
+        .cl-ghid-text .p-4 { padding: 1rem; }
+        .cl-ghid-text .border { border: 1px solid #e8e3d8; }
+        .cl-ghid-text .rounded-lg { border-radius: 0.5rem; }
+        .cl-ghid-text .bg-yellow-50 { background: #fffbeb; }
+        .cl-ghid-text .border-yellow-200 { border-color: #fde68a; }
+        .cl-ghid-text .bg-green-50 { background: #f0f7f2; }
+        .cl-ghid-text .border-green-200 { border-color: #bfdcc9; }
+
         .cl-step {
             display: flex; align-items: flex-start; gap: 0.75rem;
             padding: 0.65rem 0; border-bottom: 1px solid #f3f0e7;
@@ -1042,18 +1128,6 @@
             <p id="grupDescriere" class="grup-description">Fără descriere.</p>
         </div>
         
-        <!-- Zone preferate -->
-        <div id="zoneSection" class="section-card" style="display: none;">
-            <h2><i class="fas fa-map-marker-alt"></i> Zone preferate</h2>
-            <div id="grupZones" class="tags-display"></div>
-        </div>
-        
-        <!-- Tag-uri / Interese -->
-        <div id="tagsSection" class="section-card" style="display: none;">
-            <h2><i class="fas fa-tags"></i> Interese și preferințe</h2>
-            <div id="grupTags" class="tags-display"></div>
-        </div>
-        
         <!-- Members -->
         <div class="section-card">
             <h2><i class="fas fa-users"></i> Membri (<span id="membriCountTitle">0</span>)</h2>
@@ -1061,27 +1135,13 @@
                 <!-- Members will be populated by JS -->
             </div>
         </div>
-        
+
         <!-- Active Kick Votes - Member only -->
         <div id="kickVotesSection" class="section-card member-only" style="display: none;">
             <h2><i class="fas fa-gavel"></i> Voturi active de excludere</h2>
             <div id="kickVotesList"></div>
         </div>
-        
-        <!-- Terenuri favorite - Visible to all logged-in users -->
-        <div id="terenuriSection" class="section-card">
-            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului <span id="terenuriGrupNume"></span></h2>
-            <div id="terenuriGrid" class="terenuri-grid" style="max-height: 400px; overflow-y: auto;">
-                <div class="empty-section">
-                    <i class="fas fa-map"></i>
-                    <p>Niciun teren adăugat încă.</p>
-                    <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
-                        <i class="fas fa-search"></i> Explorează terenuri
-                    </a>
-                </div>
-            </div>
-        </div>
-        
+
         <!-- Anunțuri generale grup - Member only -->
         <div id="anunturiSection" class="section-card member-only">
             <h2><i class="fas fa-bullhorn"></i> Anunțuri generale grup</h2>
@@ -1105,8 +1165,8 @@
         
         <!-- Journal & Checklist - Member only (Coming soon) -->
         <div id="journalSection" class="section-card member-only">
-            <h2><i class="fas fa-tasks"></i> Progresul Grupului</h2>
-            <p id="checklistSubtitle" style="font-size: 0.82rem; color: #8a8a8a; margin-bottom: 1.25rem;">Urmărește și bifează pașii pe măsură ce avansați în procesul de construcție.</p>
+            <h2><i class="fas fa-tasks"></i> Cronologia pașilor</h2>
+            <p id="checklistSubtitle" style="font-size: 0.82rem; color: #8a8a8a; margin-bottom: 1.25rem;">Cei 11 pași ai unui proiect, de la prima discuție până la mutare. Caseta deschisă e cea la care ați ajuns.</p>
             <div id="checklistReadonly" style="display: none; padding: 0.6rem 1rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.82rem; color: #92400e;">
                 <i class="fas fa-info-circle"></i> Doar membrii grupului pot edita jurnalul de progres. Contactează adminul pentru modificări.
             </div>
@@ -1114,8 +1174,8 @@
             <!-- Progress bar -->
             <div style="margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                    <span style="font-size: 0.82rem; font-weight: 600; color: #1a1a1a;">Progres total</span>
-                    <span id="progressPercent" style="font-size: 0.82rem; font-weight: 700; color: #c2604a;">0%</span>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: #1a1a1a;">Pași parcurși</span>
+                    <span id="progressPercent" style="font-size: 0.82rem; font-weight: 700; color: #c2604a;">0 din 10</span>
                 </div>
                 <div style="height: 8px; background: #e8e3d8; border-radius: 4px; overflow: hidden;">
                     <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #c2604a, #dda88f); border-radius: 4px; transition: width 0.5s;"></div>
@@ -1125,7 +1185,43 @@
             <!-- Timeline phases -->
             <div id="checklistTimeline" class="checklist-timeline"></div>
         </div>
-        
+
+        <!-- Terenuri favorite - Visible to all logged-in users -->
+        <div id="terenuriSection" class="section-card">
+            <h2><i class="fas fa-heart"></i> Terenuri favorite ale grupului <span id="terenuriGrupNume"></span></h2>
+            <div id="terenuriGrid" class="terenuri-grid" style="max-height: 400px; overflow-y: auto;">
+                <div class="empty-section">
+                    <i class="fas fa-map"></i>
+                    <p>Niciun teren adăugat încă.</p>
+                    <a href="terenuri.html" class="btn-action btn-secondary" style="margin-top: 0.5rem;">
+                        <i class="fas fa-search"></i> Explorează terenuri
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone preferate - casetă pliabilă, închisă implicit -->
+        <div id="zoneSection" class="section-card section-fold" style="display: none;">
+            <h2 class="section-fold-head" onclick="toggleFold('zoneSection')">
+                <i class="fas fa-map-marker-alt"></i> Zone preferate
+                <i class="fas fa-chevron-down section-fold-chevron"></i>
+            </h2>
+            <div class="section-fold-body">
+                <div id="grupZones" class="tags-display"></div>
+            </div>
+        </div>
+
+        <!-- Tag-uri / Interese - casetă pliabilă, închisă implicit -->
+        <div id="tagsSection" class="section-card section-fold" style="display: none;">
+            <h2 class="section-fold-head" onclick="toggleFold('tagsSection')">
+                <i class="fas fa-tags"></i> Interese și preferințe
+                <i class="fas fa-chevron-down section-fold-chevron"></i>
+            </h2>
+            <div class="section-fold-body">
+                <div id="grupTags" class="tags-display"></div>
+            </div>
+        </div>
+
         <!-- Admin Section - Admin only -->
         <div id="adminSection" class="section-card" style="display: none;">
             <h2><i class="fas fa-cog"></i> Administrare grup</h2>
@@ -1687,7 +1783,7 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
         // Show readonly notice if member can't edit
         if (!canEditChecklist) {
             document.getElementById('checklistReadonly').style.display = 'block';
-            document.getElementById('checklistSubtitle').textContent = 'Urmărește progresul grupului în procesul de construcție.';
+            document.getElementById('checklistSubtitle').textContent = 'Cei 11 pași ai unui proiect, de la prima discuție până la mutare. Vezi unde a ajuns grupul.';
         }
     }
     
@@ -1927,59 +2023,77 @@ function renderTerenuri(terenuri) {
     });
 }
 
-// ── CHECKLIST TIMELINE ──
-const CHECKLIST_PHASES = [
-    {
-        key: 'faza1', title: 'Formarea Grupului', color: '#5a7196',
-        steps: [
-            { key: 'f1_in_formare', title: 'În formare' },
-            { key: 'f1_regulament', title: 'Regulament de funcționare', subtitle: 'Reguli de comunicare online · Reguli de luare a deciziilor · Responsabilități și disponibilitate' },
-            { key: 'f1_principii', title: 'Principii și scopuri comune agreate', subtitle: 'Calitatea construcției · Eficiența termică și fonică · Instalații de calitate superioară · Arhitectură contemporană' },
-            { key: 'f1_grup_format', title: 'Grup format' },
-        ]
-    },
-    {
-        key: 'faza2', title: 'Căutarea și Achiziția Terenului', color: '#2f8f5b',
-        steps: [
-            { key: 'f2_identificare', title: 'Faza de identificare terenuri' },
-            { key: 'f2_vizite', title: 'Vizite terenuri' },
-            { key: 'f2_extras_cf', title: 'Extras carte funciară obținut', subtitle: '<a href="https://epay.ancpi.ro/epay/SelectCat.action?catId=1" target="_blank" style="color:#5a7196;text-decoration:underline;">ANCPI online</a>' },
-            { key: 'f2_cert_urbanism', title: 'Certificat de urbanism informativ', subtitle: 'Oricine poate face o cerere la primăria de sector sau generală pentru obținere' },
-            { key: 'f2_analiza_generala', title: 'Analiză generală cerută pe platformă', subtitle: '<a href="terenuri.html" target="_blank" style="color:#5a7196;text-decoration:underline;">Vezi tipuri de analize</a>' },
-            { key: 'f2_istoric_notar', title: 'Istoric teren verificat la notar' },
-            { key: 'f2_studiu_geo', title: 'Studiu geotehnic preliminar realizat', subtitle: '1-2 foraje pentru a verifica natura solului de fundare – există situații în care terenul este slab și necesită costuri suplimentare pentru fundații' },
-            { key: 'f2_analiza_complexa', title: 'Analiză complexă cerută (1-2 terenuri finale)' },
-            { key: 'f2_contract_asociere', title: 'Contract asociere între membrii grupului' },
-            { key: 'f2_achizitionare', title: 'Achiziționare teren' },
-            { key: 'f2_alte_note', title: 'Alte note' },
-        ]
-    },
-    {
-        key: 'faza3', title: 'Proiectarea', color: '#c2604a',
-        steps: [
-            { key: 'f3_echipa', title: 'Echipă proiectanți selectată', subtitle: 'Arhitectură – Structură – Instalații · Lista parteneri (în viitor)' },
-            { key: 'f3_cert_construire', title: 'Certificat de urbanism pt construire', subtitle: 'Se cere la primărie de către proprietarii terenului cu atașarea unui plan de situație și alte piese explicative de către arhitect' },
-            { key: 'f3_concept', title: 'Faza concept', subtitle: 'Planuri, suprafețe, randări' },
-            { key: 'f3_avize', title: 'Faza de obținere a avizelor cerute prin certificatul de urbanism' },
-            { key: 'f3_proiect_tehnic', title: 'Faza proiect tehnic PTh', subtitle: 'Recomandat înaintea DTAC. Cu el, proiectanții tuturor specialităților pot scoate liste de cantități, iar voi puteți cere oferte de la constructori și ajusta proiectul după buget' },
-            { key: 'f3_dtac', title: 'DTAC', subtitle: 'Documentație tehnică pentru obținerea autorizației de construire. Recomandat după proiectul tehnic, ca să cunoașteți costurile reale înainte de a autoriza. Uzual se depune înaintea PTh, pentru o autorizație mai rapidă, dar atunci orice modificare de fațadă sau volumetrie cerută mai târziu înseamnă reautorizare' },
-            { key: 'f3_detalii_exec', title: 'Faza detalii de execuție', subtitle: 'Obligatorie pentru o execuție controlată a proiectului' },
-            { key: 'f3_alte_note', title: 'Alte note' },
-        ]
-    },
-    {
-        key: 'faza4', title: 'Construcția', color: '#8f5a48',
-        steps: [
-            { key: 'f4_oferte', title: 'Oferte execuție', subtitle: 'Structură, instalații, arhitectură · Lista parteneri (în viitor)' },
-            { key: 'f4_constructor', title: 'Constructor selectat' },
-            { key: 'f4_structura', title: 'Execuție structură' },
-            { key: 'f4_instalatii', title: 'Execuție instalații' },
-            { key: 'f4_finisaje', title: 'Execuție finisaje' },
-            { key: 'f4_receptie', title: 'Recepție 🏠' },
-            { key: 'f4_alte_note', title: 'Alte note' },
-        ]
-    }
+// ── CRONOLOGIA PAȘILOR: cele 11 casete ──
+// Casetele sunt exact cele din ghidul public „Pașii într-un grup"
+// (ce-este/cum-functioneaza.html). Textul NU e copiat aici: pagina citește ghidul la
+// încărcare și scoate din el secțiunea fiecărei casete, după `ghid`, care e id-ul
+// secțiunii din ghid. Așa există o singură sursă, iar ghidul rămâne HTML static,
+// deci indexabil. Dacă redenumești un id acolo, caseta de aici rămâne fără text și
+// arată în loc un link către ghid.
+//
+// ⚠️ `key` se scrie în grup_checklist.step_key, la fel pentru note și atașamente.
+// O bifă pe casetă, nu pe fiecare pas: „grupul a trecut de aici".
+// Cheile vechi (f1_/f2_/f3_/f4_) rămân în bază, nemaifolosite. Vezi scriptul de mutare
+// din db_schema/cronologia-pasilor/.
+const CHECKLIST_BOXES = [
+    { key: 'c1',  title: 'Comunicarea cu cei din grup',            color: '#5a7196', ghid: 'comunicarea' },
+    { key: 'c2',  title: 'Organizarea pe terenuri și apartamente', color: '#2f8f5b', ghid: 'organizarea' },
+    { key: 'c3',  title: 'Verificarea terenului',                  color: '#2f8f5b', ghid: 'verificarea-terenului' },
+    { key: 'c4',  title: 'Analiza detaliată',                      color: '#2f8f5b', ghid: 'analiza-detaliata' },
+    { key: 'c5',  title: 'Contractul de asociere',                 color: '#2f8f5b', ghid: 'contract-asociere' },
+    { key: 'c6',  title: 'Cumpărați terenul',                      color: '#2f8f5b', ghid: 'cumpararea-terenului' },
+    { key: 'c7',  title: 'Începeți proiectarea',                   color: '#c2604a', ghid: 'proiectarea' },
+    { key: 'c8',  title: 'Șantierul',                              color: '#8f5a48', ghid: 'santierul' },
+    // Fără bifă: nu e un pas prin care treci, e ce faci dacă se întâmplă.
+    { key: 'c9',  title: 'Dacă cineva vrea să iasă din asociere',  color: '#8a8a8a', ghid: 'iesirea', faraBifa: true },
+    { key: 'c10', title: 'Recepția și apartamentarea',             color: '#8f5a48', ghid: 'receptia' },
+    { key: 'c11', title: 'Mutarea',                                color: '#8f5a48', ghid: 'mutarea' },
 ];
+
+// Textul celor 11 secțiuni, citit o singură dată din ghid. ancoră -> HTML
+let ghidSectiuni = null;
+
+async function loadGhidPasi() {
+    if (ghidSectiuni) return ghidSectiuni;
+    ghidSectiuni = {};
+    try {
+        const res = await fetch('ce-este/cum-functioneaza.html');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+
+        CHECKLIST_BOXES.forEach(box => {
+            const sectiune = doc.getElementById(box.ghid);
+            if (!sectiune) return;
+            const copie = sectiune.cloneNode(true);
+
+            // Capul de secțiune (numărul mare și titlul) îl punem noi, în antetul casetei
+            const cap = copie.querySelector('.pas-cap');
+            if (cap) cap.remove();
+
+            // Linkurile din ghid sunt scrise față de folderul /ce-este/, pagina asta stă
+            // la rădăcină. Ancorele interne trimit la caseta corespunzătoare de aici.
+            copie.querySelectorAll('a[href]').forEach(a => {
+                const href = a.getAttribute('href') || '';
+                if (href.startsWith('#')) {
+                    const tinta = CHECKLIST_BOXES.find(b => b.ghid === href.slice(1));
+                    a.setAttribute('href', tinta ? '#phase-' + tinta.key : 'ce-este/cum-functioneaza.html' + href);
+                    return;
+                }
+                if (/^(https?:|mailto:|tel:|\/)/.test(href)) {
+                    a.setAttribute('target', '_blank');
+                    return;
+                }
+                a.setAttribute('href', 'ce-este/' + href);
+                a.setAttribute('target', '_blank');
+            });
+
+            ghidSectiuni[box.ghid] = copie.innerHTML;
+        });
+    } catch (err) {
+        console.error('Nu am putut citi pașii din ghid:', err);
+    }
+    return ghidSectiuni;
+}
 
 let checklistData = {}; // step_key -> { checked, checked_at, checked_by, notes }
 let profilesCache = {};
@@ -2012,6 +2126,9 @@ async function loadChecklist() {
             (profiles || []).forEach(p => { profilesCache[p.user_id] = p.pseudonym || 'Anonim'; });
         }
         
+        // Textul pașilor vine din ghid, o singură dată pe încărcarea paginii
+        await loadGhidPasi();
+
         renderChecklist();
     } catch (err) {
         console.error('Error loading checklist:', err);
@@ -2021,119 +2138,128 @@ async function loadChecklist() {
 
 function renderChecklist() {
     const container = document.getElementById('checklistTimeline');
-    let totalSteps = 0;
-    let doneSteps = 0;
-    
-    container.innerHTML = CHECKLIST_PHASES.map((phase, pi) => {
-        const phaseSteps = phase.steps;
-        const phaseDone = phaseSteps.filter(s => checklistData[s.key]?.checked).length;
-        totalSteps += phaseSteps.length;
-        doneSteps += phaseDone;
-        
-        // Auto-open the first incomplete phase
-        const isOpen = phaseDone < phaseSteps.length && 
-            CHECKLIST_PHASES.slice(0, pi).every(p => 
-                p.steps.every(s => checklistData[s.key]?.checked)
-            );
-        
+
+    // Casetele care se bifează (a noua e informativă, nu se bifează)
+    const cuBifa = CHECKLIST_BOXES.filter(b => !b.faraBifa);
+    const done = cuBifa.filter(b => checklistData[b.key]?.checked).length;
+
+    // Caseta „de lucru": prima nebifată. Ea stă deschisă, restul se închid.
+    const frontier = cuBifa.find(b => !checklistData[b.key]?.checked);
+
+    container.innerHTML = CHECKLIST_BOXES.map((box, bi) => {
+        const isChecked = !!checklistData[box.key]?.checked;
+        const isOpen = box === frontier;
+        const text = ghidSectiuni && ghidSectiuni[box.ghid];
+
+        // Antetul: cerc cu numărul pasului, verde cu bifă dacă grupul a trecut de el
+        const cerc = isChecked
+            ? `<div class="cl-phase-number" style="background: #2f8f5b;"><i class="fas fa-check"></i></div>`
+            : `<div class="cl-phase-number" style="background: ${box.color};">${bi + 1}</div>`;
+
         return `
-            <div class="cl-phase ${isOpen ? 'open' : ''}" id="phase-${phase.key}">
-                <div class="cl-phase-header" onclick="togglePhase('${phase.key}')">
-                    <div class="cl-phase-number" style="background: ${phase.color};">${pi + 1}</div>
-                    <span class="cl-phase-title">${phase.title}</span>
-                    <span class="cl-phase-progress">${phaseDone}/${phaseSteps.length}</span>
+            <div class="cl-phase ${isOpen ? 'open' : ''} ${isChecked ? 'gata' : ''}" id="phase-${box.key}">
+                <div class="cl-phase-header" onclick="toggleBox('${box.key}')">
+                    ${cerc}
+                    <span class="cl-phase-title">${box.title}</span>
                     <i class="fas fa-chevron-down cl-phase-chevron"></i>
                 </div>
                 <div class="cl-phase-body">
-                    ${phaseSteps.map(step => renderStep(step, phase.color)).join('')}
+                    <div class="cl-ghid-text">${text || textLipsa(box)}</div>
+                    ${box.faraBifa ? '' : renderBoxDone(box, isChecked)}
+                    ${renderBoxTools(box.key)}
                 </div>
             </div>`;
     }).join('');
-    
-    // Update progress bar
-    const pct = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
+
+    // Bara de progres numără casetele, nu pașii mărunți dinăuntru
+    const pct = cuBifa.length > 0 ? Math.round((done / cuBifa.length) * 100) : 0;
     document.getElementById('progressBar').style.width = pct + '%';
-    document.getElementById('progressPercent').textContent = pct + '%';
-    
-    // Load notes and files for open phases
-    CHECKLIST_PHASES.forEach(phase => {
-        const el = document.getElementById('phase-' + phase.key);
+    document.getElementById('progressPercent').textContent = `${done} din ${cuBifa.length}`;
+
+    // Notele și atașamentele se încarcă doar pentru caseta deschisă
+    CHECKLIST_BOXES.forEach(box => {
+        const el = document.getElementById('phase-' + box.key);
         if (el && el.classList.contains('open')) {
-            phase.steps.forEach(s => {
-                loadStepNotes(s.key);
-                loadStepFiles(s.key);
-            });
+            loadStepNotes(box.key);
+            loadStepFiles(box.key);
         }
     });
 }
 
-function renderStep(step, phaseColor) {
-    const data = checklistData[step.key];
-    const isChecked = data?.checked || false;
-    const checkedAt = data?.checked_at ? new Date(data.checked_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-    const checkedBy = data?.checked_by ? (profilesCache[data.checked_by] || '') : '';
-    
-    const checkboxHtml = canEditChecklist
-        ? `<div class="cl-check ${isChecked ? 'checked' : ''}" 
-                 onclick="toggleStep('${step.key}')"
-                 style="${isChecked ? '' : 'border-color: ' + phaseColor + '40;'}"></div>`
-        : `<div class="cl-check ${isChecked ? 'checked' : ''}" 
-                 style="cursor: default; opacity: 0.7; ${isChecked ? '' : 'border-color: ' + phaseColor + '40;'}"></div>`;
-    
-    const noteBtn = canEditChecklist
-        ? `<button class="cl-note-btn" onclick="toggleNoteInput('${step.key}')">+ notă</button>`
+// Dacă ghidul n-a putut fi citit, sau i s-a redenumit o ancoră
+function textLipsa(box) {
+    return `<p>Textul acestui pas se citește din ghid, iar acum nu a putut fi încărcat.
+        <a href="ce-este/cum-functioneaza.html#${box.ghid}" target="_blank">Deschide-l în ghid</a>.</p>`;
+}
+
+// Bifa de casetă: „grupul a trecut de aici", cu explicație lângă ea
+function renderBoxDone(box, isChecked) {
+    const data = checklistData[box.key];
+    const cand = data?.checked_at
+        ? new Date(data.checked_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' })
         : '';
-    
-    // Upload button: only for members who can edit (grup cu aprobare)
-    const uploadBtn = canEditChecklist
-        ? `<button class="cl-upload-btn" onclick="triggerFileUpload('${step.key}')"><i class="fas fa-paperclip"></i> atașează</button>`
+    const cine = data?.checked_by ? (profilesCache[data.checked_by] || '') : '';
+    const meta = isChecked && cand
+        ? `<span class="cl-box-done-meta">${cand}${cine ? ', de ' + cine : ''}</span>`
         : '';
-    
-    const noteInput = canEditChecklist
-        ? `<div class="cl-note-input" id="note-input-${step.key}" style="display: none;">
-                    <input type="text" id="note-val-${step.key}" placeholder="Scrie o notă..." maxlength="500"
-                        onkeydown="if(event.key==='Enter')addStepNote('${step.key}')">
-                    <button onclick="addStepNote('${step.key}')">Trimite</button>
-                </div>`
-        : '';
-    
-    // Hidden file input
-    const fileInput = canEditChecklist
-        ? `<input type="file" id="file-input-${step.key}" style="display:none" 
-                onchange="handleFileUpload('${step.key}', this)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip">`
-        : '';
-    
+
+    if (!canEditChecklist) {
+        return isChecked
+            ? `<div class="cl-box-done sters"><div class="cl-check checked"></div>
+                   <span>Grupul a trecut de acest pas</span>${meta}</div>`
+            : '';
+    }
+
     return `
-        <div class="cl-step ${isChecked ? 'done' : ''}" id="step-${step.key}">
-            ${checkboxHtml}
-            <div class="cl-step-content">
-                <div class="cl-step-title">${step.title}</div>
-                ${step.subtitle ? `<div class="cl-step-subtitle">${step.subtitle}</div>` : ''}
-                <div class="cl-step-meta">
-                    ${isChecked && checkedAt ? `<span><i class="fas fa-check-circle" style="color: #2f8f5b;"></i> ${checkedAt}</span>` : ''}
-                    ${isChecked && checkedBy ? `<span>de ${checkedBy}</span>` : ''}
-                    ${noteBtn}
-                    ${uploadBtn}
-                </div>
-                <div class="cl-step-files" id="files-${step.key}"></div>
-                <div class="cl-step-notes" id="notes-${step.key}"></div>
-                ${noteInput}
-                ${fileInput}
+        <div class="cl-box-done ${isChecked ? 'bifat' : ''}" onclick="toggleBoxCheck('${box.key}')">
+            <div class="cl-check ${isChecked ? 'checked' : ''}"></div>
+            <span>Grupul a trecut de acest pas</span>
+            ${meta}
+        </div>`;
+}
+
+// Notele și fișierele grupului, la nivel de casetă
+function renderBoxTools(boxKey) {
+    if (!canEditChecklist) {
+        return `<div class="cl-box-tools">
+                <div class="cl-step-files" id="files-${boxKey}"></div>
+                <div class="cl-step-notes" id="notes-${boxKey}"></div>
+            </div>`;
+    }
+
+    return `
+        <div class="cl-box-tools">
+            <div class="cl-step-files" id="files-${boxKey}"></div>
+            <div class="cl-step-notes" id="notes-${boxKey}"></div>
+            <div class="cl-step-meta">
+                <button class="cl-note-btn" onclick="toggleNoteInput('${boxKey}')">+ notă</button>
+                <button class="cl-upload-btn" onclick="triggerFileUpload('${boxKey}')"><i class="fas fa-paperclip"></i> atașează</button>
             </div>
+            <div class="cl-note-input" id="note-input-${boxKey}" style="display: none;">
+                <input type="text" id="note-val-${boxKey}" placeholder="Scrie o notă pentru grup..." maxlength="500"
+                    onkeydown="if(event.key==='Enter')addStepNote('${boxKey}')">
+                <button onclick="addStepNote('${boxKey}')">Trimite</button>
+            </div>
+            <input type="file" id="file-input-${boxKey}" style="display:none"
+                onchange="handleFileUpload('${boxKey}', this)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip">
         </div>`;
 }
 
 
-function togglePhase(phaseKey) {
-    const el = document.getElementById('phase-' + phaseKey);
+// Casetele pliabile de la finalul paginii (zone, interese)
+function toggleFold(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) el.classList.toggle('open');
+}
+
+function toggleBox(boxKey) {
+    const el = document.getElementById('phase-' + boxKey);
+    if (!el) return;
     el.classList.toggle('open');
-    // Load notes and files when opening a phase
+    // Notele și atașamentele se încarcă la prima deschidere a casetei
     if (el.classList.contains('open')) {
-        const phase = CHECKLIST_PHASES.find(p => p.key === phaseKey);
-        if (phase) phase.steps.forEach(s => {
-            loadStepNotes(s.key);
-            loadStepFiles(s.key);
-        });
+        loadStepNotes(boxKey);
+        loadStepFiles(boxKey);
     }
 }
 
@@ -2273,7 +2399,8 @@ async function deleteStepNote(noteId, stepKey) {
     }
 }
 
-async function toggleStep(stepKey) {
+// Bifa unei casete. `stepKey` e cheia casetei (c1...c11), scrisă în grup_checklist.
+async function toggleBoxCheck(stepKey) {
     const existing = checklistData[stepKey];
     const newChecked = !(existing?.checked);
     
