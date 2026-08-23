@@ -1775,6 +1775,12 @@
   .sl-actiuni{ display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin-top:.75rem; }
   .sl-mini{ font-size:13px; color:var(--terracotta); text-decoration:none; font-weight:500; }
   .sl-mini:hover{ text-decoration:underline; }
+  /* Explicația de lângă „Cere o analiză". Butonul singur nu spune ce primești,
+     iar omul care are terenul la favorite exact asta vrea să afle. Stă pe
+     același rând cât încape și trece dedesubt pe ecran îngust, fiindcă
+     `.sl-actiuni` e deja un flex care se rupe. */
+  .sl-actiuni--explicat{ gap:.25rem .5rem; align-items:baseline; }
+  .sl-explicatie{ font-size:13px; color:var(--ink-3); }
 
   /* ── CARDUL DE GRUP ── */
   .sl-grup{ background:var(--bg); border:1px solid var(--rule); border-radius:10px; padding:1rem 1.125rem; }
@@ -1794,6 +1800,15 @@
   .sl-grup-semn::before{ content:""; flex:0 0 auto; width:6px; height:6px; border-radius:50%; background:var(--sage); }
   .sl-grup-semn--cerere{ color:var(--ink); font-weight:500; }
   .sl-grup-semn--cerere::before{ background:var(--terracotta); }
+  /* Rândul cu cererea e singurul „semn" pe care se dă clic: e și singurul care
+     cere o faptă de la om. Sublinierea o poartă rândul, nu o săgeată la capăt,
+     ca să nu semene cu butonul scos de deasupra lui. */
+  .sl-grup-semn--cerere a{ color:inherit; text-decoration:none; border-bottom:1px solid var(--rule-2); }
+  .sl-grup-semn--cerere a:hover{ border-bottom-color:var(--ink); }
+  /* „Nimic nou de la ultima ta vizită" e tot un răspuns, dar unul care nu cere
+     nimic de la om: scris mai stins, cu punctul din față neutru. */
+  .sl-grup-semn--liniste{ color:var(--ink-3); }
+  .sl-grup-semn--liniste::before{ background:var(--rule); }
   /* Grupul cu cereri neaprobate se deosebește de celelalte carduri și fără
      culoare, prin chenar. Nimeni nu trebuie să compare două nuanțe ca să vadă
      că are ceva de făcut. */
@@ -3665,7 +3680,16 @@
       var actiuni = '';
       if(!areAnaliza){
         var q = 'teren_id=' + encodeURIComponent(t.id) + '&teren_titlu=' + encodeURIComponent(t.titlu || '');
-        actiuni = '<div class="sl-actiuni">' + mini('/analize.html?' + q, 'Cere o analiză', 'cere-analiza') + '</div>';
+        // ⚠️ Butonul nu mai stă singur (decizia lui Lucian, 23 august).
+        // „Cere o analiză" nu spune ce primești, iar asta e chiar întrebarea
+        // omului care are terenul la favorite. Explicația stă lângă buton, nu
+        // în ghid, și folosește aceleași cuvinte ca emailul de terenuri
+        // (`notify-admins`): câte apartamente încap și la ce preț ies.
+        actiuni = '<div class="sl-actiuni sl-actiuni--explicat">' +
+                    mini('/analize.html?' + q, 'Cere o analiză', 'cere-analiza') +
+                    '<span class="sl-explicatie">ca să vezi câte apartamente se pot ' +
+                      'construi aici și la ce prețuri ar ieși</span>' +
+                  '</div>';
       }
 
       return '<details class="sl-teren"' + (i === 0 ? ' open' : '') + '>' +
@@ -3739,35 +3763,63 @@
       // la el), apoi membrii noi (doar îl pun la zi).
       var semne = '';
       if(g.cereri > 0){
+        // ⚠️ Rândul e CLICABIL, nu descriptiv (decizia lui Lucian, 23 august).
+        // Butonul „Vezi cererile" de sub card a ieșit odată cu linkul dublat,
+        // iar fără el rândul spunea ce ai de făcut fără să-ți dea unde. Acum
+        // linkul e chiar propoziția, ca la rândul de sub titlul unui teren.
+        // Duce în același loc ca titlul grupului, dar nu e o repetare: unul e
+        // numele grupului, celălalt e treaba de rezolvat.
         semne += '<p class="sl-grup-semn sl-grup-semn--cerere">' +
+                   '<a href="/grup-details.html?id=' + encodeURIComponent(g.id) +
+                     '" data-dest="vezi-cererile">' +
                    (g.cereri === 1 ? 'O cerere de intrare așteaptă răspunsul tău'
                                    : g.cereri + ' cereri de intrare așteaptă răspunsul tău') +
-                 '</p>';
+                   '</a></p>';
+      }
+      // ── CE E NOU ÎN GRUP ──
+      // Un singur rând, cu tot ce s-a întâmplat acolo de când n-ai mai intrat:
+      // anunțuri scrise, terenuri adăugate la favoritele grupului, oameni
+      // intrați (decizia lui Lucian, 23 august). Înainte scria doar despre
+      // membrii noi, iar dedesubt stătea un buton „Deschide grupul" care ducea
+      // exact unde duce și titlul de sus. Butonul a ieșit: titlul e acum
+      // singurul link, iar locul lui îl ia motivul pentru care ai deschide.
+      //
+      // ⚠️ „De la ultima ta vizită" se scrie DOAR dacă ai fost vreodată acolo.
+      // Pentru cine n-a deschis niciodată pagina grupului, pragul e ziua în
+      // care a intrat el în grup, deci fraza aceea ar fi fost o minciună mică.
+      var vazut = g.vazutVreodata;
+      var noi = [];
+      if(g.anunturiNoi > 0){
+        noi.push(g.anunturiNoi === 1 ? 'un anunț nou' : g.anunturiNoi + ' anunțuri noi');
+      }
+      if(g.terenuriNoi > 0){
+        noi.push(g.terenuriNoi === 1 ? 'un teren adăugat' : g.terenuriNoi + ' terenuri adăugate');
       }
       if(g.membriNoi > 0){
-        // „De la ultima ta vizită" se scrie DOAR dacă a fost vreodată acolo.
-        // Pentru cine n-a deschis niciodată pagina grupului, pragul e ziua în
-        // care a intrat el în grup, deci fraza aceea ar fi fost o minciună mică.
-        var coada = g.vazutVreodata ? ' de la ultima ta vizită' : ' de când ai intrat în grup';
-        semne += '<p class="sl-grup-semn">' +
-                   (g.membriNoi === 1 ? 'Un membru nou' : g.membriNoi + ' membri noi') + coada +
-                 '</p>';
+        noi.push(g.membriNoi === 1 ? 'un membru nou' : g.membriNoi + ' membri noi');
       }
+      // Rândul se scrie ȘI când nu s-a întâmplat nimic. Fără el, cardul unui
+      // grup liniștit ar arăta la fel ca unul despre care nu știm nimic, iar
+      // „nimic nou" e un răspuns, nu o lipsă.
+      semne += noi.length
+        ? '<p class="sl-grup-semn">' +
+            (vazut ? 'De la ultima ta vizită: ' : 'De când ai intrat în grup: ') +
+            insiruire(noi, 3) + '.</p>'
+        : '<p class="sl-grup-semn sl-grup-semn--liniste">Nimic nou ' +
+            (vazut ? 'de la ultima ta vizită' : 'de când ai intrat în grup') + '.</p>';
 
-      // Butonul își schimbă textul când e ceva de rezolvat: „Deschide grupul"
-      // nu spune de ce merită deschis chiar acum.
-      var buton = g.cereri > 0
-        ? mini('/grup-details.html?id=' + encodeURIComponent(g.id),
-               g.cereri === 1 ? 'Vezi cererea' : 'Vezi cererile', 'vezi-cererile')
-        : mini('/grup-details.html?id=' + encodeURIComponent(g.id), 'Deschide grupul', 'deschide-grupul');
-
+      // ⚠️ Cardul are UN SINGUR link: titlul. Aici era și un buton („Deschide
+      // grupul", ori „Vezi cererile" când era ceva de aprobat) care ducea la
+      // exact aceeași adresă ca titlul de deasupra lui. Două linkuri identice
+      // pe un card de patru rânduri nu ajută pe nimeni, deci butonul a ieșit
+      // pe 23 august. Ce făcea el a preluat rândul cu cererea, care e acum el
+      // însuși link, pe un card care se deosebește oricum prin chenar.
       return '<div class="sl-grup' + (g.cereri > 0 ? ' sl-grup--atentie' : '') + '">' +
                '<div class="sl-grup-cap">' +
                  '<a class="sl-grup-nume" href="/grup-details.html?id=' + encodeURIComponent(g.id) +
                    '" data-dest="grupul-meu">' + esc(g.nume) + '</a>' +
                  '<span class="sl-meta">' + membri + '</span>' +
                '</div>' + semne +
-               '<div class="sl-actiuni">' + buton + '</div>' +
              '</div>';
     }
 
@@ -4529,7 +4581,27 @@
           //     trebuie să scrie pe homepage.
           grupIds.length ? bland(sb.from('grup_membri').select('grup_id, user_id, joined_at')
                                    .in('grup_id', grupIds).eq('status', 'pending')
-                                   .order('joined_at', { ascending:true }).limit(60)) : nimic
+                                   .order('joined_at', { ascending:true }).limit(60)) : nimic,
+
+          // 18. ANUNȚURILE SCRISE ÎN GRUPURILE MELE (23 august).
+          //     Până acum, cardul unui grup spunea doar despre membri noi, deși
+          //     un anunț scris acolo e motivul cel mai bun de a deschide grupul.
+          //     ⚠️ Același `pragMinim` ca la membri: baza taie larg (o
+          //     interogare nu poate avea alt filtru de dată pe fiecare grup),
+          //     iar JS-ul taie fin, pe `pragGrup[id]`.
+          grupIds.length ? bland(sb.from('grup_anunturi').select('grup_id, user_id, created_at')
+                                   .in('grup_id', grupIds).gte('created_at', pragMinim)
+                                   .limit(200)) : nimic,
+
+          // 19. TERENURILE ADĂUGATE LA FAVORITELE GRUPURILOR MELE.
+          //     Aceeași tabelă din care se numără, mai sus, grupurile
+          //     interesate de terenurile mele, doar că filtrată pe grupurile
+          //     mele și pe dată. `created_at` există pe ea (probat pe 23 august
+          //     cu cheia anonimă: coloana răspunde, RLS-ul întoarce lista
+          //     goală), iar `added_by` e cel care l-a pus.
+          grupIds.length ? bland(sb.from('terenuri_likes_grupuri').select('grup_id, added_by, created_at')
+                                   .in('grup_id', grupIds).gte('created_at', pragMinim)
+                                   .limit(200)) : nimic
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -4613,9 +4685,12 @@
               // Câți așteaptă răspuns de la mine. Zero pentru grupurile pe care
               // nu le administrez, fiindcă acolo nici nu s-au numărat.
               cereri: cereriPeGrup[id] ? cereriPeGrup[id].cati : 0,
-              // Câți au intrat de la ultima mea vizită. Se completează câteva
-              // rânduri mai jos, după ce se taie pe pragul fiecărui grup.
-              membriNoi: 0
+              // Ce s-a întâmplat în grup de la ultima mea vizită. Toate trei
+              // se completează câteva rânduri mai jos, după ce se taie pe
+              // pragul fiecărui grup.
+              membriNoi: 0,
+              anunturiNoi: 0,
+              terenuriNoi: 0
             };
           });
 
@@ -4805,6 +4880,24 @@
           var grupuriCuMembriNoi = Object.keys(peGrup).map(function(k){ return peGrup[k]; })
             .sort(function(a, b){ return String(b.cand).localeCompare(String(a.cand)); });
 
+          // ── ANUNȚURI ȘI TERENURI NOI, PE FIECARE GRUP ──
+          // Aceeași tăiere ca la membri: baza a tăiat larg, pe `pragMinim`,
+          // aici se aplică pragul grupului acela.
+          // ⚠️ Ce am făcut EU nu se numără. Un om care tocmai a scris un anunț
+          // n-are nevoie ca homepage-ul să i-l anunțe înapoi ca noutate.
+          function catePeGrup(lista, campAutor){
+            var h = {};
+            (lista || []).forEach(function(r){
+              if(r[campAutor] === user.id) return;
+              if(!r.created_at) return;
+              if(pragGrup[r.grup_id] && r.created_at <= pragGrup[r.grup_id]) return;
+              h[r.grup_id] = (h[r.grup_id] || 0) + 1;
+            });
+            return h;
+          }
+          var anunturiPeGrup    = catePeGrup(x[18], 'user_id');
+          var terenuriNoiPeGrup = catePeGrup(x[19], 'added_by');
+
           // Aceleași numere, duse și pe cardurile din „Grupurile tale": fluxul
           // anunță, cardul rămâne. `vazutVreodata` deosebește „doi oameni noi
           // de la ultima ta vizită" de „doi oameni noi de când ai intrat în
@@ -4812,14 +4905,17 @@
           // deschis niciodată pagina grupului.
           date.grupuri.forEach(function(g){
             g.membriNoi = peGrup[g.id] ? peGrup[g.id].cati : 0;
+            g.anunturiNoi = anunturiPeGrup[g.id] || 0;
+            g.terenuriNoi = terenuriNoiPeGrup[g.id] || 0;
             g.vazutVreodata = !!vizite[g.id];
           });
           // Sus stă grupul care are nevoie de el: întâi cererile de aprobat,
-          // apoi cele cu oameni noi. La egalitate, alfabetic — altfel ordinea
+          // apoi cele în care s-a întâmplat cel mai mult. La egalitate, alfabetic — altfel ordinea
           // ar veni din baza de date și cardurile s-ar rearanja de la o
           // încărcare la alta, deși nu s-a schimbat nimic.
+          function catNou(g){ return g.membriNoi + g.anunturiNoi + g.terenuriNoi; }
           date.grupuri.sort(function(a, b){
-            return (b.cereri - a.cereri) || (b.membriNoi - a.membriNoi) ||
+            return (b.cereri - a.cereri) || (catNou(b) - catNou(a)) ||
                    String(a.nume || '').localeCompare(String(b.nume || ''), 'ro');
           });
 

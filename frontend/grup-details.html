@@ -419,10 +419,41 @@
             color: #555555;
             margin: 2px 0 0;
         }
-        /* ⚠️ Aici erau `.btn-cere-analiza` (butonul negru din capul cardului) și
-           `.teren-comments-area`. Butonul a coborât în lista de pași, la pasul
-           care îl cere („Analiza preliminară"), iar comentariile au intrat
+        /* ── ANALIZA, ÎN CAPUL CARDULUI ──
+           Butonul negru s-a întors aici pe 23 august (decizia lui Lucian).
+           Coborâse în lista de pași, la pasul care îl cere („Analiza
+           preliminară"), dar acolo stă sub o casetă pliată: un grup care se
+           uită la patru terenuri nu ajunge niciodată la el. Analiza e chiar
+           întrebarea pentru care s-a strâns grupul, deci se vede fără să
+           deschizi nimic.
+           ⚠️ Butonul din lista de pași a RĂMAS. Nu e o dublare de linkuri ca
+           pe homepage: acolo e acțiunea unui pas bifabil, aici e ce are de
+           făcut grupul cu terenul, iar cele două casete sunt închise.
+           ⚠️ `.teren-comments-area` a ieșit de tot: comentariile au intrat
            într-o casetă pliată. */
+        .teren-with-comments .teren-header-text { flex: 1; min-width: 0; }
+        .teren-analiza {
+            flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 5px;
+            max-width: 240px;
+        }
+        .btn-cere-analiza {
+            display: inline-block; padding: 0.5rem 0.85rem;
+            background: #1a1a1a; color: white; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+        }
+        .btn-cere-analiza:hover { background: #333333; color: white; }
+        /* Explicația de sub buton. „Cere o analiză" nu spune ce primești, iar
+           asta e chiar întrebarea grupului. Aceleași cuvinte ca în Spațiul tău
+           de pe homepage și ca în emailul de terenuri. */
+        .teren-analiza-nota { font-size: 0.72rem; color: #8a8a8a; text-align: right; line-height: 1.35; }
+        /* Când analiza există, în locul butonului stă rezultatul ei, liniștit:
+           nu mai e nimic de cerut, deci n-are de ce să fie negru. */
+        .teren-analiza-gata {
+            font-size: 0.8125rem; font-weight: 600; color: #5f8266;
+            text-decoration: none; white-space: nowrap;
+        }
+        .teren-analiza-gata:hover { text-decoration: underline; }
 
         /* ── CASETELE PLIATE DIN CARDUL UNUI TEREN ──
            Comentariile și pașii de verificare. Amândouă închise: un grup se
@@ -1176,6 +1207,11 @@
                 width: 100%;
                 height: 140px;
             }
+            /* Pe telefon capul cardului e o coloană, deci butonul se întinde pe
+               toată lățimea și explicația citește de la stânga, ca restul. */
+            .teren-analiza { align-items: stretch; max-width: none; }
+            .btn-cere-analiza { text-align: center; }
+            .teren-analiza-nota { text-align: left; }
             /* Pe telefon, acțiunea unui pas (de exemplu „Cere o analiză") trece
                sub titlul lui, nu îl înghesuie. */
             .tv-pas { flex-wrap: wrap; }
@@ -2379,6 +2415,23 @@ function renderTerenuri(terenuri) {
         if (teren.zona) fapte.push(escapeHtml(teren.zona));
         if (teren.suprafata) fapte.push(Number(teren.suprafata).toLocaleString('ro-RO') + ' mp');
 
+        // Analiza există dacă terenului i s-a calculat câte apartamente încap.
+        // Același criteriu ca la pașii de mai jos, ca pe pagina terenului și ca
+        // în Spațiul tău de pe homepage.
+        const minAp = teren.nr_apartamente_min, maxAp = teren.nr_apartamente_max;
+        const areAnalizaCard = !!(minAp && maxAp);
+        const catApartCard = areAnalizaCard
+            ? (minAp === maxAp ? minAp + ' apartamente' : minAp + '-' + maxAp + ' apartamente')
+            : '';
+        const blocAnaliza = areAnalizaCard
+            ? `<div class="teren-analiza">
+                        <a class="teren-analiza-gata" href="teren-details.html?id=${teren.id}">✓ Analiză · ${escapeHtml(catApartCard)} →</a>
+                    </div>`
+            : `<div class="teren-analiza">
+                        <a class="btn-cere-analiza" href="analize.html?teren_id=${encodeURIComponent(teren.id)}&teren_titlu=${encodeURIComponent(teren.titlu || '')}">Cere o analiză</a>
+                        <span class="teren-analiza-nota">ca să vedeți câte apartamente se pot construi aici și la ce prețuri ar ieși</span>
+                    </div>`;
+
         // ⚠️ Comentariile și pașii sunt AMÂNDOUĂ pliate, închise. Un grup se
         // uită la trei-patru terenuri deodată; dacă fiecare card s-ar deschide
         // cu lista lui de șapte pași și cu firul de comentarii, pagina ar avea
@@ -2387,10 +2440,11 @@ function renderTerenuri(terenuri) {
             <div class="teren-with-comments">
                 <div class="teren-header">
                     <img src="${teren.image_url || 'https://via.placeholder.com/80x60?text=Teren'}" alt="${escapeHtml(teren.titlu)}">
-                    <div>
+                    <div class="teren-header-text">
                         <h4><a href="teren-details.html?id=${teren.id}">${escapeHtml(teren.titlu)}</a></h4>
                         <p><i class="fas fa-map-marker-alt"></i> ${fapte.join(' · ') || 'Zonă nespecificată'}</p>
                     </div>
+                    ${blocAnaliza}
                 </div>
 
                 <div class="tv-fold" id="fold-com-${teren.id}">
