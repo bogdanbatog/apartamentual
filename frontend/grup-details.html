@@ -481,6 +481,16 @@
 
         /* ── ANUNȚURILE GRUPULUI, STRÂNSE ── */
         .h2-numar { font-size: 0.875rem; font-weight: 500; color: #8a8a8a; }
+        /* Nota din dreapta titlului „Anunțuri". Un anunț nu rămâne doar în
+           pagină, pleacă și pe email, iar omul care scrie trebuie să știe asta
+           ÎNAINTE, nu după. Scrisă mic și gri: e o precizare, nu un avertisment.
+           ⚠️ Ora vine din `digest-anunturi-grup` (`ORA_TRIMITERII = 19`, la
+           București) și e scrisă aici de mână. Dacă se schimbă acolo, trebuie
+           schimbată și aici, altfel pagina minte fără să crape nimic. */
+        .anunt-nota {
+            margin-left: auto; text-align: right;
+            font-size: 0.72rem; font-weight: 400; color: #8a8a8a; line-height: 1.35;
+        }
 
         /* Câmpul de scris e un rând. Crește când scrii în el, deci nu ține un
            dreptunghi gol pe ecran pentru un anunț care poate nu vine azi. */
@@ -998,6 +1008,7 @@
         .capitol-sub h3 {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin: 0 0 0.9rem;
             font-size: 0.95rem;
@@ -1077,11 +1088,22 @@
             padding: 0.85rem 1.25rem; cursor: pointer; user-select: none; transition: background 0.15s;
         }
         .cl-phase-header:hover { background: #faf8f3; }
+        /* ⚠️ Era un cerc de 28px cu numărul singur în el. Din 23 august e o
+           pastilă care scrie „Pasul 3": cercul cu o cifră arăta ca un pas
+           dintr-un formular de completat, nu ca un capitol de citit, iar
+           oamenii nu înțelegeau ce sunt casetele astea (observația lui Lucian).
+           Numărul rămâne poziția în drumul întreg, nu în capitol. */
         .cl-phase-number {
-            width: 28px; height: 28px; border-radius: 50%;
+            padding: 0.2rem 0.55rem; border-radius: 999px;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 0.8rem; color: white; flex-shrink: 0;
+            font-weight: 700; font-size: 0.7rem; color: white; flex-shrink: 0;
+            white-space: nowrap; letter-spacing: 0.01em;
         }
+        /* Cuvântul de lângă săgeată. Săgeata singură spune că se deschide ceva,
+           dar nu spune CE: text de citit, nu un formular. Aceeași lecție ca la
+           butonul cu agrafă din pașii de teren, unde semnul singur păcălea. */
+        .cl-phase-citeste { font-size: 0.72rem; color: #8a8a8a; flex-shrink: 0; }
+        .cl-phase.open .cl-phase-citeste { visibility: hidden; }
         .cl-phase-title { font-weight: 700; font-size: 0.92rem; color: #1a1a1a; flex: 1; }
         /* Subtitlul casetei: ce scrie în `js/pasi-din-ghid.js` la câmpul `sub`.
            Se vede cu caseta închisă, ca omul să știe ce găsește înăuntru fără
@@ -1212,6 +1234,14 @@
             .teren-analiza { align-items: stretch; max-width: none; }
             .btn-cere-analiza { text-align: center; }
             .teren-analiza-nota { text-align: left; }
+            /* Pe telefon nu încape și cuvântul „citește" lângă titlu; rămâne
+               săgeata, iar pastila „Pasul 3" spune oricum despre ce e vorba. */
+            .cl-phase-citeste { display: none; }
+
+            /* Pe telefon nota anunțurilor nu mai încape lângă titlu: trece
+               dedesubt și citește de la stânga, ca restul textului. */
+            .anunt-nota { margin-left: 0; text-align: left; width: 100%; }
+
             /* Pe telefon, acțiunea unui pas (de exemplu „Cere o analiză") trece
                sub titlul lui, nu îl înghesuie. */
             .tv-pas { flex-wrap: wrap; }
@@ -1497,7 +1527,8 @@
                  și fiecare anunț într-un dreptunghi colorat cu avatar rotund.
                  Trei anunțuri ocupau un ecran. -->
             <div id="anunturiSection" class="capitol-sub">
-                <h3><i class="fas fa-bullhorn"></i> Anunțuri <span id="anunturiCount" class="h2-numar"></span></h3>
+                <h3><i class="fas fa-bullhorn"></i> Anunțuri <span id="anunturiCount" class="h2-numar"></span>
+                    <span class="anunt-nota">Ce scrii aici pleacă seara, la 19:00, pe emailul celorlalți membri</span></h3>
 
                 <div id="anuntFormContainer" class="anunt-scriere">
                     <textarea id="anuntInput" rows="1" placeholder="Scrie un anunț pentru grup..."></textarea>
@@ -2703,8 +2734,9 @@ function renderCasetePasi() {
             return `
             <div class="cl-phase" id="phase-${box.key}">
                 <div class="cl-phase-header" onclick="toggleBox('${box.key}')">
-                    <div class="cl-phase-number" style="background: ${box.culoare};">${nr}</div>
+                    <div class="cl-phase-number" style="background: ${box.culoare};">Pasul ${nr}</div>
                     <span class="cl-phase-title">${box.titlu}<span class="cl-phase-sub">${box.sub}</span></span>
+                    <span class="cl-phase-citeste">citește</span>
                     <i class="fas fa-chevron-down cl-phase-chevron"></i>
                 </div>
                 <div class="cl-phase-body">
