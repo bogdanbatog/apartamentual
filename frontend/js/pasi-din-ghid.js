@@ -100,11 +100,15 @@ var PASI_CU_BIFA = PASI_CASETE.filter(function(c){ return !c.faraBifa; });
    despre el pe larg.
 
    ⚠️ ÎN PAGINĂ lista asta NU se mai numește „pași" (23 august). Se cheamă
-   „De verificat pe teren", fiindcă în aceeași pagină mai există un lucru numit
+   „Verificările terenului", fiindcă în aceeași pagină mai există un lucru numit
    pas: casetele de citit din `CHECKLIST_BOXES`, care poartă pastila „Pasul 3".
    Un om care aude „pasul 3" trebuie să știe la care se referă. Numele din cod
    (`PASI_TEREN`, `tv-pas`, `cheiaPasTeren`) rămâne cum e: cheile ajung în bază
    și nu se redenumesc fără migrare.
+   ⚠️ Numele seamănă cu titlul pasului 3, „Verificarea terenului", care stă chiar
+   deasupra în pagină. E asumat (decizia lui Lucian, 23 august): prima variantă,
+   „De verificat pe teren", suna a listă de dus cu tine la fața locului, deși
+   înăuntru sunt cartea funciară, notarul și certificatul de urbanism.
    ══════════════════════════════════════════════════════════════════════ */
 var PASI_TEREN = [
   { key: 'analiza-prelim',      ghid: 'organizarea',           cereAnaliza: true,
