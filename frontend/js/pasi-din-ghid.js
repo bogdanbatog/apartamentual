@@ -99,16 +99,23 @@ var PASI_CU_BIFA = PASI_CASETE.filter(function(c){ return !c.faraBifa; });
    ⚠️ `ghid` e ancora secțiunii din care e luat pasul, ca omul să poată citi
    despre el pe larg.
 
-   ⚠️ ÎN PAGINĂ lista asta NU se mai numește „pași" (23 august). Se cheamă
-   „Verificările terenului", fiindcă în aceeași pagină mai există un lucru numit
+   ⚠️ ÎN PAGINĂ lista asta NU se numește „pași" (23 august). Se cheamă
+   „Analiza și verificările", fiindcă în aceeași pagină mai există un lucru numit
    pas: casetele de citit din `CHECKLIST_BOXES`, care poartă pastila „Pasul 3".
    Un om care aude „pasul 3" trebuie să știe la care se referă. Numele din cod
    (`PASI_TEREN`, `tv-pas`, `cheiaPasTeren`) rămâne cum e: cheile ajung în bază
    și nu se redenumesc fără migrare.
-   ⚠️ Numele seamănă cu titlul pasului 3, „Verificarea terenului", care stă chiar
-   deasupra în pagină. E asumat (decizia lui Lucian, 23 august): prima variantă,
-   „De verificat pe teren", suna a listă de dus cu tine la fața locului, deși
-   înăuntru sunt cartea funciară, notarul și certificatul de urbanism.
+
+   Numele a trecut prin trei variante în aceeași zi, și fiecare a picat dintr-un
+   motiv de reținut:
+     • „Pașii de verificare" — se lovea de pașii de citit din capitole;
+     • „De verificat pe teren" — suna a listă de dus cu tine la fața locului,
+       deși înăuntru sunt cartea funciară, notarul, certificatul de urbanism;
+     • „Verificările terenului" — prea aproape de titlul pasului 3,
+       „Verificarea terenului", care stă chiar deasupra în pagină.
+   Varianta de acum spune ce e înăuntru și scoate analiza la vedere, fiindcă ea
+   e primul rând din listă și lucrul pe care grupul îl amână cel mai des.
+   „Terenului" lipsește dinadins: rândul stă în cardul unui teren anume.
    ══════════════════════════════════════════════════════════════════════ */
 var PASI_TEREN = [
   { key: 'analiza-prelim',      ghid: 'organizarea',           cereAnaliza: true,
