@@ -98,6 +98,13 @@ var PASI_CU_BIFA = PASI_CASETE.filter(function(c){ return !c.faraBifa; });
 
    ⚠️ `ghid` e ancora secțiunii din care e luat pasul, ca omul să poată citi
    despre el pe larg.
+
+   ⚠️ ÎN PAGINĂ lista asta NU se mai numește „pași" (23 august). Se cheamă
+   „De verificat pe teren", fiindcă în aceeași pagină mai există un lucru numit
+   pas: casetele de citit din `CHECKLIST_BOXES`, care poartă pastila „Pasul 3".
+   Un om care aude „pasul 3" trebuie să știe la care se referă. Numele din cod
+   (`PASI_TEREN`, `tv-pas`, `cheiaPasTeren`) rămâne cum e: cheile ajung în bază
+   și nu se redenumesc fără migrare.
    ══════════════════════════════════════════════════════════════════════ */
 var PASI_TEREN = [
   { key: 'analiza-prelim',      ghid: 'organizarea',           cereAnaliza: true,

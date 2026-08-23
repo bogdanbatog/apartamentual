@@ -1080,8 +1080,17 @@
         /* ── CASETELE UNUI PAS ──
            Se folosesc acum în interiorul capitolelor (`.cap-pasi`). Numele
            claselor a rămas `cl-`, ca notele și atașamentele să nu se rescrie. */
+        /* ⚠️ Dunga colorată din stânga e semnul „aici se citește" (23 august).
+           Fără ea, o casetă de pas arăta exact ca o unealtă a paginii
+           („Comentarii despre teren", „De verificat pe teren", linia de
+           WhatsApp): același dreptunghi crem, aceeași săgeată, deci ochiul
+           citea toată pagina ca pe un meniu. Culoarea vine din
+           `js/pasi-din-ghid.js`, pusă inline pe casetă, ca și pastila.
+           ⚠️ Regula ține doar dacă uneltele NU primesc niciodată dunga asta.
+           E singurul lucru care le desparte fără cuvinte. */
         .cl-phase {
-            border: 1px solid #e8e3d8; border-radius: 0.75rem; overflow: hidden; background: white;
+            border: 1px solid #e8e3d8; border-left-width: 4px; border-radius: 0.75rem;
+            overflow: hidden; background: white;
         }
         .cl-phase-header {
             display: flex; align-items: center; gap: 0.75rem;
@@ -2498,7 +2507,7 @@ function renderTerenuri(terenuri) {
                 <div class="tv-fold" id="fold-pasi-${teren.id}">
                     <div class="tv-fold-cap" onclick="toggleFoldTeren('fold-pasi-${teren.id}')">
                         <i class="fas fa-list-check"></i>
-                        <span>Pașii de verificare</span>
+                        <span>De verificat pe teren</span>
                         <span class="tv-nr" id="pasi-nr-${teren.id}"></span>
                         <i class="fas fa-chevron-down tv-fold-sageata"></i>
                     </div>
@@ -2610,7 +2619,7 @@ function renderPasiTeren(teren) {
                 </div>
                 ${actiune}
                 <button class="tv-pas-buton" id="buton-${cheie}" onclick="toggleDetaliiPas('${cheie}')"
-                        title="Note și fișiere pentru pasul ăsta">
+                        title="Note și fișiere pentru verificarea asta">
                     <i class="fas fa-paperclip"></i>
                     <span class="tv-pas-eticheta">note</span>
                     <i class="fas fa-chevron-down tv-pas-sageata"></i>
@@ -2732,7 +2741,7 @@ function renderCasetePasi() {
             // Nicio casetă nu se deschide singură. Regula veche („prima nebifată
             // stă deschisă") a plecat odată cu bifele.
             return `
-            <div class="cl-phase" id="phase-${box.key}">
+            <div class="cl-phase" id="phase-${box.key}" style="border-left-color: ${box.culoare};">
                 <div class="cl-phase-header" onclick="toggleBox('${box.key}')">
                     <div class="cl-phase-number" style="background: ${box.culoare};">Pasul ${nr}</div>
                     <span class="cl-phase-title">${box.titlu}<span class="cl-phase-sub">${box.sub}</span></span>
