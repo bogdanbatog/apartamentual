@@ -1,16 +1,74 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 23 august 2026** — spațiul de lucru de pe homepage, pagina
-> grupului, și o corectură în episodul 3 al serialului. Tot ce s-a făcut, cu ce a rămas
-> de deployat și de corectat în admin, e scris pe larg în
-> `handoff/20260823 - handoff-spatiul-de-lucru-si-pagina-grupului.md`.
-> **Pe scurt, de deployat din cPanel:** `frontend/index.html`,
-> `frontend/grup-details.html` și `frontend/js/pasi-din-ghid.js` (ultimele două merg
-> împreună). Comituri `3212f68`, `555f623`, `7a38488`, `a0f7ce2`, `889c677`, `3cb8bac`,
-> toate împinse pe `main`.
+> **⏭️ ULTIMA SESIUNE: 24 august 2026, seara** — **emailul cu noutățile de pe platformă,
+> scris și comis (`20d6fd0`). ⏳ SE TRIMITE MARȚI 25 DIMINEAȚA.** Cinci fișiere noi, niciunul
+> existent atins: textul (`email_templates/email-noutati-platforma-august.md`), bilanțul și
+> lotul (`db_schema/emailuri-noutati-platforma/`), scriptul și README-ul
+> (`scripts/emailuri-noutati-platforma/`). Comanda de mâine e mai jos, la punctul 2.
 >
-> ⚠️ Restul fișierului e de pe 18 august. Restanțele de deploy descrise mai jos n-au
-> fost reverificate pe live în sesiunea din 23 august.
+> **Sesiunea dinainte, tot pe 24 august:** analiza homepage-ului **nelogat** (Plausible +
+> Facebook + captura paginii) și planul de rescriere. **Nu s-a atins niciun fișier de cod.**
+> Tot ce s-a măsurat, decis și propus e în
+> **`handoff/20260823 - handoff-analiza-homepage-nelogat.md`** (403 linii).
+>
+> **✅ RESTANȚA DE DEPLOY E ÎNCHISĂ.** Verificat pe 24 august, conținut normalizat CRLF/LF:
+> `index.html`, `grup-details.html`, `js/pasi-din-ghid.js`, `terenuri.html`,
+> `teren-details.html`, `analize.html` — **toate identice cu repo-ul pe live.** Nu mai e
+> nimic de urcat din cPanel. (Rămâne nedeployat doar `notify-admins`, edge function,
+> neverificat în sesiunea asta.)
+>
+> **🔴 CE URMEAZĂ, ÎN ORDINE:**
+> 1. **Homepage nelogat, primul ecran.** ✅ Titlul e DECIS (varianta 1 din §5.1 al
+>    handoff-ului). Metoda: întâi machetă locală doar cu hero-ul nou, abia apoi `index.html`.
+> 2. **🔴 MARȚI 25 DIMINEAȚA, PRIMUL LUCRU: se trimite emailul cu noutățile.** Textul e
+>    scris, probat pe email și comis. **Lotul: 84 de oameni** (86 din interogare, minus doi
+>    scoși de mână, vezi mai jos). Trei pași, în ordine:
+>
+>    a. **Re-rulezi `db_schema/emailuri-noutati-platforma/1-lot-pentru-email.sql`** și
+>       exporți CSV **nou**. ⚠️ Nu refolosi cel din 24 august: cine își termină profilul
+>       peste noapte n-are ce căuta în varianta „Termină-ți profilul".
+>    b. **Proba pe disc** (fără `--mod`), apoi citești lista cu ochiul.
+>    c. **Trimiterea:**
+>       ```
+>       $env:RESEND_API_KEY='re_...'; node scripts\emailuri-noutati-platforma\trimite-emailuri-noutati.js --csv="CALEA_CSV_NOU" --mod=live --confirm-trimit --fara=bogdanbatog@gmail.com,riltabutru@necub.com
+>       ```
+>
+>    **Cei doi scoși de mână** (filtrul din SQL nu-i prinde, au Gmail personal):
+>    `bogdanbatog@gmail.com` e contul de developer, proprietarul repo-ului;
+>    `riltabutru@necub.com` e o adresă de unică folosință. Amândoi cu profilul gol.
+>
+>    **Decis pe 24 august:** intră și cei 9 cu profilul neterminat, deși șase dintre ei au
+>    primit deja două mesaje despre profil (iulie + campania din august). Emailul lor începe
+>    cu ce s-a construit; profilul apare abia la final, ca motiv pentru care n-au cum să
+>    vadă. Dacă te răzgândești, `--doar-completi` îi scoate și pleacă 75.
+>
+>    ⚠️ **Nu trimite după-amiaza.** Digestul de anunțuri de grup pleacă la 19:00, iar 35 din
+>    cei 84 sunt într-un grup: două emailuri de la noi într-o oră arată a campanie.
+>
+> 3. **Joi 27: emailul cu terenuri noi**, pornit manual cu `force` (automatizarea e gata
+>    din 14 august). Apoi `3-programare.sql` → prima rulare automată luni 31.
+>    Detaliile și comenzile: §7 din handoff-ul de mai sus.
+>    ⚠️ **De verificat înainte:** butonul din emailul acela e probabil tot negru (`#1a1a1a`),
+>    iar ăla chiar pleacă singur în fiecare luni. Vezi restanța de mai jos.
+>
+> **🟡 RESTANȚE GĂSITE PE 24 AUGUST, NEREZOLVATE:**
+> - **Butoanele negre din emailuri.** `#1a1a1a` pe fundal crem dispare în clienții care
+>   afișează mesajele pe negru. Reparat doar în campania nouă (terracotta `#c2604a`, alb,
+>   cu muchie `#a54c38`). Au rămas negre: `emailuri-profil-incomplet`, `emailuri-zone`,
+>   `emailuri-terenuri-noi`, `emailuri-webinar-ora` și, cel mai important, **emailul
+>   automat de terenuri din `supabase/functions/notify-admins/`**, care pleacă singur.
+> - **Resend e pe plan plătit din 24 august**, 50.000/lună, fără plafon zilnic. README-urile
+>   campaniilor vechi încă scriu „100 pe zi". Cifră depășită, nu regulă separată. Ce a rămas
+>   valabil e limita de 2 cereri/secundă, adică pauza de 600 ms din scripturi.
+> - **`notify-admins` tot nedeployat.**
+>
+> ⚠️ Restul fișierului e de pe 18 august și descrie restanțe de deploy care **nu mai există**
+> (vezi verificarea de mai sus). Nu porni nimic pe baza lor.
+>
+> ⚠️ Sesiunea de pe 23 august (spațiul de lucru, pagina grupului, episodul 3) e descrisă în
+> `handoff/20260823 - handoff-spatiul-de-lucru-si-pagina-grupului.md`. Comituri `3212f68`,
+> `555f623`, `7a38488`, `a0f7ce2`, `889c677`, `3cb8bac`, toate împinse pe `main` **și
+> publicate**.
 
 
 > Status curent al proiectului. Citește la începutul fiecărei sesiuni noi (chat sau Claude Code) ca să intri rapid în context.
