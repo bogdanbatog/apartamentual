@@ -75,7 +75,25 @@
 > **🔴 RĂMASE DIN SESIUNILE DE DIMINEAȚĂ (24 august), ÎN ORDINE:**
 >
 > 1. **🔴 EMAILUL CU NOUTĂȚILE, care trebuia trimis marți 25 dimineața.** Textul e scris,
->    probat pe email și comis (`20d6fd0`). **Lotul: 84 de oameni.** Trei pași:
+>    probat pe email și comis (`20d6fd0`), **plus două adăugiri pe 25 august (`7b382ae`)**:
+>
+>    - **P.S. cu webinarul din 3 septembrie**, la toată lumea. Emailul nu-l anunța deloc:
+>      îl pomenea o singură dată, ca rând într-o listă despre ce vezi pe homepage, deci
+>      descria un card, fără dată, oră sau link. ⚠️ **Data e scrisă de mână** în constanta
+>      `WEBINAR` de la începutul scriptului (joi, 3 septembrie, 11:30, `luma.com/00ig0k40`).
+>      **Dacă trimiterea alunecă peste 3 septembrie, P.S.-ul devine o invitație la trecut:
+>      verifică-l înainte de `--mod=live`.** E și al treilea loc în care stă ora, după
+>      `frontend/index.html` și pagina de pe Luma; un grep prin repo nu acoperă Luma.
+>    - **Un rând pentru cine doar se uită** („Dacă deocamdată doar te uiți, e în regulă…"),
+>      înainte de semnătură, doar dacă `profil_complet=da` ȘI `are_teren=nu`. Sărit pentru
+>      profilul neterminat, fiindcă acela nu poate urma sfatul: `js/nav.js` îl întoarce la
+>      profil de pe orice pagină, deci nu ajunge la lista de terenuri.
+>
+>    ⚠️ **„A doua ediție" din P.S. n-a putut fi verificată din repo.** Homepage-ul spune
+>    „în prima joi a fiecărei luni", ceea ce n-o contrazice, dar nici n-o confirmă. Cifra
+>    e a lui Lucian, care a fost la prima.
+>
+>    **Lotul: 84 de oameni.** Trei pași:
 >
 >    a. **Re-rulezi `db_schema/emailuri-noutati-platforma/1-lot-pentru-email.sql`** și
 >       exporți CSV **nou**. ⚠️ Nu refolosi cel din 24 august: cine își termină profilul
