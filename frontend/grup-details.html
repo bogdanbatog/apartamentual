@@ -1145,6 +1145,13 @@
         .tv-pas-corp .cl-box-tools { margin-top: 0; padding-top: 0; border-top: none; }
         .tv-pas-corp .cl-step-notes:empty { margin-top: 0; }
 
+        /* Propoziția pentru cine nu poate scrie. Gri și mică, e o precizare,
+           nu un avertisment, dar EXISTĂ: panoul gol de dinainte se citea ca
+           „butonul nu funcționează". */
+        .cl-box-doar-citit {
+            margin: 0.35rem 0 0; font-size: 0.75rem; color: #8a8a8a; line-height: 1.45;
+        }
+
         .cl-step-meta {
             display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
             font-size: 0.72rem; color: #8a8a8a; flex-wrap: wrap;
@@ -1854,6 +1861,16 @@ let isMember = false;
 let isAdmin = false;
 let isSuperAdmin = false;
 let canEditChecklist = false;
+// ⚠️ DOUĂ drepturi, nu unul, fiindcă baza le dă diferit (măsurat pe live,
+// 24 august, cu contul de superadmin):
+//   · bifele pașilor de teren (`grup_teren_checklist`) → RLS îl REFUZĂ pe
+//     superadminul care nu e membru: „new row violates row-level security
+//     policy". Deci `canEditChecklist` rămâne cum era.
+//   · notele și fișierele (`grup_checklist_notes` / `_files`) → superadminul
+//     citește ȘI scrie, probat cu un insert și un delete.
+// Cu un singur steag, ori îi blocam notele (ce s-a și întâmplat), ori îi
+// aprindeam bifele ca să crape tăcut la clic.
+let poateScrieNote = false;
 let members = [];
 let pendingRequests = [];
 
@@ -2010,10 +2027,16 @@ async function loadGroupDetails() {
             isMember = members.some(m => m.user_id === currentUser.id) || isAdmin;
             isSuperAdmin = currentUserProfile && currentUserProfile.is_super_admin === true;
             
-            // Checklist edit permission:
-            // cu_aprobare → all members can edit
-            // deschis → only admin can edit
+            // Bifele pașilor de teren: adminul grupului și membrii lui.
+            // Superadminul NU intră aici, fiindcă RLS îl refuză la scriere; un
+            // buton aprins care nu face nimic e mai rău decât unul stins.
             canEditChecklist = isAdmin || (isMember && group.status === 'cu_aprobare');
+
+            // Notele și fișierele: aceiași oameni, plus superadminul, pe care
+            // baza îl lasă să scrie. Pagina îl tratează deja ca pe un membru
+            // peste tot (capitolele `member-only`); doar aici nu îl trata, și
+            // de-asta i se deschidea un panou gol la fiecare pas de teren.
+            poateScrieNote = canEditChecklist || isSuperAdmin;
             
             // Show "complete your profile" banner if user is an active member
             // of this group but hasn't completed their profile (pseudonym still null).
@@ -2864,10 +2887,15 @@ function renderCasetePasi() {
 
 // Notele și fișierele grupului, la nivel de casetă
 function renderBoxTools(boxKey) {
-    if (!canEditChecklist) {
+    // ⚠️ Cine nu poate scrie primește o propoziție, nu un panou gol. Înainte
+    // primea două `div`-uri goale, adică o linie orizontală și nimic altceva.
+    // Un panou care se deschide și nu spune nimic se citește ca „stricat", și
+    // exact așa a și fost raportat.
+    if (!poateScrieNote) {
         return `<div class="cl-box-tools">
                 <div class="cl-step-files" id="files-${boxKey}"></div>
                 <div class="cl-step-notes" id="notes-${boxKey}"></div>
+                <p class="cl-box-doar-citit">Notele și fișierele se adaugă de membrii grupului.</p>
             </div>`;
     }
 
@@ -5044,7 +5072,7 @@ async function loadStepFiles(stepKey) {
             const uploaderName = profilesCache[f.uploaded_by] || 'Utilizator';
             const dateStr = new Date(f.created_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' });
             
-            const deleteBtn = (canEditChecklist && f.uploaded_by === currentUser?.id)
+            const deleteBtn = (poateScrieNote && f.uploaded_by === currentUser?.id)
                 ? `<button class="cl-file-delete" onclick="deleteStepFile('${f.id}', '${stepKey}', '${f.storage_path}')" title="Șterge">
                        <i class="fas fa-times"></i>
                    </button>`
