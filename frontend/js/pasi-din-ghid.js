@@ -22,12 +22,19 @@
 
    ⚠️ `ghid` e id-ul secțiunii din ghid. Dacă acolo se redenumește un id,
    caseta rămâne fără text și arată în loc un link către ghid.
+
+   ⚠️ În ghid, orice element cu clasa `doar-in-ghid` NU ajunge în casetă. Așa
+   se taie din casetă contextul lung, fără să se piardă din pagina publică.
    ══════════════════════════════════════════════════════════════════════ */
 
 var PASI_CASETE = [
   { key: 'c1',  ghid: 'comunicarea',           culoare: '#5a7196',
     titlu: 'Comunicarea cu cei din grup',
-    sub: 'Pe ce canal se discută ce, și prima discuție serioasă despre ce vreți' },
+    // ⚠️ Subtitlul spunea și „prima discuție serioasă despre ce vreți".
+    // Partea aceea a rămas în ghid, marcată `doar-in-ghid`, deci în casetă
+    // nu mai e: un subtitlu care promite ceva ce nu se vede la deschidere e
+    // mai rău decât unul scurt.
+    sub: 'Pe ce canal se discută ce, de la WhatsApp la întâlnirea live' },
 
   { key: 'c2',  ghid: 'organizarea',           culoare: '#2f8f5b',
     // Titlul s-a schimbat pe 22 august (cererea lui Lucian): pasul începe cu
@@ -188,6 +195,15 @@ function incarcaPasiDinGhid(optiuni){
             // cheamă, în antetul casetei ei.
             var cap = copie.querySelector('.pas-cap');
             if (cap) cap.remove();
+
+            // Ce e marcat `doar-in-ghid` rămâne pe pagina publică și NU intră
+            // în caseta din pagina grupului sau din Spațiul tău. Ghidul e locul
+            // unde se citește pe îndelete; caseta e locul unde omul caută un
+            // singur lucru, adesea de pe telefon. Aici se taie context, povești
+            // și teasere de funcții, nu informația de care are nevoie ca să
+            // treacă pasul. Prima folosire: pasul 1, unde din tot capitolul
+            // rămâne doar lista canalelor de comunicare.
+            copie.querySelectorAll('.doar-in-ghid').forEach(function(el){ el.remove(); });
 
             // Linkurile din ghid sunt scrise față de folderul lui. Paginile
             // care cheamă stau în altă parte, deci se rescriu.

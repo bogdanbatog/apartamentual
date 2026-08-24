@@ -373,17 +373,11 @@ function renderGrupuri(grupuri) {
 
 // ── RENDER GRUP CARD ──
 function renderGrupCard(grup, isMember) {
-    const statusLabels = {
-        deschis: '🟢 Deschis',
-        cu_aprobare: '🟡 Cu aprobare',
-        // Legacy
-        activ: '🟢 Deschis',
-        explorare: '🟡 Cu aprobare',
-        inchis: '🟡 Cu aprobare',
-        arhivat: '⚫ Arhivat'
-    };
-    
-    const statusClass = `status-${grup.status}`;
+    // ⚠️ Aici se construiau eticheta de stare („🟡 Cu aprobare") și clasa ei de
+    // culoare. Nu ajungeau nicăieri în cardul de mai jos, deci cardul arăta
+    // deja fără ele; pe 24 august au ieșit și din cod, odată cu pastila din
+    // pagina grupului. Motivul e același: nimeni nu înțelegea cine ce aprobă,
+    // iar omul află în clar la butonul de alăturare.
     const membriCount = grup.membri?.[0]?.count || 0;
 
     const location = grup.oras ? 

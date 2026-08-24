@@ -29,115 +29,61 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* ── PROCESS DIAGRAM ── */
-        .process-diagram {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+        /* ── CASETELE PAȘILOR, PLIATE ──
+           Cele unsprezece secțiuni din „Partea a doua" sunt lungi. Pe telefon,
+           citite una după alta, pagina devine un zid: omul nu mai vede unde se
+           termină un pas și începe următorul, deci nu mai citește niciunul.
+           Fiecare rămâne deschisă cât o casetă și se desface la clic.
+
+           ⚠️ Pliul se face din JavaScript, DUPĂ încărcare, iar `.pas-corp` nu
+           există în HTML-ul static. Motivul: `js/pasi-din-ghid.js` citește
+           pagina asta cu `fetch` și scoate din ea textul casetelor din pagina
+           grupului și din homepage. Dacă ambalajul ar fi în HTML, l-ar lua și
+           acolo, cu buton cu tot. Pliul ține de pagină, nu de text. */
+        .pas-corp {
+            position: relative;
+            overflow: hidden;
         }
-        .phase-block {
-            min-width: 0;
+        .pas-corp.pliat {
+            max-height: 240px;
         }
-        .phase-header {
-            display: flex;
+        /* Umbra care spune „mai e text dedesubt". Aceeași culoare cu fundalul
+           secțiunii (`.ce-section` e #f3f0e7), altfel se vede o dungă. */
+        .pas-corp.pliat::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 5rem;
+            background: linear-gradient(to bottom, rgba(243,240,231,0), #f3f0e7 85%);
+            pointer-events: none;
+        }
+
+        /* Subtitlurile dinăuntru aveau margine de sus doar în `.pas-bloc`.
+           Acum, închise în plic, un h4 se lipea de lista de deasupra lui. */
+        .pas-corp h4 { margin-top: 1.3rem; }
+
+        .pas-mai {
+            display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem 0.75rem 0 0;
-            color: #1a1a1a;
-        }
-        .phase-number {
-            width: 32px;
-            height: 32px;
-            background: rgba(0,0,0,0.07);
-            color: #1a1a1a;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.95rem;
-            flex-shrink: 0;
-        }
-        .phase-header h3 {
-            font-size: 0.88rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-        .phase-duration {
-            font-size: 0.72rem;
-            opacity: 0.85;
-        }
-        .phase-steps {
-            border: 1px solid rgba(0,0,0,0.10);
-            border-top: none;
-            border-radius: 0 0 0.75rem 0.75rem;
-            padding: 0.6rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            background: white;
-        }
-        .step-item {
-            display: flex;
-            align-items: flex-start;
             gap: 0.4rem;
-            padding: 0.35rem 0.5rem;
-            border-radius: 0.35rem;
-            font-size: 0.76rem;
-            color: #333333;
-            text-decoration: none;
-            transition: background 0.15s;
-            line-height: 1.3;
+            margin-top: 0.9rem;
+            padding: 0.45rem 0.9rem;
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-family: inherit;
         }
-        .step-item:hover {
-            background: #f3f0e7;
+        .pas-mai:hover { background: #faf8f3; }
+
+        @media (max-width: 640px) {
+            .pas-corp.pliat { max-height: 170px; }
+            .ce-section { padding: 1.25rem 1.1rem; }
         }
-        .step-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            margin-top: 4px;
-        }
-        
-        /* Arrow containers */
-        .arrow-right {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 0.25rem;
-            align-self: center;
-        }
-        .arrow-down-row {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: center;
-            padding: 0.4rem 0;
-        }
-        .arrow-svg {
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.12));
-        }
-        
-        /* Grid placement */
-        .diagram-cell-1 { grid-column: 1; grid-row: 1; }
-        .diagram-arrow-h1 { grid-column: 2; grid-row: 1; }
-        .diagram-cell-2 { grid-column: 3; grid-row: 1; }
-        .diagram-arrow-down { grid-column: 1 / -1; grid-row: 2; }
-        .diagram-cell-3 { grid-column: 3; grid-row: 3; }
-        .diagram-arrow-h2 { grid-column: 2; grid-row: 3; }
-        .diagram-cell-4 { grid-column: 1; grid-row: 3; }
-        
-        @media (max-width: 768px) {
-            .process-diagram {
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-            }
-            .arrow-right { transform: rotate(90deg); padding: 0.4rem 0; }
-            .arrow-down-row { display: none; }
-            .diagram-arrow-h1, .diagram-arrow-h2 { display: flex; justify-content: center; }
-        }
+
         /* ── BULINE ÎN LISTE ──
            `.ce-section ul` din ce-este.css e fără marcaj, iar versiunea veche
            a paginii punea „•" de mână în textul fiecărui rând. Aici bulina vine
@@ -302,7 +248,6 @@
             <nav class="ghid-cuprins" aria-label="Cuprinsul ghidului">
                 <h2>Ce găsești în pagina asta</h2>
                 <ol>
-                    <li class="cuprins-parte"><a href="#cronologie">Cronologia unui proiect</a></li>
                     <li class="cuprins-parte"><a href="#cum-incepi">Partea întâi: cum începi</a></li>
                     <li><a href="#cum-incepi-pasi">Cei cinci pași până la un grup</a></li>
                     <li><a href="#cat-de-mare">Cât de mare să fie grupul</a></li>
@@ -322,197 +267,6 @@
                 </ol>
             </nav>
 
-            <!-- ══════════════ CRONOLOGIA ══════════════
-                 ⚠️ Pașii din diagramă trebuie să rămână aceiași cu titlurile
-                 secțiunilor de mai jos. Până în august 2026 diagrama și textul
-                 de pe pagina asta spuneau lucruri diferite; de aceea fiecare
-                 rând de aici trimite acum la ancora secțiunii lui.
-            -->
-            <section class="ce-section" id="cronologie" style="overflow-x: auto;">
-                <h2 class="text-2xl mb-6">Cronologia unui proiect</h2>
-                <p class="text-sm text-gray-500 mb-6">Click pe orice rând ca să sari la secțiunea care îl explică.</p>
-
-                <div class="process-diagram">
-                    <div class="diagram-cell-1 phase-block">
-                        <div class="phase-header" style="background: #e9eef3;">
-                            <span class="phase-number">1</span>
-                            <div>
-                                <h3>Grupul se formează</h3>
-                                <span class="phase-duration">2 până la 6 luni</span>
-                            </div>
-                        </div>
-                        <div class="phase-steps">
-                            <a href="#cum-incepi-pasi" class="step-item">
-                                <span class="step-dot" style="background: #5a7196;"></span>
-                                <span>Cauți terenuri în zonele tale și le salvezi pe profil</span>
-                            </a>
-                            <a href="#cum-incepi-pasi" class="step-item">
-                                <span class="step-dot" style="background: #5a7196;"></span>
-                                <span>Vezi cine mai e interesat, oameni sau grupuri</span>
-                            </a>
-                            <a href="#cum-incepi-pasi" class="step-item">
-                                <span class="step-dot" style="background: #5a7196;"></span>
-                                <span>Te alături unui grup sau pornești tu unul</span>
-                            </a>
-                            <a href="#comunicarea" class="step-item">
-                                <span class="step-dot" style="background: #5a7196;"></span>
-                                <span>Vă cunoașteți și stabiliți cum comunicați</span>
-                            </a>
-                            <a href="#de-acord" class="step-item">
-                                <span class="step-dot" style="background: #5a7196;"></span>
-                                <span>Principii comune și bugetul fiecăruia, discutate</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="diagram-cell-2 phase-block">
-                        <div class="phase-header" style="background: #e7f0e8;">
-                            <span class="phase-number">2</span>
-                            <div>
-                                <h3>Terenul</h3>
-                                <span class="phase-duration">3 până la 12 luni</span>
-                            </div>
-                        </div>
-                        <div class="phase-steps">
-                            <a href="#organizarea" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Analiză preliminară pe fiecare teren candidat</span>
-                            </a>
-                            <a href="#organizarea" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Vă organizați pe apartamente, pe variantele din analiză</span>
-                            </a>
-                            <a href="#verificarea-terenului" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Vizită, extras de carte funciară, verificare la notar</span>
-                            </a>
-                            <a href="#verificarea-terenului" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Certificat de urbanism pentru construire, cerut de proprietar</span>
-                            </a>
-                            <a href="#verificarea-terenului" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Studiu geotehnic sumar și acordul vecinilor de la calcan</span>
-                            </a>
-                            <a href="#analiza-detaliata" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Analiză detaliată, suprafețe exacte și cote</span>
-                            </a>
-                            <a href="#contract-asociere" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Contract de asociere, legalizat la notar</span>
-                            </a>
-                            <a href="#cumpararea-terenului" class="step-item">
-                                <span class="step-dot" style="background: #5f8266;"></span>
-                                <span>Cumpărarea terenului</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="diagram-cell-3 phase-block">
-                        <div class="phase-header" style="background: #f5efda;">
-                            <span class="phase-number">3</span>
-                            <div>
-                                <h3>Proiectarea</h3>
-                                <span class="phase-duration">6 până la 12 luni</span>
-                            </div>
-                        </div>
-                        <div class="phase-steps">
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Echipa de proiectare, arhitectură, structură, instalații</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Concept: planuri, suprafețe finale, randări</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Certificat de urbanism pentru construire</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Studii de teren, topografic și geotehnic complet</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Avizele cerute prin certificatul de urbanism</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Proiect tehnic și oferte reale de la constructori</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>DTAC și autorizația de construire</span>
-                            </a>
-                            <a href="#proiectarea" class="step-item">
-                                <span class="step-dot" style="background: #b8965c;"></span>
-                                <span>Detalii de execuție</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="diagram-cell-4 phase-block">
-                        <div class="phase-header" style="background: #f3e3dc;">
-                            <span class="phase-number">4</span>
-                            <div>
-                                <h3>Șantierul și mutarea</h3>
-                                <span class="phase-duration">12 până la 24 de luni</span>
-                            </div>
-                        </div>
-                        <div class="phase-steps">
-                            <a href="#santierul" class="step-item">
-                                <span class="step-dot" style="background: #c2604a;"></span>
-                                <span>Coordonator de proces și diriginte de șantier</span>
-                            </a>
-                            <a href="#santierul" class="step-item">
-                                <span class="step-dot" style="background: #c2604a;"></span>
-                                <span>Alegerea constructorului și modul de contractare</span>
-                            </a>
-                            <a href="#santierul" class="step-item">
-                                <span class="step-dot" style="background: #c2604a;"></span>
-                                <span>Execuție: structură, instalații, finisaje</span>
-                            </a>
-                            <a href="#receptia" class="step-item">
-                                <span class="step-dot" style="background: #c2604a;"></span>
-                                <span>Recepția la terminarea lucrărilor</span>
-                            </a>
-                            <a href="#receptia" class="step-item">
-                                <span class="step-dot" style="background: #c2604a;"></span>
-                                <span>Apartamentarea și intabularea</span>
-                            </a>
-                        </div>
-                        <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #f3e3dc; border: 1px solid rgba(0,0,0,0.10); border-radius: 0.5rem; text-align: center;">
-                            <a href="#mutarea" style="color: #1a1a1a; font-weight: 700; font-size: 0.85rem; text-decoration: none;">🏠 Te muți în casa ta</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 2rem; padding: 1rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
-                        <span style="font-weight: 600; font-size: 0.85rem; color: #1a1a1a;">Durată totală estimată:</span>
-                        <span style="font-weight: 700; font-size: 0.85rem; color: #555555;">23 până la 54 de luni, adică 2 până la 4 ani și jumătate</span>
-                    </div>
-                    <div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #e2e8f0;">
-                        <div style="width: 15%; background: #5a7196;" title="Grupul se formează"></div>
-                        <div style="width: 25%; background: #5f8266;" title="Terenul"></div>
-                        <div style="width: 28%; background: #b8965c;" title="Proiectarea"></div>
-                        <div style="width: 32%; background: #c2604a;" title="Șantierul și mutarea"></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 0.35rem; font-size: 0.7rem; color: #64748b;">
-                        <span>2 la 6 luni</span>
-                        <span>3 la 12 luni</span>
-                        <span>6 la 12 luni</span>
-                        <span>12 la 24 luni</span>
-                    </div>
-                </div>
-                <p class="text-sm" style="margin-top: 1rem; color: #555555;">
-                    Fazele nu vin strict una după alta. Grupul se poate forma în timp ce căutați terenuri, iar
-                    verificarea unui teren se face în paralel cu discuțiile despre cine ia ce apartament. Ce nu
-                    se poate inversa este ordinea din interiorul fiecărei faze.
-                </p>
-            </section>
 
             <!-- ══════════════════════════════════════════════════════════
                  PARTEA ÎNTÂI: CUM ÎNCEPI
@@ -659,36 +413,45 @@
             </div>
 
             <!-- 1 ── COMUNICAREA ── -->
+            <!-- ⚠️ `doar-in-ghid` = rămâne pe pagina asta, NU pleacă în caseta
+                 din pagina grupului. `js/pasi-din-ghid.js` scoate elementele
+                 astea la citire, la fel cum scoate `.pas-cap`.
+                 De ce: pasul 1 e primul lucru pe care îl deschide un om nou în
+                 grup și, cu tot textul, era un ecran plin de telefon înainte să
+                 ajungă la ce îl interesa, adică pe ce canal se vorbește
+                 (cererea lui Lucian, 24 august). În ghid textul rămâne întreg. -->
             <section class="ce-section" id="comunicarea">
                 <div class="pas-cap"><span class="pas-num">1</span><h2>Comunicarea cu cei din grup</h2></div>
-                <p>
+                <p class="doar-in-ghid">
                     Cel mai frecvent mod în care se blochează un grup nu e o problemă tehnică, ci doi oameni care
                     au discutat ceva pe telefon și un al treilea care nu a aflat niciodată. De aceea merită stabilit
                     de la început pe ce canal se discută ce.
                 </p>
 
-                <h4>Canalele pe care le aveți la îndemână</h4>
+                <h4 class="doar-in-ghid">Canalele pe care le aveți la îndemână</h4>
                 <ul class="text-sm space-y-1">
-                    <li><strong>WhatsApp</strong>, pentru discuția de zi cu zi. Grupul are un câmp în care fondatorul grupului salvează linkul, ca să îl găsească și cine intră mai târziu.</li>
-                    <li><strong>Anunțurile generale</strong>, în pagina grupului, pentru ce trebuie să afle toată lumea. Sunt trimise seara și pe email, o dată pe zi, către membrii activi.</li>
-                    <li><strong>Comentariile pe terenuri</strong>, pentru ce ține de un teren anume. Așa nu se amestecă discuția despre trei terenuri diferite într-un singur fir.</li>
-                    <li><strong>Întâlnirea live</strong>, cu un poll de întâlnire ca să găsiți ora la care puteți toți. La un moment dat trebuie să vă vedeți la față, nu se poate altfel.</li>
+                    <li><strong>WhatsApp</strong>, pentru discuția de zi cu zi. Linkul îl pune fondatorul în pagina grupului, ca să îl găsească și cine intră mai târziu.</li>
+                    <li><strong>Anunțurile</strong>, în pagina grupului, pentru ce trebuie să afle toată lumea. Pleacă și pe email, seara, la ora 19:00.</li>
+                    <li><strong>Comentariile pe terenuri</strong>, pentru ce ține de un teren anume, ca să nu se amestece trei terenuri într-un singur fir.</li>
+                    <li><strong>Întâlnirea live</strong>, fiindcă la un moment dat trebuie să vă vedeți la față. Ora se alege cu un poll de întâlnire.</li>
                 </ul>
 
-                <h4>Prima discuție serioasă</h4>
-                <p class="text-sm">
-                    Discutați generic ce vă doriți de la blocul acesta. Bugetul este elefantul din cameră, dar el
-                    se discută cu folos abia când știți prețul unui teren și aveți o analiză preliminară pe el,
-                    fiindcă atunci apar costuri estimative pe apartament și planificatorul de plăți. Până atunci,
-                    discuția despre bani rămâne o discuție despre temeri.
-                </p>
+                <div class="doar-in-ghid">
+                    <h4>Prima discuție serioasă</h4>
+                    <p class="text-sm">
+                        Discutați generic ce vă doriți de la blocul acesta. Bugetul este elefantul din cameră, dar el
+                        se discută cu folos abia când știți prețul unui teren și aveți o analiză preliminară pe el,
+                        fiindcă atunci apar costuri estimative pe apartament și planificatorul de plăți. Până atunci,
+                        discuția despre bani rămâne o discuție despre temeri.
+                    </p>
 
-                <div class="ce-tip">
-                    <strong>Secretariatul grupului <span class="eticheta-curand">în curând</span></strong><br>
-                    Un instrument care rezumă conversațiile, adună informațiile și clarifică cine ce task are și în
-                    ce stadiu este. Îi dai conversațiile și înregistrările întâlnirilor, iar el scoate un document
-                    care spune ce s-a discutat, ce terenuri ați văzut și ce așteaptă fiecare ca să poată merge mai
-                    departe. Este exact ceea ce ne-a lipsit nouă la Județului.
+                    <div class="ce-tip">
+                        <strong>Secretariatul grupului <span class="eticheta-curand">în curând</span></strong><br>
+                        Un instrument care rezumă conversațiile, adună informațiile și clarifică cine ce task are și în
+                        ce stadiu este. Îi dai conversațiile și înregistrările întâlnirilor, iar el scoate un document
+                        care spune ce s-a discutat, ce terenuri ați văzut și ce așteaptă fiecare ca să poată merge mai
+                        departe. Este exact ceea ce ne-a lipsit nouă la Județului.
+                    </div>
                 </div>
             </section>
 
@@ -1140,5 +903,118 @@
     <script src="../js/nav.js"></script>
     <script src="../js/footer.js"></script>
     <script src="../js/login-modal.js"></script>
+    <!-- ══════════════════════════════════════════════════════════════════
+         PLIEREA CELOR UNSPREZECE PAȘI
+         ══════════════════════════════════════════════════════════════════
+         Fiecare secțiune din „Partea a doua" rămâne deschisă cât o casetă și
+         se desface la clic pe „Citește mai mult".
+
+         ⚠️ Se face DIN JAVASCRIPT, nu în HTML. `js/pasi-din-ghid.js` citește
+         fișierul ăsta cu `fetch` și ia din el textul pașilor pentru pagina
+         grupului și pentru Spațiul tău din homepage. Ce adăugăm aici, după
+         încărcare, nu ajunge acolo. Dacă vreodată mutăm ambalajul în HTML-ul
+         static, butonul „Citește mai mult" va apărea și în pagina grupului,
+         unde nu face nimic.
+
+         ⚠️ Măsurarea („are secțiunea asta text ascuns?") se face la `load`, nu
+         la `DOMContentLoaded`. Tailwind vine de pe CDN și rescrie stilurile
+         după ce se termină HTML-ul: măsurat prea devreme, trei secțiuni ieșeau
+         cu 269 de pixeli dintr-un plic de 240 și rămâneau fără buton, adică
+         text tăiat pe care nimeni nu îl mai putea deschide.
+         ══════════════════════════════════════════════════════════════════ -->
+    <script>
+    (function () {
+        // Ancorele celor unsprezece pași, în ordinea din cuprins.
+        var PASI = ['comunicarea', 'organizarea', 'verificarea-terenului',
+                    'analiza-detaliata', 'contract-asociere', 'cumpararea-terenului',
+                    'proiectarea', 'santierul', 'iesirea', 'receptia', 'mutarea'];
+
+        var plicuri = [];
+
+        function pliaza(sectiune) {
+            // Capul secțiunii (numărul și titlul) rămâne mereu la vedere.
+            var cap = sectiune.querySelector('.pas-cap');
+            var corp = document.createElement('div');
+            corp.className = 'pas-corp pliat';
+
+            var deMutat = [];
+            for (var i = 0; i < sectiune.childNodes.length; i++) {
+                var nod = sectiune.childNodes[i];
+                if (nod !== cap) deMutat.push(nod);
+            }
+            deMutat.forEach(function (nod) { corp.appendChild(nod); });
+            sectiune.appendChild(corp);
+
+            var buton = document.createElement('button');
+            buton.className = 'pas-mai';
+            buton.type = 'button';
+            buton.textContent = 'Citește mai mult ↓';
+            buton.setAttribute('aria-expanded', 'false');
+            sectiune.appendChild(buton);
+
+            var plic = { sectiune: sectiune, corp: corp, buton: buton, desfacutDeOm: false };
+
+            buton.addEventListener('click', function () {
+                var deschis = corp.classList.toggle('pliat') === false;
+                plic.desfacutDeOm = deschis;
+                buton.textContent = deschis ? 'Arată mai puțin ↑' : 'Citește mai mult ↓';
+                buton.setAttribute('aria-expanded', deschis ? 'true' : 'false');
+                if (!deschis) sectiune.scrollIntoView({ block: 'start' });
+            });
+
+            plic.deschide = function () {
+                if (corp.classList.contains('pliat')) buton.click();
+            };
+            sectiune._plic = plic;
+            plicuri.push(plic);
+        }
+
+        // Dacă textul oricum încape, pliul n-are ce ascunde: scoatem butonul, ca
+        // să nu punem în pagină un buton care nu descoperă nimic. Se rulează din
+        // nou la redimensionare, fiindcă pe lat o secțiune încape și pe îngust
+        // nu. Cine a desfăcut o secțiune cu mâna lui o găsește tot desfăcută.
+        function masoara() {
+            plicuri.forEach(function (plic) {
+                if (plic.desfacutDeOm) { plic.buton.style.display = ''; return; }
+                plic.corp.classList.add('pliat');
+                var incape = plic.corp.scrollHeight <= plic.corp.clientHeight + 4;
+                plic.corp.classList.toggle('pliat', !incape);
+                plic.buton.style.display = incape ? 'none' : '';
+                plic.buton.textContent = 'Citește mai mult ↓';
+                plic.buton.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        PASI.forEach(function (id) {
+            var s = document.getElementById(id);
+            if (s) pliaza(s);
+        });
+
+        // Un link către un pas (din cuprins, din alt pas, sau lipit din altă
+        // parte) trebuie să îl și deschidă. Altfel omul aterizează pe titlu și
+        // vede tot text tăiat, fără să înțeleagă că mai e.
+        function deschideDinHash() {
+            var id = (location.hash || '').slice(1);
+            if (!id) return;
+            var s = document.getElementById(id);
+            if (s && s._plic) {
+                s._plic.deschide();
+                s.scrollIntoView({ block: 'start' });
+            }
+        }
+
+        window.addEventListener('hashchange', deschideDinHash);
+        window.addEventListener('load', function () { masoara(); deschideDinHash(); });
+
+        var asteapta;
+        window.addEventListener('resize', function () {
+            clearTimeout(asteapta);
+            asteapta = setTimeout(masoara, 200);
+        });
+
+        masoara();
+        deschideDinHash();
+    })();
+    </script>
 </body>
 </html>

@@ -159,17 +159,6 @@
             background: #20bd5a;
         }
         
-        /* Starea grupului. Era cât un buton (0.875rem, padding de 1rem) și, în
-           coloana din dreapta, „Cu aprobare" se rupea pe două rânduri și ținea
-           singură cât trei butoane. Acum e o pastilă mică, dintr-o bucată. */
-        .status-badge-lg {
-            padding: 0.25rem 0.6rem;
-            border-radius: 100px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
         /* Sections */
         .section-card {
             background: white;
@@ -747,13 +736,8 @@
             background: #f7efe9;
         }
         
-        /* Status colors */
-        .status-deschis { background: #dcfce7; color: #166534; }
-        .status-cu_aprobare { background: #fef9c3; color: #854d0e; }
-        /* Legacy */
-        .status-activ { background: #dcfce7; color: #166534; }
-        .status-explorare { background: #fef9c3; color: #854d0e; }
-        .status-inchis { background: #fef9c3; color: #854d0e; }
+        /* Culorile pastilei de stare au ieșit odată cu pastila (24 august).
+           `.status-btn` de mai sus e altceva: butoanele din Administrare. */
 
         /* Kick vote system */
         .kick-vote-card {
@@ -960,6 +944,30 @@
            spațiul dintre ele. */
         .member-only.visible.cap-pasi,
         .member-only.visible.linie-unealta { display: flex; }
+
+        /* ── BUTONUL DE WHATSAPP DIN CAPUL PAGINII ──
+           Verde plin, fiindcă e singura acțiune din capul paginii pe care omul
+           chiar o caută: intrat în grup, primul lucru pe care vrea să îl facă e
+           să vorbească cu ceilalți.
+           ⚠️ `wa-fara-link` e pusă în HTML și scoasă din `renderWhatsApp()`
+           doar dacă grupul are link. Adică butonul e ascuns din start și apare
+           dacă e cazul, nu invers: altfel, la o încărcare lentă, ar clipi în
+           pagină un buton către nimic. */
+        .wa-buton {
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.9rem;
+            padding: 0.6rem 1.1rem;
+            background: #25D366;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .wa-buton:hover { background: #20bd5a; color: #ffffff; }
+        .member-only.visible.wa-buton { display: inline-flex; }
+        .wa-buton.wa-fara-link { display: none !important; }
 
         /* ── CAPITOLELE PAGINII ──
            ⚠️ Refăcut pe 22 august, a doua oară. Prima variantă avea capitolele
@@ -1212,9 +1220,48 @@
                 justify-content: center;
             }
             
+            /* ── MEMBRII PE TELEFON ──
+               Erau un card pe rând, cu numele și „Membru din 12 august" sub el.
+               La zece oameni asta însemna zece rânduri înalte între titlul
+               grupului și primul lucru de făcut, adică exact ce vede omul
+               întâi (cererea lui Lucian, 24 august).
+               Acum: două coloane, fără data intrării. Data nu ajută pe telefon
+               și nu e motivul pentru care te uiți la lista de membri; ce te
+               interesează e cine e în grup și cine e fondatorul, iar
+               „Administrator" rămâne scris. */
             .members-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.4rem;
             }
+            .member-role:not(.member-role--admin) { display: none; }
+            .member-avatar { width: 26px; height: 26px; font-size: 0.72rem; }
+            .member-name { font-size: 0.82rem; }
+
+            /* ── MARGINILE, PE TELEFON ──
+               Cardurile aveau 2rem de margine albă de jur împrejur, adică
+               aproape un centimetru pe fiecare parte dintr-un ecran de șase.
+               Textul e același, doar rama e mai subțire. */
+            .grup-header { padding: 1.1rem 1rem; margin-bottom: 1rem; }
+            .capitol { padding: 1.1rem 1rem; margin-bottom: 1rem; }
+            .capitol-sub { margin-top: 1.1rem; padding-top: 0.9rem; }
+            .capitol-titlu { margin-bottom: 0.9rem; }
+
+            /* Titlul grupului: numele sunt lungi („Boutique, 5-10 ap, parcare,
+               10 min metrou M1/M2") și pe telefon ajungeau la patru rânduri. */
+            .grup-header h1 { font-size: 1.25rem; }
+            .grup-meta { gap: 0.25rem 0.9rem; font-size: 0.8rem; }
+
+            /* Cele două trimiteri stăteau una lângă alta și se rupeau urât;
+               una sub alta se citesc ca un mic cuprins. */
+            .grup-header-trimiteri { flex-direction: column; gap: 0.45rem; }
+
+            /* Fraza de deasupra capitolelor: se citește o dată, la prima
+               vizită, deci nu merită trei rânduri de fiecare dată. */
+            .grup-header-intro { margin: -0.25rem 0 1rem; font-size: 0.8125rem; }
+
+            /* Butonul de WhatsApp pe toată lățimea: e acțiunea principală din
+               capul paginii și, pe telefon, degetul o nimerește mai ușor. */
+            .member-only.visible.wa-buton { display: flex; justify-content: center; }
             
             /* Fix: section-card h2 nu mai e flex pe mobil
                (altfel text + <span> se rup în coloane verticale ciudate) */
@@ -1359,21 +1406,47 @@
                         <span><i class="fas fa-calendar"></i> Creat <span id="grupCreatedAt">azi</span></span>
                     </div>
                 </div>
-                <!-- Starea grupului și butoanele lui, împreună, în dreapta.
-                     ⚠️ Butoanele stăteau pe un rând propriu sub titlu și mâncau
-                     o bandă întreagă din capul paginii (cerut de Lucian,
-                     23 august). Aici intră DOAR butoanele scurte de membru;
-                     mesajele lungi pentru cei din afara grupului („Cererea ta a
-                     fost trimisă...") merg în `#headerActionsLat`, care are
-                     toată lățimea. -->
+                <!-- Butoanele grupului, în dreapta capului de pagină.
+                     ⚠️ Stăteau pe un rând propriu sub titlu și mâncau o bandă
+                     întreagă din capul paginii (cerut de Lucian, 23 august).
+                     Aici intră DOAR butoanele scurte de membru; mesajele lungi
+                     pentru cei din afara grupului („Cererea ta a fost
+                     trimisă...") merg în `#headerActionsLat`, care are toată
+                     lățimea. -->
                 <div class="grup-header-dreapta">
-                    <span id="grupStatus" class="status-badge-lg status-explorare">🟡 În explorare</span>
+                    <!-- ⚠️ Pastila de stare („🟡 Cu aprobare") a plecat de aici
+                         pe 24 august, la cererea lui Lucian: nu spunea nimănui
+                         nimic, fiindcă nu se înțelegea cine ce aprobă. Omul
+                         află oricum, în clar, în clipa în care cere alăturarea
+                         („Cererea ta a fost trimisă. Așteptăm aprobarea
+                         adminului."). Starea se schimbă în continuare din
+                         Administrare, cu butoanele `.status-btn`.
+                         Pastila a rămas pe listarea din `grupuri.html` și pe
+                         profil; dacă se scoate și de acolo, se scoate din
+                         `js/grupuri.js` și `js/profile-view-new.js`. -->
                     <div class="grup-header-actions" id="headerActions">
                         <!-- Actions will be populated by JS -->
                     </div>
                 </div>
             </div>
 
+
+            <!-- Butonul de WhatsApp, imediat sub titlu.
+                 ⚠️ Pe 22 august linkul a fost mutat din capul paginii jos, în
+                 capitolul Comunicarea. Lucian, 24 august: primul lucru pe care
+                 vrea să îl facă un om intrat în grup e să deschidă discuția,
+                 iar butonul nu se mai vedea. Acum e în amândouă locurile,
+                 dinadins: aici ca acțiune, jos ca parte a capitolului. Amândouă
+                 se umplu din `renderWhatsApp()`.
+                 Se vede doar dacă grupul ARE link, și doar membrilor: cine n-a
+                 intrat încă n-are ce căuta în discuția lor. Fondatorului fără
+                 link nu îi apare nimic aici, ca să nu ținem în capul paginii un
+                 buton care nu duce nicăieri; îndemnul de a-l adăuga îl vede jos,
+                 în Comunicarea. -->
+            <a id="whatsappHeader" class="wa-buton member-only wa-fara-link"
+               href="#" target="_blank" rel="noopener">
+                <i class="fab fa-whatsapp"></i> Deschide grupul de WhatsApp
+            </a>
             <div id="headerActionsLat" class="grup-header-lat"></div>
 
             <!-- Trimiterile din capul paginii.
@@ -2037,19 +2110,12 @@ async function renderGroupDetails(group, members, terenuri, groupZones, groupTag
     document.getElementById('grupMembriCount').textContent = members.length;
     document.getElementById('grupMaxMembri').textContent = group.max_membri;
     document.getElementById('grupCreatedAt').textContent = formatDate(group.created_at);
-    
-    // Status
-    const statusEl = document.getElementById('grupStatus');
-    const statusLabels = {
-        deschis: '🟢 Deschis',
-        cu_aprobare: '🟡 Cu aprobare',
-        // Legacy support
-        activ: '🟢 Deschis',
-        explorare: '🟡 Cu aprobare',
-        inchis: '🟡 Cu aprobare'
-    };
-    statusEl.textContent = statusLabels[group.status] || group.status;
-    statusEl.className = `status-badge-lg status-${group.status}`;
+
+    // Starea grupului nu se mai scrie în capul paginii (24 august). Pastila
+    // „🟡 Cu aprobare" nu spunea nimic omului care se uita la ea; ce contează
+    // pentru el, adică faptul că alăturarea trece pe la fondator, i se spune
+    // în clar la butonul de alăturare. Starea rămâne în bază și în butoanele
+    // din Administrare, doar afișajul decorativ a plecat.
     
     // Description
     const descEl = document.getElementById('grupDescriere');
@@ -2312,11 +2378,29 @@ function renderActions(group) {
     if (latEl) latEl.innerHTML = lat;
 }
 
-// ── LINKUL DE WHATSAPP, ÎN CAPITOLUL COMUNICAREA ──
-// Un singur rând. Se vede de orice membru; se EDITEAZĂ mai jos, în
-// Administrare, și numai de fondator.
+// ── LINKUL DE WHATSAPP ──
+// Se scrie în DOUĂ locuri, dinadins: butonul verde din capul paginii (acțiunea
+// pe care o caută omul de cum intră) și rândul din capitolul Comunicarea (unde
+// stă lângă anunțuri, ca parte a explicației despre canale).
+// Se vede de orice membru; se EDITEAZĂ mai jos, în Administrare, și numai de
+// fondator.
 function renderWhatsApp(group) {
     const box = document.getElementById('whatsappBox');
+    const buton = document.getElementById('whatsappHeader');
+
+    // Butonul din cap apare doar dacă există unde duce. Fără link nu punem în
+    // capul paginii un îndemn gol: fondatorul îl adaugă din Administrare, iar
+    // rândul din capitolul Comunicarea îi spune de unde.
+    if (buton) {
+        if (group.link_whatsapp) {
+            buton.href = group.link_whatsapp;
+            buton.classList.remove('wa-fara-link');
+        } else {
+            buton.href = '#';
+            buton.classList.add('wa-fara-link');
+        }
+    }
+
     if (!box) return;
 
     if (group.link_whatsapp) {
@@ -2337,10 +2421,14 @@ function renderWhatsApp(group) {
 }
 
 // ── RENDER MEMBERS ──
-// Câți membri se văd fără să ceri restul. Opt umple două rânduri pe ecran lat
-// și patru pe telefon; un grup plin (până la 20) ar fi împins tot restul
-// paginii sub fold.
-const MEMBRI_VIZIBILI = 8;
+// Câți membri se văd fără să ceri restul.
+// Pe ecran lat, opt umple două rânduri. Pe telefon grila are două coloane, deci
+// patru înseamnă tot două rânduri; cu opt, lista de membri ocupa singură un
+// ecran întreg înainte ca omul să ajungă la primul lucru de făcut în grup
+// (cererea lui Lucian, 24 august).
+// ⚠️ Se citește o singură dată, la încărcare. Cine rotește telefonul rămâne cu
+// numărul de la pornire, ceea ce e în regulă: butonul „Încă N membri" e acolo.
+const MEMBRI_VIZIBILI = (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) ? 4 : 8;
 let membriToti = false;
 
 function toggleTotiMembrii() {
@@ -4247,16 +4335,10 @@ window.changeStatus = async function(newStatus) {
         
         if (error) throw error;
         
-        // Update UI
+        // Butoanele din Administrare rămân singurul loc în care se vede starea
+        // grupului: pastila din capul paginii a ieșit pe 24 august.
         document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelector(`.status-btn[data-status="${newStatus}"]`).classList.add('active');
-        
-        const statusLabels = {
-            deschis: '🟢 Deschis',
-            cu_aprobare: '🟡 Cu aprobare'
-        };
-        document.getElementById('grupStatus').textContent = statusLabels[newStatus];
-        document.getElementById('grupStatus').className = `status-badge-lg status-${newStatus}`;
         
         showToast('Status actualizat!', 'success');
         
@@ -5059,9 +5141,12 @@ async function loadAnunturi() {
     }
 }
 
-// Câte anunțuri se văd fără să ceri restul. Trei e cât ține un om minte din ce
-// s-a spus în grup săptămâna asta; restul e arhivă și stă după un clic.
-const ANUNTURI_VIZIBILE = 3;
+// Câte anunțuri se văd fără să ceri restul.
+// Pe ecran lat, trei: cam atât ține un om minte din ce s-a spus în grup
+// săptămâna asta. Pe telefon, doar ultimul (cererea lui Lucian, 24 august):
+// un anunț lung are șapte-opt rânduri acolo, deci trei anunțuri însemnau
+// jumătate de ecran înainte de terenuri. Restul stau după un clic.
+const ANUNTURI_VIZIBILE = (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) ? 1 : 3;
 let anunturiToate = false;
 
 function toggleToateAnunturile() {

@@ -696,23 +696,12 @@ function renderUserGroups() {
             ? '<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs">Admin</span>'
             : '';
         
-        const statusColors = {
-            'deschis': 'bg-green-100 text-green-800',
-            'cu_aprobare': 'bg-yellow-100 text-yellow-800',
-            // Legacy
-            'activ': 'bg-green-100 text-green-800',
-            'explorare': 'bg-yellow-100 text-yellow-800',
-            'inchis': 'bg-yellow-100 text-yellow-800'
-        };
-        const statusLabel = {
-            'deschis': 'Deschis',
-            'cu_aprobare': 'Cu aprobare',
-            // Legacy
-            'activ': 'Deschis',
-            'explorare': 'Cu aprobare',
-            'inchis': 'Cu aprobare'
-        };
-        const groupStatus = group.status || 'deschis';
+        // ⚠️ Lângă „Admin" mai stătea o pastilă cu starea grupului („Cu
+        // aprobare" / „Deschis"). A ieșit pe 24 august, odată cu pastila din
+        // pagina grupului: nu se înțelegea cine ce aprobă, iar aici era și mai
+        // fără rost, fiindcă e lista de grupuri ale unui om, nu o listă în care
+        // cauți unde să intri. Cine dă clic ajunge în pagina grupului, unde
+        // scrie în clar ce se întâmplă la alăturare.
         
         return `
             <a href="grup-details.html?id=${group.id}" class="block p-4 border rounded-lg hover:border-gray-400 transition">
@@ -723,7 +712,6 @@ function renderUserGroups() {
                     </div>
                     <div class="flex gap-2">
                         ${statusBadge}
-                        <span class="px-2 py-0.5 ${statusColors[groupStatus]} rounded text-xs">${statusLabel[groupStatus]}</span>
                     </div>
                 </div>
             </a>
