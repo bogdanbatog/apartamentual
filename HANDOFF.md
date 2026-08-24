@@ -1,57 +1,111 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 24 august 2026, seara** — **emailul cu noutățile de pe platformă,
-> scris și comis (`20d6fd0`). ⏳ SE TRIMITE MARȚI 25 DIMINEAȚA.** Cinci fișiere noi, niciunul
-> existent atins: textul (`email_templates/email-noutati-platforma-august.md`), bilanțul și
-> lotul (`db_schema/emailuri-noutati-platforma/`), scriptul și README-ul
-> (`scripts/emailuri-noutati-platforma/`). Comanda de mâine e mai jos, la punctul 2.
+> **⏭️ ULTIMA SESIUNE: 24 august 2026, seara (a treia din zi)** — **pagina grupului strânsă
+> pentru telefon, ghidul curățat de cronologie, plus un bug de permisiuni găsit și reparat.**
+> Trei comituri, toate pe `origin/main`:
 >
-> **Sesiunea dinainte, tot pe 24 august:** analiza homepage-ului **nelogat** (Plausible +
-> Facebook + captura paginii) și planul de rescriere. **Nu s-a atins niciun fișier de cod.**
-> Tot ce s-a măsurat, decis și propus e în
-> **`handoff/20260823 - handoff-analiza-homepage-nelogat.md`** (403 linii).
+> | commit | ce conține |
+> |---|---|
+> | `2afeb25` | strângerea pentru telefon + eticheta „Cu aprobare" scoasă + cronologia din ghid |
+> | `8e9f84a` | „+ notă" / „atașează" se văd la pașii de teren |
+> | `52aabf1` | `poateScrieNote` separat de `canEditChecklist` |
 >
-> **✅ RESTANȚA DE DEPLOY E ÎNCHISĂ.** Verificat pe 24 august, conținut normalizat CRLF/LF:
-> `index.html`, `grup-details.html`, `js/pasi-din-ghid.js`, `terenuri.html`,
-> `teren-details.html`, `analize.html` — **toate identice cu repo-ul pe live.** Nu mai e
-> nimic de urcat din cPanel. (Rămâne nedeployat doar `notify-admins`, edge function,
-> neverificat în sesiunea asta.)
+> **🔴 PRIMUL LUCRU DE MÂINE: `52aabf1` NU E PE LIVE.** Primele două comituri erau deja
+> urcate când am verificat; al treilea a plecat după. Se urcă `frontend/grup-details.html`
+> din cPanel, apoi **Ctrl+Shift+R**: CSS-ul și JS-ul sunt scrise ÎN pagină, deci o
+> reîncărcare simplă arată versiunea din cache și pare că n-am făcut nimic.
 >
-> **🔴 CE URMEAZĂ, ÎN ORDINE:**
-> 1. **Homepage nelogat, primul ecran.** ✅ Titlul e DECIS (varianta 1 din §5.1 al
->    handoff-ului). Metoda: întâi machetă locală doar cu hero-ul nou, abia apoi `index.html`.
-> 2. **🔴 MARȚI 25 DIMINEAȚA, PRIMUL LUCRU: se trimite emailul cu noutățile.** Textul e
->    scris, probat pe email și comis. **Lotul: 84 de oameni** (86 din interogare, minus doi
->    scoși de mână, vezi mai jos). Trei pași, în ordine:
+> **CE S-A SCHIMBAT, PE SCURT**
+>
+> *Pagina grupului (`grup-details.html`), pe telefon:* membrii pe două coloane, fără data
+> intrării, patru vizibili în loc de opt; doar ultimul anunț, restul după un clic; margini,
+> titlu și trimiteri mai strânse. Constantele `MEMBRI_VIZIBILI` și `ANUNTURI_VIZIBILE` se
+> citesc din `matchMedia` **o singură dată, la încărcare**.
+>
+> *Eticheta „Cu aprobare" a ieșit din TOATĂ interfața* (cerere: „nu înțelege nimeni cine ce
+> aprobă, vede când cere alăturarea"). Trei locuri: pastila din capul paginii grupului, cod
+> mort din `js/grupuri.js` (nu ajungea în card oricum) și pastila de lângă „Admin" din lista
+> de grupuri de pe profil (`js/profile-view-new.js`). **Decizia de produs e neschimbată**,
+> doar afișajul a plecat; starea rămâne în bază și în butoanele din Administrare.
+>
+> *Buton verde de WhatsApp imediat sub titlu*, pe lângă rândul din capitolul Comunicarea,
+> care rămâne. Se vede doar membrilor și doar dacă grupul ARE link.
+>
+> *Ghidul `ce-este/cum-functioneaza.html`:* cronologia de proiect a ieșit cu totul (diagrama,
+> duratele pe faze, bara de durată totală, rândul din cuprins, CSS-ul ei). Cei 11 pași stau
+> acum în casete deschise parțial, cu „Citește mai mult". ⚠️ **Plierea se face din
+> JavaScript, după încărcare**, fiindcă `js/pasi-din-ghid.js` citește pagina cu `fetch` ca să
+> umple casetele din pagina grupului; ambalaj pus în HTML static ar pleca și acolo, cu buton
+> cu tot. Măsurarea înălțimii se face la `load`, nu la `DOMContentLoaded`: Tailwind vine de
+> pe CDN și rescrie stilurile după, iar măsurate prea devreme trei secțiuni rămâneau tăiate
+> **fără** buton.
+>
+> *Mecanism nou, `doar-in-ghid`:* orice element marcat așa în ghid e scos la extragere (ca
+> `.pas-cap`), deci rămâne pe pagina publică și NU intră în caseta din pagina grupului.
+> Prima folosire: pasul 1, unde în casetă rămân doar canalele de comunicare.
+>
+> **🐛 BUGUL, ȘI DE CE A DURAT DOUĂ ÎNCERCĂRI**
+>
+> Raportat ca „nu funcționează note la Analiza și verificările, dai pe săgeată și apare o
+> linie orizontală". Prima reparație (`8e9f84a`) a tratat aspectul: „+ notă" și „atașează"
+> erau text gri de 0.72rem fără chenar, iar linia era `border-top`-ul lui `.cl-box-tools`,
+> care are rost doar în casetele de citit. Corect, dar **nu era cauza**: eu testasem cu un
+> cont care e membru.
+>
+> Cauza reală: Lucian e **superadmin, nemembru** în grupul acela, iar `renderBoxTools`
+> decidea pe `canEditChecklist`, care nu-l include. Măsurat în pagină pe live, drepturile
+> superadminului nemembru **nu sunt uniforme pe tabele**:
+>
+> | tabelă | citire | scriere |
+> |---|---|---|
+> | `grup_checklist_notes` / `_files` | da | **da** (probat cu insert + delete) |
+> | `grup_teren_checklist` (bifele) | da | **nu**, „new row violates row-level security policy" |
+>
+> De aceea sunt acum **două** steaguri: `canEditChecklist` (bife) și `poateScrieNote` (note
+> și fișiere, plus superadminul). Cine chiar nu are voie primește o propoziție, nu un panou
+> gol. **Decis de Lucian: NU se scrie nicio politică nouă pe `grup_teren_checklist`**, nu
+> ține să bifeze el pașii altor grupuri.
+>
+> **⚠️ NEVERIFICAT: lățimea reală de telefon.** Fereastra Chrome nu s-a lăsat redimensionată
+> sub 1440px, deci regulile de sub 640px sunt confirmate doar ca **parsate de browser**, nu
+> văzute. Prima privire de mâine: pagina grupului pe telefonul lui.
+>
+> ---
+>
+> **🔴 RĂMASE DIN SESIUNILE DE DIMINEAȚĂ (24 august), ÎN ORDINE:**
+>
+> 1. **🔴 EMAILUL CU NOUTĂȚILE, care trebuia trimis marți 25 dimineața.** Textul e scris,
+>    probat pe email și comis (`20d6fd0`). **Lotul: 84 de oameni.** Trei pași:
 >
 >    a. **Re-rulezi `db_schema/emailuri-noutati-platforma/1-lot-pentru-email.sql`** și
 >       exporți CSV **nou**. ⚠️ Nu refolosi cel din 24 august: cine își termină profilul
 >       peste noapte n-are ce căuta în varianta „Termină-ți profilul".
 >    b. **Proba pe disc** (fără `--mod`), apoi citești lista cu ochiul.
->    c. **Trimiterea:**
->       ```
->       $env:RESEND_API_KEY='re_...'; node scripts\emailuri-noutati-platforma\trimite-emailuri-noutati.js --csv="CALEA_CSV_NOU" --mod=live --confirm-trimit --fara=bogdanbatog@gmail.com,riltabutru@necub.com
->       ```
+>    c. **Trimiterea:** comanda completă e în README-ul campaniei,
+>       `scripts/emailuri-noutati-platforma/README.md` (cheia Resend în mediu, `--mod=live`,
+>       `--confirm-trimit`, plus `--fara=` cu cei doi de mai jos).
 >
 >    **Cei doi scoși de mână** (filtrul din SQL nu-i prinde, au Gmail personal):
 >    `bogdanbatog@gmail.com` e contul de developer, proprietarul repo-ului;
 >    `riltabutru@necub.com` e o adresă de unică folosință. Amândoi cu profilul gol.
 >
->    **Decis pe 24 august:** intră și cei 9 cu profilul neterminat, deși șase dintre ei au
->    primit deja două mesaje despre profil (iulie + campania din august). Emailul lor începe
->    cu ce s-a construit; profilul apare abia la final, ca motiv pentru care n-au cum să
->    vadă. Dacă te răzgândești, `--doar-completi` îi scoate și pleacă 75.
+>    **Decis pe 24 august:** intră și cei 9 cu profilul neterminat. Emailul lor începe cu ce
+>    s-a construit; profilul apare abia la final. `--doar-completi` îi scoate și pleacă 75.
 >
 >    ⚠️ **Nu trimite după-amiaza.** Digestul de anunțuri de grup pleacă la 19:00, iar 35 din
 >    cei 84 sunt într-un grup: două emailuri de la noi într-o oră arată a campanie.
 >
-> 3. **Joi 27: emailul cu terenuri noi**, pornit manual cu `force` (automatizarea e gata
->    din 14 august). Apoi `3-programare.sql` → prima rulare automată luni 31.
->    Detaliile și comenzile: §7 din handoff-ul de mai sus.
->    ⚠️ **De verificat înainte:** butonul din emailul acela e probabil tot negru (`#1a1a1a`),
->    iar ăla chiar pleacă singur în fiecare luni. Vezi restanța de mai jos.
+> 2. **Homepage nelogat, primul ecran.** ✅ Titlul e DECIS (varianta 1 din §5.1 al
+>    handoff-ului). Metoda: întâi machetă locală doar cu hero-ul nou, abia apoi `index.html`.
+>    Tot ce s-a măsurat și propus e în
+>    **`handoff/20260823 - handoff-analiza-homepage-nelogat.md`** (403 linii).
 >
-> **🟡 RESTANȚE GĂSITE PE 24 AUGUST, NEREZOLVATE:**
+> 3. **Joi 27: emailul cu terenuri noi**, pornit manual cu `force` (automatizarea e gata din
+>    14 august). Apoi `3-programare.sql` → prima rulare automată luni 31.
+>    ⚠️ **De verificat înainte:** butonul din emailul acela e probabil tot negru (`#1a1a1a`),
+>    iar ăla chiar pleacă singur în fiecare luni.
+>
+> **🟡 RESTANȚE MAI VECHI, NEREZOLVATE:**
 > - **Butoanele negre din emailuri.** `#1a1a1a` pe fundal crem dispare în clienții care
 >   afișează mesajele pe negru. Reparat doar în campania nouă (terracotta `#c2604a`, alb,
 >   cu muchie `#a54c38`). Au rămas negre: `emailuri-profil-incomplet`, `emailuri-zone`,
@@ -62,8 +116,8 @@
 >   valabil e limita de 2 cereri/secundă, adică pauza de 600 ms din scripturi.
 > - **`notify-admins` tot nedeployat.**
 >
-> ⚠️ Restul fișierului e de pe 18 august și descrie restanțe de deploy care **nu mai există**
-> (vezi verificarea de mai sus). Nu porni nimic pe baza lor.
+> ⚠️ Restul fișierului e de pe 18 august și descrie restanțe de deploy care **nu mai există**.
+> Nu porni nimic pe baza lor.
 >
 > ⚠️ Sesiunea de pe 23 august (spațiul de lucru, pagina grupului, episodul 3) e descrisă în
 > `handoff/20260823 - handoff-spatiul-de-lucru-si-pagina-grupului.md`. Comituri `3212f68`,
