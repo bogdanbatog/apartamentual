@@ -569,10 +569,10 @@
         .tv-pas-sageata { font-size: 0.65rem; transition: transform 0.2s; }
         .tv-pas-buton.deschis .tv-pas-sageata { transform: rotate(180deg); }
         .tv-pas-buton.deschis { color: #c2604a; }
-        /* Notele și fișierele pasului. `.cl-box-tools` de mai jos aduce chenarul
-           de sus și spațiile; aici rămâne doar retragerea, ca să se vadă că țin
-           de pasul de deasupra. */
-        .tv-pas-corp { display: none; padding: 0 0 0.75rem 2.1rem; }
+        /* Notele și fișierele pasului. Retragerea le leagă vizual de pasul de
+           deasupra; chenarul de sus al lui `.cl-box-tools` e anulat mai jos,
+           fiindcă aici n-ar despărți nimic. */
+        .tv-pas-corp { display: none; padding: 0.15rem 0 0.75rem 2.1rem; }
         .tv-pas-corp.open { display: block; }
 
         .teren-comments-list {
@@ -1137,6 +1137,14 @@
            Ce a rămas mai jos ține de note și atașamente, care se folosesc. */
         .cl-box-tools { margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #e8e3d8; }
 
+        /* ⚠️ Linia de sus are rost DOAR în casetele de citit (`.cl-phase`),
+           unde desparte uneltele de textul din ghid. Într-un pas de teren nu
+           desparte nimic: panoul se deschide direct sub rândul pasului, deci
+           linia era primul (și, fără note, singurul) lucru care se vedea, iar
+           omul citea „nu s-a întâmplat nimic". Aici uneltele încep direct. */
+        .tv-pas-corp .cl-box-tools { margin-top: 0; padding-top: 0; border-top: none; }
+        .tv-pas-corp .cl-step-notes:empty { margin-top: 0; }
+
         .cl-step-meta {
             display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem;
             font-size: 0.72rem; color: #8a8a8a; flex-wrap: wrap;
@@ -1184,17 +1192,26 @@
             font-size: 0.65rem; padding: 2px 4px;
         }
         .cl-file-delete:hover { color: #ef4444; }
-        .cl-upload-btn {
-            font-size: 0.72rem; color: #8a8a8a; cursor: pointer; border: none;
-            background: none; padding: 0; text-decoration: underline;
+        /* ── „+ notă" ȘI „ATAȘEAZĂ" ──
+           ⚠️ Erau două cuvinte gri de 0.72rem, subliniate, fără chenar și fără
+           padding. Într-un pas de teren fără nicio notă, panoul deschis arăta
+           exact așa: o linie orizontală și, undeva sub ea, două cuvinte pe care
+           ochiul nu le prindea. Lucian, 24 august: „nu funcționează, dai pe
+           săgeată și apare o linie."
+           Funcționa, doar că nu se vedea. Acum sunt pastile cu chenar și text
+           negru: într-un panou gol ele sunt singurul lucru din el, deci trebuie
+           să fie lucrul pe care îl vezi. Degetul pe telefon are și el nevoie de
+           mai mult de 11 pixeli de text ca țintă. */
+        .cl-upload-btn, .cl-note-btn {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            font-size: 0.75rem; font-weight: 600; font-family: inherit;
+            color: #1a1a1a; background: #ffffff;
+            border: 1px solid #ddd5c6; border-radius: 100px;
+            padding: 0.3rem 0.75rem; cursor: pointer; text-decoration: none;
         }
-        .cl-upload-btn:hover { color: #5a7196; }
-        .cl-upload-btn i { margin-right: 2px; }
-        .cl-note-btn {
-            font-size: 0.72rem; color: #8a8a8a; cursor: pointer; border: none;
-            background: none; padding: 0; text-decoration: underline;
-        }
-        .cl-note-btn:hover { color: #c2604a; }
+        .cl-upload-btn:hover { border-color: #5a7196; color: #5a7196; }
+        .cl-upload-btn i { margin-right: 0; }
+        .cl-note-btn:hover { border-color: #c2604a; color: #c2604a; }
         .cl-note-input { margin-top: 0.35rem; display: flex; gap: 0.35rem; }
         .cl-note-input input {
             flex: 1; padding: 0.35rem 0.6rem; border: 1px solid #e8e3d8;
