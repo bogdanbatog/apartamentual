@@ -134,8 +134,49 @@ trimite în altă parte decât scrie pe el.)*
 deja, cu două paragrafe mai sus, că nici nu ajunge acolo. Două explicații una peste alta
 despre ce n-o să vadă fac un email care descurajează, nu unul care anunță.
 
+**Încă un rând, doar dacă `profil_complet=da` ȘI `are_teren=nu`** (adăugat pe 25 august,
+cererea lui Lucian):
+
+> Dacă deocamdată doar te uiți, e în regulă, așa încep cei mai mulți. Un pas mic care
+> ajută totuși: când vezi un teren care ți-ar plăcea, adaugă-l la profilul tău. Nu te
+> obligă la nimic, dar ceilalți văd că e cineva interesat de el, iar grupurile se nasc
+> exact din întâlnirile astea.
+
+⚠️ Condiția e **doar `!are_teren`**, nu „nici grup nici teren": îndemnul e despre terenuri,
+deci cine are deja terenuri salvate l-a făcut. Cine e într-un grup dar n-a salvat niciun
+teren îl primește, și e bine: pentru grupul lui exact asta lipsește. Sărit pentru profilul
+neterminat, fiindcă **sfatul nu se poate urma**: `js/nav.js` îl întoarce la profil de pe
+orice pagină, deci n-are cum să ajungă la lista de terenuri.
+
+Afirmația „ceilalți văd că e cineva interesat de el" e adevărată și scrisă la fel în ghid
+(`ce-este/cum-functioneaza.html`, pasul „Cauți terenuri în zonele preferate") și în cardul
+„Terenurile tale" de pe homepage, care arată câți oameni și câte grupuri sunt interesate
+de fiecare teren.
+
 Lucian și Liviu
 ApartamenTUal / LTFB Studio
+
+**P.S., la toată lumea** (adăugat pe 25 august):
+
+> **P.S.** Joi, 3 septembrie, de la 11:30, ținem a doua ediție a webinarului despre
+> construcția în grup, online și gratuit. La prima ediție, partea cea mai bună au fost
+> întrebările. Te poți înscrie aici: https://luma.com/00ig0k40
+
+⚠️ Merge și celor cu profilul neterminat: la webinar se intră cu un link, nu cu un cont.
+
+⚠️ **Al treilea loc în care e scrisă ora webinarului.** Celelalte două: `frontend/index.html`
+(blocul de webinar și `WEBINAR_ORA` din scriptul de la finalul paginii) și pagina de pe
+Luma. Verificate pe 24 august 2026: joi, 3 septembrie, 11:30, `https://luma.com/00ig0k40`.
+Un grep prin repo **nu** acoperă Luma.
+
+⚠️ Data e scrisă **de mână**, nu calculată, deși homepage-ul o calculează (prima joi a lunii).
+Aici e corect așa: campania se trimite o dată, într-o dimineață anume, iar o dată calculată
+corect dar lipită de un link Luma vechi ar trimite oamenii la evenimentul de luna trecută.
+O dată scrisă de mână, când e greșită, e greșită vizibil.
+
+⚠️ „**a doua ediție**" e o afirmație despre trecut, nu despre calendar, și **n-am putut-o
+verifica din repo**. Homepage-ul spune „în prima joi a fiecărei luni", ceea ce n-o
+contrazice, dar nici n-o confirmă. Cine schimbă luna verifică și cifra.
 
 *Ai primit acest mesaj pentru că ai un cont pe ApartamenTUal. Îți scriem rar, doar când se
 schimbă ceva ce te privește direct. Dacă nu vrei să mai primești astfel de mesaje,
@@ -147,7 +188,7 @@ răspunde cu „stop”.*
 
 | Tăiat | Motiv |
 |---|---|
-| „vezi care e următorul webinar" ca punct separat | e pe același rând cu episodul, în același card |
+| „vezi care e următorul webinar" ca punct separat | ca rând în lista despre homepage, e pe același rând cu episodul, în același card. ⚠️ **Webinarul din 3 septembrie a intrat totuși în email pe 25 august, dar în P.S., cu dată, oră și link** (cererea lui Lucian). Nu e o revenire asupra rândului ăstuia: acolo se descria un card de pe homepage, aici se face o invitație. |
 | „call-urile pe zoom" din descrierea secretariatului | detaliu de canal, nu de folos. ⚠️ **Cuvântul „secretariat" a fost pus la loc de Lucian pe 24 august**, între ghilimele. Îl tăiasem eu fiindcă suna a produs promis; e limbajul lui de produs, rămâne. |
 | „Un tab atașat unui teren pe care s-a cerut analiza preliminară" | detaliu de implementare, nu spune omului ce câștigă |
 | „Abonează-te la newsletter" | primesc deja email de la noi; butonul principal trebuie să fie unul singur |

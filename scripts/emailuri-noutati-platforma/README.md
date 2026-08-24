@@ -131,6 +131,11 @@ Erorile 429 și 5xx sunt reîncercate automat de până la 4 ori, cu pauze cresc
 - **Filtrul de excluderi nu prinde tot.** Blocul `exclusi` din SQL ratează oamenii casei
   cu Gmail personal și adresele temporare. Citește lista exportată cu ochiul înainte de
   trimitere.
+- **P.S.-ul cu webinarul are o dată scrisă de mână.** `WEBINAR`, la începutul scriptului:
+  joi, 3 septembrie, 11:30, `https://luma.com/00ig0k40`. E **al treilea loc** în care stă
+  ora, după `frontend/index.html` și pagina de pe Luma, iar un grep prin repo nu acoperă
+  Luma. ⚠️ **Dacă trimiterea alunecă după 3 septembrie, P.S.-ul devine o invitație la
+  trecut.** Verifică-l înainte de `--mod=live`, la fel ca lista de excluderi.
 - **Interogarea 1 se re-rulează în ziua trimiterii**, nu se refolosește un CSV vechi. Cine
   și-a terminat profilul între timp nu trebuie să primească varianta cu „Termină-ți
   profilul".

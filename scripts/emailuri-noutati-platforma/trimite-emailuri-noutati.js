@@ -94,6 +94,30 @@ const SUBIECTE = {
 const PREHEADER = 'Grupurile, terenurile și oamenii din zonele tale, într-un singur ecran.'
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Webinarul din P.S.
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// ⚠️ AL TREILEA LOC in care e scrisa ora webinarului. Celelalte doua:
+//    `frontend/index.html` (blocul de webinar si `WEBINAR_ORA` din scriptul de
+//    la finalul paginii) si pagina de pe Luma. Verificate pe 24 august 2026:
+//    joi, 3 septembrie, 11:30, https://luma.com/00ig0k40. Daca se muta ora sau
+//    linkul, se muta in toate trei; un grep prin repo NU acopera Luma.
+//
+// ⚠️ Data e scrisa DE MANA, nu calculata, desi homepage-ul o calculeaza (prima
+//    joi a lunii). Aici e corect asa: campania asta se trimite o data, intr-o
+//    dimineata anume, si o data gresita lipita de un link Luma vechi ar trimite
+//    oamenii la evenimentul de luna trecuta. O data scrisa de mana, cand e
+//    gresita, e gresita vizibil. Acelasi rationament ca la emailul de terenuri.
+//
+// ⚠️ „a doua editie" e o afirmatie despre trecut, nu despre calendar. Homepage-ul
+//    spune „in prima joi a fiecarei luni", ceea ce nu contrazice, dar nici nu
+//    confirma numaratoarea. Cine schimba luna verifica si cifra.
+const WEBINAR = {
+  cand: 'Joi, 3 septembrie, de la 11:30',
+  url: 'https://luma.com/00ig0k40',
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Argumente
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -252,6 +276,30 @@ function continut(r) {
     dupaButon.push('Ce vezi acolo depinde de ce ai. Dacă n-ai încă niciun grup și niciun teren la favorite, cardurile lor lipsesc, iar în locul lor îți rămân noutățile din zonele tale, oamenii care caută unde cauți și tu, și pașii.')
   }
 
+  // ── PENTRU CINE DOAR SE UITA ───────────────────────────────────────────────
+  //
+  // Cerut de Lucian, 25 august. Cea mai mare parte a listei n-a facut niciodata
+  // nimic pe platforma, si un email care insira noutati fara sa spuna „e in
+  // regula asa" ii pune pe toti in intarziere.
+  //
+  // ⚠️ Conditia e `!areTeren`, NU „nici grup nici teren": indemnul e despre
+  //    terenuri, deci cine are deja terenuri salvate l-a facut. Cine e intr-un
+  //    grup dar n-a salvat niciun teren il primeste, si e bine, fiindca pentru
+  //    grupul lui exact asta lipseste.
+  //
+  // ⚠️ NU se trimite celor cu profilul neterminat, desi si ei doar se uita.
+  //    Motivul e ca sfatul nu se poate urma: `js/nav.js` ii intoarce la profil
+  //    de pe ORICE pagina, deci nu pot ajunge la lista de terenuri. Le-am spus
+  //    deja, mai sus, ce au de facut intai.
+  //
+  // Afirmatia „ceilalti vad ca e cineva interesat" e adevarata si scrisa la
+  // fel in ghid (`ce-este/cum-functioneaza.html#cum-incepi-pasi`) si in cardul
+  // „Terenurile tale" de pe homepage, care arata cati oameni si cate grupuri
+  // sunt interesate de fiecare teren.
+  if (profilComplet && !areTeren) {
+    dupaButon.push('Dacă deocamdată doar te uiți, e în regulă, așa încep cei mai mulți. Un pas mic care ajută totuși: când vezi un teren care ți-ar plăcea, adaugă-l la profilul tău. Nu te obligă la nimic, dar ceilalți văd că e cineva interesat de el, iar grupurile se nasc exact din întâlnirile astea.')
+  }
+
   return {
     salut: salut(r),
     intro: 'Am schimbat destul de mult pe platformă în ultimele două săptămâni. Dacă intri azi, găsești altceva decât ai lăsat, așa că îți spunem pe scurt ce.',
@@ -259,6 +307,13 @@ function continut(r) {
     buton,
     dupaButon,
     semnatura: ['Lucian și Liviu', 'ApartamenTUal / LTFB Studio'],
+    // P.S.-ul cu webinarul. Merge la TOATA lumea, inclusiv la cei cu profilul
+    // neterminat: la webinar se intra cu un link, nu cu un cont.
+    // Stă DUPA semnatura, unde ii e locul si unde se citeste.
+    ps: {
+      text: `${WEBINAR.cand}, ținem a doua ediție a webinarului despre construcția în grup, online și gratuit. La prima ediție, partea cea mai bună au fost întrebările. Te poți înscrie aici:`,
+      url: WEBINAR.url,
+    },
     subsol: 'Ai primit acest mesaj pentru că ai un cont pe ApartamenTUal. Îți scriem rar, doar când se schimbă ceva ce te privește direct. Dacă nu vrei să mai primești astfel de mesaje, răspunde cu „stop”.',
   }
 }
@@ -325,6 +380,10 @@ function html(r) {
         <p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#1a1a1a;">
           ${c.semnatura.map(esc).join('<br>')}
         </p>
+        <p style="margin:24px 0 0;padding-top:16px;border-top:1px solid #e8e3d8;font-size:15px;line-height:1.6;">
+          <strong style="color:#1a1a1a;">P.S.</strong> ${esc(c.ps.text)}
+          <a href="${c.ps.url}" style="color:#c2604a;font-weight:600;">${esc(c.ps.url)}</a>
+        </p>
       </div>
       <div style="border-top:1px solid #e8e3d8;padding:20px 8px 0;">
         <p style="margin:0 0 12px;font-size:12px;line-height:1.6;color:#8a8a8a;">${esc(c.subsol)}</p>
@@ -349,6 +408,8 @@ function text(r) {
   linii.push('', `${c.buton.text}: ${c.buton.href}`, c.buton.sub)
   c.dupaButon.forEach(x => linii.push('', fara(x)))
   linii.push('', ...c.semnatura)
+  // In varianta text linkul se scrie intreg, pe randul lui: nu exista ancora.
+  linii.push('', `P.S. ${c.ps.text}`, c.ps.url)
   linii.push('', '---', c.subsol)
   return linii.join('\n')
 }
