@@ -700,6 +700,12 @@
     position:relative;
     overflow:hidden;
     border-radius:4px;
+    /* ⚠️ Filmulețul e 16:9 (verificat la sursă: 200x113), caseta de mai sus
+       e 16:7. Playerul păstrează proporția filmului și umple restul cu negru,
+       stânga și dreapta. De aceea caseta ia aici proporția filmului: dungile
+       dispar fără să se taie nimic din imagine (sus stau macaraua și ultimul
+       etaj, adică exact ce se vede crescând). */
+    aspect-ratio:16/9;
   }
   .video-ph--live iframe{
     position:absolute;
@@ -723,6 +729,24 @@
     color:var(--ink-3);
     margin:0;
   }
+
+  /* ── DOVADA DE SUB HERO ──
+     Linia de sub timelapse NU e `.carousel-note` (aia e 11px uppercase, un
+     marcaj de galerie, pe care ochiul îl sare). Aici e o propoziție care
+     trebuie citită: e singura probă că blocul există, iar acum o vede
+     toată lumea, nu doar cei care derulează până la 25%. */
+  /* ⚠️ FĂRĂ `max-width`, dinadins. Restul textelor din pagină sunt limitate la
+     720px ca să se citească comod, dar rândul ăsta e o fișă de date, nu un
+     paragraf: trebuie să încapă pe UN SINGUR rând sub filmuleț, deci se
+     întinde cât filmulețul. De aceea e și la 14px, nu 15. Pe telefon curge
+     firesc pe mai multe rânduri, n-are cum altfel. */
+  .dovada-linie{
+    margin:0.9rem 0 0;
+    font-size:14px;
+    line-height:1.5;
+    color:var(--ink-2);
+  }
+  .dovada-linie b{ color:var(--ink); font-weight:600; }
 
   /* ── CTA PUNCHY ── */
   .cta-punchy{
@@ -1569,6 +1593,15 @@
     .team-layout{ grid-template-columns:1fr; gap:2rem; }
   }
   @media (max-width:768px){
+    /* ── AERUL DE DEASUPRA HERO-ULUI, PE TELEFON ──
+       Erau 133px până la eticheta gri de 11px: 69px de nav, 48px marginea de
+       sub el și 16px padding-ul hero-ului. Pe un telefon e o treime din primul
+       ecran, goală, iar 69% dintre vizitatori vin de pe telefon.
+       ⚠️ Scopat pe `:not(.atu-logat)` și pe varianta „marketing": hero-urile A
+       și B (logat, agenție) rămân exact cum au fost lăsate pe 23 august. */
+    html:not(.atu-logat) #navigation{ margin-bottom:1.25rem; }
+    .hero[data-variant="marketing"]{ padding-top:0; }
+
     .hero-title, .hero-stage .hero[data-variant] .title{ font-size:32px; }
     .hero-stage .hero[data-variant] .eyebrow{
       white-space:normal;
@@ -1941,21 +1974,74 @@
        „HERO PE ROLURI" de la finalul paginii). Default: marketing (nelogat). -->
   <div class="hero-stage">
 
-    <!-- STARE 1 · NELOGAT → hero de marketing (NESCHIMBAT) -->
+    <!-- STARE 1 · NELOGAT → hero de marketing (rescris pe 25 august) -->
     <section class="hero" data-variant="marketing">
-      <p class="eyebrow"><span class="dot"></span> Platformă de construcție colaborativă</p>
+      <!-- Deasupra titlului stătea eticheta „Platformă de construcție
+           colaborativă", cu bulina teracotă. A ieșit pe 25 august: titlul nou
+           spune exact același lucru, cu cuvintele omului, iar eticheta îl
+           repeta cu ale noastre, în gri de 11px. Pe telefon, ea plus aerul ei
+           țineau circa 43px din primul ecran.
+           ⚠️ Scriptul „Signature TU/tău color cycle" (finalul paginii) caută
+           și `.hero[data-variant="marketing"] .eyebrow .dot`. Selectorul a
+           rămas acolo dinadins, ca bulina să reînceapă să-și schimbe culoarea
+           dacă eticheta se pune vreodată la loc. Nu dă eroare când nu găsește
+           nimic. Eticheta rămâne în hero-ul B (agenție), unde e neatinsă. -->
+      <!-- ⚠️ Titlul spune acum MECANISMUL, nu promisiunea. Cel vechi („Cauți un
+           apartament în zona bună, la preț corect") era o frază pe care o poate
+           scrie orice dezvoltator, iar ce ne deosebește apărea abia în subtitlu.
+           Măsurat pe 23 august: 1.361 de vizitatori, 56% ies imediat, adâncime
+           medie de derulare 41%. Omul venit de pe Facebook văzuse deja povestea
+           și nu primea aici confirmarea că a nimerit unde trebuie.
+           Fraza e ținută la 56 de semne dinadins: la 85 (varianta lungă, cu
+           „cumpără împreună un teren") titlul ocupa șase rânduri pe telefon și
+           împingea butoanele sub marginea ecranului. Restul mecanismului a
+           coborât în subtitlu, unde era oricum nevoie de el. -->
       <h1 class="hero-title">
-        Cauți un <span class="title-tau">apartament</span> în zona bună, la preț corect
+        Câteva familii își construiesc blocul. Fără dezvoltator.
       </h1>
       <p class="hero-sub">
-        Câteva familii din București s-au oprit din căutat și au construit propriul bloc, susținute de experți la fiecare pas. Și tu poți avea apartamentul dorit, fără dezvoltator.
+        Cumpără împreună un teren, participă la proiectare, aleg constructorul, iar apartamentele rămân ale lor. Se numește Baugruppen, e obișnuit în Germania, iar în București există deja primul bloc construit cu ajutorul apartamen<b class="apt-tu">TU</b>al.
       </p>
+      <!-- ⚠️ NU SCRIE AICI „își aleg arhitectul". A fost în subtitlu o zi și a
+           ieșit pe 25 august, la cererea lui Lucian, din două motive: mulți
+           oameni înțeleg oricum că proiectul se face cu noi, iar propoziția
+           scotea în față tocmai libertatea de a lucra cu altcineva.
+           Formularea lui: „participă la proiectare". Spune că omul e implicat,
+           fără să sugereze că proiectantul e altcineva decât noi. „Aleg
+           constructorul" rămâne, e adevărat (la Județului Housing grupul a
+           ales Mozaic Engineering) și nu atinge aceeași coardă. -->
+
+      <!-- ⚠️ NU SCRIE NICĂIERI „primul bloc construit așa" SAU „primul din
+           România". În anii '50 s-au construit la noi blocuri prin cooperative
+           de locuințe, cu sprijinul statului (credit sau teren, mai ales
+           pentru muncitori). Cine e „primul" e o discuție de istorici, pe care
+           n-o câștigăm și n-o vrem. Formularea care rămâne adevărată oricum
+           cade dezbaterea: primul construit CU AJUTORUL PLATFORMEI NOASTRE.
+           Decizia lui Lucian, 25 august 2026. -->
+
       <div class="cta-group">
+        <!-- ⚠️ BUTONUL PRINCIPAL NU MAI SCOATE OMUL DE PE SITE. Până acum trei
+             din patru CTA-uri majore duceau la aceeași pagină Luma, deci cine
+             intra pe 15 ale lunii era invitat să aștepte până în 3 septembrie.
+             Între timp, `/terenuri.html` are cel mai bun comportament din site
+             (43% ies, 84s, 60% adâncime), iar homepage-ul nu trimitea acolo.
+             ⚠️ În Plausible se schimbă doar valorile lui `dest` pe `loc=hero`
+             (primarul: webinar → terenuri; secundarul: cum-incepi → webinar).
+             Numele evenimentului rămâne `CTA Click`, ca să nu iasă din raportul
+             în care se compară toate butoanele între ele. -->
         <div class="hero-ctas">
-          <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=webinar">Înscrie-te la webinar <span class="arr">→</span></a>
-          <a href="#cum-incepi" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=cum-incepi">Cum începi</a>
+          <a href="/terenuri.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=terenuri">Vezi terenurile din zona ta <span class="arr">→</span></a>
+          <!-- Data de pe buton îi spune omului din start dacă webinarul e peste
+               trei zile sau peste trei săptămâni. NU e scrisă de mână: o pune
+               `scrieDataWebinarului()`, din aceeași socoteală ca panoul de mai
+               jos (prima joi a lunii). Ce e scris aici e doar plasa de
+               siguranță, pentru cazul în care scriptul nu apucă să ruleze. -->
+          <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=webinar">Înscrie-te la webinar · <span id="webinarDataScurt">joi 3 septembrie</span>, gratuit</a>
         </div>
-        <p class="cta-note">Pune întrebări fondatorilor · Zoom · Gratuit</p>
+        <!-- Sub butoane stătea o notă („București și împrejurimi. Fără cont,
+             ca să vezi ce e."). A ieșit la cererea lui Lucian, 25 august.
+             Orașul nu se pierde: apare în linia de sub timelapse, la câteva
+             sute de pixeli mai jos („Județului Housing, București"). -->
       </div>
     </section>
 
@@ -2010,6 +2096,41 @@
         </div>
       </div>
     </section>
+
+    <!-- ── DOVADA, IMEDIAT SUB HERO (doar pentru nelogat) ──
+         Timelapse-ul stătea la 25% adâncime, iar pozele blocului la 45%.
+         Vizitatorul mediu se oprește la 41%, deci materialul care chiar
+         convinge (un bloc adevărat, filmat cum crește) era văzut de mai
+         puțin de jumătate din oameni. Acum e primul lucru de sub titlu.
+         ⚠️ `js-marketing-only`: cine e logat vede în locul lui spațiul de
+         lucru. Iframe-ul are autoplay+loop, deci s-ar încărca și ascuns;
+         scriptul de sesiune îi golește `src`-ul căutând
+         `.video-ph--live iframe`, așa că cele două clase trebuie să rămână
+         pe el oriunde l-am muta.
+         ⚠️ Blocul stă ÎN `.hero-stage` fiindcă paleta pământie
+         (`--terracotta`, `--sage`…) e definită acolo, nu pe `:root`. -->
+    <div class="js-marketing-only">
+      <div class="video-ph video-ph--live">
+        <iframe src="https://www.youtube.com/embed/bfW2DJ1_du4?rel=0&amp;modestbranding=1&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=bfW2DJ1_du4&amp;playsinline=1" title="Timelapse Județului Housing, ApartamenTUal" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+      </div>
+      <!-- „Primul bloc construit cu ajutorul apartamenTUal" s-a mutat în
+           subtitlul de sus, ca să nu se spună de două ori la 400px distanță.
+           Aici rămân faptele concrete: ce e terenul, ce s-a construit pe el
+           și în ce stadiu e.
+           ⚠️ NU SCRIE „terminat" ȘI NU SCRIE „gata". Blocul e ridicat, dar e
+           încă în finalizare (august 2026). Timelapse-ul de deasupra arată
+           fațada gata, deci tentația e mare; nu e adevărat, iar oamenii care
+           vin la webinar întreabă exact despre stadiu. Vezi și citatul lui
+           Tiberiu din pagină: „Abia așteptăm să ne bucurăm de noua noastră
+           casă", scris de un om care încă nu s-a mutat. -->
+      <p class="dovada-linie"><b>Județului Housing, București</b> · teren cu calcan lângă un parc · 5 apartamente · spațiu comun, terasă și curte verde · în finalizare</p>
+      <!-- Aici a stat un rând despre bani („Contul e gratuit. Plătești doar
+           dacă ceri o analiză de teren sau consultanță.", cu link la
+           /servicii.html). A ieșit la cererea lui Lucian, 25 august.
+           ⚠️ Întrebarea „ce plătesc eu aici?" rămâne nerăspunsă pe primul
+           ecran, iar răspunsul e doar pe /servicii.html, unde ajung 160 de
+           oameni din 2.577. Dacă se pune la loc, aici era locul. -->
+    </div>
 
     <!-- ── BARA DE APARTAMENTE (separare prin gap, fără borders) ── -->
     <div class="aptbar" aria-hidden="true">
@@ -2095,11 +2216,8 @@
     </p>
   </section>
 
-  <!-- ── VIDEO TIMELAPSE STRADA JUDEȚULUI ── -->
-  <div class="video-ph video-ph--live js-marketing-only">
-    <iframe src="https://www.youtube.com/embed/bfW2DJ1_du4?rel=0&amp;modestbranding=1&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=bfW2DJ1_du4&amp;playsinline=1" title="Timelapse Județului Housing, ApartamenTUal" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
-  </div>
-  <p class="carousel-note js-marketing-only">Timelapse: construcția blocului de pe Strada Județului, 2024</p>
+  <!-- Timelapse-ul stătea aici. A urcat imediat sub hero, în `.hero-stage`
+       (vezi comentariul de acolo), împreună cu linia care spune ce e blocul. -->
 
   <!-- ── QUOTE FAMILIE ── -->
   <blockquote class="family-quote js-marketing-only">
@@ -2292,7 +2410,10 @@
       <div class="team-body">
         <p>Arhitecți cu aproape 20 de ani de experiență în București, fondatorii LTFB Studio. Au proiectat școli, birouri și locuințe, mereu cu același unghi: spații identitare care creează comunitate.</p>
         <p>Prin ApartamenTUal își doresc să creeze un hub al construcțiilor colaborative și să mute centrul de greutate al locuirii spre cei care chiar vor locui în acele spații.</p>
-        <p>Blocul de pe Strada Județului e primul lor proiect de acest fel, primul din România.</p>
+        <!-- Aici scria „…primul lor proiect de acest fel, primul din România".
+             A doua jumătate a ieșit odată cu cea din hero: vezi comentariul de
+             acolo despre cooperativele de locuințe din anii '50. -->
+        <p>Blocul de pe Strada Județului e primul lor proiect de acest fel.</p>
         <a href="/povestea-noastra.html" class="cta-secondary team-cta">Citește povestea noastră <span class="arr">→</span></a>
       </div>
     </div>
@@ -5016,6 +5137,16 @@
             w.toLocaleDateString('ro-RO', { day:'numeric', month:'long', year:'numeric' });
         }
         if(elOra) elOra.textContent = WEBINAR_ORA + ' · Zoom';
+
+        // Butonul secundar din hero poartă aceeași dată, în formă scurtă și
+        // cu literă mică, fiindcă e în mijlocul unei propoziții: „Înscrie-te
+        // la webinar · joi 3 septembrie, gratuit". Aceeași socoteală, deci
+        // nu poate ajunge să spună altceva decât panoul de mai jos.
+        var elScurt = document.getElementById('webinarDataScurt');
+        if(elScurt){
+          elScurt.textContent = w.toLocaleDateString('ro-RO', { weekday:'long' }) + ' ' +
+            w.toLocaleDateString('ro-RO', { day:'numeric', month:'long' });
+        }
       } catch(e){
         // Dacă pică, în pagină rămâne textul scris în HTML. Mai bine o dată
         // veche decât un panou gol.
