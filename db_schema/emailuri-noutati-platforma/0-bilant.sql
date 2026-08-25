@@ -4,9 +4,16 @@
 -- Se rulează ÎN ZIUA TRIMITERII, înaintea interogării 1. Nu modifică nimic.
 --
 -- Ce trebuie să te uiți, în ordine:
---   1. `lot final` — câți pleacă. ⚠️ Planul gratuit Resend = 100 emailuri/zi,
---      iar în aceeași zi mai pleacă și notificări de pe platformă. Dacă lotul
---      trece de ~80, împarte-l pe două zile cu `--limita`.
+--   1. `lot final` — câți pleacă. Compară-l cu ce te așteptai; dacă e mult mai
+--      mare sau mai mic, oprește-te și află de ce.
+--      ⚠️ Aici scria „planul gratuit Resend = 100 emailuri/zi, peste ~80 împarte
+--      lotul pe două zile". Nu mai e adevărat: din 24 august 2026 contul e pe
+--      plan plătit, 50.000 de emailuri pe lună, fără plafon zilnic. Un lot de
+--      campanie nu-l atinge, deci NU mai împărți nimic pe zile. Singura limită
+--      rămasă e 2 cereri pe secundă, de care se ocupă scriptul (pauză 600 ms).
+--      ⚠️ Cifra asta e lotul din SQL, ÎNAINTE de excluderile scrise de mână în
+--      `--fara=`. Lista din previzualizare e de după ele, deci e normal să fie
+--      mai mică. Nu compara direct cifra de aici cu numărătoarea de ieri.
 --   2. `cu profil incomplet` — ăștia NU ajung pe homepage. `js/nav.js:716-728`
 --      îi redirectează la formularul de profil de pe ORICE pagină. Ei primesc
 --      alt final de email și alt buton. Dacă cifra e 0, blocul acela nu se
@@ -14,6 +21,11 @@
 --   3. `fără grup și fără teren` — lor le lipsesc două carduri din cele șapte
 --      (`cere:'teren'` / `cere:'grup'`, `frontend/index.html:4202-4204`).
 --      Primesc fraza care spune ce le rămâne.
+--      ⚠️ Cifra de aici îi numără pe TOȚI, inclusiv pe cei cu profilul
+--      neterminat. Scriptul raportează un număr mai mic, fiindcă îi numără doar
+--      pe cei care chiar primesc fraza (cei cu profilul complet); ceilalți
+--      primesc celălalt final. Pe 25 august: 47 aici, 37 în script. Nu e o
+--      neconcordanță.
 --
 -- ⚠️ Scris ca UN SINGUR SELECT cu UNION ALL: editorul SQL din Supabase arată
 --    doar rezultatul ultimei interogări dintr-un script cu mai multe.

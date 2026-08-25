@@ -1,6 +1,51 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 24 august 2026, seara (a treia din zi)** — **pagina grupului strânsă
+> **⏭️ ULTIMA SESIUNE: 25 august 2026, dimineața** — **emailul cu noutățile a plecat. 84 de
+> oameni, zero eșecuri.** Nicio linie de cod atinsă în platformă.
+>
+> **CE S-A ÎNTÂMPLAT**
+>
+> Trimis între 09:49 și 09:50, cu varianta de subiect 1 („Ce s-a schimbat pe platformă în
+> ultimele două săptămâni"). Jurnalul `scripts/emailuri-noutati-platforma/local/trimise-2026-08-25.json`:
+> 84 de trimiteri `live`, toate `ok` din prima încercare, 84 de destinatari unici (niciun
+> dublu), cei doi excluși de mână absenți, nicio adresă redirectată spre cea de test.
+> Înaintea lor, 3 emailuri `test` către `apartamentual@ltfbstudio.ro`, câte unul din fiecare
+> variantă. Dimineața, deci cei 35 din grupuri au avut nouă ore până la digestul de la 19:00.
+>
+> Împărțirea lotului: **86 în CSV → 84 trimiși** (minus `bogdanbatog@gmail.com` și
+> `riltabutru@necub.com`, scoși cu `--fara=`), din care **9 cu profilul neterminat** au primit
+> finalul cu „Termină-ți profilul", **37 fără grup și fără teren** au primit fraza „ce vezi
+> totuși" plus rândul nou „Dacă deocamdată doar te uiți", **9 fără nume** au început cu
+> „Salut," simplu. P.S.-ul cu webinarul din 3 septembrie a plecat la toată lumea, cu data și
+> linkul Luma verificate în dimineața trimiterii.
+>
+> **⚠️ CAPCANA CARE NE-A COSTAT ZECE MINUTE.** Bilanțul a dat **86**, iar handoff-ul de ieri
+> spunea **84**. Pare că s-au înscris doi oameni peste noapte. Nu s-a înscris nimeni: cifra
+> din SQL e lotul **înainte** de `--fara=`, iar lista din previzualizarea de ieri era de
+> **după**. Diferența erau exact cei doi excluși. Ultima înscriere din lot e din 19 august.
+> Avertismentul e scris acum în capul lui `0-bilant.sql`, ca să nu se mai repete.
+>
+> A doua neconcordanță, tot falsă: bilanțul zice „fără grup și fără teren: 47", scriptul zice
+> 37. Bilanțul îi numără pe toți, scriptul doar pe cei care chiar primesc fraza (cu profilul
+> complet). Și asta e scrisă acum în SQL.
+>
+> **CE S-A CORECTAT ÎN REPO:** doar comentariile din `db_schema/emailuri-noutati-platforma/0-bilant.sql`
+> (plafonul „100 pe zi" al planului gratuit Resend, mort din 24 august, plus cele două capcane
+> de mai sus). Niciun cod, nicio interogare.
+>
+> **🟡 MĂRUNȚIȘ RĂMAS PE DISC:** `scripts/emailuri-noutati-platforma/local/previzualizare/`
+> are amestecate 50 de fișiere din 24 august cu cele de azi, cu aceleași numere de ordine.
+> Indexul `previzualizare.html` listează doar pe cele de azi, deci scriptul nu se încurcă, dar
+> dacă deschizi un fișier de mână poți citi emailul altcuiva, de ieri. Se șterg oricând.
+> **Jurnalul `trimise-2026-08-25.json` NU se șterge azi** (e plasa anti-dublare).
+>
+> **🔴 PRIMUL LUCRU DE FĂCUT ACUM:** homepage-ul nelogat, primul ecran (punctul 2 de mai jos).
+> ⚠️ **Neverificat de mine azi:** dacă `52aabf1` a ajuns pe live și cum arată pagina grupului
+> pe telefon. Vezi cele două avertismente din blocul de mai jos.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 24 august 2026, seara (a treia din zi)** — **pagina grupului strânsă
 > pentru telefon, ghidul curățat de cronologie, plus un bug de permisiuni găsit și reparat.**
 > Trei comituri, toate pe `origin/main`:
 >
@@ -74,45 +119,10 @@
 >
 > **🔴 RĂMASE DIN SESIUNILE DE DIMINEAȚĂ (24 august), ÎN ORDINE:**
 >
-> 1. **🔴 EMAILUL CU NOUTĂȚILE, care trebuia trimis marți 25 dimineața.** Textul e scris,
->    probat pe email și comis (`20d6fd0`), **plus două adăugiri pe 25 august (`7b382ae`)**:
->
->    - **P.S. cu webinarul din 3 septembrie**, la toată lumea. Emailul nu-l anunța deloc:
->      îl pomenea o singură dată, ca rând într-o listă despre ce vezi pe homepage, deci
->      descria un card, fără dată, oră sau link. ⚠️ **Data e scrisă de mână** în constanta
->      `WEBINAR` de la începutul scriptului (joi, 3 septembrie, 11:30, `luma.com/00ig0k40`).
->      **Dacă trimiterea alunecă peste 3 septembrie, P.S.-ul devine o invitație la trecut:
->      verifică-l înainte de `--mod=live`.** E și al treilea loc în care stă ora, după
->      `frontend/index.html` și pagina de pe Luma; un grep prin repo nu acoperă Luma.
->    - **Un rând pentru cine doar se uită** („Dacă deocamdată doar te uiți, e în regulă…"),
->      înainte de semnătură, doar dacă `profil_complet=da` ȘI `are_teren=nu`. Sărit pentru
->      profilul neterminat, fiindcă acela nu poate urma sfatul: `js/nav.js` îl întoarce la
->      profil de pe orice pagină, deci nu ajunge la lista de terenuri.
->
->    ⚠️ **„A doua ediție" din P.S. n-a putut fi verificată din repo.** Homepage-ul spune
->    „în prima joi a fiecărei luni", ceea ce n-o contrazice, dar nici n-o confirmă. Cifra
->    e a lui Lucian, care a fost la prima.
->
->    **Lotul: 84 de oameni.** Trei pași:
->
->    a. **Re-rulezi `db_schema/emailuri-noutati-platforma/1-lot-pentru-email.sql`** și
->       exporți CSV **nou**. ⚠️ Nu refolosi cel din 24 august: cine își termină profilul
->       peste noapte n-are ce căuta în varianta „Termină-ți profilul".
->    b. **Proba pe disc** (fără `--mod`), apoi citești lista cu ochiul.
->    c. **Trimiterea:** comanda completă e în README-ul campaniei,
->       `scripts/emailuri-noutati-platforma/README.md` (cheia Resend în mediu, `--mod=live`,
->       `--confirm-trimit`, plus `--fara=` cu cei doi de mai jos).
->
->    **Cei doi scoși de mână** (filtrul din SQL nu-i prinde, au Gmail personal):
->    `bogdanbatog@gmail.com` e contul de developer, proprietarul repo-ului;
->    `riltabutru@necub.com` e o adresă de unică folosință. Amândoi cu profilul gol.
->
->    **Decis pe 24 august:** intră și cei 9 cu profilul neterminat. Emailul lor începe cu ce
->    s-a construit; profilul apare abia la final. `--doar-completi` îi scoate și pleacă 75.
->
->    ⚠️ **Nu trimite după-amiaza.** Digestul de anunțuri de grup pleacă la 19:00, iar 35 din
->    cei 84 sunt într-un grup: două emailuri de la noi într-o oră arată a campanie.
->
+> 1. **✅ EMAILUL CU NOUTĂȚILE, TRIMIS pe 25 august dimineața.** 84 de oameni, zero eșecuri.
+>    Detaliile și capcanele sunt în blocul din capul fișierului. Ce era scris aici (lotul de
+>    84, cei doi scoși de mână, cele două finaluri, P.S.-ul cu webinarul) s-a confirmat la
+>    trimitere și nu mai e o restanță.
 > 2. **Homepage nelogat, primul ecran.** ✅ Titlul e DECIS (varianta 1 din §5.1 al
 >    handoff-ului). Metoda: întâi machetă locală doar cu hero-ul nou, abia apoi `index.html`.
 >    Tot ce s-a măsurat și propus e în
