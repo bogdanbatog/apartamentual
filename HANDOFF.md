@@ -1,6 +1,47 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 25 august 2026, dimineața** — **emailul cu noutățile a plecat. 84 de
+> **⏭️ ULTIMA SESIUNE: 25 august 2026, după-amiaza** — **primul ecran al homepage-ului
+> nelogat e rescris, comis și împins. NEPUBLICAT.**
+>
+> Commit `3668fb1`, un singur fișier (`frontend/index.html`), +144/−13, pe `origin/main`.
+> Live-ul e neschimbat: deployul din cPanel nu s-a făcut, dinadins, ca să publicăm o
+> singură dată, când toată pagina e refăcută.
+>
+> **CE E GATA.** Titlu nou, care spune mecanismul în loc de promisiune („Câteva familii își
+> construiesc blocul. Fără dezvoltator."), subtitlu cu cei trei pași (cumpără terenul
+> împreună, participă la proiectare, aleg constructorul). Butonul principal duce în
+> `/terenuri.html`, nu pe Luma; cel secundar poartă data webinarului, scrisă de
+> `scrieDataWebinarului()`. Timelapse-ul a urcat de la 25% adâncime imediat sub hero, în
+> casetă 16:9 (au dispărut dungile negre), cu un rând de fapte despre Județului Housing.
+> Eticheta de deasupra titlului, nota cu Bucureștiul și rândul despre bani au ieșit. Pe
+> telefon, aerul de deasupra titlului: 133px → 20px.
+>
+> **TREI REGULI DE CONȚINUT, DECISE AZI, VALABILE PE TOT SITE-UL.** (1) Nu se scrie „primul
+> din România" sau „primul bloc construit așa": cooperativele de locuințe din anii '50 fac
+> din asta o dezbatere de istorici. Rămâne „primul bloc construit cu ajutorul
+> apartamenTUal". (2) Nu se scrie „terminat" și nu se scrie „gata": blocul e ridicat, dar în
+> finalizare. (3) Nu se scrie „își aleg arhitectul", ci „participă la proiectare". Toate trei
+> sunt scrise ca avertismente în comentariile din `index.html`. **Neverificate încă în
+> `servicii.html`, `ce-este/`, ghid și șabloanele de email.**
+>
+> **🔴 CAPCANA PLĂTITĂ AZI, DE ȘTIUT ÎNAINTE DE ORICE MUTARE DE BLOC.** `index.html` are
+> fiecare secțiune scrisă de două ori în casetă de linii: `/* ── VIDEO ── */` în CSS și
+> `<!-- ── VIDEO ── -->` în markup. Un script care caută după titlu îl prinde pe primul și
+> mută 1.100 de linii, cu CSS ajuns în mijlocul paginii. **Nu se vede în pagină**, browserul
+> ignoră liniile de CSS din `<body>`. Mutările se fac cu **Edit pe text exact**; proba e
+> `git diff -U0 | grep "^@@"`.
+>
+> **🔴 URMĂTORUL PAS:** mută video-ul cu Lucian lângă testimonialul lui Tiberiu (circa 30%),
+> apoi contopește cele trei blocuri de beneficii. Detalii, decizii și comenzi:
+> **`handoff/20260825 - handoff-homepage-nelogat-primul-ecran.md`**.
+>
+> ⚠️ **Previzualizarea locală se face OBLIGATORIU în fereastră privată** pe
+> `http://127.0.0.1:8777/index.html`: browserul are o sesiune veche de test pe portul ăla și
+> logat vezi spațiul de lucru, nu pagina de marketing.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 25 august 2026, dimineața** — **emailul cu noutățile a plecat. 84 de
 > oameni, zero eșecuri.** Nicio linie de cod atinsă în platformă.
 >
 > **CE S-A ÎNTÂMPLAT**
@@ -45,7 +86,7 @@
 >
 > ---
 >
-> **⏭️ SESIUNEA DINAINTE: 24 august 2026, seara (a treia din zi)** — **pagina grupului strânsă
+> **⏭️ ȘI MAI ÎNAINTE: 24 august 2026, seara (a treia din zi)** — **pagina grupului strânsă
 > pentru telefon, ghidul curățat de cronologie, plus un bug de permisiuni găsit și reparat.**
 > Trei comituri, toate pe `origin/main`:
 >
@@ -123,10 +164,14 @@
 >    Detaliile și capcanele sunt în blocul din capul fișierului. Ce era scris aici (lotul de
 >    84, cei doi scoși de mână, cele două finaluri, P.S.-ul cu webinarul) s-a confirmat la
 >    trimitere și nu mai e o restanță.
-> 2. **Homepage nelogat, primul ecran.** ✅ Titlul e DECIS (varianta 1 din §5.1 al
->    handoff-ului). Metoda: întâi machetă locală doar cu hero-ul nou, abia apoi `index.html`.
->    Tot ce s-a măsurat și propus e în
->    **`handoff/20260823 - handoff-analiza-homepage-nelogat.md`** (403 linii).
+> 2. **✅ HOMEPAGE NELOGAT, PRIMUL ECRAN, FĂCUT pe 25 august după-amiaza.** Commit `3668fb1`,
+>    împins, **nepublicat**. Titlul ales la probă a fost o variantă mai scurtă decât cea
+>    decisă pe hârtie (56 de semne, nu 85): la 85 ocupa șase rânduri pe telefon. Ce a rămas
+>    de făcut din pagină, în ordine: **video-ul cu Lucian lângă testimonial (circa 30%) →
+>    contopirea celor trei blocuri de beneficii → un singur bloc de webinar → FAQ-ul de la 39
+>    la 6 întrebări → diacriticele din `js/faq.js`**. Detalii, decizii de conținut și capcane:
+>    **`handoff/20260825 - handoff-homepage-nelogat-primul-ecran.md`**. Analiza cu cifre, de
+>    unde a pornit totul: **`handoff/20260823 - handoff-analiza-homepage-nelogat.md`**.
 >
 > 3. **Joi 27: emailul cu terenuri noi**, pornit manual cu `force` (automatizarea e gata din
 >    14 august). Apoi `3-programare.sql` → prima rulare automată luni 31.
