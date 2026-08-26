@@ -186,7 +186,9 @@
 
   /* ── SITE FOOTER (v8) ── */
   .site-footer{
-    margin-top:2rem;
+    /* 4rem, ca toate celelalte distanțe dintre secțiuni. Era 2rem, adică
+       linia footerului avea 96px deasupra și 64px dedesubt. */
+    margin-top:4rem;
     padding:64px 0 32px;
     border-top:1px solid var(--rule);
   }
@@ -506,7 +508,10 @@
   /* ── BARA DE APARTAMENTE (pătrate separate prin GAP de 5px, fără borders) ── */
   .aptbar{
     display:flex; gap:5px; align-items:stretch;
-    background:var(--bg); margin:2.5rem 0 3.5rem;
+    /* Marginea de jos e 4rem, ca toate distanțele dintre secțiuni: bara e
+       ultimul lucru din `.hero-stage`, deci ea dă aerul de deasupra liniei
+       benzii de credibilitate. Era 3.5rem, adică 56px în loc de 64. */
+    background:var(--bg); margin:2.5rem 0 4rem;
   }
   /* înălțimea rândurilor o setează JS (px), egală cu lățimea coloanei => pătrate */
   .aptbar__cols{ flex:1 1 auto; min-width:0; display:grid; gap:5px;
@@ -783,7 +788,9 @@
 
   /* ── QUOTE ── */
   .family-quote{
-    margin:3rem 0 0;
+    /* 4rem, ca toate celelalte distanțe dintre secțiuni. Era 3rem, singura
+       valoare de 48px din pagină. Vezi nota despre ritm de la `.section`. */
+    margin:4rem 0 0;
     padding:2.5rem 3rem;
     border-left:3px solid var(--ink);
     background:var(--bg-soft);
@@ -1346,10 +1353,18 @@
   }
 
   /* ── HORIZONTAL CAROUSEL (4 square images) ── */
-  .img-carousel{
-    margin:1.5rem -1.5rem 0;
-    padding:0 1.5rem;
-  }
+  /* ⚠️ Aici era `margin:1.5rem -1.5rem 0; padding:0 1.5rem`, care făcea două
+     rele deodată, amândouă îndreptate pe 26 august:
+     1. `padding` scurt cu două valori punea padding-ul PE VERTICALĂ la ZERO,
+        anulând cei 4rem moșteniți de la `.section`. Titlul „Primul bloc
+        construit colaborativ" se lipea de linia despărțitoare de deasupra,
+        în timp ce toate celelalte secțiuni au 64px de aer sub linia lor.
+     2. Marginile negative lățeau caseta cu 24px în fiecare parte, deci și
+        `border-top`-ul: linia de deasupra galeriei era cu 48px mai lungă
+        decât toate celelalte linii din pagină.
+     Grila e `grid-template-columns:repeat(4, 1fr)`, nu un carusel care
+     derulează, deci lățirea nu servea la nimic.
+     Secțiunea folosește acum exact regulile lui `.section`. */
   .img-carousel-head{
     display:flex;
     justify-content:space-between;
