@@ -2,8 +2,26 @@
 
 **Data:** 26 august 2026
 **Fișiere:** `frontend/index.html`, `frontend/js/faq.js`, `frontend/contact.html`
-**Commit:** `b1e7e97`, pe `main`. **Neîmpins pe GitHub.**
-**Publicat:** ❌ NU. Live-ul e neschimbat.
+**Commituri:** șapte, toate pe `main` și **toate împinse pe GitHub**:
+
+| | |
+|---|---|
+| `b1e7e97` | ordinea paginii, contul în „Cum începi", FAQ scurt |
+| `0b0103c` | handoff |
+| `4231cca` | timelapse-ul se aliniază cu restul paginii |
+| `da73eaf` | ritm egal între secțiuni, 64px peste tot |
+| `739f9fa` | „Nu ești singur": fraza nu se mai termină în aer |
+| `35e7f8b` | experiența de la Județului Housing, sub cele patru casete |
+| `8d4d9ec` | aceeași frază, la singular |
+
+**Publicat:** ❌ NU. Live-ul e neschimbat, deployul din cPanel nu s-a făcut.
+⚠️ Nepublicat e și `3668fb1` de ieri (primul ecran rescris). Urcarea le duce pe amândouă.
+
+**Punct de întoarcere:** eticheta `homepage-nelogat-20260826`, împinsă pe GitHub.
+⚠️ Ea arată spre `4231cca`, adică **înainte** de ritmul între secțiuni și de toate
+schimbările de text de la „Nu ești singur". Dacă vrei punctul de salvare pe versiunea
+finală, fă o etichetă nouă. La fel, `versiuni/homepage-nelogat-20260826.zip` (netrackuit)
+e din aceeași stare veche.
 **Pornit de la:** `handoff/20260825 - handoff-homepage-nelogat-primul-ecran.md` §3
 
 ---
@@ -52,14 +70,38 @@ Textul lui absoarbe ce era în panoul negru (filtrarea terenurilor, coordonarea)
 partea juridică și alegerea constructorului:
 
 > Terenurile sunt filtrate de arhitecți. Platforma te ajută să le analizezi, ca să vezi
-> ce se poate construi și la ce costuri estimative, apoi ai partea juridică, proiectarea,
-> alegerea constructorului și coordonarea șantierului, la fiecare pas.
+> ce se poate construi și la ce costuri estimative, apoi putem face proiectare și
+> coordonăm partea juridică, alegerea constructorului, ofertele și șantierul.
 
-⚠️ **„filtrate", nu „analizate".** Prima variantă spunea „terenurile sunt analizate de
-arhitecți înainte să ajungă pe platformă", corectat de Lucian în aceeași zi. Analiza e
-serviciul plătit pe care îl ceri tu din pagina terenului, nu ceva deja făcut înainte de
-listare. Înainte de listare se face doar o filtrare. Diferența nu e de nuanță: prima
-variantă promitea gratuit lucrul care costă 99 RON.
+Sub cele patru casete, un rând care ține de toată secțiunea:
+
+> La Județului Housing am trecut prin toate astea, ca arhitect și membru al grupului.
+
+**Textul a trecut prin patru variante în aceeași zi. Motivele, ca să nu se refacă drumul:**
+
+1. ⚠️ **„filtrate", nu „analizate".** Prima variantă spunea „terenurile sunt analizate de
+   arhitecți înainte să ajungă pe platformă". Analiza e serviciul plătit pe care îl ceri
+   tu din pagina terenului; înainte de listare se face doar o filtrare. Diferența nu e de
+   nuanță: prima variantă promitea gratuit lucrul care costă 99 RON.
+2. ⚠️ **Fraza nu se mai termină cu „la fiecare pas".** „…apoi ai partea juridică, […] și
+   coordonarea șantierului, la fiecare pas" nu se lega de nimic. Nu o pune la loc.
+3. ⚠️ **„putem face" proiectare, „coordonăm" partea juridică.** Nu „facem" nici una, nici
+   alta. Grupul are voie să lucreze cu alt birou (decizia din 25 august), iar la partea
+   juridică fiecare grup ar trebui să aibă propriul consilier: noi dăm modele orientative
+   și pagina de legislație. Variantele respinse: „ai pe cineva lângă tine" (sună a ședință
+   de terapie, cuvintele lui Lucian) și „ai juriști" (sună a serviciu inclus).
+4. ⚠️ **Rândul despre Județului Housing e SUB grilă, nu în casetă**, și e la **singular**.
+   - Pus întâi în casetă, o făcea de 9 rânduri față de 3 la „Tu decizi". Grila întinde
+     toate casetele la înălțimea celei mai mari, deci rămânea un gol de 100px sub primele
+     trei. Mutat în `.avantaje-nota`, casetele au revenit la 181px.
+   - Singularul e dinadins: Lucian e cel care e și arhitect, și membru al grupului la
+     Județului Housing; pluralul întindea afirmația peste toată firma.
+   - **Consecință de urmărit la proba pe live:** „am trecut" se citește acum la persoana I
+     singular, deși restul paginii vorbește cu „noi". Nu e greșeală de acord, e o alegere.
+     Propoziția nu spune însă **cine** e „eu", iar Echipa e abia la 86% adâncime. Dacă
+     sună fără stăpân, cea mai mică reparație e semnătura („Lucian Luța") după frază.
+   - ⚠️ „am trecut prin toate astea", NU „am dus până la capăt" și NU „am terminat":
+     blocul e în finalizare. Și NU „primul din România".
 
 Fraza despre Germania, din vechiul bloc, a devenit introducerea secțiunii noi.
 Linkul „Află mai multe" a devenit „Cum funcționează, de la teren la mutare →",
@@ -174,7 +216,46 @@ Rândul de subsol („Din grup, drumul continuă până la recepție…") a răm
 
 Era între newsletter și News. E informație de încheiere, nu de convingere.
 
-### 2.7. Reparațiile mici din analiză, §5.6
+### 2.7. Alinierea și ritmul (găsite de Lucian, la probă)
+
+Două probleme de aceeași natură, amândouă din marginile negative moștenite dintr-un
+design mai vechi, unde blocurile „ieșeau" dinadins din coloana de text.
+
+**a) Timelapse-ul ieșea cu 24px în fiecare parte.** `.video-ph` avea
+`margin:2rem -1.5rem 0`, iar cei `-1.5rem` anulau exact `padding:0 1.5rem` de pe
+`.container`. Efectul era voit cât timp filmulețul stătea la 25% adâncime, izolat între
+două secțiuni. De când a urcat sub titlu (25 august) stă lipit de textul hero-ului, iar
+diferența se citește ca o greșeală. Marginile negative au fost scoase.
+
+**b) Galeria Județului era înghesuită sub linia ei ȘI avea linia mai lată.** Regula
+`.img-carousel{ margin:1.5rem -1.5rem 0; padding:0 1.5rem }` făcea două rele deodată:
+- `padding` scurt cu **două valori** punea padding-ul pe verticală la **zero**, anulând
+  cei 4rem moșteniți de la `.section`. Titlul se lipea de linie.
+- marginile negative lățeau cutia, deci și `border-top`-ul: linia de deasupra galeriei
+  era cu 48px mai lungă decât toate celelalte linii din pagină.
+
+Grila e `repeat(4, 1fr)`, nu un carusel care derulează, deci lățirea nu servea la nimic.
+Regula a fost ștearsă cu totul; secțiunea folosește acum `.section`.
+
+**c) Trei valori răzlețe de spațiere, aduse la 4rem** (căutate după ce Lucian a cerut
+distanțe egale):
+
+| | era | e acum |
+|---|---|---|
+| `.family-quote` (citatul lui Tiberiu) | `margin-top:3rem` (48px) | 4rem |
+| `.aptbar` (bara de pătrate) | `margin-bottom:3.5rem` (56px) | 4rem |
+| `.site-footer` | `margin-top:2rem`, deci linia avea 96px deasupra și 64px dedesubt | 4rem |
+
+**Starea de acum, măsurată:** fiecare linie despărțitoare are exact 64px deasupra și
+64px dedesubt, iar toate cutiile au aceeași lățime. Singura excepție e `.cred-band`,
+care are 16px sus și jos: e o bandă de un rând strânsă între două linii, dinadris compactă.
+
+⚠️ **Regula pentru sesiunile viitoare:** `padding` scris cu două valori (`padding:0 1.5rem`)
+pune ZERO pe verticală și șterge tăcut ce moștenea elementul. Într-un fișier unde
+`.section` dă ritmul întregii pagini, asta se vede ca „secțiunea aia arată ciudat", nu ca
+o eroare. Caută `padding:0` și `margin:… -1.5rem` înainte de a bănui altceva.
+
+### 2.8. Reparațiile mici din analiză, §5.6
 
 - **„Pe langa pretul mai accesibil"** scos din răspunsul despre avantaje. Era o
   promisiune de preț pe care n-o putem susține.
@@ -199,18 +280,37 @@ Era între newsletter și News. E informație de încheiere, nu de convingere.
 - **Balanța de etichete** în `index.html`: 12 `<section>` / 12 `</section>`, 2 `<style>` / 2 `</style>`.
 - **Liniuța lungă „—":** zero apariții în text nou. Cele 36 din fișier sunt toate în
   comentarii, cu o singură excepție veche, vezi §5.
+- **Spațierea:** fiecare linie despărțitoare are 64px deasupra și dedesubt; toate cutiile
+  au aceeași lățime (1052px la fereastră de 1440px).
+- **Cele patru casete de beneficii:** aceeași înălțime, 181px.
+
+⚠️ **Toate probele s-au dat pe `http://127.0.0.1:8777`, în sesiune logată, cu starea
+nelogată simulată din consolă** (scos `atu-logat`, arătat hero-ul `marketing`, ascuns
+`#spatiul-tau` și `#bloc-stare`). Ce NU s-a putut proba așa: **timelapse-ul nu pornește
+niciodată local**, fiindcă scriptul de sesiune îi golește `src`-ul pentru cei logați.
+Se verifică pe live, în fereastră privată.
 
 ---
 
 ## 4. Ce a rămas de făcut
 
-1. **Aprobarea diff-ului și commit.** Trei fișiere.
-2. **Publicarea din cPanel:** `frontend/index.html`, `frontend/js/faq.js`,
+1. **Publicarea din cPanel:** `frontend/index.html`, `frontend/js/faq.js`,
    `frontend/contact.html`. Apoi **Ctrl+Shift+R** (CSS-ul și JS-ul din index sunt
    scrise în pagină, o reîncărcare simplă arată versiunea din cache).
-   ⚠️ Rămâne nepublicat și commitul de ieri, `3668fb1`, tot pe `index.html`.
-3. **Diacriticele din restul de 33 de întrebări** din `faq.js`. Sesiune separată.
+   ⚠️ Urcarea duce pe live și commitul de ieri, `3668fb1`, tot pe `index.html`.
+
+   **De verificat cu ochiul, în fereastră privată, fiindcă local n-au putut fi probate:**
+   - timelapse-ul se încarcă și rulează;
+   - alinierea filmului și a galeriei cu restul paginii;
+   - cele 6 întrebări din FAQ și linkul către `/contact.html#faq`;
+   - dacă rândul „am trecut prin toate astea, ca arhitect și membru al grupului" sună
+     fără stăpân, la persoana I fără nume (vezi §2.1, punctul 4).
+2. **Joi 27 august: emailul cu terenuri noi**, pornit manual cu `force`. Vezi handoff-ul
+   din 23 august, §7. ⚠️ De verificat înainte dacă butonul din el e tot negru (`#1a1a1a`).
+3. **Diacriticele din restul de 33 de întrebări** din `faq.js`, plus cele două răspunsuri
+   care încă vorbesc despre „grupuri deschise" (vezi §5). Sesiune separată, e curățenie.
 4. **Rândul despre bani în primele două ecrane** (analiza §5.5), dacă te răzgândești.
+5. **`notify-admins` tot nedeployat.** Restanță veche.
 
 ---
 
@@ -222,10 +322,13 @@ Era între newsletter și News. E informație de încheiere, nu de convingere.
   trec prin aprobarea fondatorului. Întrebarea nu e printre cele 6 de pe homepage,
   deci am lăsat-o pentru sesiunea de curățenie a `faq.js`. Aceeași problemă în
   „Pot sa imi creez propriul grup?" („statusul (deschis sau cu aprobare)").
-- **O liniuță lungă rămasă în text vizibil:** `index.html:3550`,
-  `var c = x.cartier || '—'` — un rând de rezervă din spațiul de lucru al omului
-  logat, când terenul n-are cartier. E cod vechi, nu l-am atins, dar e singurul „—"
-  din pagină pe care îl poate vedea cineva.
+- **O liniuță lungă rămasă în text vizibil:** `index.html`, în scriptul spațiului de
+  lucru, `var c = x.cartier || '—'` — un rând de rezervă când terenul n-are cartier
+  (caută `peCartier`). E cod vechi, nu l-am atins, dar e singurul „—" din pagină pe
+  care îl poate vedea cineva.
+- **Eticheta din capul galeriei zice „04 IMAGINI · DERULEAZĂ →", dar nu derulează
+  nimic.** Toate patru pătratele sunt vizibile deodată; ce se schimbă sunt imaginile
+  din fiecare pătrat, singure. Semnalat lui Lucian, lăsat neatins.
 - **Butonul din emailul de terenuri e probabil tot negru** (`#1a1a1a`), de verificat
   înainte de trimiterea de joi 27 august.
 - **Analiza de teren e descrisă acum în patru locuri, cu patru formulări diferite.**
@@ -255,8 +358,25 @@ Start-Process -FilePath "C:\Python314\python.exe" `
 - ⚠️ **fereastră privată**, altfel vezi spațiul de lucru, nu pagina de marketing. Plus **Ctrl+Shift+R**.
 - se oprește cu `Get-Process python | Stop-Process`
 
-**Copia de dinaintea sesiunii** (dacă trebuie comparat ceva):
-`%LOCALAPPDATA%\Temp\claude\C--Users-lucia-proiecte-apartamentual\ee11e03b-f9ce-4f09-93d7-d1123d130238\scratchpad\index.html.bak`
+**Starea nelogată, fără să te deloghezi** (probele din sesiunea asta s-au dat așa; de
+lipit în consola browserului):
+
+```js
+document.documentElement.classList.remove('atu-logat');
+document.querySelector('.hero[data-variant="marketing"]').removeAttribute('hidden');
+document.querySelector('.hero[data-variant="a"]').setAttribute('hidden','');
+['#spatiul-tau','#bloc-stare'].forEach(s=>{
+  const e=document.querySelector(s); if(e) e.setAttribute('hidden','');
+});
+```
+
+⚠️ Nu învie timelapse-ul: `src`-ul iframe-ului e deja golit de scriptul de sesiune.
+
+**Punctele de întoarcere:**
+- `git checkout homepage-nelogat-20260826` (stare de la `4231cca`, vezi antetul)
+- `versiuni/homepage-nelogat-20260826.zip`, netrackuit, aceeași stare veche
+- ⚠️ Folderul `versiuni/` NU e în `.gitignore`. Zip-ul ar intra la următorul
+  `git add .`. De decis dacă se ignoră sau se ține în repo.
 
 **Proba că nu s-a mutat nimic din greșeală:** `git diff -U0 frontend/index.html | grep "^@@"`.
 Regula de ieri a ținut: toate mutările s-au făcut cu Edit pe text exact, niciun script.
