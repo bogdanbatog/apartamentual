@@ -626,7 +626,15 @@
 
   /* ── VIDEO PLACEHOLDER ── */
   .video-ph{
-    margin:2rem -1.5rem 0;
+    /* ⚠️ Aici era `margin:2rem -1.5rem 0`, adică marginile negative anulau
+       exact `padding:0 1.5rem` al lui `.container`. Caseta ieșea cu 24px în
+       stânga și în dreapta față de TOT restul paginii (titlu, subtitlu,
+       butoane, secțiuni). Efectul era voit cât timp filmulețul stătea la 25%
+       adâncime, izolat între două secțiuni: acolo lățimea în plus se citea ca
+       o pauză. De când a urcat imediat sub titlu, pe 25 august, stă lipit de
+       textul hero-ului și diferența se vede ca o greșeală de aliniere.
+       Îndreptat pe 26 august. */
+    margin:2rem 0 0;
     background:var(--bg-soft);
     aspect-ratio:16/7;
     display:flex;
