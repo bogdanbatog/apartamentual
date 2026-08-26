@@ -583,47 +583,10 @@
     max-width:720px;
     margin:1.25rem 0 0;
   }
-  .model-layout{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:6rem;
-    align-items:stretch;
-    margin-top:1.5rem;
-  }
-  .model-right{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap:1.5rem;
-    background:#1a1a1a;
-    border:1px solid #1a1a1a;
-    border-radius:10px;
-    padding:2rem 2.5rem;
-  }
-  .model-left{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    background:var(--bg-soft);
-    border:1px solid var(--rule);
-    border-radius:10px;
-    padding:2rem 2.5rem;
-  }
-  .model-left .section-body,
-  .model-left .section-body-lead{ margin-left:0; margin-right:0; max-width:none; }
-  .model-left .section-title{ max-width:none; }
-  .model-right .section-eyebrow{ color:rgba(255,255,255,0.4); }
-  .model-right .value-bullets li{ color:rgba(255,255,255,0.8); }
-  .model-right .value-bullets li::before{ color:rgba(255,255,255,0.35); }
-  .model-right .text-link{
-    margin-top:0;
-    padding-top:0;
-    color:rgba(255,255,255,0.7);
-    align-self:flex-end;
-  }
-  @media(max-width:768px){
-    .model-layout{ grid-template-columns:1fr; gap:2rem; }
-  }
+  /* Regulile pentru `.model-layout` / `.model-left` / `.model-right` (caseta
+     în două panouri, „Cum a devenit posibil") au fost șterse pe 26 august,
+     odată cu markup-ul. La fel `.value-bullets`, care trăia doar în panoul
+     negru. `.section-body-lead` a rămas mai sus, e o regulă generală. */
   .text-link{
     display:inline-block;
     margin-top:1.25rem;
@@ -635,30 +598,6 @@
     transition:opacity .2s ease;
   }
   .text-link:hover{ opacity:0.55; }
-  .value-bullets{
-    list-style:none;
-    padding:0;
-    margin:1rem 0 0;
-    max-width:720px;
-    display:flex;
-    flex-direction:column;
-    gap:0.5rem;
-  }
-  .value-bullets li{
-    font-size:16px;
-    line-height:1.6;
-    color:var(--ink-2);
-    padding-left:1.25rem;
-    position:relative;
-  }
-  .value-bullets li::before{
-    content:"·";
-    position:absolute;
-    left:0;
-    color:var(--ink-3);
-    font-size:18px;
-    line-height:1.4;
-  }
 
   /* ── CAROUSEL ── */
   .carousel-ph{
@@ -967,6 +906,33 @@
     color:var(--terracotta, #c06a4f);
   }
   .cale .cta-secondary{ align-self:flex-start; }
+
+  /* Caseta „Creează-ți un cont" din „Cum începi". Nu e un al treilea card:
+     e locul prin care trec amândouă căile, deci stă sub ele, pe toată
+     lățimea, și e singurul buton negru din secțiune. */
+  .cai-cont{
+    margin-top:2.5rem;
+    padding:1.75rem 2rem;
+    background:var(--bg-soft);
+    border:1px solid var(--rule);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:2rem;
+  }
+  .cai-cont-text{
+    margin:0;
+    font-size:15px;
+    line-height:1.6;
+    color:var(--ink-2);
+    max-width:640px;
+  }
+  .cai-cont .cta-primary{ flex-shrink:0; }
+  @media(max-width:768px){
+    .cai-cont{ flex-direction:column; align-items:stretch; gap:1.25rem; }
+  }
+
   .cai-subsol{
     margin-top:2.5rem;
     padding-top:1.25rem;
@@ -1041,27 +1007,8 @@
     color:var(--ink-2);
     margin:0;
   }
-  .video-points{
-    list-style:none;
-    padding:0;
-    margin:0;
-    display:flex;
-    flex-direction:column;
-    gap:0.75rem;
-  }
-  .video-points li{
-    font-size:14px;
-    color:var(--ink-2);
-    padding-left:1.25rem;
-    position:relative;
-    line-height:1.5;
-  }
-  .video-points li::before{
-    content:"·";
-    position:absolute;
-    left:0;
-    color:var(--ink-3);
-  }
+  /* Regulile pentru `.video-points` au fost șterse pe 26 august: bullet-urile
+     de lângă video spuneau același lucru ca „Ce câștigi", cu 800px mai sus. */
 
   /* ── IMAGE PLACEHOLDERS ── */
   .img-ph{
@@ -1237,21 +1184,8 @@
     border-left:3px solid var(--bg-placeholder);
   }
 
-  /* ── CTA FINAL ── */
-  .cta-final{
-    text-align:center;
-    padding:4rem 3rem;
-    margin:4rem 0 0;
-    background:#1a1a1a;
-    border-radius:8px;
-  }
-  .cta-final .section-title{ max-width:100%; margin-bottom:0.75rem; color:#fff; }
-  .cta-final .section-body{ max-width:100%; margin-bottom:2rem; color:rgba(255,255,255,0.65); }
-  .cta-final .hero-ctas{ justify-content:center; }
-  .cta-final .cta-primary{ background:#fff; color:#1a1a1a; border-color:#fff; padding:15px 28px; font-size:14px; }
-  .cta-final .cta-primary:hover{ background:rgba(255,255,255,0.88); }
-  .cta-final .cta-secondary{ color:rgba(255,255,255,0.7); border-color:rgba(255,255,255,0.25); }
-  .cta-final .cta-secondary:hover{ background:rgba(255,255,255,0.07); }
+  /* Regulile pentru `.cta-final` (bandă neagră, al doilea bloc de webinar) au
+     fost șterse pe 26 august, odată cu markup-ul. */
 
   /* ── NEWS ── */
   .news-grid{
@@ -1357,12 +1291,19 @@
     letter-spacing:0.10em;
   }
 
-  /* ── AVANTAJE ── */
+  /* ── AVANTAJE ──
+     Patru coloane de la 26 august, când s-a adăugat „Nu ești singur".
+     La 3rem între coloane, al patrulea punct rupea rândul urât pe laptop,
+     de aceea distanța a scăzut la 2rem și apare o treaptă intermediară de
+     două coloane, înainte de coloana unică din media query-ul de la 768px. */
   .avantaje{
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:0 3rem;
+    grid-template-columns:repeat(4, 1fr);
+    gap:2.5rem 2rem;
     margin-top:2.5rem;
+  }
+  @media(max-width:1000px){
+    .avantaje{ grid-template-columns:repeat(2, 1fr); }
   }
   .avantaj{
     padding-top:1.5rem;
@@ -2156,37 +2097,77 @@
     <span>De la teren la apartamentul tău</span>
   </div>
 
-  <!-- ── CE E MODELUL ── -->
-  <section class="section section--model js-marketing-only">
-    <div class="model-layout">
-      <div class="model-left">
-        <p class="section-eyebrow">Platformă de construcție colaborativă</p>
-        <h2 class="section-title">Cum a devenit posibil să construiești un apartament.</h2>
-        <p class="section-body">
-          În Germania și Europa de Vest, mii de familii construiesc deja așa: se asociază, aleg împreună un teren, proiectează un bloc pentru nevoile lor reale și îl finalizează fără intermediar. Cu vecini pe care îi cunoști din prima zi.
-        </p>
-        <p class="section-body-lead">
-          Apartamentual e platforma care îți facilitează traseul spre un apartament construit cum ai nevoie, la costul real al construcției, fără intermediar.
-        </p>
+  <!-- ── CE CÂȘTIGI (contopit din trei blocuri, 26 august) ──
+       Aici erau trei secțiuni care spuneau același lucru, la 12%, 35% și 62%
+       adâncime: „Cum a devenit posibil să construiești un apartament",
+       „Ce câștigi când construiești colaborativ?" și bullet-urile de lângă
+       video-ul fondatorului. Toate trei ziceau: fără marja dezvoltatorului,
+       tu decizi, îți alegi vecinii.
+       A rămas formularea din „Ce câștigi", cea mai bine scrisă, plus al
+       patrulea punct, „Nu ești singur", care răspunde la frica reală
+       „nu știu să fac asta". Bullet-urile de lângă video au fost șterse, nu
+       mutate: conținutul lor e absorbit aici, în punctele 1, 2, 3 și 4.
+       ⚠️ .avantaje are acum 4 coloane fixe pe desktop. Un al cincilea punct
+       cere și o schimbare în CSS, nu doar un <div> în plus. -->
+  <section class="section js-marketing-only">
+    <p class="section-eyebrow">De ce funcționează</p>
+    <h2 class="section-title">Ce câștigi când construiești colaborativ?</h2>
+    <p class="section-body">
+      În Germania și în Europa de Vest, mii de familii construiesc deja așa: se asociază, aleg împreună un teren, proiectează un bloc pentru nevoile lor reale și îl duc până la capăt fără intermediar. Cu vecini pe care îi cunosc din prima zi.
+    </p>
+    <div class="avantaje">
+      <div class="avantaj">
+        <h3>Fără marja dezvoltatorului</h3>
+        <p>Toți banii tăi rămân în apartamentul tău. Niciun cost ascuns: fiecare buget e văzut și aprobat de grup, de la teren până la finalizarea blocului.</p>
       </div>
-      <div class="model-right">
-        <p class="section-eyebrow">Cum facem asta?</p>
-        <ul class="value-bullets">
-          <li>Analizăm terenurile cu arhitecți înainte să le listăm</li>
-          <li>Facem matching în funcție de zonă și preferințe de locuire</li>
-          <li>Coordonăm tot procesul tehnic și legislativ</li>
-          <li>Tu decizi ce construiești</li>
-        </ul>
-        <a href="https://apartamentual.ro/ce-este/" class="text-link">Află mai multe</a>
+      <div class="avantaj">
+        <h3>Tu decizi ce construiești</h3>
+        <p>Zona, suprafața, configurația, finisajele. Nu primești un plan standardizat, construiești ce ai nevoie de la zero.</p>
+      </div>
+      <div class="avantaj">
+        <h3>Vecini pe care îi alegi</h3>
+        <p>Cunoști oamenii cu care construiești înainte să semnezi ceva. Grupul se formează în jurul unor valori comune, nu pe criteriul că v-ați nimerit în același bloc.</p>
+      </div>
+      <div class="avantaj">
+        <h3>Nu ești singur</h3>
+        <!-- ⚠️ „filtrate", nu „analizate". Analiza e serviciul pe care îl ceri
+             tu de pe platformă, nu ceva deja făcut înainte de listare. Corectat
+             de Lucian pe 26 august, prima variantă spunea „analizate de
+             arhitecți înainte să ajungă pe platformă" și promitea altceva. -->
+        <p>Terenurile sunt filtrate de arhitecți. Platforma te ajută să le analizezi, ca să vezi ce se poate construi și la ce costuri estimative, apoi ai partea juridică, proiectarea, alegerea constructorului și coordonarea șantierului, la fiecare pas.</p>
       </div>
     </div>
+    <a href="/ce-este/" class="text-link">Cum funcționează, de la teren la mutare →</a>
   </section>
 
   <!-- ── CUM ÎNCEPI (două căi de intrare) ── -->
   <section class="section" id="cum-incepi">
     <p class="section-eyebrow">Procesul</p>
     <h2 class="section-title">Cum începi</h2>
-    <p class="section-body">Pornești de la un teren sau de la o zonă. Ambele duc într-un grup.</p>
+
+    <!-- ── CONTUL, PRIMUL LUCRU DIN SECȚIUNE ──
+         Aici era subtitlul „Pornești de la un teren sau de la o zonă. Ambele
+         duc într-un grup." Scos pe 26 august: spunea exact ce scrie în cele
+         două titluri de dedesubt și în rândul de subsol.
+         Caseta a stat o oră sub cele două căi. A urcat deasupra lor fiindcă
+         amândouă încep cu o acțiune care cere cont („le adaugi la profil",
+         „creezi un grup"), deci contul e primul pas, nu concluzia.
+         ⚠️ Textul spune ce se completează, nu doar „fă-ți cont". Profilul
+         cere pseudonim (nu numele real), iar vârsta și emailul apar public
+         doar dacă bifezi.
+         ⚠️ NU scrie aici „nu îți dai date personale" și nici „nu cere acte".
+         Prima ar fi neadevărată: `profile-edit-new.html` cere și profesie, și
+         telefon. A doua a stat o oră în pagină și a fost scoasă de Lucian pe
+         26 august: era adevărată, dar aducea în discuție o frică pe care omul
+         n-o avea încă. Textul de acum spune doar ce se completează.
+         ⚠️ `js-marketing-only` pe casetă, NU pe secțiune. „Cum începi" rămâne
+         vizibilă și pentru cine e logat (intenționat), dar butonul de creat
+         cont n-are ce căuta acolo. -->
+    <div class="cai-cont js-marketing-only">
+      <p class="cai-cont-text">Începe cu un cont. E gratuit, iar numele poate fi un pseudonim. Completezi o singură dată zonele care te interesează și ce fel de apartament cauți, fiindcă pe acestea se face potrivirea cu terenurile, cu grupurile și cu ceilalți oameni.</p>
+      <a href="/register.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=register">Creează-ți un cont <span class="arr">→</span></a>
+    </div>
+
     <div class="cai">
       <div class="cale">
         <h3>Pornești de la un teren</h3>
@@ -2219,31 +2200,47 @@
   <!-- Timelapse-ul stătea aici. A urcat imediat sub hero, în `.hero-stage`
        (vezi comentariul de acolo), împreună cu linia care spune ce e blocul. -->
 
+  <!-- ── VIDEO ── (mutat aici din zona 62%, pe 26 august)
+       ⚠️ NU primește `js-marketing-only`, intenționat. Cine s-a înregistrat
+       direct de pe o pagină de grup n-a văzut niciodată explicația modelului
+       (187 de intrări directe în site au fost pe pagini de grup). Aceeași
+       regulă e scrisă și în comentariul de la `.atu-logat .js-marketing-only`.
+       Bullet-urile de lângă video au fost șterse pe 26 august: spuneau exact
+       ce spune acum caseta „Ce câștigi", cu 800px mai sus. -->
+  <section class="video-section">
+    <div class="video-layout">
+      <div class="video-wrap">
+        <!-- Thumbnail + buton play poziționat sub față (preluat din site-ul actual: fără logo Shorts în centru) -->
+        <div class="hero-video-thumb" id="luciVideoThumb" data-youtube-id="fnuX-un_FdA"
+             style="position:relative; width:100%; height:100%; cursor:pointer; overflow:hidden; border-radius:12px; background:linear-gradient(135deg,#1f211a 0%,#3d4035 100%);">
+          <img src="https://i.ytimg.com/vi/fnuX-un_FdA/hqdefault.jpg" onerror="this.style.display='none';" alt="Lucian Luța explică modelul ApartamenTUal" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <!-- fade sus: acoperă zona logo/galbenă a thumbnail-ului -->
+          <div style="position:absolute; top:0; left:0; right:0; height:40%; background:linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%); pointer-events:none;"></div>
+          <!-- buton play în partea inferioară, sub fața subiectului -->
+          <div style="position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center; padding-bottom:38%;">
+            <div class="hero-play-btn" style="width:64px; height:64px; background:rgba(0,0,0,0.7); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .2s, background .2s;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-left:3px;"><path d="M8 5v14l11-7z"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="video-body">
+        <p class="section-eyebrow">Fondatorul explică</p>
+        <h2 class="section-title">Ce este, concret, apartamen<b class="apt-tu">TU</b>al</h2>
+        <p>Arhitectul Lucian Luța povestește cum se formează un grup, cum se alege terenul și cine duce partea tehnică mai departe.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ── QUOTE FAMILIE ── -->
   <blockquote class="family-quote js-marketing-only">
     <p class="quote-text">„După lungi căutări prin ofertele imobiliare clasice, am știut din prima că apartamen<b class="apt-tu">TU</b>al e ce căutam de fapt. Ne-a plăcut mult libertatea de a alege zona, posibilitatea de a ne croi interiorul exact după nevoile noastre, de a decide ce fel de spații comune includem și de a fi implicați în toate fazele, fără intermediari. Au fost și provocări, dar e mai ușor când împarți responsabilitățile cu ceilalți. Abia așteptăm să ne bucurăm de noua noastră casă, alături de viitorii vecini.”</p>
     <footer class="quote-attr">Tiberiu M. · familie participantă, Județului Housing</footer>
   </blockquote>
 
-  <!-- ── AVANTAJE BAUGRUPPEN ── -->
-  <section class="section js-marketing-only">
-    <p class="section-eyebrow">De ce funcționează</p>
-    <h2 class="section-title">Ce câștigi când construiești colaborativ?</h2>
-    <div class="avantaje">
-      <div class="avantaj">
-        <h3>Fără marja dezvoltatorului</h3>
-        <p>Toți banii tăi rămân în apartamentul tău. Niciun cost ascuns: fiecare buget e văzut și aprobat de grup, de la teren până la finalizarea blocului.</p>
-      </div>
-      <div class="avantaj">
-        <h3>Tu decizi ce construiești</h3>
-        <p>Zona, suprafața, configurația, finisajele. Nu primești un plan standardizat, construiești ce ai nevoie de la zero.</p>
-      </div>
-      <div class="avantaj">
-        <h3>Vecini pe care îi alegi</h3>
-        <p>Cunoști oamenii cu care construiești înainte să semnezi ceva. Grupul se formează în jurul unor valori comune, nu pe criteriul că v-ați nimerit în același bloc.</p>
-      </div>
-    </div>
-  </section>
+  <!-- Blocul „Ce câștigi când construiești colaborativ?" stătea aici, la 35%
+       adâncime. A urcat imediat sub banda de credibilitate, contopit cu
+       „Cum a devenit posibil" și cu bullet-urile de lângă video. -->
 
   <!-- ── CTA PUNCHY WEBINAR ── -->
   <!-- ⚠️ `js-marketing-only`: caseta asta e o pledoarie, nu o unealtă. Cine e
@@ -2382,7 +2379,53 @@
     </div>
   </section>
 
-  <!-- ── ECHIPA ── -->
+  <!-- Echipa stătea aici, între newsletter și News. A coborât sub FAQ, ultima
+       secțiune înainte de footer: e informație de încheiere, nu de convingere. -->
+
+  <!-- Video-ul fondatorului stătea aici, la 62% adâncime, adică sub linia pe
+       care o atinge vizitatorul mediu. A urcat lângă citatul familiei
+       Tiberiu, imediat după „Cum începi". -->
+
+  <!-- ── NEWS ── -->
+  <section class="section" id="news">
+    <p class="section-eyebrow">Resurse</p>
+    <h2 class="section-title">News</h2>
+    <p class="section-body">Articole și resurse despre Baugruppen din întreaga lume.</p>
+    <!-- Cardurile se randează dinamic din Supabase (vezi scriptul de mai jos):
+         episoadele serialului Județului apar automat (nou→vechi), urmate de
+         exemplele alese manual în CURATED_EXAMPLES. -->
+    <div class="news-grid" id="newsGrid"></div>
+    <div class="news-more">
+      <a href="/news.html" class="text-link">Vezi toate articolele →</a>
+    </div>
+  </section>
+
+  <!-- Al doilea bloc de webinar stătea aici, la 85% adâncime. Șters pe 26
+       august: repeta cuvânt cu cuvânt îndemnul din caseta „Nu îți vine să
+       crezi", cu deosebirea că nimeni nu ajungea până la el. Rămâne un
+       singur bloc de webinar în pagină, plus butonul din hero.
+       ⚠️ În Plausible dispar evenimentele `CTA Click` cu `loc=final`
+       (dest=webinar și dest=povestea). Linkul către povestea Județului nu
+       s-a pierdut: e în subsolul galeriei. -->
+
+  <!-- ── FAQ (populat de js/faq.js) ──
+       `data-faq-mode="top"` randează DOAR întrebările din lista TOP_QUESTIONS
+       din `js/faq.js`, ca listă simplă, fără taburi de categorie. Toate cele
+       39 rămân pe /contact.html, care folosește același fișier fără atribut.
+       ⚠️ Potrivirea se face pe textul exact al întrebării. Dacă rescrii o
+       întrebare în faq.js, actualizează și TOP_QUESTIONS, altfel ea dispare
+       tăcut de pe homepage, fără nicio eroare în consolă. -->
+  <section class="section" id="faq" style="border-top:none">
+    <p class="section-eyebrow">Întrebări</p>
+    <h2 class="section-title">Întrebări frecvente</h2>
+    <div id="faq-container" class="space-y-4" data-faq-mode="top"></div>
+    <div class="news-more">
+      <a href="/contact.html#faq" class="text-link">Vezi toate întrebările frecvente →</a>
+    </div>
+  </section>
+
+  <!-- ── ECHIPA ── (coborâtă aici din zona 70%, pe 26 august: e informație de
+       încheiere, nu de convingere) -->
   <section class="section js-marketing-only">
     <p class="section-eyebrow">Echipa</p>
     <h2 class="section-title">Cine sunt oamenii din spatele apartamen<b class="apt-tu">TU</b>al</h2>
@@ -2390,10 +2433,10 @@
       <div class="team-portraits">
         <div class="portrait-card">
           <div class="portrait-img">
-            <img src="assets/images/echipa/lucian-luta.jpg" alt="Lucian Luta">
+            <img src="assets/images/echipa/lucian-luta.jpg" alt="Lucian Luța">
           </div>
           <div class="portrait-meta">
-            <p class="portrait-name">Lucian Luta</p>
+            <p class="portrait-name">Lucian Luța</p>
             <p class="portrait-role">Co-fondator · LTFB Studio</p>
           </div>
         </div>
@@ -2417,69 +2460,6 @@
         <a href="/povestea-noastra.html" class="cta-secondary team-cta">Citește povestea noastră <span class="arr">→</span></a>
       </div>
     </div>
-  </section>
-
-  <!-- ── VIDEO ── -->
-  <section class="video-section">
-    <div class="video-layout">
-      <div class="video-wrap">
-        <!-- Thumbnail + buton play poziționat sub față (preluat din site-ul actual: fără logo Shorts în centru) -->
-        <div class="hero-video-thumb" id="luciVideoThumb" data-youtube-id="fnuX-un_FdA"
-             style="position:relative; width:100%; height:100%; cursor:pointer; overflow:hidden; border-radius:12px; background:linear-gradient(135deg,#1f211a 0%,#3d4035 100%);">
-          <img src="https://i.ytimg.com/vi/fnuX-un_FdA/hqdefault.jpg" onerror="this.style.display='none';" alt="Lucian Luța explică modelul ApartamenTUal" style="width:100%; height:100%; object-fit:cover; display:block;">
-          <!-- fade sus: acoperă zona logo/galbenă a thumbnail-ului -->
-          <div style="position:absolute; top:0; left:0; right:0; height:40%; background:linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0) 100%); pointer-events:none;"></div>
-          <!-- buton play în partea inferioară, sub fața subiectului -->
-          <div style="position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center; padding-bottom:38%;">
-            <div class="hero-play-btn" style="width:64px; height:64px; background:rgba(0,0,0,0.7); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .2s, background .2s;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-left:3px;"><path d="M8 5v14l11-7z"></path></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="video-body">
-        <p class="section-eyebrow">Fondatorul explică</p>
-        <h2 class="section-title">Ce este, concret, apartamen<b class="apt-tu">TU</b>al</h2>
-        <p>Arhitectul Lucian Luta explică modelul de construcție colaborativă.</p>
-        <ul class="video-points">
-          <li>Toți banii tăi merg în apartament, fără marja dezvoltatorului</li>
-          <li>Alegi finisajele, configurația și fiecare detaliu al locuinței</li>
-          <li>Cunoști vecinii înainte să existe blocul</li>
-          <li>Platforma te ajută să formezi grupul, să găsești terenul și să coordonezi construcția</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── NEWS ── -->
-  <section class="section" id="news">
-    <p class="section-eyebrow">Resurse</p>
-    <h2 class="section-title">News</h2>
-    <p class="section-body">Articole și resurse despre Baugruppen din întreaga lume.</p>
-    <!-- Cardurile se randează dinamic din Supabase (vezi scriptul de mai jos):
-         episoadele serialului Județului apar automat (nou→vechi), urmate de
-         exemplele alese manual în CURATED_EXAMPLES. -->
-    <div class="news-grid" id="newsGrid"></div>
-    <div class="news-more">
-      <a href="/news.html" class="text-link">Vezi toate articolele →</a>
-    </div>
-  </section>
-
-  <!-- ── CTA FINAL ── -->
-  <div class="cta-final js-marketing-only">
-    <h2 class="section-title">Nu rata următoarea întâlnire.</h2>
-    <p class="section-body">Vii, asculți, întrebi. Fără angajament, fără cont, fără nimic de pregătit.</p>
-    <div class="hero-ctas">
-      <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=final plausible-event-dest=webinar">Înscrie-te la webinar <span class="arr">→</span></a>
-      <a href="/povestea-noastra.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=final plausible-event-dest=povestea">Vezi proiectul Județului Housing</a>
-    </div>
-  </div>
-
-  <!-- ── FAQ (populat de js/faq.js — întrebările reale, complete) ── -->
-  <section class="section" id="faq" style="border-top:none">
-    <p class="section-eyebrow">Întrebări</p>
-    <h2 class="section-title">Întrebări frecvente</h2>
-    <div id="faq-container" class="space-y-4"></div>
   </section>
 
   <!-- ── FOOTER (v8) ── -->
