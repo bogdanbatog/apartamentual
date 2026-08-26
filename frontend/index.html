@@ -1320,6 +1320,16 @@
   @media(max-width:1000px){
     .avantaje{ grid-template-columns:repeat(2, 1fr); }
   }
+  /* Rândul despre Județului Housing, sub cele patru casete. E o probă, nu un
+     al cincilea beneficiu, de aceea nu e casetă: text simplu, cu numele
+     proiectului îngroșat, ca în linia de sub timelapse. */
+  .avantaje-nota{
+    margin:2.5rem 0 0;
+    font-size:15px;
+    line-height:1.6;
+    color:var(--ink-2);
+    max-width:720px;
+  }
   .avantaj{
     padding-top:1.5rem;
     border-top:1px solid var(--rule);
@@ -2166,9 +2176,23 @@
         <!-- ⚠️ La proiectare e „putem face", nu „facem": grupul are voie să
              lucreze cu alt birou, iar asta a fost o decizie explicită (vezi
              comentariul din hero despre „își aleg arhitectul"). -->
+        <!-- ⚠️ Caseta asta e deja cea mai lungă dintre cele patru. Dacă mai
+             adaugi un rând aici, grila întinde TOATE casetele la înălțimea ei
+             și rămâne un gol sub primele trei. Ce ține de toată secțiunea, nu
+             doar de acest punct, se scrie în `.avantaje-nota`, sub grilă. -->
         <p>Terenurile sunt filtrate de arhitecți. Platforma te ajută să le analizezi, ca să vezi ce se poate construi și la ce costuri estimative, apoi putem face proiectare și coordonăm partea juridică, alegerea constructorului, ofertele și șantierul.</p>
       </div>
     </div>
+    <!-- ⚠️ Rândul ăsta a stat câteva minute ÎN caseta „Nu ești singur". Acolo
+         o făcea de 9 rânduri, față de 3 la „Tu decizi", iar grila întinde toate
+         casetele la înălțimea celei mai mari: rămânea un gol de 100px sub
+         primele trei. Aici jos ține oricum de toate patru, nu doar de una.
+         ⚠️ „am trecut prin toate astea", NU „am dus până la capăt" și NU
+         „am terminat": blocul e în finalizare (vezi regula din blocul de
+         dovadă de sub hero). Și NU „primul din România".
+         Lucian e participant real la Județului Housing, de aceea „ca membri
+         ai grupului" e adevărat, nu o figură de stil. -->
+    <p class="avantaje-nota">La Județului Housing am trecut prin toate astea, ca arhitecți și ca membri ai grupului.</p>
     <a href="/ce-este/" class="text-link">Cum funcționează, de la teren la mutare →</a>
   </section>
 
