@@ -2,7 +2,7 @@
 
 **Data:** 26 august 2026
 **Fișiere:** `frontend/index.html`, `frontend/js/faq.js`, `frontend/contact.html`
-**Commit:** ❌ nu încă, așteaptă aprobarea diff-ului
+**Commit:** `b1e7e97`, pe `main`. **Neîmpins pe GitHub.**
 **Publicat:** ❌ NU. Live-ul e neschimbat.
 **Pornit de la:** `handoff/20260825 - handoff-homepage-nelogat-primul-ecran.md` §3
 
