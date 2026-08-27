@@ -1,6 +1,69 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 25 august 2026, după-amiaza** — **primul ecran al homepage-ului
+> **⏭️ ULTIMA SESIUNE: 27 august 2026, dimineața** — **emailul cu terenuri noi a plecat la
+> toți 66 de oameni, iar automatizarea săptămânală e PORNITĂ.** Commit `6f9cab4`, împins pe
+> `main`. Nu e nimic de publicat din cPanel: totul e edge functions și SQL.
+>
+> **CE S-A TRIMIS.** 66 de emailuri, toate `delivered`, zero eșecuri, zero duplicate
+> (verificat 62+4 rânduri în `terenuri_digest_log` față de 62 de adrese distincte în
+> exportul Resend). Fereastra a fost lărgită punctual la **23 de zile**, ca să prindă și
+> golul dintre campania manuală din 3 august și podeaua obișnuită de 14 zile.
+>
+> **CRONUL E INSTALAT ȘI ACTIV:** `cron.job` jobid **2**, `digest-terenuri-zone`,
+> `7 * * * *`. **Prima rulare automată: luni 31 august, 10:07.**
+>
+> ▶️ **DE FĂCUT LUNI 31, după 10:07:** blocurile **3b** și **3c** din
+> `db_schema/digest-terenuri/3-programare.sql` (aștepți `status = succeeded` și citești ce
+> a răspuns funcția), plus o privire pe `#app_events`.
+>
+> ▶️ **DE FĂCUT ÎNTRE 3 ȘI 7 SEPTEMBRIE:** actualizează constanta `WEBINAR` din
+> `notify-admins` (zi, link Luma nou, `expira`) și dă deploy. Blocul de webinar din emailul
+> automat **se stinge singur** după 3 septembrie seara, deci altfel emailul pleacă în fiecare
+> luni fără el, **fără nicio eroare**. Detaliile și celelalte cinci locuri unde trăiește
+> linkul sunt în `NOTES.md`, prima intrare.
+>
+> **⚠️ CE A MERS PROST ȘI CUM E REPARAT.** Trimiterea către tot lotul deodată **a crăpat**
+> la al 61-lea om: Supabase limitează cât de des poate o edge function să cheme altă edge
+> function, iar refuzul vine ca **excepție aruncată de `fetch`**, nu ca status urât
+> (`RateLimitError: Rate limit exceeded for function. Retry after 1562ms`). Apelul fiind un
+> `await fetch` gol, a oprit toată rularea: 4 oameni fără email și, mai rău, **rezumatul de
+> pe Slack n-a mai plecat**, deci eșecul a fost invizibil. Reparat în `6f9cab4`: apel cu
+> reîncercare care respectă `retryAfterMs` și întoarce `null` în loc să arunce, pauză
+> 300 → 700 ms, plafon de **30 de oameni pe rulare**, fereastră de trimitere **luni
+> 10:00-13:00** în loc de oră fixă (cronul bate oricum din oră în oră, deci un lot mare se
+> drenează la 11:07 și 12:07), și o linie pe Slack care spune câți au rămas.
+> ⚠️ **Același tipar nereparat e în `digest-anunturi-grup`**, care face un apel per grup.
+> Azi sunt puține grupuri, deci n-a lovit încă.
+>
+> **DOUĂ SCHIMBĂRI DE CONȚINUT, cerute de Lucian pe drum.** (1) Fraza de la webinar nu mai
+> spune „Dacă ai un teren în cap dintre cele de mai sus, adu-l cu tine", ci „Dacă vreunul
+> dintre terenurile de mai sus te interesează, vino cu întrebările despre el". (2)
+> **Subiectul primește coada „și în alte zone ale tale"** când omul are potriviri în mai
+> multe zone. Motivul: cifra din subiect e a zonei numite, nu a emailului întreg, iar la
+> recuperarea de trei săptămâni un om cu 16 terenuri în 10 zone primea „3 terenuri noi în
+> Cotroceni". ⚠️ Totalul **nu** se pune în față („16 terenuri noi în Cotroceni și încă 9
+> zone") fiindcă se citește greșit, ca și cum toate 16 ar fi acolo.
+>
+> **UNELTE NOI, de știut pentru data viitoare.** `digest-terenuri-zone` acceptă acum
+> `fereastra_zile` (doar împreună cu `force`, plafonat la 60 de zile), pentru recuperări
+> punctuale. Anti-dublarea rămâne sigură oricât ai lărgi: fereastra fiecărui om e ultima
+> trimitere **către el**, deci o podea largă nu retrimite nimic cuiva servit deja. Se vede
+> și în raport, ca `fereastra_zile`.
+>
+> ⚠️ **TITLURILE TERENURILOR AJUNG LITERAL ÎN EMAIL.** Din 23 de titluri, **10 aveau
+> cuvinte fără diacritice** („Piata Muncii", „Grozavesti", „Tepes Voda", „constructii") și
+> s-au corectat din admin înainte de trimitere. **Se recitesc înainte de fiecare campanie.**
+> Editarea e sigură: terenurile n-au slug, iar potrivirea cu zonele se face pe
+> `oras`+`cartier`, nu pe titlu. Decizia lui Lucian: titlurile scrise cu **sedilă**
+> (`ţ`/`ş`, tastatura lui) rămân așa, nu se uniformizează.
+>
+> ⚠️ **`handoff/handoff-automatizare-terenuri-noi.md` se oprește la 14 august** și mai
+> spune că `notify-admins` e nedeployat. Nu e adevărat din 20 august. Nu porni nimic pe
+> baza acelui fișier fără să verifici întâi.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 25 august 2026, după-amiaza** — **primul ecran al homepage-ului
 > nelogat e rescris, comis și împins. NEPUBLICAT.**
 >
 > Commit `3668fb1`, un singur fișier (`frontend/index.html`), +144/−13, pe `origin/main`.
@@ -173,21 +236,27 @@
 >    **`handoff/20260825 - handoff-homepage-nelogat-primul-ecran.md`**. Analiza cu cifre, de
 >    unde a pornit totul: **`handoff/20260823 - handoff-analiza-homepage-nelogat.md`**.
 >
-> 3. **Joi 27: emailul cu terenuri noi**, pornit manual cu `force` (automatizarea e gata din
->    14 august). Apoi `3-programare.sql` → prima rulare automată luni 31.
->    ⚠️ **De verificat înainte:** butonul din emailul acela e probabil tot negru (`#1a1a1a`),
->    iar ăla chiar pleacă singur în fiecare luni.
+> 3. **✅ FĂCUT pe 27 august: emailul cu terenuri noi a plecat la toți 66**, iar
+>    `3-programare.sql` e rulat. Vezi blocul din capul fișierului.
 >
 > **🟡 RESTANȚE MAI VECHI, NEREZOLVATE:**
 > - **Butoanele negre din emailuri.** `#1a1a1a` pe fundal crem dispare în clienții care
->   afișează mesajele pe negru. Reparat doar în campania nouă (terracotta `#c2604a`, alb,
+>   afișează mesajele pe negru. Reparat în campania nouă (terracotta `#c2604a`, alb,
 >   cu muchie `#a54c38`). Au rămas negre: `emailuri-profil-incomplet`, `emailuri-zone`,
->   `emailuri-terenuri-noi`, `emailuri-webinar-ora` și, cel mai important, **emailul
->   automat de terenuri din `supabase/functions/notify-admins/`**, care pleacă singur.
+>   `emailuri-terenuri-noi`, `emailuri-webinar-ora`, plus `newsletter-subscribe`,
+>   `email_templates/sign_up.html` și `reset_password.html`.
+>   ⚠️ **CORECTURĂ (27 august): emailul automat de terenuri NU e printre ele.** Fișierul
+>   ăsta spunea că e, și cel mai important dintre toate, fiindcă pleacă singur. Verificat
+>   în cod pe 27 august: și butonul comun al platformei (`ctaHtml`, reparat pe 20 august),
+>   și butoanele din emailul de terenuri (`buton()`, reparate pe 14 august) sunt teracotă
+>   cu contur. Grepul care le găsește pe cele rămase:
+>   `grep -rn 'background:#1a1a1a' scripts/ supabase/functions/ email_templates/`
+>   (ignoră ce iese din `scripts/*/local/previzualizare/`, sunt campanii deja trimise).
 > - **Resend e pe plan plătit din 24 august**, 50.000/lună, fără plafon zilnic. README-urile
 >   campaniilor vechi încă scriu „100 pe zi". Cifră depășită, nu regulă separată. Ce a rămas
 >   valabil e limita de 2 cereri/secundă, adică pauza de 600 ms din scripturi.
-> - **`notify-admins` tot nedeployat.**
+> - ~~**`notify-admins` tot nedeployat.**~~ ⚠️ **NEADEVĂRAT din 20 august**, când a urcat
+>   odată cu semnătura emailurilor. Redeployat de două ori pe 27 august.
 >
 > ⚠️ Restul fișierului e de pe 18 august și descrie restanțe de deploy care **nu mai există**.
 > Nu porni nimic pe baza lor.
