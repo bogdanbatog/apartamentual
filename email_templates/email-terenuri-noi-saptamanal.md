@@ -68,11 +68,24 @@ dar frontendul n-o citește — dacă emailul ar folosi-o, ar putea arăta alt n
 
 ## Subiect
 
-**Implicit:** `{terenuri_1_text} în {zona_1}` → *„3 terenuri noi în Tineretului"*
+**O singură zonă cu potriviri:** `{terenuri_1_text} în {zona_1}`
+→ *„3 terenuri noi în Tineretului"*
+
+**Mai multe zone:** `{terenuri_1_text} în {zona_1} și în alte zone ale tale`
+→ *„3 terenuri noi în Cotroceni și în alte zone ale tale"*
 
 E factual, e util, și — important pentru un email recurent — **se schimbă singur de la o
 săptămână la alta**, fiindcă se schimbă și zona, și cifra. Un subiect fix ar ajunge să arate
 ca un abonament pe care omul uită că l-a cerut.
+
+⚠️ **Cifra e a zonei numite, nu a emailului întreg.** `zona_1` e zona în care omului i-au
+apărut cele mai multe terenuri noi, iar `terenuri_1_text` numără doar acolo. De aceea există
+coada „și în alte zone ale tale": pe 27 august, la recuperarea de trei săptămâni, un om cu 16
+terenuri în 10 zone primea „3 terenuri noi în Cotroceni".
+
+Totalul **nu** se pune în față („16 terenuri noi în Cotroceni și încă 9 zone"), fiindcă se
+citește ușor greșit, ca și cum toate 16 ar fi în Cotroceni. Așa, cifra din față nu promite
+niciodată mai mult decât e în zona numită.
 
 Variante, dacă vrei altceva:
 2. `Terenuri noi în {zona_1}` — fără cifră
@@ -218,8 +231,8 @@ Al doilea link duce la `analize.html?teren_titlu=…&teren_id=…`, cu terenul �
 >
 > În prima joi a fiecărei luni ne întâlnim pe Zoom și răspundem la întrebări despre
 > construcția în grup: cum se cumpără terenul în comun, cum se împart costurile, ce se
-> semnează și când. Data viitoare, joi, 3 septembrie, de la 11:30. Dacă ai un teren în cap
-> dintre cele de mai sus, adu-l cu tine.
+> semnează și când. Data viitoare, joi, 3 septembrie, de la 11:30. Dacă vreunul dintre
+> terenurile de mai sus te interesează, vino cu întrebările despre el.
 >
 > [ Înscrie-te la webinar → ]
 >

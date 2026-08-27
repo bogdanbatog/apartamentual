@@ -82,6 +82,27 @@ const ZIUA_TRIMITERII = 'Mon'
 const ZIUA_TRIMITERII_RO = 'luni'
 const ORA_TRIMITERII = 10
 
+// Ultima oră la care digestul mai are voie să plece. Fereastra 10:00-13:00
+// există ca să se poată drena un lot mai mare decât `MAX_PER_RULARE`: cronul
+// bate oricum din oră în oră, deci ce n-a încăput la 10:00 pleacă la 11:00.
+//
+// ⚠️ În săptămânile obișnuite nu se schimbă nimic: la 10:00 pleacă tot, iar la
+// 11:00 lotul e gol și funcția se întoarce tăcută, exact ca înainte. Ora 13
+// e o oprire fermă: mai târziu de atât, un email „terenuri noi" trimis în
+// mijlocul zilei de luni nu mai seamănă cu începutul de săptămână promis.
+const ORA_ULTIMEI_INCERCARI = 13
+
+// Câți oameni procesează o singură rulare. Nu e o limită de timp, ci una de
+// invocări: fiecare om înseamnă un apel către `notify-admins`, iar platforma
+// refuză rafalele lungi (vezi comentariul de la `cheamaNotifyAdmins`). 30 de
+// apeluri la 700 ms distanță înseamnă circa 25 de secunde de rafală, cu marjă
+// bună față de pragul la care am fost refuziți pe 27 august (60 de apeluri la
+// 300 ms).
+//
+// ⚠️ Nu ridica cifra fără să ridici și `PAUZA_INTRE_EMAILURI_MS`. Cele două
+// împreună dau ritmul, iar ritmul e cel limitat, nu numărul.
+const MAX_PER_RULARE = 30
+
 // Podeaua ferestrei. Cine n-a primit niciodată emailul pornește de aici; cine
 // a primit pornește de la ultima lui trimitere. Nimeni nu primește vreodată
 // terenuri mai vechi de atât, nici dacă funcția stă picată o lună.
@@ -103,10 +124,15 @@ const MAX_TERENURI = 40
 // fereastra lui începe de la ultima trimitere și nu mai are terenuri noi.
 const PRAG_ANTI_DUBLARE_ORE = 20
 
-// Pauza dintre două apeluri la `notify-admins`. Resend refuză cu 429 rafalele
-// (s-au pierdut 18 emailuri într-un minut pe 26 iulie). `notify-admins` are
-// reîncercare cu componentă aleatoare, dar e mai ieftin să nu ajungem acolo.
-const PAUZA_INTRE_EMAILURI_MS = 300
+// Pauza dintre două apeluri la `notify-admins`. Are acum DOUĂ motive, nu unul:
+//
+//   1. Resend refuză cu 429 rafalele (s-au pierdut 18 emailuri într-un minut
+//      pe 26 iulie). `notify-admins` are reîncercare cu componentă aleatoare,
+//      dar e mai ieftin să nu ajungem acolo.
+//   2. ⚠️ Supabase limitează și cât de des poate o funcție să cheme altă
+//      funcție. Pe 27 august, la 300 ms, al 61-lea apel a fost refuzat și a
+//      oprit toată rularea. Urcată la 700 ms, împreună cu `MAX_PER_RULARE`.
+const PAUZA_INTRE_EMAILURI_MS = 700
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -121,6 +147,59 @@ function json(body: unknown, status = 200): Response {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// ⚠️ DE CE EXISTĂ FUNCȚIA ASTA (27 august 2026, dintr-o pățanie reală).
+//
+// Supabase limitează cât de des poate o edge function să cheme altă edge
+// function. La trimiterea de recuperare din 27 august, cu 66 de oameni în lot
+// și 300 ms între apeluri, al 61-lea `fetch` către `notify-admins` a fost
+// refuzat de platformă, NU de `notify-admins`:
+//
+//     RateLimitError: Rate limit exceeded for function. Retry after 1562ms.
+//
+// ⚠️ Refuzul ăsta nu vine ca un răspuns cu status urât, pe care să-l poți citi
+// din `res.status`. `fetch` ARUNCĂ. Iar apelul fiind un `await fetch` gol,
+// eroarea a urcat până la `catch`-ul de sus și a oprit toată rularea: ultimii
+// 4 oameni n-au primit nimic, jurnalul lor a rămas gol (bine) și rezumatul de
+// pe Slack n-a mai plecat (rău, fiindcă eșecul a fost invizibil).
+//
+// Aici e reparația: apelul se reîncearcă, respectând `retryAfterMs` cerut de
+// platformă, iar dacă tot nu merge întoarce `null` în loc să arunce. Un om
+// pierdut nu mai înseamnă un lot pierdut.
+const REINCERCARI_LA_REFUZ = 3
+const MARJA_PESTE_RETRY_MS = 250
+
+async function cheamaNotifyAdmins(
+  supabaseUrl: string,
+  antete: Record<string, string>,
+  payload: unknown,
+): Promise<Response | null> {
+  for (let incercare = 1; incercare <= REINCERCARI_LA_REFUZ; incercare++) {
+    try {
+      return await fetch(`${supabaseUrl}/functions/v1/notify-admins`, {
+        method: 'POST',
+        headers: antete,
+        body: JSON.stringify(payload),
+      })
+    } catch (err) {
+      // `retryAfterMs` vine chiar din eroarea platformei. Când lipsește (altă
+      // eroare de rețea), urcăm noi: 2s, 4s, 6s.
+      const cerut = Number((err as any)?.retryAfterMs)
+      const asteptare = Number.isFinite(cerut) && cerut > 0
+        ? cerut + MARJA_PESTE_RETRY_MS
+        : incercare * 2000
+
+      if (incercare === REINCERCARI_LA_REFUZ) {
+        console.error(`Apelul la notify-admins a eșuat de ${REINCERCARI_LA_REFUZ} ori:`, err)
+        return null
+      }
+
+      console.warn(`Apel refuzat (încercarea ${incercare}), reiau peste ${asteptare} ms:`, err)
+      await sleep(asteptare)
+    }
+  }
+  return null
 }
 
 // Ora locală la București, 0–23. `hourCycle: 'h23'` e important: fără el,
@@ -209,10 +288,14 @@ serve(async (req) => {
     const zi = ziLaBucuresti(acum)
 
     // ── 2. E ziua și ora potrivită? ────────────────────────────────────────
-    if (!fortat && (zi !== ZIUA_TRIMITERII || ora !== ORA_TRIMITERII)) {
+    // ⚠️ E o FEREASTRĂ, nu o oră fixă (schimbat 27 august). Rularea de la 10:00
+    // trimite tot ce încape în `MAX_PER_RULARE`; dacă a rămas lume, cronul o
+    // cheamă din nou la 11:00 și la 12:00, iar restul pleacă atunci. Când n-a
+    // rămas nimeni, rulările următoare găsesc lotul gol și tac.
+    if (!fortat && (zi !== ZIUA_TRIMITERII || ora < ORA_TRIMITERII || ora > ORA_ULTIMEI_INCERCARI)) {
       return json({
         sarit: true,
-        motiv: `la București e ${zi}, ora ${ora}; digestul pleacă ${ZIUA_TRIMITERII_RO} la ${ORA_TRIMITERII}`,
+        motiv: `la București e ${zi}, ora ${ora}; digestul pleacă ${ZIUA_TRIMITERII_RO} între ${ORA_TRIMITERII} și ${ORA_ULTIMEI_INCERCARI}`,
       })
     }
 
@@ -220,7 +303,25 @@ serve(async (req) => {
     // Toată logica (excluderi, prag, fereastră per persoană, acord gramatical,
     // lista de terenuri) stă în SQL și e probată pe date reale. Aici doar
     // chemăm și dăm podeaua ferestrei.
-    const podea = new Date(acum.getTime() - FEREASTRA_MAXIMA_ZILE * 24 * 3600 * 1000)
+    //
+    // ⚠️ Podeaua se poate coborî PUNCTUAL, dintr-o comandă dată de mână, când
+    // s-a sărit o trimitere și vrem să recuperăm terenurile rămase în gol
+    // (cazul din 27 august: ultima campanie fusese pe 3 august, iar podeaua de
+    // 14 zile ar fi lăsat afară tot ce s-a adăugat între 3 și 13 august).
+    //
+    // Merge NUMAI împreună cu `force`, deci sarcina de cron nu poate lărgi
+    // fereastra niciodată: ea trimite corpul fără `force` și cade automat pe
+    // constanta de mai sus. Plafon dur la 60 de zile, ca o cifră greșit tastată
+    // să nu trimită cuiva un email cu terenuri de anul trecut.
+    //
+    // De ce parametru și nu constanta schimbată: schimbată, ar fi cerut un al
+    // doilea deploy ca să pună lucrurile la loc înainte de prima rulare
+    // automată, iar deploy-ul acela e exact genul de pas care se uită.
+    const fereastraZile = fortat && Number.isFinite(Number(corp?.fereastra_zile))
+      ? Math.min(Math.max(Math.round(Number(corp.fereastra_zile)), 1), 60)
+      : FEREASTRA_MAXIMA_ZILE
+
+    const podea = new Date(acum.getTime() - fereastraZile * 24 * 3600 * 1000)
 
     const resLot = await fetch(`${supabaseUrl}/rest/v1/rpc/lot_terenuri_noi`, {
       method: 'POST',
@@ -288,7 +389,14 @@ serve(async (req) => {
 
     // ── 6. Câte un email per persoană ──────────────────────────────────────
     const rezultate: any[] = []
-    const deProcesat = limita ? lot.slice(0, limita) : lot
+
+    // ⚠️ Plafonul se aplică ȘI peste `limita` cerută de mână, dinadins: o
+    // comandă manuală cu `limita: 60` ar reproduce exact refuzul din 27 august.
+    // Cine vrea tot lotul dă comanda de două ori; oamenii serviți ies singuri
+    // prin jurnal, deci a doua rulare nu poate dubla nimic.
+    const cati = Math.min(limita ?? MAX_PER_RULARE, MAX_PER_RULARE)
+    const deProcesat = lot.slice(0, cati)
+    const ramasi = lot.length - deProcesat.length
 
     for (const om of deProcesat) {
       const terenuri: any[] = Array.isArray(om.terenuri_lista) ? om.terenuri_lista : []
@@ -351,15 +459,15 @@ serve(async (req) => {
         // Un singur email de probă, cu datele primului om, la adresa cerută.
         // Jurnalul rămâne neatins, iar omul din lot nu primește nimic.
         if (emailProba && rezultate.length === 0) {
-          const res = await fetch(`${supabaseUrl}/functions/v1/notify-admins`, {
-            method: 'POST',
-            headers: antete,
-            body: JSON.stringify({
-              ...payload,
-              data: { ...payload.data, recipient_email: emailProba },
-            }),
+          const res = await cheamaNotifyAdmins(supabaseUrl, antete, {
+            ...payload,
+            data: { ...payload.data, recipient_email: emailProba },
           })
-          randProba.email_proba_trimis = res.ok ? emailProba : `eșuat: ${res.status} ${await res.text()}`
+          randProba.email_proba_trimis = !res
+            ? 'eșuat: apel refuzat de platformă (limită de invocări)'
+            : res.ok
+              ? emailProba
+              : `eșuat: ${res.status} ${await res.text()}`
         }
 
         rezultate.push(randProba)
@@ -368,11 +476,16 @@ serve(async (req) => {
 
       // 6b. Trimiterea. Refolosim `notify-admins`: acolo stau șablonul,
       //     jurnalul de notificări și reîncercarea la 429-urile de la Resend.
-      const res = await fetch(`${supabaseUrl}/functions/v1/notify-admins`, {
-        method: 'POST',
-        headers: antete,
-        body: JSON.stringify(payload),
-      })
+      const res = await cheamaNotifyAdmins(supabaseUrl, antete, payload)
+
+      // Apelul n-a ajuns niciodată la `notify-admins`: platforma l-a refuzat de
+      // trei ori la rând. Îl tratăm ca pe orice eșec de trimitere, adică fără
+      // rând de jurnal, ca să reintre în digestul următor.
+      if (!res) {
+        rezultate.push({ nume: om.nume, eroare: 'apel refuzat de platformă (limită de invocări)' })
+        await sleep(PAUZA_INTRE_EMAILURI_MS)
+        continue
+      }
 
       if (!res.ok) {
         // NU scriem în jurnal. Fără rând de jurnal, fereastra omului rămâne
@@ -425,8 +538,15 @@ serve(async (req) => {
       zi_bucuresti: zi,
       ora_bucuresti: ora,
       proba: doarProba,
+      // Câte zile în urmă a mers podeaua la rularea asta. Scris în răspuns
+      // dinadins: altfel, dintr-un raport nu se poate deosebi „n-au apărut
+      // terenuri mai vechi" de „parametrul n-a fost citit".
+      fereastra_zile: fereastraZile,
       in_lot: lot.length,
       procesati: rezultate.length,
+      // Câți au rămas nedistribuiți din cauza plafonului. La rulările automate
+      // pleacă la ora următoare; la o comandă manuală, dai comanda din nou.
+      ramasi,
       trimise: rezultate.filter((r) => r.trimis === true).length,
       erori: rezultate.filter((r) => r.eroare).length,
       terenuri_nelegate: terenuriNelegate.length,
@@ -472,6 +592,15 @@ function rezumatSlack(
 
   if (raspuns.erori > 0) {
     linii.push(`⚠️ ${raspuns.erori} eșecuri la trimitere (terenurile lor intră în digestul viitor).`)
+  }
+
+  // Plafonul de invocări a tăiat lotul. Se scrie pe Slack tocmai ca să nu fie
+  // tăcut: pe 27 august, o rulare oprită la jumătate n-a lăsat nicio urmă.
+  if ((raspuns.ramasi ?? 0) > 0) {
+    linii.push(
+      `⏳ Au mai rămas ${raspuns.ramasi} de trimis (plafon de ${raspuns.procesati} pe rulare). ` +
+      `Pleacă singuri la rularea de la ora următoare.`
+    )
   }
 
   const faraJurnal = rezultate.filter((r) => r.avertisment).length

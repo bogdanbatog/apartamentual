@@ -75,6 +75,19 @@ select cron.schedule(
 
 -- Emailurile pleacă deci luni la 10:07, nu la 10:00 fix.
 --
+-- ⚠️ ACTUALIZAT 27 AUGUST: funcția acceptă acum o FEREASTRĂ, luni 10:00-13:00,
+--    nu o oră fixă, și procesează cel mult 30 de oameni pe rulare. Sarcina de
+--    cron rămâne neschimbată, fiindcă bătea oricum din oră în oră: rulările de
+--    la 10:07, 11:07, 12:07 și 13:07 intră toate în fereastră, iar un lot mai
+--    mare de 30 se drenează singur peste ele. În săptămânile obișnuite pleacă
+--    tot la 10:07, iar rulările următoare găsesc lotul gol și tac.
+--
+--    Motivul plafonului: pe 27 august, o trimitere de recuperare cu 66 de
+--    oameni a fost oprită de limita de invocări a platformei la al 61-lea apel
+--    („RateLimitError ... Retry after 1562ms"), pierzând 4 oameni și rezumatul
+--    de pe Slack. Detaliile stau în `digest-terenuri-zone/index.ts`, la
+--    `cheamaNotifyAdmins`.
+--
 -- ⚠️ DOUĂ DIFERENȚE FAȚĂ DE SARCINA DIGESTULUI DE ANUNȚURI, ambele voite:
 --
 --   • MINUTUL 7, nu 5. Digestul de anunțuri rulează la minutul 5. Dacă ar
@@ -83,8 +96,9 @@ select cron.schedule(
 --     e destul — digestul de anunțuri pleacă seara, oricum.
 --
 --   • TIMEOUT 120 de secunde, nu 30. Digestul de anunțuri face UN apel per
---     grup (câteva). Ăsta face CÂTE UN APEL PER OM — ~62 de apeluri cu pauză
---     de 0,3s între ele, deci peste 30 de secunde de rulare doar din pauze.
+--     grup (câteva). Ăsta face CÂTE UN APEL PER OM — până la 30 de apeluri cu
+--     pauză de 0,7s între ele, deci circa 21 de secunde doar din pauze, plus
+--     timpul fiecărei trimiteri.
 --     ⚠️ Timeout-ul lui `pg_net` NU oprește funcția: cererea e asincronă, iar
 --     funcția își duce treaba până la capăt chiar dacă `pg_net` a renunțat să
 --     mai aștepte răspunsul. Dar cu timeout mic n-ai avea ce citi în

@@ -857,9 +857,26 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
       // Subiectul: „3 terenuri noi în Tineretului". Se schimbă singur de la o
       // săptămână la alta (altă zonă, altă cifră), ceea ce contează la un email
       // recurent — un subiect fix ajunge să arate ca un abonament nedorit.
-      const title = zone.length > 0
-        ? `${textZona1} în ${zone[0]}`
-        : 'Terenuri noi în zonele tale'
+      //
+      // ⚠️ CIFRA E A ZONEI NUMITE, NU A EMAILULUI ÎNTREG. `zona_1` e zona în
+      // care omului i-au apărut cele mai multe terenuri noi, iar
+      // `terenuri_1_text` numără doar acolo. Când are potriviri și în alte
+      // zone, se adaugă o coadă fără cifră.
+      //
+      // Găsit pe 27 august, la recuperarea de trei săptămâni: un om cu 16
+      // terenuri în 10 zone primea „3 terenuri noi în Cotroceni". La ritmul
+      // săptămânal normal diferența e mică sau zero, fiindcă omul obișnuit are
+      // potriviri într-una sau două zone, dar coada nu strică nimic acolo.
+      //
+      // ⚠️ DE CE NU TOTALUL ÎN FAȚĂ („16 terenuri noi în Cotroceni și încă 9
+      // zone"): se citește ușor greșit, ca și cum toate 16 ar fi în Cotroceni.
+      // Așa, cifra din față nu promite niciodată mai mult decât e în zona
+      // numită. Decizia lui Lucian, 27 august.
+      const title = zone.length === 0
+        ? 'Terenuri noi în zonele tale'
+        : totalZone > 1
+          ? `${textZona1} în ${zone[0]} și în alte zone ale tale`
+          : `${textZona1} în ${zone[0]}`
 
       // ⚠️ NICIO mențiune de perioadă („săptămâna asta", „ultimele 7 zile").
       // Fereastra e per persoană, de la ultima trimitere către el, cu plafon la
@@ -937,7 +954,7 @@ function formatNotificationMessage(payload: NotificationPayload): FormattedMessa
         WEBINAR.arata && new Date() < new Date(WEBINAR.expira)
       const blocWebinar = webinarValid
         ? `${capDeBloc(`Ne vedem online, ${WEBINAR.zi}`)}
-             ${p(`În prima joi a fiecărei luni ne întâlnim pe Zoom și răspundem la întrebări despre construcția în grup: cum se cumpără terenul în comun, cum se împart costurile, ce se semnează și când. Data viitoare, ${escHtml(WEBINAR.zi)}, de la ${escHtml(WEBINAR.ora)}. Dacă ai un teren în cap dintre cele de mai sus, adu-l cu tine.`)}
+             ${p(`În prima joi a fiecărei luni ne întâlnim pe Zoom și răspundem la întrebări despre construcția în grup: cum se cumpără terenul în comun, cum se împart costurile, ce se semnează și când. Data viitoare, ${escHtml(WEBINAR.zi)}, de la ${escHtml(WEBINAR.ora)}. Dacă vreunul dintre terenurile de mai sus te interesează, vino cu întrebările despre el.`)}
              ${buton(WEBINAR.link, 'Înscrie-te la webinar →')}
            </div>`
         : ''
