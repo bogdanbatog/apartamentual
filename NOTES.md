@@ -173,6 +173,9 @@ Nu acționa pe niciuna fără confirmare explicită.
 - [ ] **Capcană de stil: `.hero-content p` bate orice selector cu o singură clasă**
   Hero-ul paginii de terenuri are `.hero-content p { color: var(--slate-300); font-size: 1rem; }`. Orice `<p>` nou pus în hero primește culoarea și mărimea aia, oricât de explicit ai scris tu altceva într-o clasă. Pe 14 august eticheta panoului de analiză s-a randat gri deschis la 16px, cu contrast sub 1,5:1, deși în cod scria teracotă la 11px. Reparat cu selectori de două clase. **Tiparul de hero se repetă și pe alte pagini**, deci capcana nu e doar aici.
 
+- [ ] **Timelapse-ul de pe homepage e un player YouTube, nu un element de design (așteaptă un fișier comprimat, de la Lucian)**
+  Deschis pe 31 august. Filmulețul de sub hero e un `<iframe>` YouTube cu autoplay, mut, în buclă: aduce cu el colțul, sigla, bara de titlu la pornire și încărcarea playerului lor. Un `<video muted loop playsinline autoplay>` fără controale ar arăta ca parte din pagină și s-ar încărca mai repede. **Blocantul e fișierul:** singurul pe care îl avem, `frontend/povestea_noastra/videos/timelapse-santier.mp4`, are **17,9 MB**, mult prea mult pentru pornire automată pe date mobile; e nevoie de o versiune de 10-15 secunde, sub 3 MB, tăiată din montaj. ⚠️ **NU-l îngusta din CSS ca soluție de compromis**: probat pe 31 august la 820px (se câștigau ~130px de derulare) și **respins de Lucian, arată sărăcăcios**, cu un gol în dreapta care face zona să pară neterminată. La fel respinse varianta centrată și tăierea de jos la 16:7,8. Motivul e scris și în comentariul de la `.video-ph--live`. ⚠️ Și încă ceva, pentru oricine probează: **într-o filă automată filmulețul nu pornește** (rămâne la 0:00, cu cerculețul de așteptare), deci playerul își arată toată podoaba și pare mult mai urât decât e; cum arată în mișcare se judecă doar pe un ecran real.
+
 ---
 
 ## Rezolvate
