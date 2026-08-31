@@ -300,6 +300,20 @@
   }
   .cta-group{ display:flex; flex-direction:column; gap:0.5rem; }
   .cta-note{ font-size:11px; color:var(--ink-3); }
+  /* Rândul de sub butoane care spune ce e site-ul. NU folosește `.cta-note`
+     (11px, `--ink-3`): aceea e mărime de subsol, potrivită pentru o notă de
+     serviciu, nu pentru singura propoziție din primul ecran care numește
+     platforma. 13px pe `--ink-2` se citește fără să concureze cu subtitlul de
+     16px de deasupra. Adăugat pe 31 august. */
+  .hero-platforma{
+    margin:0.5rem 0 0;
+    font-size:13px;
+    line-height:1.55;
+    color:var(--ink-2);
+    /* 680px, nu 600: la 600 fraza se rupea și rămânea „loc." singur pe rândul
+       al doilea. Pe telefon se rupe oricum, dar acolo n-are cum să nu. */
+    max-width:680px;
+  }
   .cta-primary,
   .cta-secondary{
     display:inline-flex;
@@ -658,6 +672,15 @@
        dispar fără să se taie nimic din imagine (sus stau macaraua și ultimul
        etaj, adică exact ce se vede crescând). */
     aspect-ratio:16/9;
+    /* ⚠️ NU-L ÎNGUSTA. Probat pe 31 august: la 820px lățime (461px înălțime)
+       se câștigau ~130px de derulare, dar arăta sărăcăcios, cu un gol în
+       dreapta care făcea toată zona să pară neterminată. Decizia lui Lucian:
+       filmulețul stă pe toată lățimea. Micșorarea, dacă se face vreodată, se
+       face din montaj (clip mai scurt, alt cadru), nu din CSS.
+       Probate și respinse atunci: varianta centrată la 820px (linia
+       „Județului Housing, București…" de sub el pornea tot din stânga, deci
+       cele două nu se mai legau) și tăierea de jos la 16:7,8 (câștiga doar
+       79px și tăia din imagine). */
   }
   .video-ph--live iframe{
     position:absolute;
@@ -1348,6 +1371,51 @@
     margin:0;
   }
 
+  /* ── CE FACE PLATFORMA ──
+     Listă numerotată, nu casete. Imediat deasupra sunt deja patru casete cu
+     linie sus („Ce câștigi"); dacă și blocul ăsta era o grilă de carduri, cele
+     două secțiuni se citeau ca una singură, repetată. Cifra mono teracotă e
+     aceeași cu cea din `.cale ol` („Cum începi"), ca blocul să se lege de
+     secțiunea care urmează imediat.
+     ⚠️ `--terracotta` e definit pe `.hero-stage`, nu pe `:root`, iar secțiunea
+     asta e în afara lui. De aceea `var()` are ȘI valoarea de rezervă: fără ea,
+     cifrele ar fi rămas fără culoare, fără nicio eroare. Aceeași grijă e
+     luată la `.cale ol li::before`. */
+  .platforma-lista{
+    list-style:none;
+    counter-reset:platf;
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:1.75rem 3rem;
+    margin:2.5rem 0 0;
+    padding:0;
+  }
+  .platforma-lista li{
+    counter-increment:platf;
+    position:relative;
+    padding-left:2.25rem;
+    font-size:14px;
+    line-height:1.6;
+    color:var(--ink-2);
+  }
+  .platforma-lista li::before{
+    content:counter(platf);
+    position:absolute;
+    left:0;
+    top:0;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.85;
+    color:var(--terracotta, #c06a4f);
+  }
+  .platforma-lista b{
+    color:var(--ink);
+    font-weight:600;
+  }
+  @media(max-width:1000px){
+    .platforma-lista{ grid-template-columns:1fr; gap:1.5rem; }
+  }
+
   /* ── HERO accent ── */
   .hero-title .title-tau{
     color:var(--ink);
@@ -1597,6 +1665,12 @@
     .cai{ grid-template-columns:1fr; gap:2rem; }
     .cale .cta-secondary{ align-self:stretch; }
     .avantaje{ grid-template-columns:1fr; }
+    /* Banda are de la 31 august trei propoziții, nu trei lozinci de câte
+       patru cuvinte. Pe telefon ele se desfac oricum pe câte un rând (prima
+       pe două), iar cu `gap:1.5rem` moștenit din regula de sus banda ajungea
+       la 160px de aer. Coloană explicită plus un gap mic: se citește ca o
+       listă de trei, nu ca trei blocuri fără legătură. */
+    .cred-band{ flex-direction:column; align-items:flex-start; gap:0.6rem; }
     .video-layout{ grid-template-columns:1fr; gap:2rem; }
     .video-wrap{ max-width:320px; }
     .family-quote{ padding:1.75rem 1.5rem; }
@@ -2016,6 +2090,21 @@
              ca să vezi ce e."). A ieșit la cererea lui Lucian, 25 august.
              Orașul nu se pierde: apare în linia de sub timelapse, la câteva
              sute de pixeli mai jos („Județului Housing, București"). -->
+        <!-- ⚠️ Rândul de mai jos e singurul loc din primul ecran care spune că
+             ăsta e un site pe care faci ceva, nu o pagină de prezentare.
+             Adăugat pe 31 august, la cererea lui Lucian: titlul și subtitlul
+             spun mecanismul (ce fac câteva familii), dar niciunul nu spunea ce
+             e platforma. Măsurat înainte: primul cuvânt despre platformă
+             apărea la 23% adâncime, al treilea ecran pe telefon.
+             ⚠️ Numele apare a doua oară la 150px de prima (subtitlul se
+             termină cu „cu ajutorul apartamenTUal"). E acceptat dinadins: a
+             doua oară e cea care îl definește. Dacă sună repetat, se taie
+             începutul și rămâne „E platforma pe care…".
+             ⚠️ NU scrie aici „îți alegi arhitectul" și nici „găsești
+             arhitecți": vezi regula din comentariul de deasupra subtitlului.
+             „arhitecți, la un loc" spune că sunt acolo, nu că îi alegi dintr-o
+             listă. -->
+        <p class="hero-platforma">apartamen<b class="apt-tu">TU</b>al e platforma pe care se formează aceste grupuri: oameni, terenuri și arhitecți, la un loc.</p>
       </div>
     </section>
 
@@ -2123,11 +2212,25 @@
     <div class="sl-grid"></div>
   </section>
 
-  <!-- ── CREDIBILITY BAND ── -->
+  <!-- ── CREDIBILITY BAND ──
+       ⚠️ REscrisă pe 31 august. Spunea trei lucruri vagi („Modelul Baugruppen
+       aplicat în România", „Tu deții decizia, noi coordonăm", „De la teren la
+       apartamentul tău"), niciunul despre ce e site-ul ăsta. Măsurat atunci:
+       primul cuvânt despre platformă apărea abia la 23% adâncime, adică al
+       treilea ecran pe telefon, deși omul își pune întrebarea „ce e site-ul
+       ăsta?" pe primul. Banda stă la 15% (ecranul 1,3), imediat sub dovadă,
+       și nu costă niciun pixel în plus, deci ea răspunde prima.
+       ⚠️ Banda e cuprinsul secțiunii „Cu ce te ajută apartamenTUal", de mai
+       jos. Cele trei rânduri urmăresc punctele 1, 2 și 4 de acolo; dacă se
+       schimbă unele, se schimbă și celelalte.
+       ⚠️ „filtrate" plus „analiză la cerere", NU „terenuri analizate":
+       analiza e serviciul pe care îl ceri tu. Regula întreagă e scrisă la
+       secțiunea „Cu ce te ajută apartamenTUal".
+       ⚠️ Baugruppen nu se pierde: e în subtitlul hero-ului, cu 400px mai sus. -->
   <div class="cred-band js-marketing-only">
-    <span>Modelul Baugruppen aplicat în România</span>
-    <span>Tu deții decizia, noi coordonăm</span>
-    <span>De la teren la apartamentul tău</span>
+    <span>Pe platformă găsești oamenii și grupurile din zona ta</span>
+    <span>Terenuri filtrate de arhitecți, cu analiză la cerere</span>
+    <span>Arhitecți lângă grup, până la mutare</span>
   </div>
 
   <!-- ── CE CÂȘTIGI (contopit din trei blocuri, 26 august) ──
@@ -2163,24 +2266,23 @@
       </div>
       <div class="avantaj">
         <h3>Nu ești singur</h3>
-        <!-- ⚠️ „filtrate", nu „analizate". Analiza e serviciul pe care îl ceri
-             tu de pe platformă, nu ceva deja făcut înainte de listare. Corectat
-             de Lucian pe 26 august, prima variantă spunea „analizate de
-             arhitecți înainte să ajungă pe platformă" și promitea altceva.
-             ⚠️ „coordonăm", NU „facem", la partea juridică. Formulare aleasă
-             de Lucian pe 26 august. FAQ-ul spune că fiecare grup ar trebui să
-             aibă propriul consilier juridic, iar noi dăm modele orientative și
-             pagina de legislație; a scrie că facem noi actele ar fi altceva.
-             ⚠️ Fraza s-a terminat o vreme cu „…la fiecare pas", care nu se
-             lega de nimic. Nu o pune la loc. -->
-        <!-- ⚠️ La proiectare e „putem face", nu „facem": grupul are voie să
-             lucreze cu alt birou, iar asta a fost o decizie explicită (vezi
-             comentariul din hero despre „își aleg arhitectul"). -->
-        <!-- ⚠️ Caseta asta e deja cea mai lungă dintre cele patru. Dacă mai
-             adaugi un rând aici, grila întinde TOATE casetele la înălțimea ei
-             și rămâne un gol sub primele trei. Ce ține de toată secțiunea, nu
-             doar de acest punct, se scrie în `.avantaje-nota`, sub grilă. -->
-        <p>Terenurile sunt filtrate de arhitecți. Platforma te ajută să le analizezi, ca să vezi ce se poate construi și la ce costuri estimative, apoi putem face proiectare și coordonăm partea juridică, alegerea constructorului, ofertele și șantierul.</p>
+        <!-- ⚠️ SCURTATĂ pe 31 august. Aici stătea enumerarea serviciilor
+             („Terenurile sunt filtrate de arhitecți. Platforma te ajută să le
+             analizezi… putem face proiectare și coordonăm partea juridică,
+             alegerea constructorului, ofertele și șantierul."). S-a mutat în
+             secțiunea „Cu ce te ajută apartamenTUal", de mai jos, care e
+             locul unde se spune ce face platforma. Aici rămâne doar răspunsul
+             la frica reală („nu știu să fac asta"), care e rostul casetei.
+             ⚠️ NU pune enumerarea la loc: s-ar spune de două ori la 200px
+             distanță, iar caseta redevine cea mai lungă din grilă.
+             ⚠️ Regulile de formulare pentru servicii („filtrate" nu
+             „analizate", „putem face" la proiectare, „coordonăm" la juridic)
+             s-au mutat odată cu textul; sunt scrise acum în comentariul
+             secțiunii „Cu ce te ajută apartamenTUal".
+             ⚠️ Caseta era cea mai lungă dintre cele patru și întindea grila.
+             Dacă mai adaugi un rând aici, se întâmplă din nou. Ce ține de
+             toată secțiunea se scrie în `.avantaje-nota`, sub grilă. -->
+        <p>Nu trebuie să știi dinainte cum se cumpără un teren sau cum se autorizează un bloc. Ai pașii scriși în ordine și arhitecți lângă tine la fiecare dintre ei.</p>
       </div>
     </div>
     <!-- ⚠️ Rândul ăsta a stat câteva minute ÎN caseta „Nu ești singur". Acolo
@@ -2200,9 +2302,63 @@
     <a href="/ce-este/" class="text-link">Cum funcționează, de la teren la mutare →</a>
   </section>
 
+  <!-- ── CE FACE PLATFORMA (adăugată pe 31 august) ──
+       Pagina explica modelul (hero), arăta dovada (timelapse), spunea de ce
+       merită („Ce câștigi") și cum intri („Cum începi"), dar nu spunea nicăieri
+       ce e platforma și ce primești de la ea. Cuvântul „platformă" nu apărea în
+       niciun titlu și în niciun subtitlu; singura frază concretă stătea ascunsă
+       în a patra casetă de mai sus, iar banda de credibilitate era prea vagă ca
+       să conteze. Observația e a lui Lucian, 31 august.
+       ⚠️ Stă ÎNTRE „Ce câștigi" și „Cum începi", dinadins: întâi de ce merită,
+       apoi cu ce te ajutăm, apoi primul pas. Lipită de „Cum începi", se citește
+       „asta găsești aici, uite cum intri". Mutată mai sus (imediat sub
+       timelapse) ar cere omului să afle ce facem noi înainte să știe de ce l-ar
+       interesa.
+       ⚠️ `js-marketing-only`: pentru cine e logat, homepage-ul e spațiul de
+       lucru, iar prezentarea platformei acolo e zgomot. Video-ul de mai jos
+       face invers, dinadins; vezi comentariul de acolo.
+       ⚠️ Punctul 2 repetă o formulare care e scrisă de mână în mai multe locuri
+       („câte apartamente se pot construi și la ce prețuri"): și mai jos în
+       pagină, în `grup-details.html` și în emailul de terenuri. Dacă se
+       schimbă, se schimbă în toate.
+       ⚠️ REGULILE DE FORMULARE PENTRU SERVICII SUNT ACUM AICI, mutate pe 31
+       august din caseta „Nu ești singur":
+       · „filtrate", NU „analizate": analiza e serviciul pe care îl ceri tu, nu
+         ceva făcut înainte de listare (corectat de Lucian, 26 august; prima
+         variantă spunea „analizate de arhitecți înainte să ajungă pe
+         platformă" și promitea altceva);
+       · la proiectare „putem face", NU „facem": grupul are voie să lucreze cu
+         alt birou, decizie explicită (vezi comentariul din hero despre „își
+         aleg arhitectul");
+       · la partea juridică „coordonăm", NU „facem" (Lucian, 26 august): FAQ-ul
+         spune că fiecare grup ar trebui să aibă propriul consilier juridic,
+         iar noi dăm modele orientative și pagina de legislație.
+       ⚠️ Punctul 4 și caseta „Nu ești singur" de mai sus s-au despărțit pe 31
+       august: enumerarea serviciilor e aici, frica („nu știu să fac asta")
+       rămâne acolo. Nu le lipi la loc una peste alta. -->
+  <section class="section js-marketing-only">
+    <p class="section-eyebrow">Platforma</p>
+    <h2 class="section-title">Cu ce te ajută apartamen<b class="apt-tu">TU</b>al</h2>
+    <p class="section-body">
+      Un grup de construcție are nevoie de patru lucruri: oameni, un teren bun, o ordine a pașilor și arhitecți lângă el. Pe platformă le găsești pe toate într-un singur loc.
+    </p>
+    <ol class="platforma-lista">
+      <li><b>Găsești oamenii.</b> Vezi cine mai caută în zonele tale și ce grupuri se formează acum, apoi intri într-unul sau începi tu unul.</li>
+      <li><b>Găsești terenul.</b> Terenurile sunt filtrate de arhitecți, iar pentru fiecare poți cere o analiză care arată câte apartamente se pot construi și la ce prețuri.</li>
+      <li><b>Vă organizați.</b> Grupul își ține pașii în ordine, documentele la un loc și jurnalul discuțiilor, ca să nu se piardă nimic pe drum.</li>
+      <li><b>Nu vă descurcați singuri.</b> Putem face proiectarea, iar mai departe coordonăm partea juridică, alegerea constructorului, ofertele și șantierul.</li>
+    </ol>
+  </section>
+
   <!-- ── CUM ÎNCEPI (două căi de intrare) ── -->
   <section class="section" id="cum-incepi">
-    <p class="section-eyebrow">Procesul</p>
+    <!-- ⚠️ Eyebrow-ul era „Procesul". Schimbat pe 31 august, din două motive:
+         procesul propriu-zis are patru faze și e în „Cum funcționează", pe
+         când secțiunea asta e despre intrarea pe platformă (cont, teren sau
+         zonă); iar întrebarea „cum începi, dar unde?" își primește răspunsul
+         aici, în eyebrow, nu în titlu. Titlul rămâne scurt dinadins: „Cum
+         începi pe platformă" e o frază de manual lângă una bună. -->
+    <p class="section-eyebrow">Primii pași pe platformă</p>
     <h2 class="section-title">Cum începi</h2>
 
     <!-- ── CONTUL, PRIMUL LUCRU DIN SECȚIUNE ──
@@ -2286,7 +2442,16 @@
       </div>
       <div class="video-body">
         <p class="section-eyebrow">Fondatorul explică</p>
-        <h2 class="section-title">Ce este, concret, apartamen<b class="apt-tu">TU</b>al</h2>
+        <!-- ⚠️ Titlul era „Ce este, concret, apartamenTUal". Schimbat pe 31
+             august: secțiunea nouă de mai sus se cheamă „Cu ce te ajută
+             apartamenTUal", iar numele apărea în două titluri la câteva sute
+             de pixeli distanță. Aici video-ul chiar despre grup vorbește (vezi
+             rândul de dedesubt: cum se formează, cum se alege terenul), deci
+             titlul spune asta. „Concret" rămâne, e cuvântul care făcea titlul
+             vechi bun.
+             ⚠️ Numele nu se mai pune aici: dacă vrei brandul într-un titlu,
+             locul lui e secțiunea „Cu ce te ajută apartamenTUal". -->
+        <h2 class="section-title">Ce este, concret, un grup de construcție</h2>
         <p>Arhitectul Lucian Luța povestește cum se formează un grup, cum se alege terenul și cine duce partea tehnică mai departe.</p>
       </div>
     </div>
