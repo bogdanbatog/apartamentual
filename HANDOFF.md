@@ -1,6 +1,69 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 1 septembrie 2026, după-amiaza** — **împărțirea apartamentelor a fost
+> **⏭️ ULTIMA SESIUNE: 1 septembrie 2026, seara** — **prima analiză urbanistică reală e în
+> platformă. Blocantul de pe 30 august a căzut. Migrația 12 rulată. 🔴 NECOMIS.**
+>
+> Detaliile întregi: `handoff/20260901 - handoff-prima-analiza-galvani.md`.
+>
+> **CE E ÎN BAZĂ.** Luigi Galvani 57 (641 mp, UTR M3, Sector 2) pe grupul de probă „Bloc Eco
+> pentru Medici și Profesioniști": **7 variante, 38 de niveluri, 64 de apartamente**, din două
+> ipoteze de volum (P+5 la CUT 2,490, adică la plafon, și P+4 la 2,246). Costuri de intrare
+> 1.200 €/mp Sd, teren 830.000 €, subsolul la 70%: nu sunt în CSV, s-au scos înapoi din formula
+> UA și ies rotunde pe toate șapte.
+>
+> **GENERATOR, NU SQL DE MÂNĂ.** `scripts/import-analiza/genereaza-sql.js` + un JSON. Citește
+> exportul CSV al lui Liviu (format nou, din 31 august, scris special pentru importul ăsta) și
+> scoate SQL comentat, de rulat manual. Analiza următoare cere schimbat doar JSON-ul.
+> ⚠️ `*.csv` e în `.gitignore`, deci intrarea nu e în repo.
+>
+> **⚠️ BLOCURILE 1-4 DIN `import-galvani-57.sql` SUNT DEJA RULATE** și nu se mai ating: ar face
+> o a doua analiză cu același titlu, iar restul blocurilor, care se leagă de titlu, ar scrie
+> fiecare variantă de două ori.
+>
+> **TREI LUCRURI DE DUS LA LIVIU.** (1) Trei variante din setul P+4 pun la parter un apartament
+> al cărui minim din normativ (66 mp) e mai mare decât Su-ul rămas după parcaje (58,37): în
+> pagină scrie „min 66 max 58". Se repară în UA, nu la import. (2) `var_descriere` e inversată
+> la P+5 V1 și V2 („11 apartamente" pe una cu 10); descrierea se scrie acum din counts.
+> (3) P+4 V1 și V4 sunt același amestec, diferă doar așezarea pe etaje.
+>
+> **MIGRAȚIA 12: fișa și volumul, pe variantă.** Sunt ale SETULUI (ipoteza de volum), nu ale
+> analizei: un export UA = o fișă + un KML, iar KML-ul e volumul construibil al ipotezei, deci
+> toate variantele setului arată la fel în Google Earth. Patru coloane nullable pe
+> `analiza_varianta` + trei tipuri KML în bucketul `analize-fise`. Grantul de SELECT e pe
+> tabelă, deci acoperă coloanele noi fără nimic în plus.
+> ⚠️ **Google Earth nu se deschide printr-un link**: KML-ul se descarcă.
+>
+> **⭐ GREȘEALA DE AȘEZARE, DE ȚINUT MINTE.** Prima formă arăta doar documentele setului
+> DESCHIS, cu numele lui în etichetă ca schimbarea să se vadă. Nu se vede: linkurile stau
+> DEASUPRA filelor, deci apeși jos și se schimbă ceva sus, în afara privirii. Acum e un rând
+> fix pe set. **Regula: nu lega de o filă ceva ce stă deasupra ei.**
+>
+> **PATRU CAPCANE.** (1) O coloană NULL pe TOATE rândurile dintr-un `VALUES` e tipizată `text`
+> și refuză inserarea în numeric; lovește exact coloanele care descriu excepții, deci crapă pe
+> analiza simplă, nu pe cea bogată. (2) Fișier urcat în rădăcina bucketului, nu în folderul
+> grupului, e invizibil pentru toți fără nicio eroare, **iar din pagină nu se poate deosebi de
+> „n-a fost urcat"**: se vede doar din SQL Editor. (3) `Content-Disposition` nu e expus de CORS,
+> deci nu se poate verifica din pagină dacă o adresă chiar descarcă. (4) `window.open` după un
+> `await` e oprit de blocatorul de ferestre.
+>
+> **PROBAT:** încărcarea, filele, prețurile, **tragerea cursorului** (scrie în
+> `apartament_suprafata`, calea nedovedită până acum), fișa PDF, volumul KML.
+> **NEPROBAT:** înscrierea pe apartament, preferințele, jurnalul, documentele terenului, cazul
+> „cont care NU e în grup", și curl-ul cu cheia anonimă pe `analiza_teren`.
+>
+> **⚠️ PREȚURILE DIN PAGINĂ NU SUNT CELE DIN FIȘĂ**, cu −3,2% până la +2,2%, fiindcă pagina
+> reface Sd-ul din suprafața efectiv împărțită (decizia din 28 august). Consecință nerezolvată:
+> **parcajele acoperite de la parter nu se plătesc deloc**, deși UA le construiește la 20%. Nu
+> depind de cursoare, deci sunt cost fix ca subsolul. Cere o coloană nouă pe variantă.
+>
+> **▶️ TASKUL URMĂTOR: aceeași analiză pe grupul Parcul Circului.** Se copiază JSON-ul și se
+> schimbă o linie. ⚠️ Dar acolo sunt ~20 de membri REALI, care vor vedea și parterurile
+> stricate: recomandarea e **doar setul P+5**, până se lămurește cu Liviu. ⚠️ Și fișierele se
+> urcă a doua oară, sub id-ul acelui grup.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 1 septembrie 2026, după-amiaza** — **împărțirea apartamentelor a fost
 > probată pe date reale și a trecut. Două migrații noi, 9 și 10, rulate și verificate.
 > 🔴 NIMIC NU E COMIS.**
 >

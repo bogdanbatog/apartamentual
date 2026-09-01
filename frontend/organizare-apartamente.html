@@ -734,9 +734,16 @@
   }
   .oa-inapoi:hover{color:var(--cerneala);}
 
-  .oa-fisa{margin-top:14px;font-size:13.5px;}
+  .oa-fisa{margin-top:10px;font-size:13.5px;}
   .oa-fisa a{color:var(--teracota);font-weight:600;text-decoration:none;}
   .oa-fisa a:hover{text-decoration:underline;}
+  /* Câte un rând pe ipoteză de volum (P+4, P+5), toate vizibile deodată.
+     Legate de filă, s-ar fi schimbat deasupra locului în care apeși. */
+  .oa-doc-rand{display:block;margin-top:2px;}
+  .oa-doc-set{display:inline-block;min-width:42px;color:var(--gri);font-weight:700;}
+  /* Ce se întâmplă când apeși pe volum: fișierul se descarcă, harta nu se
+     deschide singură. Explicația stă lângă butonul care o cere, nu în ghid. */
+  .oa-doc-nota{display:block;margin-top:5px;color:var(--gri);font-size:12.5px;font-weight:400;}
     </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -769,6 +776,7 @@
     <h1 id="oaTitlu"></h1>
     <div class="sub" id="oaSub"></div>
     <div class="insigna" id="oaInsigna"></div>
+    <p class="oa-fisa" id="oaFisa" hidden></p>
     <div class="context" id="oaContext" hidden></div>
 
     <section id="oaVariante">
@@ -801,7 +809,6 @@
         <div class="scroll-x" id="costuri"></div>
       </details>
 
-      <p class="oa-fisa" id="oaFisa" hidden></p>
     </section>
 
     <section id="oaVerificari">

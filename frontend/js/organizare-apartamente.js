@@ -59,6 +59,15 @@ const ETAJE = {
 const COEF_UTIL_IMPLICIT = 0.70;   // Su / Sd, ca în Urban Analyzer
 const FACTOR_SUBSOL_IMPLICIT = 0.70;
 
+/* Sub cât nu merită spus că rămâne spațiu neîmpărțit.
+   Avertismentul a fost scris pentru golurile mari, unde chiar se mișcă ceva: la
+   Galvani, varianta cu 80 mp liberi la parter arată o scumpire de 3,6%. Pornea
+   însă la orice gol, iar pe unul de 4 mp ieșea o frază care nu spune nimic:
+   „ponderea lui urcă de la 34% la 34% […] cu 0,2% mai mare". Un gol de câțiva
+   metri nu e o decizie a grupului, e rotunjirea suprafețelor din analiză.
+   Pragul stă pe scumpire, nu pe metri, fiindcă despre scumpire e fraza. */
+const PRAG_SCUMPIRE = 0.005;   // 0,5%
+
 const MEMBRI_VIZIBILI = (window.matchMedia && window.matchMedia('(max-width: 640px)').matches) ? 3 : 8;
 
 /* ── STARE ──────────────────────────────────────────────────────────────── */
@@ -78,6 +87,10 @@ let suntAdmin = false;         // fondatorul: șterge notele, documentele și ju
 const eTelefon = () => window.matchMedia('(max-width: 720px)').matches;
 const fmt = n => Math.round(n).toLocaleString('ro-RO');
 const mii = n => Math.round(n / 1000);
+/* `toFixed` scrie cu punct, iar restul cifrelor din pagină ies prin `fmt`, care
+   e pe `ro-RO` și scrie cu virgulă. Fără asta, „0.2%" stătea la doi pași de
+   „2.613 €" în aceeași frază. */
+const pct = n => n.toFixed(1).replace('.', ',') + '%';
 function esc(t){ const d = document.createElement('div'); d.textContent = (t == null ? '' : t); return d.innerHTML; }
 function numeMic(id){ const m = membri.find(x => x.id === id); return m ? esc(m.nume.split(' ')[0]) : 'cineva'; }
 
@@ -232,6 +245,115 @@ function renderFile(){
   });
 }
 
+/* Numele setului, luat din numele variantei. Convenția „P+5 · V1” o pune
+   scriptul de import (`scripts/import-analiza/genereaza-sql.js`), fiindcă două
+   exporturi din Urban Analyzer își numesc amândouă variantele V1, V2, V3. O
+   analiză cu un singur set n-are prefix, și atunci nu se scrie niciun set. */
+function numeSet(v){
+  const i = v.nume.indexOf(' · ');
+  return i > 0 ? v.nume.slice(0, i) : '';
+}
+
+/* Deschiderea unui fișier din bucketul privat `analize-fise`. Nu există adresă
+   publică de pus în pagină: se cere una semnată, la clic. */
+async function deschideDocument(cale, nume, felul){
+  /* ⚠️ Fereastra se deschide ÎNAINTE de `await`. Un `window.open` chemat după
+     ce s-a întors o promisiune nu mai e legat de clicul omului, iar blocatorul
+     de ferestre îl oprește fără să spună nimic. */
+  const fereastra = (felul === 'pdf') ? window.open('', '_blank', 'noopener') : null;
+  try {
+    if (felul === 'pdf') {
+      /* Adresă semnată, deschisă în filă: Supabase servește PDF-ul `inline`,
+         deci se vede pe loc și nu ajunge în Downloads. */
+      const { data, error } = await sb.storage.from('analize-fise')
+        .createSignedUrl(cale, 3600);
+      if (error) throw error;
+      if (fereastra) fereastra.location = data.signedUrl;
+      else window.location.href = data.signedUrl;
+      return;
+    }
+
+    /* KML-ul se ia ca blob, nu ca adresă semnată cu `?download=`.
+       ⚠️ Nu din economie, ci fiindcă altfel nu putem ști ce se întâmplă:
+       `Content-Disposition` nu e un antet expus de CORS, deci din pagină nu se
+       poate verifica nici măcar cu `fetch` dacă adresa chiar descarcă. Dacă
+       n-ar descărca, clicul ar duce pagina la un document XML și omul și-ar
+       pierde locul din analiză. Un blob de aceeași origine ascultă sigur de
+       atributul `download`, iar fișierele astea au 4 KB. */
+    const { data, error } = await sb.storage.from('analize-fise').download(cale);
+    if (error) throw error;
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nume || 'volum.kml';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    /* Adresa se eliberează târziu, nu imediat după clic: descărcarea abia a
+       pornit, iar o eliberare pe loc o poate reteza. */
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  } catch (err) {
+    if (fereastra) fereastra.close();
+    console.warn('document analiză:', err);
+    alert('Nu am putut deschide fișierul.');
+  }
+}
+
+/* Fișa PDF și volumul KML, pe seturi, TOATE odată.
+   ⚠️ Prima formă arăta doar documentele setului deschis, iar eticheta purta
+   numele lui („Fișa P+5") ca să se vadă că se schimbă odată cu fila. Nu se
+   vede: linkurile stau DEASUPRA filelor, deci apeși jos și se schimbă ceva sus,
+   în afara privirii. Un rând fix pe set nu cere nimănui să bage de seamă. */
+function renderDocumenteleAnalizei(){
+  const el = document.getElementById('oaFisa');
+
+  const seturi = [];
+  variante.forEach(function (v) {
+    if (!v.pdfPath && !v.kmlPath) return;
+    const cheie = numeSet(v);
+    let s = seturi.find(x => x.cheie === cheie);
+    if (!s) { s = { cheie: cheie, pdf: null, kml: null }; seturi.push(s); }
+    /* Toate variantele unui set poartă aceleași căi, deci prima le dă pe ale
+       tuturor. Vezi migrația 12. */
+    if (!s.pdf && v.pdfPath) s.pdf = { cale: v.pdfPath, nume: v.pdfNume };
+    if (!s.kml && v.kmlPath) s.kml = { cale: v.kmlPath, nume: v.kmlNume };
+  });
+
+  /* O analiză cu un singur set își ține fișa pe ea, ca până acum. */
+  if (!seturi.length && analiza && analiza.pdf_path) {
+    seturi.push({ cheie: '', kml: null,
+                  pdf: { cale: analiza.pdf_path, nume: analiza.pdf_nume } });
+  }
+
+  if (!seturi.length) { el.innerHTML = ''; el.hidden = true; return; }
+
+  el.innerHTML = seturi.map(function (s, i) {
+    const legaturi = [];
+    if (s.pdf) legaturi.push('<a href="#" data-doc="pdf" data-set="' + i + '">' +
+      '<i class="fas fa-file-pdf"></i> Fișa (PDF)</a>');
+    if (s.kml) legaturi.push('<a href="#" data-doc="kml" data-set="' + i + '">' +
+      '<i class="fas fa-globe"></i> Volumul (KML)</a>');
+    return '<span class="oa-doc-rand">' +
+      (s.cheie ? '<b class="oa-doc-set">' + esc(s.cheie) + '</b>' : '') +
+      legaturi.join(' · ') + '</span>';
+  }).join('') +
+  (seturi.some(s => s.kml)
+    ? '<span class="oa-doc-nota">Volumul se descarcă drept fișier KML și se deschide în ' +
+      'Google Earth: dublu clic, dacă îl ai instalat, sau „Import KML” pe earth.google.com. ' +
+      'Arată forma clădirii pe teren, nu împărțirea apartamentelor.</span>'
+    : '');
+  el.hidden = false;
+
+  el.querySelectorAll('a[data-doc]').forEach(function (a) {
+    a.onclick = function (e) {
+      e.preventDefault();
+      const s = seturi[Number(a.dataset.set)];
+      const d = (a.dataset.doc === 'pdf') ? s.pdf : s.kml;
+      deschideDocument(d.cale, d.nume, a.dataset.doc);
+    };
+  });
+}
+
 /* Locul în care va sta clădirea, cât timp analiza nu există. Casetele sunt
    goale dinadins: o schiță cu cifre inventate ar fi arătat ca niște date
    ascunse sub blur, iar cineva ar fi încercat să le citească. */
@@ -278,12 +400,15 @@ function renderVarianta(){
         (comun ? ' <span style="font-size:12px">(plus ' + fmt(comun) + ' comuni)</span>' : '') + '</div>' +
       '<div class="cifra">teren <b>' + mii(v.costTeren) + ' mii €</b> + construcție <b>' +
         mii(constr) + ' mii €</b> = <b>' + mii(costTotal(v)) + ' mii €</b></div>' +
-      (nedistribuit > 0 ? '<div class="avertisment">' +
+      (scumpire >= PRAG_SCUMPIRE ? '<div class="avertisment">' +
         '<b>' + fmt(nedistribuit) + ' mp</b> nu sunt încă dați nimănui. Construcția lor nu se mai face, ' +
         'deci investiția scade, dar terenul costă la fel și se împarte la mai puțini metri: ' +
-        'ponderea lui urcă de la <b>' + pondereaPlin.toFixed(0) + '%</b> la <b>' + pondere.toFixed(0) +
-        '%</b> din investiție, iar prețul pe metru util e cu <b>' + (scumpire * 100).toFixed(1) +
-        '%</b> mai mare decât dacă s-ar împărți tot (' + fmt(eurPeMpPlin(v)) + ' €/mp).' +
+        (pondereaPlin.toFixed(0) !== pondere.toFixed(0)
+          ? 'ponderea lui urcă de la <b>' + pondereaPlin.toFixed(0) + '%</b> la <b>' +
+            pondere.toFixed(0) + '%</b> din investiție, iar prețul'
+          : 'prețul') +
+        ' pe metru util e cu <b>' + pct(scumpire * 100) +
+        '</b> mai mare decât dacă s-ar împărți tot (' + fmt(eurPeMpPlin(v)) + ' €/mp).' +
       '</div>' : '') +
     '</div>';
 
@@ -1336,6 +1461,7 @@ function render(){
   document.getElementById('oaExplicaVariante').hidden = !areAnaliza;
   document.getElementById('variantaCorp').classList.toggle('oa-fara-analiza', !areAnaliza);
   renderFile();
+  renderDocumenteleAnalizei();
   renderVarianta();
   if (areAnaliza) renderCosturi();
   renderMembri();
@@ -1458,6 +1584,12 @@ async function oaPorneste(){
     return {
       id: v.id, nume: v.nume, desc: v.descriere,
       niveluri: niveluri, ap: ap,
+      /* Fișa și volumul sunt ale SETULUI (P+4 față de P+5), nu ale variantei:
+         KML-ul e volumul construibil al ipotezei, deci toate variantele
+         aceluiași set arată la fel în Google Earth. De aceea aceeași cale e
+         scrisă pe trei-patru rânduri, dinadins. Vezi migrația 12. */
+      pdfPath: v.pdf_path || null, pdfNume: v.pdf_nume || null,
+      kmlPath: v.kml_path || null, kmlNume: v.kml_nume || null,
       costTeren: Number(v.cost_teren || analiza.cost_teren || 0),
       costMpSd: Number(analiza.cost_constructie_mp || 0),
       coefUtil: Number(v.coef_su_sd || COEF_UTIL_IMPLICIT),
@@ -1598,29 +1730,6 @@ function scrieCapulPaginii(teren){
     ctx.hidden = false;
   }
 
-  /* Fișa PDF, dacă a fost atașată. Bucketul `analize-fise` e privat, deci se
-     cere o adresă semnată la clic, nu una publică pusă în pagină. */
-  if (analiza && analiza.pdf_path) {
-    const el = document.getElementById('oaFisa');
-    el.innerHTML = '<a href="#" id="oaFisaLink"><i class="fas fa-file-pdf"></i> ' +
-      esc(analiza.pdf_nume || 'Descarcă fișa analizei') + '</a>';
-    el.hidden = false;
-    document.getElementById('oaFisaLink').onclick = async function (e) {
-      e.preventDefault();
-      try {
-        const { data, error } = await sb.storage.from('analize-fise').download(analiza.pdf_path);
-        if (error) throw error;
-        const url = URL.createObjectURL(data);
-        const a = document.createElement('a');
-        a.href = url; a.download = analiza.pdf_nume || 'analiza.pdf';
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.warn('fișa:', err);
-        alert('Nu am putut descărca fișa.');
-      }
-    };
-  }
 }
 
 const LUNI = ['ianuarie','februarie','martie','aprilie','mai','iunie',

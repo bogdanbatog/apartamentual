@@ -1,0 +1,37 @@
+{
+  "_comentariu": [
+    "Configurația importului pentru terenul din Luigi Galvani 57, Sector 2.",
+    "Cele trei cifre de cost sunt cele tastate de Liviu în Urban Analyzer.",
+    "Nu se citesc din CSV (acolo sunt doar rezultatele), dar au fost verificate",
+    "înapoi prin formula din UA pe toate cele șapte variante.",
+    "",
+    "`grup_cauta` și `teren_cauta` sunt bucăți de text pentru ilike. Trebuie să",
+    "nimerească EXACT un rând fiecare; BLOC 0 din SQL-ul generat le numără."
+  ],
+  "titlu": "Analiză preliminară Luigi Galvani 57",
+  "data_analizei": "2026-09-01",
+  "grup_cauta": "Eco pentru medici",
+  "teren_cauta": "Galvani",
+  "cost_teren": 830000,
+  "cost_constructie_mp": 1200,
+  "cost_subsol_pct": 70,
+  "coef_su_sd": 0.7,
+  "suprafata_teren_mp": 641.01,
+  "note": "Analiză preliminară Urban Analyzer, 1 septembrie 2026. Teren 641,01 mp, UTR M3 (Sector 2), reglementare din certificat de urbanism: POT max 60%, CUT max 2,50, regim max P+5, spațiu verde min 30%. Două ipoteze de volum: P+4 (patru variante, CUT 2,246) și P+5 (trei variante, CUT 2,490, adică la plafon). Costuri de intrare: 1.200 euro pe mp Sd, teren 830.000 euro, subsolul la 70% din prețul pe metru. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.",
+  "seturi": [
+    {
+      "prefix": "P+5",
+      "csv": "../../analize din Urban Analyzer/Luigi Galvani 57/var 10-11 ap/analiza-urbanistica (7).csv",
+      "suprafata_teren_mp": 641.01,
+      "pdf_nume": "galvani-57-fisa-p5.pdf",
+      "kml_nume": "galvani-57-volum-p5.kml"
+    },
+    {
+      "prefix": "P+4",
+      "csv": "../../analize din Urban Analyzer/Luigi Galvani 57/var 8-9 ap/analiza-urbanistica (6).csv",
+      "suprafata_teren_mp": 641.01,
+      "pdf_nume": "galvani-57-fisa-p4.pdf",
+      "kml_nume": "galvani-57-volum-p4.kml"
+    }
+  ]
+}
