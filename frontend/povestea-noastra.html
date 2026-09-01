@@ -325,8 +325,18 @@
 
     <!-- ═══════════════════ HERO ═══════════════════ -->
     <section class="story-hero">
-        <video autoplay muted loop playsinline poster="povestea_noastra/images/randare-fata.jpg">
-            <source src="povestea_noastra/videos/timelapse-santier.mp4" type="video/mp4">
+        <!-- ⚠️ Fișierul e ACELAȘI folosit de homepage, în caseta de sub hero.
+             Stă în `video/`, nu în `povestea_noastra/videos/`, tocmai ca să nu
+             ținem de două ori 8 MB în repo. Dacă îl schimbi, se schimbă în
+             amândouă paginile deodată, iar pe homepage mai trebuie potrivit și
+             `aspect-ratio` din `.video-ph--live`.
+             Aici filmul stă la `opacity:.5` sub un strat întunecat, deci
+             proporția nu contează: `object-fit:cover` umple hero-ul oricum.
+             Vechiul `povestea_noastra/videos/timelapse-santier.mp4` (17,8 MB,
+             montajul din 2025, doar 720p) a fost șters odată cu schimbarea
+             asta; se recuperează din istoricul git, dacă e vreodată nevoie. -->
+        <video autoplay muted loop playsinline poster="video/timelapse-judetului-poster.jpg">
+            <source src="video/timelapse-judetului.mp4" type="video/mp4">
         </video>
         <div class="story-hero-overlay">
             <div class="story-hero-eyebrow">Povestea noastră</div>

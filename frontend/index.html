@@ -666,12 +666,16 @@
     position:relative;
     overflow:hidden;
     border-radius:4px;
-    /* ⚠️ Filmulețul e 16:9 (verificat la sursă: 200x113), caseta de mai sus
-       e 16:7. Playerul păstrează proporția filmului și umple restul cu negru,
-       stânga și dreapta. De aceea caseta ia aici proporția filmului: dungile
-       dispar fără să se taie nimic din imagine (sus stau macaraua și ultimul
-       etaj, adică exact ce se vede crescând). */
-    aspect-ratio:16/9;
+    /* ⚠️ Caseta ia proporția EXACTĂ a filmului, altfel apar dungi negre.
+       Regula asta a fost scrisă pentru vechiul film YouTube, care era 16:9.
+       Din 1 septembrie filmul e local și are 854x456 (montaj nou, cu cropul
+       benzilor negre pe care le lipise CapCut sus și jos). Dacă înlocuiești
+       filmul, măsoară-l și potrivește numărul de mai jos, nu-l lăsa moștenit:
+       un film mai lat decât caseta primește dungi sus-jos, unul mai îngust
+       le primește în stânga-dreapta.
+       Sus stau macaraua, ultimul etaj și ceasul camerei, adică exact ce se
+       vede crescând; de aceea nu se taie de sus. */
+    aspect-ratio:854/456;
     /* ⚠️ NU-L ÎNGUSTA. Probat pe 31 august: la 820px lățime (461px înălțime)
        se câștigau ~130px de derulare, dar arăta sărăcăcios, cu un gol în
        dreapta care făcea toată zona să pară neterminată. Decizia lui Lucian:
@@ -682,12 +686,21 @@
        cele două nu se mai legau) și tăierea de jos la 16:7,8 (câștiga doar
        79px și tăia din imagine). */
   }
-  .video-ph--live iframe{
+  /* `iframe` a rămas în selector pentru cazul în care filmul se întoarce
+     vreodată pe YouTube; `video` e ce se folosește azi. */
+  .video-ph--live iframe,
+  .video-ph--live video{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
     border:0;
+    /* Caseta are deja proporția filmului, deci `cover` nu taie nimic. E aici
+       ca plasă de siguranță: dacă filmul se schimbă și cineva uită să
+       potrivească `aspect-ratio` de mai sus, imaginea umple caseta în loc să
+       primească dungi negre. */
+    object-fit:cover;
+    display:block;
   }
   .video-ph-inner{
     display:flex;
@@ -1762,6 +1775,11 @@
      Cuprinsul e subtitlul paginii: spune ce urmează și duce direct acolo. */
   .bs-rezumat{ font-size:16px; line-height:1.6; color:var(--ink); margin:0; }
   .bs-rezumat b{ font-weight:600; }
+  /* Numele grupului e link din 30 august. Subliniat discret, nu colorat:
+     stă în mijlocul unei fraze, iar o culoare acolo ar rupe propoziția în
+     două. Se îngroașă la trecerea cu mouse-ul, ca să se vadă că e de apăsat. */
+  .bs-grup{ color:inherit; text-decoration:none; border-bottom:2px solid var(--rule-2); }
+  .bs-grup:hover{ border-bottom-color:var(--ink); }
   .bs-cuprins{ display:flex; flex-wrap:wrap; gap:8px 18px; margin:16px 0 0; }
   .bs-cuprins a{
     font-size:14px; color:var(--ink); text-decoration:none;
@@ -1890,6 +1908,14 @@
      nimic de la om: scris mai stins, cu punctul din față neutru. */
   .sl-grup-semn--liniste{ color:var(--ink-3); }
   .sl-grup-semn--liniste::before{ background:var(--rule); }
+  /* Scurtătura către Împărțirea apartamentelor. Poartă săgeată, spre deosebire
+     de rândul cu cererea: acela te duce unde te duce și titlul cardului, ăsta
+     te scoate din pagină, în altă unealtă. Săgeata e semnul că pleci. */
+  .sl-grup-semn--impartire::before{ background:var(--slate); }
+  .sl-grup-semn--impartire a{ color:var(--ink); font-weight:500; text-decoration:none;
+    border-bottom:1px solid var(--rule-2); }
+  .sl-grup-semn--impartire a::after{ content:" →"; }
+  .sl-grup-semn--impartire a:hover{ border-bottom-color:var(--ink); }
   /* Grupul cu cereri neaprobate se deosebește de celelalte carduri și fără
      culoare, prin chenar. Nimeni nu trebuie să compare două nuanțe ca să vadă
      că are ceva de făcut. */
@@ -2166,15 +2192,26 @@
          convinge (un bloc adevărat, filmat cum crește) era văzut de mai
          puțin de jumătate din oameni. Acum e primul lucru de sub titlu.
          ⚠️ `js-marketing-only`: cine e logat vede în locul lui spațiul de
-         lucru. Iframe-ul are autoplay+loop, deci s-ar încărca și ascuns;
-         scriptul de sesiune îi golește `src`-ul căutând
-         `.video-ph--live iframe`, așa că cele două clase trebuie să rămână
-         pe el oriunde l-am muta.
+         lucru. Filmul are autoplay+loop, deci s-ar descărca și ascuns;
+         scriptul de sesiune îl oprește căutând `.video-ph--live video`,
+         așa că cele două clase trebuie să rămână pe el oriunde l-am muta.
+         ⚠️ Din 1 septembrie filmul e local, nu mai vine de pe YouTube.
+         Fișierul (`video/timelapse-judetului.mp4`) e folosit ȘI de
+         `povestea-noastra.html`, în hero-ul de acolo. Dacă îl schimbi, se
+         schimbă în amândouă locurile deodată; iar dacă noul film are altă
+         proporție, potrivește `aspect-ratio` din `.video-ph--live`.
          ⚠️ Blocul stă ÎN `.hero-stage` fiindcă paleta pământie
          (`--terracotta`, `--sage`…) e definită acolo, nu pe `:root`. -->
     <div class="js-marketing-only">
       <div class="video-ph video-ph--live">
-        <iframe src="https://www.youtube.com/embed/bfW2DJ1_du4?rel=0&amp;modestbranding=1&amp;autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=bfW2DJ1_du4&amp;playsinline=1" title="Timelapse Județului Housing, ApartamenTUal" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+        <!-- `src` stă direct pe <video>, nu într-un <source>, ca scriptul de
+             sesiune să-l poată goli cu removeAttribute, exact cum făcea cu
+             iframe-ul. Filmul n-are sunet deloc, dar `muted` rămâne
+             obligatoriu: fără el browserul refuză pornirea automată. -->
+        <video src="video/timelapse-judetului.mp4"
+               poster="video/timelapse-judetului-poster.jpg"
+               title="Timelapse Județului Housing, ApartamenTUal"
+               autoplay muted loop playsinline></video>
       </div>
       <!-- „Primul bloc construit cu ajutorul apartamenTUal" s-a mutat în
            subtitlul de sus, ca să nu se spună de două ori la 400px distanță.
@@ -3593,8 +3630,19 @@
       if(n === 1) bucati.push('Ai <b>un teren</b> salvat');
       else if(n > 1) bucati.push('Ai <b>' + n + ' terenuri</b> salvate');
 
+      // ⚠️ Numele grupului e LINK, nu doar îngroșat (decizia lui Lucian,
+      // 30 august). Arăta ca un link fără să fie, iar drumul până la grup
+      // trecea prin cardul de mai jos: patru rânduri de derulat pentru ceva ce
+      // se vede deja în prima frază. Cardul nu devine de prisos, fiindcă
+      // spune ALTCEVA: cererile de aprobat și ce s-a schimbat de la ultima
+      // vizită. Fraza dă poarta, cardul dă motivul.
+      // La mai multe grupuri rămâne fără link: n-ar avea unde să ducă.
       var g = date.grupuri;
-      if(g.length === 1) bucati.push('ești în <b>' + esc(g[0].nume) + '</b>');
+      if(g.length === 1){
+        bucati.push('ești în <b><a class="bs-grup" href="/grup-details.html?id=' +
+                    encodeURIComponent(g[0].id) + '" data-dest="grup-din-rezumat">' +
+                    esc(g[0].nume) + '</a></b>');
+      }
       else if(g.length > 1) bucati.push('ești în <b>' + g.length + ' grupuri</b>');
 
       if(bucati.length === 0) return '';
@@ -4134,12 +4182,36 @@
         : '<p class="sl-grup-semn sl-grup-semn--liniste">Nimic nou ' +
             (vazut ? 'de la ultima ta vizită' : 'de când ai intrat în grup') + '.</p>';
 
-      // ⚠️ Cardul are UN SINGUR link: titlul. Aici era și un buton („Deschide
-      // grupul", ori „Vezi cererile" când era ceva de aprobat) care ducea la
-      // exact aceeași adresă ca titlul de deasupra lui. Două linkuri identice
-      // pe un card de patru rânduri nu ajută pe nimeni, deci butonul a ieșit
-      // pe 23 august. Ce făcea el a preluat rândul cu cererea, care e acum el
-      // însuși link, pe un card care se deosebește oricum prin chenar.
+      // ── SCURTĂTURA CĂTRE ÎMPĂRȚIREA APARTAMENTELOR (30 august) ──
+      // Un rând per teren cu analiză, care sare peste trei pagini: fără el,
+      // drumul e homepage → grupurile mele → grupul → cardul terenului →
+      // unealta. Grupul Parcul Circului își ținea echivalentul în Google
+      // Sheets tocmai fiindcă intra direct în el, dintr-un semn de carte.
+      //
+      // ⚠️ Rândul lipsește cu totul cât timp grupul n-are nicio analiză, deci
+      // și pentru toate grupurile de azi: `g.analize` vine gol din interogarea
+      // 20, iar aceea întoarce gol și dacă tabelele nici nu există încă.
+      //
+      // Numele terenului se scrie pe rând fiindcă un grup poate avea analize
+      // pe mai multe terenuri deodată, iar „Împărțirea apartamentelor →" fără
+      // el n-ar spune pe care.
+      (g.analize || []).forEach(function(t){
+        semne += '<p class="sl-grup-semn sl-grup-semn--impartire">' +
+                   '<a href="/organizare-apartamente.html?grup=' + encodeURIComponent(g.id) +
+                     '&teren=' + encodeURIComponent(t.id) +
+                     '" data-dest="impartirea-apartamentelor">' +
+                   'Împărțirea apartamentelor · ' + esc(t.titlu) +
+                   '</a></p>';
+      });
+
+      // ⚠️ Cardul are UN SINGUR link către pagina grupului: titlul. Aici era și
+      // un buton („Deschide grupul", ori „Vezi cererile" când era ceva de
+      // aprobat) care ducea la exact aceeași adresă ca titlul de deasupra lui.
+      // Două linkuri identice pe un card de patru rânduri nu ajută pe nimeni,
+      // deci butonul a ieșit pe 23 august. Ce făcea el a preluat rândul cu
+      // cererea, care e acum el însuși link, pe un card care se deosebește
+      // oricum prin chenar. Rândurile de împărțire duc în ALT loc, deci nu
+      // încalcă regula.
       return '<div class="sl-grup' + (g.cereri > 0 ? ' sl-grup--atentie' : '') + '">' +
                '<div class="sl-grup-cap">' +
                  '<a class="sl-grup-nume" href="/grup-details.html?id=' + encodeURIComponent(g.id) +
@@ -4653,14 +4725,21 @@
         // Confirmă presupunerea din <head> (ex: localStorage golit între timp).
         HTML.classList.add('atu-logat');
 
-        // Timelapse-ul e ascuns cu display:none, dar iframe-ul are autoplay+loop
-        // și s-ar încărca oricum, invizibil. Îi golim src-ul ca să nu plătim un
-        // player YouTube degeaba. Elementul RĂMÂNE în DOM.
+        // Timelapse-ul e ascuns cu display:none, dar are autoplay+loop și s-ar
+        // descărca oricum, invizibil. Îl oprim ca să nu plătim degeaba ~8 MB de
+        // trafic. Elementul RĂMÂNE în DOM.
         // ⚠️ Abia AICI, nu mai devreme: dacă am face-o pe baza clasei puse în
         // <head>, o agenție aflată la prima vizită (fără `atu_hero_variant` în
         // localStorage) ar rămâne cu pagina întreagă, dar cu timelapse-ul mort.
-        var frame = document.querySelector('.video-ph--live iframe');
-        if(frame) frame.removeAttribute('src');
+        // ⚠️ `pause()` singur nu ajunge: browserul continuă descărcarea pornită.
+        // Ordinea contează: întâi oprit, apoi golit src-ul, apoi `load()`, care
+        // e cel care taie efectiv transferul în curs.
+        var film = document.querySelector('.video-ph--live video');
+        if(film){
+          film.pause();
+          film.removeAttribute('src');
+          film.load();
+        }
 
         // Doar terenurile aprobate se numără, ca pe pagina de profil
         // (profile-view-new.js): un teren depublicat n-are ce căuta la socoteală.
@@ -4927,7 +5006,26 @@
           //     goală), iar `added_by` e cel care l-a pus.
           grupIds.length ? bland(sb.from('terenuri_likes_grupuri').select('grup_id, added_by, created_at')
                                    .in('grup_id', grupIds).gte('created_at', pragMinim)
-                                   .limit(200)) : nimic
+                                   .limit(200)) : nimic,
+
+          // 20. ANALIZELE GRUPURILOR MELE, pentru scurtătura către Împărțirea
+          //     apartamentelor (30 august). Fără ea, drumul până acolo e
+          //     homepage → grupurile mele → grupul → cardul terenului →
+          //     unealta: patru pagini pentru locul în care grupul chiar
+          //     lucrează.
+          //
+          //     ⚠️ Trecută prin `bland`, ca toate celelalte, și de aceea se
+          //     poate pune ÎNAINTE ca tabela să existe: cât timp migrația
+          //     `db_schema/organizare-apartamente/` nu e rulată, interogarea
+          //     pică, `bland` întoarce listă goală, iar rândul pur și simplu
+          //     nu se scrie. Nu strică nimic din restul spațiului de lucru.
+          //
+          //     ⚠️ Se cere DOAR ce trebuie ca să scriem rândul: grupul,
+          //     terenul și numele lui. Nicio cifră din analiză nu ajunge pe
+          //     homepage.
+          grupIds.length ? bland(sb.from('analiza_teren')
+                                   .select('grup_id, teren_id, terenuri(id, titlu)')
+                                   .in('grup_id', grupIds).limit(60)) : nimic
         ]).then(function(x){
           // ── TERENURI ──
           // „Interesați" înseamnă ALȚII, nu și el: pe terenul lui propriu
@@ -5229,11 +5327,26 @@
           // de la ultima ta vizită" de „doi oameni noi de când ai intrat în
           // grup" — a doua frază ar fi fost o minciună mică pentru cine n-a
           // deschis niciodată pagina grupului.
+
+          // Terenurile pe care grupul are analiză, pentru scurtătura din card.
+          // ⚠️ Un teren poate avea DOUĂ analize (preliminară și detaliată), iar
+          // rândul trebuie scris o singură dată: `vazute` ține terenurile deja
+          // adăugate, altfel omul ar vedea același teren de două ori.
+          var analizePeGrup = {};
+          (x[20] || []).forEach(function(a){
+            if(!a.terenuri) return;
+            var lista = analizePeGrup[a.grup_id] || (analizePeGrup[a.grup_id] = { items:[], vazute:{} });
+            if(lista.vazute[a.teren_id]) return;
+            lista.vazute[a.teren_id] = true;
+            lista.items.push({ id: a.teren_id, titlu: a.terenuri.titlu });
+          });
+
           date.grupuri.forEach(function(g){
             g.membriNoi = peGrup[g.id] ? peGrup[g.id].cati : 0;
             g.anunturiNoi = anunturiPeGrup[g.id] || 0;
             g.terenuriNoi = terenuriNoiPeGrup[g.id] || 0;
             g.vazutVreodata = !!vizite[g.id];
+            g.analize = analizePeGrup[g.id] ? analizePeGrup[g.id].items : [];
           });
           // Sus stă grupul care are nevoie de el: întâi cererile de aprobat,
           // apoi cele în care s-a întâmplat cel mai mult. La egalitate, alfabetic — altfel ordinea

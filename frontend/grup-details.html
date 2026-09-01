@@ -408,18 +408,6 @@
             color: #555555;
             margin: 2px 0 0;
         }
-        /* ── ANALIZA, ÎN CAPUL CARDULUI ──
-           Butonul negru s-a întors aici pe 23 august (decizia lui Lucian).
-           Coborâse în lista de pași, la pasul care îl cere („Analiza
-           preliminară"), dar acolo stă sub o casetă pliată: un grup care se
-           uită la patru terenuri nu ajunge niciodată la el. Analiza e chiar
-           întrebarea pentru care s-a strâns grupul, deci se vede fără să
-           deschizi nimic.
-           ⚠️ Butonul din lista de pași a RĂMAS. Nu e o dublare de linkuri ca
-           pe homepage: acolo e acțiunea unui pas bifabil, aici e ce are de
-           făcut grupul cu terenul, iar cele două casete sunt închise.
-           ⚠️ `.teren-comments-area` a ieșit de tot: comentariile au intrat
-           într-o casetă pliată. */
         .teren-with-comments .teren-header-text { flex: 1; min-width: 0; }
         .teren-analiza {
             flex-shrink: 0;
@@ -575,11 +563,31 @@
         .tv-pas-corp { display: none; padding: 0.15rem 0 0.75rem 2.1rem; }
         .tv-pas-corp.open { display: block; }
 
-        .teren-comments-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 12px;
+        /* Linkul către Împărțirea apartamentelor, în locul casetei de
+           comentarii scoase pe 30 august. Arată ca un rând de card, nu ca un
+           buton: e o trecere într-o altă unealtă, nu o acțiune pe teren. */
+        .tv-impartire {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 0.9rem;
+            border-top: 1px solid #f0ece3;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background 0.15s;
         }
+        .tv-impartire:hover { background: #faf8f4; }
+        .tv-impartire > i:first-child { color: #C4553B; font-size: 0.9rem; }
+        .tv-impartire span { flex: 1; }
+        .tv-impartire-sageata {
+            color: #8a8a8a;
+            font-size: 0.75rem;
+            transition: transform 0.15s;
+        }
+        .tv-impartire:hover .tv-impartire-sageata { transform: translateX(2px); }
+
         .teren-comment {
             display: flex;
             gap: 10px;
@@ -611,71 +619,6 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 2px;
-        }
-        .comment-author {
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: #2a2a2a;
-        }
-        .comment-time {
-            font-size: 0.6875rem;
-            color: #8a8a8a;
-        }
-        .comment-text {
-            font-size: 0.8125rem;
-            color: #1a1a1a;
-            line-height: 1.5;
-            word-break: break-word;
-        }
-        .comment-delete {
-            background: none;
-            border: none;
-            color: #ddd5c6;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            transition: all 0.15s;
-        }
-        .comment-delete:hover {
-            color: #ef4444;
-            background: #fef2f2;
-        }
-        .comment-input-row {
-            display: flex;
-            gap: 8px;
-        }
-        .comment-input-row input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #e8e3d8;
-            border-radius: 8px;
-            font-size: 0.8125rem;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .comment-input-row input:focus {
-            border-color: #c2604a;
-        }
-        .comment-input-row button {
-            padding: 8px 16px;
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
-        .comment-input-row button:hover {
-            background: #333333;
-        }
-        .comment-input-row button:disabled {
-            background: #ddd5c6;
-            cursor: not-allowed;
         }
         .no-comments {
             text-align: center;
@@ -2615,147 +2558,53 @@ function renderTerenuri(terenuri) {
                     ${blocAnaliza}
                 </div>
 
-                <div class="tv-fold" id="fold-com-${teren.id}">
-                    <div class="tv-fold-cap" onclick="toggleFoldTeren('fold-com-${teren.id}')">
-                        <i class="fas fa-comments"></i>
-                        <span>Comentarii despre teren</span>
-                        <span class="tv-nr" id="com-nr-${teren.id}"></span>
-                        <i class="fas fa-chevron-down tv-fold-sageata"></i>
-                    </div>
-                    <div class="tv-fold-corp">
-                        <div class="teren-comments-list" id="comments-${teren.id}"></div>
-                        <div class="comment-input-row">
-                            <input type="text" id="input-${teren.id}" placeholder="Scrie un comentariu..." maxlength="2000"
-                                onkeydown="if(event.key==='Enter')addComment('${teren.id}')">
-                            <button onclick="addComment('${teren.id}')">Trimite</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- ⚠️ CASETA DE COMENTARII A IEȘIT DE AICI PE 30 AUGUST 2026.
+                     Discuțiile despre un teren s-au mutat în jurnalul din
+                     „Împărțirea apartamentelor", unde fiecare intrare are un fel
+                     (discuție, vizită, document, observație) și DATA FAPTULUI, nu
+                     doar data scrierii. Un fir de comentarii nu se poate scana:
+                     ca să afli când s-a vorbit ultima oară cu agentul, trebuia
+                     citit tot.
 
-                <div class="tv-fold" id="fold-pasi-${teren.id}">
-                    <div class="tv-fold-cap" onclick="toggleFoldTeren('fold-pasi-${teren.id}')">
-                        <i class="fas fa-list-check"></i>
-                        <span>Analiza și verificările</span>
-                        <span class="tv-nr" id="pasi-nr-${teren.id}"></span>
-                        <i class="fas fa-chevron-down tv-fold-sageata"></i>
-                    </div>
-                    <div class="tv-fold-corp">
-                        <div class="tv-pasi" id="pasi-teren-${teren.id}"></div>
-                    </div>
-                </div>
+                     Nu s-a pierdut nimic: e aceeași tabelă, grup_teren_comments,
+                     iar comentariile scrise până acum apar acolo ca observații,
+                     cu data la care au fost scrise.
+
+                     ⚠️ Fără apostrof invers în comentariul ăsta: el stă ÎNTR-UN
+                     template string, iar un apostrof invers îl închide. Pagina
+                     rămâne pe „Se încarcă", cu consola curată.
+
+                     ⚠️ Linkul de mai jos apare pe ORICE teren favorit, nu doar pe
+                     cele cu analiză: pagina de organizare se deschide și fără ea,
+                     cu preferințele membrilor, documentele și jurnalul. Grupul
+                     Parcul Circului se organiza exact așa cu luni înainte să aibă
+                     vreo analiză. -->
+                <a class="tv-impartire" href="organizare-apartamente.html?grup=${currentGroup.id}&teren=${teren.id}">
+                    <i class="fas fa-table-cells-large"></i>
+                    <span>Împărțirea apartamentelor${areAnalizaCard ? '' : ', notele și documentele terenului'}</span>
+                    <i class="fas fa-arrow-right tv-impartire-sageata"></i>
+                </a>
+
             </div>
         `;
     }).join('');
 
-    // Comentariile și bifele se citesc pentru toate terenurile deodată: numărul
-    // lor se scrie pe capul casetei pliate, deci trebuie știut chiar și când
-    // caseta e închisă.
-    terenuri.forEach(t => {
-        if (t.teren) loadComments(t.teren.id);
-    });
-    loadTerenChecklist(terenuri);
+    /* ⚠️ Aici se citeau bifele și comentariile fiecărui teren. Amândouă s-au
+       mutat pe 30 august 2026 în „Împărțirea apartamentelor": comentariile ca
+       jurnal, bifele ca „Verificările terenului". Cardul rămâne ce trebuia să
+       fie de la început, o carte de vizită a terenului, cu drumul spre locul în
+       care grupul chiar lucrează. */
 }
 
-// Casetele pliate din cardul unui teren (comentarii, pași)
+// Casetele pliate din cardul unui teren (pașii de verificare)
 function toggleFoldTeren(id) {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('open');
 }
 
 
-// ══════════════════════════════════════════════════════════════════════
-// PAȘII DE VERIFICARE, PE FIECARE TEREN
-// ══════════════════════════════════════════════════════════════════════
-//
-// Lista pașilor stă în `PASI_TEREN`, din `js/pasi-din-ghid.js`. Bifele stau în
-// tabela `grup_teren_checklist`, pe (grup, teren, pas): același pas bifat pe un
-// teren nu spune nimic despre celălalt teren la care se uită grupul.
-//
-// ⚠️ Notele și fișierele NU au tabelă nouă. Se scriu în `grup_checklist_notes`
-// și `grup_checklist_files`, cele care există deja, cu o cheie compusă
-// (`cheiaPasTeren`). Așa moștenesc politicile RLS care le închid pe membrii
-// grupului, iar funcțiile de note și atașamente rămân neschimbate.
-let terenChecklist = {};   // terenId -> { step_key: rândul din bază }
 
-function cheiaPasTeren(terenId, pas) { return 't-' + terenId + '-' + pas; }
 
-async function loadTerenChecklist(terenuri) {
-    const ids = (terenuri || []).map(t => t.teren && t.teren.id).filter(Boolean);
-    if (!ids.length) return;
-
-    terenChecklist = {};
-    try {
-        const { data, error } = await sb
-            .from('grup_teren_checklist')
-            .select('teren_id, step_key, checked, checked_at, checked_by')
-            .eq('grup_id', currentGroup.id)
-            .in('teren_id', ids);
-
-        if (error) throw error;
-
-        (data || []).forEach(r => {
-            terenChecklist[r.teren_id] = terenChecklist[r.teren_id] || {};
-            terenChecklist[r.teren_id][r.step_key] = r;
-        });
-    } catch (err) {
-        // Lista de pași se arată oricum, nebifată: e utilă și doar citită.
-        console.warn('Bifele pe teren nu s-au putut citi:', err.message || err);
-    }
-
-    terenuri.forEach(t => { if (t.teren) renderPasiTeren(t.teren); });
-}
-
-function renderPasiTeren(teren) {
-    const container = document.getElementById('pasi-teren-' + teren.id);
-    if (!container) return;
-
-    const bife = terenChecklist[teren.id] || {};
-    const facute = PASI_TEREN.filter(p => bife[p.key] && bife[p.key].checked).length;
-
-    const nr = document.getElementById('pasi-nr-' + teren.id);
-    if (nr) nr.textContent = facute + ' din ' + PASI_TEREN.length;
-
-    // Analiza există dacă terenului i s-a calculat câte apartamente încap. E
-    // același criteriu ca pe pagina terenului și în Spațiul tău din homepage.
-    const min = teren.nr_apartamente_min, max = teren.nr_apartamente_max;
-    const areAnaliza = !!(min && max);
-    const catApart = areAnaliza ? (min === max ? min + ' apartamente' : min + '-' + max + ' apartamente') : '';
-
-    container.innerHTML = PASI_TEREN.map(pas => {
-        const bifat = !!(bife[pas.key] && bife[pas.key].checked);
-        const cheie = cheiaPasTeren(teren.id, pas.key);
-
-        // Primul pas e singurul cu o acțiune proprie: fără analiză, butonul
-        // care o cere; cu analiză, rezultatul ei, ca să se vadă de ce e bifat.
-        let actiune = '';
-        if (pas.cereAnaliza) {
-            actiune = areAnaliza
-                ? `<a class="tv-actiune" href="teren-details.html?id=${teren.id}">${escapeHtml(catApart)} →</a>`
-                : `<a class="tv-actiune" href="analize.html?teren_id=${encodeURIComponent(teren.id)}&teren_titlu=${encodeURIComponent(teren.titlu || '')}">Cere o analiză →</a>`;
-        }
-
-        const bifa = canEditChecklist
-            ? `<div class="tv-check ${bifat ? 'checked' : ''}" onclick="toggleTerenStep('${teren.id}', '${pas.key}')"></div>`
-            : `<div class="tv-check ${bifat ? 'checked' : ''} blocat"></div>`;
-
-        return `
-            <div class="tv-pas ${bifat ? 'bifat' : ''}">
-                ${bifa}
-                <div class="tv-pas-text" onclick="toggleDetaliiPas('${cheie}')">
-                    <span class="tv-pas-titlu">${pas.titlu}</span>
-                    <span class="tv-pas-sub">${pas.sub}</span>
-                </div>
-                ${actiune}
-                <button class="tv-pas-buton" id="buton-${cheie}" onclick="toggleDetaliiPas('${cheie}')"
-                        title="Note și fișiere pentru verificarea asta">
-                    <i class="fas fa-paperclip"></i>
-                    <span class="tv-pas-eticheta">note</span>
-                    <i class="fas fa-chevron-down tv-pas-sageata"></i>
-                </button>
-            </div>
-            <div class="tv-pas-corp" id="corp-${cheie}">${renderBoxTools(cheie)}</div>`;
-    }).join('');
-}
 
 // Notele și fișierele unui pas de teren. Se citesc la prima deschidere, nu la
 // randare: șapte pași × patru terenuri ar însemna 28 de perechi de interogări
@@ -2778,40 +2627,6 @@ function toggleDetaliiPas(cheie) {
 }
 
 // Bifa unui pas, pe un teren anume.
-async function toggleTerenStep(terenId, pasKey) {
-    if (!canEditChecklist || !currentUser || !currentGroup) return;
-
-    const existent = (terenChecklist[terenId] || {})[pasKey];
-    const nou = !(existent && existent.checked);
-
-    try {
-        const { error } = await sb
-            .from('grup_teren_checklist')
-            .upsert({
-                grup_id: currentGroup.id,
-                teren_id: terenId,
-                step_key: pasKey,
-                checked: nou,
-                checked_at: nou ? new Date().toISOString() : null,
-                checked_by: nou ? currentUser.id : null,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'grup_id,teren_id,step_key' });
-
-        if (error) throw error;
-
-        terenChecklist[terenId] = terenChecklist[terenId] || {};
-        terenChecklist[terenId][pasKey] = { checked: nou, checked_by: currentUser.id };
-
-        // Se redesenează doar terenul atins, ca să nu se închidă la loc casetele
-        // deschise pe celelalte terenuri.
-        const teren = (currentTerenuri.find(t => t.teren && t.teren.id === terenId) || {}).teren;
-        if (teren) renderPasiTeren(teren);
-
-    } catch (err) {
-        console.error('Eroare la bifarea pasului de teren:', err);
-        showToast('Nu am putut salva bifa.', 'error');
-    }
-}
 
 // ── CASETELE PAȘILOR, ÎMPRĂȘTIATE PE CAPITOLE ──
 // Lista celor 11 casete și citirea textului lor din ghid stau în
@@ -3086,124 +2901,15 @@ async function deleteStepNote(noteId, stepKey) {
 // vreodată se răzgândește cineva (commit `2b85040` și mai devreme).
 
 // ── COMMENTS ──
-async function loadComments(terenId) {
-    const container = document.getElementById('comments-' + terenId);
-    if (!container) return;
-    
-    try {
-        const { data, error } = await sb
-            .from('grup_teren_comments')
-            .select('id, content, created_at, user_id')
-            .eq('grup_id', currentGroup.id)
-            .eq('teren_id', terenId)
-            .order('created_at', { ascending: true });
-        
-        if (error) throw error;
+/* ⚠️ AICI ERAU `loadComments`, `addComment` și `deleteComment`, scoase pe
+   30 august 2026 odată cu caseta de comentarii din cardul terenului.
 
-        // Numărul de pe capul casetei pliate. Gol când nu e niciunul: „(0)" e
-        // tot un lucru de citit, degeaba.
-        const nr = document.getElementById('com-nr-' + terenId);
-        if (nr) nr.textContent = (data && data.length) ? data.length : '';
+   Nu s-au mutat: pagina „Împărțirea apartamentelor" are propria citire și
+   propria scriere pe aceeași tabelă (`grup_teren_comments`), cu cele două
+   coloane noi, `fel` și `data_faptului`. Vezi `js/organizare-apartamente.js`.
 
-        // ⚠️ Fără „Niciun comentariu încă. Fii primul!". Ocupa un rând întreg pe
-        // fiecare teren ca să spună că nu e nimic de citit. Rămâne doar câmpul
-        // de scris, care spune același lucru și mai e și de folos.
-        if (!data || data.length === 0) {
-            container.innerHTML = '';
-            return;
-        }
+   `timeAgo` a rămas mai jos: îl folosesc și anunțurile. */
 
-        // Get profile names for comment authors
-        const userIds = [...new Set(data.map(c => c.user_id))];
-        const { data: profiles } = await sb
-            .from('profiles_visible')
-            .select('user_id, pseudonym')
-            .in('user_id', userIds);
-        
-        const profileMap = {};
-        (profiles || []).forEach(p => { profileMap[p.user_id] = p.pseudonym || 'Anonim'; });
-        
-        container.innerHTML = data.map(c => {
-            const name = profileMap[c.user_id] || 'Anonim';
-            const initials = name.substring(0, 2).toUpperCase();
-            const time = timeAgo(c.created_at);
-            const isOwn = currentUser && c.user_id === currentUser.id;
-            
-            return `
-                <div class="teren-comment">
-                    <div class="comment-avatar">${initials}</div>
-                    <div class="comment-body">
-                        <div class="comment-meta">
-                            <span class="comment-author">${escapeHtml(name)}</span>
-                            <span class="comment-time">${time}</span>
-                        </div>
-                        <div class="comment-text">${escapeHtml(c.content)}</div>
-                    </div>
-                    ${isOwn ? '<button class="comment-delete" onclick="deleteComment(\'' + c.id + '\', \'' + terenId + '\')" title="Sterge"><i class="fas fa-trash-alt"></i></button>' : ''}
-                </div>
-            `;
-        }).join('');
-        
-        // Scroll to bottom
-        container.scrollTop = container.scrollHeight;
-        
-    } catch (e) {
-        console.error('Load comments error:', e);
-        container.innerHTML = '<div class="no-comments">Eroare la incarcarea comentariilor.</div>';
-    }
-}
-
-window.addComment = async function(terenId) {
-    const input = document.getElementById('input-' + terenId);
-    if (!input) return;
-    
-    const content = input.value.trim();
-    if (!content || !currentUser || !currentGroup) return;
-    
-    input.disabled = true;
-    
-    try {
-        const { error } = await sb
-            .from('grup_teren_comments')
-            .insert({
-                grup_id: currentGroup.id,
-                teren_id: terenId,
-                user_id: currentUser.id,
-                content: content
-            });
-        
-        if (error) throw error;
-        
-        input.value = '';
-        await loadComments(terenId);
-        
-    } catch (e) {
-        console.error('Add comment error:', e);
-        showToast('Eroare la adaugarea comentariului.', 'error');
-    } finally {
-        input.disabled = false;
-        input.focus();
-    }
-};
-
-window.deleteComment = async function(commentId, terenId) {
-    if (!confirm('Stergi comentariul?')) return;
-    
-    try {
-        const { error } = await sb
-            .from('grup_teren_comments')
-            .delete()
-            .eq('id', commentId);
-        
-        if (error) throw error;
-        
-        await loadComments(terenId);
-        
-    } catch (e) {
-        console.error('Delete comment error:', e);
-        showToast('Eroare la stergerea comentariului.', 'error');
-    }
-};
 
 function timeAgo(dateStr) {
     const now = new Date();
@@ -5072,7 +4778,16 @@ async function loadStepFiles(stepKey) {
             const uploaderName = profilesCache[f.uploaded_by] || 'Utilizator';
             const dateStr = new Date(f.created_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' });
             
-            const deleteBtn = (poateScrieNote && f.uploaded_by === currentUser?.id)
+            // ⚠️ Ștergerea: cine a urcat fișierul, PLUS fondatorul grupului și
+            // superadminul (31 august 2026). Până azi cerea doar `uploaded_by`,
+            // iar fondatorul nu putea face curat în propriul grup: exact asta
+            // s-a lovit când au rămas trei fișiere de probă din martie și
+            // nimeni nu avea butonul ca să le scoată.
+            // ⚠️ Merge doar cu politicile din `8-stergerea-fisierelor.sql`
+            // rulate: fără ele butonul apare, dar ștergerea e refuzată tăcut de
+            // RLS, ceea ce e mai rău decât să nu apară deloc.
+            const potSterge = f.uploaded_by === currentUser?.id || isAdmin || isSuperAdmin;
+            const deleteBtn = (poateScrieNote && potSterge)
                 ? `<button class="cl-file-delete" onclick="deleteStepFile('${f.id}', '${stepKey}', '${f.storage_path}')" title="Șterge">
                        <i class="fas fa-times"></i>
                    </button>`
