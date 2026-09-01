@@ -180,6 +180,14 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## Rezolvate
 
+- [x] **2026-09-01 — Timelapse-ul iese de pe YouTube și devine fișier local, în două pagini** *(commit `190a5c5`, împins; **nepublicat**, cPanel manual)*
+  Montaj nou al șantierului Județului (capturi Reolink 2026 + arhiva 2025), pus în `frontend/video/timelapse-judetului.mp4` (7,9 MB, 854×456, H.264). **Un singur fișier servește și homepage-ul și hero-ul din Povestea noastră**, ca să nu ținem 8 MB de două ori. Vechiul `povestea_noastra/videos/timelapse-santier.mp4` (17,8 MB, 720p, montajul din 2025) e **șters**; se recuperează din `190a5c5^`.
+  ⚠️ **`aspect-ratio` din `.video-ph--live` trebuie să fie proporția EXACTĂ a filmului**, azi `854/456`. Era `16/9`, pus tot ca să nu apară dungi, cu filmul vechi care chiar era 16:9. Un film mai lat decât caseta primește dungi sus-jos, unul mai îngust în stânga-dreapta. **Dacă se schimbă filmul, se măsoară și se potrivește numărul.** `object-fit:cover` e pus ca plasă, dar nu înlocuiește potrivirea.
+  ⚠️ **Scriptul care oprea filmul pentru cei logați căuta `.video-ph--live iframe`.** Cu `<video>` selectorul nu mai găsea nimic, deci un om logat ar fi descărcat 7,9 MB pentru un film ascuns cu `display:none`. Acum face `pause()` + `removeAttribute('src')` + **`load()`**; ultimul e cel care taie efectiv transferul pornit, `pause()` singur nu-l oprește. Probat: `networkState` ajunge 0.
+  ⚠️ **Machetele au rămas pe YouTube**: `frontend/_macheta-hero-nelogat-ecran.html` și `package-homepage-v9/index.html` au tot iframe-ul vechi (`bfW2DJ1_du4`). Nu sunt pagini live, dar acum arată altceva decât homepage-ul real.
+  ✅ **Trafic, verificat, nu presupus:** homepage-ul are ~700 afișări pe lună (2.098 în 91 de zile, Plausible), iar site-ul a consumat 5,33 GB în august (cPanel → Bandwidth; 7,72 GB cu emailuri cu tot). Filmul adaugă ~5 GB pe lună, deci cam dublează consumul, și rămâne departe de orice limită rezonabilă. Decizia de a merge local s-a luat pe cifrele astea.
+  ✅ Ceasul camerei rămâne în imagine: tăietura care îl scotea mușca și din acoperiș. Capcanele exportului din CapCut (HEVC, benzi negre coapte, index la sfârșit, 1080p implicit) sunt scrise separat, nu se repetă aici.
+
 - [x] **2026-08-15 — Homepage: secțiunea „Cum începi", două căi de intrare** *(comituri `7df6e2d` + `2ff29e6`, împinse; **publicat** din cPanel și verificat pe live)*
   Secțiunea „Cum funcționează" (4 pași) s-a **înlocuit** cu două căi concrete, de la teren sau de la zonă, și s-a **mutat** imediat sub blocul „Cum a devenit posibil", deasupra liniei de derulare a majorității vizitatorilor. Motivul din handoff: 52% rată de ieșire, 43% adâncime de derulare, iar cei 4 pași vechi descriau serviciul și includeau etape aflate la ani distanță de vizitator („Cumpărați terenul", „Construiți și vă mutați"). CTA-ul secundar din hero a devenit ancoră internă `#cum-incepi`, cu derulare lină și `scroll-margin-top:88px` (nav-ul e `sticky`, 64px, altfel titlul rămânea sub el).
   **Derularea lină e anulată pe `prefers-reduced-motion`** — cine a cerut din sistem mai puțină mișcare primește saltul instant. Butonul „sus" din nav era deja lin prin JS, nu se bat cap în cap.
@@ -229,4 +237,4 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ---
 
-*Ultima actualizare: 2026-08-22*
+*Ultima actualizare: 2026-09-01*
