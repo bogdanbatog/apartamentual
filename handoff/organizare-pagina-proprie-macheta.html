@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizarea pe apartamente, machetă de pagină</title>
+<style>
+  :root{
+    --crem:#F7F4EE;
+    --hartie:#FFFFFF;
+    --cerneala:#1A1815;
+    --gri:#6E675E;
+    --linie:#E4DED4;
+    --teracota:#C4553B;
+    --teracota-slab:#F3DED8;
+    --salvie:#8A9B7C;
+    --salvie-slab:#EDF1E8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--crem);color:var(--cerneala);
+    line-height:1.5;padding:24px 16px 80px;
+  }
+  .pagina{max-width:1080px;margin:0 auto;}
+
+  /* ⚠️ Banda asta NU face parte din pagină. În platformă ești autentificat,
+     deci nu există niciun „cine ești": selectorul de mai jos e doar unealta
+     machetei, ca să se poată vedea pagina prin ochii mai multor membri. De
+     aceea stă aici, în banda de avertisment, nu într-o secțiune a paginii. */
+  .demo-banda{
+    background:var(--cerneala);color:var(--crem);
+    font-size:12.5px;letter-spacing:.03em;
+    padding:8px 12px;border-radius:8px;margin-bottom:24px;
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  }
+  .demo-banda .text{flex:1;min-width:220px;}
+  .demo-banda label{color:#C9C2B6;}
+  .demo-banda select{
+    font:inherit;font-size:12.5px;padding:4px 8px;border-radius:6px;
+    border:1px solid #4A443C;background:#2A2620;color:var(--crem);cursor:pointer;
+  }
+  .eticheta{font-size:11px;font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--teracota);}
+  h1{font-size:26px;font-weight:700;margin:4px 0 2px;}
+  .sub{color:var(--gri);font-size:15px;}
+  .insigna{display:inline-block;background:var(--cerneala);color:var(--crem);
+    font-size:12px;padding:4px 10px;border-radius:99px;margin-top:8px;}
+  .context{margin-top:14px;font-size:13.5px;color:var(--gri);}
+  .context a{color:var(--teracota);text-decoration:none;font-weight:600;}
+  .context a:hover{text-decoration:underline;}
+
+  section{margin-top:36px;}
+  h2{font-size:18px;margin-bottom:4px;}
+  .explica{color:var(--gri);font-size:14px;margin-bottom:16px;}
+
+
+  /* ── filele variantelor, colorate termic ─────────────────────────── */
+  .file{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .fila{font:inherit;font-size:13px;text-align:left;cursor:pointer;
+    border:1.5px solid transparent;border-radius:8px;padding:7px 11px;transition:transform .08s;}
+  .fila:hover{transform:translateY(-1px);}
+  .fila b{display:block;font-size:13px;}
+  .fila small{font-size:10.5px;opacity:.75;}
+  .fila.activ{border-color:var(--cerneala);}
+
+  .varianta-corp{background:var(--hartie);border:1px solid var(--linie);
+    border-radius:12px;padding:14px 16px 16px;}
+  .varianta-cap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;
+    padding-bottom:9px;margin-bottom:12px;border-bottom:1px solid var(--linie);}
+  .varianta-cap h3{font-size:14.5px;}
+  .varianta-cap .desc{color:var(--gri);font-size:12.5px;flex:1;min-width:180px;}
+  .varianta-cap .cifra{font-size:12.5px;color:var(--gri);}
+  .varianta-cap .cifra b{font-size:13.5px;color:var(--cerneala);}
+  .avertisment{
+    width:100%;margin-top:6px;padding:8px 10px;border-radius:7px;
+    background:var(--teracota-slab);color:#7C3524;font-size:12px;line-height:1.45;
+  }
+  .avertisment b{color:#5E2719;}
+
+  /* ── nivelurile ───────────────────────────────────────────────────── */
+  .nivel{display:flex;align-items:stretch;gap:8px;margin-bottom:6px;}
+  .nivel-nume{width:64px;flex:none;font-size:10px;font-weight:600;
+    letter-spacing:.06em;color:var(--gri);text-transform:uppercase;
+    text-align:right;padding-top:7px;line-height:1.25;}
+  .nivel-nume small{display:block;font-size:9.5px;font-weight:400;
+    letter-spacing:0;text-transform:none;color:#B5ADA2;}
+  .nivel-ap{display:flex;flex:1;gap:6px;justify-content:flex-start;align-items:stretch;}
+
+  /* ⚠️ Strâns dinadins (28 august): casetele erau aerisite ca niște carduri de
+     prezentare, dar aici se compară șase deodată, pe cinci variante. Un tabel
+     dens se scanează dintr-o privire; carduri mari cer derulare. */
+  /* ⚠️ `position:relative` e obligatoriu: mânerul de tragere e `absolute` și
+     se agață de el. Fără rândul ăsta se ancorează de pagină, ajunge lat cât
+     tot ecranul și înalt de zero, deci nu se mai poate apuca nicăieri, fără
+     nicio eroare în consolă. */
+  .ap{
+    position:relative;
+    border:1.5px solid var(--linie);border-radius:7px;background:var(--crem);
+    padding:6px 7px 5px;cursor:pointer;min-width:0;
+    transition:border-color .12s, background .12s, box-shadow .12s;
+    display:flex;flex-direction:column;
+  }
+  .ap:hover{border-color:var(--gri);}
+  .ap-titlu{display:flex;align-items:baseline;gap:5px;line-height:1.2;}
+  .ap-titlu .tip{font-weight:700;font-size:12.5px;flex:1;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;}
+  .ap-titlu .mp{font-size:12px;font-weight:700;color:var(--cerneala);white-space:nowrap;}
+  /* Săgețile de glisare. Una singură când apartamentul e la capătul
+     intervalului, ca să nu promită o direcție în care nu se poate merge. */
+  /* Eticheta lungă pe ecran lat, cea scurtă pe telefon. Amândouă în DOM, ca să
+     nu depindem de o re-randare la rotirea telefonului. */
+  .tip-scurt{display:none;}
+  /* Săgeata de deschidere a panoului: doar pe telefon. */
+  .ap-jos-sageata{display:none;font-size:11px;color:var(--gri);line-height:1;}
+
+  /* Costurile la stânga, cine s-a înscris la dreapta: pe același rând, fiindcă
+     în casetele late rămânea o bandă goală sub cifre. */
+  .ap-jos{display:flex;align-items:center;gap:8px;margin-top:5px;
+    border-top:1px solid var(--linie);padding-top:4px;}
+  .ap-bani{font-size:10px;color:var(--gri);flex:1;min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;}
+  .ap-bani b{color:var(--cerneala);font-weight:600;}
+  .ap-bani b.tot{font-size:11.5px;font-weight:700;}
+
+  .cine{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;
+    flex:0 1 auto;min-width:0;}
+  .punct{font-size:9.5px;font-weight:700;color:var(--crem);background:var(--cerneala);
+    border-radius:99px;padding:1px 6px;white-space:nowrap;}
+  .ap.unul{border-color:var(--salvie);background:var(--salvie-slab);}
+  .ap.unul .punct{background:var(--salvie);}
+  .ap.multi{border-color:var(--teracota);background:var(--teracota-slab);}
+  .ap.multi .punct{background:var(--teracota);}
+  .ap-eu{font-size:9px;font-weight:700;color:var(--cerneala);
+    letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;align-self:center;}
+
+  /* ── mânerul de tragere ────────────────────────────────────────────────
+     Lat de 16 pixeli, nu de 9 cât avea prima formă, și fără cele două săgeți
+     „‹›" de lângă suprafață: săgețile arătau ca niște butoane fără să fie
+     (indicau doar direcția), iar mânerul de sub ele era prea îngust ca să se
+     nimerească din prima. Acum zona de apucat e una singură și destul de lată
+     cât să nu ceară ochire.
+
+     ⚠️ Se sprijină pe `position:relative` de pe `.ap`. Fără el se ancorează de
+     pagină, iese lat cât tot ecranul și înalt de zero, iar tragerea nu mai
+     merge de nicăieri, fără nicio eroare în consolă. */
+  .ap-maner{
+    position:absolute;top:0;right:-6px;bottom:0;width:16px;
+    cursor:col-resize;z-index:2;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:none;
+  }
+  .ap-maner::before{
+    content:"";width:3px;height:26px;border-radius:3px;
+    background:var(--linie);transition:background .12s, height .12s, width .12s;
+  }
+  .ap:hover .ap-maner::before{background:var(--gri);width:4px;}
+  .ap-maner:hover::before{background:var(--teracota);width:4px;height:70%;}
+  .ap.trage{border-color:var(--teracota);}
+  .ap.trage .ap-maner::before{background:var(--teracota);width:4px;height:80%;}
+  /* Cât ține tragerea, tot ecranul poartă cursorul de redimensionare și nu se
+     mai poate selecta text. Fără rândul al doilea, o tragere mai lungă apucă
+     jumătate din pagină și o colorează albastru. */
+  body.se-trage{cursor:col-resize;user-select:none;}
+
+  /* Fără joc în nicio direcție: mânerul rămâne, dar stins. */
+  .ap-maner.blocat{cursor:default;}
+  .ap-maner.blocat::before{opacity:.35;}
+  .ap:hover .ap-maner.blocat::before,
+  .ap-maner.blocat:hover::before{background:var(--linie);width:3px;height:26px;}
+
+  /* Cât se poate întinde caseta, arătat DOAR în timpul tragerii. Tot restul
+     timpului ar fi două cifre în plus pe fiecare casetă, degeaba. */
+  .ap-limite{display:none;justify-content:space-between;
+    font-size:9px;color:#B5ADA2;line-height:1.2;margin-top:3px;}
+  .ap.trage .ap-limite{display:flex;}
+  .ap.al-meu{box-shadow:0 0 0 2px var(--cerneala);}
+  .ap.comun{cursor:default;border-style:dashed;color:var(--gri);}
+  .ap.comun:hover{border-color:var(--linie);}
+
+  /* Golul rămas pe nivel. Nu e o greșeală, e suprafață care încă nu s-a dat
+     nimănui, dar pe care o plătește cineva: de asta se vede. */
+  .gol-nivel{
+    border:1.5px dashed var(--linie);border-radius:7px;
+    background:repeating-linear-gradient(135deg,transparent,transparent 6px,
+      rgba(110,103,94,.06) 6px,rgba(110,103,94,.06) 12px);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:10px;color:#B5ADA2;padding:6px 4px;min-width:0;line-height:1.25;
+  }
+
+  /* ── nivelurile pe telefon ─────────────────────────────────────────────
+     ⚠️ Casetele își PĂSTREAZĂ lățimea proporțională, nu trec pe lățime fixă.
+     Prima formă le punea pe `flex:1 1 170px`, iar atunci un apartament de 112
+     mp arăta cât unul de 78, glisarea nu mai lățea nimic, iar gestul rămânea
+     fără răspuns vizual: se schimba doar cifra.
+
+     Ce cedează în loc e textul, nu geometria: font mai mic, iar în casetele
+     prea înguste costurile se taie cu trei puncte. Cifra care contează
+     (suprafața) și numele celui înscris rămân mereu vizibile, iar detaliul e
+     în titlul casetei, la apăsare lungă.
+
+     Numele nivelului trece deasupra, ca să nu mai ia 64 de pixeli din lățime:
+     pe 390 de pixeli, aceia sunt o șesime din clădire. */
+  @media (max-width:720px){
+    .nivel{flex-direction:column;gap:3px;margin-bottom:9px;}
+    .nivel-nume{width:auto;text-align:left;padding-top:0;}
+    .nivel-nume small{display:inline;margin-left:6px;}
+    .nivel-ap{gap:4px;}
+    .ap{padding:5px 5px 4px;border-radius:6px;}
+    .ap-titlu{gap:3px;}
+    .ap-titlu .tip{font-size:11px;}
+    .ap-titlu .mp{font-size:11px;}
+    .ap-jos{gap:4px;margin-top:4px;padding-top:3px;}
+    .ap-bani{font-size:9px;}
+    .ap-bani b.tot{font-size:10px;}
+    .punct{font-size:9px;padding:1px 5px;}
+    .ap-eu{display:none;}
+    .gol-nivel{font-size:9px;padding:4px 2px;}
+  }
+
+  .stare-legenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--gri);}
+  .stare-legenda span{display:flex;align-items:center;gap:6px;}
+  .buline{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--linie);background:var(--crem);flex:none;}
+  .buline.b1{border-color:var(--salvie);background:var(--salvie-slab);}
+  .buline.b2{border-color:var(--teracota);background:var(--teracota-slab);}
+
+  details{margin-top:16px;}
+  summary{cursor:pointer;font-size:13.5px;color:var(--teracota);font-weight:600;}
+  table{width:100%;border-collapse:collapse;background:var(--hartie);
+    border:1px solid var(--linie);border-radius:12px;overflow:hidden;
+    font-size:13.5px;margin-top:10px;}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--linie);}
+  th:first-child,td:first-child{text-align:left;}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gri);
+    background:var(--crem);font-weight:600;}
+  tr:last-child td{border-bottom:none;}
+  tr.total-rand td{font-weight:700;background:var(--crem);}
+  .scroll-x{overflow-x:auto;}
+
+  .membri{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+  .membru{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;padding:13px 15px;font-size:13.5px;}
+  .membru.eu{border-color:var(--cerneala);}
+  .membru b{font-size:14px;}
+  .membru .cere{color:var(--gri);margin-top:4px;}
+  .membru .bani{margin-top:5px;font-size:12.5px;color:var(--gri);}
+  .membru .bani b{color:var(--cerneala);font-weight:600;}
+  .membru .nota{margin-top:6px;font-size:12.5px;color:var(--gri);font-style:italic;}
+  .membru .ales{margin-top:7px;font-size:12.5px;padding-top:7px;border-top:1px solid var(--linie);}
+  .membru .ales-aici{display:block;}
+  .membru .ales-altele{display:block;margin-top:3px;color:var(--gri);}
+  .membru .ales em{font-style:normal;color:var(--teracota);font-weight:600;}
+  .membru .gol{color:#A79F94;}
+
+  /* ── jurnalul terenului, ca tabel ─────────────────────────────────────
+     A fost întâi o listă de carduri. Arăta bine și se citea prost: într-un
+     Excel vezi zece rânduri deodată și le scanezi pe coloană, în carduri
+     derulezi. Ce ei aveau pe două coloane („Observații" și „Note discuție la
+     telefon") stă aici pe un rând per fapt, cu felul lui. ─────────────── */
+  .jurnal-tabel{width:100%;border-collapse:collapse;background:var(--hartie);
+    border:1px solid var(--linie);border-radius:12px;overflow:hidden;
+    font-size:13px;margin-top:12px;}
+  .jurnal-tabel th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gri);background:var(--crem);font-weight:600;
+    padding:7px 10px;text-align:left;border-bottom:1px solid var(--linie);}
+  /* ⚠️ `text-align:left` explicit. Regula generală de tabel din pagină
+     (`th,td{text-align:right}`) e făcută pentru coloane de cifre; aici toate
+     coloanele sunt text, iar fără rândul ăsta jurnalul se aliniază la dreapta.
+     Pe ecran lat nu se vede, fiindcă textul umple celula; pe telefon coloana
+     se strânge la câteva cuvinte și se rupe zdrențuit spre stânga. */
+  .jurnal-tabel td{padding:7px 10px;border-bottom:1px solid var(--linie);
+    vertical-align:top;line-height:1.45;text-align:left;}
+  .jurnal-tabel tr:last-child td{border-bottom:none;}
+  .jurnal-tabel tr:hover td{background:var(--crem);}
+  .j-cand{white-space:nowrap;font-weight:600;width:1%;}
+  .j-cand small{display:block;font-weight:400;font-size:10.5px;color:#B5ADA2;}
+  .j-fel{white-space:nowrap;width:1%;}
+  .j-fel span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    border-radius:99px;padding:2px 8px;border:1px solid;}
+  .j-fel .discutie{color:#8E3A26;background:var(--teracota-slab);border-color:var(--teracota);}
+  .j-fel .vizita{color:#4E5C42;background:var(--salvie-slab);border-color:var(--salvie);}
+  .j-fel .document{color:#4A5266;background:#EDEFF4;border-color:#8892A8;}
+  .j-fel .observatie{color:var(--gri);background:var(--crem);border-color:var(--linie);}
+  .j-cine{white-space:nowrap;width:1%;color:var(--gri);}
+  .j-text{color:var(--cerneala);}
+
+  .jurnal-nou{background:var(--hartie);border:1px dashed var(--linie);border-radius:10px;
+    padding:11px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .jurnal-nou select,.jurnal-nou input[type=date],.jurnal-nou input[type=text]{
+    font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--linie);
+    border-radius:7px;background:var(--crem);color:var(--cerneala);}
+  .jurnal-nou input[type=text]{flex:1;min-width:200px;}
+  .jurnal-nou button{font:inherit;font-size:13px;font-weight:600;border:none;
+    border-radius:7px;padding:8px 14px;cursor:pointer;background:var(--cerneala);color:var(--crem);}
+
+  /* ⚠️ FĂRĂ scroll interior pe jurnal, oricât s-ar aduna. Pagina grupului a
+     avut asta pe lista de terenuri și s-a scos: două bare de derulare una în
+     alta e cel mai sigur fel de a ascunde ceva de om, iar ce e sub prima nu se
+     mai citește niciodată. Tiparul casei e plierea, ca la anunțuri și la
+     membri: se arată ultimele câteva, restul la cerere. */
+  .jurnal-mai,.membri-mai{
+    display:block;width:100%;margin-top:10px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:8px;padding:8px 14px;
+    background:var(--hartie);color:var(--teracota);
+  }
+  .jurnal-mai:hover,.membri-mai:hover{border-color:var(--teracota);}
+
+  /* ── cardul membrului ─────────────────────────────────────────────── */
+  .membru-cap{display:flex;align-items:baseline;gap:8px;}
+  .membru-cap b{flex:1;}
+  .btn-mic{
+    font:inherit;font-size:12px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:7px;padding:3px 10px;
+    background:var(--crem);color:var(--cerneala);
+  }
+  .btn-mic:hover{border-color:var(--gri);}
+  .sursa{
+    font-size:10.5px;letter-spacing:.04em;border-radius:99px;padding:1px 7px;
+    background:var(--salvie-slab);color:#4E5C42;border:1px solid var(--salvie);
+  }
+  .sursa.alt{background:var(--teracota-slab);color:#7C3524;border-color:var(--teracota);}
+
+  /* ── formularul de preferințe ──────────────────────────────────────────
+     Grupat pe trei întrebări, fiecare cu titlul ei: ce fel de apartament, ce
+     mai trebuie pe lângă el, cu ce bani. Înșirate la rând, cele opt câmpuri
+     arătau ca o listă de variabile, iar omul nu vedea că bugetul e altceva
+     decât etajul. ─────────────────────────────────────────────────────── */
+  .form-pref{
+    display:none;background:var(--hartie);border:1px solid var(--linie);
+    border-radius:14px;margin-bottom:18px;overflow:hidden;
+    box-shadow:0 2px 14px rgba(26,24,21,.07);
+  }
+  .pref-cap{
+    display:flex;align-items:center;gap:12px;
+    padding:13px 20px;border-bottom:1px solid var(--linie);background:var(--crem);
+  }
+  .pref-cap h3{flex:1;font-size:15px;}
+  .pref-corp{padding:18px 20px;}
+
+  .pref-din-profil{
+    background:var(--salvie-slab);border:1px solid var(--salvie);border-radius:10px;
+    padding:11px 14px;font-size:13px;color:#3F4B35;margin-bottom:20px;line-height:1.5;
+  }
+  .pref-din-profil b{color:#2F3927;}
+  .pref-din-profil a{color:#3F4B35;font-weight:600;}
+
+  .pref-sectiune{margin-bottom:18px;}
+  .pref-sectiune:last-of-type{margin-bottom:0;}
+  .pref-titlu{
+    font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--teracota);margin-bottom:10px;
+    padding-bottom:5px;border-bottom:1px solid var(--linie);
+  }
+  .pref-rand{display:grid;gap:14px;}
+  .pref-rand.trei{grid-template-columns:repeat(3,1fr);}
+  .pref-rand.doua{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:640px){
+    .pref-rand.trei,.pref-rand.doua{grid-template-columns:1fr;}
+  }
+
+  .pref-camp{display:flex;flex-direction:column;gap:5px;}
+  .pref-camp > span{font-size:12.5px;color:var(--gri);}
+  .pref-camp small{font-size:11.5px;color:#A79F94;line-height:1.4;}
+
+  /* Unitatea stă ÎN câmp, la dreapta, nu după el: „115" și „mp" despărțite de
+     un chenar se citesc ca două lucruri diferite. */
+  .camp-cu-unitate{position:relative;display:block;}
+  .camp-cu-unitate .unitate{
+    position:absolute;right:11px;top:50%;transform:translateY(-50%);
+    font-size:12.5px;color:#A79F94;pointer-events:none;
+  }
+  .camp-cu-unitate input{padding-right:38px;}
+
+  .form-pref select,.form-pref input[type=number],.form-pref input[type=text]{
+    font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--linie);
+    border-radius:8px;background:var(--crem);color:var(--cerneala);width:100%;
+    transition:border-color .12s, background .12s;
+  }
+  .form-pref select:focus,.form-pref input:focus{
+    outline:none;border-color:var(--cerneala);background:var(--hartie);
+  }
+  .form-pref input::placeholder{color:#B5ADA2;}
+
+  .pref-butoane{
+    display:flex;gap:10px;justify-content:flex-end;align-items:center;
+    padding:13px 20px;border-top:1px solid var(--linie);background:var(--crem);
+  }
+  .btn-principal{
+    font:inherit;font-size:14px;font-weight:600;border:none;border-radius:8px;
+    padding:10px 22px;cursor:pointer;background:var(--cerneala);color:var(--crem);
+  }
+  .btn-principal:hover{background:#2F2A24;}
+  .btn-sters{
+    font:inherit;font-size:13.5px;cursor:pointer;border:1px solid var(--linie);
+    border-radius:8px;padding:9px 16px;background:var(--hartie);color:var(--gri);
+  }
+  .btn-sters:hover{border-color:var(--gri);color:var(--cerneala);}
+
+  /* ── cardul de membru pe telefon ───────────────────────────────────────
+     Rândul „Aici: V5 · Etaj 2 · 3 camere" iese: aceeași informație stă deja pe
+     casetele de mai sus, unde numele omului scrie chiar pe apartamentul lui.
+     Pe un ecran de 390 de pixeli, două rânduri care repetă ceva înseamnă un
+     card cu un sfert mai înalt, ori de nouă ori.
+
+     ⚠️ „Și pe Busolei 16" RĂMÂNE: alegerile de pe celelalte terenuri ale
+     grupului nu se văd nicăieri altundeva în pagină, iar fără ele cineva care
+     s-a așezat deja pe alt teren pare doar nehotărât. Când omul n-are nimic pe
+     alt teren, cade tot blocul, cu linia lui despărțitoare cu tot. */
+  @media (max-width:640px){
+    .membru .ales-aici{display:none;}
+    .membru .ales--doar-aici{display:none;}
+  }
+
+  /* ── jurnalul pe telefon: listă, nu tabel ──────────────────────────────
+     La 390 de pixeli, patru coloane strâng textul la vreo șaizeci, iar fraza
+     se rupe cuvânt cu cuvânt pe verticală, cu jumătate de ecran gol în stânga.
+     Aici data, felul și autorul stau pe un rând, iar textul dedesubt, pe toată
+     lățimea. Aceleași date, alt așezământ. */
+  @media (max-width:640px){
+    .jurnal-tabel{display:block;border-radius:12px;}
+    .jurnal-tabel tbody,.jurnal-tabel tr,.jurnal-tabel td{display:block;width:auto;}
+    /* Capul de tabel n-are ce căuta: etichetele coloanelor se înțeleg din
+       forma rândului. */
+    .jurnal-tabel tr:first-child{display:none;}
+    .jurnal-tabel tr{padding:11px 13px;border-bottom:1px solid var(--linie);}
+    .jurnal-tabel tr:last-child{border-bottom:none;}
+    .jurnal-tabel td{border:none;padding:0;}
+    /* ⚠️ Selectorii poartă `.jurnal-tabel` dinadins. Fără el, `.j-cand` are
+       specificitate mai mică decât `.jurnal-tabel td` de mai sus, iar `display:
+       block` de acolo câștigă: data, eticheta și numele ajung pe câte un rând
+       fiecare, adică patru rânduri de antet pentru două rânduri de conținut. */
+    .jurnal-tabel .j-cand,
+    .jurnal-tabel .j-fel,
+    .jurnal-tabel .j-cine{display:inline-block;vertical-align:middle;
+      width:auto;margin:0 7px 0 0;}
+    .jurnal-tabel .j-cand small{display:inline;margin-left:5px;}
+    .jurnal-tabel .j-cine{color:var(--gri);}
+    .jurnal-tabel .j-text{display:block;margin-top:6px;}
+  }
+
+  /* ── panoul apartamentului, pe telefon ─────────────────────────────────
+     Ce nu încape în casetă: prețul defalcat, cine s-a înscris, reglarea
+     suprafeței din butoane și înscrierea propriu-zisă. Stă sub nivelul din
+     care face parte, nu peste pagină, ca să rămână vizibilă clădirea. */
+  .ap-detaliu{display:none;}
+  @media (max-width:720px){
+    .ap-detaliu{
+      display:block;background:var(--crem);border:1px solid var(--linie);
+      border-left:3px solid var(--cerneala);border-radius:8px;
+      padding:11px 13px;margin:2px 0 10px;font-size:13px;
+    }
+    .apd-cap{margin-bottom:8px;}
+    .apd-bani{font-size:12.5px;color:var(--gri);line-height:1.55;
+      padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--linie);}
+    .apd-bani b{color:var(--cerneala);float:right;font-weight:600;}
+    .apd-bani .tot b{font-weight:700;}
+    .apd-marime{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+      font-size:12.5px;color:var(--gri);margin-bottom:9px;}
+    .apd-marime b{color:var(--cerneala);min-width:52px;text-align:center;}
+    .apd-marime small{font-size:11px;color:#B5ADA2;}
+    .apd-pas{
+      font:inherit;font-size:17px;line-height:1;cursor:pointer;
+      width:34px;height:34px;border-radius:8px;
+      border:1px solid var(--linie);background:var(--hartie);color:var(--cerneala);
+    }
+    .apd-pas:disabled{opacity:.35;cursor:default;}
+    .apd-cine{font-size:12.5px;color:var(--gri);margin-bottom:9px;}
+    .apd-cine b{color:var(--cerneala);}
+    .apd-buton{
+      display:block;width:100%;font:inherit;font-size:13.5px;font-weight:600;
+      border:none;border-radius:8px;padding:11px;cursor:pointer;
+      background:var(--cerneala);color:var(--crem);
+    }
+    .apd-buton.retrage{background:var(--hartie);color:var(--cerneala);
+      border:1px solid var(--linie);}
+
+    /* În casetă rămâne doar cât e de mare și săgeata care deschide restul. */
+    .tip-lung{display:none;}
+    .tip-scurt{display:inline;}
+    /* „mp" iese din casetă: pe o garsonieră de 69 de pixeli, cele trei
+       caractere costă exact atât cât trebuie ca „Gars." să se taie la „G".
+       Unitatea se vede în panou, iar lângă un tip de apartament o cifră nu se
+       poate citi altfel. */
+    .mp-unitate{display:none;}
+    .ap-jos-sageata{display:inline;}
+    .ap-jos{display:none;}
+    .ap{padding:7px 6px;}
+    .ap.deschis{border-color:var(--cerneala);box-shadow:0 0 0 1px var(--cerneala);}
+  }
+
+  .nota-final{margin-top:40px;padding:16px;border-left:3px solid var(--teracota);
+    background:var(--hartie);border-radius:0 10px 10px 0;font-size:14px;color:var(--gri);}
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="demo-banda">
+    <span class="text">Machetă cu date demonstrative. Cifrele și oamenii sunt inventați, nu provin dintr-o analiză reală.</span>
+    <label for="eu">Vezi pagina ca:</label>
+    <select id="eu"></select>
+  </div>
+
+  <div class="eticheta">Grup Parcul Circului · Organizare</div>
+  <h1>Teren Str. Despot Vodă 30</h1>
+  <div class="sub">520 mp · cinci variante de împărțire, din analiza preliminară</div>
+  <div class="insigna">Analiză ApartamenTUal · 24 august 2026</div>
+  <div class="context">
+    Grupul are analize pe trei terenuri. Vezi și
+    <a href="#">Busolei 16</a> · <a href="#">Cosminului 16</a>.
+    Poți fi interesat de apartamente pe oricare dintre ele.
+  </div>
+
+
+  <section>
+    <h2>Variantele de împărțire</h2>
+    <p class="explica">
+      Trage de marginea din dreapta a unei casete ca să îi dai suprafața pe care o vrei;
+      prețul se schimbă odată cu ea. Fiecare apartament se poate mări sau micșora doar în
+      intervalul prevăzut pentru numărul lui de camere; dacă vrei unul mai mare sau mai
+      mic pe același etaj, caută altă variantă din analiză. Apasă pe casetă ca să spui că
+      te interesează apartamentul: numele tău apare pe ea.
+    </p>
+    <p class="explica">
+      Cu cât rămâne mai mult spațiu neîmpărțit, cu atât crește ponderea terenului în prețul
+      total, adică plătești mai mult teren decât construcție.
+    </p>
+
+    <div class="file" id="file"></div>
+    <div class="varianta-corp" id="variantaCorp"></div>
+
+    <div class="stare-legenda">
+      <span><i class="buline"></i> liber</span>
+      <span><i class="buline b1"></i> un doritor</span>
+      <span><i class="buline b2"></i> mai mulți doritori, de discutat</span>
+    </div>
+
+    <details>
+      <summary>Vezi toate costurile variantei în tabel</summary>
+      <div class="scroll-x" id="costuri"></div>
+    </details>
+  </section>
+
+  <section>
+    <h2>Ce își dorește fiecare</h2>
+    <p class="explica">Camerele și suprafața vin din profil, unde sunt oricum obligatorii. Aici se completează doar ce profilul nu are: etajul, parcarea, boxa și cei doi bugeți. Alegerile de mai sus apar automat pe fiecare card.</p>
+    <div class="form-pref" id="formPref"></div>
+    <div class="membri" id="membri"></div>
+    <button class="membri-mai" id="membriMai" style="display:none" onclick="toggleMembri()"></button>
+    <div class="scroll-x" id="totaluri"></div>
+  </section>
+
+  <section>
+    <h2>Jurnalul terenului</h2>
+    <p class="explica">
+      Tot ce s-a aflat despre teren, în ordine, cu data faptului și cine l-a scris.
+      Aici intră discuțiile cu agentul sau cu proprietarul, vizitele și documentele primite.
+      Se vede de toți membrii grupului.
+    </p>
+    <div class="jurnal-nou">
+      <select id="jFel">
+        <option value="discutie">Discuție</option>
+        <option value="vizita">Vizită</option>
+        <option value="document">Document</option>
+        <option value="observatie">Observație</option>
+      </select>
+      <input type="date" id="jCand">
+      <input type="text" id="jText" placeholder="Ce s-a întâmplat, pe scurt" maxlength="2000">
+      <button id="jAdauga">Adaugă în jurnal</button>
+    </div>
+    <div class="scroll-x" id="jurnal"></div>
+  </section>
+
+  <div class="nota-final">
+    Pagina nu decide în locul grupului și nu spune nimănui că nu încape. Un grup are aproape mereu mai mulți membri decât apartamente, iar oamenii se așază în timp, uitându-se la mai multe terenuri deodată. Ce se vede aici e unde s-a adunat lumea pe același apartament și care variantă se apropie de a fi completă.
+  </div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   TIPOLOGIILE
+
+   Aceleași ca în Urban Analyzer (APT_TYPES). Intervalul din normativ rămâne
+   limita între care se poate trage caseta, dar suprafața pe care o alege
+   grupul e o cifră, nu un interval: oamenii se uită la preț, iar un preț
+   „de la 226 la 298 mii" nu ajută pe nimeni să se hotărască.
+   ══════════════════════════════════════════════════════════════════════ */
+const TIPURI = {
+  gars:   {label:"Garsonieră", scurt:"Gars.",  min:37, max:42},
+  studio: {label:"Studio",     scurt:"Studio", min:42, max:52},
+  cam2:   {label:"2 camere",   scurt:"2 cam",  min:52, max:65},
+  cam3:   {label:"3 camere",   scurt:"3 cam",  min:66, max:87},
+  cam34:  {label:"3-4 camere", scurt:"3-4 cam",min:87, max:120}
+};
+
+/* ⚠️ Pe telefon, o casetă își păstrează lățimea proporțională, deci o
+   garsonieră care ține a șasea parte dintr-un etaj are vreo 70 de pixeli. Nu
+   încape nimic în ei: nici costurile, nici numele celui înscris. Atunci caseta
+   arată doar cât e de mare, iar tot restul se deschide dedesubt, la apăsare.
+   Pe ecran lat panoul nu există: acolo încape tot în casetă. */
+const eTelefon = () => window.matchMedia("(max-width: 720px)").matches;
+let deschisMobil = null;
+
+/* ══════════════════════════════════════════════════════════════════════
+   MEMBRII ȘI CE ÎȘI DORESC
+
+   ⭐ `profil` NU se completează aici. Numărul de camere și suprafața dorită
+   sunt câmpuri obligatorii în profilul de pe platformă (`preferred_rooms` și
+   `preferred_area_sqm`, amândouă `required`) ȘI fac parte din definiția SQL a
+   „profilului complet", care e condiția de intrare într-un grup. Cine e într-un
+   grup le are completate, altfel n-ar fi putut intra. Se citesc de acolo.
+
+   `pref` e ce se completează pe grup, și doar ce profilul NU știe: etajul,
+   parcarea, boxa, cei doi bugeți, o notă scurtă.
+
+   ⚠️ `pref.camere` și `pref.mp` sunt NULL cât timp omul nu le-a schimbat pentru
+   grupul acesta, iar atunci valoarea vine din profil. Nu se copiază la
+   înscriere: o valoare copiată rămâne veche după ce omul își schimbă profilul,
+   iar nimeni nu ar ști care dintre cele două e adevărul.
+   ══════════════════════════════════════════════════════════════════════ */
+const membri = [
+  {id:"robert",  nume:"Robert T.",   profil:{camere:4, mp:115},
+   pref:{camere:null, mp:null, etaj:"parter-sau-ultim", parcare:1, boxa:true,  cash:null,   total:400000, note:"preferabil garaj subteran"}},
+  {id:"dan",     nume:"Dan N.",      profil:{camere:3, mp:80},
+   pref:{camere:null, mp:null, etaj:"parter",           parcare:0, boxa:false, cash:null,   total:null,   note:""}},
+  {id:"cristian",nume:"Cristian R.", profil:{camere:3, mp:85},
+   pref:{camere:null, mp:null, etaj:"orice",            parcare:1, boxa:true,  cash:null,   total:null,   note:""}},
+  {id:"george",  nume:"George I.",   profil:{camere:4, mp:95},
+   pref:{camere:null, mp:null, etaj:"etaj-1-2",         parcare:1, boxa:true,  cash:80000,  total:320000, note:"preferabil garaj subteran"}},
+  {id:"roxana",  nume:"Roxana B.",   profil:{camere:4, mp:100},
+   pref:{camere:null, mp:null, etaj:"superior",         parcare:0, boxa:false, cash:null,   total:null,   note:""}},
+  {id:"alex",    nume:"Alexandru M.",profil:{camere:4, mp:100},
+   pref:{camere:null, mp:80,   etaj:"orice",            parcare:1, boxa:true,  cash:40000,  total:240000, note:"pe terenul asta accept si 80 mp; buget cash discutabil"}},
+  {id:"bogdan",  nume:"Bogdan P.",   profil:{camere:4, mp:100},
+   pref:{camere:null, mp:null, etaj:"orice",            parcare:0, boxa:false, cash:null,   total:null,   note:""}},
+  {id:"cristi",  nume:"Cristian G.", profil:{camere:3, mp:75},
+   pref:{camere:null, mp:null, etaj:"etaj-1-2",         parcare:1, boxa:true,  cash:null,   total:null,   note:"preferabil garaj subteran"}},
+  {id:"iosif",   nume:"Alexandru I.",profil:{camere:4, mp:100},
+   pref:{camere:null, mp:null, etaj:"orice",            parcare:1, boxa:true,  cash:null,   total:350000, note:""}}
+];
+
+/* Etajele, ca listă închisă. În Excelul lor asta era text liber („dispus să
+   locuiască la parter / ultimul etaj"), ceea ce se citește bine de om dar nu se
+   poate număra: nu poți afla câți din grup vor parter. */
+const ETAJE = {
+  "orice":             "orice etaj",
+  "parter":            "parter",
+  "etaj-1-2":          "etaj 1 sau 2",
+  "superior":          "etaj superior",
+  "ultim":             "ultimul etaj",
+  "parter-sau-ultim":  "parter sau ultimul etaj"
+};
+
+/* Ce vrea omul, cu profilul ca bază și preferința de grup deasupra. */
+function camere(m){ return m.pref.camere ?? m.profil.camere; }
+function mpDorit(m){ return m.pref.mp ?? m.profil.mp; }
+function dinProfil(m){ return m.pref.camere === null && m.pref.mp === null; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   CIFRELE DE PORNIRE
+
+   Terenul: 520 mp, cumpărat cu 700.000 €. E singura sumă care NU se mișcă
+   orice ar face grupul cu suprafețele.
+
+   Construcția se calculează din suprafața desfășurată, la un cost pe metru
+   pătrat construit pe care îl dă arhitectul în Urban Analyzer. Subsolul costă
+   circa 70% dintr-un metru obișnuit (săpătură, hidroizolație, sprijiniri) și
+   NU se micșorează dacă se micșorează apartamentele: parcarea rămâne aceeași.
+
+   `su` pe fiecare nivel vine din Urban Analyzer și e PLAFONUL: suma
+   apartamentelor de pe un nivel nu îl poate depăși.
+   ══════════════════════════════════════════════════════════════════════ */
+const COST_TEREN     = 700000;  // €, fix
+const COST_MP_SD     = 1200;    // €/mp suprafață desfășurată
+const COEF_UTIL      = 0.70;    // Su / Sd, ca în Urban Analyzer
+const FACTOR_SUBSOL  = 0.70;    // subsolul costă 70% dintr-un mp obișnuit
+
+const variante = [
+  {id:"V1", nume:"Varianta 1", desc:"6 apartamente, toate parcările la parter",
+   subsolSd:0,
+   niveluri:[{nume:"Parter",ord:0,su:45},{nume:"Etaj 1",ord:1,su:136},
+             {nume:"Etaj 2",ord:2,su:136},{nume:"Etaj 3",ord:3,su:108}],
+   ap:[{niv:"Parter",tip:"gars",  mpu:41},
+       {niv:"Etaj 1",tip:"cam2",  mpu:57}, {niv:"Etaj 1",tip:"cam3", mpu:75},
+       {niv:"Etaj 2",tip:"cam2",  mpu:57}, {niv:"Etaj 2",tip:"cam3", mpu:75},
+       {niv:"Etaj 3",tip:"cam34", mpu:104}]},
+
+  {id:"V2", nume:"Varianta 2", desc:"7 apartamente, niciunul mare",
+   subsolSd:0,
+   niveluri:[{nume:"Parter",ord:0,su:45},{nume:"Etaj 1",ord:1,su:122},
+             {nume:"Etaj 2",ord:2,su:122},{nume:"Etaj 3",ord:3,su:140}],
+   ap:[{niv:"Parter",tip:"gars", mpu:41},
+       {niv:"Etaj 1",tip:"cam2", mpu:59}, {niv:"Etaj 1",tip:"cam2", mpu:59},
+       {niv:"Etaj 2",tip:"cam2", mpu:59}, {niv:"Etaj 2",tip:"cam2", mpu:59},
+       {niv:"Etaj 3",tip:"cam3", mpu:68}, {niv:"Etaj 3",tip:"cam3", mpu:68}]},
+
+  {id:"V3", nume:"Varianta 3", desc:"5 apartamente, parterul rămâne spațiu comun",
+   subsolSd:0,
+   niveluri:[{nume:"Parter",ord:0,su:48},{nume:"Etaj 1",ord:1,su:136},
+             {nume:"Etaj 2",ord:2,su:136},{nume:"Etaj 3",ord:3,su:111}],
+   comun:{niv:"Parter", mpu:48, text:"Spațiu comun"},
+   ap:[{niv:"Etaj 1",tip:"cam2", mpu:57}, {niv:"Etaj 1",tip:"cam3", mpu:76},
+       {niv:"Etaj 2",tip:"cam2", mpu:57}, {niv:"Etaj 2",tip:"cam3", mpu:76},
+       {niv:"Etaj 3",tip:"cam34",mpu:107}]},
+
+  {id:"V4", nume:"Varianta 4", desc:"6 apartamente, cu subsol de parcare",
+   subsolSd:200,
+   niveluri:[{nume:"Parter",ord:0,su:84},{nume:"Etaj 1",ord:1,su:136},
+             {nume:"Etaj 2",ord:2,su:136},{nume:"Etaj 3",ord:3,su:114}],
+   ap:[{niv:"Parter",tip:"cam3", mpu:80},
+       {niv:"Etaj 1",tip:"cam2", mpu:57}, {niv:"Etaj 1",tip:"cam3", mpu:76},
+       {niv:"Etaj 2",tip:"cam2", mpu:57}, {niv:"Etaj 2",tip:"cam3", mpu:76},
+       {niv:"Etaj 3",tip:"cam34",mpu:110}]},
+
+  {id:"V5", nume:"Varianta 5", desc:"6 apartamente, două mari, cu subsol",
+   subsolSd:200,
+   niveluri:[{nume:"Parter",ord:0,su:44},{nume:"Etaj 1",ord:1,su:157},
+             {nume:"Etaj 2",ord:2,su:160},{nume:"Etaj 3",ord:3,su:115}],
+   ap:[{niv:"Parter",tip:"gars", mpu:40},
+       {niv:"Etaj 1",tip:"cam2", mpu:58}, {niv:"Etaj 1",tip:"cam34",mpu:95},
+       {niv:"Etaj 2",tip:"cam3", mpu:78}, {niv:"Etaj 2",tip:"cam3", mpu:78},
+       {niv:"Etaj 3",tip:"cam34",mpu:112}]}
+];
+
+variante.forEach(v=>{ v.ap.forEach((a,i)=>{ a.id = v.id+"-"+i; a.v = v.id; }); });
+
+let interese = {
+  "V1-2":["alex"],
+  "V1-5":["bogdan"],
+  "V2-1":["cristi"],
+  "V5-2":["george","roxana"],
+  "V5-3":["dan"],
+  "V5-4":["cristian"],
+  "V5-5":["robert"]
+};
+
+const alteTerenuri = {
+  robert:["Busolei 16"], dan:["Busolei 16","Cosminului 16"],
+  george:["Cosminului 16"], alex:["Busolei 16"], cristian:["Cosminului 16"]
+};
+
+let variantaActiva = "V5";
+
+const fmt = n => Math.round(n).toLocaleString("ro-RO");
+const mii = n => Math.round(n/1000);
+const numeMic = id => membri.find(m=>m.id===id).nume.split(" ")[0];
+
+const selEu = document.getElementById("eu");
+membri.forEach(m=>{
+  const o=document.createElement("option");
+  o.value=m.id;o.textContent=m.nume;selEu.appendChild(o);
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   BANII
+
+   ⭐ CONSTRUCȚIA SE CALCULEAZĂ, NU E O SUMĂ FIXĂ PE VARIANTĂ.
+
+   Prima formă a machetei ținea costul construcției fix, așa că micșorarea unui
+   apartament împărțea aceeași sumă la mai puțini metri și scotea o scumpire de
+   3%. Era greșit: dacă se construiește mai puțin, construcția chiar costă mai
+   puțin.
+
+   Lanțul corect, pe care îl semnalează Lucian pe 28 august:
+
+       Sd                = Su împărțit / 0,70
+       cost construcție  = Sd × 1.200 €/mp   (+ subsolul, care NU se micșorează)
+       cost total        = teren + construcție
+       cota apartamentului = suprafața lui / Su împărțit
+       cost apartament   = cotă × cost total
+
+   TERENUL E SINGURA SUMĂ CARE NU SE MIȘCĂ. De aceea prețul pe metru tot urcă
+   atunci când rămân goluri, dar din alt motiv decât credeam: cele 700.000 € de
+   teren se împart la mai puțini metri utili, deci ponderea terenului în
+   investiție crește. Asta face golurile neeficiente, nu un cost de construcție
+   care ar rămâne neschimbat.
+
+   La fel și subsolul: parcarea rămâne aceeași chiar dacă apartamentele scad,
+   deci variantele cu subsol au o parte fixă mai mare și sunt pedepsite mai
+   tare de goluri.
+   ══════════════════════════════════════════════════════════════════════ */
+function suTeoretic(v){ return v.niveluri.reduce((s,n)=>s+n.su,0); }
+
+/* Suprafața care se împarte pe apartamente. Cotele se calculează din ea. */
+function suAlocat(v){ return v.ap.reduce((s,a)=>s+a.mpu,0); }
+
+/* ⚠️ Spațiul comun NU e suprafață nedistribuită. E o alegere a variantei: se
+   construiește și se plătește, dar de toți. De aceea intră în suprafața
+   construită (deci în cost), dar NU în cea care se împarte (deci nu în cote):
+   exact asta face varianta cu parterul comun mai scumpă pe metru de locuință. */
+function suComun(v){ return v.comun ? v.comun.mpu : 0; }
+function suConstruit(v){ return suAlocat(v) + suComun(v); }
+function suImpartibil(v){ return suTeoretic(v) - suComun(v); }
+
+function costConstructie(v, suUtil){
+  const suprateran = (suUtil + suComun(v)) / COEF_UTIL * COST_MP_SD;
+  const subsol = v.subsolSd * COST_MP_SD * FACTOR_SUBSOL;
+  return suprateran + subsol;
+}
+function costTotal(v){ return COST_TEREN + costConstructie(v, suAlocat(v)); }
+function cotaTeren(v){ return COST_TEREN/costTotal(v); }
+function eurPeMp(v){ return costTotal(v)/suAlocat(v); }
+
+/* Cât ar fi costat metrul dacă s-ar împărți tot ce se poate împărți. Aici
+   construcția e recalculată pentru suprafața plină, nu ținută fixă. */
+function eurPeMpPlin(v){
+  const su = suImpartibil(v);
+  return (COST_TEREN + costConstructie(v, su)) / su;
+}
+
+function bani(v, a){
+  const tot = a.mpu * eurPeMp(v), c = cotaTeren(v);
+  return {tot, teren:tot*c, constr:tot*(1-c)};
+}
+
+/* Cât a mai rămas nedistribuit pe un nivel. */
+function liberPeNivel(v, numeNivel){
+  const niv = v.niveluri.find(n=>n.nume===numeNivel);
+  if(!niv) return 0;
+  const luat = v.ap.filter(a=>a.niv===numeNivel).reduce((s,a)=>s+a.mpu,0)
+             + (v.comun && v.comun.niv===numeNivel ? v.comun.mpu : 0);
+  return Math.max(0, niv.su - luat);
+}
+
+function scorVarianta(v){
+  let unul=0;
+  v.ap.forEach(a=>{ if((interese[a.id]||[]).length===1) unul++; });
+  return {unul, total:v.ap.length, scor:unul/v.ap.length};
+}
+
+function culoareFila(scor){
+  const h = 35 + (11-35)*scor, s = 12 + (58-12)*scor, l = 93 + (52-93)*scor;
+  return {fundal:`hsl(${h.toFixed(0)},${s.toFixed(0)}%,${l.toFixed(0)}%)`,
+          text: l < 66 ? "#F7F4EE" : "#1A1815"};
+}
+
+function renderFile(){
+  document.getElementById("file").innerHTML = variante.map(v=>{
+    const s = scorVarianta(v), c = culoareFila(s.scor);
+    /* Câte apartamente sunt luate NU se mai scrie: o spune culoarea, iar filele
+       rămân scurte, deci toate cinci intră pe un rând și se compară dintr-o
+       privire. Cifra exactă e în titlu, pentru cine trece cu mouse-ul. */
+    return `<button class="fila${v.id===variantaActiva?" activ":""}" data-v="${v.id}"
+              style="background:${c.fundal};color:${c.text}"
+              title="${v.nume}: ${s.unul} din ${s.total} apartamente au un singur doritor">
+      <b>${v.nume}</b>
+      <small>${v.ap.length} apartamente · ${fmt(eurPeMp(v))} €/mp</small>
+    </button>`;
+  }).join("");
+  document.querySelectorAll(".fila").forEach(b=>{
+    b.onclick = () => { variantaActiva = b.dataset.v; render(); };
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TRAGEREA DE MARGINEA CASETEI
+
+   Cât se poate întinde un apartament: până la maximul tipologiei lui, dar nu
+   mai mult decât lasă nivelul. Plafonul se calculează din CEILALȚI de pe nivel,
+   nu din golul curent: în timpul tragerii, suprafața celui tras se schimbă la
+   fiecare pixel, iar un plafon socotit din ea ar fugi odată cu degetul.
+   ══════════════════════════════════════════════════════════════════════ */
+function plafonPentru(v, a){
+  const niv = v.niveluri.find(n=>n.nume===a.niv);
+  const ceilalti = v.ap
+    .filter(x => x.niv === a.niv && x !== a)
+    .reduce((s,x)=>s+x.mpu, 0)
+    + (v.comun && v.comun.niv === a.niv ? v.comun.mpu : 0);
+  return Math.min(TIPURI[a.tip].max, niv.su - ceilalti);
+}
+
+function schimbaSuprafata(v, a, cerut){
+  const nou = Math.max(TIPURI[a.tip].min, Math.min(plafonPentru(v, a), Math.round(cerut)));
+  if(nou === a.mpu) return false;
+  a.mpu = nou;
+  render();
+  return true;
+}
+
+let tragere = null;
+
+function incepeTragerea(e, v, a, el){
+  e.preventDefault();
+  e.stopPropagation();
+  /* Scara se ia din caseta însăși: câți pixeli are acum pentru câți metri are
+     acum. Mai exact decât o socoteală pe lățimea rândului, fiindcă spațiile
+     dintre casete nu intră în ea. */
+  tragere = {v, a, x0:e.clientX, mpu0:a.mpu, pxPerMp: el.offsetWidth / a.mpu, id:a.id};
+  el.classList.add("trage");
+  document.body.classList.add("se-trage");
+  window.addEventListener("pointermove", inTimpulTragerii);
+  window.addEventListener("pointerup", terminaTragerea, {once:true});
+  window.addEventListener("pointercancel", terminaTragerea, {once:true});
+}
+
+function inTimpulTragerii(e){
+  if(!tragere) return;
+  const dx = e.clientX - tragere.x0;
+  schimbaSuprafata(tragere.v, tragere.a, tragere.mpu0 + dx / tragere.pxPerMp);
+  /* `render()` reface casetele, deci clasa de „se trage acum" trebuie pusă din
+     nou pe cea nouă. Ascultătorii stau pe `window`, nu pe casetă, tocmai ca
+     tragerea să nu se rupă când elementul de sub deget e înlocuit. */
+  const el = document.querySelector(`[data-ap="${tragere.id}"]`);
+  if(el) el.classList.add("trage");
+}
+
+function terminaTragerea(){
+  window.removeEventListener("pointermove", inTimpulTragerii);
+  document.body.classList.remove("se-trage");
+  document.querySelectorAll(".ap.trage").forEach(el=>el.classList.remove("trage"));
+  tragere = null;
+}
+
+function renderVarianta(){
+  const v = variante.find(x=>x.id===variantaActiva);
+  const eu = selEu.value;
+  const cont = document.getElementById("variantaCorp");
+  const alocat = suAlocat(v), impartibil = suImpartibil(v);
+  const nedistribuit = impartibil - alocat;
+  const scumpire = eurPeMp(v)/eurPeMpPlin(v) - 1;
+  const constr = costConstructie(v, alocat);
+  const pondereTeren = cotaTeren(v)*100;
+  const pondereTerenPlin = COST_TEREN/(COST_TEREN + costConstructie(v, impartibil))*100;
+
+  cont.innerHTML = `<div class="varianta-cap">
+      <h3>${v.nume}</h3>
+      <div class="desc">${v.desc}${v.subsolSd>0?" · are subsol":""}</div>
+      <div class="cifra"><b>${fmt(eurPeMp(v))} €</b>/mp util</div>
+      <div class="cifra"><b>${fmt(alocat)} mp</b> împărțiți din ${fmt(impartibil)}${v.comun?` <span style="font-size:12px">(plus ${v.comun.mpu} comuni)</span>`:""}</div>
+      <div class="cifra">teren <b>${mii(COST_TEREN)} mii €</b> + construcție <b>${mii(constr)} mii €</b> = <b>${mii(costTotal(v))} mii €</b></div>
+      ${nedistribuit > 0 ? `<div class="avertisment">
+        <b>${fmt(nedistribuit)} mp</b> nu sunt încă dați nimănui. Construcția lor nu se mai face,
+        deci investiția scade, dar terenul costă la fel și se împarte la mai puțini metri:
+        ponderea lui urcă de la <b>${pondereTerenPlin.toFixed(0)}%</b> la
+        <b>${pondereTeren.toFixed(0)}%</b> din investiție, iar prețul pe metru util e cu
+        <b>${(scumpire*100).toFixed(1)}%</b> mai mare decât dacă s-ar împărți tot
+        (${fmt(eurPeMpPlin(v))} €/mp).
+      </div>` : ""}
+    </div>`;
+
+  /* Grila comună: nivelul cu cea mai mare suprafață umple rândul, restul se
+     raportează la el. O garsonieră singură pe parter rămâne îngustă. */
+  const grila = Math.max(...v.niveluri.map(n=>n.su));
+  const lat = mp => `0 0 calc(${(mp/grila*100).toFixed(2)}% - 8px)`;
+  const niveluri = [...v.niveluri].sort((a,b)=>b.ord-a.ord);
+
+  niveluri.forEach(niv=>{
+    const us = v.ap.filter(a=>a.niv===niv.nume);
+    const comun = v.comun && v.comun.niv===niv.nume ? v.comun : null;
+    const liber = liberPeNivel(v, niv.nume);
+
+    const rand=document.createElement("div");
+    rand.className="nivel";
+    rand.innerHTML=`<div class="nivel-nume">${niv.nume}<small>${niv.su} mp utili</small></div>`;
+    const zona=document.createElement("div");
+    zona.className="nivel-ap";
+
+    us.forEach(a=>{
+      const t = TIPURI[a.tip], b_ = bani(v, a);
+      const cine = interese[a.id]||[];
+      /* Cursorul nu poate trece nici peste maximul tipologiei, nici peste cât
+         a mai rămas liber pe nivel. Ca să crești peste atât, trebuie ca altul
+         să lase din al lui: exact negocierea care se poartă oricum. */
+      const plafon = Math.min(t.max, a.mpu + liber);
+
+      const el=document.createElement("div");
+      el.className="ap"+(cine.length>1?" multi":cine.length===1?" unul":"")
+        +(cine.includes(eu)?" al-meu":"")+(deschisMobil===a.id?" deschis":"");
+      el.style.flex=lat(a.mpu);
+      el.dataset.ap = a.id;
+      /* Când apartamentul nu se mai poate mișca deloc (etajul e plin și e
+         chiar la minimul tipologiei), mânerul se estompează. Altfel rămâne
+         viu, oricât de puțin joc ar fi. */
+      const blocat = (a.mpu <= t.min && a.mpu >= plafon);
+
+      el.innerHTML=`
+        <div class="ap-titlu">
+          <span class="tip"><span class="tip-lung">${t.label}</span><span class="tip-scurt">${t.scurt}</span></span>
+          <span class="mp">${a.mpu}<span class="mp-unitate"> mp</span></span>
+          <span class="ap-jos-sageata" aria-hidden="true">${deschisMobil===a.id?"▴":"▾"}</span>
+        </div>
+        <div class="ap-jos">
+          <div class="ap-bani">
+            teren <b>${mii(b_.teren)}</b> + constr. <b>${mii(b_.constr)}</b>
+            = <b class="tot">${fmt(b_.tot)} €</b>
+          </div>
+          <div class="cine">
+            ${cine.includes(eu)?`<span class="ap-eu">te interesează</span>`:""}
+            ${cine.map(id=>`<span class="punct">${numeMic(id)}</span>`).join("")}
+          </div>
+        </div>
+        <div class="ap-limite"><span>min ${t.min}</span><span>max ${plafon}</span></div>`;
+      el.title = (cine.includes(eu) ? "Apasă ca să te retragi" : "Apasă ca să te înscrii")
+        + `
+cost teren ${fmt(b_.teren)} € + cost construcție ${fmt(b_.constr)} € = ${fmt(b_.tot)} €`
+        + `
+interval ${t.min}-${t.max} mp utili`;
+
+      /* Mânerul de tragere. Fără `stopPropagation`, o tragere s-ar termina și
+         cu „mă interesează apartamentul". */
+      const maner = document.createElement("div");
+      maner.className = "ap-maner" + (blocat ? " blocat" : "");
+      maner.title = "Trage ca să schimbi suprafața";
+      maner.onclick = e => e.stopPropagation();
+      maner.onpointerdown = e => incepeTragerea(e, v, a, el);
+      el.appendChild(maner);
+
+      /* Aceeași reglare de la tastatură, pentru cine nu poate trage cu mouse-ul:
+         săgeți pentru un metru, cu Shift pentru cinci. */
+      el.tabIndex = 0;
+      el.onkeydown = e => {
+        const pas = (e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0)
+                  * (e.shiftKey ? 5 : 1);
+        if(!pas) return;
+        e.preventDefault();
+        schimbaSuprafata(v, a, a.mpu + pas);
+      };
+
+      /* ⚠️ Apăsarea face lucruri diferite după lățime, dinadins. Pe ecran lat
+         înscrie direct: informația e deja toată sub ochi, iar retragerea e o a
+         doua apăsare. Pe telefon deschide panoul, fiindcă în casetă nu scrie
+         nici prețul, nici cine mai e pe el, iar cineva n-ar trebui să se
+         înscrie pe ceva ce nu vede. Înscrierea se face din panou. */
+      el.onclick=()=>{
+        if(eTelefon()){
+          deschisMobil = (deschisMobil === a.id) ? null : a.id;
+          render();
+          return;
+        }
+        const arr = interese[a.id]||(interese[a.id]=[]);
+        const i = arr.indexOf(eu);
+        i>=0 ? arr.splice(i,1) : arr.push(eu);
+        render();
+      };
+      zona.appendChild(el);
+    });
+
+    if(comun){
+      const c=document.createElement("div");
+      c.className="ap comun";
+      c.style.flex=lat(comun.mpu);
+      c.innerHTML=`<div class="ap-titlu">
+          <span class="tip">${comun.text}</span><span class="mp">${comun.mpu} mp</span>
+        </div>
+        <div class="ap-jos"><div class="ap-bani">plătit de toți</div></div>`;
+      zona.appendChild(c);
+    }
+
+    if(liber > 0){
+      const g=document.createElement("div");
+      g.className="gol-nivel";
+      g.style.flex=lat(liber);
+      g.innerHTML = `${liber} mp<br>neîmpărțiți`;
+      g.title = "Trage de marginea unui apartament de pe nivelul acesta ca să îi dai suprafața asta";
+      zona.appendChild(g);
+    }
+
+    rand.appendChild(zona);
+    cont.appendChild(rand);
+
+    /* Panoul apartamentului deschis, sub nivelul lui. Doar pe telefon: pe
+       ecran lat clasa e ascunsă din CSS, iar `deschisMobil` rămâne gol. */
+    const aDeschis = us.find(a => a.id === deschisMobil);
+    if(aDeschis){
+      const t = TIPURI[aDeschis.tip], b_ = bani(v, aDeschis);
+      const cine = interese[aDeschis.id] || [];
+      const eSum = cine.includes(eu);
+      const plafon = plafonPentru(v, aDeschis);
+
+      const pd = document.createElement("div");
+      pd.className = "ap-detaliu";
+      pd.innerHTML = `
+        <div class="apd-cap">${t.label} · ${niv.nume} · <b>${aDeschis.mpu} mp utili</b></div>
+        <div class="apd-bani">
+          <div>cost teren <b>${fmt(b_.teren)} €</b></div>
+          <div>cost construcție <b>${fmt(b_.constr)} €</b></div>
+          <div class="tot">cost total <b>${fmt(b_.tot)} €</b></div>
+        </div>
+        <div class="apd-marime">
+          <span>Suprafață</span>
+          <button class="apd-pas" data-pas="-1" ${aDeschis.mpu<=t.min?"disabled":""}>−</button>
+          <b>${aDeschis.mpu} mp</b>
+          <button class="apd-pas" data-pas="1" ${aDeschis.mpu>=plafon?"disabled":""}>+</button>
+          <small>între ${t.min} și ${plafon}</small>
+        </div>
+        ${cine.length?`<div class="apd-cine">Interesați: <b>${cine.map(numeMic).join(", ")}</b></div>`:""}
+        <button class="apd-buton${eSum?" retrage":""}">${
+          eSum ? "Retrage-mă de pe apartament" : "Mă interesează apartamentul"}</button>`;
+
+      pd.querySelectorAll(".apd-pas").forEach(b => {
+        b.onclick = e => {
+          e.stopPropagation();
+          schimbaSuprafata(v, aDeschis, aDeschis.mpu + Number(b.dataset.pas));
+        };
+      });
+      pd.querySelector(".apd-buton").onclick = e => {
+        e.stopPropagation();
+        const arr = interese[aDeschis.id] || (interese[aDeschis.id] = []);
+        const i = arr.indexOf(eu);
+        i>=0 ? arr.splice(i,1) : arr.push(eu);
+        render();
+      };
+      cont.appendChild(pd);
+    }
+  });
+}
+
+function renderCosturi(){
+  const v = variante.find(x=>x.id===variantaActiva);
+  const alocat = suAlocat(v);
+  document.getElementById("costuri").innerHTML = `
+  <table>
+    <tr><th>Apartament</th><th>mp utili</th><th>Cost teren</th><th>Cost construcție</th><th>Cost total</th></tr>
+    ${v.ap.map(a=>{
+      const t=TIPURI[a.tip], b_=bani(v,a);
+      return `<tr>
+        <td>${a.niv} · ${t.label}</td>
+        <td>${a.mpu}</td>
+        <td>${fmt(b_.teren)} €</td><td>${fmt(b_.constr)} €</td>
+        <td>${fmt(b_.tot)} €</td>
+      </tr>`;
+    }).join("")}
+    <tr class="total-rand">
+      <td>Total împărțit</td><td>${fmt(alocat)}</td>
+      <td>${fmt(COST_TEREN)} €</td><td>${fmt(costConstructie(v, alocat))} €</td>
+      <td>${fmt(costTotal(v))} €</td>
+    </tr>
+  </table>
+  <p class="explica" style="margin-top:10px">
+    Terenul costă ${fmt(COST_TEREN)} € oricât s-ar construi pe el. Construcția se calculează
+    la ${COST_MP_SD} €/mp desfășurat${v.subsolSd>0?`, plus subsolul (${v.subsolSd} mp, la ${Math.round(FACTOR_SUBSOL*100)}% din prețul unui metru obișnuit)`:""},
+    deci scade dacă apartamentele scad. Fiecare apartament plătește cât la sută din suprafața
+    utilă împărțită reprezintă.
+  </p>`;
+}
+
+function renderMembri(){
+  const eu = selEu.value;
+  /* Eu sunt mereu primul: cardul meu are butonul „Modifică", iar dacă ar cădea
+     sub tăietură ar trebui să desfac lista ca să îmi completez preferințele. */
+  const ordonati = [...membri].sort((a,b)=> (a.id===eu ? -1 : b.id===eu ? 1 : 0));
+  const vizibili = membriToti ? ordonati : ordonati.slice(0, MEMBRI_VIZIBILI);
+  const ascunsi = ordonati.length - MEMBRI_VIZIBILI;
+
+  document.getElementById("membri").innerHTML = vizibili.map(m=>{
+    const alese = [];
+    variante.forEach(v=>v.ap.forEach(a=>{
+      if((interese[a.id]||[]).includes(m.id))
+        alese.push(`${v.nume.replace("Varianta ","V")} · ${a.niv} · ${TIPURI[a.tip].label}`);
+    }));
+    const b_ = [];
+    if(m.pref.cash)  b_.push(`cash teren <b>${mii(m.pref.cash)} mii €</b>`);
+    if(m.pref.total) b_.push(`total <b>${mii(m.pref.total)} mii €</b>`);
+    const altele = alteTerenuri[m.id] || [];
+    const extra = [];
+    if(m.pref.parcare) extra.push(`${m.pref.parcare} ${m.pref.parcare===1?"parcare":"parcări"}`);
+    if(m.pref.boxa) extra.push("boxă");
+    return `<div class="membru${m.id===eu?" eu":""}">
+      <div class="membru-cap">
+        <b>${m.nume}</b>
+        ${m.id===eu?`<button class="btn-mic" onclick="deschidePreferinte()">Modifică</button>`:""}
+      </div>
+      <div class="cere">
+        ${mpDorit(m)} mp · ${camere(m)} camere
+        ${dinProfil(m)?`<span class="sursa" title="Vine din profilul lui ${m.nume.split(" ")[0]}">din profil</span>`
+                      :`<span class="sursa alt" title="Schimbat pentru grupul acesta">ajustat aici</span>`}
+      </div>
+      <div class="cere">${ETAJE[m.pref.etaj]}${extra.length?" · "+extra.join(" · "):""}</div>
+      ${b_.length?`<div class="bani">${b_.join(" · ")}</div>`:`<div class="bani gol">buget necompletat</div>`}
+      ${m.pref.note?`<div class="nota">${m.pref.note}</div>`:""}
+      <div class="ales${altele.length?"":" ales--doar-aici"}">
+        <span class="ales-aici">${alese.length
+          ? `Aici: <em>${alese.join(", ")}</em>`
+          : `<span class="gol">nicio alegere pe terenul acesta</span>`}</span>
+        ${altele.length?`<span class="ales-altele">Și pe ${altele.join(", ")}</span>`:""}
+      </div>
+    </div>`;
+  }).join("");
+
+  const btn = document.getElementById("membriMai");
+  if(ascunsi > 0){
+    btn.style.display = "block";
+    btn.textContent = membriToti
+      ? "Arată mai puțini ↑"
+      : (ascunsi === 1 ? "Încă un membru ↓" : "Încă " + ascunsi + " membri ↓");
+  } else {
+    btn.style.display = "none";
+  }
+
+  /* Totalurile din josul Excelului lor, plus unul pe care ei nu îl aveau: câți
+     n-au completat bugetul, fiindcă un buget lipsă e tot un fapt.
+     ⚠️ A mai fost aici o coloană „acceptă parter", scoasă pe 30 august. Era o
+     inferență de-a noastră, nu o cerere a grupului, iar rândul avea deja șapte
+     coloane. Etajul dorit rămâne scris pe cardul fiecăruia, unde îl citește
+     cine are nevoie de el. */
+  const t = {
+    mp: membri.reduce((s,m)=>s+mpDorit(m),0),
+    cam: membri.reduce((s,m)=>s+camere(m),0),
+    parc: membri.reduce((s,m)=>s+m.pref.parcare,0),
+    boxe: membri.filter(m=>m.pref.boxa).length,
+    cash: membri.reduce((s,m)=>s+(m.pref.cash||0),0),
+    fara: membri.filter(m=>!m.pref.cash).length
+  };
+  document.getElementById("totaluri").innerHTML = `
+  <table>
+    <tr><th>Ce cere grupul</th><th>Familii</th><th>mp utili</th><th>Camere</th><th>Parcări</th><th>Boxe</th><th>Cash pentru teren</th></tr>
+    <tr class="total-rand">
+      <td>Total</td><td>${membri.length}</td><td>${fmt(t.mp)}</td><td>${t.cam}</td>
+      <td>${t.parc}</td><td>${t.boxe}</td>
+      <td>${fmt(t.cash)} €${t.fara?` <span style="font-weight:400;color:var(--gri)">(${t.fara} necompletate)</span>`:""}</td>
+    </tr>
+  </table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FORMULARUL DE PREFERINȚE
+
+   Fără nicio casetă de text în care să scrii „3 camere, 65-75 mp, etaj 1":
+   așa a arătat coloana „Notă" din Excelul lor, se citește bine de om, dar nu se
+   poate număra. Cu liste închise, pagina poate spune „4 din 9 acceptă parter",
+   ceea ce chiar hotărăște dacă parterul se face locuință sau parcare.
+
+   Rămâne o singură casetă liberă, la sfârșit, pentru ce nu încape în rubrici.
+   ══════════════════════════════════════════════════════════════════════ */
+function deschidePreferinte(){
+  const m = membri.find(x=>x.id===selEu.value);
+  const f = document.getElementById("formPref");
+  const optiuniCamere = [1,2,3,4,5]
+    .map(n=>`<option value="${n}" ${m.pref.camere===n?"selected":""}>${n} camere</option>`).join("");
+  const optiuniEtaj = Object.entries(ETAJE)
+    .map(([k,v])=>`<option value="${k}" ${m.pref.etaj===k?"selected":""}>${v}</option>`).join("");
+  const optiuniParcare = [0,1,2]
+    .map(n=>`<option value="${n}" ${m.pref.parcare===n?"selected":""}>${
+      n===0?"niciunul":n===1?"un loc":"două locuri"}</option>`).join("");
+
+  f.innerHTML = `
+    <div class="pref-cap">
+      <h3>Ce îmi doresc, în grupul acesta</h3>
+      <button class="btn-mic" onclick="inchidePreferinte()">Închide</button>
+    </div>
+
+    <div class="pref-corp">
+      <div class="pref-din-profil">
+        Din profilul tău: <b>${m.profil.camere} camere</b>, <b>${m.profil.mp} mp utili</b>.
+        Se folosesc pe toate terenurile și în toate grupurile. Le schimbi din
+        <a href="#" onclick="return false">profil</a>, ca să nu le rescrii de fiecare dată.
+        Mai jos le poți ajusta doar pentru grupul acesta.
+      </div>
+
+      <div class="pref-sectiune">
+        <div class="pref-titlu">Apartamentul</div>
+        <div class="pref-rand trei">
+          <label class="pref-camp">
+            <span>Camere</span>
+            <select id="pCamere">
+              <option value="">ca în profil (${m.profil.camere})</option>
+              ${optiuniCamere}
+            </select>
+          </label>
+          <label class="pref-camp">
+            <span>Suprafață utilă</span>
+            <span class="camp-cu-unitate">
+              <input type="number" id="pMp" min="20" max="500" step="1"
+                     placeholder="ca în profil (${m.profil.mp})" value="${m.pref.mp ?? ""}">
+              <span class="unitate">mp</span>
+            </span>
+          </label>
+          <label class="pref-camp">
+            <span>Etaj</span>
+            <select id="pEtaj">${optiuniEtaj}</select>
+          </label>
+        </div>
+      </div>
+
+      <div class="pref-sectiune">
+        <div class="pref-titlu">Pe lângă apartament</div>
+        <div class="pref-rand doua">
+          <label class="pref-camp">
+            <span>Locuri de parcare</span>
+            <select id="pParcare">${optiuniParcare}</select>
+          </label>
+          <label class="pref-camp">
+            <span>Boxă</span>
+            <select id="pBoxa">
+              <option value="nu" ${!m.pref.boxa?"selected":""}>nu</option>
+              <option value="da" ${m.pref.boxa?"selected":""}>da</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="pref-sectiune">
+        <div class="pref-titlu">Bugetul</div>
+        <div class="pref-rand doua">
+          <label class="pref-camp">
+            <span>Pentru teren, în numerar</span>
+            <span class="camp-cu-unitate">
+              <input type="number" id="pCash" min="0" step="1000" placeholder="necompletat"
+                     value="${m.pref.cash ?? ""}">
+              <span class="unitate">€</span>
+            </span>
+            <small>Terenul se cumpără cash, înainte de orice credit.</small>
+          </label>
+          <label class="pref-camp">
+            <span>Total, cu credit cu tot</span>
+            <span class="camp-cu-unitate">
+              <input type="number" id="pTotal" min="0" step="1000" placeholder="necompletat"
+                     value="${m.pref.total ?? ""}">
+              <span class="unitate">€</span>
+            </span>
+            <small>Cât poți duce în total pentru apartament.</small>
+          </label>
+        </div>
+      </div>
+
+      <div class="pref-sectiune">
+        <div class="pref-titlu">Alte lucruri de știut</div>
+        <label class="pref-camp">
+          <input type="text" id="pNote" maxlength="200" value="${m.pref.note.replace(/"/g,"&quot;")}"
+                 placeholder="ex. preferabil garaj subteran, dispus să stau la parter">
+        </label>
+      </div>
+    </div>
+
+    <div class="pref-butoane">
+      <button class="btn-sters" onclick="inchidePreferinte()">Renunță</button>
+      <button class="btn-principal" onclick="salveazaPreferinte()">Salvează</button>
+    </div>`;
+  f.style.display = "block";
+  f.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function inchidePreferinte(){ document.getElementById("formPref").style.display = "none"; }
+
+function salveazaPreferinte(){
+  const m = membri.find(x=>x.id===selEu.value);
+  const nr = id => {
+    const v = document.getElementById(id).value.trim();
+    return v === "" ? null : Number(v);
+  };
+  m.pref.camere  = nr("pCamere");
+  m.pref.mp      = nr("pMp");
+  m.pref.etaj    = document.getElementById("pEtaj").value;
+  m.pref.parcare = Number(document.getElementById("pParcare").value);
+  m.pref.boxa    = document.getElementById("pBoxa").value === "da";
+  m.pref.cash    = nr("pCash");
+  m.pref.total   = nr("pTotal");
+  m.pref.note    = document.getElementById("pNote").value.trim();
+  inchidePreferinte();
+  render();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   JURNALUL TERENULUI
+
+   Două date, nu una: `cand` e ziua în care s-a întâmplat faptul, `scris` e
+   ziua în care cineva a apucat să îl noteze. Sunt aproape mereu diferite, iar
+   pe cea dintâi o caută omul când răsfoiește peste trei luni.
+   ══════════════════════════════════════════════════════════════════════ */
+const FELURI = {discutie:"Discuție", vizita:"Vizită", document:"Document", observatie:"Observație"};
+
+/* Câte intrări se văd din capul locului. Pe telefon mai puține, ca la anunțuri
+   și la membri în pagina grupului. */
+const JURNAL_VIZIBILE = (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) ? 4 : 8;
+let jurnalTot = false;
+function toggleJurnal(){ jurnalTot = !jurnalTot; renderJurnal(); }
+
+/* Câți membri se văd din capul locului. Aceleași praguri ca la lista de membri
+   din pagina grupului (`MEMBRI_VIZIBILI`): pe telefon un card ocupă cât un sfert
+   de ecran, iar nouă dintre ele îngroapă jurnalul de sub ele. */
+const MEMBRI_VIZIBILI = (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) ? 3 : 8;
+let membriToti = false;
+function toggleMembri(){ membriToti = !membriToti; renderMembri(); }
+
+let jurnal = [
+  {fel:"discutie", cand:"2026-08-22", scris:"2026-08-25", cine:"george",
+   text:"Vorbit cu agentul. Revine cu documentele pe WhatsApp până vineri. Prețul e discutabil, a zis că proprietarul a mai lăsat la alte oferte."},
+  {fel:"observatie", cand:"2026-08-21", scris:"2026-08-21", cine:"robert",
+   text:"Situat pe colț, aproape sigur e numărul 18. Adâncimea măsurată în Google e de circa 15 m, deci lungimea ar trebui să fie în jur de 27 m."},
+  {fel:"vizita", cand:"2026-08-19", scris:"2026-08-20", cine:"cristian",
+   text:"Am fost la teren sâmbătă dimineață. Casa de la nr. 59 nu deranjează din punct de vedere însorire. În spate e o hală, deci nu se pune problema de însorire pe latura aceea."},
+  {fel:"document", cand:"2026-08-14", scris:"2026-08-14", cine:"dan",
+   text:"Primit de la proprietar certificatul de urbanism, pe WhatsApp. E din 2023, deci expirat, dar arată POT 45% și regim P+2+3r."},
+  {fel:"discutie", cand:"2026-08-11", scris:"2026-08-12", cine:"alex",
+   text:"Numărul din anunț m-a redirectat la altcineva. Proprietarul e plecat din țară de peste 30 de ani. S-a interesat și a zis că maxim 1000 de metri pătrați construiți supraterani ar ieși pe terenul respectiv."},
+  {fel:"observatie", cand:"2026-08-08", scris:"2026-08-08", cine:"roxana",
+   text:"În PUZ sectorul 2 terenul e trecut ca zonă mixtă. POT 45%, CUT 1,6, regim P+2+3 retras."},
+  {fel:"vizita", cand:"2026-08-06", scris:"2026-08-07", cine:"bogdan",
+   text:"Trecut pe acolo într-o seară, să văd zgomotul. Strada e liniștită după ora 20, dar dimineața se aude șantierul de la nr. 42."},
+  {fel:"document", cand:"2026-08-04", scris:"2026-08-05", cine:"george",
+   text:"Extras de carte funciară cerut la ANCPI, ajunge în 5 zile lucrătoare. Costă 20 de lei, l-am plătit eu."},
+  {fel:"discutie", cand:"2026-08-01", scris:"2026-08-01", cine:"cristi",
+   text:"Sunat la primărie pentru certificatul de urbanism. Se depune de proprietar sau de cineva cu procură. Termen 30 de zile."},
+  {fel:"observatie", cand:"2026-07-29", scris:"2026-07-30", cine:"dan",
+   text:"Vecinul de la nord are calcan liber pe toată lungimea, deci se poate lipi construcția. De confirmat cu un releveu."},
+  {fel:"discutie", cand:"2026-07-25", scris:"2026-07-26", cine:"robert",
+   text:"Prima discuție cu agentul. Preț cerut 700.000 €, negociabil sub 680.000 dacă plata e rapidă. Nu acceptă rezervare fără avans."}
+];
+
+const LUNI_SCURT = ["ian","feb","mar","apr","mai","iun",
+                    "iul","aug","sep","oct","noi","dec"];
+function dataScurta(iso){
+  const [a,l,z] = iso.split("-").map(Number);
+  return z + " " + LUNI_SCURT[l-1];
+}
+
+function renderJurnal(){
+  const sortat = [...jurnal].sort((x,y)=> y.cand.localeCompare(x.cand));
+  const vizibile = jurnalTot ? sortat : sortat.slice(0, JURNAL_VIZIBILE);
+  const ascunse = sortat.length - JURNAL_VIZIBILE;
+
+  document.getElementById("jurnal").innerHTML = `
+  <table class="jurnal-tabel">
+    <tr><th>Când</th><th>Fel</th><th>Cine</th><th>Ce s-a întâmplat</th></tr>
+    ${vizibile.map(i=>{
+      const m = membri.find(p=>p.id===i.cine);
+      return `<tr>
+        <td class="j-cand">${dataScurta(i.cand)}
+          ${i.cand===i.scris?"":`<small>notat ${dataScurta(i.scris)}</small>`}</td>
+        <td class="j-fel"><span class="${i.fel}">${FELURI[i.fel]}</span></td>
+        <td class="j-cine">${m ? m.nume : "cineva"}</td>
+        <td class="j-text">${i.text}</td>
+      </tr>`;
+    }).join("")}
+  </table>
+  ${ascunse > 0 ? `<button class="jurnal-mai" onclick="toggleJurnal()">${
+      jurnalTot ? "Arată mai puține ↑"
+                : (ascunse === 1 ? "Încă o intrare ↓" : "Încă " + ascunse + " intrări ↓")
+    }</button>` : ""}`;
+}
+
+const azi = new Date().toISOString().slice(0,10);
+document.getElementById("jCand").value = azi;
+document.getElementById("jCand").max = azi;
+
+document.getElementById("jAdauga").onclick = () => {
+  const text = document.getElementById("jText").value.trim();
+  if(!text) return;
+  jurnal.push({fel:document.getElementById("jFel").value,
+               cand:document.getElementById("jCand").value || azi,
+               scris:azi, cine:selEu.value, text});
+  document.getElementById("jText").value = "";
+  renderJurnal();
+};
+document.getElementById("jText").onkeydown = e => {
+  if(e.key === "Enter") document.getElementById("jAdauga").click();
+};
+
+function render(){
+  renderFile();
+  renderVarianta();
+  renderCosturi();
+  renderMembri();
+  renderJurnal();
+}
+
+selEu.onchange = render;
+render();
+</script>
+</body>
+</html>

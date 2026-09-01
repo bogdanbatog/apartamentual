@@ -258,3 +258,213 @@ intră în cote). Fără scăderea lui, un parter comun de 48 mp arăta o scumpi
 Două servere Python, pe `8010` (folderul `handoff`) și `8020` (folderul `frontend`). Se opresc
 singure la repornirea calculatorului; dacă vrei mai devreme, închide procesele `python` din
 Task Manager.
+
+---
+
+# ADAOS: sesiunea de 1 septembrie 2026
+
+**Probele s-au făcut.** Lucian a umblat prin pagină pe date reale și a confirmat că merg:
+bifele, notele pe pași, documentele (fișier și link), jurnalul cu data faptului, preferințele.
+Din ele au ieșit trei cereri, toate rezolvate în sesiune, plus una lăsată pentru altă dată.
+
+## Ce s-a schimbat
+
+### 1. „Aport propriu", nu „cash"
+
+Cerere de conținut, în patru locuri din pagină: eticheta din formularul de preferințe
+(„Pentru teren, aport propriu"), explicația de sub ea, rândul de pe cardul membrului
+(„aport propriu 40 mii €") și capul tabelului de totaluri („Aport propriu pentru teren").
+
+Coloana din bază rămâne `buget_teren_cash`. Nu merită o migrație pentru un nume intern, dar
+**cuvântul pe care îl citește omul e cel din discuțiile lui cu banca**, nu cel din schemă.
+În cod e un comentariu care leagă cele două nume, ca să nu pară o scăpare.
+
+### 2. Jurnalul: ștergere și editare, care n-aveau butoane deloc
+
+Jurnalul era singura secțiune fără nicio unealtă pe intrările deja scrise. Acum:
+
+- **× șterge**, pentru autor **sau fondator** (migrația `9-stergerea-din-jurnal.sql`,
+  rulată și verificată);
+- **✎ editează**, **doar pentru autor** (migrația `10-editarea-din-jurnal.sql`, rulată și
+  verificată). Formularul de sus se umple cu valorile intrării, butonul devine „Salvează
+  modificarea", apare „Renunță" (și Escape), iar rândul care se editează se colorează.
+- O intrare schimbată poartă de atunci **„modificat [data]"**. Într-un jurnal citit de tot
+  grupul, o frază schimbată în tăcere e mai rea decât una ștearsă.
+
+⭐ **De ce editarea nu răstoarnă decizia din 31 august.** Regula era „fondatorul poate ȘTERGE
+ceva greșit, nu poate REscrie ce a spus altcineva". Ea privește vorbele ALTUIA. Un om care își
+corectează propria intrare nu o atinge. De aceea ștergerea e autor-sau-fondator, iar editarea
+e doar a autorului, și așa rămâne.
+
+### 3. Documentele: dreptul exista, butonul nu
+
+Găsit pe drum. `3-atasamente-teren.sql` dă ștergerea autorului **sau fondatorului**, și pe
+tabelă, și pe bucket, încă din 30 august. Pagina însă arăta „Șterge" doar autorului: fondatorul
+avea voie și n-avea pe ce apăsa.
+
+⚠️ **E capcana în oglindă cu cea de la superadmin** (unde butonul există fără drept). Se ratează
+în ambele sensuri și niciunul nu dă vreo eroare. Condiția de ștergere e scrisă acum identic în
+toate trei locurile din pagină, `(al meu) || suntAdmin`, fiecare cu un comentariu care numește
+politica din bază de care atârnă.
+
+## Capcanele sesiunii
+
+- ⭐ **BLOC 0 și-a plătit chiria.** Migrația 10 adăuga la început o coloană `editat_la`. BLOC 0
+  a arătat că tabela are deja **`updated_at`**, de dinaintea pachetului, cu `default now()`.
+  Ar fi ieșit două coloane pentru același lucru, dintre care peste un an nimeni n-ar mai fi
+  știut care spune adevărul. Verificat înainte de a o folosi: e egală cu `created_at` la toate
+  rândurile, iar singurul declanșator al tabelei e `trigger_activity_on_comment`, AFTER INSERT,
+  care ține activitatea membrilor și n-o atinge. Deci „modificat" se citește din
+  `updated_at > created_at`, cu un prag de câteva secunde, nu din prezența unei coloane.
+- **Grantul de UPDATE e pe COLOANE, nu pe tabelă** (`content`, `fel`, `data_faptului`,
+  `updated_at`). Pe toată tabela, cineva își putea rescrie propriul rând mutându-l în alt grup:
+  `with check` se uită la `user_id`, nu la `grup_id`, iar intrarea ar fi apărut în jurnalul unui
+  grup din care omul nu face parte. A mers curat tocmai fiindcă nu exista deja un grant pe
+  tabelă; unul de tabelă nu se mai poate restrânge după aceea cu un revoke pe coloană.
+- **Verificarea „nu trebuie să apară niciun rând" era prost formulată** în BLOC 3 al migrației
+  10: interogarea nu filtrează după rol, deci `postgres` și `service_role` apar normal. Ce
+  conta era absența lui `authenticated`. Textul din fișier e corectat.
+- **Jurnalul are 2 rânduri, nu 100+.** Antetul migrației 4 spune „cele 100+ de comentarii
+  existente". Cifra e greșită; n-a schimbat nimic, dar nu te bizui pe ea.
+
+## ▶️ TASKUL URMĂTOR, hotărât la finalul sesiunii de 1 septembrie
+
+**O singură zonă de note și documente pe pagina grupului, scoasă din spatele pașilor.**
+
+**De unde a pornit.** Lucian, uitându-se la uneltele de pe cele 11 casete de capitol din
+`grup-details.html`: „notele și fișierele atașate acolo mi se pare redundante, apar note peste
+tot", și „acum sunt ascunse în spatele pașilor, complicat". Prima lui idee a fost să le scoată
+de tot și să lase note doar în pagina de organizare.
+
+⚠️ **De ce nu se putea așa, și de ce a ieșit altceva mai bun.** Notele de pe capitole nu sunt
+despre un teren: „Comunicarea", „Contractul de asociere", „Ieșirea din grup" sunt subiecte ale
+grupului. Pagina de organizare e, prin construcție, per (grup, teren). Deci n-ar fi fost o
+mutare, ci o desființare, iar un grup fără niciun teren la favorite ar fi rămas fără niciun loc
+de scris. Decizia luată: **zonă proprie de note și documente pe pagina grupului**, la nivel de
+grup, nu ascunsă în casete.
+
+**Rezultatul: trei feluri de note devin două**, fiecare cu locul lui. Notele GRUPULUI pe pagina
+grupului, notele TERENULUI în pagina de organizare.
+
+### Cum se face, și de ce nu cere nicio migrație
+
+⭐ **Nu se pierde nimic și nu se atinge baza.** Notele de pe capitole sunt deja în
+`grup_checklist_notes` cu `step_key` = `c1`…`c11`. Zona nouă înseamnă doar: **citește toate
+notele grupului al căror `step_key` NU începe cu `t-`**, arată-le într-o listă cu dată și autor,
+iar cele noi scrie-le cu o cheie fixă. Notele scrise până acum apar acolo de la sine, în ordine.
+La fel fișierele, din `grup_checklist_files`.
+
+Politicile și drepturile există deja, verificate pe 1 septembrie (migrația 11): `authenticated`
+are SELECT, INSERT, UPDATE, DELETE pe note și SELECT, INSERT, DELETE pe fișiere.
+
+**Ce se scoate:** din cele 11 casete, `renderBoxTools` cu tot ce ține de note și fișiere.
+
+⚠️ **Casetele din `grup-details.html` NU au bife.** Au fost scoase mai demult, e scris în cod la
+`renderCasetePasi`: „Regula veche (prima nebifată stă deschisă) a plecat odată cu bifele". Bifele
+există doar pe pașii TERENULUI, în pagina de organizare. Deci după ce ies notele și fișierele,
+**caseta rămâne numai cu textul din ghid**: cele 11 devin material de citit, fără nicio acțiune
+în ele. Nu e o problemă (e drumul grupului, povestit pe capitole), dar e o schimbare de rol care
+trebuie văzută înainte, nu descoperită după.
+
+⭐ **Editarea notelor există deja și se portează, nu se scrie de la zero.** `saveEditNote` din
+`grup-details.html` (în jurul liniei 2862) face `update({ content, updated_at })` cu câmp deschis
+în loc, Enter pentru salvare, Escape pentru renunțare. E și răspunsul la cererea de mai jos: în
+pagina de organizare notele pașilor de teren nu se pot edita, iar tiparul e deja scris aici.
+
+⚠️ **Înainte de a scoate butoanele, de rulat numărătoarea** (nu mai e blocantă, fiindcă nimic nu
+se orfanizează, dar e bine de știut ce e acolo):
+
+```sql
+select 'note pe capitole (c1-c11)' as ce, count(*)::text as cate,
+       coalesce(string_agg(distinct step_key, ', '), '(niciuna)') as detalii
+from public.grup_checklist_notes where step_key not like 't-%'
+union all
+select 'fisiere pe capitole', count(*)::text,
+       coalesce(string_agg(distinct step_key, ', '), '(niciunul)')
+from public.grup_checklist_files where step_key not like 't-%';
+```
+
+⚠️ **Se face în sesiune proprie, DUPĂ commitul pachetului de față.** Atinge tot
+`grup-details.html`, exact fișierul care a fost deja luat din greșeală de commitul altui task pe
+1 septembrie dimineața. Două taskuri necomise în același fișier e chiar tiparul care a produs
+încurcătura.
+
+## De ținut minte pentru sesiunea următoare
+
+▶️ **Notele din „Verificările terenului" nu se pot edita** (cerut de Lucian pe 1 septembrie,
+lăsat explicit pentru altă sesiune). Azi se pot doar scrie și șterge.
+
+✅ **CONFIRMAT: e numai frontend, nu trebuie nicio migrație.** Politica „Users can update own
+checklist notes" (`auth.uid() = user_id`) există pe `grup_checklist_notes`, iar `authenticated`
+are și dreptul de UPDATE sub ea, verificat cu `role_table_grants` la BLOC 0 al migrației 11.
+Amândouă sunt necesare, o politică fără grant nu face nimic; aici sunt amândouă.
+
+⚠️ **Dar grantul e pe TOATĂ tabela, nu pe coloane**, spre deosebire de cel scris azi pentru
+jurnal, și are aceeași gaură pe care am ocolit-o acolo: politica cere `auth.uid() = user_id`,
+deci cine își editează propria notă nu o poate da pe numele altuia, **dar îi poate schimba
+`grup_id` sau `step_key`**, adică o poate muta în alt grup sau pe alt pas. Merită strâns la
+un grant pe coloana `content` când se face editarea, e o linie în plus în aceeași sesiune.
+
+**Forma:** la note nu există formular sus care să poată fi refolosit, ca la jurnal. Cel mai
+probabil se editează în loc, în caseta pasului. Și acolo, ca la jurnal, editarea e **doar a
+autorului**; fondatorul păstrează doar ștergerea, care merge deja.
+
+## Stadiul: tot nimic nu e comis
+
+Fișierele care așteaptă: `frontend/organizare-apartamente.html`,
+`frontend/js/organizare-apartamente.js` (amândouă netrackuite), plus migrațiile 9 și 10 din
+`db_schema/organizare-apartamente/`.
+
+⚠️ **Cuplajul de care trebuie ținut cont la publicare.** Linkul din cardul terenului și golirea
+cardului (comentariile și verificările mutate în pagina nouă) **au intrat deja pe `main`**, luate
+din greșeală de commitul `190a5c5` („Timelapse nou, local"), care a comis `grup-details.html` și
+`index.html` întregi. Deci `main` trimite azi către o pagină care nu există în repo. Live-ul e
+încă bun, fiindcă publicarea din cPanel nu s-a făcut; dar **timelapse-ul și pagina asta nu se
+mai pot publica separat.** Cine publică din cPanel trebuie să urce și
+`organizare-apartamente.html`, altfel membrii pierd comentariile și bifele de pe teren și
+primesc un link către 404.
+
+✅ **Cazul „cont care NU e în grup": probat și trecut.** Pagina spune „Doar pentru membrii
+grupului". Proba s-a dat fără niciun cont de test: **cu contul lui Lucian, pe un grup în care nu
+e membru.** Pagina nu se uită nicăieri la superadmin, doar la `grup_membri` și la fondator, deci
+pentru ea e un străin ca oricare. Merită ținut minte ca tipar: probele de „nu ai voie" nu cer
+mereu al doilea cont, ci un obiect pe care contul tău nu are drepturi.
+
+## Proba cu cheia anonimă: făcută, și a scos ceva
+
+Dată pe toate cele unsprezece tabele atinse de pachet, nu doar pe `analiza_teren`. Zece refuză
+din drepturi, înainte de orice RLS (`401, permission denied for table`): `analiza_teren`,
+`analiza_varianta`, `analiza_nivel`, `analiza_apartament`, `apartament_suprafata`,
+`apartament_interes`, `grup_membru_preferinte`, `teren_atasamente`, `grup_teren_comments`,
+`grup_teren_checklist`. Asta e starea bună.
+
+⚠️ **Două răspund 200 cu listă goală:** `grup_checklist_notes` și `grup_checklist_files`. Nu se
+scurge nimic, dar `anon` ARE drept de citire pe ele, iar tot ce ține ușa închisă e o frază de
+RLS. Tabele vechi, dinaintea pachetului: Supabase le-a dat `ALL` automat, iar migrația 6 le-a
+atins politica, nu granturile. **TRUNCATE, dacă e printre drepturi, nu e atins de RLS deloc.**
+
+Verificat că revocarea nu rupe nimic: amândouă se citesc doar din `grup-details.html` și din
+`js/organizare-apartamente.js`, în spatele contului.
+
+✅ **Strâns cu `11-drepturi-anon-note-si-fisiere.sql`, rulat și verificat pe 1 septembrie.**
+BLOC 1 s-a scris abia DUPĂ inventar, nu pe ghicite, fiindcă forma reparației depindea de răspuns:
+dacă dreptul venea prin rolul `PUBLIC`, o revocare de la `anon` s-ar fi executat curat fără să
+schimbe nimic; iar dacă `authenticated` se sprijinea tot pe `PUBLIC`, o revocare de acolo ar fi
+închis paginile pentru toți utilizatorii logați.
+
+**Ce a arătat inventarul:** niciun rând pe `PUBLIC`, deci granturi directe. Dar amândouă tabelele
+aveau **toate cele șapte drepturi la amândouă rolurile**, inclusiv **TRUNCATE**, și la `anon`, și
+la `authenticated`. Nu fuseseră strânse niciodată, nici măcar pentru cei logați.
+
+**Starea de acum**, verificată: șapte rânduri, toate pe `authenticated`.
+`grup_checklist_files`: SELECT, INSERT, DELETE (fără UPDATE, tabela n-are politică de UPDATE și
+nicio pagină nu face una). `grup_checklist_notes`: SELECT, INSERT, DELETE, UPDATE. Zero pentru
+`anon`, zero TRUNCATE. Proba din afară, dată din nou după: amândouă întorc `401, permission
+denied for table`.
+
+Politicile n-au fost atinse. Câteva sunt scrise pe rolul `public` în loc de `authenticated`, dar
+după ce `anon` n-are niciun drept e oprit ÎNAINTE de RLS, deci rolul politicii nu-l mai privește.
+O politică nu se rescrie fără să i se citească întâi condiția întreagă.
+
+(În treacăt, fără legătură cu pachetul: `grupuri` întoarce date anonimilor, dar `grupuri.html`
+e pagină publică, fără poartă de login, deci e intenționat.)

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Împărțirea apartamentelor - ApartamenTUal</title>
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+    <meta name="description" content="Împărțirea apartamentelor pe variantele analizei, pentru membrii grupului.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <!-- Cei șapte pași de verificare a terenului. Aceeași listă ca în pagina
+         grupului și în ghid: `PASI_TEREN`. -->
+    <script src="js/pasi-din-ghid.js"></script>
+    <style>
+/* ═══════════════════════════════════════════════════════════════════════
+   ÎMPĂRȚIREA APARTAMENTELOR
+
+   Stilurile vin din macheta lucrată împreună cu Lucian în august 2026
+   (`handoff/organizare-pagina-proprie-macheta.html`), care rămâne locul unde
+   se încearcă schimbări de formă înainte să ajungă aici: acolo datele sunt
+   scrise de mână, deci se poate umbla fără bază de date și fără cont.
+
+   ⚠️ Paleta e scopată pe `.oa-pagina`, nu pusă pe `:root`. Pagina folosește
+   `css/apartamentual-v9.css` pentru nav și footer, iar variabilele de acolo
+   au alte nume; două seturi pe `:root` s-ar călca în picioare.
+   ═══════════════════════════════════════════════════════════════════════ */
+  /* Fundalul crem al paginii, pus pe `body` printr-o clasă adăugată din
+     `oa-porneste()`. Nu se pune pe `body` direct din foaia asta: nav-ul și
+     footer-ul vin din `apartamentual-v9.css` și își au fundalul lor. */
+  body.oa-fundal{background:#F7F4EE;}
+
+
+  .oa-pagina{
+    --crem:#F7F4EE;
+    --hartie:#FFFFFF;
+    --cerneala:#1A1815;
+    --gri:#6E675E;
+    --linie:#E4DED4;
+    --teracota:#C4553B;
+    --teracota-slab:#F3DED8;
+    --salvie:#8A9B7C;
+    --salvie-slab:#EDF1E8;
+  }
+  .oa-pagina *{box-sizing:border-box;}
+  /* ⚠️ `hidden` e doar `display:none` din foaia implicită a browserului, deci
+     orice `display` scris de noi îl bate. Fără regula asta, ascunderea legendei
+     sau a explicațiilor din JS nu are niciun efect, fiindcă amândouă sunt
+     `flex` sau `block` din CSS. */
+  .oa-pagina [hidden]{display:none !important;}
+  .oa-pagina h1,.oa-pagina h2,.oa-pagina h3,.oa-pagina p,.oa-pagina table{margin:0;}
+  .oa-pagina{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    color:var(--cerneala);line-height:1.5;
+    max-width:1080px;margin:0 auto;padding:0 16px 72px;
+  }
+  .eticheta{font-size:11px;font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--teracota);}
+  h1{font-size:26px;font-weight:700;margin:4px 0 2px;}
+  .sub{color:var(--gri);font-size:15px;}
+  .insigna{display:inline-block;background:var(--cerneala);color:var(--crem);
+    font-size:12px;padding:4px 10px;border-radius:99px;margin-top:8px;}
+  .context{margin-top:14px;font-size:13.5px;color:var(--gri);}
+  .context a{color:var(--teracota);text-decoration:none;font-weight:600;}
+  .context a:hover{text-decoration:underline;}
+
+  section{margin-top:36px;}
+  h2{font-size:18px;margin-bottom:4px;}
+  .explica{color:var(--gri);font-size:14px;margin-bottom:16px;}
+
+
+  /* ── filele variantelor, colorate termic ─────────────────────────── */
+  .file{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .fila{font:inherit;font-size:13px;text-align:left;cursor:pointer;
+    border:1.5px solid transparent;border-radius:8px;padding:7px 11px;transition:transform .08s;}
+  .fila:hover{transform:translateY(-1px);}
+  .fila b{display:block;font-size:13px;}
+  .fila small{font-size:10.5px;opacity:.75;}
+  .fila.activ{border-color:var(--cerneala);}
+
+  .varianta-corp{background:var(--hartie);border:1px solid var(--linie);
+    border-radius:12px;padding:14px 16px 16px;}
+  .varianta-cap{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;
+    padding-bottom:9px;margin-bottom:12px;border-bottom:1px solid var(--linie);}
+  .varianta-cap h3{font-size:14.5px;}
+  .varianta-cap .desc{color:var(--gri);font-size:12.5px;flex:1;min-width:180px;}
+  .varianta-cap .cifra{font-size:12.5px;color:var(--gri);}
+  .varianta-cap .cifra b{font-size:13.5px;color:var(--cerneala);}
+  .avertisment{
+    width:100%;margin-top:6px;padding:8px 10px;border-radius:7px;
+    background:var(--teracota-slab);color:#7C3524;font-size:12px;line-height:1.45;
+  }
+  .avertisment b{color:#5E2719;}
+
+  /* ── nivelurile ───────────────────────────────────────────────────── */
+  .nivel{display:flex;align-items:stretch;gap:8px;margin-bottom:6px;}
+  .nivel-nume{width:64px;flex:none;font-size:10px;font-weight:600;
+    letter-spacing:.06em;color:var(--gri);text-transform:uppercase;
+    text-align:right;padding-top:7px;line-height:1.25;}
+  .nivel-nume small{display:block;font-size:9.5px;font-weight:400;
+    letter-spacing:0;text-transform:none;color:#B5ADA2;}
+  .nivel-ap{display:flex;flex:1;gap:6px;justify-content:flex-start;align-items:stretch;}
+
+  /* ⚠️ Strâns dinadins (28 august): casetele erau aerisite ca niște carduri de
+     prezentare, dar aici se compară șase deodată, pe cinci variante. Un tabel
+     dens se scanează dintr-o privire; carduri mari cer derulare. */
+  /* ⚠️ `position:relative` e obligatoriu: mânerul de tragere e `absolute` și
+     se agață de el. Fără rândul ăsta se ancorează de pagină, ajunge lat cât
+     tot ecranul și înalt de zero, deci nu se mai poate apuca nicăieri, fără
+     nicio eroare în consolă. */
+  .ap{
+    position:relative;
+    border:1.5px solid var(--linie);border-radius:7px;background:var(--crem);
+    padding:6px 7px 5px;cursor:pointer;min-width:0;
+    transition:border-color .12s, background .12s, box-shadow .12s;
+    display:flex;flex-direction:column;
+  }
+  .ap:hover{border-color:var(--gri);}
+  .ap-titlu{display:flex;align-items:baseline;gap:5px;line-height:1.2;}
+  .ap-titlu .tip{font-weight:700;font-size:12.5px;flex:1;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;}
+  .ap-titlu .mp{font-size:12px;font-weight:700;color:var(--cerneala);white-space:nowrap;}
+  /* Săgețile de glisare. Una singură când apartamentul e la capătul
+     intervalului, ca să nu promită o direcție în care nu se poate merge. */
+  /* Eticheta lungă pe ecran lat, cea scurtă pe telefon. Amândouă în DOM, ca să
+     nu depindem de o re-randare la rotirea telefonului. */
+  .tip-scurt{display:none;}
+  /* Săgeata de deschidere a panoului: doar pe telefon. */
+  .ap-jos-sageata{display:none;font-size:11px;color:var(--gri);line-height:1;}
+
+  /* Costurile la stânga, cine s-a înscris la dreapta: pe același rând, fiindcă
+     în casetele late rămânea o bandă goală sub cifre. */
+  .ap-jos{display:flex;align-items:center;gap:8px;margin-top:5px;
+    border-top:1px solid var(--linie);padding-top:4px;}
+  .ap-bani{font-size:10px;color:var(--gri);flex:1;min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35;}
+  .ap-bani b{color:var(--cerneala);font-weight:600;}
+  .ap-bani b.tot{font-size:11.5px;font-weight:700;}
+
+  .cine{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;
+    flex:0 1 auto;min-width:0;}
+  .punct{font-size:9.5px;font-weight:700;color:var(--crem);background:var(--cerneala);
+    border-radius:99px;padding:1px 6px;white-space:nowrap;}
+  .ap.unul{border-color:var(--salvie);background:var(--salvie-slab);}
+  .ap.unul .punct{background:var(--salvie);}
+  .ap.multi{border-color:var(--teracota);background:var(--teracota-slab);}
+  .ap.multi .punct{background:var(--teracota);}
+  .ap-eu{font-size:9px;font-weight:700;color:var(--cerneala);
+    letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;align-self:center;}
+
+  /* ── mânerul de tragere ────────────────────────────────────────────────
+     Lat de 16 pixeli, nu de 9 cât avea prima formă, și fără cele două săgeți
+     „‹›" de lângă suprafață: săgețile arătau ca niște butoane fără să fie
+     (indicau doar direcția), iar mânerul de sub ele era prea îngust ca să se
+     nimerească din prima. Acum zona de apucat e una singură și destul de lată
+     cât să nu ceară ochire.
+
+     ⚠️ Se sprijină pe `position:relative` de pe `.ap`. Fără el se ancorează de
+     pagină, iese lat cât tot ecranul și înalt de zero, iar tragerea nu mai
+     merge de nicăieri, fără nicio eroare în consolă. */
+  .ap-maner{
+    position:absolute;top:0;right:-6px;bottom:0;width:16px;
+    cursor:col-resize;z-index:2;
+    display:flex;align-items:center;justify-content:center;
+    touch-action:none;
+  }
+  .ap-maner::before{
+    content:"";width:3px;height:26px;border-radius:3px;
+    background:var(--linie);transition:background .12s, height .12s, width .12s;
+  }
+  .ap:hover .ap-maner::before{background:var(--gri);width:4px;}
+  .ap-maner:hover::before{background:var(--teracota);width:4px;height:70%;}
+  .ap.trage{border-color:var(--teracota);}
+  .ap.trage .ap-maner::before{background:var(--teracota);width:4px;height:80%;}
+  /* Cât ține tragerea, tot ecranul poartă cursorul de redimensionare și nu se
+     mai poate selecta text. Fără rândul al doilea, o tragere mai lungă apucă
+     jumătate din pagină și o colorează albastru. */
+  body.se-trage{cursor:col-resize;user-select:none;}
+
+  /* Fără joc în nicio direcție: mânerul rămâne, dar stins. */
+  .ap-maner.blocat{cursor:default;}
+  .ap-maner.blocat::before{opacity:.35;}
+  .ap:hover .ap-maner.blocat::before,
+  .ap-maner.blocat:hover::before{background:var(--linie);width:3px;height:26px;}
+
+  /* Cât se poate întinde caseta, arătat DOAR în timpul tragerii. Tot restul
+     timpului ar fi două cifre în plus pe fiecare casetă, degeaba. */
+  .ap-limite{display:none;justify-content:space-between;
+    font-size:9px;color:#B5ADA2;line-height:1.2;margin-top:3px;}
+  .ap.trage .ap-limite{display:flex;}
+  .ap.al-meu{box-shadow:0 0 0 2px var(--cerneala);}
+  .ap.comun{cursor:default;border-style:dashed;color:var(--gri);}
+  .ap.comun:hover{border-color:var(--linie);}
+
+  /* Golul rămas pe nivel. Nu e o greșeală, e suprafață care încă nu s-a dat
+     nimănui, dar pe care o plătește cineva: de asta se vede. */
+  .gol-nivel{
+    border:1.5px dashed var(--linie);border-radius:7px;
+    background:repeating-linear-gradient(135deg,transparent,transparent 6px,
+      rgba(110,103,94,.06) 6px,rgba(110,103,94,.06) 12px);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:10px;color:#B5ADA2;padding:6px 4px;min-width:0;line-height:1.25;
+  }
+
+  /* ── nivelurile pe telefon ─────────────────────────────────────────────
+     ⚠️ Casetele își PĂSTREAZĂ lățimea proporțională, nu trec pe lățime fixă.
+     Prima formă le punea pe `flex:1 1 170px`, iar atunci un apartament de 112
+     mp arăta cât unul de 78, glisarea nu mai lățea nimic, iar gestul rămânea
+     fără răspuns vizual: se schimba doar cifra.
+
+     Ce cedează în loc e textul, nu geometria: font mai mic, iar în casetele
+     prea înguste costurile se taie cu trei puncte. Cifra care contează
+     (suprafața) și numele celui înscris rămân mereu vizibile, iar detaliul e
+     în titlul casetei, la apăsare lungă.
+
+     Numele nivelului trece deasupra, ca să nu mai ia 64 de pixeli din lățime:
+     pe 390 de pixeli, aceia sunt o șesime din clădire. */
+  @media (max-width:720px){
+    .nivel{flex-direction:column;gap:3px;margin-bottom:9px;}
+    .nivel-nume{width:auto;text-align:left;padding-top:0;}
+    .nivel-nume small{display:inline;margin-left:6px;}
+    .nivel-ap{gap:4px;}
+    .ap{padding:5px 5px 4px;border-radius:6px;}
+    .ap-titlu{gap:3px;}
+    .ap-titlu .tip{font-size:11px;}
+    .ap-titlu .mp{font-size:11px;}
+    .ap-jos{gap:4px;margin-top:4px;padding-top:3px;}
+    .ap-bani{font-size:9px;}
+    .ap-bani b.tot{font-size:10px;}
+    .punct{font-size:9px;padding:1px 5px;}
+    .ap-eu{display:none;}
+    .gol-nivel{font-size:9px;padding:4px 2px;}
+  }
+
+  .stare-legenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--gri);}
+  .stare-legenda span{display:flex;align-items:center;gap:6px;}
+  .buline{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--linie);background:var(--crem);flex:none;}
+  .buline.b1{border-color:var(--salvie);background:var(--salvie-slab);}
+  .buline.b2{border-color:var(--teracota);background:var(--teracota-slab);}
+
+  details{margin-top:16px;}
+  summary{cursor:pointer;font-size:13.5px;color:var(--teracota);font-weight:600;}
+  table{width:100%;border-collapse:collapse;background:var(--hartie);
+    border:1px solid var(--linie);border-radius:12px;overflow:hidden;
+    font-size:13.5px;margin-top:10px;}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--linie);}
+  th:first-child,td:first-child{text-align:left;}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gri);
+    background:var(--crem);font-weight:600;}
+  tr:last-child td{border-bottom:none;}
+  tr.total-rand td{font-weight:700;background:var(--crem);}
+  .scroll-x{overflow-x:auto;}
+
+  .membri{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+  .membru{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;padding:13px 15px;font-size:13.5px;}
+  .membru.eu{border-color:var(--cerneala);}
+  .membru b{font-size:14px;}
+  .membru .cere{color:var(--gri);margin-top:4px;}
+  .membru .bani{margin-top:5px;font-size:12.5px;color:var(--gri);}
+  .membru .bani b{color:var(--cerneala);font-weight:600;}
+  .membru .nota{margin-top:6px;font-size:12.5px;color:var(--gri);font-style:italic;}
+  .membru .ales{margin-top:7px;font-size:12.5px;padding-top:7px;border-top:1px solid var(--linie);}
+  .membru .ales-aici{display:block;}
+  .membru .ales-altele{display:block;margin-top:3px;color:var(--gri);}
+  .membru .ales em{font-style:normal;color:var(--teracota);font-weight:600;}
+  .membru .gol{color:#A79F94;}
+
+
+  /* ── cardul membrului ─────────────────────────────────────────────── */
+  .membru-cap{display:flex;align-items:baseline;gap:8px;}
+  .membru-cap b{flex:1;}
+  .btn-mic{
+    font:inherit;font-size:12px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:7px;padding:3px 10px;
+    background:var(--crem);color:var(--cerneala);
+  }
+  .btn-mic:hover{border-color:var(--gri);}
+  .sursa{
+    font-size:10.5px;letter-spacing:.04em;border-radius:99px;padding:1px 7px;
+    background:var(--salvie-slab);color:#4E5C42;border:1px solid var(--salvie);
+  }
+  .sursa.alt{background:var(--teracota-slab);color:#7C3524;border-color:var(--teracota);}
+
+  /* ── formularul de preferințe ──────────────────────────────────────────
+     Grupat pe trei întrebări, fiecare cu titlul ei: ce fel de apartament, ce
+     mai trebuie pe lângă el, cu ce bani. Înșirate la rând, cele opt câmpuri
+     arătau ca o listă de variabile, iar omul nu vedea că bugetul e altceva
+     decât etajul. ─────────────────────────────────────────────────────── */
+  .form-pref{
+    display:none;background:var(--hartie);border:1px solid var(--linie);
+    border-radius:14px;margin-bottom:18px;overflow:hidden;
+    box-shadow:0 2px 14px rgba(26,24,21,.07);
+  }
+  .pref-cap{
+    display:flex;align-items:center;gap:12px;
+    padding:13px 20px;border-bottom:1px solid var(--linie);background:var(--crem);
+  }
+  .pref-cap h3{flex:1;font-size:15px;}
+  .pref-corp{padding:18px 20px;}
+
+  .pref-din-profil{
+    background:var(--salvie-slab);border:1px solid var(--salvie);border-radius:10px;
+    padding:11px 14px;font-size:13px;color:#3F4B35;margin-bottom:20px;line-height:1.5;
+  }
+  .pref-din-profil b{color:#2F3927;}
+  .pref-din-profil a{color:#3F4B35;font-weight:600;}
+
+  .pref-sectiune{margin-bottom:18px;}
+  .pref-sectiune:last-of-type{margin-bottom:0;}
+  .pref-titlu{
+    font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--teracota);margin-bottom:10px;
+    padding-bottom:5px;border-bottom:1px solid var(--linie);
+  }
+  .pref-rand{display:grid;gap:14px;}
+  .pref-rand.trei{grid-template-columns:repeat(3,1fr);}
+  .pref-rand.doua{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:640px){
+    .pref-rand.trei,.pref-rand.doua{grid-template-columns:1fr;}
+  }
+
+  .pref-camp{display:flex;flex-direction:column;gap:5px;}
+  .pref-camp > span{font-size:12.5px;color:var(--gri);}
+  .pref-camp small{font-size:11.5px;color:#A79F94;line-height:1.4;}
+
+  /* Unitatea stă ÎN câmp, la dreapta, nu după el: „115" și „mp" despărțite de
+     un chenar se citesc ca două lucruri diferite. */
+  .camp-cu-unitate{position:relative;display:block;}
+  .camp-cu-unitate .unitate{
+    position:absolute;right:11px;top:50%;transform:translateY(-50%);
+    font-size:12.5px;color:#A79F94;pointer-events:none;
+  }
+  .camp-cu-unitate input{padding-right:38px;}
+
+  .form-pref select,.form-pref input[type=number],.form-pref input[type=text]{
+    font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--linie);
+    border-radius:8px;background:var(--crem);color:var(--cerneala);width:100%;
+    transition:border-color .12s, background .12s;
+  }
+  .form-pref select:focus,.form-pref input:focus{
+    outline:none;border-color:var(--cerneala);background:var(--hartie);
+  }
+  .form-pref input::placeholder{color:#B5ADA2;}
+
+  .pref-butoane{
+    display:flex;gap:10px;justify-content:flex-end;align-items:center;
+    padding:13px 20px;border-top:1px solid var(--linie);background:var(--crem);
+  }
+  .btn-principal{
+    font:inherit;font-size:14px;font-weight:600;border:none;border-radius:8px;
+    padding:10px 22px;cursor:pointer;background:var(--cerneala);color:var(--crem);
+  }
+  .btn-principal:hover{background:#2F2A24;}
+  .btn-sters{
+    font:inherit;font-size:13.5px;cursor:pointer;border:1px solid var(--linie);
+    border-radius:8px;padding:9px 16px;background:var(--hartie);color:var(--gri);
+  }
+  .btn-sters:hover{border-color:var(--gri);color:var(--cerneala);}
+
+  /* ── cardul de membru pe telefon ───────────────────────────────────────
+     Rândul „Aici: V5 · Etaj 2 · 3 camere" iese: aceeași informație stă deja pe
+     casetele de mai sus, unde numele omului scrie chiar pe apartamentul lui.
+     Pe un ecran de 390 de pixeli, două rânduri care repetă ceva înseamnă un
+     card cu un sfert mai înalt, ori de nouă ori.
+
+     ⚠️ „Și pe Busolei 16" RĂMÂNE: alegerile de pe celelalte terenuri ale
+     grupului nu se văd nicăieri altundeva în pagină, iar fără ele cineva care
+     s-a așezat deja pe alt teren pare doar nehotărât. Când omul n-are nimic pe
+     alt teren, cade tot blocul, cu linia lui despărțitoare cu tot. */
+  @media (max-width:640px){
+    .membru .ales-aici{display:none;}
+    .membru .ales--doar-aici{display:none;}
+  }
+
+
+  /* ── panoul apartamentului, pe telefon ─────────────────────────────────
+     Ce nu încape în casetă: prețul defalcat, cine s-a înscris, reglarea
+     suprafeței din butoane și înscrierea propriu-zisă. Stă sub nivelul din
+     care face parte, nu peste pagină, ca să rămână vizibilă clădirea. */
+  .ap-detaliu{display:none;}
+  @media (max-width:720px){
+    .ap-detaliu{
+      display:block;background:var(--crem);border:1px solid var(--linie);
+      border-left:3px solid var(--cerneala);border-radius:8px;
+      padding:11px 13px;margin:2px 0 10px;font-size:13px;
+    }
+    .apd-cap{margin-bottom:8px;}
+    .apd-bani{font-size:12.5px;color:var(--gri);line-height:1.55;
+      padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--linie);}
+    .apd-bani b{color:var(--cerneala);float:right;font-weight:600;}
+    .apd-bani .tot b{font-weight:700;}
+    .apd-marime{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+      font-size:12.5px;color:var(--gri);margin-bottom:9px;}
+    .apd-marime b{color:var(--cerneala);min-width:52px;text-align:center;}
+    .apd-marime small{font-size:11px;color:#B5ADA2;}
+    .apd-pas{
+      font:inherit;font-size:17px;line-height:1;cursor:pointer;
+      width:34px;height:34px;border-radius:8px;
+      border:1px solid var(--linie);background:var(--hartie);color:var(--cerneala);
+    }
+    .apd-pas:disabled{opacity:.35;cursor:default;}
+    .apd-cine{font-size:12.5px;color:var(--gri);margin-bottom:9px;}
+    .apd-cine b{color:var(--cerneala);}
+    .apd-buton{
+      display:block;width:100%;font:inherit;font-size:13.5px;font-weight:600;
+      border:none;border-radius:8px;padding:11px;cursor:pointer;
+      background:var(--cerneala);color:var(--crem);
+    }
+    .apd-buton.retrage{background:var(--hartie);color:var(--cerneala);
+      border:1px solid var(--linie);}
+
+    /* În casetă rămâne doar cât e de mare și săgeata care deschide restul. */
+    .tip-lung{display:none;}
+    .tip-scurt{display:inline;}
+    /* „mp" iese din casetă: pe o garsonieră de 69 de pixeli, cele trei
+       caractere costă exact atât cât trebuie ca „Gars." să se taie la „G".
+       Unitatea se vede în panou, iar lângă un tip de apartament o cifră nu se
+       poate citi altfel. */
+    .mp-unitate{display:none;}
+    .ap-jos-sageata{display:inline;}
+    .ap-jos{display:none;}
+    .ap{padding:7px 6px;}
+    .ap.deschis{border-color:var(--cerneala);box-shadow:0 0 0 1px var(--cerneala);}
+  }
+
+  .nota-final{margin-top:40px;padding:16px;border-left:3px solid var(--teracota);
+    background:var(--hartie);border-radius:0 10px 10px 0;font-size:14px;color:var(--gri);}
+
+  /* ⚠️ FĂRĂ scroll interior pe lista de membri, oricât s-ar aduna. Pagina
+     grupului a avut asta pe lista de terenuri și s-a scos: două bare de
+     derulare una în alta e cel mai sigur fel de a ascunde ceva de om. Tiparul
+     casei e plierea, ca la anunțuri și la membri în `grup-details.html`. */
+  .membri-mai{
+    display:block;width:100%;margin-top:10px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:8px;padding:8px 14px;
+    background:var(--hartie);color:var(--teracota);
+  }
+  .membri-mai:hover{border-color:var(--teracota);}
+
+  /* ── locul clădirii, cât timp nu există analiză ────────────────────────
+     Pagina se deschide și fără analiză: grupul Parcul Circului își scria ce
+     vrea fiecare și ce a aflat despre teren cu luni înainte să existe una.
+     Aici stă o schiță estompată, ca să se vadă ce va apărea în locul ei.
+
+     ⚠️ Casetele schiței sunt GOALE. Cu cifre inventate sub blur ar fi arătat
+     ca niște date ascunse, iar cineva ar fi încercat să le citească. */
+  .varianta-corp.oa-fara-analiza{position:relative;padding:0;overflow:hidden;}
+  .oa-schita{
+    padding:20px 16px;filter:blur(3px);opacity:.5;pointer-events:none;
+    user-select:none;
+  }
+  .oa-schita .ap{height:52px;background:var(--crem);}
+  .oa-schita .nivel-nume{width:64px;}
+  .oa-schita-mesaj{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    padding:24px 22px;background:rgba(255,255,255,.72);
+  }
+  .oa-schita-titlu{font-size:16px;font-weight:700;margin-bottom:6px;}
+  .oa-schita-mesaj p{font-size:13.5px;color:var(--gri);max-width:460px;line-height:1.55;}
+  .oa-schita-cta{margin-top:12px;}
+  .oa-schita-cta a{color:var(--teracota);font-weight:600;text-decoration:none;}
+  .oa-schita-cta a:hover{text-decoration:underline;}
+  @media (max-width:640px){
+    .oa-schita{padding:14px 10px;}
+    .oa-schita .ap{height:40px;}
+    .oa-schita-mesaj{padding:18px 14px;}
+  }
+
+  /* ── jurnalul terenului, ca tabel ─────────────────────────────────────
+     A fost întâi o listă de carduri. Arăta bine și se citea prost: într-un
+     Excel vezi zece rânduri deodată și le scanezi pe coloană, în carduri
+     derulezi. Ce ei aveau pe două coloane („Observații" și „Note discuție la
+     telefon") stă aici pe un rând per fapt, cu felul lui. ─────────────── */
+  .jurnal-tabel{width:100%;border-collapse:collapse;background:var(--hartie);
+    border:1px solid var(--linie);border-radius:12px;overflow:hidden;
+    font-size:13px;margin-top:12px;}
+  .jurnal-tabel th{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gri);background:var(--crem);font-weight:600;
+    padding:7px 10px;text-align:left;border-bottom:1px solid var(--linie);}
+  /* ⚠️ `text-align:left` explicit. Regula generală de tabel din pagină
+     (`th,td{text-align:right}`) e făcută pentru coloane de cifre; aici toate
+     coloanele sunt text, iar fără rândul ăsta jurnalul se aliniază la dreapta.
+     Pe ecran lat nu se vede, fiindcă textul umple celula; pe telefon coloana
+     se strânge la câteva cuvinte și se rupe zdrențuit spre stânga. */
+  .jurnal-tabel td{padding:7px 10px;border-bottom:1px solid var(--linie);
+    vertical-align:top;line-height:1.45;text-align:left;}
+  .jurnal-tabel tr:last-child td{border-bottom:none;}
+  .jurnal-tabel tr:hover td{background:var(--crem);}
+  .j-cand{white-space:nowrap;font-weight:600;width:1%;}
+  .j-cand small{display:block;font-weight:400;font-size:10.5px;color:#B5ADA2;}
+  .j-fel{white-space:nowrap;width:1%;}
+  .j-fel span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    border-radius:99px;padding:2px 8px;border:1px solid;}
+  .j-fel .discutie{color:#8E3A26;background:var(--teracota-slab);border-color:var(--teracota);}
+  .j-fel .vizita{color:#4E5C42;background:var(--salvie-slab);border-color:var(--salvie);}
+  .j-fel .document{color:#4A5266;background:#EDEFF4;border-color:#8892A8;}
+  .j-fel .observatie{color:var(--gri);background:var(--crem);border-color:var(--linie);}
+  .j-cine{white-space:nowrap;width:1%;color:var(--gri);}
+  .j-text{color:var(--cerneala);}
+  /* ⚠️ Selectorul poartă `.jurnal-tabel` dinadins, la fel ca cei de pe telefon:
+     `.jurnal-tabel td` de mai sus e 0-1-1 și ar bate un `.j-sterge` singur
+     (0-1-0), deci alinierea la dreapta n-ar prinde. */
+  .jurnal-tabel .j-sterge{width:1%;text-align:right;white-space:nowrap;}
+  .j-sterge button{
+    font:inherit;font-size:15px;line-height:1;cursor:pointer;
+    border:none;background:none;color:#B5ADA2;padding:0 3px;
+  }
+  .j-sterge button:hover{color:var(--teracota);}
+  .j-editat{color:#B5ADA2;font-size:11px;font-style:italic;margin-left:6px;}
+  /* Rândul care se editează chiar acum: câmpurile lui sunt sus, în formular, iar
+     fără semnul ăsta n-ai ști pe care dintre ele ai apăsat. */
+  .jurnal-tabel tr.se-editeaza td{background:var(--crem);}
+  .j-renunta{background:none !important;color:var(--gri) !important;
+    border:1px solid var(--linie) !important;}
+
+  .jurnal-nou{background:var(--hartie);border:1px dashed var(--linie);border-radius:10px;
+    padding:11px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .jurnal-nou select,.jurnal-nou input[type=date],.jurnal-nou input[type=text]{
+    font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--linie);
+    border-radius:7px;background:var(--crem);color:var(--cerneala);}
+  .jurnal-nou input[type=text]{flex:1;min-width:200px;}
+  .jurnal-nou button{font:inherit;font-size:13px;font-weight:600;border:none;
+    border-radius:7px;padding:8px 14px;cursor:pointer;background:var(--cerneala);color:var(--crem);}
+
+  /* ⚠️ FĂRĂ scroll interior pe jurnal, oricât s-ar aduna. Pagina grupului a
+     avut asta pe lista de terenuri și s-a scos: două bare de derulare una în
+     alta e cel mai sigur fel de a ascunde ceva de om, iar ce e sub prima nu se
+     mai citește niciodată. Tiparul casei e plierea, ca la anunțuri și la
+     membri: se arată ultimele câteva, restul la cerere. */
+  .jurnal-mai,.membri-mai{
+    display:block;width:100%;margin-top:10px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:8px;padding:8px 14px;
+    background:var(--hartie);color:var(--teracota);
+  }
+  .jurnal-mai:hover,.membri-mai:hover{border-color:var(--teracota);}
+
+
+  /* ── jurnalul pe telefon: listă, nu tabel ──────────────────────────────
+     La 390 de pixeli, patru coloane strâng textul la vreo șaizeci, iar fraza
+     se rupe cuvânt cu cuvânt pe verticală, cu jumătate de ecran gol în stânga.
+     Aici data, felul și autorul stau pe un rând, iar textul dedesubt, pe toată
+     lățimea. Aceleași date, alt așezământ. */
+  @media (max-width:640px){
+    .jurnal-tabel{display:block;border-radius:12px;}
+    .jurnal-tabel tbody,.jurnal-tabel tr,.jurnal-tabel td{display:block;width:auto;}
+    /* Capul de tabel n-are ce căuta: etichetele coloanelor se înțeleg din
+       forma rândului. */
+    .jurnal-tabel tr:first-child{display:none;}
+    .jurnal-tabel tr{padding:11px 13px;border-bottom:1px solid var(--linie);}
+    .jurnal-tabel tr:last-child{border-bottom:none;}
+    .jurnal-tabel td{border:none;padding:0;}
+    /* ⚠️ Selectorii poartă `.jurnal-tabel` dinadins. Fără el, `.j-cand` are
+       specificitate mai mică decât `.jurnal-tabel td` de mai sus, iar `display:
+       block` de acolo câștigă: data, eticheta și numele ajung pe câte un rând
+       fiecare, adică patru rânduri de antet pentru două rânduri de conținut. */
+    .jurnal-tabel .j-cand,
+    .jurnal-tabel .j-fel,
+    .jurnal-tabel .j-cine{display:inline-block;vertical-align:middle;
+      width:auto;margin:0 7px 0 0;}
+    .jurnal-tabel .j-cand small{display:inline;margin-left:5px;}
+    .jurnal-tabel .j-cine{color:var(--gri);}
+    .jurnal-tabel .j-text{display:block;margin-top:6px;}
+    /* × rămâne bloc pe toată lățimea, lipit de dreapta: pe telefon un buton de
+       15 pixeli băgat între cuvinte se apasă din greșeală. */
+    .jurnal-tabel .j-sterge{display:block;width:auto;margin-top:4px;}
+  }
+
+  .jurnal-nou{background:var(--hartie);border:1px dashed var(--linie);border-radius:10px;
+    padding:11px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;}
+  .jurnal-nou select,.jurnal-nou input[type=date],.jurnal-nou input[type=text]{
+    font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--linie);
+    border-radius:7px;background:var(--crem);color:var(--cerneala);}
+  .jurnal-nou input[type=text]{flex:1;min-width:200px;}
+  .jurnal-nou input:focus,.jurnal-nou select:focus{outline:none;border-color:var(--cerneala);background:var(--hartie);}
+  .jurnal-nou button{font:inherit;font-size:13px;font-weight:600;border:none;
+    border-radius:7px;padding:8px 14px;cursor:pointer;background:var(--cerneala);color:var(--crem);}
+  .jurnal-gol{font-size:13.5px;color:#A79F94;padding:14px 2px;}
+
+  /* ── verificările terenului ────────────────────────────────────────────
+     Cei șapte pași, mutați aici din cardul terenului pe 30 august: omul sărea
+     între card și pagină pentru lucruri care se fac în același loc.
+     Atașamentele pe pas au ieșit de tot; documentele stau într-o singură
+     secțiune, mai jos. */
+  .vf-contor{font-size:12.5px;font-weight:400;color:var(--gri);margin-left:6px;}
+  .verificari{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;
+    overflow:hidden;}
+  .vf-pas{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;
+    border-bottom:1px solid var(--linie);}
+  .vf-pas.bifat{background:var(--salvie-slab);}
+  .vf-bifa{
+    flex:0 0 auto;width:19px;height:19px;margin-top:1px;border-radius:5px;
+    border:1.5px solid var(--linie);background:var(--crem);cursor:pointer;
+    transition:background .12s, border-color .12s;
+  }
+  .vf-bifa:hover{border-color:var(--salvie);}
+  .vf-bifa.bifata{background:var(--salvie);border-color:var(--salvie);position:relative;}
+  /* ⚠️ Bifa e desenată cu două linii, nu cu un caracter: paleta e scopată pe
+     `.oa-pagina`, iar un „✓" alb pe fundal alb ar fi invizibil dacă vreodată
+     caseta iese din ambalajul ei. */
+  .vf-bifa.bifata::after{
+    content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+  }
+  .vf-bifa:focus-visible{outline:2px solid var(--cerneala);outline-offset:2px;}
+  .vf-text{flex:1;min-width:0;cursor:pointer;}
+  .vf-titlu{display:block;font-size:13.5px;font-weight:600;line-height:1.3;}
+  .vf-sub{display:block;font-size:12px;color:var(--gri);line-height:1.4;margin-top:1px;}
+  .vf-actiune{flex:0 0 auto;font-size:12.5px;font-weight:600;color:var(--teracota);
+    text-decoration:none;white-space:nowrap;align-self:center;}
+  .vf-actiune:hover{text-decoration:underline;}
+  .vf-buton{
+    flex:0 0 auto;display:flex;align-items:center;gap:5px;align-self:center;
+    font:inherit;font-size:12px;cursor:pointer;color:var(--gri);
+    border:1px solid var(--linie);border-radius:7px;padding:4px 9px;background:var(--crem);
+  }
+  .vf-buton:hover{border-color:var(--gri);color:var(--cerneala);}
+  .vf-nr{background:var(--cerneala);color:var(--crem);border-radius:99px;
+    font-size:10px;font-weight:700;padding:1px 6px;}
+  .vf-buton i{font-size:9px;}
+
+  .vf-corp{padding:0 14px 13px 44px;border-bottom:1px solid var(--linie);
+    background:var(--crem);}
+  .vf-fara-note{font-size:12.5px;color:#A79F94;padding:9px 0;}
+  .vf-nota{padding:9px 0;border-bottom:1px solid var(--linie);}
+  .vf-nota:last-of-type{border-bottom:none;}
+  .vf-nota-cap{display:flex;align-items:baseline;gap:8px;font-size:11.5px;color:var(--gri);}
+  .vf-nota-autor{font-weight:600;color:var(--cerneala);}
+  .vf-nota-cand{flex:1;}
+  .vf-nota-sterge{
+    font:inherit;font-size:15px;line-height:1;cursor:pointer;
+    border:none;background:none;color:#B5ADA2;padding:0 3px;
+  }
+  .vf-nota-sterge:hover{color:var(--teracota);}
+  .vf-nota-text{font-size:13px;margin-top:2px;}
+  .vf-nota-nou{display:flex;gap:7px;margin-top:10px;}
+  .vf-nota-nou input{
+    flex:1;font:inherit;font-size:13px;padding:7px 10px;
+    border:1px solid var(--linie);border-radius:7px;background:var(--hartie);
+  }
+  .vf-nota-nou input:focus{outline:none;border-color:var(--cerneala);}
+  .vf-nota-nou button{
+    font:inherit;font-size:13px;font-weight:600;border:none;border-radius:7px;
+    padding:7px 14px;cursor:pointer;background:var(--cerneala);color:var(--crem);
+  }
+  @media (max-width:640px){
+    .vf-pas{flex-wrap:wrap;gap:9px;}
+    .vf-text{flex:1 1 100%;order:2;}
+    .vf-buton{order:3;}
+    .vf-actiune{order:4;}
+    .vf-corp{padding-left:14px;}
+  }
+
+  /* ── documentele terenului ─────────────────────────────────────────────
+     Un singur loc pentru tot ce a strâns grupul, în locul documentelor agățate
+     de câte un anunț, pe care nu le găsea nimeni fără să răsfoiască firul.
+     Un rând poate fi fișier urcat la noi sau link către Drive; felul se vede,
+     fiindcă un link se poate strica fără să anunțe pe nimeni. */
+  .doc-nou{
+    background:var(--hartie);border:1px dashed var(--linie);border-radius:12px;
+    padding:14px 16px;margin-bottom:14px;
+  }
+  .doc-mod{display:flex;gap:6px;margin-bottom:14px;}
+  .doc-mod-buton{
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:8px;padding:7px 13px;
+    background:var(--crem);color:var(--gri);
+  }
+  .doc-mod-buton.activ{background:var(--cerneala);color:var(--crem);border-color:var(--cerneala);}
+  .doc-campuri{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .doc-camp{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--gri);}
+  .doc-camp.doc-lat{grid-column:1 / -1;}
+  .doc-camp small{font-size:11.5px;color:#A79F94;}
+  .doc-camp input[type=text],.doc-camp input[type=url],.doc-camp select{
+    font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--linie);
+    border-radius:8px;background:var(--crem);color:var(--cerneala);width:100%;
+  }
+  .doc-camp input[type=file]{font-size:13px;color:var(--cerneala);}
+  .doc-camp input:focus,.doc-camp select:focus{outline:none;border-color:var(--cerneala);background:var(--hartie);}
+  .doc-butoane{display:flex;align-items:center;gap:12px;justify-content:flex-end;margin-top:14px;}
+  .doc-mesaj{flex:1;font-size:12.5px;color:var(--gri);}
+  .doc-mesaj.rau{color:var(--teracota);}
+  @media (max-width:640px){ .doc-campuri{grid-template-columns:1fr;} }
+
+  .doc-lista{display:flex;flex-direction:column;gap:8px;}
+  .doc-rand{
+    background:var(--hartie);border:1px solid var(--linie);border-radius:10px;
+    padding:11px 13px;display:flex;align-items:flex-start;gap:11px;font-size:13.5px;
+  }
+  .doc-semn{
+    flex:0 0 auto;width:30px;height:30px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-size:13px;
+    background:var(--crem);color:var(--gri);border:1px solid var(--linie);
+  }
+  .doc-rand.link .doc-semn{background:var(--salvie-slab);color:#4E5C42;border-color:var(--salvie);}
+  .doc-corp{flex:1;min-width:0;}
+  .doc-titlu{font-weight:600;color:var(--cerneala);}
+  .doc-titlu a{color:inherit;text-decoration:none;border-bottom:1px solid var(--rule,#E4DED4);}
+  .doc-titlu a:hover{border-bottom-color:var(--cerneala);}
+  .doc-meta{font-size:11.5px;color:#A79F94;margin-top:2px;}
+  .doc-eticheta{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;border-radius:99px;padding:1px 7px;margin-right:6px;
+    background:var(--crem);color:var(--gri);border:1px solid var(--linie);
+  }
+  .doc-nota{font-size:12.5px;color:var(--gri);font-style:italic;margin-top:3px;}
+  .doc-sterge{
+    flex:0 0 auto;font:inherit;font-size:12px;cursor:pointer;
+    border:1px solid var(--linie);border-radius:7px;padding:4px 9px;
+    background:var(--crem);color:var(--gri);
+  }
+  .doc-sterge:hover{border-color:var(--teracota);color:var(--teracota);}
+  .doc-gol{font-size:13.5px;color:#A79F94;padding:14px 2px;}
+
+  /* ── stările paginii ───────────────────────────────────────────────────
+     Corpul rămâne ascuns până se știe sigur că omul e membru activ ȘI că
+     analiza există. Altfel ar clipi o clădire goală înainte de „nu ai acces". */
+  .oa-stare{padding:64px 0;text-align:center;}
+  .oa-stare-text{font-size:15px;color:var(--gri);}
+  .oa-stare-titlu{font-size:20px;font-weight:700;margin-bottom:8px;}
+  .oa-stare a{color:var(--teracota);font-weight:600;text-decoration:none;}
+  .oa-stare a:hover{text-decoration:underline;}
+
+  .oa-inapoi{
+    display:inline-block;margin:20px 0 18px;font-size:13.5px;
+    color:var(--gri);text-decoration:none;
+  }
+  .oa-inapoi:hover{color:var(--cerneala);}
+
+  .oa-fisa{margin-top:14px;font-size:13.5px;}
+  .oa-fisa a{color:var(--teracota);font-weight:600;text-decoration:none;}
+  .oa-fisa a:hover{text-decoration:underline;}
+    </style>
+    <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#1a1a1a">
+</head>
+<body>
+<!-- Nav unificat v9 (injectat de nav.js) -->
+<div id="navigation"></div>
+
+<div class="oa-pagina">
+
+  <!-- Se încarcă / eroare / nu ai voie: trei stări închise, una singură
+       vizibilă odată. Corpul paginii rămâne ascuns până se știe sigur că omul
+       e membru activ al grupului ȘI că analiza există. -->
+  <div id="oaStare" class="oa-stare">
+    <p class="oa-stare-text">Se încarcă împărțirea apartamentelor…</p>
+  </div>
+
+  <div id="oaCorp" hidden>
+
+    <a class="oa-inapoi" id="oaInapoi" href="grupuri.html">
+      <i class="fas fa-arrow-left"></i> Înapoi la grup
+    </a>
+
+    <div class="eticheta" id="oaEticheta"></div>
+    <h1 id="oaTitlu"></h1>
+    <div class="sub" id="oaSub"></div>
+    <div class="insigna" id="oaInsigna"></div>
+    <div class="context" id="oaContext" hidden></div>
+
+    <section id="oaVariante">
+      <h2 id="oaTitluVariante">Variantele de împărțire</h2>
+      <div id="oaExplicaVariante">
+      <p class="explica">
+        Trage de marginea din dreapta a unei casete ca să îi dai suprafața pe care o vrei;
+        prețul se schimbă odată cu ea. Fiecare apartament se poate mări sau micșora doar în
+        intervalul prevăzut pentru numărul lui de camere; dacă vrei unul mai mare sau mai
+        mic pe același etaj, caută altă variantă din analiză. Apasă pe casetă ca să spui că
+        te interesează apartamentul: numele tău apare pe ea.
+      </p>
+      <p class="explica">
+        Cu cât rămâne mai mult spațiu neîmpărțit, cu atât crește ponderea terenului în prețul
+        total, adică plătești mai mult teren decât construcție.
+      </p>
+      </div>
+
+      <div class="file" id="file"></div>
+      <div class="varianta-corp" id="variantaCorp"></div>
+
+      <div class="stare-legenda">
+        <span><i class="buline"></i> liber</span>
+        <span><i class="buline b1"></i> un doritor</span>
+        <span><i class="buline b2"></i> mai mulți doritori, de discutat</span>
+      </div>
+
+      <details>
+        <summary>Vezi toate costurile variantei în tabel</summary>
+        <div class="scroll-x" id="costuri"></div>
+      </details>
+
+      <p class="oa-fisa" id="oaFisa" hidden></p>
+    </section>
+
+    <section id="oaVerificari">
+      <h2>Verificările terenului <span class="vf-contor" id="verificariNr"></span></h2>
+      <p class="explica">
+        Pașii prin care se trece înainte de a cumpăra un teren. Bifați ce ați făcut și scrieți
+        pe fiecare ce ați aflat. Documentele nu se agață aici: stau toate la un loc, mai jos.
+      </p>
+      <div class="verificari" id="verificari"></div>
+    </section>
+
+    <section>
+      <h2>Ce își dorește fiecare</h2>
+      <p class="explica">
+        Camerele și suprafața vin din profil, unde sunt oricum obligatorii. Aici se completează
+        doar ce profilul nu are: etajul, parcarea, boxa și cei doi bugeți. Alegerile de mai sus
+        apar automat pe fiecare card.
+      </p>
+      <div class="form-pref" id="formPref"></div>
+      <div class="membri" id="membri"></div>
+      <button class="membri-mai" id="membriMai" style="display:none" onclick="toggleMembri()"></button>
+      <div class="scroll-x" id="totaluri"></div>
+    </section>
+
+    <section id="oaDocumente">
+      <h2>Documentele terenului</h2>
+      <p class="explica">
+        Tot ce a strâns grupul despre terenul acesta, într-un singur loc: extrase de carte
+        funciară, certificate de urbanism, planuri, oferte. Poți urca un fișier sau pune un
+        link către ce ai deja în Drive. Se vede de toți membrii grupului.
+      </p>
+
+      <div class="doc-nou">
+        <div class="doc-mod">
+          <button type="button" class="doc-mod-buton activ" data-mod="fisier">Urcă un fișier</button>
+          <button type="button" class="doc-mod-buton" data-mod="link">Pune un link</button>
+        </div>
+
+        <div class="doc-campuri">
+          <label class="doc-camp doc-lat">
+            <span>Ce e documentul</span>
+            <input type="text" id="docTitlu" maxlength="140" placeholder="ex. Extras de carte funciară">
+          </label>
+          <label class="doc-camp">
+            <span>Categorie</span>
+            <select id="docCategorie">
+              <option value="">fără categorie</option>
+              <option value="acte">Acte</option>
+              <option value="urbanism">Urbanism</option>
+              <option value="masuratori">Măsurători</option>
+              <option value="oferte">Oferte</option>
+              <option value="poze">Poze</option>
+              <option value="altele">Altele</option>
+            </select>
+          </label>
+
+          <label class="doc-camp doc-lat" id="docCampFisier">
+            <span>Fișierul</span>
+            <input type="file" id="docFisier"
+                   accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx">
+            <small>Maximum 25 MB. PDF, imagini, Word sau Excel.</small>
+          </label>
+
+          <label class="doc-camp doc-lat" id="docCampLink" hidden>
+            <span>Adresa</span>
+            <input type="url" id="docUrl" placeholder="https://drive.google.com/...">
+            <small>Grijă la partajare: linkul trebuie să meargă și pentru ceilalți membri.</small>
+          </label>
+        </div>
+
+        <div class="doc-butoane">
+          <span class="doc-mesaj" id="docMesaj"></span>
+          <button class="btn-principal" id="docAdauga">Adaugă</button>
+        </div>
+      </div>
+
+      <div class="doc-lista" id="docLista"></div>
+      <button class="membri-mai" id="docMai" style="display:none" onclick="toggleDocumente()"></button>
+    </section>
+
+    <section id="oaJurnal">
+      <h2>Jurnalul terenului</h2>
+      <p class="explica">
+        Tot ce s-a aflat despre teren, în ordine, cu data faptului și cine l-a scris.
+        Aici intră discuțiile cu agentul sau cu proprietarul, vizitele și documentele primite.
+        Se vede de toți membrii grupului.
+      </p>
+      <div class="jurnal-nou">
+        <select id="jFel">
+          <option value="discutie">Discuție</option>
+          <option value="vizita">Vizită</option>
+          <option value="document">Document</option>
+          <option value="observatie">Observație</option>
+        </select>
+        <input type="date" id="jCand">
+        <input type="text" id="jText" placeholder="Ce s-a întâmplat, pe scurt" maxlength="2000">
+        <button id="jAdauga">Adaugă în jurnal</button>
+        <!-- Apare doar cât se editează o intrare. Aceleași trei câmpuri servesc
+             și la scris, și la corectat: un al doilea formular, deschis în rând,
+             ar fi însemnat aceeași logică scrisă de două ori, iar pe telefon
+             rândurile sunt oricum blocuri înguste. -->
+        <button id="jRenunta" class="j-renunta" hidden>Renunță</button>
+      </div>
+      <div class="scroll-x" id="jurnal"></div>
+      <button class="membri-mai" id="jurnalMai" style="display:none" onclick="toggleJurnal()"></button>
+    </section>
+
+    <div class="nota-final">
+      Pagina nu decide în locul grupului și nu spune nimănui că nu încape. Un grup are aproape
+      mereu mai mulți membri decât apartamente, iar oamenii se așază în timp, uitându-se la mai
+      multe terenuri deodată. Ce se vede aici e unde s-a adunat lumea pe același apartament și
+      care variantă se apropie de a fi completă.
+    </div>
+
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/login-modal.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/organizare-apartamente.js"></script>
+</body>
+</html>

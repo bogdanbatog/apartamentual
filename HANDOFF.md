@@ -1,6 +1,77 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 1 septembrie 2026, dimineața** — **timelapse-ul a ieșit de pe YouTube
+> **⏭️ ULTIMA SESIUNE: 1 septembrie 2026, după-amiaza** — **împărțirea apartamentelor a fost
+> probată pe date reale și a trecut. Două migrații noi, 9 și 10, rulate și verificate.
+> 🔴 NIMIC NU E COMIS.**
+>
+> **CE S-A PROBAT ȘI MERGE** (Lucian, în pagină, pe un grup real): bifele pe pași, notele,
+> documentele (fișier și link), jurnalul cu data faptului, preferințele. Din probe au ieșit
+> trei cereri, toate rezolvate azi.
+>
+> **(1) „APORT PROPRIU", NU „CASH"**, în patru locuri din pagină: eticheta din formularul de
+> preferințe, explicația de sub ea, rândul de pe cardul membrului și capul tabelului de
+> totaluri. Coloana din bază rămâne `buget_teren_cash`; cuvântul pe care îl citește omul e cel
+> din discuțiile lui cu banca, nu cel din schemă.
+>
+> **(2) JURNALUL A PRIMIT ȘTERGERE ȘI EDITARE**, pe care nu le avea deloc.
+> `9-stergerea-din-jurnal.sql` (× pentru autor **sau fondator**) și
+> `10-editarea-din-jurnal.sql` (✎ **doar pentru autor**), amândouă rulate, cu verificările
+> citite. O intrare schimbată poartă „modificat [data]": într-un jurnal citit de tot grupul, o
+> frază schimbată în tăcere e mai rea decât una ștearsă.
+> ⭐ **Editarea NU răstoarnă decizia din 31 august.** Aceea spunea că fondatorul nu poate
+> REscrie ce a spus ALTCINEVA. Un om care își corectează propria intrare nu atinge vorbele
+> nimănui. De aceea ștergerea e autor-sau-fondator, iar editarea doar a autorului.
+>
+> **(3) LA DOCUMENTE, DREPTUL EXISTA DIN 30 AUGUST, DAR BUTONUL NU APĂREA.** Politica din
+> `3-atasamente-teren.sql` dă ștergerea autorului sau fondatorului, și pe tabelă, și pe bucket;
+> pagina arăta „Șterge" doar autorului. ⚠️ E capcana în oglindă cu cea de la superadmin (buton
+> fără drept). Se ratează în ambele sensuri și niciunul nu dă vreo eroare. Condiția e scrisă
+> acum identic în toate trei locurile din pagină, `(al meu) || suntAdmin`.
+>
+> **⭐ BLOC 0 ȘI-A PLĂTIT CHIRIA.** Migrația 10 adăuga la început o coloană `editat_la`.
+> Inventarul a arătat că tabela are deja **`updated_at`**, de dinaintea pachetului, cu
+> `default now()`. Ar fi ieșit două coloane pentru același lucru. Verificat înainte de a o
+> folosi: e egală cu `created_at` la toate rândurile, iar singurul declanșator e AFTER INSERT
+> și n-o atinge. Deci „modificat" se citește din `updated_at > created_at`, cu un prag de
+> câteva secunde.
+>
+> **⚠️ GRANTUL DE UPDATE E PE COLOANE, NU PE TABELĂ** (`content`, `fel`, `data_faptului`,
+> `updated_at`). Pe toată tabela, cineva își putea rescrie propriul rând mutându-l în alt grup:
+> `with check` se uită la `user_id`, nu la `grup_id`. A mers curat tocmai fiindcă nu exista deja
+> un grant pe tabelă; unul de tabelă nu se mai poate restrânge după aceea cu un revoke pe coloană.
+>
+> **▶️ TASKUL URMĂTOR, hotărât de Lucian la finalul sesiunii: O SINGURĂ ZONĂ DE NOTE ȘI DOCUMENTE
+> PE PAGINA GRUPULUI**, scoasă din spatele celor 11 casete de capitol („apar note peste tot",
+> „acum sunt ascunse în spatele pașilor, complicat"). ⚠️ Prima idee a fost să le scoată de tot și
+> să lase note doar în pagina de organizare, dar **nu se putea**: notele de pe capitole nu sunt
+> despre un teren (comunicarea, contractul de asociere, ieșirea din grup), iar pagina de
+> organizare e per (grup, teren); un grup fără teren la favorite ar fi rămas fără niciun loc de
+> scris. ⭐ **Nu cere nicio migrație și nu pierde nimic:** zona nouă citește toate notele grupului
+> al căror `step_key` NU începe cu `t-`, deci cele scrise până acum apar acolo de la sine;
+> politicile și drepturile există. ⭐ **Editarea notelor există deja și se portează:**
+> `saveEditNote` din `grup-details.html` (~linia 2862). ⚠️ **Se face DUPĂ commitul pachetului de
+> față**, fiindcă atinge tot `grup-details.html`, chiar fișierul luat din greșeală de commitul
+> altui task azi-dimineață. Rețeta întreagă e în handoff-ul pachetului.
+>
+> **Tot de acolo:** notele pașilor de teren, din pagina de organizare, nu se pot edita. Politica
+> ȘI grantul de UPDATE există (verificate azi), deci e numai frontend, cu tiparul de mai sus.
+>
+> **⚠️ CUPLAJUL DE LA PUBLICARE, DE ȚINUT MINTE.** Linkul din cardul terenului și golirea
+> cardului **sunt deja pe `main`**, luate din greșeală de commitul `190a5c5` („Timelapse nou"),
+> care a comis `grup-details.html` și `index.html` întregi. Deci `main` trimite azi către o
+> pagină care nu există în repo. Live-ul e încă bun (cPanel n-a fost apăsat), dar **timelapse-ul
+> și pagina asta nu se mai pot publica separat**: cine publică trebuie să urce și
+> `organizare-apartamente.html`, altfel membrii pierd comentariile și bifele de pe teren și
+> primesc un link către 404.
+>
+> **RĂMASE ÎNAINTE DE COMMIT:** cazul „cont care NU e în grup" (trebuie să spună „Doar pentru
+> membrii grupului") și un curl cu cheia anonimă pe `analiza_teren`, care trebuie să întoarcă
+> listă goală. Fișierele care așteaptă: `frontend/organizare-apartamente.html`,
+> `frontend/js/organizare-apartamente.js` (netrackuite) și migrațiile 9 și 10.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 1 septembrie 2026, dimineața** — **timelapse-ul a ieșit de pe YouTube
 > și e acum fișier local, folosit de două pagini. Commituri `190a5c5` și `f38cb8b`, împinse
 > pe `main`. 🔴 NEPUBLICAT: cPanel manual.**
 >

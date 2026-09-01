@@ -32,3 +32,15 @@ scripts/*/local/
 # `git add` pe folderul serialului, pe 22 august, și n-au ce căuta în repo.
 ~$*
 ~WRL*.tmp
+
+# Capturi din foile de calcul ale unui grup real (Parcul Circului).
+# Au fost cea mai bună listă de cerințe pe care am avut-o, dar conțin nume de
+# oameni, bugete și ce vrea fiecare familie. Ce am învățat din ele e scris în
+# handoff; capturile rămân locale. Un fișier comis o dată rămâne în istoric
+# chiar dacă îl ștergi a doua zi.
+handoff/xcel grup parc circului/
+
+# Capturi de pe telefon din timpul lucrului la o pagină: ajutor de moment,
+# aproape un megabyte care nu mai spune nimic peste o lună. Machetele HTML,
+# care sunt referința de formă, se comit normal.
+handoff/capturi-telefon/

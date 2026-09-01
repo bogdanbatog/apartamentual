@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizarea grupului, mockup</title>
+<style>
+  :root{
+    --crem:#F7F4EE;
+    --hartie:#FFFFFF;
+    --cerneala:#1A1815;
+    --gri:#6E675E;
+    --linie:#E4DED4;
+    --teracota:#C4553B;
+    --teracota-slab:#F3DED8;
+    --salvie:#8A9B7C;
+    --salvie-slab:#EDF1E8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--crem);
+    color:var(--cerneala);
+    line-height:1.5;
+    padding:24px 16px 80px;
+  }
+  .pagina{max-width:960px;margin:0 auto;}
+
+  .demo-banda{
+    background:var(--cerneala);color:var(--crem);
+    font-size:13px;letter-spacing:.04em;
+    padding:8px 14px;border-radius:8px;margin-bottom:28px;
+  }
+
+  .eticheta{
+    font-size:11px;font-weight:600;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--teracota);
+  }
+  h1{font-size:26px;font-weight:700;margin:4px 0 2px;}
+  .sub{color:var(--gri);font-size:15px;margin-bottom:6px;}
+  .insigna{
+    display:inline-block;background:var(--cerneala);color:var(--crem);
+    font-size:12px;padding:4px 10px;border-radius:99px;margin-top:8px;
+  }
+
+  section{margin-top:40px;}
+  h2{font-size:18px;margin-bottom:4px;}
+  .explica{color:var(--gri);font-size:14px;margin-bottom:16px;}
+
+  .identitate{
+    background:var(--hartie);border:1px solid var(--linie);border-radius:12px;
+    padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  }
+  .identitate label{font-size:14px;color:var(--gri);}
+  .identitate select{
+    font:inherit;padding:8px 12px;border:1px solid var(--linie);
+    border-radius:8px;background:var(--crem);color:var(--cerneala);
+  }
+
+  .variante{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:720px){.variante{grid-template-columns:1fr;}}
+  .varianta{
+    background:var(--hartie);border:1px solid var(--linie);
+    border-radius:14px;padding:18px;
+  }
+  .varianta h3{font-size:15px;}
+  .varianta .meta{font-size:13px;color:var(--gri);margin-bottom:14px;}
+
+  .nivel{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .nivel-nume{
+    width:44px;flex:none;font-size:11px;font-weight:600;
+    letter-spacing:.08em;color:var(--gri);text-transform:uppercase;text-align:right;
+  }
+  .nivel-ap{display:flex;flex:1;gap:6px;}
+
+  .ap{
+    border:1.5px solid var(--linie);border-radius:8px;
+    background:var(--crem);
+    padding:8px 4px 7px;text-align:center;cursor:pointer;
+    transition:border-color .15s, background .15s, transform .05s;
+    min-width:0;
+  }
+  .ap:active{transform:scale(.98);}
+  .ap .tip{font-weight:700;font-size:13.5px;line-height:1.25;}
+  .ap .mp{font-size:11px;color:var(--gri);}
+  .ap .pret{font-size:11.5px;font-weight:700;margin-top:2px;white-space:nowrap;}
+  .ap .cine{
+    margin-top:5px;min-height:16px;display:flex;gap:3px;
+    justify-content:center;flex-wrap:wrap;
+  }
+  .ap.unul{border-color:var(--salvie);background:var(--salvie-slab);}
+  .ap.multi{border-color:var(--teracota);background:var(--teracota-slab);}
+  .ap.al-meu{outline:2px solid var(--cerneala);outline-offset:1px;}
+  .ap.activ{box-shadow:0 0 0 3px rgba(196,85,59,.25);}
+
+  .punct{
+    font-size:10px;font-weight:700;color:var(--crem);
+    background:var(--cerneala);border-radius:99px;padding:1.5px 6px;
+  }
+  .ap.unul .punct{background:var(--salvie);}
+  .ap.multi .punct{background:var(--teracota);}
+
+  /* panoul de detaliu */
+  .detaliu{
+    margin:4px 0 12px 54px;
+    background:var(--crem);border:1px solid var(--linie);border-radius:10px;
+    padding:12px 14px;font-size:13.5px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+  }
+  .detaliu .rand{color:var(--gri);}
+  .detaliu .rand b{color:var(--cerneala);}
+  .detaliu button{
+    font:inherit;font-size:13.5px;font-weight:600;
+    border:none;border-radius:8px;padding:8px 14px;cursor:pointer;
+    background:var(--cerneala);color:var(--crem);
+  }
+  .detaliu button.retrage{background:var(--hartie);color:var(--cerneala);border:1.5px solid var(--linie);}
+  @media (max-width:720px){.detaliu{margin-left:0;}}
+
+  .varianta-rezumat{
+    margin-top:12px;padding-top:10px;border-top:1px dashed var(--linie);
+    font-size:12.5px;color:var(--gri);text-align:center;
+  }
+  .varianta-rezumat b{color:var(--cerneala);}
+
+  .stare-legenda{
+    display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;
+    font-size:12.5px;color:var(--gri);
+  }
+  .stare-legenda span{display:flex;align-items:center;gap:6px;}
+  .buline{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--linie);background:var(--crem);flex:none;}
+  .buline.b1{border-color:var(--salvie);background:var(--salvie-slab);}
+  .buline.b2{border-color:var(--teracota);background:var(--teracota-slab);}
+
+  details{margin-top:14px;}
+  summary{cursor:pointer;font-size:13.5px;color:var(--teracota);font-weight:600;}
+  table{width:100%;border-collapse:collapse;background:var(--hartie);
+    border:1px solid var(--linie);border-radius:12px;overflow:hidden;font-size:13.5px;margin-top:10px;}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--linie);}
+  th:first-child,td:first-child{text-align:left;}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gri);
+    background:var(--crem);font-weight:600;}
+  tr:last-child td{border-bottom:none;}
+  .tot{font-weight:700;}
+
+  .membri{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+  .membru{
+    background:var(--hartie);border:1px solid var(--linie);
+    border-radius:12px;padding:12px 14px;font-size:13.5px;
+  }
+  .membru b{font-size:14px;}
+  .membru .pref{color:var(--gri);margin-top:3px;}
+  .membru .ales{margin-top:6px;font-size:12.5px;}
+  .membru .ales em{font-style:normal;color:var(--teracota);font-weight:600;}
+
+  .nota-final{
+    margin-top:40px;padding:16px;border-left:3px solid var(--teracota);
+    background:var(--hartie);border-radius:0 10px 10px 0;
+    font-size:14px;color:var(--gri);
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="demo-banda">Mockup cu date demonstrative. Cifrele nu provin dintr-o analiză reală.</div>
+
+  <div class="eticheta">Grup Rond Coșbuc · Organizare</div>
+  <h1>Teren Str. Bosianu 32</h1>
+  <div class="sub">650 mp · două variante de împărțire, din analiza preliminară</div>
+  <div class="insigna">Analiză ApartamenTUal · 12 august 2026</div>
+
+  <section>
+    <h2>Cine ești?</h2>
+    <p class="explica">În platformă vei fi autentificat automat. Aici alege un membru de probă, apoi apasă pe un apartament.</p>
+    <div class="identitate">
+      <label for="eu">Membru:</label>
+      <select id="eu"></select>
+    </div>
+  </section>
+
+  <section>
+    <h2>Variantele de împărțire</h2>
+    <p class="explica">Fiecare casetă e un apartament, cu costul total estimat (teren plus construcție). Lățimea e proporțională cu suprafața utilă. Apasă pe o casetă pentru detalii și înscriere.</p>
+
+    <div class="variante" id="variante"></div>
+
+    <div class="stare-legenda">
+      <span><i class="buline"></i> liber</span>
+      <span><i class="buline b1"></i> un doritor</span>
+      <span><i class="buline b2"></i> mai mulți doritori, de discutat</span>
+    </div>
+
+    <details>
+      <summary>Vezi toate costurile în tabel</summary>
+      <div id="costuri"></div>
+    </details>
+  </section>
+
+  <section>
+    <h2>Membrii grupului și preferințele lor</h2>
+    <p class="explica">Fiecare membru își completează preferințele o singură dată. Alegerile de mai sus apar automat aici.</p>
+    <div class="membri" id="membri"></div>
+  </section>
+
+  <div class="nota-final">
+    Documentul nu decide în locul grupului. Arată unde e cerere mare pe același apartament și unde o variantă se așază natural, ca discuția de la masă să pornească de la fapte, nu de la impresii.
+  </div>
+
+</div>
+
+<script>
+const membri = [
+  {id:"alin",  nume:"Alin T.",     pref:"3 camere, 65-75 mpu, etaj 1"},
+  {id:"mihai", nume:"Mihai R.",    pref:"2 camere, 45-55 mpu, orice etaj"},
+  {id:"ioana", nume:"Ioana D.",    pref:"4 camere, peste 90 mpu, parter"},
+  {id:"vlad",  nume:"Vlad + Ana",  pref:"3 camere, 68-75 mpu, etaj 1-2"},
+  {id:"maria", nume:"Maria S.",    pref:"2 camere, sub 50 mpu, etaj 2"}
+];
+
+const unitati = [
+  {id:"A-P1", v:"A", niv:"Parter", tip:"4 cam", mpu:96, mpc:127, teren:144000, constr:139000},
+  {id:"A-11", v:"A", niv:"Etaj 1", tip:"3 cam", mpu:70, mpc:92,  teren:105000, constr:101000},
+  {id:"A-12", v:"A", niv:"Etaj 1", tip:"2 cam", mpu:50, mpc:66,  teren:75000,  constr:72000},
+  {id:"A-21", v:"A", niv:"Etaj 2", tip:"3 cam", mpu:70, mpc:92,  teren:105000, constr:101000},
+  {id:"A-22", v:"A", niv:"Etaj 2", tip:"2 cam", mpu:50, mpc:66,  teren:75000,  constr:72000},
+
+  {id:"B-P1", v:"B", niv:"Parter", tip:"2 cam", mpu:55, mpc:73,  teren:76000,  constr:74000},
+  {id:"B-P2", v:"B", niv:"Parter", tip:"2 cam", mpu:55, mpc:73,  teren:76000,  constr:74000},
+  {id:"B-11", v:"B", niv:"Etaj 1", tip:"3 cam", mpu:68, mpc:90,  teren:94000,  constr:91000},
+  {id:"B-12", v:"B", niv:"Etaj 1", tip:"2 cam", mpu:48, mpc:63,  teren:66000,  constr:64000},
+  {id:"B-21", v:"B", niv:"Etaj 2", tip:"3 cam", mpu:68, mpc:90,  teren:94000,  constr:91000},
+  {id:"B-22", v:"B", niv:"Etaj 2", tip:"2 cam", mpu:48, mpc:63,  teren:66000,  constr:64000}
+];
+
+const varianteMeta = {
+  A:{nume:"Varianta A", desc:"5 apartamente, mai generoase"},
+  B:{nume:"Varianta B", desc:"6 apartamente, cost de intrare mai mic"}
+};
+
+let interese = {
+  "A-11":["alin","vlad"],
+  "A-22":["maria"],
+  "B-11":["vlad"]
+};
+
+let deschis = null; // unitatea cu panoul de detaliu deschis
+
+const selEu = document.getElementById("eu");
+membri.forEach(m=>{
+  const o=document.createElement("option");
+  o.value=m.id;o.textContent=m.nume;selEu.appendChild(o);
+});
+
+const fmt = n => n.toLocaleString("ro-RO");
+const fmtMii = n => fmt(Math.round(n/1000)) + ".000";
+
+function niveleOrdonate(){ return ["Etaj 2","Etaj 1","Parter"]; }
+
+function render(){
+  const eu = selEu.value;
+
+  const cont=document.getElementById("variante");
+  cont.innerHTML="";
+  ["A","B"].forEach(v=>{
+    const div=document.createElement("div");
+    div.className="varianta";
+    div.innerHTML=`<h3>${varianteMeta[v].nume}</h3><div class="meta">${varianteMeta[v].desc}</div>`;
+    niveleOrdonate().forEach(niv=>{
+      const us=unitati.filter(u=>u.v===v&&u.niv===niv);
+      if(!us.length)return;
+      const totalMp=us.reduce((s,u)=>s+u.mpu,0);
+      const rand=document.createElement("div");
+      rand.className="nivel";
+      rand.innerHTML=`<div class="nivel-nume">${niv}</div>`;
+      const zona=document.createElement("div");
+      zona.className="nivel-ap";
+      us.forEach(u=>{
+        const cine=interese[u.id]||[];
+        const b=document.createElement("div");
+        b.className="ap"+(cine.length>1?" multi":cine.length===1?" unul":"")
+          +(cine.includes(eu)?" al-meu":"")+(deschis===u.id?" activ":"");
+        b.style.flexGrow=u.mpu/totalMp*100;
+        b.style.flexBasis="0";
+        b.innerHTML=`<div class="tip">${u.tip}</div><div class="mp">${u.mpu} mpu</div>
+          <div class="pret">${fmtMii(u.teren+u.constr)} €</div>
+          <div class="cine">${cine.map(id=>`<span class="punct">${membri.find(m=>m.id===id).nume.split(" ")[0]}</span>`).join("")}</div>`;
+        b.onclick=()=>{ deschis = (deschis===u.id? null : u.id); render(); };
+        zona.appendChild(b);
+      });
+      rand.appendChild(zona);
+      div.appendChild(rand);
+
+      // panoul de detaliu sub nivelul care contine unitatea deschisa
+      const uDeschis = us.find(u=>u.id===deschis);
+      if(uDeschis){
+        const cine=interese[uDeschis.id]||[];
+        const eSum=cine.includes(eu);
+        const pd=document.createElement("div");
+        pd.className="detaliu";
+        const tot=uDeschis.teren+uDeschis.constr;
+        pd.innerHTML=`
+          <div class="rand"><b>${uDeschis.tip}</b>, ${uDeschis.niv}, ${uDeschis.mpu} mpu (${uDeschis.mpc} mpc)</div>
+          <div class="rand">Teren ${fmt(uDeschis.teren)} € + construcție ${fmt(uDeschis.constr)} € = <b>${fmt(tot)} €</b></div>
+          <div class="rand"><b>${fmt(Math.round(tot/uDeschis.mpc))} €</b>/mp construit · <b>${fmt(Math.round(tot/uDeschis.mpu))} €</b>/mp util</div>
+        `;
+        const btn=document.createElement("button");
+        btn.textContent = eSum? "Retrage-mă de pe apartament" : "Mă interesează apartamentul";
+        if(eSum) btn.className="retrage";
+        btn.onclick=(e)=>{
+          e.stopPropagation();
+          const arr=interese[uDeschis.id]||(interese[uDeschis.id]=[]);
+          const i=arr.indexOf(eu);
+          i>=0?arr.splice(i,1):arr.push(eu);
+          render();
+        };
+        pd.appendChild(btn);
+        div.appendChild(pd);
+      }
+    });
+
+    // rezumatul variantei: costuri medii pe mp
+    const usV=unitati.filter(u=>u.v===v);
+    const totV=usV.reduce((s,u)=>s+u.teren+u.constr,0);
+    const mpuV=usV.reduce((s,u)=>s+u.mpu,0);
+    const mpcV=usV.reduce((s,u)=>s+u.mpc,0);
+    const foot=document.createElement("div");
+    foot.className="varianta-rezumat";
+    foot.innerHTML=`<b>${fmt(Math.round(totV/mpcV))} €</b>/mp construit · <b>${fmt(Math.round(totV/mpuV))} €</b>/mp util`;
+    div.appendChild(foot);
+
+    cont.appendChild(div);
+  });
+
+  document.getElementById("costuri").innerHTML=`
+  <table>
+    <tr><th>Apartament</th><th>mpu</th><th>Teren</th><th>Construcție</th><th>Total</th><th>EUR/mpu</th></tr>
+    ${unitati.map(u=>{
+      const tot=u.teren+u.constr;
+      return `<tr><td>${u.v} · ${u.niv} · ${u.tip}</td>
+        <td>${u.mpu}</td><td>${fmt(u.teren)}</td><td>${fmt(u.constr)}</td>
+        <td class="tot">${fmt(tot)}</td><td>${fmt(Math.round(tot/u.mpu))}</td></tr>`;
+    }).join("")}
+  </table>`;
+
+  document.getElementById("membri").innerHTML=membri.map(m=>{
+    const alese=Object.entries(interese).filter(([,a])=>a.includes(m.id)).map(([id])=>{
+      const u=unitati.find(x=>x.id===id);
+      return `${u.v} · ${u.niv} · ${u.tip}`;
+    });
+    return `<div class="membru"><b>${m.nume}</b>
+      <div class="pref">${m.pref}</div>
+      <div class="ales">${alese.length?`Interesat de: <em>${alese.join(", ")}</em>`:"Nicio alegere încă"}</div></div>`;
+  }).join("");
+}
+
+selEu.onchange=render;
+render();
+</script>
+</body>
+</html>
