@@ -1,6 +1,78 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 27 august 2026, dimineața** — **emailul cu terenuri noi a plecat la
+> **⏭️ ULTIMA SESIUNE: 1 septembrie 2026, dimineața** — **timelapse-ul a ieșit de pe YouTube
+> și e acum fișier local, folosit de două pagini. Commituri `190a5c5` și `f38cb8b`, împinse
+> pe `main`. 🔴 NEPUBLICAT: cPanel manual.**
+>
+> **CE E DE URCAT PE CPANEL** (până atunci live-ul rulează în continuare filmul vechi de pe
+> YouTube): `frontend/index.html`, `frontend/povestea-noastra.html`,
+> `frontend/grup-details.html` și folderul nou `frontend/video/` cu două fișiere. De **șters
+> de pe server** `povestea_noastra/videos/timelapse-santier.mp4` (17,8 MB), pe care nu-l mai
+> cere nicio pagină.
+>
+> **CE S-A FĂCUT.** Montaj nou al șantierului Județului (capturi Reolink 2026 plus arhiva
+> 2025), pus în `frontend/video/timelapse-judetului.mp4` (7,9 MB, 854×456, H.264, fără pistă
+> audio, index la început). **Un singur fișier servește și homepage-ul și hero-ul din
+> Povestea noastră**, ca să nu ținem 8 MB de două ori. Vechiul `timelapse-santier.mp4`
+> (17,8 MB, 720p, montajul din 2025) e **șters din repo**; se recuperează din `190a5c5^`.
+> Pagina Povestea noastră a scăzut de la 28,5 MB la 19,3 MB.
+>
+> **⚠️ TREI CAPCANE, ÎN ORDINEA ÎN CARE MUȘCĂ.**
+> (1) **`aspect-ratio` din `.video-ph--live` trebuie să fie proporția EXACTĂ a filmului**,
+> azi `854/456`. Era `16/9`, pus tot ca să nu apară dungi, pe vremea când filmul chiar era
+> 16:9 (vezi sesiunea din 25 august, mai jos). Un film mai lat decât caseta primește dungi
+> sus-jos, unul mai îngust în stânga-dreapta. **Filmul schimbat ⇒ numărul remăsurat.**
+> `object-fit:cover` e pus ca plasă, dar nu ține loc de potrivire.
+> (2) **Scriptul care oprește filmul pentru cei logați căuta `.video-ph--live iframe`.** Cu
+> `<video>` selectorul nu mai găsea nimic, deci un om logat ar fi descărcat 7,9 MB pentru un
+> film ascuns cu `display:none`. Acum face `pause()` + `removeAttribute('src')` + **`load()`**;
+> ultimul e cel care taie efectiv transferul pornit, `pause()` singur nu-l oprește.
+> (3) **Machetele au rămas pe YouTube:** `frontend/_macheta-hero-nelogat-ecran.html` și
+> `package-homepage-v9/index.html` au tot iframe-ul `bfW2DJ1_du4`. Nu sunt pagini live, dar
+> acum arată altceva decât homepage-ul real.
+>
+> **⚠️ VERIFICAREA PE LIVE CERE FEREASTRĂ PRIVATĂ.** Browserul lui Lucian are sesiune pe
+> apartamentual.ro, deci logat **nu vede filmul deloc** — exact asta face scriptul. Plus
+> `Ctrl+Shift+R`, altfel `index.html` vine din cache și pare că nu s-a schimbat nimic.
+>
+> **✅ DECIZIA S-A LUAT PE CIFRE, NU PE PRESUPUNERI.** Homepage-ul are ~700 afișări pe lună
+> (2.098 în 91 de zile, Plausible), iar site-ul a consumat 5,33 GB în august (cPanel →
+> Bandwidth; 7,72 GB cu emailuri cu tot). Filmul adaugă ~5 GB pe lună, adică dublează
+> consumul, și rămâne departe de orice limită rezonabilă. Pe YouTube traficul era zero,
+> de-aia s-a pus întrebarea.
+>
+> **UNELTE, de știut data viitoare.** **ffmpeg e instalat** (winget), dar nu e în PATH-ul
+> unei sesiuni noi:
+> `C:\Users\lucia\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-9.0.1-full_build\bin\`.
+> ⚠️ **Previzualizarea unui `<video>` local cere un server care suportă Range.**
+> `python -m http.server` NU suportă: Chrome rămâne blocat pe `readyState 0`, fără nicio
+> eroare în consolă. Trebuie unul care întoarce 206.
+> ⚠️ **Exporturile CapCut ies nefolosibile pe web din trei motive tăcute:** codec HEVC
+> (Firefox nu-l redă deloc, Chrome doar pe unele calculatoare), benzi negre coapte în
+> imagine după un crop (12px sus-jos aici, găsite cu `cropdetect`), index la sfârșitul
+> fișierului plus o pistă de sunet mută. Și exportă implicit 1080p la ~10 Mbps, ceea ce
+> umflă o sursă de 720p cu pixeli inventați.
+> ⚠️ **Un timelapse de șantier nu se comprimă bine.** Textura fină pe toată suprafața nu
+> lasă compresia să taie: un prag de calitate mai bun a ieșit *mai mare* decât originalul,
+> de două ori. Merg doar mai puțini pixeli și mai puține cadre.
+>
+> **▶️ URMĂTORUL TASK, cerut de Lucian la finalul sesiunii: organizarea apartamentelor.**
+> Există lucru început, **netrackuit în git**: `frontend/organizare-apartamente.html`,
+> `frontend/js/organizare-apartamente.js`, `db_schema/organizare-apartamente/`,
+> `handoff/handoff-organizare-apartamente.md`, plus două machete în `handoff/`. Se citește
+> întâi handoff-ul. ⚠️ **Dar handoff-ul acela e depășit pe două puncte:** s-a decis între
+> timp că **preferințele membrilor intră acum** și că are **pagină proprie**. Se mai știe
+> că **numele celor interesați se văd** și că **analiza aparține perechii (grup, teren)**.
+>
+> **▶️ RESTANȚĂ CARE DEVINE URGENTĂ ZILELE ASTEA:** actualizarea constantei `WEBINAR` din
+> `notify-admins`, între 3 și 7 septembrie. Detaliile, mai jos, la sesiunea din 27 august,
+> și în `NOTES.md`, prima intrare. ⚠️ Tot de acolo: verificarea rulării automate de **luni
+> 31 august, 10:07** (blocurile 3b/3c din `db_schema/digest-terenuri/3-programare.sql`) —
+> nu știu dacă s-a făcut, sesiunea de azi n-a atins zona aia.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 27 august 2026, dimineața** — **emailul cu terenuri noi a plecat la
 > toți 66 de oameni, iar automatizarea săptămânală e PORNITĂ.** Commit `6f9cab4`, împins pe
 > `main`. Nu e nimic de publicat din cPanel: totul e edge functions și SQL.
 >
