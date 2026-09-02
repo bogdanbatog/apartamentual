@@ -65,6 +65,12 @@
   .sub{color:var(--gri);font-size:15px;}
   .insigna{display:inline-block;background:var(--cerneala);color:var(--crem);
     font-size:12px;padding:4px 10px;border-radius:99px;margin-top:8px;}
+  /* Premisa de cost, sub insignă. Toate prețurile din pagină, și totalul, și
+     euro pe mp util, atârnă de cifra asta; fără ea omul citește un preț ca pe
+     o promisiune, nu ca pe rezultatul unei ipoteze. Se citește din analiză,
+     nu e scrisă de mână: fiecare analiză își are cifra ei. */
+  .oa-premise{margin-top:10px;font-size:13.5px;color:var(--gri);}
+  .oa-premise strong{color:var(--cerneala);font-weight:600;}
   .context{margin-top:14px;font-size:13.5px;color:var(--gri);}
   .context a{color:var(--teracota);text-decoration:none;font-weight:600;}
   .context a:hover{text-decoration:underline;}
@@ -776,6 +782,7 @@
     <h1 id="oaTitlu"></h1>
     <div class="sub" id="oaSub"></div>
     <div class="insigna" id="oaInsigna"></div>
+    <p class="oa-premise" id="oaPremise" hidden></p>
     <p class="oa-fisa" id="oaFisa" hidden></p>
     <div class="context" id="oaContext" hidden></div>
 

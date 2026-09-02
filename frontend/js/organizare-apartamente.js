@@ -83,6 +83,12 @@ let membriToti = false;
 let altePagini = [];           // celelalte terenuri ale grupului cu analiză
 let alteAlegeri = {};          // user_id -> [titluri de terenuri]
 let suntAdmin = false;         // fondatorul: șterge notele, documentele și jurnalul oricui
+/* Superadminul vede pagina oricărui grup, dar NU primește butoanele
+   fondatorului: `suntAdmin` rămâne strict al fondatorului. Un buton de
+   ștergere afișat fără politică în spate eșuează tăcut, exact ca butonul de
+   ștergere a anunțurilor, care i se arată superadminului din 13 august și nu
+   face nimic când îl apeși. */
+let suntSuperAdmin = false;
 
 const eTelefon = () => window.matchMedia('(max-width: 720px)').matches;
 const fmt = n => Math.round(n).toLocaleString('ro-RO');
@@ -1498,11 +1504,35 @@ async function oaPorneste(){
      pur și simplu liste goale, iar omul ar vedea „nu există analiză" și când e
      vorba de fapt că nu e membru. RLS rămâne bariera adevărată; întrebarea de
      aici e doar ca să știm ce să scriem pe ecran. */
-  const [{ data: membru }, { data: grup }] = await Promise.all([
+  /* ⚠️ Superadminul se află întrebând FUNCȚIA `is_super_admin()`, nu citind
+     coloana din profil. Politicile RLS o cheamă pe ea, deci așa nu pot ajunge
+     interfața și baza să spună lucruri diferite: fie te lasă amândouă, fie
+     niciuna. Tiparul invers, buton fără drept sau drept fără buton, s-a
+     întâmplat de trei ori (`grup_checklist_files`, `grup_anunturi`, ștergerea
+     anunțurilor). Dacă apelul crapă, `data` e null și rămânem pe `false`, deci
+     greșeala cade în partea închisă. */
+  const [{ data: membru }, { data: grup }, raspunsSuper] = await Promise.all([
     sb.from('grup_membri').select('status').eq('grup_id', grupId).eq('user_id', eu).maybeSingle(),
-    sb.from('grupuri').select('id, nume, admin_id').eq('id', grupId).maybeSingle()
+    sb.from('grupuri').select('id, nume, admin_id').eq('id', grupId).maybeSingle(),
+    sb.rpc('is_super_admin')
   ]);
-  const eMembru = (membru && String(membru.status) === 'activ') || (grup && grup.admin_id === eu);
+  if (raspunsSuper && raspunsSuper.error) {
+    /* Funcția nu răspunde prin PostgREST. Se întâmplă dacă n-are drept de
+       execuție pentru `authenticated`, dacă cere un argument, sau dacă nu e
+       expusă deloc: nicio pagină din platformă n-o chema până acum prin RPC,
+       toate citesc coloana din profil. Atunci se cade pe coloană, cum face
+       restul platformei (`teren-details.js`, `grup-terenuri-edit.js`).
+       Interogarea în plus se face DOAR pe eroare, nu și când funcția a răspuns
+       cinstit „nu”: altfel fiecare membru obișnuit ar plăti o rundă degeaba. */
+    console.warn('is_super_admin() prin RPC nu a răspuns:', raspunsSuper.error.message);
+    const { data: profilEu } = await sb.from('profiles_visible')
+      .select('is_super_admin').eq('user_id', eu).maybeSingle();
+    suntSuperAdmin = !!(profilEu && profilEu.is_super_admin);
+  } else {
+    suntSuperAdmin = raspunsSuper && raspunsSuper.data === true;
+  }
+  const eMembru = (membru && String(membru.status) === 'activ') ||
+                  (grup && grup.admin_id === eu) || suntSuperAdmin;
   suntAdmin = !!(grup && grup.admin_id === eu);
   if (!grup) {
     arataStarea('Grupul nu există', 'Poate a fost șters, sau linkul e greșit.',
@@ -1541,7 +1571,12 @@ async function oaPorneste(){
      estompată, care spune ce va apărea acolo. */
   analiza = (analize && analize.length) ? analize[0] : null;
 
-  if (!analiza && !favorit) {
+  /* Superadminul trece și de poarta asta. Ea există ca să nu poată cineva
+     deschide pagina grupului său pe un teren la care nimeni de acolo nu s-a
+     uitat; pentru superadmin, care se uită tocmai ca să răspundă unei
+     întrebări, ar fi ajuns invers: perechea cea mai probabil de verificat e
+     exact cea care încă n-are nimic. */
+  if (!analiza && !favorit && !suntSuperAdmin) {
     arataStarea('Terenul nu e la favoritele grupului',
       'Adaugă-l întâi din pagina grupului, apoi puteți scrie aici ce vă doriți și ce ați aflat despre el.',
       '<a href="grup-details.html?id=' + encodeURIComponent(grupId) + '">Înapoi la grup</a>');
@@ -1693,7 +1728,12 @@ async function incarcaAlteTerenuri(variantIdsDeAici){
 
 function scrieCapulPaginii(teren){
   const numeGrup = document.getElementById('oaEticheta');
-  numeGrup.textContent = 'Împărțirea apartamentelor';
+  /* Scris pe pagină, nu doar știut: altfel superadminul citește datele altui
+     grup fără niciun semn că nu e la el acasă, iar o captură de ecran luată de
+     aici ajunge mai târziu să pară a fi de la un membru. */
+  numeGrup.textContent = suntSuperAdmin && !suntAdmin
+    ? 'Împărțirea apartamentelor · vezi ca superadmin'
+    : 'Împărțirea apartamentelor';
 
   document.getElementById('oaTitlu').textContent = teren ? teren.titlu : 'Teren';
   const bucati = [];
@@ -1719,6 +1759,19 @@ function scrieCapulPaginii(teren){
       (analiza.data_analizei ? ' · ' + formatData(analiza.data_analizei) : '');
   } else {
     ins.hidden = true;
+  }
+
+  /* Premisa de cost, scrisă sus, o dată. Toate cifrele din pagină, totalul și
+     euro pe mp util, atârnă de ea; fără ea omul citește un preț ca pe o
+     promisiune, nu ca pe rezultatul unei ipoteze. Se ia din analiză, deci e
+     corectă și când altă analiză are alt cost pe metru. */
+  const prem = document.getElementById('oaPremise');
+  if (analiza && Number(analiza.cost_constructie_mp) > 0) {
+    prem.innerHTML = 'Toate costurile din pagină sunt calculate la <strong>' +
+      fmt(analiza.cost_constructie_mp) + ' € pe metru pătrat construit</strong>, ' +
+      'un cost de referință din experiența recentă a construcției colaborative. ' +
+      'Costul real se stabilește la ofertarea constructorului și poate să difere.';
+    prem.hidden = false;
   }
 
   if (altePagini.length) {
