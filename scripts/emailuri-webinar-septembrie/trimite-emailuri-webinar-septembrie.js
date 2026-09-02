@@ -365,22 +365,49 @@ async function trimite(apiKey, mesaj) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Ziua, la ora Bucurestiului. `toISOString()` da ziua in UTC, deci o rulare
- * dupa miezul noptii ar deschide jurnalul zilei de ieri si ar trimite din nou
- * catre cine a primit deja.
+ * ⚠️ CAPCANA ZILEI DIN NUMELE JURNALULUI. Campaniile din august scriau
+ * `trimise-<zi UTC>.json` si citeau DOAR fisierul zilei curente. La granita
+ * dintre zile asta poate merge in doua feluri, si doar unul e nevinovat:
+ *
+ *   - deschis jurnalul de IERI  → oamenii de ieri sunt sariti. Neplacut doar
+ *     daca vrei sa trimiti aceleiasi liste a doua zi, ceea ce la o campanie
+ *     de o singura data nu se intampla niciodata.
+ *   - deschis un jurnal GOL     → toata lista primeste emailul A DOUA OARA.
+ *
+ * O trimitere la 23:50 re-rulata la 00:10 pica exact pe al doilea caz daca ziua
+ * e cea locala (fisier nou, gol). Deci nu se rezolva schimband fusul: ziua ramane
+ * cea de la Bucuresti pentru fisierul in care SCRIEM (ca sa fie usor de citit
+ * cand s-a trimis), dar setul de „deja trimise" se aduna din TOATE jurnalele din
+ * folder. Asa, o re-rulare nu are cum sa trimita de doua ori, indiferent de ora.
  */
 function ziLocala() {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Bucharest' }).format(new Date())
 }
 
+/** Fisierul in care se scrie de acum incolo. */
 function caleJurnal() {
   return path.join(DIR_IESIRE, `trimise-${ziLocala()}.json`)
 }
 
-function citesteJurnal() {
-  const f = caleJurnal()
+function citesteFisierJurnal(f) {
   if (!fs.existsSync(f)) return []
-  try { return JSON.parse(fs.readFileSync(f, 'utf8')) } catch { return [] }
+  try {
+    const x = JSON.parse(fs.readFileSync(f, 'utf8'))
+    return Array.isArray(x) ? x : []
+  } catch { return [] }
+}
+
+/** Doar intrarile din fisierul de azi: alea se rescriu la fiecare trimitere. */
+function citesteJurnalAzi() {
+  return citesteFisierJurnal(caleJurnal())
+}
+
+/** TOATE intrarile din folder, pentru setul de „deja trimise”. */
+function citesteToateJurnalele() {
+  if (!fs.existsSync(DIR_IESIRE)) return []
+  return fs.readdirSync(DIR_IESIRE)
+    .filter(n => /^trimise-\d{4}-\d{2}-\d{2}\.json$/.test(n))
+    .flatMap(n => citesteFisierJurnal(path.join(DIR_IESIRE, n)))
 }
 
 function scrieJurnal(intrari) {
@@ -536,10 +563,18 @@ async function main() {
     tinte = randuri.map(r => ({ rand: r, catre: r.email, subiectPrefix: '' }))
   }
 
-  const jurnal = citesteJurnal()
+  // Scriem in fisierul de azi, dar ne uitam in toate. Vezi comentariul de la
+  // `citesteToateJurnalele`: un jurnal gol la granita dintre zile inseamna
+  // trimitere dubla catre tot lotul.
+  const jurnal = citesteJurnalAzi()
   const dejaTrimise = new Set(
-    jurnal.filter(x => x.ok && x.mod === MOD).map(x => `${x.mod}:${x.email}`)
+    citesteToateJurnalele()
+      .filter(x => x.ok && x.mod === MOD)
+      .map(x => `${x.mod}:${x.email}`)
   )
+  if (dejaTrimise.size) {
+    console.log(`Jurnale gasite in folder: ${dejaTrimise.size} adrese deja servite in modul „${MOD}”. Alea se sar.`)
+  }
 
   let reusite = 0, esecuri = 0, sarite = 0
   for (let i = 0; i < tinte.length; i++) {
@@ -548,7 +583,7 @@ async function main() {
 
     if (dejaTrimise.has(cheie)) {
       sarite++
-      console.log(`(${i + 1}/${tinte.length}) ${rand.email} — SARIT, e deja in jurnalul de azi`)
+      console.log(`(${i + 1}/${tinte.length}) ${rand.email} — SARIT, e deja intr-un jurnal din folder`)
       continue
     }
 

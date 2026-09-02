@@ -93,11 +93,16 @@ La final închide fereastra PowerShell sau rulează `$env:RESEND_API_KEY=""`.
 ## Ce se întâmplă dacă ceva pică
 
 Fiecare trimitere reușită se scrie imediat în `local\trimise-<data>.json` (data e ziua la
-ora Bucureștiului, nu UTC). Dacă rulezi din nou aceeași comandă, adresele deja trimise
-sunt **sărite** și se reîncearcă doar cele eșuate. De aceea:
+ora Bucureștiului). Dacă rulezi din nou aceeași comandă, adresele deja trimise sunt
+**sărite** și se reîncearcă doar cele eșuate. De aceea:
 
-> ⚠️ Nu șterge `local\trimise-<data>.json` în ziua campaniei. Fără el, o re-rulare
-> trimite a doua oară acelorași oameni.
+> ⚠️ Nu șterge fișierele `local\trimise-*.json`. Fără ele, o re-rulare trimite a doua
+> oară acelorași oameni.
+
+**Diferență față de scripturile din august:** acolo se citea doar jurnalul zilei curente.
+Aici se citesc **toate** fișierele `trimise-*.json` din folder. Motivul e granița dintre
+zile: o trimitere la 23:50 re-rulată la 00:10 deschidea un fișier nou, gol, și tot lotul
+primea emailul a doua oară. Acum ora nu mai contează.
 
 Erorile 429 și 5xx sunt reîncercate automat de până la 4 ori, cu pauze crescătoare.
 
