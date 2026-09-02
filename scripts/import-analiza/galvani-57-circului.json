@@ -1,0 +1,53 @@
+{
+  "_comentariu": [
+    "Analiza terenului din Luigi Galvani 57, pusă și pe grupul „Parcul Circului”.",
+    "Aceleași fișiere CSV și aceleași cifre ca în `galvani-57.json`: e aceeași",
+    "analiză a aceluiași teren, citită de alt grup.",
+    "",
+    "TITLUL E ACELAȘI, dinadins. Analiza e a perechii (grup, teren), deci un teren",
+    "analizat pentru două grupuri dă două analize care poartă firesc același nume.",
+    "Din 2 septembrie, blocurile generate se leagă de analiză prin titlu ȘI grup,",
+    "nu prin titlu singur, tocmai ca să nu fie nevoie de o etichetă artificială pe",
+    "ceva ce citește omul pe pagină.",
+    "⚠️ Cu un generator mai vechi, importul ăsta ar fi scris variante și în analiza",
+    "grupului de medici. Nu-l rula cu o versiune veche a scriptului.",
+    "",
+    "TERENUL: id-ul e cel citit din BLOC 0 al probei de pe grupul medicilor,",
+    "„Luigi Galvani 57 - 639mp”. Lucian spune că e deja la favoritele grupului",
+    "Parcul Circului; BLOC 0 confirmă, la secțiunea „favorit”.",
+    "",
+    "CELE TREI CIFRE DE COST: vezi `galvani-57.json`, unde sunt verificate înapoi",
+    "prin formula din Urban Analyzer pe toate cele șapte variante.",
+    "",
+    "⚠️ La generare ies trei avertismente despre parterul din setul P+4: dozarea",
+    "din UA pune acolo un apartament al cărui minim din normativ e mai mare decât",
+    "ce a rămas liber pe nivel după parcaje. Sunt cunoscute, sunt aceleași ca la",
+    "importul de pe grupul medicilor, și se rezolvă la sursă, nu aici."
+  ],
+  "titlu": "Analiză preliminară Luigi Galvani 57",
+  "data_analizei": "2026-09-01",
+  "grup_cauta": "Parcul Circului",
+  "teren_id": "8f46e444-76f7-4721-b8a5-96634956795f",
+  "cost_teren": 830000,
+  "cost_constructie_mp": 1200,
+  "cost_subsol_pct": 70,
+  "coef_su_sd": 0.7,
+  "suprafata_teren_mp": 641.01,
+  "note": "Analiză preliminară Urban Analyzer, 1 septembrie 2026. Teren 641,01 mp, UTR M3 (Sector 2), reglementare din certificat de urbanism: POT max 60%, CUT max 2,50, regim max P+5, spațiu verde min 30%. Două ipoteze de volum: P+4 (patru variante, CUT 2,246) și P+5 (trei variante, CUT 2,490, adică la plafon). Costuri de intrare: 1.200 euro pe mp Sd, teren 830.000 euro, subsolul la 70% din prețul pe metru. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.",
+  "seturi": [
+    {
+      "prefix": "P+5",
+      "csv": "../../analize din Urban Analyzer/Luigi Galvani 57/var 10-11 ap/analiza-urbanistica (7).csv",
+      "suprafata_teren_mp": 641.01,
+      "pdf_nume": "galvani-57-fisa-p5.pdf",
+      "kml_nume": "galvani-57-volum-p5.kml"
+    },
+    {
+      "prefix": "P+4",
+      "csv": "../../analize din Urban Analyzer/Luigi Galvani 57/var 8-9 ap/analiza-urbanistica (6).csv",
+      "suprafata_teren_mp": 641.01,
+      "pdf_nume": "galvani-57-fisa-p4.pdf",
+      "kml_nume": "galvani-57-volum-p4.kml"
+    }
+  ]
+}

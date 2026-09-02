@@ -260,6 +260,45 @@ function main() {
   const cfg = JSON.parse(fs.readFileSync(caleConfig, 'utf8'));
   const radacina = path.dirname(path.resolve(caleConfig));
 
+  /* ── CUM SE NIMEREȘTE TERENUL ──────────────────────────────────────────────
+
+     Trei feluri, în ordinea încrederii:
+
+       `teren_id`        id-ul, scris în configurație. Cel mai sigur.
+       `teren_din_grup`  terenul pus de grup la favorite.
+       `teren_cauta`     bucată din titlu, prin ilike. Cel mai fragil.
+
+     ⚠️ TITLUL TERENULUI NU CONȚINE NEAPĂRAT ADRESA. La Constantin Bosianu 32,
+     terenul e trecut în platformă după rondul de lângă („Rond Coșbuc”), deci
+     nicio bucată din titlul analizei nu-l nimerea, iar BLOC 0 raporta corect
+     că nu există. Plus capcana veche: potrivirea pe text se rupe pe un
+     diacritic scris altfel și nu spune nimic, întoarce zero rânduri.
+
+     ⚠️ EXISTĂ DOUĂ TABELE CARE LEAGĂ UN TEREN DE UN GRUP, ȘI SE FOLOSEȘTE A
+     DOUA. `grup_terenuri` (cu `removed_at`, scrisă din `grup-terenuri-edit`)
+     e goală la grupurile reale; legătura vie e `terenuri_likes_grupuri`, aia
+     pe care o scrie butonul de pe pagina terenului și o citesc spațiul de
+     lucru (`grupuri.js:204`) și pagina de împărțire
+     (`organizare-apartamente.js:1524`). Cine se uită în cea greșită vede zero
+     rânduri, fără nicio eroare, și crede că terenul nu e în platformă.
+     `terenuri_likes_grupuri` se șterge de-a binelea (`teren-details.js:243`),
+     deci n-are nevoie de filtru pe ștergere logică.
+
+     Un grup poate avea mai multe favorite. BLOC 0 le arată pe toate, cu `in`;
+     dacă ies două, BLOC 1 se oprește cu „more than one row returned by a
+     subquery” și atunci se scrie `teren_id` de mână.                         */
+  const grupSubq = '(select id from public.grupuri where nume ilike ' +
+                   sqlText('%' + cfg.grup_cauta + '%') + ')';
+  const terenSubq =
+      /* Parantezele nu sunt de frumusețe: forma asta se folosește și ca
+         `t.id in <aici>` în BLOC 0, iar `in` fără paranteze e eroare de
+         sintaxă. Un scalar în paranteze merge în amândouă locurile. */
+      cfg.teren_id      ? '(' + sqlText(cfg.teren_id) + '::uuid)'
+    : cfg.teren_din_grup ? '(select l.teren_id from public.terenuri_likes_grupuri l' +
+                           ' where l.grup_id = ' + grupSubq + ')'
+    :                      '(select id from public.terenuri where titlu ilike ' +
+                           sqlText('%' + cfg.teren_cauta + '%') + ')';
+
   /* Fiecare set = un fișier CSV = o ipoteză de volum (P+4, P+5...). Variantele
      din seturi diferite se ciocnesc la nume (toate încep cu V1), de aceea
      fiecare set are un prefix scris în configurație. */
@@ -310,6 +349,25 @@ function main() {
 
   const o = [];
   const p = s => o.push(s);
+
+  /* ── CUM SE NIMEREȘTE ANALIZA, ÎN TOATE BLOCURILE DE DUPĂ ─────────────────
+
+     Titlul ȘI grupul, niciodată titlul singur.
+
+     Analiza e a perechii (grup, teren), deci ACELAȘI teren analizat pentru
+     două grupuri dă două analize care, firesc, poartă același titlu: „Analiză
+     preliminară Luigi Galvani 57” e numele corect pentru amândouă. Legate doar
+     pe titlu, blocurile 2, 3 și 4 ale celui de-al doilea import ar scrie
+     variante și în analiza primului grup, iar BLOC 5 le-ar amesteca la
+     verificare, exact ca dublura de la Bosianu 32 din 1 septembrie.
+
+     Alternativa ar fi fost să lipim o etichetă pe titlu („(Parcul Circului)”)
+     ca să iasă unic. Adică să stricăm ce citește omul pe pagină ca să-i fie
+     comod uneltei.                                                           */
+  const pUndeAnaliza = function (indent) {
+    p(indent + 'where a.titlu = ' + sqlText(cfg.titlu));
+    p(indent + '  and a.grup_id = ' + grupSubq);
+  };
   const linie = '-- ═══════════════════════════════════════════════════════════════════════════';
 
   p(linie);
@@ -342,7 +400,9 @@ function main() {
   p('  union all');
   p("  select 2, 'teren', t.id::text, t.titlu, t.suprafata::text");
   p('    from public.terenuri t');
-  p('   where t.titlu ilike ' + sqlText('%' + cfg.teren_cauta + '%'));
+  /* `in`, nu `=`: dacă potrivirea prinde două terenuri, vrem să le VEDEM
+     amândouă aici, nu să crape interogarea de verificare. */
+  p('   where t.id in ' + terenSubq);
   p('  union all');
   p("  select 3, 'membru activ', m.user_id::text,");
   p("         coalesce(pr.pseudonym, '(fără pseudonim)'), m.status");
@@ -352,28 +412,54 @@ function main() {
   p('                        where nume ilike ' + sqlText('%' + cfg.grup_cauta + '%') + ')');
   p("     and m.status = 'activ'");
   p('  union all');
-  p("  select 4, 'teren la favorite', l.teren_id::text, 'da', null");
+  /* Cele două tabele de legătură, amândouă, NEFILTRATE de terenul căutat:
+     dacă legătura e într-una și noi ne uităm în cealaltă, vedem zero rânduri
+     fără nicio eroare și tragem concluzia că terenul nu e în platformă. S-a
+     întâmplat la Bosianu 32. Deci se listează tot ce atârnă de grup. */
+  p("  select 4, 'favorit (terenuri_likes_grupuri)', l.teren_id::text,");
+  p("         coalesce(t.titlu, '⚠️ teren inexistent'), t.suprafata::text");
   p('    from public.terenuri_likes_grupuri l');
-  p('   where l.grup_id in (select id from public.grupuri');
-  p('                        where nume ilike ' + sqlText('%' + cfg.grup_cauta + '%') + ')');
-  p('     and l.teren_id in (select id from public.terenuri');
-  p('                         where titlu ilike ' + sqlText('%' + cfg.teren_cauta + '%') + ')');
+  p('    left join public.terenuri t on t.id = l.teren_id');
+  p('   where l.grup_id in ' + grupSubq);
   p('  union all');
-  p("  select 5, 'analiză deja existentă', a.id::text, a.titlu, a.data_analizei::text");
+  /* A patra coloană spune dacă analiza găsită e pe TERENUL NOSTRU sau pe
+     altul. Analiza e a perechii (grup, teren), deci un grup poate avea liniștit
+     mai multe analize, câte una de teren: „Eco pentru medici” are Galvani și
+     primește Bosianu. Ce nu merge e a doua analiză pe ACELAȘI teren, fiindcă
+     atunci pagina o arată pe cea mai nouă și cealaltă rămâne ascunsă. */
+  p("  select 5, 'analiză deja existentă', a.id::text, a.titlu,");
+  p("         case when a.teren_id in " + terenSubq);
+  p("              then '⚠️ PE ACELAȘI TEREN · ' || a.data_analizei::text");
+  p("              else 'pe alt teren · ' || a.data_analizei::text end");
   p('    from public.analiza_teren a');
-  p('   where a.grup_id in (select id from public.grupuri');
-  p('                        where nume ilike ' + sqlText('%' + cfg.grup_cauta + '%') + ')');
+  p('   where a.grup_id in ' + grupSubq);
+  p('  union all');
+  p("  select 6, 'legat vechi (grup_terenuri)', gt.teren_id::text,");
+  p("         coalesce(t.titlu, '⚠️ teren inexistent'),");
+  p("         case when gt.removed_at is null then 'activ'");
+  p("              else 'SCOS ' || gt.removed_at::date::text end");
+  p('    from public.grup_terenuri gt');
+  p('    left join public.terenuri t on t.id = gt.teren_id');
+  p('   where gt.grup_id in ' + grupSubq);
   p(') x order by ord, detaliu;');
   p('');
   p('-- CE TREBUIE SĂ VEZI:');
   p('--   • exact UN rând „grup” și exact UN rând „teren”. Dacă ies două,');
   p('--     restrânge textul căutat în configurație; blocurile de mai jos');
   p('--     crapă la „more than one row returned by a subquery”.');
-  p('--   • „teren la favorite” poate lipsi: pagina se deschide oricum, fiindcă');
-  p('--     de acum există o analiză. Fără analiză ȘI fără favorit, ar refuza.');
-  p('--   • „analiză deja existentă” trebuie să lipsească. Dacă apare una pe');
-  p('--     ACELAȘI teren, pagina o arată pe cea mai nouă și cealaltă rămâne');
-  p('--     ascunsă, nu ștearsă. Șterge-o întâi cu BLOC 6.');
+  p('--   • rândurile „favorit” și „legat vechi” arată TOT ce atârnă de grup,');
+  p('--     din amândouă tabelele de legătură, nefiltrate. Cea vie e');
+  p('--     `terenuri_likes_grupuri`: pe ea o scrie butonul de pe pagina');
+  p('--     terenului și pe ea o citesc spațiul de lucru și pagina de');
+  p('--     împărțire. `grup_terenuri` e de obicei goală. Dacă terenul apare');
+  p('--     DOAR la „legat vechi”, pagina nu-l va găsi: se pune la favorite');
+  p('--     din pagina terenului, cu butonul de salvare la grup.');
+  p('--   • „analiză deja existentă” poate să apară, atâta timp cât scrie „pe');
+  p('--     alt teren”: analiza e a perechii (grup, teren), deci un grup are');
+  p('--     câte una de fiecare teren al lui și stau toate.');
+  p('--     Ce oprește importul e „⚠️ PE ACELAȘI TEREN”: atunci pagina o');
+  p('--     arată pe cea mai nouă și cealaltă rămâne ascunsă, nu ștearsă.');
+  p('--     Șterge-o întâi cu BLOC 6.');
   p('');
 
   /* ── BLOC 1 ──────────────────────────────────────────────────────────── */
@@ -396,9 +482,15 @@ function main() {
   p('  grup_id, teren_id, tip, titlu, data_analizei,');
   p('  cost_teren, cost_constructie_mp, cost_subsol_pct,');
   p('  suprafata_teren_mp, sd_total_mp, su_total_mp, pot_obtinut, cut_obtinut, note');
-  p(') values (');
-  p('  (select id from public.grupuri  where nume  ilike ' + sqlText('%' + cfg.grup_cauta + '%') + '),');
-  p('  (select id from public.terenuri where titlu ilike ' + sqlText('%' + cfg.teren_cauta + '%') + '),');
+  /* `select ... where not exists`, nu `values`: rulat de două ori din
+     neatenție, blocul scrie „INSERT 0 0” în loc să facă o a doua analiză cu
+     același titlu. Într-un import care se rulează bloc cu bloc, cu ochiul, e
+     ușor să pierzi șirul, iar dublura nu se vede nicăieri în pagină: pagina
+     arată una din ele și tace despre cealaltă. */
+  p(')');
+  p('select');
+  p('  ' + grupSubq + ',');
+  p('  ' + terenSubq + ',');
   p("  'preliminara',");
   p('  ' + sqlText(cfg.titlu) + ',');
   p('  date ' + sqlText(cfg.data_analizei) + ',');
@@ -414,11 +506,19 @@ function main() {
     ', ' + sqlNum(cuMaxSd.sdTotal) + ', ' + sqlNum(cuMaxSd.suTotal) + ', ' +
     sqlNum(cuMaxSd.potObtinut) + ', ' + sqlNum(cuMaxSd.cutObtinut) + ',');
   p('  ' + sqlText(cfg.note) );
-  p(');');
+  /* Plasa se uită la PERECHEA grup + teren, care e adevărata unicitate, nu la
+     titlu: același teren analizat pentru două grupuri dă două analize cu
+     același titlu, și amândouă au dreptul să existe. */
+  p('where not exists (select 1 from public.analiza_teren');
+  p('                   where grup_id = ' + grupSubq);
+  p('                     and teren_id in ' + terenSubq + ');');
   p('');
-  p('-- Trebuie să scrie „INSERT 0 1”. „INSERT 0 0” nu se poate întâmpla aici');
-  p('-- (grup_id e NOT NULL, deci o căutare fără rezultat oprește inserarea cu');
-  p('-- eroare), dar citește oricum linia de răspuns.');
+  p('-- Trebuie să scrie „INSERT 0 1”.');
+  p('--');
+  p('-- „INSERT 0 0” înseamnă că analiza EXISTĂ DEJA, adică blocul a mai fost');
+  p('-- rulat o dată. Nu e o pagubă, dar oprește-te: dacă ai rulat deja și');
+  p('-- blocurile 2, 3, 4, sunt și ele duble, iar asta chiar se vede în pagină.');
+  p('-- Se curăță cu BLOC 6 și se ia totul de la capăt.');
   p('');
   /* Fișierele setului: fișa PDF și volumul KML. Sunt ale SETULUI, nu ale
      variantei (KML-ul e volumul ipotezei de volum, deci toate variantele
@@ -444,7 +544,8 @@ function main() {
     p('--                    where nume ilike ' + sqlText('%' + cfg.grup_cauta + '%') + ")");
     p("--                  || '/' || " + sqlText(cfg.pdf_nume || 'fisa.pdf') + ',');
     p('--        pdf_nume = ' + sqlText(cfg.pdf_nume || 'fisa.pdf'));
-    p('--  where titlu = ' + sqlText(cfg.titlu) + ';');
+    p('--  where titlu = ' + sqlText(cfg.titlu));
+    p('--    and grup_id = ' + grupSubq + ';');
     p('');
   }
 
@@ -493,9 +594,17 @@ function main() {
   });
   p('       ) as v(nume, descriere, su_total, sd_total, coef, subsol_sd,');
   p('              are_subsol, su_com, parcaje, ordine)');
-  p(' where a.titlu = ' + sqlText(cfg.titlu) + ';');
+  pUndeAnaliza(' ');
+  /* Plasa contra rulării de două ori. La Bosianu 32, 1 septembrie, blocul ăsta
+     a intrat de două ori: 4 variante în loc de 2, iar blocurile 3 și 4, rulate
+     o singură dată peste ele, au scos 16 niveluri și 24 de apartamente. Nimic
+     nu s-a plâns, fiindcă nimic nu era invalid. */
+  p('   and not exists (select 1 from public.analiza_varianta va2');
+  p('                    where va2.analiza_id = a.id and va2.nume = v.nume);');
   p('');
   p('-- Trebuie să scrie „INSERT 0 ' + variante.length + '”.');
+  p('-- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te și');
+  p('-- verifică cu BLOC 5 înainte să mergi mai departe.');
   p('');
 
   /* ── BLOC 3 ──────────────────────────────────────────────────────────── */
@@ -537,9 +646,12 @@ function main() {
   });
   p('       ) as n(varianta, nume, ordine, su, parter, comun)');
   p('    on n.varianta = va.nume');
-  p(' where a.titlu = ' + sqlText(cfg.titlu) + ';');
+  pUndeAnaliza(' ');
+  p('   and not exists (select 1 from public.analiza_nivel ni2');
+  p('                    where ni2.varianta_id = va.id and ni2.nume = n.nume);');
   p('');
   p('-- Trebuie să scrie „INSERT 0 ' + totalNiveluri + '”.');
+  p('-- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.');
   p('');
 
   /* ── BLOC 4 ──────────────────────────────────────────────────────────── */
@@ -587,9 +699,15 @@ function main() {
   });
   p('       ) as x(varianta, nivel, ordine, tip, eticheta, mpu_min, mpu_max, mpu_propus)');
   p('    on x.varianta = va.nume and x.nivel = ni.nume');
-  p(' where a.titlu = ' + sqlText(cfg.titlu) + ';');
+  pUndeAnaliza(' ');
+  /* `ordine` deosebește apartamentele de pe același nivel: două de 2 camere pe
+     un etaj au același tip și aceeași suprafață, deci nimic altceva nu le
+     separă. */
+  p('   and not exists (select 1 from public.analiza_apartament ap2');
+  p('                    where ap2.nivel_id = ni.id and ap2.ordine = x.ordine);');
   p('');
   p('-- Trebuie să scrie „INSERT 0 ' + randuriAp.length + '”.');
+  p('-- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.');
   p('');
 
   /* ── BLOC 5 ──────────────────────────────────────────────────────────── */
@@ -602,13 +720,38 @@ function main() {
   p('         count(distinct ni.id)::text as niveluri,');
   p('         count(ap.id)::text as apartamente,');
   p('         round(sum(ap.mpu_propus), 2)::text as mp_dati,');
-  p('         round(va.su_total_mp, 2)::text as mp_de_dat');
+  /* ⚠️ Bugetul e suma Su-urilor de locuințe ale NIVELURILOR, nu
+     `va.su_total_mp`. Su-ul variantei include și subsolul, și spațiul
+     comercial de la parter, adică fix ce nu se împarte în apartamente: pe o
+     variantă cu subsol ieșea o diferență de 90 mp care arăta ca o pierdere și
+     nu era nimic. La Bosianu 32 coloanele se potriveau din întâmplare, fiindcă
+     analiza aceea n-are nici subsol, nici comercial.
+     Subinterogare, nu `sum(ni.su_mp)` peste join: nivelul apare o dată pentru
+     fiecare apartament al lui, deci suma ar fi ieșit înmulțită. */
+  p('         (select round(sum(ni2.su_mp), 2) from public.analiza_nivel ni2');
+  p('           where ni2.varianta_id = va.id)::text as mp_de_dat');
   p('    from public.analiza_varianta va');
   p('    join public.analiza_teren a on a.id = va.analiza_id');
   p('    left join public.analiza_nivel ni on ni.varianta_id = va.id');
   p('    left join public.analiza_apartament ap on ap.nivel_id = ni.id');
-  p('   where a.titlu = ' + sqlText(cfg.titlu));
-  p('   group by va.nume, va.ordine, va.su_total_mp');
+  pUndeAnaliza('   ');
+  /* ⚠️ `va.id` în grupare, nu doar `va.nume`. Dacă BLOC 1 intră de două ori,
+     există două analize cu același titlu, fiecare cu varianta ei „P+3 · V1”;
+     gruparea pe nume le lipește și adună ce e în amândouă. Atunci numărul de
+     rânduri arată corect și doar cifrele dinăuntru sunt duble, adică exact
+     forma în care o greșeală trece de verificare. S-a întâmplat la Bosianu 32,
+     1 septembrie: 8 niveluri pe variantă în loc de 4. Cu `va.id` ies patru
+     rânduri și se vede din prima. */
+  p('   group by va.id, va.nume, va.ordine');
+  p('  union all');
+  p('  -- (a2) analiza nu trebuie să existe decât o dată. Se verifică separat');
+  p('  --      fiindcă la o dublură rândurile de mai sus arată numai cifre');
+  p('  --      duble, fără să spună de ce.');
+  p("  select 0, 'ANALIZĂ DUBLĂ', 'sunt ' || count(*)::text || ' analize cu acest titlu',");
+  p("         string_agg(a.id::text, ', ' order by a.created_at), null, null, null");
+  p('    from public.analiza_teren a');
+  pUndeAnaliza('   ');
+  p('  having count(*) > 1');
   p('  union all');
   p('  -- (b) niciun apartament nu trebuie să iasă din intervalul lui');
   p("  select 2, 'ÎN AFARA INTERVALULUI', va.nume || ' · ' || ni.nume || ' · ' || ap.tip_eticheta,");
@@ -617,7 +760,7 @@ function main() {
   p('    join public.analiza_nivel ni on ni.id = ap.nivel_id');
   p('    join public.analiza_varianta va on va.id = ap.varianta_id');
   p('    join public.analiza_teren a on a.id = va.analiza_id');
-  p('   where a.titlu = ' + sqlText(cfg.titlu));
+  pUndeAnaliza('   ');
   p('     and (ap.mpu_propus < ap.mpu_min or ap.mpu_propus > ap.mpu_max)');
   p('  union all');
   p('  -- (c) niciun nivel nu trebuie să fie umplut peste Su-ul lui');
@@ -627,7 +770,7 @@ function main() {
   p('    join public.analiza_nivel ni on ni.id = ap.nivel_id');
   p('    join public.analiza_varianta va on va.id = ap.varianta_id');
   p('    join public.analiza_teren a on a.id = va.analiza_id');
-  p('   where a.titlu = ' + sqlText(cfg.titlu));
+  pUndeAnaliza('   ');
   p('   group by va.nume, ni.nume, ni.su_mp');
   p('  having sum(ap.mpu_propus) > ni.su_mp + 0.01');
   p('  union all');
@@ -636,7 +779,8 @@ function main() {
   p("  select 4, 'GRUP GREȘIT', va.nume, va.grup_id::text, a.grup_id::text, null, null");
   p('    from public.analiza_varianta va');
   p('    join public.analiza_teren a on a.id = va.analiza_id');
-  p('   where a.titlu = ' + sqlText(cfg.titlu) + ' and va.grup_id <> a.grup_id');
+  pUndeAnaliza('   ');
+  p('     and va.grup_id <> a.grup_id');
   p(') x order by ord, detaliu;');
   p('');
   p('-- CE TREBUIE SĂ VEZI: doar rânduri „variantă”, câte unul de fiecare.');
@@ -689,6 +833,7 @@ function main() {
       p('  from public.analiza_teren a');
       p(' where a.id = va.analiza_id');
       p('   and a.titlu = ' + sqlText(cfg.titlu));
+      p('   and a.grup_id = ' + grupSubq);
       p('   and va.nume like ' + sqlText(set.prefix + ' · %') + ';');
       p('');
       p('-- Trebuie să scrie „UPDATE ' + ale.length + '”.');
@@ -702,7 +847,7 @@ function main() {
     p("       (va.pdf_path like a.grup_id::text || '/%') as incepe_cu_grupul");
     p('  from public.analiza_varianta va');
     p('  join public.analiza_teren a on a.id = va.analiza_id');
-    p(' where a.titlu = ' + sqlText(cfg.titlu));
+    pUndeAnaliza(' ');
     p(' order by va.ordine;');
     p('');
   }
@@ -717,7 +862,13 @@ function main() {
   p('-- jurnalul terenului, documentele sau notele: acelea nu depind de analiză.');
   p(linie);
   p('');
-  p('-- delete from public.analiza_teren where titlu = ' + sqlText(cfg.titlu) + ';');
+  p('-- delete from public.analiza_teren');
+  p('--  where titlu = ' + sqlText(cfg.titlu));
+  p('--    and grup_id = ' + grupSubq + ';');
+  p('--');
+  p('-- ⚠️ Și grupul, nu doar titlul: același teren analizat pentru două grupuri');
+  p('--    dă două analize cu același titlu, iar ștergerea pe titlu le-ar lua pe');
+  p('--    amândouă, inclusiv pe a celuilalt grup.');
   p('');
 
   process.stdout.write(o.join('\n') + '\n');

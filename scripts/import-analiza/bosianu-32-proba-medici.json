@@ -1,0 +1,44 @@
+{
+  "_comentariu": [
+    "PROBĂ. Aceeași analiză a terenului din Constantin Bosianu 32, pusă pe grupul",
+    "„Eco pentru medici” ca să se vadă pagina înainte de a ajunge la grupul real.",
+    "Aceleași cifre, același CSV, alt grup.",
+    "",
+    "⚠️ TITLUL E ALTUL, DINADINS. Plasa din BLOC 1 („where not exists ... where",
+    "titlu = ...”) se uită la titlu în TOATĂ tabela, nu doar în grupul curent.",
+    "Cu același titlu, al doilea import ar scrie „INSERT 0 0” și n-ar face nimic,",
+    "iar BLOC 5 ar amesteca cele două analize la verificare.",
+    "",
+    "Analiza e a perechii (grup, teren), deci asta nu se ciocnește de analiza",
+    "Galvani a aceluiași grup: sunt pe terenuri diferite și stau amândouă.",
+    "",
+    "TERENUL e același rând ca la importul real, id-ul luat din BLOC 0 al lui:",
+    "„Teren zona Rond Cosbuc, blvd Libertății, Unirii”, 468 mp. Lucian l-a pus",
+    "la favoritele grupului „Eco pentru medici” pe 1 septembrie, ca proba să",
+    "poată porni.",
+    "",
+    "CIFRELE DE COST: vezi `bosianu-32.json`, sunt aceleași și verificate acolo.",
+    "",
+    "DE ȘTERS DUPĂ PROBĂ: `delete from public.analiza_teren where titlu = ...`,",
+    "comanda e la BLOC 6 în SQL-ul generat. Cascada duce tot."
+  ],
+  "titlu": "PROBĂ · Analiză preliminară Constantin Bosianu 32",
+  "data_analizei": "2026-09-01",
+  "grup_cauta": "Eco pentru medici",
+  "teren_id": "f5d185cc-2396-4e81-b62a-6a14da054172",
+  "cost_teren": 650000,
+  "cost_constructie_mp": 1200,
+  "cost_subsol_pct": 70,
+  "coef_su_sd": 0.7,
+  "suprafata_teren_mp": 468.01,
+  "note": "PROBĂ. Analiza terenului din Constantin Bosianu 32 (Sector 4), pusă pe acest grup ca să vedem cum arată pagina de împărțire. Nu e o analiză a unui teren al grupului și se șterge după ce ne uităm la ea. Cifrele sunt reale: analiză preliminară Urban Analyzer, 1 septembrie 2026, teren 468,01 mp, UTR M1, POT max 40%, CUT max 1,80, regim max P+3. O ipoteză de volum, P+3, cu două variante: 703,84 mp construiți și 419,97 mp utili de locuință, împărțiți în două feluri. Fără subsol.",
+  "seturi": [
+    {
+      "prefix": "P+3",
+      "csv": "../../analize din Urban Analyzer/Constantin Bosianu 32/ANALIZE CONTUR NOU/analiza-urbanistica (7).csv",
+      "suprafata_teren_mp": 468.01,
+      "pdf_nume": "bosianu-32-fisa.pdf",
+      "kml_nume": "bosianu-32-volum.kml"
+    }
+  ]
+}

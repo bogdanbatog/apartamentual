@@ -30,6 +30,35 @@ format-csv-export.md`, deci analiza următoare se importă schimbând doar confi
 Un JSON cu grupul, terenul, cele trei cifre de cost și lista de fișiere CSV. Vezi
 `galvani-57.json`, comentat.
 
+### Cum se nimerește terenul
+
+Trei feluri, în ordinea încrederii:
+
+| cheie | ce face |
+|---|---|
+| `teren_id` | id-ul, scris de mână. Cel mai sigur. |
+| `teren_din_grup: true` | ia terenul pus de grup la favorite |
+| `teren_cauta` | bucată din titlu, prin ilike. Cel mai fragil. |
+
+⚠️ **Titlul terenului nu conține neapărat adresa.** La Constantin Bosianu 32, terenul e
+trecut în platformă după rondul de lângă („Rond Coșbuc"), nu după stradă, deși e chiar
+terenul analizei. `teren_cauta: "Bosianu"` nu-l nimerea, iar BLOC 0 raporta corect că nu
+există niciun teren. Peste asta vine capcana veche: potrivirea pe text se rupe pe un
+diacritic scris altfel și nu spune nimic, întoarce zero rânduri.
+
+⚠️ **Sunt două tabele care leagă un teren de un grup, și contează a doua.** `grup_terenuri`
+(cu `removed_at`, scrisă din `grup-terenuri-edit.html`) e goală la grupurile reale.
+Legătura vie e **`terenuri_likes_grupuri`**: pe ea o scrie butonul de salvare la grup de pe
+pagina terenului, și pe ea o citesc spațiul de lucru (`grupuri.js:204`) și pagina de
+împărțire (`organizare-apartamente.js:1524`). Cine se uită în cea greșită vede zero rânduri,
+fără nicio eroare, și trage concluzia că terenul nu e în platformă. De aceea BLOC 0 le
+listează pe amândouă, nefiltrate: dacă terenul apare doar la „legat vechi", pagina de
+împărțire nu-l va găsi și trebuie pus la favorite.
+
+Un grup poate avea mai multe favorite. Dacă ies două, BLOC 1 se oprește cu „more than one
+row returned by a subquery"; atunci se scrie `teren_id` de mână. BLOC 0 arată terenul ales,
+cu id și titlu, și se citește înainte de BLOC 1.
+
 Cele trei cifre de cost (**euro pe mp Sd**, **prețul terenului**, **procentul subsolului**)
 sunt lucruri pe care le tastează arhitectul în Urban Analyzer. **Nu sunt în CSV**, care
 exportă rezultate, nu intrări. Se pot scoate înapoi din formula UA:
@@ -42,6 +71,20 @@ costConstr = (Sd − Sc_parcaje) × costMp
 
 La Galvani au ieșit exact: 1.200 €/mp, 830.000 € terenul, subsolul la 70%. Dacă nu ies
 cifre rotunde, întreabă, nu ghici.
+
+### Același teren, două grupuri
+
+Se poate, și nu cere nimic special: se copiază configurația, se schimbă `grup_cauta` și
+`teren_id`, **titlul rămâne același**. Analiza e a perechii (grup, teren), deci un teren
+analizat pentru două grupuri dă două analize care poartă firesc același nume.
+
+⚠️ **Din 2 septembrie 2026** blocurile generate se leagă de analiză prin **titlu ȘI grup**.
+Înainte se legau doar prin titlu, iar al doilea import ar fi scris variante și în analiza
+primului grup, fără să se plângă nimic: patru variante cu nume duplicate sunt perfect
+legale în schemă. Nu rula un import de-al doilea grup cu o versiune veche a scriptului.
+
+Alternativa ar fi fost să lipim o etichetă pe titlu ca să iasă unic, adică să stricăm ce
+citește omul pe pagină ca să-i fie comod uneltei.
 
 ---
 
