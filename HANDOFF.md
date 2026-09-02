@@ -1,6 +1,58 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 1 septembrie 2026, seara** — **prima analiză urbanistică reală e în
+> **⏭️ ULTIMA SESIUNE: 2 septembrie 2026** — **Galvani e și pe Parcul Circului (21 de membri
+> reali). Superadminul vede împărțirea oricărui grup: zece politici noi. ✅ COMIS (`ec5ca6c`,
+> `c2fa56f`), ÎMPINS, DEPLOYAT din cPanel și confirmat live de Lucian.**
+>
+> Detaliile întregi: `handoff/20260902 - handoff-circului-si-superadmin.md`.
+>
+> **🔴 SINGURUL LUCRU CARE CERE O DECIZIE ACUM.** Handoff-ul de ieri recomanda, pentru Parcul
+> Circului, **doar setul P+5**, fiindcă membrii reali ar vedea parterurile stricate din P+4. Au
+> intrat amândouă seturile: recomandarea aceea n-a fost citită înainte de execuție. Lucian
+> fusese avertizat despre cele trei `NIVEL DEPĂȘIT` și despre cum arată în pagină („min 66 /
+> max 58"), dar nu și despre recomandare. **21 de oameni văd trei variante cu un apartament
+> imposibil la parter.** Se șterg cele patru variante P+4 (cascada duce nivelurile și
+> apartamentele) sau se lasă până vine corectura de la Liviu. **Lecția: citește handoff-ul
+> înainte de a executa un task pe care handoff-ul îl descrie.**
+>
+> **SUPERADMINUL VEDE ÎMPĂRȚIREA.** Zece politici de SELECT, rulate și verificate
+> (`db_schema/superadmin-vede-impartirea/`). Zece, nu douăsprezece: `grup_checklist_notes` și
+> `grup_membri` aveau deja acces, iar o politică în plus pe o tabelă care are acces nu e
+> inofensivă, cele permisive se combină cu OR. **Al patrulea caz al aceluiași tipar** după
+> `grup_checklist_files`, `grup_anunturi` și butonul de ștergere a anunțurilor. Doar SELECT:
+> vede, nu mișcă, și nu primește butoanele fondatorului.
+> ⚠️ **DE COMUNICAT UTILIZATORILOR:** `grup_membru_preferinte` conține bugete.
+>
+> **CAPCANĂ NOUĂ, A COSTAT DOUĂ RUNDE.** Sunt **două** tabele care leagă un teren de un grup.
+> `grup_terenuri` e goală la grupurile reale; cea vie e **`terenuri_likes_grupuri`**. Cine se
+> uită în cea greșită vede zero rânduri, fără eroare, și crede că terenul nu e în platformă.
+> Plus: **titlul unui teren nu conține neapărat adresa**, iar în platformă sunt două terenuri
+> diferite cu „Rond Coșbuc" în titlu, unul scris cu „ş" cu sedilă.
+>
+> **CAPCANĂ DE DEPLOY, A DOUA OARĂ.** Prima urcare în cPanel n-a dus JS-ul. Simptomul arată
+> identic cu „politicile nu merg" și „funcția nu răspunde"; s-au verificat degeaba amândouă.
+> **Proba care lămurește din prima: deschide `https://apartamentual.ro/js/<fișier>.js` și caută
+> un cuvânt din codul nou.** De făcut ASTA înainte de orice diagnostic pe bază.
+>
+> **DUBLURA DE LA BOSIANU, ȘI DE CE N-A FOST PRINSĂ.** BLOC 2 a intrat de două ori: 4 variante
+> în loc de 2, iar blocurile 3 și 4, rulate o dată peste ele, au dat 16 niveluri și 24 de
+> apartamente, fiindcă se leagă de variante pe NUME. Nimic nu s-a plâns: nume duplicate sunt
+> legale în schemă. **BLOC 5 nu l-a prins fiindcă grupa tot pe nume**, adică verificarea se uita
+> la aceleași chei pe care se legau inserările. Reparat: plasă anti-dublare pe toate cele patru
+> blocuri (rulate a doua oară scriu `INSERT 0 0`), gruparea pe `va.id`, secțiune `ANALIZĂ
+> DUBLĂ`, și blocurile se leagă acum de analiză prin titlu **ȘI** grup.
+>
+> **RÂND NOU SUS PE PAGINA DE ÎMPĂRȚIRE:** toate costurile sunt calculate la 1.200 €/mp
+> construit. Cifra se citește din analiză, nu e scrisă de mână.
+>
+> **⏭️ BOSIANU 32 E ÎN AȘTEPTARE:** Liviu mai lucrează la analiză, erau probleme, trimite
+> finalul. Configurația și SQL-ul sunt gata; se schimbă calea CSV și se regenerează, o comandă.
+> **De dus la Liviu:** în exportul din 1 septembrie, varianta V2 cere 9 locuri de parcare și
+> așază 7, deci nu se poate autoriza.
+>
+> ---
+>
+> **⏭️ SESIUNEA DINAINTE: 1 septembrie 2026, seara** — **prima analiză urbanistică reală e în
 > platformă. Blocantul de pe 30 august a căzut. Migrația 12 rulată. 🔴 NECOMIS.**
 >
 > Detaliile întregi: `handoff/20260901 - handoff-prima-analiza-galvani.md`.
