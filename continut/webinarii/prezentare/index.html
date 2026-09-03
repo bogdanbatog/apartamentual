@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Construcția colaborativă · webinar ApartamenTUal</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   CULORILE
+   Paleta e cea a logoului „TU" din frontend/js/nav.js:521. Pe site cele șase
+   culori se rotesc la 2,4 secunde; aici NU se mișcă nimic. Fiecare capitol are
+   o culoare fixă, iar schimbarea se vede doar când treci la capitolul următor.
+
+   ⚠️ Cărămiziul #c2604a, prima culoare din paletă, e scos dinadins (decizia lui
+   Lucian, 3 septembrie 2026): e culoarea pe care o vede peste tot și îi dă
+   senzația de șablon.
+
+   ⚠️ Fiecare capitol are DOUĂ nuanțe, și nu sunt interschimbabile:
+     --viu     bulina, cifra capitolului, liniile. Contrast mic, dar nu poartă text.
+     --inchis  titlul și orice cuvânt colorat. Trece pragul de 4,5:1 pe crem.
+   Măsurat pe #faf8f3: ocrul viu e la 2,62:1, adică invizibil pe un proiector.
+   Nu folosi --viu pe text, oricât de bine arată pe monitorul tău.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --crem:#faf8f3;
+  --cerneala:#1a1a1a;
+  --gri:#6b6b6b;
+  --linie:#e8e3d8;
+  --viu:#7a9a90; --inchis:#5a776e;          /* coperta: verde-cenușiu */
+}
+.cap1{ --viu:#5e8a6c; --inchis:#53795f; }   /* cine sunt, de ce            */
+.cap2{ --viu:#5a7196; --inchis:#5a7196; }   /* nu e un model nou           */
+.cap3{ --viu:#b8965c; --inchis:#896c3c; }   /* cum am început              */
+.cap4{ --viu:#a76782; --inchis:#9f5c79; }   /* elementele procesului       */
+.cap5{ --viu:#5e8a6c; --inchis:#53795f; }   /* final: revine prima culoare */
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; background:#2a2a2a; }
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  color:var(--cerneala);
+  -webkit-font-smoothing:antialiased;
+  /* Slide-ul se centrează în fereastră. Fără asta, el se așeza sus, iar marginea
+     de jos împingea pagina în derulare: în ecran complet se vedea o bară de
+     scroll și titlul ieșea tăiat. */
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ── Un slide = o foaie 16:9 ──────────────────────────────────────────────
+   Totul se scalează din --u, care e 1% din lățimea slide-ului. Așa aceeași
+   pagină arată la fel pe laptop, pe proiector și în PDF, fără media queries. */
+/* ⚠️ Cei doi factori NU sunt 100vw și 177.78vh, deși ăia ar da exact 16:9 pe
+   toată fereastra. Sunt 96vw și 163.5vh, adică 16:9 înscris în 96% din lățime
+   și 92% din înălțime, ca să rămână loc pentru rama întunecată și pentru bara
+   de navigare. Cu valorile exacte, slide-ul umple fix fereastra și orice pixel
+   de margine împinge pagina în derulare. */
+.slide{
+  --u:calc(min(96vw, 163.5vh) / 100);
+  width:calc(var(--u) * 100);
+  height:calc(var(--u) * 56.25);
+  background:var(--crem);
+  margin:0 auto;
+  padding:calc(var(--u) * 5) calc(var(--u) * 6.5);
+  display:none;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 calc(var(--u) * .6) calc(var(--u) * 2) rgba(0,0,0,.35);
+}
+.slide.activ{ display:flex; }
+
+/* ── Antetul de capitol: bulina, numărul, numele ─────────────────────────── */
+.antet{
+  display:flex; align-items:center; gap:calc(var(--u) * 1.2);
+  font-size:calc(var(--u) * 1.6);
+  letter-spacing:.09em; text-transform:uppercase;
+  color:var(--gri);
+  margin-bottom:calc(var(--u) * 2.2);
+}
+.bulina{
+  width:calc(var(--u) * 1.3); height:calc(var(--u) * 1.3);
+  border-radius:50%; background:var(--viu); flex:none;
+}
+.antet b{ color:var(--inchis); font-weight:600; }
+
+h1{
+  font-size:calc(var(--u) * 6.4); line-height:1.1; font-weight:600;
+  margin:0 0 calc(var(--u) * 2); letter-spacing:-.01em;
+}
+h2{
+  font-size:calc(var(--u) * 3.6); line-height:1.15; font-weight:600;
+  color:var(--inchis);
+  margin:0 0 calc(var(--u) * 1); letter-spacing:-.01em;
+}
+.subtitlu{
+  font-size:calc(var(--u) * 1.9); color:var(--gri); font-weight:400;
+  margin:0 0 calc(var(--u) * 2.2);
+}
+p{ font-size:calc(var(--u) * 1.9); line-height:1.45; margin:0 0 calc(var(--u) * 1.3); }
+
+/* Lista cu bulină în culoarea capitolului. Textul rămâne cerneală: e text mic,
+   iar în culoarea capitolului n-ar avea contrast pe proiector. */
+ul{ list-style:none; margin:0; padding:0; }
+ul li{
+  font-size:calc(var(--u) * 1.9); line-height:1.4;
+  margin:0 0 calc(var(--u) * 1.1); padding-left:calc(var(--u) * 2.7);
+  position:relative;
+}
+ul li::before{
+  content:''; position:absolute; left:0; top:calc(var(--u) * .95);
+  width:calc(var(--u) * 1.1); height:calc(var(--u) * 1.1);
+  border-radius:50%; background:var(--viu);
+}
+strong{ font-weight:650; color:var(--cerneala); }
+
+.corp{ flex:1; display:flex; flex-direction:column; min-height:0; }
+.doua{
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:minmax(0,1fr);
+  gap:calc(var(--u) * 4); flex:1; min-height:0;
+}
+.coloana{ min-height:0; display:flex; flex-direction:column; }
+.doua ul li{ font-size:calc(var(--u) * 1.8); margin-bottom:calc(var(--u) * .95); }
+.doua p{ font-size:calc(var(--u) * 1.85); }
+.coloana .figuri{ min-height:0; }
+.coloana figure{ min-height:0; }
+.coloana h3{
+  font-size:calc(var(--u) * 2.1); font-weight:600; color:var(--inchis);
+  margin:0 0 calc(var(--u) * 1.4);
+  padding-bottom:calc(var(--u) * .9); border-bottom:calc(var(--u) * .25) solid var(--viu);
+}
+
+/* ── Imagini ──────────────────────────────────────────────────────────────── */
+.figuri{ display:flex; gap:calc(var(--u) * 1.6); flex:1; min-height:0; }
+.figuri > *{ min-height:0; }
+.figuri.sus{ align-items:flex-start; }
+figure{ margin:0; flex:1; min-width:0; display:flex; flex-direction:column; }
+figure img{
+  width:100%; flex:1; min-height:0; object-fit:cover;
+  border-radius:calc(var(--u) * .5); background:#eceae4;
+}
+figure.intreg img{ object-fit:contain; }
+figcaption{
+  font-size:calc(var(--u) * 1.35); color:var(--gri); line-height:1.35;
+  margin-top:calc(var(--u) * .8);
+  /* Doua randuri rezervate din start. Fara asta, o legenda care se rupe pe doua
+     randuri scurteaza imaginea de deasupra ei, iar sirul de poze iese cu bazele
+     la inaltimi diferite. Se vede imediat pe slide-ul cu patru imagini. */
+  min-height:calc(var(--u) * 3.8);
+}
+.figuri figure:only-child figcaption{ min-height:0; }
+.plin{ position:absolute; inset:0; }
+.plin img{ width:100%; height:100%; object-fit:cover; }
+
+/* ── Cifra mare de pe slide-ul de cost ────────────────────────────────────── */
+.cifra{
+  font-size:calc(var(--u) * 5.8); font-weight:650; color:var(--inchis);
+  line-height:1; margin:calc(var(--u) * .6) 0 calc(var(--u) * .5);
+}
+.avertisment{
+  font-size:calc(var(--u) * 1.9); line-height:1.4;
+  border-left:calc(var(--u) * .5) solid var(--viu);
+  padding:calc(var(--u) * .4) 0 calc(var(--u) * .4) calc(var(--u) * 2);
+  margin:0 0 calc(var(--u) * 1.2);
+}
+.citat{
+  font-size:calc(var(--u) * 2.2); line-height:1.3; color:var(--inchis);
+  font-weight:500; margin:calc(var(--u) * 1.4) 0 calc(var(--u) * .5);
+}
+
+/* ── Subsol: sursa foto, numărul paginii ──────────────────────────────────── */
+.sursa{
+  font-size:calc(var(--u) * 1.25); color:#9a9a9a; line-height:1.4;
+  margin-top:calc(var(--u) * 1.4);
+}
+.numar{
+  position:absolute; right:calc(var(--u) * 3); bottom:calc(var(--u) * 2.4);
+  font-size:calc(var(--u) * 1.35); color:#b4b0a8;
+}
+
+/* ── Coperta și finalul ───────────────────────────────────────────────────── */
+.centrat{ justify-content:center; }
+.centrat h1{ font-size:calc(var(--u) * 5.8); max-width:92%; }
+.marca{
+  display:flex; align-items:center; gap:calc(var(--u) * 1.4);
+  font-size:calc(var(--u) * 2); color:var(--gri);
+  margin-top:calc(var(--u) * 4);
+}
+.marca .bulina{ width:calc(var(--u) * 1.6); height:calc(var(--u) * 1.6); }
+.marca b{ color:var(--cerneala); font-weight:600; }
+.marca b i{ color:var(--inchis); font-style:normal; }
+
+/* ── Bara de navigare, doar pe ecran ──────────────────────────────────────── */
+#bara{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:14px;
+  display:flex; align-items:center; gap:14px;
+  background:rgba(20,20,20,.82); color:#e8e3d8;
+  padding:8px 16px; border-radius:999px; font-size:13px;
+  backdrop-filter:blur(6px); z-index:10;
+}
+#bara button{
+  background:none; border:1px solid #55524c; color:#e8e3d8;
+  width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px; line-height:1;
+}
+#bara button:hover{ border-color:#e8e3d8; }
+#bara .ajutor{ color:#8e8a83; }
+
+@media print{
+  @page{ size:297mm 167mm; margin:0; }
+  html,body{ background:#fff; }
+  /* ⚠️ Pe ecran `body` e flex, ca slide-ul activ sa stea centrat in fereastra.
+     La tipar asta e o catastrofa tacuta: cele 25 de slide-uri devin 25 de
+     elemente pe ACELASI rand flex, se suprapun, iar `page-break-after` nu are
+     niciun efect pe un element de flex. Rezultatul e un PDF de o pagina cu tot
+     textul unul peste altul. Inapoi la `block` inainte de orice altceva. */
+  body{ display:block; min-height:0; }
+  #bara{ display:none; }
+  .slide{
+    display:flex !important;
+    --u:2.97mm;
+    width:297mm; height:167mm;
+    margin:0; box-shadow:none;
+    page-break-after:always; break-after:page;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ 1. COPERTĂ ═══════════════════════════════════════════════════════════ -->
+<section class="slide centrat activ">
+  <h1>Construcția colaborativă:<br>cum funcționează un grup<br>care își construiește blocul</h1>
+  <p class="subtitlu">Webinar, ediția a doua · 3 septembrie 2026</p>
+  <div class="marca">
+    <span class="bulina"></span>
+    <span><b>apartamen<i>TU</i>al</b> · LTFB Studio · apartamentual.ro</span>
+  </div>
+</section>
+
+<!-- ══ CAPITOLUL 1 · verde salvie ═══════════════════════════════════════════ -->
+
+<!-- REPARAȚIA 1: titlul era „Cine suntem", dar textul vorbea doar la persoana I
+     singular. Acum sunt doi oameni, câte o coloană fiecare, iar numele stau ca
+     titlu de coloană, ca să nu înceapă fiecare rând cu „Lucian Luță este".
+     Rândul de jos e la persoana I fiindcă îl spune cel care prezintă, și e
+     singurul loc unde asta sună firesc. -->
+<section class="slide cap1">
+  <div class="antet"><span class="bulina"></span><b>Cine suntem</b></div>
+  <div class="corp">
+    <h2>Cine suntem</h2>
+    <p class="subtitlu">LTFB Studio, birou de arhitectură cu aproape 20 de ani de experiență în clădiri rezidențiale</p>
+    <div class="doua">
+      <div class="coloana">
+        <h3>Lucian Luță</h3>
+        <p>Arhitect. Co-fondator al LTFB Studio și al platformei <strong>ApartamenTUal</strong>, care sprijină grupurile care își construiesc propriile apartamente, direct, fără intermediar.</p>
+      </div>
+      <div class="coloana">
+        <h3>Liviu Fabian</h3>
+        <p>Arhitect. Co-fondator al LTFB Studio și al platformei <strong>ApartamenTUal</strong>. Co-autor al proiectului <strong>Județului Housing</strong>, blocul despre care o să vorbim astăzi.</p>
+      </div>
+    </div>
+    <p class="citat">Blocul de pe strada Județului l-am proiectat împreună. Eu, Lucian, sunt și coproprietar acolo, așa că vă povestesc despre model din ambele poziții: ca arhitect și ca beneficiar.</p>
+  </div>
+  <div class="numar">2</div>
+</section>
+
+<section class="slide cap1">
+  <div class="antet"><span class="bulina"></span><b>Cine suntem</b></div>
+  <div class="corp">
+    <h2>LTFB Studio</h2>
+    <p class="subtitlu">câteva dintre proiectele noastre</p>
+    <div class="figuri">
+      <figure><img src="img/ltfb-timisoara.jpg" alt="Locuințe colective, Timișoara"><figcaption>Locuințe colective, Timișoara</figcaption></figure>
+      <figure><img src="img/ltfb-galvani.jpg" alt="Locuință, strada Galvani, București"><figcaption>Locuință, Galvani, București</figcaption></figure>
+      <figure><img src="img/ltfb-dante.jpg" alt="Extindere liceu Dante Alighieri"><figcaption>Extindere liceu Dante Alighieri</figcaption></figure>
+      <figure><img src="img/ltfb-bacau-curte.jpg" alt="Locuințe colective, Bacău"><figcaption>Locuințe colective, Bacău</figcaption></figure>
+    </div>
+  </div>
+  <div class="numar">3</div>
+</section>
+
+<section class="slide cap1">
+  <div class="antet"><span class="bulina"></span><b>De ce</b></div>
+  <div class="corp">
+    <h2>De ce sprijinim construcția colaborativă</h2>
+    <p>Suntem arhitecți și suntem formați să căutăm modalități prin care crește calitatea locuirii. Astăzi, apartamentele care oferă o calitate bună a locuirii sunt foarte scumpe și vor continua să se scumpească.</p>
+    <ul>
+      <li>un cost mai apropiat de <strong>costul real al construcției</strong></li>
+      <li>acces la un teren dintr-o zonă preferată, <strong>împărțind costul lui</strong></li>
+      <li>mai puțini vecini și, dacă vă doriți, o mică comunitate</li>
+      <li>apartamentul <strong>configurat după nevoile fiecărei familii</strong></li>
+    </ul>
+  </div>
+  <div class="numar">4</div>
+</section>
+
+<section class="slide cap1">
+  <div class="antet"><span class="bulina"></span><b>De ce</b></div>
+  <div class="corp">
+    <h2>Spații care creează comunitate</h2>
+    <p class="subtitlu">din proiectele noastre</p>
+    <div class="figuri">
+      <figure><img src="img/ltfb-scoala-muzica.jpg" alt="Școala de Muzică nr. 5, București"><figcaption>Școala de Muzică nr. 5, București</figcaption></figure>
+      <figure><img src="img/ltfb-scoala-spatiu.jpg" alt="Spațiul comunității din Școala de Muzică"><figcaption>Spațiul comunității</figcaption></figure>
+      <figure><img src="img/ltfb-scoala-concert.jpg" alt="Concert în spațiul comunității"><figcaption>Același spațiu, în timpul unui concert</figcaption></figure>
+      <figure><img src="img/ltfb-bacau-curte-2.jpg" alt="Curtea comună, locuințe colective Bacău"><figcaption>Curtea comună, Bacău</figcaption></figure>
+    </div>
+  </div>
+  <div class="numar">5</div>
+</section>
+
+<!-- ══ CAPITOLUL 2 · albastru prăfuit ═══════════════════════════════════════ -->
+
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Nu este un model nou</b></div>
+  <div class="corp">
+    <h2>Nu este un model nou</h2>
+    <p>Se numește <strong>construcție colaborativă</strong>. Modelul de care ne-am apropiat cel mai mult la Județului Housing se numește <strong>Baugruppen</strong> și este predominant în Germania.</p>
+    <div class="doua">
+      <div class="coloana">
+        <h3>Baugruppen</h3>
+        <p>Colaborare temporară, pentru a construi. Fiecare familie rămâne proprietară pe apartamentul ei. Spațiile comune sunt puține și alese.</p>
+      </div>
+      <div class="coloana">
+        <h3>Co-housing</h3>
+        <p>Comunitate permanentă, cu spații comune extinse, adesea în regim de închiriere. <strong>Nu este modelul nostru.</strong></p>
+      </div>
+    </div>
+  </div>
+  <div class="numar">6</div>
+</section>
+
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Un exemplu din Berlin</b></div>
+  <div class="corp">
+    <h2>Ausbauhaus Neukölln, Berlin, 2014</h2>
+    <p class="subtitlu">Praeger Richter Architekten · 24 de unități de locuit și de lucru · 3.600 mp construiți · buget cca 3,5 mil. €</p>
+    <div class="figuri">
+      <figure class="intreg"><img src="img/berlin-exterior.jpg" alt="Ausbauhaus Neukölln, fațada"></figure>
+      <figure class="intreg"><img src="img/berlin-loggii.jpg" alt="Ausbauhaus Neukölln, loggiile"></figure>
+    </div>
+    <p class="sursa">Un grup de familii, constituit ca Baugruppe, pe un teren de 1.400 mp. Deutscher Bauherrenpreis 2018. Foto: Andreas Friedel și Christoph Naumann, prin amabilitatea Praeger Richter Architekten.</p>
+  </div>
+  <div class="numar">7</div>
+</section>
+
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Un exemplu din Berlin</b></div>
+  <div class="corp">
+    <h2>Conceptul: un raft</h2>
+    <p class="subtitlu">structură comună, interior liber</p>
+    <div class="doua">
+      <div class="coloana">
+        <ul>
+          <li>structură din elemente prefabricate, cu planșee de deschidere mare</li>
+          <li><strong>niciun perete portant</strong> în interiorul apartamentelor</li>
+          <li>fațadă cu ritm regulat de goluri: pereții interiori pot fi aproape oriunde</li>
+          <li>trei metri înălțime liberă și o loggie spre sud la fiecare unitate</li>
+          <li>prefabricarea a scurtat execuția cu circa 12 luni</li>
+        </ul>
+      </div>
+      <div class="coloana">
+        <figure class="intreg"><img src="img/berlin-izometrie.jpg" alt="Izometrie conceptuală"><figcaption>Desen: Praeger Richter Architekten</figcaption></figure>
+      </div>
+    </div>
+  </div>
+  <div class="numar">8</div>
+</section>
+
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Un exemplu din Berlin</b></div>
+  <div class="corp">
+    <h2>24 de apartamente, niciunul la fel</h2>
+    <div class="doua">
+      <div class="coloana">
+        <ul>
+          <li>fiecare familie și-a configurat propriul apartament <strong>în același cadru</strong></li>
+          <li>la finisaje, trei pachete la alegere: apartament finisat, variantă minimală sau preluare la roșu, pentru cine voia să facă singur</li>
+          <li>aproximativ 80% i-au angajat pe aceiași arhitecți și pentru finisaje</li>
+          <li>recompartimentarea ulterioară rămâne simplă: structura nu intră în apartamente</li>
+        </ul>
+        <p class="citat">„Puțină co-decizie la structură, multă libertate în interior."</p>
+        <p class="sursa">regula arhitecților</p>
+      </div>
+      <div class="coloana">
+        <figure class="intreg"><img src="img/berlin-planuri.jpg" alt="Grila de planuri, 24 de apartamente"></figure>
+      </div>
+    </div>
+  </div>
+  <div class="numar">9</div>
+</section>
+
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Un exemplu din Berlin</b></div>
+  <div class="corp">
+    <h2>Cum s-au asociat și cum s-au finanțat</h2>
+    <p class="subtitlu">răspunsurile primite de la arhitecții proiectului</p>
+    <div class="doua">
+      <div class="coloana">
+        <h3>Asocierea</h3>
+        <ul>
+          <li>membrii încheie între ei contractul de societate (GbR), iar terenul este cumpărat <strong>de grup ca întreg</strong>, nu de fiecare pe cota lui</li>
+          <li>împărțirea pe apartamente se face abia <strong>după obținerea autorizației</strong> de construire</li>
+          <li>dacă un membru vrea să iasă, așteaptă până intră altul care îi preia obligațiile și costurile acumulate</li>
+        </ul>
+      </div>
+      <div class="coloana">
+        <h3>Finanțarea</h3>
+        <ul>
+          <li>credite individuale, dar <strong>toți la aceeași bancă</strong></li>
+          <li>motivul: până la împărțire există o singură carte funciară, iar orice bancă cere rangul întâi pe ea</li>
+          <li>în unele proiecte, un consultant financiar independent verifică în avans capacitatea fiecărui membru</li>
+          <li>terenul se acoperă din aport propriu sau prin aceeași bancă; în Germania există bănci specializate</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="numar">10</div>
+</section>
+
+<!-- REPARAȚIA 2: avertismentul stă ACUM DEASUPRA cifrei și la aceeași greutate.
+     Motivul: cifra e cel mai fotografiabil lucru din prezentare. Într-o captură
+     de ecran pleacă singură, fără contextul de dedesubt. -->
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Un exemplu din Berlin</b></div>
+  <div class="corp">
+    <h2>Costul, în Germania, în 2014</h2>
+    <p class="avertisment"><strong>Alt an, altă scară, altă piață.</strong> Cifra de mai jos este din Berlin, acum peste zece ani. Nu se compară direct cu prețurile de azi din București și nu este o estimare pentru un proiect de la noi.</p>
+    <div class="cifra">1.000 - 1.150 €/mp</div>
+    <p class="subtitlu">de la, în funcție de pachetul de finisare ales</p>
+    <ul>
+      <li>doar structură și instalații (categoriile de cost 300 și 400)</li>
+      <li><strong>fără</strong> teren, amenajări exterioare, proiectare, taxe sau finanțare</li>
+      <li>nivel de cost comparabil cu al locuințelor sociale subvenționate din Germania, obținut însă cu trei metri înălțime, loggii și planuri libere</li>
+    </ul>
+  </div>
+  <div class="numar">11</div>
+</section>
+
+<section class="slide cap2">
+  <div class="antet"><span class="bulina"></span><b>Nu este un model nou</b></div>
+  <div class="corp">
+    <h2>Același model, alte scări</h2>
+    <div class="figuri">
+      <figure><img src="img/alt-brutopia.jpg" alt="Brutopia, Bruxelles"><figcaption><strong>Brutopia, Bruxelles.</strong> 29 de familii, două volume în jurul unei grădini comune de 757 mp. Apartamentele au fost predate la gri, ca să rămână accesibile; fiecare familie și-a ales mărimea ferestrelor și a terasei.</figcaption></figure>
+      <figure><img src="img/alt-r50.jpg" alt="R50, Berlin"><figcaption><strong>R50, Berlin.</strong> 19 apartamente, un atelier și spații comune. Terenul a fost obținut de la oraș prin concurs de concept, nu prin licitație de preț. Balcon continuu care leagă apartamentele la fiecare etaj.</figcaption></figure>
+      <figure><img src="img/alt-scarwafa.jpg" alt="Scarwafa, Amsterdam"><figcaption><strong>Scarwafa, Amsterdam.</strong> Trei familii prietene, trei parcele alăturate, un limbaj arhitectural comun și detalii identice, pentru economie la execuție, dar trei case diferite, pe nevoile fiecărei familii.</figcaption></figure>
+    </div>
+    <p class="sursa">Foto: stekke + fraas (Brutopia) · ifau + Heide &amp; von Beckerath (R50) · Krft (Scarwafa)</p>
+  </div>
+  <div class="numar">12</div>
+</section>
+
+<!-- ══ CAPITOLUL 3 · ocru ═══════════════════════════════════════════════════ -->
+
+<section class="slide cap3">
+  <div class="antet"><span class="bulina"></span><b>Cum am început</b></div>
+  <div class="corp">
+    <h2>Cum am început</h2>
+    <p class="subtitlu">de la propria noastră nevoie</p>
+    <div class="doua">
+      <div class="coloana">
+        <ul>
+          <li>căutam noi înșine o locuință mai bună, la un cost corect</li>
+          <li>am deschis o pagină de Facebook și am început să căutăm terenuri</li>
+          <li>pentru fiecare teren <strong>făceam o analiză și o publicam</strong></li>
+          <li>s-au adunat oameni interesați; din ei a rămas un grup nucleu</li>
+          <li>am găsit terenul de pe strada Județului, iar o parte din grup a rămas pe el și a construit</li>
+        </ul>
+      </div>
+      <div class="coloana">
+        <figure class="intreg"><img src="img/fb-analiza-preliminara.jpg" alt="O analiză preliminară publicată pe Facebook"><figcaption>Așa arăta o analiză preliminară, la început.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+  <div class="numar">13</div>
+</section>
+
+<section class="slide cap3">
+  <div class="antet"><span class="bulina"></span><b>Cum am început</b></div>
+  <div class="corp">
+    <h2>Oamenii scriau chiar sub anunțuri</h2>
+    <div class="figuri">
+      <figure class="intreg"><img src="img/fb-comentarii-01.jpg" alt="Comentarii sub un anunț de teren"></figure>
+      <figure class="intreg"><img src="img/fb-comentarii-02.jpg" alt="Continuarea firului de comentarii"></figure>
+    </div>
+    <p class="sursa">Numele și fotografiile au fost estompate.</p>
+  </div>
+  <div class="numar">14</div>
+</section>
+
+<section class="slide cap3">
+  <div class="antet"><span class="bulina"></span><b>Cum am început</b></div>
+  <div class="corp">
+    <h2>Terenul de pe strada Județului</h2>
+    <div class="figuri">
+      <figure><img src="img/teren-judetului.jpg" alt="Terenul înainte de construcție"><figcaption>Terenul, înainte de construcție</figcaption></figure>
+      <figure class="intreg"><img src="img/analiza-detaliata.jpg" alt="O variantă din analiza detaliată"><figcaption>O variantă din analiza detaliată, făcută înainte de contractul de asociere</figcaption></figure>
+    </div>
+  </div>
+  <div class="numar">15</div>
+</section>
+
+<section class="slide cap3">
+  <div class="antet"><span class="bulina"></span><b>Cum am început</b></div>
+  <div class="corp">
+    <h2>Ce a rezultat</h2>
+    <div class="figuri">
+      <figure><img src="img/randare-strada.jpg" alt="Randare, fațada dinspre stradă"><figcaption>Randare: fațada dinspre stradă</figcaption></figure>
+      <figure><img src="img/randare-curte.jpg" alt="Randare, curtea comună"><figcaption>Randare: curtea comună și spațiul comun de la parter</figcaption></figure>
+    </div>
+    <p class="sursa">Câteva familii, un teren cumpărat împreună, un bloc cu apartamente în proprietate individuală și câteva spații comune alese: terasa circulabilă, curtea și un spațiu comun de circa 30 mp la parter.</p>
+  </div>
+  <div class="numar">16</div>
+</section>
+
+<!-- REPARAȚIA 3, cea mai importantă: emailul a promis „cum se formează un grup
+     și cum intri într-unul", iar prezentarea povestea doar cum am început NOI,
+     în 2019, cu o pagină de Facebook. Slide-ul ăsta face puntea de la povestea
+     noastră la ce poate face omul care se uită acum la ecran.
+     ⚠️ Tot ce scrie aici trebuie să fie adevărat despre platformă:
+        grupurile sunt DOAR cu aprobarea fondatorului (nu există grupuri deschise),
+        mărimea e 5-10 familii, și NU există mesagerie, doar invitații. -->
+<section class="slide cap3">
+  <div class="antet"><span class="bulina"></span><b>Cum am început</b></div>
+  <div class="corp">
+    <h2>Cum se formează un grup astăzi</h2>
+    <p class="subtitlu">ce s-a schimbat față de pagina de Facebook</p>
+    <div class="doua">
+      <div class="coloana">
+        <h3>Cum se naște un grup</h3>
+        <ul>
+          <li>îți completezi profilul cu orașul și <strong>zonele</strong> în care ai vrea să locuiești</li>
+          <li>vezi terenurile din zonele tale și le salvezi pe cele care ți-ar plăcea; ceilalți văd că e <strong>cineva interesat</strong> de un teren, iar grupurile se nasc exact din întâlnirile astea</li>
+          <li>oricine poate crea un grup, pe un teren sau pe o zonă</li>
+        </ul>
+      </div>
+      <div class="coloana">
+        <h3>Cum intri într-unul</h3>
+        <ul>
+          <li>toate grupurile sunt <strong>cu aprobare</strong>: ceri să intri, iar cel care l-a fondat decide</li>
+          <li>mărimea la care ne uităm este de <strong>5 până la 10 familii</strong></li>
+          <li>în grup găsești pașii de urmat, jurnalul comun și analiza terenului, pe care o pot edita toți membrii</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="numar">17</div>
+</section>
+
+<!-- ══ CAPITOLUL 4 · prună ══════════════════════════════════════════════════ -->
+
+<section class="slide cap4">
+  <div class="antet"><span class="bulina"></span><b>Elementele procesului · 1</b></div>
+  <div class="corp">
+    <h2>Instrumentul de asociere</h2>
+    <div class="doua">
+      <div class="coloana">
+        <ul>
+          <li>contract de asociere redactat cu avocat <strong>înainte de cumpărarea terenului</strong> și legalizat la notar</li>
+          <li>în el intră tot: cotele indivize, pașii, modalitățile de plată, procedura de retragere, planurile fiecărui apartament, parcările, spațiile comune</li>
+          <li>în Germania, echivalentul este GbR, iar terenul este cumpărat de asociere ca întreg</li>
+          <li>la noi nu există încă o asociere care să poată cumpăra terenul; cooperativa de locuințe există în lege, dar fără norme de aplicare</li>
+        </ul>
+        <p class="citat">Coeziunea grupului nu vine din forma de proprietate, ci din contract. De aceea se scrie înainte, nu după ce apare problema.</p>
+      </div>
+      <div class="coloana">
+        <figure class="intreg"><img src="img/santier-01.jpg" alt="Șantierul de pe strada Județului"></figure>
+      </div>
+    </div>
+  </div>
+  <div class="numar">18</div>
+</section>
+
+<section class="slide cap4">
+  <div class="antet"><span class="bulina"></span><b>Elementele procesului · 2</b></div>
+  <div class="corp">
+    <h2>Modalitățile de plată</h2>
+    <div class="doua">
+      <div class="coloana">
+        <ul>
+          <li>terenul se cumpără din aport propriu; băncile nu finanțează, în practică, achiziția terenului de către un grup</li>
+          <li>construcția se poate finanța prin credite individuale, <strong>de preferat la aceeași bancă</strong></li>
+          <li>la Județului Housing doar unul dintre membri a făcut un credit, separat de proiect; restul am plătit pe situații de lucrări, din aport propriu</li>
+          <li>plățile etapizate urmează execuția: <strong>se plătește ce e executat și facturat</strong></li>
+        </ul>
+      </div>
+      <div class="coloana">
+        <figure class="intreg"><img src="img/santier-05.jpg" alt="Execuția, în etape"></figure>
+      </div>
+    </div>
+  </div>
+  <div class="numar">19</div>
+</section>
+
+<section class="slide cap4">
+  <div class="antet"><span class="bulina"></span><b>Elementele procesului · 3</b></div>
+  <div class="corp">
+    <h2>Tipul de contractare a execuției</h2>
+    <div class="doua">
+      <div class="coloana">
+        <h3>Antrepriză generală</h3>
+        <p>Un singur constructor pentru tot. Grupul alege o dată, la început, dintr-un set limitat de opțiuni, cunoscând prețul, și merge mai departe. Mai puține discuții, mai puțină flexibilitate.</p>
+      </div>
+      <div class="coloana">
+        <h3>Pe tipuri de lucrări</h3>
+        <p>Contractare separată, pe etape. Mai mult control și, uneori, costuri mai mici, dar fiecare alegere se face abia când ajungi la faza ei, cu ofertele și prețurile de atunci. Înseamnă timp și discuții în grup pe costuri, la fiecare etapă. <strong>Așa am făcut noi.</strong></p>
+      </div>
+    </div>
+    <div class="figuri" style="flex:0 0 30%;margin-top:calc(var(--u) * 1.4)">
+      <figure><img src="img/santier-07.jpg" alt="Șantier"></figure>
+      <figure><img src="img/santier-08.jpg" alt="Șantier"></figure>
+      <figure><img src="img/santier-04.jpg" alt="Șantier"></figure>
+    </div>
+  </div>
+  <div class="numar">20</div>
+</section>
+
+<section class="slide cap4">
+  <div class="antet"><span class="bulina"></span><b>Elementele procesului · 4</b></div>
+  <div class="corp">
+    <h2>Comunicarea și deciziile de grup</h2>
+    <div class="doua" style="grid-template-columns:1.5fr 1fr">
+      <div class="coloana">
+        <ul>
+          <li>grupul are de luat multe decizii, deseori într-un timp scurt</li>
+          <li>de preferat, <strong>un arhitect care sprijină grupul pe tot parcursul</strong></li>
+          <li>ca arhitect, am fost util grupului prin argumente tehnice: discuțiile se închid mai repede când există un criteriu, nu doar preferințe</li>
+          <li>de stabilit devreme, în scris: ce se decide împreună, ce decide arhitectul, ce alege fiecare la el în apartament</li>
+          <li>o decizie luată împreună: <strong>șapa flotantă</strong> între niveluri. Se face rar la blocurile de pe piață, ne-a costat puțin în plus, iar diferența la zgomot se aude.</li>
+        </ul>
+      </div>
+      <div class="coloana">
+        <figure class="intreg"><img src="img/santier-02.jpg" alt="Decizii pe șantier"></figure>
+      </div>
+    </div>
+  </div>
+  <div class="numar">21</div>
+</section>
+
+<section class="slide cap4">
+  <div class="antet"><span class="bulina"></span><b>Elementele procesului</b></div>
+  <div class="corp">
+    <h2>Fiecare apartament, după nevoile familiei</h2>
+    <div class="figuri">
+      <figure style="flex:1.5"><img src="img/corp-spate-02.jpg" alt="Corpul din spate, cu ferestre diferite de la un apartament la altul"></figure>
+      <figure style="flex:1"><img src="img/geam-colt.jpg" style="object-position:left center" alt="Geamul de colț cerut de una dintre familii"></figure>
+      <figure style="flex:.7"><img src="img/ferestre-01.jpg" alt="Montajul geamurilor"></figure>
+      <figure style="flex:1.2"><img src="img/ferestre-02.jpg" alt="Montajul geamurilor mari"></figure>
+    </div>
+    <p class="sursa">Ferestrele corpului din spate sunt diferite de la un apartament la altul: fiecare familie a ales în funcție de cum voia să folosească spațiul. Unul dintre noi și-a dorit un geam de colț, iar acum îl are. Structura și regulile au rămas comune.</p>
+  </div>
+  <div class="numar">22</div>
+</section>
+
+<section class="slide cap4">
+  <div class="antet"><span class="bulina"></span><b>Elementele procesului</b></div>
+  <div class="corp">
+    <h2>Acum, la finisaje</h2>
+    <div class="figuri">
+      <figure style="flex:1.05"><img src="img/finisaje-01.jpg" alt="Fațada dinspre stradă"></figure>
+      <figure style="flex:2.05"><img src="img/finisaje-02.jpg" alt="Blocul în stradă"></figure>
+      <figure style="flex:1.45"><img src="img/finisaje-03.jpg" style="object-position:55% center" alt="Blocul și casa veche de alături"></figure>
+    </div>
+    <p class="sursa">Blocul de pe strada Județului este în faza de finisaje. Curtea comună se lucrează chiar acum.</p>
+  </div>
+  <div class="numar">23</div>
+</section>
+
+<!-- ══ CAPITOLUL 5 · revine verdele salvie ══════════════════════════════════ -->
+
+<!-- REPARAȚIA 4: prezentarea se termina pe „Întrebări", fără să spună nimănui
+     ce are de făcut. Publicul emailului era exact cel care s-a înregistrat și
+     s-a oprit acolo, deci ultimul lucru rămas pe ecran trebuie să fie pasul
+     concret, nu o invitație la tăcere. -->
+<section class="slide cap5">
+  <div class="antet"><span class="bulina"></span><b>Mai departe</b></div>
+  <div class="corp">
+    <h2>Ce poți face mai departe</h2>
+    <p class="subtitlu">nimic din ce urmează nu te obligă la nimic</p>
+    <ul>
+      <li><strong>Completează-ți profilul</strong> cu orașul și zonele în care ai vrea să locuiești. Fără ele, platforma n-are ce terenuri să-ți arate și n-are cu cine să te potrivească.</li>
+      <li><strong>Salvează un teren care ți-ar plăcea.</strong> E pasul cel mai mic și cel mai util: ceilalți văd că e cineva interesat de el.</li>
+      <li><strong>Uită-te la grupurile deschise în zonele tale</strong> și cere să intri în unul. Dacă niciunul nu ți se potrivește, poți crea tu unul.</li>
+      <li><strong>Dacă ceva nu e clar, întreabă-ne.</strong> Butonul „Ai o întrebare?" de pe platformă ajunge la un arhitect din echipă, iar răspunsul scris nu costă nimic.</li>
+    </ul>
+  </div>
+  <div class="numar">24</div>
+</section>
+
+<section class="slide cap5 centrat">
+  <h1>Întrebări</h1>
+  <p class="subtitlu">Partea cea mai bună a primei ediții.</p>
+  <div class="marca">
+    <span class="bulina"></span>
+    <span><b>apartamen<i>TU</i>al</b> · LTFB Studio · apartamentual.ro</span>
+  </div>
+</section>
+
+<div id="bara">
+  <button id="inapoi" title="Slide-ul dinainte">‹</button>
+  <span id="contor">1 / 25</span>
+  <button id="inainte" title="Slide-ul următor">›</button>
+  <span class="ajutor">săgeți · spațiu · F pentru ecran complet</span>
+</div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const contor = document.getElementById('contor');
+  let i = 0;
+
+  function arata(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('activ', k === i));
+    contor.textContent = (i + 1) + ' / ' + slides.length;
+    // Ancora din URL ține locul, ca un refresh accidental în timpul
+    // prezentării să nu te arunce înapoi la coperta.
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+
+  document.getElementById('inainte').onclick = () => arata(i + 1);
+  document.getElementById('inapoi').onclick  = () => arata(i - 1);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); arata(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); arata(i - 1); }
+    else if (e.key === 'Home') arata(0);
+    else if (e.key === 'End') arata(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+  });
+
+  // Click în jumătatea dreaptă înainte, în stânga înapoi. Util la prezentarea
+  // de pe tabletă sau cu telecomanda, care trimite tot click-uri.
+  document.addEventListener('click', e => {
+    if (e.target.closest('#bara')) return;
+    arata(e.clientX > window.innerWidth / 2 ? i + 1 : i - 1);
+  });
+
+  const start = parseInt((location.hash || '').slice(1), 10);
+  arata(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
