@@ -1,0 +1,182 @@
+# Handoff, 4 septembrie 2026
+## Importul Bosianu 32 și cursoarele de preț pe împărțirea apartamentelor
+
+Trei commituri, toate împinse: `baf4c0a`, `1524bb7`, `4a4036c`.
+Deploy cPanel făcut de Lucian pentru al doilea (singurul care atinge `frontend/`).
+
+---
+
+## 1. Bosianu 32 e importat și e live
+
+**Terminat.** Grupul „Constantin Bosianu nr. 32, sector 4"
+(`597d71bd-2289-468a-8988-d510e1ac55a6`), terenul `f5d185cc-…` („Teren zona Rond Cosbuc,
+blvd Libertății, Unirii", 468 mp). Blocurile 0 → 5 rulate curat, BLOC 7 rulat, ambele
+variante cu `incepe_cu_grupul = true`.
+
+Analiza: **P+3, două variante, 5 apartamente fiecare.**
+
+| | Su de locuit | cost total | €/mp util |
+|---|---|---|---|
+| V1 · 5 ap., 18,69 mp liberi la parter | 380,37 mp | 1.261 mii € | 3.485 |
+| V2 · 5 ap., 30 mp birouri la parter | 362,07 mp | 1.315 mii € | 3.637 |
+
+Cifrele de intrare: **teren 600.000 €**, **construcție 1.200 €/mp Sd**, **`coef_su_sd` 0,657**.
+
+### Ce s-a schimbat față de exportul din 1 septembrie
+
+UTR **L1b** (era M1), Su de locuit scade de la 419,97 la 380,37, **5 apartamente pe variantă
+în loc de 6** (mai mari), parterul primește 8 parcaje în loc de 6. Sd (703,84), POT (39,99%),
+CUT (1,504) și suprafața terenului sunt IDENTICE, deci volumul construibil nu s-a schimbat
+și KML-ul din 1 septembrie a rămas bun.
+
+✅ **Problema de parcare de la V2 e rezolvată la sursă.** Pe exportul vechi cerea 9 locuri și
+așeza 7. Acum V1 cere 8 și așază 9, V2 cere 8 și așază 8. Cele 8 ale lui V2 ies din 6 de la
+apartamente plus 2 pentru cei 30 mp de birouri.
+
+### Reexportul „final" din 4 septembrie
+
+Liviu a reexportat cu terenul la 600.000 (era 650.000, prețul din anunț).
+Față de exportul din 2 septembrie **diferă DOAR prețul terenului și cele două cifre derivate
+din el**; geometria, nivelurile, apartamentele, parcajele și costul de construcție sunt
+identice la ultimul caracter. Deci **în bază n-a fost nimic de schimbat**, importul rulat era
+deja corect, iar SQL-ul regenerat diferă prin două comentarii și niciun rând de date.
+
+🔴 **RĂMAS DE FĂCUT, singurul lucru deschis la Bosianu:** înlocuiește fișa în Storage,
+`analize-fise/597d71bd-2289-468a-8988-d510e1ac55a6/bosianu-32-fisa.pdf`. Cea urcată e încă
+versiunea cu 650.000 €, adică ultimul loc unde grupul vede cifra veche. Fișierul bun e în
+`analize din Urban Analyzer/Constantin Bosianu 32/_de-urcat/`. Numele rămâne identic, deci
+căile din bază sunt valabile și **BLOC 7 nu se rerulează**. Dacă dashboard-ul refuză urcarea
+peste un fișier existent, șterge-l întâi pe cel vechi.
+
+---
+
+## 2. Eroarea din generator: comercialul se scădea de două ori
+
+🔴 **`su_mp` pe nivel se scria ca `niv_su_locuinte_mp` MINUS comercialul.** Coloana aceea din
+CSV e deja fără comercial, deci era scădere de două ori. La V2, parterul ieșea cu
+**`su_mp = −29,61`**, suprafață negativă, perfect legală în schemă și fără nicio eroare.
+
+**De ce n-a lovit până acum:** nicio analiză importată nu avusese comercial, iar zero minus
+zero e tot zero. Verificat pe toate CSV-urile: **importurile Galvani din bază sunt curate.**
+
+**Ce vrea de fapt coloana:** Su-ul ÎNTREG al nivelului (locuințe + comercial), fiindcă pagina
+scade ea singură `su_comun_mp` (`organizare-apartamente.js:130`) și îl adună înapoi la cost,
+spațiul comercial construindu-se chiar dacă nu se împarte.
+
+**De ce n-a prins-o BLOC 5:** verificarea se uita la aceleași chei pe care se lega inserarea.
+Al doilea caz al aceluiași tipar, după dublura din 1 septembrie.
+
+### Plase noi în generator
+
+- suma nivelurilor trebuie să dea Su-ul variantei (`SU NEPOTRIVITĂ`)
+- niciun nivel cu suprafață negativă (`NIVEL CU SUPRAFAȚĂ NEGATIVĂ`)
+- `niv_su_mp` trebuie să fie locuințe + comercial, altfel avertisment
+- prețul terenului din configurație diferit de cel din CSV: avertisment pe ecran ȘI scris în
+  capul SQL-ului, fiindcă avertismentele se pierd iar SQL-ul se citește peste o lună
+- `NIVEL DEPĂȘIT` compară acum cu `su_mp − su_comun_mp`, ca pagina
+- descrierea variantei spune ce e la parter când acolo stă comercial; altfel V2 se descria
+  „tot parterul intră în parcaje" pe un parter cu 30 mp de birouri
+
+---
+
+## 3. `coef_su_sd` nu e 0,70
+
+⛔ **Nu e Su/Sd, e Su împărțit la Sd-ul care se taxează INTEGRAL**, adică fără partea de
+parcaje, care intră la 20%. Valoarea reală e între **0,657 și 0,678** pe tot ce s-a importat.
+
+Cu 0,70, pagina arăta la Bosianu V1 un cost de construcție de 652.063 € acolo unde fișa scrie
+694.846: **42.783 € în minus, vreo 8.500 € pe familie.** Bosianu e importat cu 0,657 și acum
+platforma și fișa spun același lucru la ultimul euro.
+
+✅ **Formula e confirmată de fișă, nu doar dedusă.** Sub „Cost construcție" fișa tipărește
+`547,84 mp × 1.200,00 + 156,00 mp parc. × 20%`. Cei 156 mp sunt 8 × 19,50, adică exact
+coloana `var_sc_per_parcare_parter_mp`. **Nota veche care presupunea 15 mp pe loc de parcare
+era greșită**: pe exportul din 1 septembrie ambele variante aveau același număr de parcaje,
+deci cifra nu se putea deduce, doar ghici.
+
+🔴 **RĂMAS DESCHIS: Galvani a rămas în bază cu 0,70**, la ambele grupuri, deci pagina arată
+acolo un cost de construcție cu vreo 4% mai mic decât fișa. Se repară cu un UPDATE scurt, dar
+e o cifră pe care o văd 21 de oameni la Parcul Circului, deci cere o decizie a lui Lucian, nu
+o strecurare.
+
+---
+
+## 4. Cursoarele de preț
+
+Două cursoare deasupra tabelului de costuri, în pagina de împărțire: prețul terenului și
+prețul construcției pe mp desfășurat.
+
+**Le vede orice membru și oricine poate trage de ele, dar ce trage unul nu ajunge la nimeni.**
+Simularea stă într-o variabilă din fila lui de browser: nu se salvează, nu pleacă nimic către
+bază, piere la reîncărcare. Decizia, luată cu Lucian: suprafețele apartamentelor sunt o
+decizie a grupului și de aceea se scriu în `apartament_suprafata`; prețurile nu se hotărăsc,
+se află, din negocierea cu vânzătorul și din oferta constructorului. Dacă fiecare și-ar putea
+fixa prețul pentru toți, cinci familii s-ar uita la cinci totaluri diferite fără să vadă de ce.
+
+**Marginile sunt asimetrice la construcție, mai mult loc în sus decât în jos** (−15% / +40%),
+fiindcă la Județului Housing costurile au depășit estimările, nu au scăzut sub ele. Un cursor
+de preț proiectat prost e o mașină de autoamăgire.
+
+Cât timp cifrele nu mai sunt cele din analiză: panoul se face teracotă, capul variantei poartă
+cuvântul „simulare", tabelul primește bandă, apare butonul de revenire. Textul spune, în
+amândouă stările, că nu se schimbă nimic pentru ceilalți, că reîncărcarea readuce cifrele
+analizei, și că se pot deschide mai multe taburi pentru comparație.
+
+⚠️ **`coef_su_sd` NU primește cursor**, dinadins: nu e un preț, e o proprietate geometrică.
+Cine îl mișcă începe să inventeze altă clădire.
+
+Toate cele nouă locuri care citeau prețurile trec acum prin `pretTeren()` și `pretMp()`, deci
+nicio cifră din pagină nu poate rămâne în urmă.
+
+**Probat în browser pe analiza reală Galvani de la Parcul Circului:** ambele cursoare,
+revenirea, schimbarea variantei cu simularea pornită, lățimea de telefon, consola curată,
+zero scrieri către bază.
+
+---
+
+## 5. Semnal de produs: V2 costă mai mult și dă mai puțin
+
+🟡 **Nu e o eroare, e o problemă de fond, de discutat cu Liviu.** Pentru 54 mii € în plus,
+grupul primește cu 18 mp de locuință mai puțin. Singurul lucru care ar justifica V2 sunt cei
+30 mp de birouri de la parter, dar pagina nu spune nimic despre ei în afară de
+**„Spațiu comun · plătit de toți"**.
+
+Adică un membru citește „plătesc în plus pentru 30 de metri care nu sunt ai nimănui". Nimeni
+n-o să aleagă V2 vreodată, și pe bună dreptate.
+
+Cauza: pagina are **un singur concept, `su_comun_mp`**, folosit până acum pentru spațiu comun
+adevărat (hol mare, spălătorie), care chiar e plătit de toți și nu produce nimic. Un spațiu
+comercial e altceva: se vinde, se închiriază (venit pentru asociație), sau îl cumpără unul
+dintre membri. Nici una dintre variante nu încape în „plătit de toți".
+
+**Întrebarea de răspuns înainte de orice cod:** ce se întâmplă, la ApartamenTUal, cu spațiul
+comercial de la parter? Din răspuns iese și textul din pagină, și dacă `su_comun_mp` trebuie
+despicat în două coloane cu înțelesuri diferite.
+
+---
+
+## 6. Alte lucruri de ținut minte
+
+**Grupul are 5 membri activi și amândouă variantele au fix 5 apartamente.** Se potrivește
+exact, dar înseamnă zero rezervă: dacă pleacă cineva rămâne un apartament fără om, iar dacă
+vine al șaselea nu are loc în nicio variantă. De spus lui Alin înainte să caute oameni noi.
+
+**Superadminul VEDE împărțirea apartamentelor**, din 2 septembrie
+(`db_schema/superadmin-vede-impartirea/2-politici.sql`, zece politici de citire). Politicile
+din `1-tabele-analiza-si-interes.sql` cer membru activ și par să spună contrariul; nu te opri
+la ele.
+
+**Proba pe pagina de împărțire cere cont de membru sau de superadmin**, plus server local
+(`python -m http.server 8123 --directory frontend`, pornit detașat cu `Start-Process`).
+Sesiunea Supabase e per-origine, deci pe `127.0.0.1` trebuie logat din nou.
+
+---
+
+## ⏭️ De făcut în sesiunea următoare
+
+1. 🔴 **Înlocuiește fișa Bosianu în Storage** (secțiunea 1). Ultimul loc cu 650.000 €.
+2. 🔴 **Decide ce se face cu `coef_su_sd = 0,70` la Galvani** (secțiunea 3). 21 de oameni.
+3. 🟡 **Ce se întâmplă cu spațiul comercial de la parter** (secțiunea 5). Blochează V2.
+4. Rămase din sesiunile dinainte: setul P+4 de pe Parcul Circului cu parterul imposibil,
+   filtrul `status = 'active'` din `grup-terenuri-edit.js:222`, politica de pe `grup_membri`
+   pusă pe rolul `public`, comunicarea către utilizatori că superadminii văd preferințele.
