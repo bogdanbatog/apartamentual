@@ -2,7 +2,8 @@
 ## Importul Bosianu 32 și cursoarele de preț pe împărțirea apartamentelor
 
 Cinci commituri, toate împinse: `baf4c0a`, `1524bb7`, `4a4036c`, `1729990`, `40f7488`.
-Deploy cPanel făcut de Lucian pentru al doilea (singurul care atinge `frontend/`).
+Două dintre ele ating `frontend/` și cer deploy din cPanel: `1524bb7` (cursoarele de preț,
+deployat) și `40f7488` (caseta de parcare).
 
 ---
 
