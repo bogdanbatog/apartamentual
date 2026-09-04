@@ -249,6 +249,37 @@
   .buline.b1{border-color:var(--salvie);background:var(--salvie-slab);}
   .buline.b2{border-color:var(--teracota);background:var(--teracota-slab);}
 
+  /* ── SIMULAREA DE PREȚURI ────────────────────────────────────
+
+     Două cursoare care schimbă DOAR ce vede omul care le mișcă: prețul
+     terenului și prețul construcției. Nu se salvează nimic și nimeni din grup
+     nu vede ce a încercat el.
+
+     ⚠️ Cât timp cifrele nu mai sunt cele din analiză, panoul se îmbracă în
+     teracotă și tabelul de costuri primește o bandă. Altfel cineva revine peste
+     zece minute, citește un total pe care l-a inventat singur și îl crede al
+     analizei; apoi îl spune grupului. */
+  .oa-sim{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;
+    padding:12px 14px;margin-top:16px;}
+  .oa-sim.activa{border-color:var(--teracota);background:var(--teracota-slab);}
+  .oa-sim-cap{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;
+    justify-content:space-between;}
+  .oa-sim-cap h3{font-size:13.5px;}
+  .oa-sim-revino{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;
+    border:1px solid var(--linie);border-radius:8px;padding:5px 11px;
+    background:var(--hartie);color:var(--teracota);}
+  .oa-sim-rand{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:10px;}
+  .oa-sim-nume{font-size:13px;min-width:196px;}
+  .oa-sim-rand input[type=range]{flex:1;min-width:170px;accent-color:var(--teracota);}
+  .oa-sim-val{font-size:13.5px;font-weight:700;min-width:118px;text-align:right;}
+  .oa-sim-sursa{font-size:12.5px;color:var(--gri);margin-top:10px;}
+  .oa-sim-marca{color:var(--teracota);font-weight:700;}
+  .oa-sim-banda{font-size:12.5px;color:var(--teracota);font-weight:600;margin-top:10px;}
+  @media (max-width:560px){
+    .oa-sim-nume{min-width:100%;}
+    .oa-sim-val{min-width:0;text-align:left;}
+  }
+
   details{margin-top:16px;}
   summary{cursor:pointer;font-size:13.5px;color:var(--teracota);font-weight:600;}
   table{width:100%;border-collapse:collapse;background:var(--hartie);
@@ -809,6 +840,24 @@
         <span><i class="buline"></i> liber</span>
         <span><i class="buline b1"></i> un doritor</span>
         <span><i class="buline b2"></i> mai mulți doritori, de discutat</span>
+      </div>
+
+      <div class="oa-sim" id="oaSim" hidden>
+        <div class="oa-sim-cap">
+          <h3>Ce se întâmplă dacă se schimbă prețurile</h3>
+          <button type="button" class="oa-sim-revino" id="oaSimRevino" hidden>Revino la cifrele analizei</button>
+        </div>
+        <label class="oa-sim-rand">
+          <span class="oa-sim-nume">Terenul</span>
+          <input type="range" id="oaSimTeren">
+          <span class="oa-sim-val" id="oaSimTerenVal"></span>
+        </label>
+        <label class="oa-sim-rand">
+          <span class="oa-sim-nume">Construcția, pe mp desfășurat</span>
+          <input type="range" id="oaSimMp">
+          <span class="oa-sim-val" id="oaSimMpVal"></span>
+        </label>
+        <p class="oa-sim-sursa" id="oaSimSursa"></p>
       </div>
 
       <details>

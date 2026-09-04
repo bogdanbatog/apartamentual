@@ -90,6 +90,19 @@ let suntAdmin = false;         // fondatorul: șterge notele, documentele și ju
    face nimic când îl apeși. */
 let suntSuperAdmin = false;
 
+/* Simularea de prețuri. `null` înseamnă „cifra din analiză”, nu „zero”: așa se
+   deosebește un cursor neatins de unul tras exact pe valoarea de pornire, și tot
+   așa se șterge simularea, punând `null` la loc. Nu se salvează nicăieri și nu
+   pleacă nimic către bază: e o întrebare pe care și-o pune un singur om. */
+const simulare = { teren: null, mp: null };
+/* Marginile cursoarelor, socotite din cifrele analizei. Terenul se mișcă la fel
+   în amândouă direcțiile, fiindcă se negociază în amândouă. Construcția are mai
+   mult loc în sus decât în jos, fiindcă acolo e riscul adevărat: la Județului
+   Housing costurile au depășit estimările, nu au scăzut sub ele. */
+const SIM_TEREN = { jos: 0.75, sus: 1.25, pas: 10000 };
+const SIM_MP    = { jos: 0.85, sus: 1.40, pas: 25 };
+let simBaza = null;            // cifrele pe care s-au construit cursoarele
+
 const eTelefon = () => window.matchMedia('(max-width: 720px)').matches;
 const fmt = n => Math.round(n).toLocaleString('ro-RO');
 const mii = n => Math.round(n / 1000);
@@ -124,22 +137,31 @@ function arataStarea(titlu, text, link){
    înainte de calculul scumpirii, altfel un parter comun de 48 mp apare ca gol
    lăsat de grup.
    ═══════════════════════════════════════════════════════════════════════════ */
+/* Cele două prețuri se citesc PRIN funcțiile astea, niciodată direct din
+   variantă: când cineva mișcă un cursor de simulare, aici se întoarce cifra lui,
+   și tot ce se calculează mai jos o urmează, până la cota fiecărui apartament.
+   Simularea stă doar în fila lui și piere la reîncărcare: nu se salvează nimic
+   și nimeni din grup nu vede ce a încercat el. Vezi `renderSimulare`. */
+function pretTeren(v){ return simulare.teren != null ? simulare.teren : v.costTeren; }
+function pretMp(v){ return simulare.mp != null ? simulare.mp : v.costMpSd; }
+function simulareActiva(){ return simulare.teren != null || simulare.mp != null; }
+
 function suTeoretic(v){ return v.niveluri.reduce((s, n) => s + n.su, 0); }
 function suComun(v){ return v.niveluri.reduce((s, n) => s + (n.suComun || 0), 0); }
 function suAlocat(v){ return v.ap.reduce((s, a) => s + a.mpu, 0); }
 function suImpartibil(v){ return suTeoretic(v) - suComun(v); }
 
 function costConstructie(v, suUtil){
-  const suprateran = (suUtil + suComun(v)) / v.coefUtil * v.costMpSd;
-  const subsol = (v.subsolSd || 0) * v.costMpSd * v.factorSubsol;
+  const suprateran = (suUtil + suComun(v)) / v.coefUtil * pretMp(v);
+  const subsol = (v.subsolSd || 0) * pretMp(v) * v.factorSubsol;
   return suprateran + subsol;
 }
-function costTotal(v){ return v.costTeren + costConstructie(v, suAlocat(v)); }
-function cotaTeren(v){ return v.costTeren / costTotal(v); }
+function costTotal(v){ return pretTeren(v) + costConstructie(v, suAlocat(v)); }
+function cotaTeren(v){ return pretTeren(v) / costTotal(v); }
 function eurPeMp(v){ return costTotal(v) / suAlocat(v); }
 function eurPeMpPlin(v){
   const su = suImpartibil(v);
-  return (v.costTeren + costConstructie(v, su)) / su;
+  return (pretTeren(v) + costConstructie(v, su)) / su;
 }
 function bani(v, a){
   const tot = a.mpu * eurPeMp(v), c = cotaTeren(v);
@@ -395,7 +417,7 @@ function renderVarianta(){
   const scumpire = eurPeMp(v) / eurPeMpPlin(v) - 1;
   const constr = costConstructie(v, alocat);
   const pondere = cotaTeren(v) * 100;
-  const pondereaPlin = v.costTeren / (v.costTeren + costConstructie(v, impartibil)) * 100;
+  const pondereaPlin = pretTeren(v) / (pretTeren(v) + costConstructie(v, impartibil)) * 100;
   const comun = suComun(v);
 
   cont.innerHTML = '<div class="varianta-cap">' +
@@ -404,8 +426,9 @@ function renderVarianta(){
       '<div class="cifra"><b>' + fmt(eurPeMp(v)) + ' €</b>/mp util</div>' +
       '<div class="cifra"><b>' + fmt(alocat) + ' mp</b> împărțiți din ' + fmt(impartibil) +
         (comun ? ' <span style="font-size:12px">(plus ' + fmt(comun) + ' comuni)</span>' : '') + '</div>' +
-      '<div class="cifra">teren <b>' + mii(v.costTeren) + ' mii €</b> + construcție <b>' +
-        mii(constr) + ' mii €</b> = <b>' + mii(costTotal(v)) + ' mii €</b></div>' +
+      '<div class="cifra">teren <b>' + mii(pretTeren(v)) + ' mii €</b> + construcție <b>' +
+        mii(constr) + ' mii €</b> = <b>' + mii(costTotal(v)) + ' mii €</b>' +
+        (simulareActiva() ? ' <span class="oa-sim-marca">simulare</span>' : '') + '</div>' +
       (scumpire >= PRAG_SCUMPIRE ? '<div class="avertisment">' +
         '<b>' + fmt(nedistribuit) + ' mp</b> nu sunt încă dați nimănui. Construcția lor nu se mai face, ' +
         'deci investiția scade, dar terenul costă la fel și se împarte la mai puțini metri: ' +
@@ -608,11 +631,116 @@ function terminaTragerea(){
   tragere = null;
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   CURSOARELE DE PREȚ
+
+   Două întrebări de tipul „ce-ar fi dacă”: cât se schimbă prețul pe metru util
+   dacă terenul se negociază altfel, sau dacă constructorul cere mai mult pe metru.
+
+   ⚠️ NU se salvează și NU se împarte cu grupul, spre deosebire de cursoarele de
+   suprafață de mai sus. Suprafețele sunt o decizie a grupului, deci se scriu în
+   `apartament_suprafata` și le vede toată lumea. Prețurile nu se hotărăsc, se
+   află: din negocierea cu vânzătorul, din oferta constructorului. Dacă fiecare
+   și-ar putea fixa prețul pentru toți, cinci familii s-ar uita la cinci totaluri
+   diferite fără să vadă de ce, exact în pagina făcută ca să se uite la aceleași
+   cifre. Când un preț devine real, se schimbă în analiză, o dată pentru toți.
+
+   ⚠️ Cursorul e unul singur pentru toate variantele, dinadins: dacă fiecare
+   variantă ar avea prețul ei simulat, comparația dintre file n-ar mai însemna
+   nimic. Marginile se socotesc din varianta deschisă și se refac dacă alta vine
+   cu alte cifre de pornire (se poate: `analiza_varianta.cost_teren` există, deși
+   la importurile de până acum e mereu NULL).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Marginile unui cursor, rotunjite la pas ca omul să nu vadă cifre ca 449.997. */
+function marginiSim(baza, cfg){
+  const jos = Math.floor(baza * cfg.jos / cfg.pas) * cfg.pas;
+  const sus = Math.ceil(baza * cfg.sus / cfg.pas) * cfg.pas;
+  return { jos: jos, sus: sus, pas: cfg.pas };
+}
+
+function renderSimulare(){
+  const panou = document.getElementById('oaSim');
+  if (!panou) return;
+  const v = variante.find(x => x.id === variantaActiva);
+  panou.hidden = !v;
+  if (!v) return;
+
+  const cTeren = document.getElementById('oaSimTeren');
+  const cMp    = document.getElementById('oaSimMp');
+
+  /* Cursoarele se refac doar când se schimbă cifrele de pornire, nu la fiecare
+     desenare: altfel scrierea lui `value` în timpul tragerii s-ar bate cu degetul
+     omului. În restul timpului se împrospătează doar etichetele. */
+  const baza = { teren: v.costTeren, mp: v.costMpSd };
+  if (!simBaza || simBaza.teren !== baza.teren || simBaza.mp !== baza.mp) {
+    simBaza = baza;
+    const mT = marginiSim(baza.teren, SIM_TEREN), mM = marginiSim(baza.mp, SIM_MP);
+    cTeren.min = mT.jos; cTeren.max = mT.sus; cTeren.step = mT.pas;
+    cMp.min    = mM.jos; cMp.max    = mM.sus; cMp.step    = mM.pas;
+    /* O simulare pornită pe altă variantă poate cădea în afara noilor margini. */
+    if (simulare.teren != null) simulare.teren = Math.min(mT.sus, Math.max(mT.jos, simulare.teren));
+    if (simulare.mp != null)    simulare.mp    = Math.min(mM.sus, Math.max(mM.jos, simulare.mp));
+    cTeren.value = pretTeren(v);
+    cMp.value    = pretMp(v);
+  }
+
+  const activa = simulareActiva();
+  panou.classList.toggle('activa', activa);
+  document.getElementById('oaSimRevino').hidden = !activa;
+  document.getElementById('oaSimTerenVal').textContent = fmt(pretTeren(v)) + ' €';
+  document.getElementById('oaSimMpVal').textContent    = fmt(pretMp(v)) + ' €/mp';
+  document.getElementById('oaSimSursa').innerHTML = activa
+    ? '<span class="oa-sim-marca">Simulare.</span> Analiza spune <b>' + fmt(v.costTeren) +
+      ' €</b> terenul și <b>' + fmt(v.costMpSd) + ' €/mp</b> construcția. ' +
+      'Cifrele de mai jos sunt doar ale tale: nu se schimbă pentru nimeni altcineva din grup. ' +
+      'Dacă reîncarci pagina, revin la cele ale analizei. Simularea e a fiecărui tab în parte, ' +
+      'deci poți deschide încă unul, cu alt preț, și să le compari alături.'
+    : 'Cifrele analizei. Mută un cursor ca să vezi cât se schimbă prețul pe metru util. ' +
+      'Ce încerci aici rămâne la tine: ceilalți din grup văd mai departe cifrele analizei, ' +
+      'iar dacă reîncarci pagina revii și tu la ele. Ca să compari două ipoteze una lângă alta, ' +
+      'deschide pagina în două taburi și pune alt preț în fiecare.';
+}
+
+/* Se leagă o singură dată, la pornire. `input`, nu `change`: cifrele se mișcă în
+   timp ce tragi, altfel cursorul pare stricat până când îl lași. */
+function legSimulare(){
+  const cTeren = document.getElementById('oaSimTeren');
+  const cMp    = document.getElementById('oaSimMp');
+  const revino = document.getElementById('oaSimRevino');
+  if (!cTeren || !cMp || !revino) return;
+
+  /* Tras înapoi FIX pe cifra analizei înseamnă că nu mai simulezi nimic, deci se
+     scrie `null`, nu valoarea: altfel panoul ar rămâne îmbrăcat în teracotă și ar
+     striga „simulare” peste niște cifre care sunt chiar ale analizei. */
+  cTeren.addEventListener('input', function(){
+    const v = variante.find(x => x.id === variantaActiva);
+    const n = Number(cTeren.value);
+    simulare.teren = (v && n === v.costTeren) ? null : n;
+    render();
+  });
+  cMp.addEventListener('input', function(){
+    const v = variante.find(x => x.id === variantaActiva);
+    const n = Number(cMp.value);
+    simulare.mp = (v && n === v.costMpSd) ? null : n;
+    render();
+  });
+  revino.addEventListener('click', function(){
+    simulare.teren = null; simulare.mp = null;
+    simBaza = null;              // forțează rescrierea lui `value` pe cursoare
+    render();
+  });
+}
+
 function renderCosturi(){
   const v = variante.find(x => x.id === variantaActiva);
   if (!v) return;
   const alocat = suAlocat(v);
   document.getElementById('costuri').innerHTML =
+  (simulareActiva()
+    ? '<p class="oa-sim-banda">Simulare: terenul la ' + fmt(pretTeren(v)) + ' € și construcția la ' +
+      fmt(pretMp(v)) + ' €/mp. Nu sunt cifrele analizei.</p>'
+    : '') +
   '<table><tr><th>Apartament</th><th>mp utili</th><th>Cost teren</th><th>Cost construcție</th><th>Cost total</th></tr>' +
     v.ap.map(function (a) {
       const b_ = bani(v, a);
@@ -622,10 +750,10 @@ function renderCosturi(){
         '<td>' + fmt(b_.constr) + ' €</td><td>' + fmt(b_.tot) + ' €</td></tr>';
     }).join('') +
     '<tr class="total-rand"><td>Total împărțit</td><td>' + fmt(alocat) + '</td>' +
-      '<td>' + fmt(v.costTeren) + ' €</td><td>' + fmt(costConstructie(v, alocat)) + ' €</td>' +
+      '<td>' + fmt(pretTeren(v)) + ' €</td><td>' + fmt(costConstructie(v, alocat)) + ' €</td>' +
       '<td>' + fmt(costTotal(v)) + ' €</td></tr></table>' +
-  '<p class="explica" style="margin-top:10px">Terenul costă ' + fmt(v.costTeren) +
-    ' € oricât s-ar construi pe el. Construcția se calculează la ' + fmt(v.costMpSd) +
+  '<p class="explica" style="margin-top:10px">Terenul costă ' + fmt(pretTeren(v)) +
+    ' € oricât s-ar construi pe el. Construcția se calculează la ' + fmt(pretMp(v)) +
     ' €/mp desfășurat' + (v.subsolSd > 0 ? ', plus subsolul (' + fmt(v.subsolSd) + ' mp, la ' +
       Math.round(v.factorSubsol * 100) + '% din prețul unui metru obișnuit)' : '') +
     ', deci scade dacă apartamentele scad. Fiecare apartament plătește cât la sută din suprafața ' +
@@ -1469,6 +1597,7 @@ function render(){
   renderFile();
   renderDocumenteleAnalizei();
   renderVarianta();
+  renderSimulare();
   if (areAnaliza) renderCosturi();
   renderMembri();
   renderDocumente();
@@ -1689,6 +1818,7 @@ async function oaPorneste(){
   document.body.classList.add('oa-fundal');
   legDocumente();
   legJurnal();
+  legSimulare();
   render();
 }
 
