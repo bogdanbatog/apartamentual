@@ -59,6 +59,31 @@ Un grup poate avea mai multe favorite. Dacă ies două, BLOC 1 se oprește cu �
 row returned by a subquery"; atunci se scrie `teren_id` de mână. BLOC 0 arată terenul ales,
 cu id și titlu, și se citește înainte de BLOC 1.
 
+### Coeficientul Su/Sd nu se scrie de mână
+
+⛔ `coef_su_sd` **nu e raportul Su/Sd**, deși așa se numește. Urban Analyzer taxează
+amprenta parcajelor de la parter la 20%, nu la 100%, iar pagina n-are niciun concept de
+parcaj: singura pârghie prin care poate intra reducerea aceea e chiar coeficientul.
+
+Până pe 4 septembrie 2026 stătea scris 0,70 în configurație. **Cu 0,70 pagina arăta un
+cost de construcție cu 4,4% mai mic decât fișa PDF pe care o descarcă grupul**: 56.000 -
+68.000 € pe fiecare variantă Galvani, 42.783 € la Bosianu. Vreo 7.000-8.500 € pe familie.
+
+De acum generatorul îl calculează singur, **per variantă**, înapoi din costul scris de UA:
+
+```
+coef = Su × costMp / (cost_constructie − Sd_subsol × costMp × factor_subsol)
+```
+
+Subsolul se scade întâi fiindcă pagina îl ține separat, în `subsol_sd_mp`. Iese între
+0,657 și 0,678 pe analizele de până acum. **E per variantă, nu pe analiză**: două variante
+ale aceleiași clădiri au coeficienți diferiți dacă au număr diferit de parcaje la parter.
+
+Coloana din bază e `numeric(4,3)`, deci trei zecimale; rotunjirea lasă cel mult 0,07%.
+`coef_su_sd` din configurație a rămas doar ca plasă, pentru un CSV fără coloana de cost.
+
+---
+
 Cele trei cifre de cost (**euro pe mp Sd**, **prețul terenului**, **procentul subsolului**)
 sunt lucruri pe care le tastează arhitectul în Urban Analyzer. **Nu sunt în CSV**, care
 exportă rezultate, nu intrări. Se pot scoate înapoi din formula UA:

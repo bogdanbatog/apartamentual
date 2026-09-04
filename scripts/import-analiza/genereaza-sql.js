@@ -86,8 +86,18 @@ function grupeazaVariante(randuri) {
            configurația), dar se compară cu ea: dacă diferă, fișa PDF pe care o
            descarcă grupul arată alt total decât pagina. */
         costTerenCsv: nr(r.var_cost_teren_eur),
+        /* Costul construcției calculat de UA. Din el iese `coef_su_sd`: vezi
+           `coeficientulVariantei`. */
+        costConstrCsv: nr(r.var_cost_constructie_eur),
         parcajeNecesare: nr(r.var_parcaje_necesare),
         parcajeSubsol: nr(r.var_parcaje_subsol),
+        /* ⚠️ Necesarul ȘI așezarea lui sunt lucruri diferite. La variantele cu
+           subsol o parte din locuri coboară acolo (Galvani P+5 V2: 16 necesare,
+           8 la parter, 8 la subsol), iar uneori se pun mai multe decât trebuie
+           (Bosianu V1: 8 necesare, 8 la parter plus 1 pe teren). Din
+           `parcajeParter` iese caseta de parcare din rândul parterului. */
+        parcajeParter: nr(r.var_parcaje_parter),
+        parcajeTeren: nr(r.var_parcaje_teren),
         subsolSd: 0,
         niveluri: new Map()
       };
@@ -209,6 +219,61 @@ function suprafeteDePornire(nivel) {
     }
   }
   return { valori: valori, avertismente: avertismente };
+}
+
+/* ── COEFICIENTUL Su/Sd AL UNEI VARIANTE ───────────────────────────────
+
+   `coef_su_sd` e cifra prin care pagina află câți metri desfășurați se construiesc
+   pentru metrii utili împărțiți:
+
+       cost = (Su împărțit + Su comun) / coef × costMp  +  Sd_subsol × costMp × factor
+
+   ⛔ NU e Su/Sd, deși așa se numește și așa a fost tratat până pe 4 septembrie 2026,
+   când stătea scris de mână în configurație ca 0,70. Pagina n-are niciun concept de
+   parcaj, iar UA taxează amprenta parcajelor de la parter la 20%, nu la 100%. Deci
+   singura pârghie prin care poate intra reducerea aceea în pagină e chiar coeficientul.
+   Cu 0,70 pagina arăta la Galvani un cost de construcție cu **56.000 până la 68.000 €
+   mai mic decât fișa** pe care o descarcă grupul, adică vreo 4,4%.
+
+   De aceea se calculează înapoi din costul pe care UA îl scrie în CSV, scazând întâi
+   partea de subsol, fiindcă pagina o ține separat, în `subsol_sd_mp`:
+
+       coef = Su × costMp / (cost_constructie − Sd_subsol × costMp × factor)
+
+   ⚠️ E PER VARIANTĂ, nu pe analiză: două variante ale aceleiași clădiri au coeficienți
+   diferiți dacă au număr diferit de parcaje la parter. La Galvani ies între 0,668 și
+   0,678. O singură cifră pentru toate ar lăsa o eroare de până la 1,4%.
+
+   ⚠️ Coloana din bază e `numeric(4,3)`, deci TREI zecimale. Rotunjirea lasă o eroare
+   de cel mult 0,07%, adică vreo mie de euro pe un milion și jumătate. Se rotunjește
+   aici, nu în bază, ca să se vadă în SQL exact cifra care se scrie.
+
+   `cfg.coef_su_sd` rămâne ca plasă, pentru un CSV fără coloana de cost.               */
+
+function coeficientulVariantei(v, cfg, avertismente) {
+  const costMp = cfg.cost_constructie_mp;
+  const factor = (cfg.cost_subsol_pct != null ? cfg.cost_subsol_pct / 100 : 0.70);
+  const subsol = (v.subsolSd || 0) * costMp * factor;
+  const supra  = (v.costConstrCsv != null) ? (v.costConstrCsv - subsol) : null;
+
+  if (!costMp || supra == null || supra <= 0 || !v.suTotal) {
+    avertismente.push(v.nume + ': nu s-a putut calcula `coef_su_sd` din CSV, se folosește ' +
+      cfg.coef_su_sd + ' din configurație. Verifică prețul pe mp și costul din export.');
+    return cfg.coef_su_sd;
+  }
+
+  const exact = v.suTotal * costMp / supra;
+  const coef  = Math.round(exact * 1000) / 1000;
+
+  /* În afara benzii ăsteia nu mai e o clădire, e o cifră de intrare greșită. Peste 1
+     baza refuză singură (`analiza_varianta_coef_ok`), deci acolo se oprește oricum;
+     sub 0,55 intră liniștit și scrie bani greșiți, deci se strigă. */
+  if (coef < 0.55 || coef > 0.85) {
+    avertismente.push(v.nume + ': `coef_su_sd` iese ' + coef.toFixed(3) +
+      ', în afara benzii obișnuite 0,55-0,85. Aproape sigur ' + costMp +
+      ' €/mp nu e prețul cu care a fost făcut exportul.');
+  }
+  return coef;
 }
 
 /* ── DESCRIEREA VARIANTEI ────────────────────────────────────────────────────
@@ -365,6 +430,7 @@ function main() {
       v.liber.set(n.idx, Math.max(0, Math.round((n.su - dat) * 100) / 100));
     });
     v.descriere = descriereVarianta(v, v.liber);
+    v.coef = coeficientulVariantei(v, cfg, avertismente);
     if (v.costTerenCsv != null && cfg.cost_teren != null &&
         Math.abs(v.costTerenCsv - cfg.cost_teren) > 1) {
       avertismente.push(v.nume + ': terenul e ' + cfg.cost_teren +
@@ -628,10 +694,12 @@ function main() {
   p('');
   p('insert into public.analiza_varianta (');
   p('  analiza_id, grup_id, nume, descriere, su_total_mp, sd_total_mp,');
-  p('  coef_su_sd, subsol_sd_mp, are_subsol, su_comercial_mp, locuri_parcare, ordine');
+  p('  coef_su_sd, subsol_sd_mp, are_subsol, su_comercial_mp, locuri_parcare,');
+  p('  locuri_parcare_parter, locuri_parcare_subsol, locuri_parcare_teren, ordine');
   p(')');
   p('select a.id, a.grup_id, v.nume, v.descriere, v.su_total, v.sd_total,');
-  p('       v.coef, v.subsol_sd, v.are_subsol, v.su_com, v.parcaje, v.ordine');
+  p('       v.coef, v.subsol_sd, v.are_subsol, v.su_com, v.parcaje,');
+  p('       v.parc_parter, v.parc_subsol, v.parc_teren, v.ordine');
   p('  from public.analiza_teren a,');
   p('       (values');
   variante.forEach(function (v, i) {
@@ -640,17 +708,21 @@ function main() {
       sqlText(v.descriere),
       sqlNum(v.suLocuinte),
       sqlNum(v.sdTotal),
-      sqlNum(cfg.coef_su_sd),
+      sqlNum(v.coef),
       sqlNum(v.subsolSd),
       v.areSubsol ? 'true' : 'false',
       sqlNum(v.suComercial || null),
       sqlNum(v.parcajeNecesare),
+      String(v.parcajeParter || 0),
+      String(v.parcajeSubsol || 0),
+      String(v.parcajeTeren || 0),
       String(i + 1)
     ].join(', ') + ')' + (i === variante.length - 1 ? '' : ',') +
       '   -- ' + v.regim + ', ' + v.apTotal + ' ap.');
   });
   p('       ) as v(nume, descriere, su_total, sd_total, coef, subsol_sd,');
-  p('              are_subsol, su_com, parcaje, ordine)');
+  p('              are_subsol, su_com, parcaje,');
+  p('              parc_parter, parc_subsol, parc_teren, ordine)');
   pUndeAnaliza(' ');
   /* Plasa contra rulării de două ori. La Bosianu 32, 1 septembrie, blocul ăsta
      a intrat de două ori: 4 variante în loc de 2, iar blocurile 3 și 4, rulate

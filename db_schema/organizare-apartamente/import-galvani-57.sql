@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- IMPORT ANALIZĂ: Analiză preliminară Luigi Galvani 57
--- Generat de scripts/import-analiza/genereaza-sql.js pe 2026-09-01
+-- Generat de scripts/import-analiza/genereaza-sql.js pe 2026-09-04
 --
 -- ⚠️ NU pune BEGIN / ROLLBACK în tab. Editorul SQL din Supabase rulează tot
 --    tabul ca o singură tranzacție, iar un ROLLBACK pus „de probă” anulează
@@ -26,7 +26,7 @@ select * from (
   union all
   select 2, 'teren', t.id::text, t.titlu, t.suprafata::text
     from public.terenuri t
-   where t.titlu ilike '%Galvani%'
+   where t.id in (select id from public.terenuri where titlu ilike '%Galvani%')
   union all
   select 3, 'membru activ', m.user_id::text,
          coalesce(pr.pseudonym, '(fără pseudonim)'), m.status
@@ -36,38 +36,55 @@ select * from (
                         where nume ilike '%Eco pentru medici%')
      and m.status = 'activ'
   union all
-  select 4, 'teren la favorite', l.teren_id::text, 'da', null
+  select 4, 'favorit (terenuri_likes_grupuri)', l.teren_id::text,
+         coalesce(t.titlu, '⚠️ teren inexistent'), t.suprafata::text
     from public.terenuri_likes_grupuri l
-   where l.grup_id in (select id from public.grupuri
-                        where nume ilike '%Eco pentru medici%')
-     and l.teren_id in (select id from public.terenuri
-                         where titlu ilike '%Galvani%')
+    left join public.terenuri t on t.id = l.teren_id
+   where l.grup_id in (select id from public.grupuri where nume ilike '%Eco pentru medici%')
   union all
-  select 5, 'analiză deja existentă', a.id::text, a.titlu, a.data_analizei::text
+  select 5, 'analiză deja existentă', a.id::text, a.titlu,
+         case when a.teren_id in (select id from public.terenuri where titlu ilike '%Galvani%')
+              then '⚠️ PE ACELAȘI TEREN · ' || a.data_analizei::text
+              else 'pe alt teren · ' || a.data_analizei::text end
     from public.analiza_teren a
-   where a.grup_id in (select id from public.grupuri
-                        where nume ilike '%Eco pentru medici%')
+   where a.grup_id in (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+  union all
+  select 6, 'legat vechi (grup_terenuri)', gt.teren_id::text,
+         coalesce(t.titlu, '⚠️ teren inexistent'),
+         case when gt.removed_at is null then 'activ'
+              else 'SCOS ' || gt.removed_at::date::text end
+    from public.grup_terenuri gt
+    left join public.terenuri t on t.id = gt.teren_id
+   where gt.grup_id in (select id from public.grupuri where nume ilike '%Eco pentru medici%')
 ) x order by ord, detaliu;
 
 -- CE TREBUIE SĂ VEZI:
 --   • exact UN rând „grup” și exact UN rând „teren”. Dacă ies două,
 --     restrânge textul căutat în configurație; blocurile de mai jos
 --     crapă la „more than one row returned by a subquery”.
---   • „teren la favorite” poate lipsi: pagina se deschide oricum, fiindcă
---     de acum există o analiză. Fără analiză ȘI fără favorit, ar refuza.
---   • „analiză deja existentă” trebuie să lipsească. Dacă apare una pe
---     ACELAȘI teren, pagina o arată pe cea mai nouă și cealaltă rămâne
---     ascunsă, nu ștearsă. Șterge-o întâi cu BLOC 6.
+--   • rândurile „favorit” și „legat vechi” arată TOT ce atârnă de grup,
+--     din amândouă tabelele de legătură, nefiltrate. Cea vie e
+--     `terenuri_likes_grupuri`: pe ea o scrie butonul de pe pagina
+--     terenului și pe ea o citesc spațiul de lucru și pagina de
+--     împărțire. `grup_terenuri` e de obicei goală. Dacă terenul apare
+--     DOAR la „legat vechi”, pagina nu-l va găsi: se pune la favorite
+--     din pagina terenului, cu butonul de salvare la grup.
+--   • „analiză deja existentă” poate să apară, atâta timp cât scrie „pe
+--     alt teren”: analiza e a perechii (grup, teren), deci un grup are
+--     câte una de fiecare teren al lui și stau toate.
+--     Ce oprește importul e „⚠️ PE ACELAȘI TEREN”: atunci pagina o
+--     arată pe cea mai nouă și cealaltă rămâne ascunsă, nu ștearsă.
+--     Șterge-o întâi cu BLOC 6.
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 1 · ANALIZA
 --
--- Cifrele de cost sunt cele tastate în Urban Analyzer, nu derivate:
+-- Cifrele de cost vin din configurație, nu din CSV:
 --   • 1200 €/mp Sd
 --   • 830000 € terenul
 --   • subsolul la 70% din prețul pe metru
--- Verificate înapoi prin formula din UA (costConstr = sdFull×costMp +
--- sParcParter×costMp×0,2 + sdSubsol×costMp×factor) pe toate variantele.
+-- Prețul pe mp e verificat înapoi prin formula din UA (costConstr =
+-- sdFull×costMp + sParcParter×costMp×0,2 + sdSubsol×costMp×factor).
 --
 -- Bilanțul de pe analiză e al variantei cu volumul cel mai mare; fiecare
 -- variantă îl are pe al ei în `analiza_varianta`.
@@ -77,8 +94,9 @@ insert into public.analiza_teren (
   grup_id, teren_id, tip, titlu, data_analizei,
   cost_teren, cost_constructie_mp, cost_subsol_pct,
   suprafata_teren_mp, sd_total_mp, su_total_mp, pot_obtinut, cut_obtinut, note
-) values (
-  (select id from public.grupuri  where nume  ilike '%Eco pentru medici%'),
+)
+select
+  (select id from public.grupuri where nume ilike '%Eco pentru medici%'),
   (select id from public.terenuri where titlu ilike '%Galvani%'),
   'preliminara',
   'Analiză preliminară Luigi Galvani 57',
@@ -86,11 +104,16 @@ insert into public.analiza_teren (
   830000, 1200, 70,
   641.01, 1596.01, 1013.9, 43.22, 2.49,
   'Analiză preliminară Urban Analyzer, 1 septembrie 2026. Teren 641,01 mp, UTR M3 (Sector 2), reglementare din certificat de urbanism: POT max 60%, CUT max 2,50, regim max P+5, spațiu verde min 30%. Două ipoteze de volum: P+4 (patru variante, CUT 2,246) și P+5 (trei variante, CUT 2,490, adică la plafon). Costuri de intrare: 1.200 euro pe mp Sd, teren 830.000 euro, subsolul la 70% din prețul pe metru. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.'
-);
+where not exists (select 1 from public.analiza_teren
+                   where grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+                     and teren_id in (select id from public.terenuri where titlu ilike '%Galvani%'));
 
--- Trebuie să scrie „INSERT 0 1”. „INSERT 0 0” nu se poate întâmpla aici
--- (grup_id e NOT NULL, deci o căutare fără rezultat oprește inserarea cu
--- eroare), dar citește oricum linia de răspuns.
+-- Trebuie să scrie „INSERT 0 1”.
+--
+-- „INSERT 0 0” înseamnă că analiza EXISTĂ DEJA, adică blocul a mai fost
+-- rulat o dată. Nu e o pagubă, dar oprește-te: dacă ai rulat deja și
+-- blocurile 2, 3, 4, sunt și ele duble, iar asta chiar se vede în pagină.
+-- Se curăță cu BLOC 6 și se ia totul de la capăt.
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 2 · VARIANTELE (7)
@@ -117,24 +140,38 @@ select a.id, a.grup_id, v.nume, v.descriere, v.su_total, v.sd_total,
        v.coef, v.subsol_sd, v.are_subsol, v.su_com, v.parcaje, v.ordine
   from public.analiza_teren a,
        (values
-         ('P+5 · V1', '10 apartamente · 5 × 3 camere, 5 × 3-4 camere · tot parterul intră în parcaje', 927.5, 1596.01, 0.7, 0, false, null::numeric, 15, 1),   -- P+5, 10 ap.
-         ('P+5 · V2', '11 apartamente · 1 × 2 camere, 5 × 3 camere, 5 × 3-4 camere · 80 mp liberi la parter', 1003.1, 1596.01, 0.7, 486.67, true, null::numeric, 16, 2),   -- P+5, 11 ap.
-         ('P+5 · V3', '10 apartamente · 5 × 3 camere, 5 × 3-4 camere · 91 mp liberi la parter', 1013.9, 1596.01, 0.7, 486.67, true, null::numeric, 15, 3),   -- P+5, 10 ap.
-         ('P+4 · V1', '8 apartamente · 3 × 3 camere, 5 × 3-4 camere · unul la parter', 851.14, 1439.81, 0.7, 0, false, null::numeric, 13, 4),   -- P+4, 8 ap.
-         ('P+4 · V2', '9 apartamente · 2 × 2 camere, 2 × 3 camere, 5 × 3-4 camere · unul la parter', 842.14, 1439.81, 0.7, 0, false, null::numeric, 14, 5),   -- P+4, 9 ap.
-         ('P+4 · V3', '8 apartamente · 1 × 2 camere, 2 × 3 camere, 5 × 3-4 camere · 67 mp liberi la parter', 860.14, 1439.81, 0.7, 0, false, null::numeric, 13, 6),   -- P+4, 8 ap.
-         ('P+4 · V4', '8 apartamente · 3 × 3 camere, 5 × 3-4 camere · unul la parter · aceleași apartamente ca la V1, altfel așezate pe etaje', 851.14, 1439.81, 0.7, 0, false, null::numeric, 13, 7)   -- P+4, 8 ap.
+         ('P+5 · V1', '10 apartamente · 5 × 3 camere, 5 × 3-4 camere · tot parterul intră în parcaje', 927.5, 1596.01, 0.672, 0, false, null::numeric, 15, 1),   -- P+5, 10 ap.
+         ('P+5 · V2', '11 apartamente · 1 × 2 camere, 5 × 3 camere, 5 × 3-4 camere · 80 mp liberi la parter', 1003.1, 1596.01, 0.677, 486.67, true, null::numeric, 16, 2),   -- P+5, 11 ap.
+         ('P+5 · V3', '10 apartamente · 5 × 3 camere, 5 × 3-4 camere · 91 mp liberi la parter', 1013.9, 1596.01, 0.678, 486.67, true, null::numeric, 15, 3),   -- P+5, 10 ap.
+         ('P+4 · V1', '8 apartamente · 3 × 3 camere, 5 × 3-4 camere · unul la parter', 851.14, 1439.81, 0.669, 0, false, null::numeric, 13, 4),   -- P+4, 8 ap.
+         ('P+4 · V2', '9 apartamente · 2 × 2 camere, 2 × 3 camere, 5 × 3-4 camere · unul la parter', 842.14, 1439.81, 0.668, 0, false, null::numeric, 14, 5),   -- P+4, 9 ap.
+         ('P+4 · V3', '8 apartamente · 1 × 2 camere, 2 × 3 camere, 5 × 3-4 camere · 67 mp liberi la parter', 860.14, 1439.81, 0.67, 0, false, null::numeric, 13, 6),   -- P+4, 8 ap.
+         ('P+4 · V4', '8 apartamente · 3 × 3 camere, 5 × 3-4 camere · unul la parter · aceleași apartamente ca la V1, altfel așezate pe etaje', 851.14, 1439.81, 0.669, 0, false, null::numeric, 13, 7)   -- P+4, 8 ap.
        ) as v(nume, descriere, su_total, sd_total, coef, subsol_sd,
               are_subsol, su_com, parcaje, ordine)
- where a.titlu = 'Analiză preliminară Luigi Galvani 57';
+ where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+   and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+   and not exists (select 1 from public.analiza_varianta va2
+                    where va2.analiza_id = a.id and va2.nume = v.nume);
 
 -- Trebuie să scrie „INSERT 0 7”.
+-- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te și
+-- verifică cu BLOC 5 înainte să mergi mai departe.
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 3 · NIVELURILE (38)
 --
--- `su_mp` e `niv_su_locuinte_mp` din CSV, nu `niv_su_mp`: bugetul de
--- împărțit, adică ce rămâne după ce se scade comercialul de la parter.
+-- `su_mp` e Su-ul ÎNTREG al nivelului, locuințe plus comercial, iar
+-- comercialul se scrie SEPARAT în `su_comun_mp`. Așa îl citește pagina:
+-- `suImpartibil` scade `su_comun_mp` din `su_mp` ca să afle cât se
+-- împarte (organizare-apartamente.js:130), iar costul îl adună la loc,
+-- fiindcă spațiul comercial se construiește chiar dacă nu se împarte.
+--
+-- ⚠️ Până la 4 septembrie 2026 aici se scria `niv_su_locuinte_mp` MINUS
+-- comercialul, adică scădere de două ori: coloana din CSV e deja fără
+-- comercial. La Bosianu 32, V2, parterul ieșea `su_mp = -29,61`.
+-- N-a lovit nimic până atunci fiindcă nicio analiză importată n-avea
+-- comercial, iar zero minus zero e tot zero.
 --
 -- SUBSOLUL NU E AICI. Ar intra în desen ca cel mai lat rând (365 mp utili,
 -- față de 194 pe un etaj), iar lățimile din pagină se raportează la
@@ -187,9 +224,13 @@ select va.id, va.grup_id, n.nume, n.ordine, n.su, n.parter, n.comun
          ('P+4 · V4', 'Etaj 4', 4, 147.48, false, null::numeric)   -- 1 ap.
        ) as n(varianta, nume, ordine, su, parter, comun)
     on n.varianta = va.nume
- where a.titlu = 'Analiză preliminară Luigi Galvani 57';
+ where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+   and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+   and not exists (select 1 from public.analiza_nivel ni2
+                    where ni2.varianta_id = va.id and ni2.nume = n.nume);
 
 -- Trebuie să scrie „INSERT 0 38”.
+-- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 4 · APARTAMENTELE (64)
@@ -281,9 +322,13 @@ select ni.id, ni.varianta_id, ni.grup_id, x.tip, x.eticheta,
          ('P+4 · V4', 'Etaj 4', 1, 'cam34', '3-4 cam', 87, 150, 147.48)
        ) as x(varianta, nivel, ordine, tip, eticheta, mpu_min, mpu_max, mpu_propus)
     on x.varianta = va.nume and x.nivel = ni.nume
- where a.titlu = 'Analiză preliminară Luigi Galvani 57';
+ where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+   and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+   and not exists (select 1 from public.analiza_apartament ap2
+                    where ap2.nivel_id = ni.id and ap2.ordine = x.ordine);
 
 -- Trebuie să scrie „INSERT 0 64”.
+-- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 5 · VERIFICĂRILE. Nu schimbă nimic.
@@ -294,13 +339,26 @@ select * from (
          count(distinct ni.id)::text as niveluri,
          count(ap.id)::text as apartamente,
          round(sum(ap.mpu_propus), 2)::text as mp_dati,
-         round(va.su_total_mp, 2)::text as mp_de_dat
+         (select round(sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0)), 2)
+            from public.analiza_nivel ni2
+           where ni2.varianta_id = va.id)::text as mp_de_dat
     from public.analiza_varianta va
     join public.analiza_teren a on a.id = va.analiza_id
     left join public.analiza_nivel ni on ni.varianta_id = va.id
     left join public.analiza_apartament ap on ap.nivel_id = ni.id
    where a.titlu = 'Analiză preliminară Luigi Galvani 57'
-   group by va.nume, va.ordine, va.su_total_mp
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+   group by va.id, va.nume, va.ordine
+  union all
+  -- (a2) analiza nu trebuie să existe decât o dată. Se verifică separat
+  --      fiindcă la o dublură rândurile de mai sus arată numai cifre
+  --      duble, fără să spună de ce.
+  select 0, 'ANALIZĂ DUBLĂ', 'sunt ' || count(*)::text || ' analize cu acest titlu',
+         string_agg(a.id::text, ', ' order by a.created_at), null, null, null
+    from public.analiza_teren a
+   where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+  having count(*) > 1
   union all
   -- (b) niciun apartament nu trebuie să iasă din intervalul lui
   select 2, 'ÎN AFARA INTERVALULUI', va.nume || ' · ' || ni.nume || ' · ' || ap.tip_eticheta,
@@ -310,25 +368,62 @@ select * from (
     join public.analiza_varianta va on va.id = ap.varianta_id
     join public.analiza_teren a on a.id = va.analiza_id
    where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
      and (ap.mpu_propus < ap.mpu_min or ap.mpu_propus > ap.mpu_max)
   union all
   -- (c) niciun nivel nu trebuie să fie umplut peste Su-ul lui
   select 3, 'NIVEL DEPĂȘIT', va.nume || ' · ' || ni.nume,
-         round(sum(ap.mpu_propus), 2)::text, round(ni.su_mp, 2)::text, null, null
+         round(sum(ap.mpu_propus), 2)::text,
+         round(ni.su_mp - coalesce(ni.su_comun_mp, 0), 2)::text, null, null
     from public.analiza_apartament ap
     join public.analiza_nivel ni on ni.id = ap.nivel_id
     join public.analiza_varianta va on va.id = ap.varianta_id
     join public.analiza_teren a on a.id = va.analiza_id
    where a.titlu = 'Analiză preliminară Luigi Galvani 57'
-   group by va.nume, ni.nume, ni.su_mp
-  having sum(ap.mpu_propus) > ni.su_mp + 0.01
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+   group by va.nume, ni.nume, ni.su_mp, ni.su_comun_mp
+  having sum(ap.mpu_propus) > ni.su_mp - coalesce(ni.su_comun_mp, 0) + 0.01
+  union all
+  -- (c2) suma nivelurilor trebuie să dea Su-ul de locuințe al variantei.
+  --      Verificarea asta a lipsit până pe 4 septembrie 2026 și de aceea a
+  --      trecut nevăzut un generator care scădea comercialul de două ori:
+  --      rezultatul era un nivel cu su_mp negativ, perfect legal în schemă.
+  --      Toleranța de 0,05 e rotunjirea la doi zecimali din exportul UA.
+  select 5, 'SU NEPOTRIVITĂ', va.nume,
+         (select round(sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0)), 2)
+            from public.analiza_nivel ni2
+           where ni2.varianta_id = va.id)::text,
+         round(va.su_total_mp, 2)::text, null, null
+    from public.analiza_varianta va
+    join public.analiza_teren a on a.id = va.analiza_id
+   where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+     and abs(coalesce((select sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0))
+                        from public.analiza_nivel ni2
+                       where ni2.varianta_id = va.id), 0)
+             - va.su_total_mp) > 0.05
+  union all
+  -- (c3) niciun nivel nu poate rămâne cu suprafață negativă de împărțit.
+  --      Schema o acceptă fără să se plângă, pagina o desenează ca pe un
+  --      rând fără lățime. Zero NU e semnalat: un parter numai comercial
+  --      e o variantă legitimă.
+  select 6, 'NIVEL CU SUPRAFAȚĂ NEGATIVĂ', va.nume || ' · ' || ni.nume,
+         ni.su_mp::text, coalesce(ni.su_comun_mp, 0)::text, null, null
+    from public.analiza_nivel ni
+    join public.analiza_varianta va on va.id = ni.varianta_id
+    join public.analiza_teren a on a.id = va.analiza_id
+   where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+     and ni.su_mp - coalesce(ni.su_comun_mp, 0) < 0
   union all
   -- (d) grup_id-ul copiat trebuie să fie același peste tot: o variantă
   --     scrisă pe alt grup e invizibilă în pagină, fără nicio eroare
   select 4, 'GRUP GREȘIT', va.nume, va.grup_id::text, a.grup_id::text, null, null
     from public.analiza_varianta va
     join public.analiza_teren a on a.id = va.analiza_id
-   where a.titlu = 'Analiză preliminară Luigi Galvani 57' and va.grup_id <> a.grup_id
+   where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
+     and va.grup_id <> a.grup_id
 ) x order by ord, detaliu;
 
 -- CE TREBUIE SĂ VEZI: doar rânduri „variantă”, câte unul de fiecare.
@@ -366,6 +461,7 @@ update public.analiza_varianta va
   from public.analiza_teren a
  where a.id = va.analiza_id
    and a.titlu = 'Analiză preliminară Luigi Galvani 57'
+   and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
    and va.nume like 'P+5 · %';
 
 -- Trebuie să scrie „UPDATE 3”.
@@ -379,6 +475,7 @@ update public.analiza_varianta va
   from public.analiza_teren a
  where a.id = va.analiza_id
    and a.titlu = 'Analiză preliminară Luigi Galvani 57'
+   and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
    and va.nume like 'P+4 · %';
 
 -- Trebuie să scrie „UPDATE 4”.
@@ -392,6 +489,7 @@ select va.nume, va.pdf_nume, va.kml_nume,
   from public.analiza_varianta va
   join public.analiza_teren a on a.id = va.analiza_id
  where a.titlu = 'Analiză preliminară Luigi Galvani 57'
+   and a.grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%')
  order by va.ordine;
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -403,5 +501,11 @@ select va.nume, va.pdf_nume, va.kml_nume,
 -- jurnalul terenului, documentele sau notele: acelea nu depind de analiză.
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- delete from public.analiza_teren where titlu = 'Analiză preliminară Luigi Galvani 57';
+-- delete from public.analiza_teren
+--  where titlu = 'Analiză preliminară Luigi Galvani 57'
+--    and grup_id = (select id from public.grupuri where nume ilike '%Eco pentru medici%');
+--
+-- ⚠️ Și grupul, nu doar titlul: același teren analizat pentru două grupuri
+--    dă două analize cu același titlu, iar ștergerea pe titlu le-ar lua pe
+--    amândouă, inclusiv pe a celuilalt grup.
 

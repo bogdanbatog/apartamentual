@@ -538,6 +538,45 @@ function renderVarianta(){
       zona.appendChild(g);
     }
 
+    /* PARCAREA DE LA PARTER.
+
+       `niv.su` e suprafața utilă rămasă DUPĂ ce parcajele și-au luat locul, deci
+       rândul parterului iese mai scurt decât al etajelor și restul lui rămânea gol,
+       fără nicio explicație. La Galvani P+5 V1 parterul are 4,24 mp utili dintr-un
+       rând care la etaj înseamnă 193,95: 98% gol, și arăta ca o greșeală de afișare.
+       Caseta umple exact diferența și spune câte mașini stau acolo.
+
+       ⚠️ Lățimea e diferența până la nivelul cel mai lat, NU amprenta reală a
+       parcajelor (8 × 19,50 = 156 mp la Bosianu). Amprenta e suprafață
+       CONSTRUITĂ, iar rândul e o scară de suprafață UTILĂ: desenată la scara ei,
+       caseta ar ieși din rând și ar strica comparația dintre niveluri. Așa cum e,
+       ocupă exact golul de care e răspunzătoare.
+
+       ⚠️ Nu se desenează când parterul e chiar nivelul cel mai lat: n-ar avea unde.
+          Nu s-a întâmplat pe nicio analiză de până acum, dar e posibil. */
+    const spatiuParcare = grila - niv.su;
+    if (niv.parter && v.parcParter > 0 && spatiuParcare > grila * 0.02) {
+      const alteLocuri = [];
+      if (v.parcSubsol > 0) alteLocuri.push('plus ' + v.parcSubsol + ' la subsol');
+      if (v.parcTeren  > 0) alteLocuri.push('plus ' + v.parcTeren  + ' pe teren');
+
+      const pc = document.createElement('div');
+      pc.className = 'ap parcare';
+      pc.style.flex = lat(spatiuParcare);
+      pc.innerHTML =
+        '<div class="ap-titlu">' +
+          '<span class="tip"><i class="fas fa-car" aria-hidden="true"></i> Parcare</span>' +
+          '<span class="mp">' + v.parcParter +
+            '<span class="mp-unitate"> ' + (v.parcParter === 1 ? 'loc' : 'locuri') + '</span></span>' +
+        '</div>' +
+        '<div class="ap-jos"><div class="ap-bani">' +
+          (alteLocuri.length ? alteLocuri.join(', ') : 'ocupă restul parterului') +
+        '</div></div>';
+      pc.title = 'Locurile de parcare ocupă parterul, de aceea rămâne mai puțină ' +
+                 'suprafață utilă aici decât la etaje.';
+      zona.appendChild(pc);
+    }
+
     rand.appendChild(zona);
     cont.appendChild(rand);
 
@@ -1731,7 +1770,8 @@ async function oaPorneste(){
   variante = (vars.data || []).map(function (v) {
     const niveluri = (nivs.data || []).filter(n => n.varianta_id === v.id).map(n => ({
       id: n.id, nume: n.nume, ord: n.ordine, su: Number(n.su_mp),
-      suComun: n.su_comun_mp ? Number(n.su_comun_mp) : 0
+      suComun: n.su_comun_mp ? Number(n.su_comun_mp) : 0,
+      parter: n.este_parter === true
     }));
     const nivIds = niveluri.map(n => n.id);
     const ap = (aps.data || []).filter(a => nivIds.indexOf(a.nivel_id) >= 0).map(function (a) {
@@ -1758,6 +1798,12 @@ async function oaPorneste(){
       costMpSd: Number(analiza.cost_constructie_mp || 0),
       coefUtil: Number(v.coef_su_sd || COEF_UTIL_IMPLICIT),
       subsolSd: Number(v.subsol_sd_mp || 0),
+      /* Unde stau locurile de parcare. Din `parcParter` iese caseta din rândul
+         parterului; celelalte două se scriu în ea, ca să se vadă toată
+         socoteala. `locuri_parcare` rămâne necesarul și NU e același lucru. */
+      parcParter: Number(v.locuri_parcare_parter || 0),
+      parcSubsol: Number(v.locuri_parcare_subsol || 0),
+      parcTeren:  Number(v.locuri_parcare_teren  || 0),
       factorSubsol: analiza.cost_subsol_pct ? Number(analiza.cost_subsol_pct) / 100 : FACTOR_SUBSOL_IMPLICIT
     };
   }).filter(v => v.ap.length > 0);

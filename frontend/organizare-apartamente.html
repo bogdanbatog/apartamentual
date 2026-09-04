@@ -203,6 +203,15 @@
   .ap.comun{cursor:default;border-style:dashed;color:var(--gri);}
   .ap.comun:hover{border-color:var(--linie);}
 
+  /* Parcarea de la parter. Arătă ca o casetă de apartament, fiindcă asta întreabă
+     omul când vede rândul scurt: „ce e acolo?". Dar nu se apasă și nu se trage de
+     ea, deci e punctată și în gri, ca spațiul comun. */
+  .ap.parcare{cursor:default;border-style:dashed;color:var(--gri);
+    background:repeating-linear-gradient(135deg,var(--hartie),var(--hartie) 7px,
+      rgba(110,103,94,.05) 7px,rgba(110,103,94,.05) 14px);}
+  .ap.parcare:hover{border-color:var(--linie);}
+  .ap.parcare .ap-titlu .tip i{margin-right:4px;opacity:.75;}
+
   /* Golul rămas pe nivel. Nu e o greșeală, e suprafață care încă nu s-a dat
      nimănui, dar pe care o plătește cineva: de asta se vede. */
   .gol-nivel{
@@ -459,6 +468,10 @@
        Unitatea se vede în panou, iar lângă un tip de apartament o cifră nu se
        poate citi altfel. */
     .mp-unitate{display:none;}
+    /* ⚠️ La parcare unitatea RĂMÂNE. La un apartament, „100" se citește mp
+       fiindcă tot rândul e despre suprafețe; la parcare, un „8" singur pare
+       8 mp, adică exact ce nu e. „8 locuri" încape. */
+    .ap.parcare .mp-unitate{display:inline;}
     .ap-jos-sageata{display:inline;}
     .ap-jos{display:none;}
     .ap{padding:7px 6px;}

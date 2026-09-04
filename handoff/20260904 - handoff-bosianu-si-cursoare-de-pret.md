@@ -20,7 +20,8 @@ Analiza: **P+3, două variante, 5 apartamente fiecare.**
 | V1 · 5 ap., 18,69 mp liberi la parter | 380,37 mp | 1.261 mii € | 3.485 |
 | V2 · 5 ap., 30 mp birouri la parter | 362,07 mp | 1.315 mii € | 3.637 |
 
-Cifrele de intrare: **teren 600.000 €**, **construcție 1.200 €/mp Sd**, **`coef_su_sd` 0,657**.
+Cifrele de intrare: **teren 600.000 €**, **construcție 1.200 €/mp Sd**, `coef_su_sd` **0,657**
+la V1 și **0,659** la V2 (vezi secțiunea 3: e per variantă, nu pe analiză).
 
 ### Ce s-a schimbat față de exportul din 1 septembrie
 
@@ -41,12 +42,12 @@ din el**; geometria, nivelurile, apartamentele, parcajele și costul de construc
 identice la ultimul caracter. Deci **în bază n-a fost nimic de schimbat**, importul rulat era
 deja corect, iar SQL-ul regenerat diferă prin două comentarii și niciun rând de date.
 
-🔴 **RĂMAS DE FĂCUT, singurul lucru deschis la Bosianu:** înlocuiește fișa în Storage,
-`analize-fise/597d71bd-2289-468a-8988-d510e1ac55a6/bosianu-32-fisa.pdf`. Cea urcată e încă
-versiunea cu 650.000 €, adică ultimul loc unde grupul vede cifra veche. Fișierul bun e în
-`analize din Urban Analyzer/Constantin Bosianu 32/_de-urcat/`. Numele rămâne identic, deci
-căile din bază sunt valabile și **BLOC 7 nu se rerulează**. Dacă dashboard-ul refuză urcarea
-peste un fișier existent, șterge-l întâi pe cel vechi.
+✅ **Fișa din Storage a fost înlocuită și verificată.** Descărcată din
+`analize-fise/597d71bd-2289-468a-8988-d510e1ac55a6/`, i s-a calculat amprenta SHA-256 și e
+**identică la nivel de octet** cu cea de pe disc (`b1c43a7e…`, 415.746 octeți). Proba s-a făcut
+pe amprentă, nu pe mărime, fiindcă cele două versiuni diferă printr-un singur octet.
+KML-ul, neatins. Numele a rămas identic, deci căile din bază sunt valabile și BLOC 7 nu s-a
+rerulat. **Nu mai există niciun loc unde grupul să vadă 650.000 €.**
 
 ---
 
@@ -94,10 +95,26 @@ coloana `var_sc_per_parcare_parter_mp`. **Nota veche care presupunea 15 mp pe lo
 era greșită**: pe exportul din 1 septembrie ambele variante aveau același număr de parcaje,
 deci cifra nu se putea deduce, doar ghici.
 
-🔴 **RĂMAS DESCHIS: Galvani a rămas în bază cu 0,70**, la ambele grupuri, deci pagina arată
-acolo un cost de construcție cu vreo 4% mai mic decât fișa. Se repară cu un UPDATE scurt, dar
-e o cifră pe care o văd 21 de oameni la Parcul Circului, deci cere o decizie a lui Lucian, nu
-o strecurare.
+✅ **REPARAT în aceeași seară, pe toate analizele.** Migrația
+`db_schema/organizare-apartamente/13-coeficientul-su-sd.sql`, rulată, `UPDATE 16`: 7 variante
+× 2 grupuri Galvani („Bloc Eco pentru Medici și Profesioniști" și „Parcul Circului") plus
+cele 2 de la Bosianu. Înainte, pagina arăta între 56.139 și 68.105 € mai puțin decât fișa pe
+fiecare variantă; acum diferența maximă e **1.052 €, adică 0,07%**, doar rotunjirea la trei
+zecimale. Probat și în pagină, nu doar în SQL Editor: P+5 · V1 la Parcul Circului a urcat de
+la 2.613 la 2.685 €/mp.
+
+**Coeficienții, per variantă:** P+5 V1 0,672 · V2 0,677 · V3 0,678; P+4 V1 0,669 · V2 0,668 ·
+V3 0,670 · V4 0,669; Bosianu V1 0,657 · V2 0,659. Diferă între ele fiindcă depind de câte
+parcaje stau la parter.
+
+✅ **Și cauza e reparată, nu doar efectul.** Generatorul îl calculează de acum singur, per
+variantă, înapoi din costul scris de UA în CSV, deci nu mai e o cifră scrisă de mână care se
+poate uita la următorul import. Descoperirea care face calculul posibil: la Galvani
+`var_sd_total_mp` **nu include subsolul**, deci costul se reconstituie exact scăzând întâi
+partea de subsol, pe care pagina o ține separat în `subsol_sd_mp`.
+
+⚠️ **Costurile au CRESCUT pentru 21 de oameni la Parcul Circului.** Nu e o scumpire, e o
+subestimare reparată, dar cine și-a notat cifrele vechi merită o vorbă pe grup.
 
 ---
 
@@ -174,9 +191,10 @@ Sesiunea Supabase e per-origine, deci pe `127.0.0.1` trebuie logat din nou.
 
 ## ⏭️ De făcut în sesiunea următoare
 
-1. 🔴 **Înlocuiește fișa Bosianu în Storage** (secțiunea 1). Ultimul loc cu 650.000 €.
-2. 🔴 **Decide ce se face cu `coef_su_sd = 0,70` la Galvani** (secțiunea 3). 21 de oameni.
-3. 🟡 **Ce se întâmplă cu spațiul comercial de la parter** (secțiunea 5). Blochează V2.
+1. ✅ Fișa Bosianu a fost înlocuită în Storage și verificată prin amprentă SHA-256, identică
+   la nivel de octet cu cea de pe disc. Nimic de făcut.
+2. 🟡 **Ce se întâmplă cu spațiul comercial de la parter** (secțiunea 5). Blochează V2.
+3. Spune-le celor de la Parcul Circului că s-au corectat costurile în sus (secțiunea 3).
 4. Rămase din sesiunile dinainte: setul P+4 de pe Parcul Circului cu parterul imposibil,
    filtrul `status = 'active'` din `grup-terenuri-edit.js:222`, politica de pe `grup_membri`
    pusă pe rolul `public`, comunicarea către utilizatori că superadminii văd preferințele.

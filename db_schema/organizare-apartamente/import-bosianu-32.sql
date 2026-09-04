@@ -140,7 +140,7 @@ select a.id, a.grup_id, v.nume, v.descriere, v.su_total, v.sd_total,
   from public.analiza_teren a,
        (values
          ('P+3 · V1', '5 apartamente · 2 × studio, 3 × 3-4 camere · tot parterul intră în parcaje', 380.37, 703.84, 0.657, 0, false, null::numeric, 8, 1),   -- P+3, 5 ap.
-         ('P+3 · V2', '5 apartamente · 2 × 2 camere, 2 × 3 camere, 1 × 3-4 camere · 30 mp birouri la parter', 362.07, 703.84, 0.657, 0, false, 30, 8, 2)   -- P+3, 5 ap.
+         ('P+3 · V2', '5 apartamente · 2 × 2 camere, 2 × 3 camere, 1 × 3-4 camere · 30 mp birouri la parter', 362.07, 703.84, 0.659, 0, false, 30, 8, 2)   -- P+3, 5 ap.
        ) as v(nume, descriere, su_total, sd_total, coef, subsol_sd,
               are_subsol, su_com, parcaje, ordine)
  where a.titlu = 'Analiză preliminară Constantin Bosianu 32'
