@@ -86,10 +86,6 @@ select * from (
 -- Prețul pe mp e verificat înapoi prin formula din UA (costConstr =
 -- sdFull×costMp + sParcParter×costMp×0,2 + sdSubsol×costMp×factor).
 --
--- ⚠️ TERENUL DIFERĂ DE CSV: exportul are 650000 €. Cifra de
--- mai sus e cea bună, dar fișa PDF pe care o descarcă grupul rămâne pe
--- cealaltă, deci totalul ei nu se potrivește cu al paginii.
---
 -- Bilanțul de pe analiză e al variantei cu volumul cel mai mare; fiecare
 -- variantă îl are pe al ei în `analiza_varianta`.
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -122,7 +118,7 @@ where not exists (select 1 from public.analiza_teren
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 2 · VARIANTELE (2)
 --
---   P+3: 2 variante, din analiza-urbanistica (10).csv
+--   P+3: 2 variante, din analiza-urbanistica (11).csv
 --
 -- Numele poartă prefixul setului fiindcă amândouă exporturile își numesc
 -- variantele V1, V2, V3: fără prefix, filele din pagină s-ar ciocni.
