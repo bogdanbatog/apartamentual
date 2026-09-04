@@ -1,7 +1,7 @@
 # Handoff, 4 septembrie 2026
 ## Importul Bosianu 32 și cursoarele de preț pe împărțirea apartamentelor
 
-Trei commituri, toate împinse: `baf4c0a`, `1524bb7`, `4a4036c`.
+Cinci commituri, toate împinse: `baf4c0a`, `1524bb7`, `4a4036c`, `1729990`, `40f7488`.
 Deploy cPanel făcut de Lucian pentru al doilea (singurul care atinge `frontend/`).
 
 ---
@@ -151,7 +151,37 @@ zero scrieri către bază.
 
 ---
 
-## 5. Semnal de produs: V2 costă mai mult și dă mai puțin
+## 5. Caseta de parcare de la parter
+
+Rândul parterului arăta mai scurt decât etajele și restul lui rămânea gol, fără nicio
+explicație. Cauza: `analiza_nivel.su_mp` e suprafața utilă rămasă **după** ce parcajele și-au
+luat locul. La Galvani P+5 V1, parterul are 4,24 mp utili dintr-un rând care la etaj înseamnă
+193,95: **98% gol, pentru 15 mașini**, și arăta ca o greșeală de afișare. Golul e între 53% și
+98% pe toate cele 16 variante.
+
+Migrația `14-locurile-de-parcare.sql`, rulată: trei coloane noi pe `analiza_varianta`
+(`locuri_parcare_parter`, `_subsol`, `_teren`) plus cifrele pentru variantele existente.
+
+⚠️ **Erau necesare fiindcă `locuri_parcare` e NECESARUL, nu așezarea lui.** Galvani P+5 V2 are
+16 necesare, dar 8 la parter și 8 la subsol; Bosianu V1 are 8 necesare și pune 9 (8 la parter,
+1 pe teren). Nu se poate deduce, trebuie ținut.
+
+Caseta arată ca una de apartament, fiindcă asta întreabă omul când vede rândul scurt, dar e
+punctată și în gri ca spațiul comun: nu se apasă și nu se trage de ea. Scrie numărul de locuri,
+iar dedesubt unde stau celelalte („plus 8 la subsol", „plus 1 pe teren").
+
+⚠️ **Lățimea e golul până la nivelul cel mai lat, NU amprenta reală a parcajelor** (8 × 19,50 =
+156 mp la Bosianu). Rândul e o scară de suprafață **utilă**; desenată la scara ei, caseta ar
+ieși din rând și ar strica comparația dintre niveluri. **De aceea nu se scriu mp pe ea, doar
+locuri:** o cifră de mp lângă o casetă care nu e de acea mărime ar minți.
+
+⚠️ Pe telefon unitatea rămâne vizibilă doar pe caseta asta. La un apartament „100" se citește
+mp fără să te gândești, fiindcă tot rândul e despre suprafețe; la parcare un „8" singur pare
+8 mp, adică fix ce nu e.
+
+---
+
+## 6. Semnal de produs: V2 costă mai mult și dă mai puțin
 
 🟡 **Nu e o eroare, e o problemă de fond, de discutat cu Liviu.** Pentru 54 mii € în plus,
 grupul primește cu 18 mp de locuință mai puțin. Singurul lucru care ar justifica V2 sunt cei
@@ -172,7 +202,7 @@ despicat în două coloane cu înțelesuri diferite.
 
 ---
 
-## 6. Alte lucruri de ținut minte
+## 7. Alte lucruri de ținut minte
 
 **Grupul are 5 membri activi și amândouă variantele au fix 5 apartamente.** Se potrivește
 exact, dar înseamnă zero rezervă: dacă pleacă cineva rămâne un apartament fără om, iar dacă
@@ -193,7 +223,7 @@ Sesiunea Supabase e per-origine, deci pe `127.0.0.1` trebuie logat din nou.
 
 1. ✅ Fișa Bosianu a fost înlocuită în Storage și verificată prin amprentă SHA-256, identică
    la nivel de octet cu cea de pe disc. Nimic de făcut.
-2. 🟡 **Ce se întâmplă cu spațiul comercial de la parter** (secțiunea 5). Blochează V2.
+2. 🟡 **Ce se întâmplă cu spațiul comercial de la parter** (secțiunea 6). Blochează V2.
 3. Spune-le celor de la Parcul Circului că s-au corectat costurile în sus (secțiunea 3).
 4. Rămase din sesiunile dinainte: setul P+4 de pe Parcul Circului cu parterul imposibil,
    filtrul `status = 'active'` din `grup-terenuri-edit.js:222`, politica de pe `grup_membri`
