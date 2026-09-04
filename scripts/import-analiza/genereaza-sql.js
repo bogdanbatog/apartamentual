@@ -76,9 +76,16 @@ function grupeazaVariante(randuri) {
         suTotal: nr(r.var_su_total_mp),
         suLocuinte: nr(r.var_su_locuinte_mp),
         suComercial: nr(r.var_su_comercial_mp),
+        /* Ce stă la parter când nu stau locuințe: „birouri”, „comercial”,
+           „servicii”. Gol pe variantele fără comercial. */
+        parterFunctiune: (r.var_parter_functiune || '').trim(),
         potObtinut: nr(r.var_pot_obtinut_pct),
         cutObtinut: nr(r.var_cut_obtinut),
         apTotalDinCsv: nr(r.var_apartamente_total),
+        /* Prețul terenului tastat în UA. Nu se folosește la import (îl dă
+           configurația), dar se compară cu ea: dacă diferă, fișa PDF pe care o
+           descarcă grupul arată alt total decât pagina. */
+        costTerenCsv: nr(r.var_cost_teren_eur),
         parcajeNecesare: nr(r.var_parcaje_necesare),
         parcajeSubsol: nr(r.var_parcaje_subsol),
         subsolSd: 0,
@@ -103,6 +110,12 @@ function grupeazaVariante(randuri) {
            ce rămâne după ce se scade comercialul de la parter. */
         su: nr(r.niv_su_locuinte_mp),
         suComercial: nr(r.niv_su_comercial_mp) || 0,
+        /* Su-ul ÎMPREUNĂ cu comercialul, adică ce așteaptă coloana `su_mp` din
+           bază. Se ține separat de `su` fiindcă sunt două lucruri diferite:
+           `su` e cât se împarte în apartamente, `suTotal` e cât se construiește
+           pe nivel. Egale peste tot în afară de un parter cu comercial. */
+        suTotal: nr(r.niv_su_locuinte_mp) + (nr(r.niv_su_comercial_mp) || 0),
+        suCsv: nr(r.niv_su_mp),
         apartamente: []
       };
       v.niveluri.set(idx, n);
@@ -227,14 +240,26 @@ function descriereVarianta(v, liberPeNivel) {
   const parter = v.niveluriSortate.find(n => n.esteParter);
   if (parter) {
     const liber = liberPeNivel.get(parter.idx) || 0;
-    if (parter.apartamente.length === 0 && liber >= 20) {
-      parti.push(Math.round(liber) + ' mp liberi la parter');
-    } else if (parter.apartamente.length === 0 && liber < 20) {
-      parti.push('tot parterul intră în parcaje');
-    } else if (parter.apartamente.length === 1) {
+    /* Comercialul de la parter e adesea singurul lucru care deosebește două
+       variante cu același amestec de apartamente, deci se spune înaintea
+       oricărei alte vorbe despre parter. Funcțiunea vine din CSV; când
+       lipsește, se scrie neutru. */
+    if (parter.suComercial > 0) {
+      const ce = { birouri: 'birouri', servicii: 'servicii',
+                   comercial: 'spațiu comercial' }[v.parterFunctiune.toLowerCase()]
+                 || v.parterFunctiune || 'spațiu comercial';
+      parti.push(Math.round(parter.suComercial) + ' mp ' + ce + ' la parter');
+    }
+    if (parter.apartamente.length === 1) {
       parti.push('unul la parter');
-    } else {
+    } else if (parter.apartamente.length > 1) {
       parti.push(parter.apartamente.length + ' la parter');
+    } else if (parter.suComercial > 0) {
+      /* Comercialul s-a spus deja și explică singur parterul. */
+    } else if (liber >= 20) {
+      parti.push(Math.round(liber) + ' mp liberi la parter');
+    } else {
+      parti.push('tot parterul intră în parcaje');
     }
   }
   return parti.join(' · ');
@@ -323,10 +348,29 @@ function main() {
       (rez.avertismente || []).forEach(function (a) {
         avertismente.push(v.nume + ' · ' + n.nume + ': ' + a);
       });
+      /* Cele trei coloane de Su ale nivelului trebuie să se închidă între ele.
+         Dacă nu se închid, înseamnă că pe nivel mai stă ceva ce nu e nici
+         locuință, nici comercial, iar `su_mp` scris de noi ar fi mai mic decât
+         ce se construiește acolo. Toleranță de un ban, pentru rotunjiri. */
+      if (n.suCsv != null && Math.abs(n.suTotal - n.suCsv) > 0.011) {
+        avertismente.push(v.nume + ' · ' + n.nume + ': `niv_su_mp` e ' + n.suCsv +
+          ', dar locuințe plus comercial dau ' + Math.round(n.suTotal * 100) / 100 +
+          '. Verifică exportul înainte de import.');
+      }
       const dat = n.propuse.reduce((s, x) => s + x, 0);
-      v.liber.set(n.idx, Math.max(0, Math.round((n.su - n.suComercial - dat) * 100) / 100));
+      /* `n.su` e deja fără comercial (`niv_su_locuinte_mp`), deci NU se mai
+         scade o dată `n.suComercial`: la Bosianu 32, V2, parterul ieșea cu
+         „liber” negativ și descrierea spunea „tot parterul intră în parcaje”
+         pe un parter care are 30 mp de birouri. */
+      v.liber.set(n.idx, Math.max(0, Math.round((n.su - dat) * 100) / 100));
     });
     v.descriere = descriereVarianta(v, v.liber);
+    if (v.costTerenCsv != null && cfg.cost_teren != null &&
+        Math.abs(v.costTerenCsv - cfg.cost_teren) > 1) {
+      avertismente.push(v.nume + ': terenul e ' + cfg.cost_teren +
+        ' € în configurație, dar ' + v.costTerenCsv + ' € în CSV. Importul ia cifra' +
+        ' din configurație, dar fișa PDF rămâne pe cealaltă: grupul vede două totaluri.');
+    }
     if (v.apTotalDinCsv != null && v.apTotalDinCsv !== v.apTotal) {
       avertismente.push(v.nume + ': CSV-ul spune ' + v.apTotalDinCsv +
         ' apartamente, dar numărătoarea pe niveluri dă ' + v.apTotal);
@@ -464,15 +508,28 @@ function main() {
 
   /* ── BLOC 1 ──────────────────────────────────────────────────────────── */
   const primaVarianta = variante[0];
+  /* Prețul terenului din CSV, când nu e cel din configurație. Se scrie în capul
+     blocului ca să nu se piardă: avertismentele ies pe ecran și dispar, SQL-ul
+     rămâne și se citește peste o lună. */
+  const terenDiferit =
+    (primaVarianta && primaVarianta.costTerenCsv != null && cfg.cost_teren != null &&
+     Math.abs(primaVarianta.costTerenCsv - cfg.cost_teren) > 1)
+      ? primaVarianta.costTerenCsv : null;
   p(linie);
   p('-- BLOC 1 · ANALIZA');
   p('--');
-  p('-- Cifrele de cost sunt cele tastate în Urban Analyzer, nu derivate:');
+  p('-- Cifrele de cost vin din configurație, nu din CSV:');
   p('--   • ' + cfg.cost_constructie_mp + ' €/mp Sd');
   p('--   • ' + cfg.cost_teren + ' € terenul');
   p('--   • subsolul la ' + cfg.cost_subsol_pct + '% din prețul pe metru');
-  p('-- Verificate înapoi prin formula din UA (costConstr = sdFull×costMp +');
-  p('-- sParcParter×costMp×0,2 + sdSubsol×costMp×factor) pe toate variantele.');
+  p('-- Prețul pe mp e verificat înapoi prin formula din UA (costConstr =');
+  p('-- sdFull×costMp + sParcParter×costMp×0,2 + sdSubsol×costMp×factor).');
+  if (terenDiferit != null) {
+    p('--');
+    p('-- ⚠️ TERENUL DIFERĂ DE CSV: exportul are ' + terenDiferit + ' €. Cifra de');
+    p('-- mai sus e cea bună, dar fișa PDF pe care o descarcă grupul rămâne pe');
+    p('-- cealaltă, deci totalul ei nu se potrivește cu al paginii.');
+  }
   p('--');
   p('-- Bilanțul de pe analiză e al variantei cu volumul cel mai mare; fiecare');
   p('-- variantă îl are pe al ei în `analiza_varianta`.');
@@ -612,8 +669,17 @@ function main() {
   p(linie);
   p('-- BLOC 3 · NIVELURILE (' + totalNiveluri + ')');
   p('--');
-  p('-- `su_mp` e `niv_su_locuinte_mp` din CSV, nu `niv_su_mp`: bugetul de');
-  p('-- împărțit, adică ce rămâne după ce se scade comercialul de la parter.');
+  p('-- `su_mp` e Su-ul ÎNTREG al nivelului, locuințe plus comercial, iar');
+  p('-- comercialul se scrie SEPARAT în `su_comun_mp`. Așa îl citește pagina:');
+  p('-- `suImpartibil` scade `su_comun_mp` din `su_mp` ca să afle cât se');
+  p('-- împarte (organizare-apartamente.js:130), iar costul îl adună la loc,');
+  p('-- fiindcă spațiul comercial se construiește chiar dacă nu se împarte.');
+  p('--');
+  p('-- ⚠️ Până la 4 septembrie 2026 aici se scria `niv_su_locuinte_mp` MINUS');
+  p('-- comercialul, adică scădere de două ori: coloana din CSV e deja fără');
+  p('-- comercial. La Bosianu 32, V2, parterul ieșea `su_mp = -29,61`.');
+  p('-- N-a lovit nimic până atunci fiindcă nicio analiză importată n-avea');
+  p('-- comercial, iar zero minus zero e tot zero.');
   p('--');
   p('-- SUBSOLUL NU E AICI. Ar intra în desen ca cel mai lat rând (365 mp utili,');
   p('-- față de 194 pe un etaj), iar lățimile din pagină se raportează la');
@@ -633,7 +699,7 @@ function main() {
         v: v, n: n,
         sql: '(' + [
           sqlText(v.nume), sqlText(n.nume), String(n.idx),
-          sqlNum(Math.round((n.su - n.suComercial) * 100) / 100),
+          sqlNum(Math.round(n.suTotal * 100) / 100),
           n.esteParter ? 'true' : 'false',
           sqlNum(n.suComercial || null)
         ].join(', ') + ')'
@@ -720,15 +786,16 @@ function main() {
   p('         count(distinct ni.id)::text as niveluri,');
   p('         count(ap.id)::text as apartamente,');
   p('         round(sum(ap.mpu_propus), 2)::text as mp_dati,');
-  /* ⚠️ Bugetul e suma Su-urilor de locuințe ale NIVELURILOR, nu
-     `va.su_total_mp`. Su-ul variantei include și subsolul, și spațiul
-     comercial de la parter, adică fix ce nu se împarte în apartamente: pe o
-     variantă cu subsol ieșea o diferență de 90 mp care arăta ca o pierdere și
-     nu era nimic. La Bosianu 32 coloanele se potriveau din întâmplare, fiindcă
-     analiza aceea n-are nici subsol, nici comercial.
+  /* ⚠️ Bugetul se socotește pe NIVELURI, nu din `va.su_total_mp`: subsolul
+     nu e nivel la noi, deci pe o variantă cu subsol ieșea o diferență de 90 mp
+     care arăta ca o pierdere și nu era nimic.
+     `su_mp` MINUS `su_comun_mp`, fiindcă `su_mp` e Su-ul întreg al nivelului,
+     iar comercialul de la parter se construiește dar nu se împarte. Exact
+     scăderea pe care o face și pagina (organizare-apartamente.js:130).
      Subinterogare, nu `sum(ni.su_mp)` peste join: nivelul apare o dată pentru
      fiecare apartament al lui, deci suma ar fi ieșit înmulțită. */
-  p('         (select round(sum(ni2.su_mp), 2) from public.analiza_nivel ni2');
+  p('         (select round(sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0)), 2)');
+  p('            from public.analiza_nivel ni2');
   p('           where ni2.varianta_id = va.id)::text as mp_de_dat');
   p('    from public.analiza_varianta va');
   p('    join public.analiza_teren a on a.id = va.analiza_id');
@@ -765,14 +832,45 @@ function main() {
   p('  union all');
   p('  -- (c) niciun nivel nu trebuie să fie umplut peste Su-ul lui');
   p("  select 3, 'NIVEL DEPĂȘIT', va.nume || ' · ' || ni.nume,");
-  p('         round(sum(ap.mpu_propus), 2)::text, round(ni.su_mp, 2)::text, null, null');
+  p('         round(sum(ap.mpu_propus), 2)::text,');
+  p('         round(ni.su_mp - coalesce(ni.su_comun_mp, 0), 2)::text, null, null');
   p('    from public.analiza_apartament ap');
   p('    join public.analiza_nivel ni on ni.id = ap.nivel_id');
   p('    join public.analiza_varianta va on va.id = ap.varianta_id');
   p('    join public.analiza_teren a on a.id = va.analiza_id');
   pUndeAnaliza('   ');
-  p('   group by va.nume, ni.nume, ni.su_mp');
-  p('  having sum(ap.mpu_propus) > ni.su_mp + 0.01');
+  p('   group by va.nume, ni.nume, ni.su_mp, ni.su_comun_mp');
+  p('  having sum(ap.mpu_propus) > ni.su_mp - coalesce(ni.su_comun_mp, 0) + 0.01');
+  p('  union all');
+  p('  -- (c2) suma nivelurilor trebuie să dea Su-ul de locuințe al variantei.');
+  p('  --      Verificarea asta a lipsit până pe 4 septembrie 2026 și de aceea a');
+  p('  --      trecut nevăzut un generator care scădea comercialul de două ori:');
+  p('  --      rezultatul era un nivel cu su_mp negativ, perfect legal în schemă.');
+  p('  --      Toleranța de 0,05 e rotunjirea la doi zecimali din exportul UA.');
+  p("  select 5, 'SU NEPOTRIVITĂ', va.nume,");
+  p('         (select round(sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0)), 2)');
+  p('            from public.analiza_nivel ni2');
+  p('           where ni2.varianta_id = va.id)::text,');
+  p('         round(va.su_total_mp, 2)::text, null, null');
+  p('    from public.analiza_varianta va');
+  p('    join public.analiza_teren a on a.id = va.analiza_id');
+  pUndeAnaliza('   ');
+  p('     and abs(coalesce((select sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0))');
+  p('                        from public.analiza_nivel ni2');
+  p('                       where ni2.varianta_id = va.id), 0)');
+  p('             - va.su_total_mp) > 0.05');
+  p('  union all');
+  p('  -- (c3) niciun nivel nu poate rămâne cu suprafață negativă de împărțit.');
+  p('  --      Schema o acceptă fără să se plângă, pagina o desenează ca pe un');
+  p('  --      rând fără lățime. Zero NU e semnalat: un parter numai comercial');
+  p('  --      e o variantă legitimă.');
+  p("  select 6, 'NIVEL CU SUPRAFAȚĂ NEGATIVĂ', va.nume || ' · ' || ni.nume,");
+  p('         ni.su_mp::text, coalesce(ni.su_comun_mp, 0)::text, null, null');
+  p('    from public.analiza_nivel ni');
+  p('    join public.analiza_varianta va on va.id = ni.varianta_id');
+  p('    join public.analiza_teren a on a.id = va.analiza_id');
+  pUndeAnaliza('   ');
+  p('     and ni.su_mp - coalesce(ni.su_comun_mp, 0) < 0');
   p('  union all');
   p('  -- (d) grup_id-ul copiat trebuie să fie același peste tot: o variantă');
   p('  --     scrisă pe alt grup e invizibilă în pagină, fără nicio eroare');

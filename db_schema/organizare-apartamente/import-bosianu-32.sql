@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- IMPORT ANALIZĂ: Analiză preliminară Constantin Bosianu 32
--- Generat de scripts/import-analiza/genereaza-sql.js pe 2026-09-02
+-- Generat de scripts/import-analiza/genereaza-sql.js pe 2026-09-04
 --
 -- ⚠️ NU pune BEGIN / ROLLBACK în tab. Editorul SQL din Supabase rulează tot
 --    tabul ca o singură tranzacție, iar un ROLLBACK pus „de probă” anulează
@@ -79,12 +79,16 @@ select * from (
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 1 · ANALIZA
 --
--- Cifrele de cost sunt cele tastate în Urban Analyzer, nu derivate:
+-- Cifrele de cost vin din configurație, nu din CSV:
 --   • 1200 €/mp Sd
---   • 650000 € terenul
+--   • 600000 € terenul
 --   • subsolul la 70% din prețul pe metru
--- Verificate înapoi prin formula din UA (costConstr = sdFull×costMp +
--- sParcParter×costMp×0,2 + sdSubsol×costMp×factor) pe toate variantele.
+-- Prețul pe mp e verificat înapoi prin formula din UA (costConstr =
+-- sdFull×costMp + sParcParter×costMp×0,2 + sdSubsol×costMp×factor).
+--
+-- ⚠️ TERENUL DIFERĂ DE CSV: exportul are 650000 €. Cifra de
+-- mai sus e cea bună, dar fișa PDF pe care o descarcă grupul rămâne pe
+-- cealaltă, deci totalul ei nu se potrivește cu al paginii.
 --
 -- Bilanțul de pe analiză e al variantei cu volumul cel mai mare; fiecare
 -- variantă îl are pe al ei în `analiza_varianta`.
@@ -100,10 +104,10 @@ select
   ('f5d185cc-2396-4e81-b62a-6a14da054172'::uuid),
   'preliminara',
   'Analiză preliminară Constantin Bosianu 32',
-  date '2026-09-01',
-  650000, 1200, 70,
-  468.01, 703.84, 419.97, 39.99, 1.504,
-  'Analiză preliminară Urban Analyzer, 1 septembrie 2026, pe conturul nou al terenului. Teren 468,01 mp, front 17,28 ml, UTR M1 (Sector 4), reglementare din certificat de urbanism: POT max 40%, CUT max 1,80, regim max P+3, spațiu verde min 30%. O singură ipoteză de volum, P+3, cu două variante: același bloc de 703,84 mp construiți și 419,97 mp utili de locuință, împărțit în două feluri. POT obținut 39,99%, CUT obținut 1,504, deci sub plafonul de 1,80. Fără subsol: toate cele 7 locuri de parcare stau la parter, în afară de unul pe teren, iar parterul rămâne cu 58,29 mp utili, adică un singur apartament. Costuri de intrare: 1.200 euro pe mp Sd și 650.000 euro terenul, prețul din anunț. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.'
+  date '2026-09-02',
+  600000, 1200, 70,
+  468.01, 703.84, 392.07, 39.99, 1.504,
+  'Analiză preliminară Urban Analyzer, 2 septembrie 2026, pe conturul nou al terenului. Teren 468,01 mp, front 17,28 ml, UTR L1b (Sector 4), reglementare din certificat de urbanism: POT max 40%, CUT max 1,80, regim max P+3, spațiu verde min 30%. O singură ipoteză de volum, P+3, cu două variante: același bloc de 703,84 mp construiți, împărțit în două feluri. POT obținut 39,99%, CUT obținut 1,504, deci sub plafonul de 1,80. Fără subsol: parcajele stau la parter, plus un loc pe teren, iar din parter mai rămâne foarte puțin. V1 pune 5 apartamente pe etaje și lasă 18,69 mp liberi la parter. V2 pune tot 5 apartamente și așază 30 mp de birouri sau servicii la parter. Costuri de intrare: 1.200 euro pe mp Sd și 600.000 euro terenul. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.'
 where not exists (select 1 from public.analiza_teren
                    where grup_id = (select id from public.grupuri where nume ilike '%Constantin Bosianu%')
                      and teren_id in ('f5d185cc-2396-4e81-b62a-6a14da054172'::uuid));
@@ -118,7 +122,7 @@ where not exists (select 1 from public.analiza_teren
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 2 · VARIANTELE (2)
 --
---   P+3: 2 variante, din analiza-urbanistica (7).csv
+--   P+3: 2 variante, din analiza-urbanistica (10).csv
 --
 -- Numele poartă prefixul setului fiindcă amândouă exporturile își numesc
 -- variantele V1, V2, V3: fără prefix, filele din pagină s-ar ciocni.
@@ -139,8 +143,8 @@ select a.id, a.grup_id, v.nume, v.descriere, v.su_total, v.sd_total,
        v.coef, v.subsol_sd, v.are_subsol, v.su_com, v.parcaje, v.ordine
   from public.analiza_teren a,
        (values
-         ('P+3 · V1', '6 apartamente · 3 × 2 camere, 2 × 3 camere, 1 × 3-4 camere · unul la parter', 419.97, 703.84, 0.7, 0, false, null::numeric, 7, 1),   -- P+3, 6 ap.
-         ('P+3 · V2', '6 apartamente · 2 × studio, 1 × 2 camere, 3 × 3-4 camere · unul la parter', 419.97, 703.84, 0.7, 0, false, null::numeric, 9, 2)   -- P+3, 6 ap.
+         ('P+3 · V1', '5 apartamente · 2 × studio, 3 × 3-4 camere · tot parterul intră în parcaje', 380.37, 703.84, 0.657, 0, false, null::numeric, 8, 1),   -- P+3, 5 ap.
+         ('P+3 · V2', '5 apartamente · 2 × 2 camere, 2 × 3 camere, 1 × 3-4 camere · 30 mp birouri la parter', 362.07, 703.84, 0.657, 0, false, 30, 8, 2)   -- P+3, 5 ap.
        ) as v(nume, descriere, su_total, sd_total, coef, subsol_sd,
               are_subsol, su_com, parcaje, ordine)
  where a.titlu = 'Analiză preliminară Constantin Bosianu 32'
@@ -155,8 +159,17 @@ select a.id, a.grup_id, v.nume, v.descriere, v.su_total, v.sd_total,
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 3 · NIVELURILE (8)
 --
--- `su_mp` e `niv_su_locuinte_mp` din CSV, nu `niv_su_mp`: bugetul de
--- împărțit, adică ce rămâne după ce se scade comercialul de la parter.
+-- `su_mp` e Su-ul ÎNTREG al nivelului, locuințe plus comercial, iar
+-- comercialul se scrie SEPARAT în `su_comun_mp`. Așa îl citește pagina:
+-- `suImpartibil` scade `su_comun_mp` din `su_mp` ca să afle cât se
+-- împarte (organizare-apartamente.js:130), iar costul îl adună la loc,
+-- fiindcă spațiul comercial se construiește chiar dacă nu se împarte.
+--
+-- ⚠️ Până la 4 septembrie 2026 aici se scria `niv_su_locuinte_mp` MINUS
+-- comercialul, adică scădere de două ori: coloana din CSV e deja fără
+-- comercial. La Bosianu 32, V2, parterul ieșea `su_mp = -29,61`.
+-- N-a lovit nimic până atunci fiindcă nicio analiză importată n-avea
+-- comercial, iar zero minus zero e tot zero.
 --
 -- SUBSOLUL NU E AICI. Ar intra în desen ca cel mai lat rând (365 mp utili,
 -- față de 194 pe un etaj), iar lățimile din pagină se raportează la
@@ -169,11 +182,11 @@ select va.id, va.grup_id, n.nume, n.ordine, n.su, n.parter, n.comun
   from public.analiza_varianta va
   join public.analiza_teren a on a.id = va.analiza_id
   join (values
-         ('P+3 · V1', 'Parter', 0, 58.29, true, null::numeric),   -- 1 ap.
+         ('P+3 · V1', 'Parter', 0, 18.69, true, null::numeric),   -- 0 ap.
          ('P+3 · V1', 'Etaj 1', 1, 131, false, null::numeric),   -- 2 ap.
          ('P+3 · V1', 'Etaj 2', 2, 131, false, null::numeric),   -- 2 ap.
          ('P+3 · V1', 'Etaj 3', 3, 99.68, false, null::numeric),   -- 1 ap.
-         ('P+3 · V2', 'Parter', 0, 58.29, true, null::numeric),   -- 1 ap.
+         ('P+3 · V2', 'Parter', 0, 30.39, true, 30),   -- 0 ap.
          ('P+3 · V2', 'Etaj 1', 1, 131, false, null::numeric),   -- 2 ap.
          ('P+3 · V2', 'Etaj 2', 2, 131, false, null::numeric),   -- 2 ap.
          ('P+3 · V2', 'Etaj 3', 3, 99.68, false, null::numeric)   -- 1 ap.
@@ -188,7 +201,7 @@ select va.id, va.grup_id, n.nume, n.ordine, n.su, n.parter, n.comun
 -- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- BLOC 4 · APARTAMENTELE (12)
+-- BLOC 4 · APARTAMENTELE (10)
 --
 -- Urban Analyzer nu dă suprafața fiecărui apartament, și nici nu trebuie:
 -- la faza preliminară ea nu există, se negociază pe nivel, la proiectare.
@@ -211,18 +224,16 @@ select ni.id, ni.varianta_id, ni.grup_id, x.tip, x.eticheta,
   join public.analiza_varianta va on va.id = ni.varianta_id
   join public.analiza_teren a on a.id = va.analiza_id
   join (values
-         ('P+3 · V1', 'Parter', 1, 'cam2', '2 cam', 52, 65, 58.29),
-         ('P+3 · V1', 'Etaj 1', 1, 'cam2', '2 cam', 52, 65, 56.77),
-         ('P+3 · V1', 'Etaj 1', 2, 'cam3', '3 cam', 66, 87, 74.23),
-         ('P+3 · V1', 'Etaj 2', 1, 'cam2', '2 cam', 52, 65, 56.77),
-         ('P+3 · V1', 'Etaj 2', 2, 'cam3', '3 cam', 66, 87, 74.23),
-         ('P+3 · V1', 'Etaj 3', 1, 'cam34', '3-4 cam', 87, 135, 99.68),
-         ('P+3 · V2', 'Parter', 1, 'cam2', '2 cam', 52, 65, 58.29),
-         ('P+3 · V2', 'Etaj 1', 1, 'studio', 'Studio', 42, 52, 42),
-         ('P+3 · V2', 'Etaj 1', 2, 'cam34', '3-4 cam', 87, 135, 89),
-         ('P+3 · V2', 'Etaj 2', 1, 'studio', 'Studio', 42, 52, 42),
-         ('P+3 · V2', 'Etaj 2', 2, 'cam34', '3-4 cam', 87, 135, 89),
-         ('P+3 · V2', 'Etaj 3', 1, 'cam34', '3-4 cam', 87, 135, 99.68)
+         ('P+3 · V1', 'Etaj 1', 1, 'studio', 'Studio', 42, 52, 42),
+         ('P+3 · V1', 'Etaj 1', 2, 'cam34', '3-4 cam', 87, 120, 89),
+         ('P+3 · V1', 'Etaj 2', 1, 'studio', 'Studio', 42, 52, 42),
+         ('P+3 · V1', 'Etaj 2', 2, 'cam34', '3-4 cam', 87, 120, 89),
+         ('P+3 · V1', 'Etaj 3', 1, 'cam34', '3-4 cam', 87, 120, 99.68),
+         ('P+3 · V2', 'Etaj 1', 1, 'cam2', '2 cam', 52, 65, 56.77),
+         ('P+3 · V2', 'Etaj 1', 2, 'cam3', '3 cam', 66, 87, 74.23),
+         ('P+3 · V2', 'Etaj 2', 1, 'cam2', '2 cam', 52, 65, 56.77),
+         ('P+3 · V2', 'Etaj 2', 2, 'cam3', '3 cam', 66, 87, 74.23),
+         ('P+3 · V2', 'Etaj 3', 1, 'cam34', '3-4 cam', 87, 120, 99.68)
        ) as x(varianta, nivel, ordine, tip, eticheta, mpu_min, mpu_max, mpu_propus)
     on x.varianta = va.nume and x.nivel = ni.nume
  where a.titlu = 'Analiză preliminară Constantin Bosianu 32'
@@ -230,7 +241,7 @@ select ni.id, ni.varianta_id, ni.grup_id, x.tip, x.eticheta,
    and not exists (select 1 from public.analiza_apartament ap2
                     where ap2.nivel_id = ni.id and ap2.ordine = x.ordine);
 
--- Trebuie să scrie „INSERT 0 12”.
+-- Trebuie să scrie „INSERT 0 10”.
 -- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -242,7 +253,8 @@ select * from (
          count(distinct ni.id)::text as niveluri,
          count(ap.id)::text as apartamente,
          round(sum(ap.mpu_propus), 2)::text as mp_dati,
-         (select round(sum(ni2.su_mp), 2) from public.analiza_nivel ni2
+         (select round(sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0)), 2)
+            from public.analiza_nivel ni2
            where ni2.varianta_id = va.id)::text as mp_de_dat
     from public.analiza_varianta va
     join public.analiza_teren a on a.id = va.analiza_id
@@ -275,15 +287,48 @@ select * from (
   union all
   -- (c) niciun nivel nu trebuie să fie umplut peste Su-ul lui
   select 3, 'NIVEL DEPĂȘIT', va.nume || ' · ' || ni.nume,
-         round(sum(ap.mpu_propus), 2)::text, round(ni.su_mp, 2)::text, null, null
+         round(sum(ap.mpu_propus), 2)::text,
+         round(ni.su_mp - coalesce(ni.su_comun_mp, 0), 2)::text, null, null
     from public.analiza_apartament ap
     join public.analiza_nivel ni on ni.id = ap.nivel_id
     join public.analiza_varianta va on va.id = ap.varianta_id
     join public.analiza_teren a on a.id = va.analiza_id
    where a.titlu = 'Analiză preliminară Constantin Bosianu 32'
      and a.grup_id = (select id from public.grupuri where nume ilike '%Constantin Bosianu%')
-   group by va.nume, ni.nume, ni.su_mp
-  having sum(ap.mpu_propus) > ni.su_mp + 0.01
+   group by va.nume, ni.nume, ni.su_mp, ni.su_comun_mp
+  having sum(ap.mpu_propus) > ni.su_mp - coalesce(ni.su_comun_mp, 0) + 0.01
+  union all
+  -- (c2) suma nivelurilor trebuie să dea Su-ul de locuințe al variantei.
+  --      Verificarea asta a lipsit până pe 4 septembrie 2026 și de aceea a
+  --      trecut nevăzut un generator care scădea comercialul de două ori:
+  --      rezultatul era un nivel cu su_mp negativ, perfect legal în schemă.
+  --      Toleranța de 0,05 e rotunjirea la doi zecimali din exportul UA.
+  select 5, 'SU NEPOTRIVITĂ', va.nume,
+         (select round(sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0)), 2)
+            from public.analiza_nivel ni2
+           where ni2.varianta_id = va.id)::text,
+         round(va.su_total_mp, 2)::text, null, null
+    from public.analiza_varianta va
+    join public.analiza_teren a on a.id = va.analiza_id
+   where a.titlu = 'Analiză preliminară Constantin Bosianu 32'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Constantin Bosianu%')
+     and abs(coalesce((select sum(ni2.su_mp - coalesce(ni2.su_comun_mp, 0))
+                        from public.analiza_nivel ni2
+                       where ni2.varianta_id = va.id), 0)
+             - va.su_total_mp) > 0.05
+  union all
+  -- (c3) niciun nivel nu poate rămâne cu suprafață negativă de împărțit.
+  --      Schema o acceptă fără să se plângă, pagina o desenează ca pe un
+  --      rând fără lățime. Zero NU e semnalat: un parter numai comercial
+  --      e o variantă legitimă.
+  select 6, 'NIVEL CU SUPRAFAȚĂ NEGATIVĂ', va.nume || ' · ' || ni.nume,
+         ni.su_mp::text, coalesce(ni.su_comun_mp, 0)::text, null, null
+    from public.analiza_nivel ni
+    join public.analiza_varianta va on va.id = ni.varianta_id
+    join public.analiza_teren a on a.id = va.analiza_id
+   where a.titlu = 'Analiză preliminară Constantin Bosianu 32'
+     and a.grup_id = (select id from public.grupuri where nume ilike '%Constantin Bosianu%')
+     and ni.su_mp - coalesce(ni.su_comun_mp, 0) < 0
   union all
   -- (d) grup_id-ul copiat trebuie să fie același peste tot: o variantă
   --     scrisă pe alt grup e invizibilă în pagină, fără nicio eroare
