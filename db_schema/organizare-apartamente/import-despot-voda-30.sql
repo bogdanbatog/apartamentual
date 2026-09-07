@@ -100,10 +100,10 @@ select
   ('8d320d3e-22b1-4c6c-b4dd-5a7afccc96c0'::uuid),
   'preliminara',
   'Analiză preliminară Despot Vodă 30',
-  date '2026-09-06',
+  date '2026-09-07',
   595000, 1200, 70,
-  415.99, 665.14, 375.12, 44.4, 1.599,
-  'Analiză preliminară Urban Analyzer, 6 septembrie 2026. Teren 415,99 mp, parcelă de colț cu două fronturi, UTR L1a (Sector 2), reglementare din PUZ Sector 2: POT max 45%, CUT max 1,60 prin excepția pentru parcele de colț, regim max P+3, spațiu verde min 45%, cu retragere obligatorie H/2 la nivelurile superioare. Două ipoteze de volum: un singur corp P+3 (două variante) și clădire în „L” cu două corpuri, P+2 și P+3 (o variantă). Toate trei ies la CUT 1,59-1,60, adică la plafon, și niciuna nu are subsol, deci parcajele stau acoperite la parter și consumă din el. Costuri de intrare: 1.200 euro pe mp Sd, teren 595.000 euro. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.'
+  415.99, 665.14, 403.92, 44.4, 1.599,
+  'Analiză preliminară Urban Analyzer, 7 septembrie 2026. Teren 415,99 mp, parcelă de colț cu două fronturi, UTR L1a (Sector 2), reglementare din PUZ Sector 2: POT max 45%, CUT max 1,60 prin excepția pentru parcele de colț, regim max P+3, spațiu verde min 30%, cu retragere obligatorie H/2 la nivelurile superioare. Două ipoteze de volum: un singur corp P+3 (două variante) și clădire în „L” cu două corpuri, P+2 și P+3 (o variantă). Toate trei ies la CUT 1,59-1,60, adică la plafon, și niciuna nu are subsol. Parcarea e așezată de arhitect, nu dedusă: o parte din locuri stau acoperite la parter, sub etajul 1, restul pe teren, ceea ce lasă loc pentru un apartament și la parter. Costuri de intrare: 1.200 euro pe mp Sd, teren 595.000 euro. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.'
 where not exists (select 1 from public.analiza_teren
                    where grup_id = (select id from public.grupuri where nume ilike '%Parcul Circului%')
                      and teren_id in ('8d320d3e-22b1-4c6c-b4dd-5a7afccc96c0'::uuid));
@@ -118,8 +118,8 @@ where not exists (select 1 from public.analiza_teren
 -- ═══════════════════════════════════════════════════════════════════════════
 -- BLOC 2 · VARIANTELE (3)
 --
---   Un corp: 2 variante, din analiza-urbanistica (12).csv
---   Clădire în L: 1 variante, din analiza-urbanistica (13).csv
+--   Un corp: 2 variante, din analiza-urbanistica (13).csv
+--   Clădire în L: 1 variante, din analiza-urbanistica (14).csv
 --
 -- Numele poartă prefixul setului fiindcă amândouă exporturile își numesc
 -- variantele V1, V2, V3: fără prefix, filele din pagină s-ar ciocni.
@@ -142,9 +142,9 @@ select a.id, a.grup_id, v.nume, v.descriere, v.su_total, v.sd_total,
        v.parc_parter, v.parc_subsol, v.parc_teren, v.ordine
   from public.analiza_teren a,
        (values
-         ('Un corp · V1', '5 apartamente · 2 × studio, 1 × 3 camere, 2 × 3-4 camere · tot parterul intră în parcaje', 346.32, 665.14, 0.653, 0, false, null::numeric, 7, 7, 0, 0, 1),   -- P+3, 5 ap.
-         ('Un corp · V2', '5 apartamente · 2 × 2 camere, 3 × 3 camere · 39 mp liberi la parter', 375.12, 665.14, 0.659, 0, false, null::numeric, 5, 5, 0, 0, 2),   -- P+3, 5 ap.
-         ('Clădire în L · V1', '5 apartamente · 2 × 2 camere, 3 × 3 camere · tot parterul intră în parcaje', 346.38, 662.56, 0.653, 0, false, null::numeric, 5, 5, 0, 0, 3)   -- P+3, 5 ap.
+         ('Un corp · V1', '6 apartamente · 2 × 2 camere, 4 × 3 camere · unul la parter', 403.92, 665.14, 0.665, 0, false, null::numeric, 6, 3, 0, 3, 1),   -- P+3, 6 ap.
+         ('Un corp · V2', '6 apartamente · 2 × studio, 1 × 2 camere, 1 × 3 camere, 2 × 3-4 camere · unul la parter', 389.52, 665.14, 0.662, 0, false, null::numeric, 8, 4, 0, 4, 2),   -- P+3, 6 ap.
+         ('Clădire în L · V1', '6 apartamente · 1 × studio, 2 × 2 camere, 3 × 3 camere · unul la parter', 385.98, 662.56, 0.662, 0, false, null::numeric, 6, 3, 0, 3, 3)   -- P+3, 6 ap.
        ) as v(nume, descriere, su_total, sd_total, coef, subsol_sd,
               are_subsol, su_com, parcaje,
               parc_parter, parc_subsol, parc_teren, ordine)
@@ -183,15 +183,15 @@ select va.id, va.grup_id, n.nume, n.ordine, n.su, n.parter, n.comun
   from public.analiza_varianta va
   join public.analiza_teren a on a.id = va.analiza_id
   join (values
-         ('Un corp · V1', 'Parter', 0, 10.02, true, null::numeric),   -- 0 ap.
+         ('Un corp · V1', 'Parter', 0, 67.62, true, null::numeric),   -- 1 ap.
          ('Un corp · V1', 'Etaj 1', 1, 129.29, false, null::numeric),   -- 2 ap.
          ('Un corp · V1', 'Etaj 2', 2, 129.29, false, null::numeric),   -- 2 ap.
          ('Un corp · V1', 'Etaj 3', 3, 77.71, false, null::numeric),   -- 1 ap.
-         ('Un corp · V2', 'Parter', 0, 38.82, true, null::numeric),   -- 0 ap.
+         ('Un corp · V2', 'Parter', 0, 53.22, true, null::numeric),   -- 1 ap.
          ('Un corp · V2', 'Etaj 1', 1, 129.29, false, null::numeric),   -- 2 ap.
          ('Un corp · V2', 'Etaj 2', 2, 129.29, false, null::numeric),   -- 2 ap.
          ('Un corp · V2', 'Etaj 3', 3, 77.71, false, null::numeric),   -- 1 ap.
-         ('Clădire în L · V1', 'Parter', 0, 11.48, true, null::numeric),   -- 0 ap.
+         ('Clădire în L · V1', 'Parter', 0, 51.08, true, null::numeric),   -- 1 ap.
          ('Clădire în L · V1', 'Etaj 1', 1, 128.9, false, null::numeric),   -- 2 ap.
          ('Clădire în L · V1', 'Etaj 2', 2, 128.9, false, null::numeric),   -- 2 ap.
          ('Clădire în L · V1', 'Etaj 3', 3, 77.1, false, null::numeric)   -- 1 ap.
@@ -206,7 +206,7 @@ select va.id, va.grup_id, n.nume, n.ordine, n.su, n.parter, n.comun
 -- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- BLOC 4 · APARTAMENTELE (15)
+-- BLOC 4 · APARTAMENTELE (18)
 --
 -- Urban Analyzer nu dă suprafața fiecărui apartament, și nici nu trebuie:
 -- la faza preliminară ea nu există, se negociază pe nivel, la proiectare.
@@ -229,16 +229,19 @@ select ni.id, ni.varianta_id, ni.grup_id, x.tip, x.eticheta,
   join public.analiza_varianta va on va.id = ni.varianta_id
   join public.analiza_teren a on a.id = va.analiza_id
   join (values
-         ('Un corp · V1', 'Etaj 1', 1, 'studio', 'Studio', 42, 52, 42),
-         ('Un corp · V1', 'Etaj 1', 2, 'cam34', '3-4 cam', 87, 120, 87.29),
-         ('Un corp · V1', 'Etaj 2', 1, 'studio', 'Studio', 42, 52, 42),
-         ('Un corp · V1', 'Etaj 2', 2, 'cam34', '3-4 cam', 87, 120, 87.29),
+         ('Un corp · V1', 'Parter', 1, 'cam3', '3 cam', 66, 87, 67.62),
+         ('Un corp · V1', 'Etaj 1', 1, 'cam2', '2 cam', 52, 65, 56.03),
+         ('Un corp · V1', 'Etaj 1', 2, 'cam3', '3 cam', 66, 87, 73.26),
+         ('Un corp · V1', 'Etaj 2', 1, 'cam2', '2 cam', 52, 65, 56.03),
+         ('Un corp · V1', 'Etaj 2', 2, 'cam3', '3 cam', 66, 87, 73.26),
          ('Un corp · V1', 'Etaj 3', 1, 'cam3', '3 cam', 66, 87, 77.71),
-         ('Un corp · V2', 'Etaj 1', 1, 'cam2', '2 cam', 52, 65, 56.03),
-         ('Un corp · V2', 'Etaj 1', 2, 'cam3', '3 cam', 66, 87, 73.26),
-         ('Un corp · V2', 'Etaj 2', 1, 'cam2', '2 cam', 52, 65, 56.03),
-         ('Un corp · V2', 'Etaj 2', 2, 'cam3', '3 cam', 66, 87, 73.26),
+         ('Un corp · V2', 'Parter', 1, 'cam2', '2 cam', 52, 65, 53.22),
+         ('Un corp · V2', 'Etaj 1', 1, 'studio', 'Studio', 42, 52, 42),
+         ('Un corp · V2', 'Etaj 1', 2, 'cam34', '3-4 cam', 87, 120, 87.29),
+         ('Un corp · V2', 'Etaj 2', 1, 'studio', 'Studio', 42, 52, 42),
+         ('Un corp · V2', 'Etaj 2', 2, 'cam34', '3-4 cam', 87, 120, 87.29),
          ('Un corp · V2', 'Etaj 3', 1, 'cam3', '3 cam', 66, 87, 77.71),
+         ('Clădire în L · V1', 'Parter', 1, 'studio', 'Studio', 42, 52, 51.08),
          ('Clădire în L · V1', 'Etaj 1', 1, 'cam2', '2 cam', 52, 65, 55.86),
          ('Clădire în L · V1', 'Etaj 1', 2, 'cam3', '3 cam', 66, 87, 73.04),
          ('Clădire în L · V1', 'Etaj 2', 1, 'cam2', '2 cam', 52, 65, 55.86),
@@ -251,7 +254,7 @@ select ni.id, ni.varianta_id, ni.grup_id, x.tip, x.eticheta,
    and not exists (select 1 from public.analiza_apartament ap2
                     where ap2.nivel_id = ni.id and ap2.ordine = x.ordine);
 
--- Trebuie să scrie „INSERT 0 15”.
+-- Trebuie să scrie „INSERT 0 18”.
 -- „INSERT 0 0” înseamnă că blocul a mai fost rulat. Oprește-te.
 
 -- ═══════════════════════════════════════════════════════════════════════════
