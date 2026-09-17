@@ -358,8 +358,14 @@ function numeSet(v){
 async function deschideDocument(cale, nume, felul){
   /* ⚠️ Fereastra se deschide ÎNAINTE de `await`. Un `window.open` chemat după
      ce s-a întors o promisiune nu mai e legat de clicul omului, iar blocatorul
-     de ferestre îl oprește fără să spună nimic. */
-  const fereastra = (felul === 'pdf') ? window.open('', '_blank', 'noopener') : null;
+     de ferestre îl oprește fără să spună nimic.
+     ⚠️ FĂRĂ `'noopener'` în `window.open`: cu el, browserul deschide fila, dar
+     întoarce `null`. Codul credea atunci că fila n-a apucat să se deschidă și
+     încărca PDF-ul peste pagina împărțirii, iar fila nouă rămânea goală
+     (găsit de Lucian, 17 septembrie). Legătura spre pagina noastră se taie de
+     mână, cu `opener = null`. */
+  const fereastra = (felul === 'pdf') ? window.open('', '_blank') : null;
+  if (fereastra) fereastra.opener = null;
   try {
     if (felul === 'pdf') {
       /* Adresă semnată, deschisă în filă: Supabase servește PDF-ul `inline`,
@@ -367,8 +373,16 @@ async function deschideDocument(cale, nume, felul){
       const { data, error } = await sb.storage.from('analize-fise')
         .createSignedUrl(cale, 3600);
       if (error) throw error;
-      if (fereastra) fereastra.location = data.signedUrl;
-      else window.location.href = data.signedUrl;
+      if (fereastra) { fereastra.location = data.signedUrl; return; }
+      /* Blocatorul de ferestre a oprit fila. Pagina împărțirii NU se
+         înlocuiește cu PDF-ul (omul și-ar pierde locul): se mai încearcă o
+         dată o filă, iar dacă nici aceea nu merge, i se spune ce să facă. */
+      const aDoua = window.open(data.signedUrl, '_blank');
+      if (aDoua) aDoua.opener = null;
+      else {
+        alert('Browserul a blocat deschiderea fișei într-o filă nouă. ' +
+          'Permite ferestrele pop-up pentru apartamentual.ro și apasă din nou.');
+      }
       return;
     }
 
