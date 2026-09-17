@@ -794,16 +794,50 @@
   }
   .oa-inapoi:hover{color:var(--cerneala);}
 
-  .oa-fisa{margin-top:10px;font-size:13.5px;}
-  .oa-fisa a{color:var(--teracota);font-weight:600;text-decoration:none;}
-  .oa-fisa a:hover{text-decoration:underline;}
-  /* Câte un rând pe ipoteză de volum (P+4, P+5), toate vizibile deodată.
+  /* ── antetul și documentele analizei ─────────────────────────────────
+     ⚠️ Fișa și volumul au fost un rând mic de linkuri sub insignă, și
+     oamenii nu vedeau volumul deloc (feedback, 17 septembrie). Acum sunt
+     butoane mari, în coloana din dreapta a antetului. */
+  .oa-cap{display:flex;gap:28px;align-items:flex-start;justify-content:space-between;}
+  .oa-cap-text{flex:1 1 auto;min-width:0;}
+  .oa-fisa{flex:0 0 auto;margin-top:18px;max-width:440px;}
+  /* Câte o coloană pe ipoteză de volum (P+4, P+5), toate vizibile deodată.
      Legate de filă, s-ar fi schimbat deasupra locului în care apeși. */
-  .oa-doc-rand{display:block;margin-top:2px;}
-  .oa-doc-set{display:inline-block;min-width:42px;color:var(--gri);font-weight:700;}
-  /* Ce se întâmplă când apeși pe volum: fișierul se descarcă, harta nu se
-     deschide singură. Explicația stă lângă butonul care o cere, nu în ghid. */
-  .oa-doc-nota{display:block;margin-top:5px;color:var(--gri);font-size:12.5px;font-weight:400;}
+  .oa-doc-seturi{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(200px,1fr);gap:12px;}
+  .oa-doc-grup{display:flex;flex-direction:column;gap:8px;}
+  .oa-doc-set{font-size:11px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--gri);}
+  .oa-doc-buton{
+    display:flex;align-items:center;gap:11px;text-align:left;
+    font:inherit;cursor:pointer;text-decoration:none;
+    background:var(--hartie);color:var(--cerneala);
+    border:1px solid var(--linie);border-left:3px solid var(--teracota);
+    border-radius:10px;padding:10px 14px;
+    box-shadow:0 1px 2px rgba(26,24,21,.06);
+  }
+  /* Butonul Google Earth e un link, iar linkurile de pe site sunt colorate;
+     fără regula asta ar ieși altfel decât butonul fișei de lângă el. */
+  .oa-fisa a.oa-doc-buton{color:var(--cerneala);}
+  .oa-doc-buton:hover{border-color:var(--teracota);background:var(--crem);}
+  .oa-doc-buton i{font-size:20px;color:var(--teracota);width:22px;text-align:center;flex:0 0 auto;}
+  .oa-doc-buton span{display:flex;flex-direction:column;line-height:1.25;}
+  .oa-doc-buton b{font-size:14.5px;font-weight:700;}
+  .oa-doc-buton small{font-size:12px;color:var(--gri);}
+  /* Ce arată volumul și, unde n-avem link, ce faci cu fișierul descărcat.
+     Explicația stă lângă butonul care o cere, nu în ghid. */
+  .oa-doc-nota{margin-top:9px;color:var(--gri);font-size:12.5px;}
+  @media (max-width:720px){
+    .oa-cap{flex-direction:column;gap:0;}
+    .oa-fisa{max-width:none;width:100%;margin-top:16px;}
+    /* Pe telefon seturile se așază unul sub altul, iar în fiecare set cele
+       două butoane stau alături. */
+    .oa-doc-seturi{grid-auto-flow:row;grid-auto-columns:auto;}
+    .oa-doc-grup{display:grid;grid-template-columns:1fr 1fr;}
+    .oa-doc-set{grid-column:1 / -1;}
+  }
+  @media (max-width:400px){
+    .oa-doc-grup{grid-template-columns:1fr;}
+  }
     </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -832,12 +866,18 @@
       <i class="fas fa-arrow-left"></i> Înapoi la grup
     </a>
 
-    <div class="eticheta" id="oaEticheta"></div>
-    <h1 id="oaTitlu"></h1>
-    <div class="sub" id="oaSub"></div>
-    <div class="insigna" id="oaInsigna"></div>
-    <p class="oa-premise" id="oaPremise" hidden></p>
-    <p class="oa-fisa" id="oaFisa" hidden></p>
+    <!-- Antetul pe două coloane: textul în stânga, documentele analizei în
+         dreapta, unde era loc gol. Pe telefon coboară sub text. -->
+    <div class="oa-cap">
+      <div class="oa-cap-text">
+        <div class="eticheta" id="oaEticheta"></div>
+        <h1 id="oaTitlu"></h1>
+        <div class="sub" id="oaSub"></div>
+        <div class="insigna" id="oaInsigna"></div>
+        <p class="oa-premise" id="oaPremise" hidden></p>
+      </div>
+      <div class="oa-fisa" id="oaFisa" hidden></div>
+    </div>
     <div class="context" id="oaContext" hidden></div>
 
     <section id="oaVariante">

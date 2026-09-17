@@ -60,7 +60,8 @@
       "csv": "../../analize din Urban Analyzer/RADOVICI 4/analiza-urbanistica (24).csv",
       "suprafata_teren_mp": 632.31,
       "pdf_nume": "radovici-4-fisa.pdf",
-      "kml_nume": "radovici-4-volum.kml"
+      "kml_nume": "radovici-4-volum.kml",
+      "earth_url": "https://earth.google.com/earth/d/1yUOeFqNMxnHVnO3f4AZDGV15YI94XQYj?usp=sharing"
     }
   ]
 }

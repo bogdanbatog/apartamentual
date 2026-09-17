@@ -398,57 +398,86 @@ async function deschideDocument(cale, nume, felul){
   }
 }
 
-/* Fișa PDF și volumul KML, pe seturi, TOATE odată.
+/* Fișa PDF și volumul, pe seturi, TOATE odată, ca butoane mari în dreapta
+   antetului.
    ⚠️ Prima formă arăta doar documentele setului deschis, iar eticheta purta
    numele lui („Fișa P+5") ca să se vadă că se schimbă odată cu fila. Nu se
-   vede: linkurile stau DEASUPRA filelor, deci apeși jos și se schimbă ceva sus,
-   în afara privirii. Un rând fix pe set nu cere nimănui să bage de seamă. */
+   vede: butoanele stau DEASUPRA filelor, deci apeși jos și se schimbă ceva sus,
+   în afara privirii. O coloană fixă pe set nu cere nimănui să bage de seamă.
+   ⚠️ A doua formă era un rând mic de linkuri sub insignă, iar oamenii nu
+   vedeau volumul deloc (17 septembrie). */
 function renderDocumenteleAnalizei(){
   const el = document.getElementById('oaFisa');
 
   const seturi = [];
   variante.forEach(function (v) {
-    if (!v.pdfPath && !v.kmlPath) return;
+    if (!v.pdfPath && !v.kmlPath && !v.earthUrl) return;
     const cheie = numeSet(v);
     let s = seturi.find(x => x.cheie === cheie);
-    if (!s) { s = { cheie: cheie, pdf: null, kml: null }; seturi.push(s); }
+    if (!s) { s = { cheie: cheie, pdf: null, kml: null, earth: null }; seturi.push(s); }
     /* Toate variantele unui set poartă aceleași căi, deci prima le dă pe ale
-       tuturor. Vezi migrația 12. */
+       tuturor. Vezi migrațiile 12 și 16. */
     if (!s.pdf && v.pdfPath) s.pdf = { cale: v.pdfPath, nume: v.pdfNume };
     if (!s.kml && v.kmlPath) s.kml = { cale: v.kmlPath, nume: v.kmlNume };
+    /* Baza refuză orice altă adresă (regula din migrația 16); verificarea de
+       aici e a doua plasă, fiindcă adresa ajunge într-un link pe care se apasă. */
+    if (!s.earth && v.earthUrl && v.earthUrl.indexOf('https://earth.google.com/') === 0) {
+      s.earth = v.earthUrl;
+    }
   });
 
   /* O analiză cu un singur set își ține fișa pe ea, ca până acum. */
   if (!seturi.length && analiza && analiza.pdf_path) {
-    seturi.push({ cheie: '', kml: null,
+    seturi.push({ cheie: '', kml: null, earth: null,
                   pdf: { cale: analiza.pdf_path, nume: analiza.pdf_nume } });
   }
 
   if (!seturi.length) { el.innerHTML = ''; el.hidden = true; return; }
 
-  el.innerHTML = seturi.map(function (s, i) {
-    const legaturi = [];
-    if (s.pdf) legaturi.push('<a href="#" data-doc="pdf" data-set="' + i + '">' +
-      '<i class="fas fa-file-pdf"></i> Fișa (PDF)</a>');
-    if (s.kml) legaturi.push('<a href="#" data-doc="kml" data-set="' + i + '">' +
-      '<i class="fas fa-globe"></i> Volumul (KML)</a>');
-    return '<span class="oa-doc-rand">' +
-      (s.cheie ? '<b class="oa-doc-set">' + esc(s.cheie) + '</b>' : '') +
-      legaturi.join(' · ') + '</span>';
-  }).join('') +
-  (seturi.some(s => s.kml)
-    ? '<span class="oa-doc-nota">Volumul se descarcă drept fișier KML și se deschide în ' +
-      'Google Earth: dublu clic, dacă îl ai instalat, sau „Import KML” pe earth.google.com. ' +
-      'Arată forma clădirii pe teren, nu împărțirea apartamentelor.</span>'
-    : '');
+  /* Numele setului („P+4") se scrie doar când sunt mai multe: la un singur
+     set n-are cu ce să fie confundat. */
+  const cuNume = seturi.length > 1;
+
+  el.innerHTML = '<div class="oa-doc-seturi">' + seturi.map(function (s, i) {
+    const butoane = [];
+    if (s.pdf) butoane.push(
+      '<button type="button" class="oa-doc-buton" data-doc="pdf" data-set="' + i + '">' +
+        '<i class="fas fa-file-pdf" aria-hidden="true"></i>' +
+        '<span><b>Fișa PDF</b><small>Se deschide într-o filă nouă</small></span>' +
+      '</button>');
+    if (s.earth) butoane.push(
+      /* `esc` nu atinge ghilimelele, iar adresa stă între ghilimele. */
+      '<a class="oa-doc-buton" href="' + esc(s.earth).replace(/"/g, '%22') +
+        '" target="_blank" rel="noopener">' +
+        '<i class="fas fa-earth-europe" aria-hidden="true"></i>' +
+        '<span><b>Volumul în Google Earth</b><small>Se deschide în browser</small></span>' +
+      '</a>');
+    else if (s.kml) butoane.push(
+      '<button type="button" class="oa-doc-buton" data-doc="kml" data-set="' + i + '">' +
+        '<i class="fas fa-earth-europe" aria-hidden="true"></i>' +
+        '<span><b>Volumul în Google Earth</b><small>Se descarcă fișierul KML</small></span>' +
+      '</button>');
+    return '<div class="oa-doc-grup">' +
+      (cuNume && s.cheie ? '<div class="oa-doc-set">' + esc(s.cheie) + '</div>' : '') +
+      butoane.join('') + '</div>';
+  }).join('') + '</div>';
+
+  const areVolum = seturi.some(s => s.earth || s.kml);
+  const doarFisier = seturi.some(s => !s.earth && s.kml);
+  if (areVolum) {
+    el.innerHTML += '<p class="oa-doc-nota">Volumul arată forma clădirii pe teren, nu ' +
+      'împărțirea apartamentelor.' +
+      (doarFisier ? ' Fișierul KML se deschide cu dublu clic, dacă ai Google Earth instalat, ' +
+        'sau prin „Import KML” pe earth.google.com.' : '') +
+      '</p>';
+  }
   el.hidden = false;
 
-  el.querySelectorAll('a[data-doc]').forEach(function (a) {
-    a.onclick = function (e) {
-      e.preventDefault();
-      const s = seturi[Number(a.dataset.set)];
-      const d = (a.dataset.doc === 'pdf') ? s.pdf : s.kml;
-      deschideDocument(d.cale, d.nume, a.dataset.doc);
+  el.querySelectorAll('button[data-doc]').forEach(function (b) {
+    b.onclick = function () {
+      const s = seturi[Number(b.dataset.set)];
+      const d = (b.dataset.doc === 'pdf') ? s.pdf : s.kml;
+      deschideDocument(d.cale, d.nume, b.dataset.doc);
     };
   });
 }
@@ -1904,6 +1933,8 @@ async function oaPorneste(){
          scrisă pe trei-patru rânduri, dinadins. Vezi migrația 12. */
       pdfPath: v.pdf_path || null, pdfNume: v.pdf_nume || null,
       kmlPath: v.kml_path || null, kmlNume: v.kml_nume || null,
+      /* Linkul proiectului Google Earth, tot al setului. Vezi migrația 16. */
+      earthUrl: v.earth_url || null,
       costTeren: Number(v.cost_teren || analiza.cost_teren || 0),
       costMpSd: Number(analiza.cost_constructie_mp || 0),
       coefUtil: Number(v.coef_su_sd || COEF_UTIL_IMPLICIT),

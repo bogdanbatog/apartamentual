@@ -179,7 +179,21 @@ politica de citire se uită la primul folder din nume ca să știe cine are voie
 Un fișier pus în rădăcină nu se vede de nimeni, fără nicio eroare. BLOC 7 verifică asta la
 final, cu o coloană `incepe_cu_grupul`.
 
-**Google Earth nu se deschide printr-un link.** Nu există adresă care să încarce un KML în
-Google Earth, nici web, nici desktop. Linkul din pagină descarcă fișierul, iar el se
-deschide cu dublu clic sau prin „Import KML" pe earth.google.com. Textul de sub link spune
-asta, fiindcă altfel omul apasă și se întreabă unde e harta.
+### Linkul Google Earth (`earth_url`)
+
+Un KML singur nu se poate deschide în Google Earth printr-o adresă. Din versiunea v263_48 a
+lui Urban Analyzer, însă, Liviu lipește în aplicație linkul **proiectului** Google Earth, iar
+linkul acela se deschide direct în browser. Butonul „Volumul în Google Earth" din pagină îl
+folosește când există; când nu, descarcă fișierul KML, ca înainte.
+
+⚠️ **Linkul NU vine în CSV**, ci doar în fișa PDF, ca hyperlink. Se copiază de mână în
+câmpul `earth_url` al setului din configurație. Se scoate din PDF așa:
+
+```
+python -c "import re,sys; print(re.findall(rb'/URI\s*\((https://earth[^)]*)\)', open(sys.argv[1],'rb').read()))" fisa.pdf
+```
+
+Coloana `analiza_varianta.earth_url` vine din migrația `16-link-google-earth.sql`, care
+refuză orice adresă ce nu începe cu `https://earth.google.com/` (și generatorul se oprește
+pe o asemenea adresă). **Înainte de import, linkul se deschide într-o fereastră privată:**
+proiectul stă pe Drive-ul lui Liviu, iar dacă cere cont, oamenii din grup văd același lucru.

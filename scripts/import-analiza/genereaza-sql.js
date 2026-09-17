@@ -759,8 +759,16 @@ function main() {
   /* Fișierele setului: fișa PDF și volumul KML. Sunt ale SETULUI, nu ale
      variantei (KML-ul e volumul ipotezei de volum, deci toate variantele
      aceluiași set arată la fel în Google Earth), de aceea blocul scrie aceeași
-     cale pe toate variantele cu același prefix. Vezi migrația 12. */
-  const cuFisiere = cfg.seturi.filter(s => s.pdf_nume || s.kml_nume);
+     cale pe toate variantele cu același prefix. Vezi migrația 12.
+     `earth_url` e linkul proiectului Google Earth (migrația 16): nu vine în
+     CSV, doar în fișa PDF, deci se scrie de mână în configurație. */
+  cfg.seturi.forEach(function (s) {
+    if (s.earth_url && s.earth_url.indexOf('https://earth.google.com/') !== 0) {
+      throw new Error('Setul ' + s.prefix + ': `earth_url` trebuie să înceapă cu ' +
+        'https://earth.google.com/ (baza refuză altceva). Primit: ' + s.earth_url);
+    }
+  });
+  const cuFisiere = cfg.seturi.filter(s => s.pdf_nume || s.kml_nume || s.earth_url);
 
   if (!cuFisiere.length) {
     p(linie);
@@ -1125,7 +1133,12 @@ function main() {
     p('-- BLOC 7 · FIȘA ȘI VOLUMUL. Se rulează ULTIMUL, și numai după două lucruri:');
     p('--');
     p('--   1. migrația `12-fisa-si-volum-pe-varianta.sql`, care face coloanele');
-    p('--      și lasă bucketul să primească și KML;');
+    p('--      și lasă bucketul să primească și KML' +
+      (cuFisiere.some(s => s.earth_url)
+        ? ', plus `16-link-google-earth.sql`,' : ';'));
+    if (cuFisiere.some(s => s.earth_url)) {
+      p('--      care face coloana `earth_url` (fără ea, blocul crapă);');
+    }
     p('--   2. urcarea fișierelor de mână în Storage, în bucketul `analize-fise`.');
     p('--');
     p('-- ⚠️ Drumul trebuie să înceapă cu id-ul GRUPULUI. Politica de citire se');
@@ -1160,7 +1173,10 @@ function main() {
         seteaza.push('       kml_path = ' + grupSub + " || '/' || " + sqlText(set.kml_nume));
         seteaza.push('       kml_nume = ' + sqlText(set.kml_nume));
       }
-      seteaza[0] = seteaza[0].replace(/^   set /, '   set ');
+      if (set.earth_url) {
+        seteaza.push('       earth_url = ' + sqlText(set.earth_url));
+      }
+      seteaza[0] = seteaza[0].replace(/^ {7}/, '   set ');
       seteaza.forEach((linieSet, k) => p(linieSet + (k === seteaza.length - 1 ? '' : ',')));
       p('  from public.analiza_teren a');
       p(' where a.id = va.analiza_id');

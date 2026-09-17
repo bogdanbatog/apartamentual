@@ -390,7 +390,8 @@ select * from (
 -- BLOC 7 · FIȘA ȘI VOLUMUL. Se rulează ULTIMUL, și numai după două lucruri:
 --
 --   1. migrația `12-fisa-si-volum-pe-varianta.sql`, care face coloanele
---      și lasă bucketul să primească și KML;
+--      și lasă bucketul să primească și KML, plus `16-link-google-earth.sql`,
+--      care face coloana `earth_url` (fără ea, blocul crapă);
 --   2. urcarea fișierelor de mână în Storage, în bucketul `analize-fise`.
 --
 -- ⚠️ Drumul trebuie să înceapă cu id-ul GRUPULUI. Politica de citire se
@@ -412,7 +413,8 @@ update public.analiza_varianta va
    set pdf_path = (select id::text from public.grupuri where nume ilike '%Parcul Circului%') || '/' || 'radovici-4-fisa.pdf',
        pdf_nume = 'radovici-4-fisa.pdf',
        kml_path = (select id::text from public.grupuri where nume ilike '%Parcul Circului%') || '/' || 'radovici-4-volum.kml',
-       kml_nume = 'radovici-4-volum.kml'
+       kml_nume = 'radovici-4-volum.kml',
+       earth_url = 'https://earth.google.com/earth/d/1yUOeFqNMxnHVnO3f4AZDGV15YI94XQYj?usp=sharing'
   from public.analiza_teren a
  where a.id = va.analiza_id
    and a.titlu = 'Analiză preliminară Radovici 4'
