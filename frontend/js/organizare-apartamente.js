@@ -163,9 +163,77 @@ function eurPeMpPlin(v){
   const su = suImpartibil(v);
   return (pretTeren(v) + costConstructie(v, su)) / su;
 }
+/* Banii unei LOCUINȚE: la un duplex, oricare jumătate ar fi dată, se socotește
+   pe suma lor. */
 function bani(v, a){
-  const tot = a.mpu * eurPeMp(v), c = cotaTeren(v);
+  const tot = mpuLocuinta(a) * eurPeMp(v), c = cotaTeren(v);
   return { tot: tot, teren: tot * c, constr: tot * (1 - c) };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DUPLEXURILE (17 septembrie 2026, prima dată la Radovici 4)
+
+   Un duplex e o singură locuință pe două niveluri (triplexul, pe trei). În bază
+   fiecare jumătate e un rând al ei în `analiza_apartament`, pe nivelul ei, iar
+   jumătățile se recunosc după același `duplex_nr` în aceeași variantă (migrația
+   `15-duplexuri.sql`).
+
+   Ce rămâne pe JUMĂTATE: suprafața și cursorul. Fiecare ia din bugetul
+   nivelului ei, deci `liberPeNivel`, `plafonPentru` și tragerea nu știu nimic de
+   duplex și nici nu trebuie să știe.
+
+   Ce e al LOCUINȚEI întregi: prețul (din suma jumătăților), înscrierea,
+   numărătoarea din file, scorul variantei, tabelul de costuri și alegerile din
+   cardul membrului.
+
+   ⚠️ Înscrierea se scrie DOAR pe jumătatea de la nivelul cel mai de jos
+   (`bazaId`), oricare ar fi caseta apăsată. Altfel doi oameni înscriși pe
+   jumătăți diferite ar arăta ca doi doritori „singuri", adică o variantă
+   așezată, când de fapt se calcă pe picioare.
+
+   Pe casetă NU scrie tipologia jumătății (decizia lui Lucian, 17 septembrie):
+   „Garsonieră" pe etajul unui duplex numește o locuință care nu există. Scrie
+   „Duplex 1 · Parter" și suprafața jumătății.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function legaLocuintele(ap, niveluri){
+  const ordNivel = {};
+  niveluri.forEach(n => { ordNivel[n.id] = n.ord; });
+  const grupuri = {};
+  ap.forEach(function (a) {
+    if (a.duplex == null) { a.bazaId = a.id; a.jumatati = [a]; return; }
+    (grupuri[a.duplex] || (grupuri[a.duplex] = [])).push(a);
+  });
+  Object.keys(grupuri).forEach(function (k) {
+    const jum = grupuri[k].sort((x, y) => (ordNivel[x.nivId] - ordNivel[y.nivId]) || (x.ord - y.ord));
+    jum.forEach(a => { a.bazaId = jum[0].id; a.jumatati = jum; });
+  });
+  const vazute = {};
+  return ap.map(a => (a.jumatati[0])).filter(function (baza) {
+    if (vazute[baza.id]) return false;
+    vazute[baza.id] = true;
+    return true;
+  });
+}
+
+function eDuplex(a){ return a.jumatati.length > 1; }
+function felLocuinta(a){ return a.jumatati.length > 2 ? 'Triplex' : 'Duplex'; }
+function mpuLocuinta(a){ return a.jumatati.reduce((s, x) => s + x.mpu, 0); }
+function interesePe(a){ return interese[a.bazaId] || []; }
+function numeNivel(v, a){
+  const niv = v.niveluri.find(n => n.id === a.nivId);
+  return niv ? niv.nume : '';
+}
+/* „Parter" → „P", „Etaj 1" → „E1": pentru casetele înguste de pe telefon. */
+function nivelScurt(nume){
+  if (/^parter$/i.test(nume)) return 'P';
+  const m = /^etaj\s*(\d+)$/i.exec(nume);
+  return m ? 'E' + m[1] : nume.slice(0, 3);
+}
+/* Cum se numește locuința într-o frază sau un tabel: un duplex o dată, cu toate
+   nivelurile lui. */
+function numeLocuinta(v, a){
+  if (!eDuplex(a)) return numeNivel(v, a) + ' · ' + a.tipEticheta;
+  return felLocuinta(a) + ' ' + a.duplex + ' · ' + a.jumatati.map(x => numeNivel(v, x)).join(' + ');
 }
 
 function liberPeNivel(v, nivId){
@@ -188,8 +256,9 @@ function plafonPentru(v, a){
 
 function scorVarianta(v){
   let unul = 0;
-  v.ap.forEach(a => { if ((interese[a.id] || []).length === 1) unul++; });
-  return { unul: unul, total: v.ap.length, scor: v.ap.length ? unul / v.ap.length : 0 };
+  v.locuinte.forEach(a => { if (interesePe(a).length === 1) unul++; });
+  const total = v.locuinte.length;
+  return { unul: unul, total: total, scor: total ? unul / total : 0 };
 }
 function culoareFila(scor){
   const h = 35 + (11 - 35) * scor, s = 12 + (58 - 12) * scor, l = 93 + (52 - 93) * scor;
@@ -229,7 +298,9 @@ async function salveazaSuprafata(a){
   }
 }
 
-async function comutaInteres(a){
+async function comutaInteres(caseta){
+  /* La un duplex, oricare jumătate s-a apăsat, înscrierea e pe cea de jos. */
+  const a = { id: caseta.bazaId };
   const arr = interese[a.id] || (interese[a.id] = []);
   const i = arr.indexOf(eu);
   const maInscriu = (i < 0);
@@ -265,7 +336,7 @@ function renderFile(){
       ' style="background:' + c.fundal + ';color:' + c.text + '"' +
       ' title="' + esc(v.nume) + ': ' + s.unul + ' din ' + s.total + ' apartamente au un singur doritor">' +
       '<b>' + esc(v.nume) + '</b>' +
-      '<small>' + v.ap.length + ' apartamente · ' + fmt(eurPeMp(v)) + ' €/mp</small>' +
+      '<small>' + v.locuinte.length + ' apartamente · ' + fmt(eurPeMp(v)) + ' €/mp</small>' +
       '</button>';
   }).join('');
   document.querySelectorAll('.fila').forEach(function (b) {
@@ -449,7 +520,13 @@ function renderVarianta(){
   const niveluri = v.niveluri.slice().sort((a, b) => b.ord - a.ord);
 
   niveluri.forEach(function (niv) {
-    const us = v.ap.filter(a => a.nivId === niv.id).sort((a, b) => a.ord - b.ord);
+    /* Jumătățile de duplex stau primele în rând, în ordinea numărului: așa
+       ajung la începutul rândurilor lor, una sub alta, și se citesc drept o
+       singură locuință pe două niveluri. */
+    const us = v.ap.filter(a => a.nivId === niv.id).sort(function (a, b) {
+      const da = eDuplex(a) ? a.duplex : Infinity, db = eDuplex(b) ? b.duplex : Infinity;
+      return (da === db ? 0 : da < db ? -1 : 1) || (a.ord - b.ord);
+    });
     const liber = liberPeNivel(v, niv.id);
 
     const rand = document.createElement('div');
@@ -461,27 +538,49 @@ function renderVarianta(){
 
     us.forEach(function (a) {
       const b_ = bani(v, a);
-      const cine = interese[a.id] || [];
+      const cine = interesePe(a);
       const plafon = plafonPentru(v, a);
       const blocat = (a.mpu <= a.mpuMin && a.mpu >= plafon);
-      const scurt = (TIPURI[a.tip] && TIPURI[a.tip].scurt) || a.tipEticheta;
+      const dup = eDuplex(a);
+      const lung = dup ? felLocuinta(a) + ' ' + a.duplex + ' · ' + niv.nume : a.tipEticheta;
+      const scurt = dup ? felLocuinta(a).charAt(0) + a.duplex + ' · ' + nivelScurt(niv.nume)
+                        : ((TIPURI[a.tip] && TIPURI[a.tip].scurt) || a.tipEticheta);
 
       const el = document.createElement('div');
       el.className = 'ap' + (cine.length > 1 ? ' multi' : cine.length === 1 ? ' unul' : '') +
                      (cine.indexOf(eu) >= 0 ? ' al-meu' : '') +
+                     (dup ? ' duplex' : '') +
                      (deschisMobil === a.id ? ' deschis' : '');
       el.style.flex = lat(a.mpu);
       el.dataset.ap = a.id;
+      if (dup) {
+        el.dataset.locuinta = a.bazaId;
+        el.title = numeLocuinta(v, a) + ': ' +
+          a.jumatati.map(x => fmt(x.mpu) + ' mp').join(' + ') + ' = ' + fmt(mpuLocuinta(a)) +
+          ' mp. O singură locuință, cu un singur preț. Fiecare nivel își are suprafața lui.';
+        /* Trecând peste o jumătate se aprind toate: altfel legătura dintre
+           rânduri se ghicește doar după număr. */
+        el.onmouseenter = () => document.querySelectorAll('[data-locuinta="' + a.bazaId + '"]')
+          .forEach(x => x.classList.add('duplex-aprins'));
+        el.onmouseleave = () => document.querySelectorAll('.duplex-aprins')
+          .forEach(x => x.classList.remove('duplex-aprins'));
+      }
       el.innerHTML =
         '<div class="ap-titlu">' +
-          '<span class="tip"><span class="tip-lung">' + esc(a.tipEticheta) + '</span>' +
+          '<span class="tip"><span class="tip-lung">' + esc(lung) + '</span>' +
             '<span class="tip-scurt">' + esc(scurt) + '</span></span>' +
           '<span class="mp">' + fmt(a.mpu) + '<span class="mp-unitate"> mp</span></span>' +
           '<span class="ap-jos-sageata" aria-hidden="true">' + (deschisMobil === a.id ? '▴' : '▾') + '</span>' +
         '</div>' +
         '<div class="ap-jos">' +
-          '<div class="ap-bani">teren <b>' + mii(b_.teren) + ' mii €</b> + constr. <b>' +
-            mii(b_.constr) + ' mii €</b> = <b class="tot">' + fmt(b_.tot) + ' €</b></div>' +
+          (dup
+            /* Prețul e al locuinței întregi și apare pe fiecare jumătate. De
+               aceea scrie lângă el pe câți metri e socotit: fără asta, cineva
+               ar aduna cele două cifre. */
+            ? '<div class="ap-bani">tot ' + felLocuinta(a).toLowerCase() + 'ul <b>' + fmt(mpuLocuinta(a)) +
+              ' mp</b> = <b class="tot">' + fmt(b_.tot) + ' €</b></div>'
+            : '<div class="ap-bani">teren <b>' + mii(b_.teren) + ' mii €</b> + constr. <b>' +
+              mii(b_.constr) + ' mii €</b> = <b class="tot">' + fmt(b_.tot) + ' €</b></div>') +
           '<div class="cine">' +
             (cine.indexOf(eu) >= 0 ? '<span class="ap-eu">te interesează</span>' : '') +
             cine.map(id => '<span class="punct">' + numeMic(id) + '</span>').join('') +
@@ -585,21 +684,29 @@ function renderVarianta(){
     const aDeschis = us.find(a => a.id === deschisMobil);
     if (aDeschis) {
       const b_ = bani(v, aDeschis);
-      const cine = interese[aDeschis.id] || [];
+      const cine = interesePe(aDeschis);
       const eSum = cine.indexOf(eu) >= 0;
       const plafon = plafonPentru(v, aDeschis);
+      const dup = eDuplex(aDeschis);
+      const cuvant = dup ? felLocuinta(aDeschis).toLowerCase() + 'ul' : 'apartamentul';
 
       const pd = document.createElement('div');
       pd.className = 'ap-detaliu';
       pd.innerHTML =
-        '<div class="apd-cap">' + esc(aDeschis.tipEticheta) + ' · ' + esc(niv.nume) +
-          ' · <b>' + fmt(aDeschis.mpu) + ' mp utili</b></div>' +
+        (dup
+          ? '<div class="apd-cap">' + esc(felLocuinta(aDeschis) + ' ' + aDeschis.duplex) + ' · ' +
+              esc(niv.nume) + ' · <b>' + fmt(aDeschis.mpu) + ' mp utili</b></div>' +
+            '<div class="apd-cine">Toată locuința: ' +
+              aDeschis.jumatati.map(x => esc(numeNivel(v, x)) + ' ' + fmt(x.mpu) + ' mp').join(' + ') +
+              ' = <b>' + fmt(mpuLocuinta(aDeschis)) + ' mp</b>. Costurile de mai jos sunt pe toată.</div>'
+          : '<div class="apd-cap">' + esc(aDeschis.tipEticheta) + ' · ' + esc(niv.nume) +
+              ' · <b>' + fmt(aDeschis.mpu) + ' mp utili</b></div>') +
         '<div class="apd-bani">' +
           '<div>cost teren <b>' + fmt(b_.teren) + ' €</b></div>' +
           '<div>cost construcție <b>' + fmt(b_.constr) + ' €</b></div>' +
           '<div class="tot">cost total <b>' + fmt(b_.tot) + ' €</b></div>' +
         '</div>' +
-        '<div class="apd-marime"><span>Suprafață</span>' +
+        '<div class="apd-marime"><span>' + (dup ? 'Suprafața la ' + esc(niv.nume.toLowerCase()) : 'Suprafață') + '</span>' +
           '<button class="apd-pas" data-pas="-1"' + (aDeschis.mpu <= aDeschis.mpuMin ? ' disabled' : '') + '>−</button>' +
           '<b>' + fmt(aDeschis.mpu) + ' mp</b>' +
           '<button class="apd-pas" data-pas="1"' + (aDeschis.mpu >= plafon ? ' disabled' : '') + '>+</button>' +
@@ -607,7 +714,7 @@ function renderVarianta(){
         '</div>' +
         (cine.length ? '<div class="apd-cine">Interesați: <b>' + cine.map(numeMic).join(', ') + '</b></div>' : '') +
         '<button class="apd-buton' + (eSum ? ' retrage' : '') + '">' +
-          (eSum ? 'Retrage-mă de pe apartament' : 'Mă interesează apartamentul') + '</button>';
+          (eSum ? 'Retrage-mă de pe ' + cuvant : 'Mă interesează ' + cuvant) + '</button>';
 
       pd.querySelectorAll('.apd-pas').forEach(function (b) {
         b.onclick = function (e) {
@@ -781,11 +888,12 @@ function renderCosturi(){
       fmt(pretMp(v)) + ' €/mp. Nu sunt cifrele analizei.</p>'
     : '') +
   '<table><tr><th>Apartament</th><th>mp utili</th><th>Cost teren</th><th>Cost construcție</th><th>Cost total</th></tr>' +
-    v.ap.map(function (a) {
+    /* O linie pe LOCUINȚĂ: un duplex apare o dată, cu suma jumătăților. Două
+       linii ar fi adunat de două ori același preț în capul cititorului. */
+    v.locuinte.map(function (a) {
       const b_ = bani(v, a);
-      const niv = v.niveluri.find(n => n.id === a.nivId);
-      return '<tr><td>' + esc(niv ? niv.nume : '') + ' · ' + esc(a.tipEticheta) + '</td>' +
-        '<td>' + fmt(a.mpu) + '</td><td>' + fmt(b_.teren) + ' €</td>' +
+      return '<tr><td>' + esc(numeLocuinta(v, a)) + '</td>' +
+        '<td>' + fmt(mpuLocuinta(a)) + '</td><td>' + fmt(b_.teren) + ' €</td>' +
         '<td>' + fmt(b_.constr) + ' €</td><td>' + fmt(b_.tot) + ' €</td></tr>';
     }).join('') +
     '<tr class="total-rand"><td>Total împărțit</td><td>' + fmt(alocat) + '</td>' +
@@ -808,10 +916,9 @@ function renderMembri(){
 
   document.getElementById('membri').innerHTML = vizibili.map(function (m) {
     const alese = [];
-    variante.forEach(v => v.ap.forEach(function (a) {
-      if ((interese[a.id] || []).indexOf(m.id) >= 0) {
-        const niv = v.niveluri.find(n => n.id === a.nivId);
-        alese.push(esc(v.nume) + ' · ' + esc(niv ? niv.nume : '') + ' · ' + esc(a.tipEticheta));
+    variante.forEach(v => v.locuinte.forEach(function (a) {
+      if (interesePe(a).indexOf(m.id) >= 0) {
+        alese.push(esc(v.nume) + ' · ' + esc(numeLocuinta(v, a)));
       }
     }));
     const b_ = [];
@@ -1782,12 +1889,15 @@ async function oaPorneste(){
         mpuMin: Number(a.mpu_min), mpuMax: Number(a.mpu_max), mpuPropus: propus,
         /* Un rând lipsă în `apartament_suprafata` înseamnă că nimeni n-a mișcat
            nimic, deci se folosește propunerea arhitectului. */
-        mpu: suprafete[a.id] != null ? suprafete[a.id] : propus
+        mpu: suprafete[a.id] != null ? suprafete[a.id] : propus,
+        /* Gol la un apartament obișnuit. Vezi `legaLocuintele`. */
+        duplex: a.duplex_nr != null ? Number(a.duplex_nr) : null
       };
     });
+    const locuinte = legaLocuintele(ap, niveluri);
     return {
       id: v.id, nume: v.nume, desc: v.descriere,
-      niveluri: niveluri, ap: ap,
+      niveluri: niveluri, ap: ap, locuinte: locuinte,
       /* Fișa și volumul sunt ale SETULUI (P+4 față de P+5), nu ale variantei:
          KML-ul e volumul construibil al ipotezei, deci toate variantele
          aceluiași set arată la fel în Google Earth. De aceea aceeași cale e

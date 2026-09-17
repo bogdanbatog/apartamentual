@@ -37,6 +37,28 @@
    pentru un rând gol. Sd-ul lui merge în `analiza_varianta.subsol_sd_mp`,
    exact rubrica pentru care a fost făcută.
 
+   ─────────────────────────────────────────────────────────────────────────
+   DUPLEXURILE (17 septembrie 2026, Radovici 4)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Din 8 septembrie CSV-ul are coloanele `apt_duplex_*`. Fiecare jumătate de
+   duplex e un rând SUPLIMENTAR cu `apt_nr = 1`, iar rândurile normale nu o mai
+   numără o dată. Deci locuințele = apartamentele normale + duplexurile
+   distincte, NU suma lui `apt_nr`. Fără regula asta Radovici 4 ieșea cu 8
+   apartamente în loc de 6.
+
+   Fiecare jumătate rămâne un apartament pe nivelul ei (ia din bugetul lui, are
+   cursorul ei), doar că primește `duplex_nr`. Pagina le adună la preț și la
+   înscriere. Vezi migrația `15-duplexuri.sql`.
+
+   ⚠️ `apt_duplex_grup_id` NU e unic în tot exportul, deși spec-ul o spune: la
+   Radovici 4 fiecare variantă are „grupul 1” și „grupul 2”, cu apartamente
+   diferite. Deci se grupează pe (variantă, grup), niciodată pe grup singur.
+
+   ⚠️ Numărul afișat vine din eticheta UA („Duplex #2 - baza Parter”), nu din
+   `apt_duplex_grup_id`: la Radovici 4, V1, grupul 1 e „Duplex #2”. Fișa PDF
+   folosește eticheta, deci pagina trebuie să spună același număr.
+
    ═══════════════════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -99,7 +121,9 @@ function grupeazaVariante(randuri) {
         parcajeParter: nr(r.var_parcaje_parter),
         parcajeTeren: nr(r.var_parcaje_teren),
         subsolSd: 0,
-        niveluri: new Map()
+        niveluri: new Map(),
+        /* apt_duplex_grup_id -> { nr, tip, suMin, suMax, jumatati: [...] } */
+        duplexuri: new Map()
       };
       variante.set(r.var_cod, v);
     }
@@ -131,22 +155,100 @@ function grupeazaVariante(randuri) {
       v.niveluri.set(idx, n);
     }
 
+    /* O jumătate de duplex: exact un apartament fizic pe nivelul ăsta, legat de
+       celelalte jumătăți prin `apt_duplex_grup_id`. Intervalul sumat și locurile
+       de parcare stau doar pe rândul de bază (nivelul cel mai de jos). */
+    const tipDuplex = (r.apt_duplex_tip || '').trim().toLowerCase();
+    if (tipDuplex) {
+      const grup = r.apt_duplex_grup_id;
+      let d = v.duplexuri.get(grup);
+      if (!d) {
+        const dinEticheta = /#\s*(\d+)/.exec(r.apt_duplex_eticheta || '');
+        d = { grup: grup, nr: dinEticheta ? Number(dinEticheta[1]) : nr(grup),
+              tip: tipDuplex, eticheta: r.apt_duplex_eticheta,
+              suMin: null, suMax: null, jumatati: [] };
+        v.duplexuri.set(grup, d);
+      }
+      if (nr(r.apt_duplex_su_grup_min_mp) != null) d.suMin = nr(r.apt_duplex_su_grup_min_mp);
+      if (nr(r.apt_duplex_su_grup_max_mp) != null) d.suMax = nr(r.apt_duplex_su_grup_max_mp);
+      const jum = {
+        tip: r.apt_tip,
+        eticheta: r.apt_denumire,
+        min: nr(r.apt_su_min_mp),
+        max: nr(r.apt_su_max_mp),
+        duplex: d,
+        nivIdx: idx
+      };
+      d.jumatati.push(jum);
+      n.apartamente.push(jum);
+      if ((nr(r.apt_nr) || 0) !== 1) {
+        v.avertismenteCitire = v.avertismenteCitire || [];
+        v.avertismenteCitire.push(n.nume + ': jumătatea de ' + tipDuplex + ' ' + grup +
+          ' are `apt_nr` = ' + r.apt_nr + ', spec-ul spune că e mereu 1. S-a luat drept 1.');
+      }
+      return;
+    }
+
     const cate = nr(r.apt_nr) || 0;
     for (let i = 0; i < cate; i++) {
       n.apartamente.push({
         tip: r.apt_tip,
         eticheta: r.apt_denumire,
         min: nr(r.apt_su_min_mp),
-        max: nr(r.apt_su_max_mp)
+        max: nr(r.apt_su_max_mp),
+        duplex: null
       });
     }
   });
 
   variante.forEach(function (v) {
     v.niveluriSortate = Array.from(v.niveluri.values()).sort((a, b) => a.idx - b.idx);
-    v.apTotal = v.niveluriSortate.reduce((s, n) => s + n.apartamente.length, 0);
+    /* Rânduri de apartament (ce intră în `analiza_apartament`) față de locuințe
+       (ce vede omul): un duplex e două rânduri și o singură locuință. */
+    v.apRanduri = v.niveluriSortate.reduce((s, n) => s + n.apartamente.length, 0);
+    v.apTotal = v.niveluriSortate.reduce(
+      (s, n) => s + n.apartamente.filter(a => !a.duplex).length, 0) + v.duplexuri.size;
   });
   return Array.from(variante.values());
+}
+
+/* ── VERIFICAREA DUPLEXURILOR ÎNAINTE DE SCRIERE ───────────────────────────
+   Ce poate ieși strâmb dintr-un export și n-ar opri nimic în bază:
+     · un duplex cu o singură jumătate (arată ca un apartament obișnuit, dar
+       cu eticheta de duplex);
+     · două jumătăți pe același nivel (nu mai e duplex);
+     · două duplexuri din aceeași variantă cu același număr afișat (s-ar lipi
+       într-o singură locuință, fiindcă pagina le leagă pe număr);
+     · intervalul sumat din CSV diferit de suma jumătăților.
+   Spec-ul mai spune că exporturile vechi scriau rânduri de duplex și pe
+   variantele care nu mai aveau apartamentele acelea. Asta nu se vede de aici,
+   se vede din numărătoarea față de `var_apartamente_total`.                 */
+function verificaDuplexurile(v, avertismente) {
+  (v.avertismenteCitire || []).forEach(a => avertismente.push(v.nume + ' · ' + a));
+  const numere = new Map();
+  v.duplexuri.forEach(function (d) {
+    const nume = v.nume + ' · ' + d.tip + ' ' + d.nr;
+    if (d.jumatati.length < 2) {
+      avertismente.push(nume + ': are o singură jumătate. Verifică exportul.');
+    }
+    const niveluri = new Set(d.jumatati.map(j => j.nivIdx));
+    if (niveluri.size !== d.jumatati.length) {
+      avertismente.push(nume + ': are două jumătăți pe același nivel. Verifică exportul.');
+    }
+    if (numere.has(d.nr)) {
+      avertismente.push(nume + ': același număr ca alt duplex din variantă. Pagina le-ar lipi' +
+        ' într-o singură locuință. Se renumerotează.');
+      d.nr = Math.max.apply(null, Array.from(numere.keys())) + 1;
+    }
+    numere.set(d.nr, d);
+    const sMin = d.jumatati.reduce((s, j) => s + j.min, 0);
+    const sMax = d.jumatati.reduce((s, j) => s + j.max, 0);
+    if ((d.suMin != null && Math.abs(d.suMin - sMin) > 0.05) ||
+        (d.suMax != null && Math.abs(d.suMax - sMax) > 0.05)) {
+      avertismente.push(nume + ': intervalul din CSV e ' + d.suMin + '-' + d.suMax +
+        ' mp, dar jumătățile însumează ' + sMin + '-' + sMax + ' mp.');
+    }
+  });
 }
 
 /* ── SUPRAFAȚA DE PORNIRE A FIECĂRUI APARTAMENT ──────────────────────────────
@@ -289,7 +391,10 @@ function descriereVarianta(v, liberPeNivel) {
      făcute. Ordinea e cea din normativ, de la mic la mare. */
   const ordineTipuri = ['gars', 'studio', 'cam2', 'cam3', 'cam34'];
   const numarate = new Map();
+  /* Jumătățile de duplex nu intră în amestec: „1 × garsonieră” ar numi o
+     locuință care nu există. Duplexul se numără o dată, la sfârșit. */
   v.niveluriSortate.forEach(n => n.apartamente.forEach(function (a) {
+    if (a.duplex) return;
     if (!numarate.has(a.tip)) numarate.set(a.tip, { eticheta: a.eticheta, cate: 0 });
     numarate.get(a.tip).cate++;
   }));
@@ -300,11 +405,18 @@ function descriereVarianta(v, liberPeNivel) {
     const nume = x.eticheta.replace(/\bcam\b\.?/i, 'camere').replace(/^Gars\.$/, 'garsoniere');
     return x.cate + ' × ' + nume.toLowerCase();
   });
+  ['duplex', 'triplex'].forEach(function (fel) {
+    const cate = Array.from(v.duplexuri.values()).filter(d => d.tip === fel).length;
+    if (cate) amestec.push(cate + ' × ' + fel);
+  });
   if (amestec.length) parti.push(amestec.join(', '));
 
   const parter = v.niveluriSortate.find(n => n.esteParter);
   if (parter) {
     const liber = liberPeNivel.get(parter.idx) || 0;
+    /* Locuințe cu ceva la parter: un duplex cu baza acolo se numără o dată. */
+    const laParter = parter.apartamente.filter(a => !a.duplex).length +
+                     new Set(parter.apartamente.filter(a => a.duplex).map(a => a.duplex)).size;
     /* Comercialul de la parter e adesea singurul lucru care deosebește două
        variante cu același amestec de apartamente, deci se spune înaintea
        oricărei alte vorbe despre parter. Funcțiunea vine din CSV; când
@@ -315,10 +427,10 @@ function descriereVarianta(v, liberPeNivel) {
                  || v.parterFunctiune || 'spațiu comercial';
       parti.push(Math.round(parter.suComercial) + ' mp ' + ce + ' la parter');
     }
-    if (parter.apartamente.length === 1) {
+    if (laParter === 1) {
       parti.push('unul la parter');
-    } else if (parter.apartamente.length > 1) {
-      parti.push(parter.apartamente.length + ' la parter');
+    } else if (laParter > 1) {
+      parti.push(laParter + ' la parter');
     } else if (parter.suComercial > 0) {
       /* Comercialul s-a spus deja și explică singur parterul. */
     } else if (liber >= 20) {
@@ -429,6 +541,7 @@ function main() {
          pe un parter care are 30 mp de birouri. */
       v.liber.set(n.idx, Math.max(0, Math.round((n.su - dat) * 100) / 100));
     });
+    verificaDuplexurile(v, avertismente);
     v.descriere = descriereVarianta(v, v.liber);
     v.coef = coeficientulVariantei(v, cfg, avertismente);
     if (v.costTerenCsv != null && cfg.cost_teren != null &&
@@ -802,15 +915,41 @@ function main() {
           sql: '(' + [
             sqlText(v.nume), sqlText(n.nume), String(i + 1),
             sqlText(a.tip), sqlText(a.eticheta),
-            sqlNum(a.min), sqlNum(a.max), sqlNum(n.propuse[i])
+            sqlNum(a.min), sqlNum(a.max), sqlNum(n.propuse[i]),
+            /* Aceeași capcană ca la `sqlNum`: pe o analiză fără niciun duplex
+               coloana e numai NULL, deci Postgres ar tipiza-o `text`. */
+            a.duplex ? String(a.duplex.nr) : 'null::smallint'
           ].join(', ') + ')'
         });
       });
     });
   });
+  const totalDuplexuri = variante.reduce((s, v) => s + v.duplexuri.size, 0);
+  const totalLocuinte = variante.reduce((s, v) => s + v.apTotal, 0);
   p(linie);
-  p('-- BLOC 4 · APARTAMENTELE (' + randuriAp.length + ')');
+  p('-- BLOC 4 · APARTAMENTELE (' + randuriAp.length + ' rânduri' +
+    (totalDuplexuri ? ', adică ' + totalLocuinte + ' locuințe, dintre care ' +
+      totalDuplexuri + ' duplexuri' : '') + ')');
   p('--');
+  if (totalDuplexuri) {
+    p('-- ⚠️ CERE MIGRAȚIA `15-duplexuri.sql` RULATĂ ÎNAINTE. Fără ea blocul crapă');
+    p('--    cu „column duplex_nr does not exist”.');
+    p('--');
+    p('-- Fiecare jumătate de duplex e un rând al ei, pe nivelul ei, și ia din');
+    p('-- bugetul nivelului ei. Jumătățile aceleiași locuințe au același');
+    p('-- `duplex_nr`, unic doar în variantă. Pagina le adună la preț și la');
+    p('-- înscriere.');
+    variante.forEach(function (v) {
+      v.duplexuri.forEach(function (d) {
+        p('--   ' + v.nume + ' · ' + d.tip + ' ' + d.nr + ': ' +
+          d.jumatati.map(function (j) {
+            const niv = v.niveluriSortate.find(n => n.idx === j.nivIdx);
+            return (niv ? niv.nume : '?') + ' ' + j.eticheta;
+          }).join(' + '));
+      });
+    });
+    p('--');
+  }
   p('-- Urban Analyzer nu dă suprafața fiecărui apartament, și nici nu trebuie:');
   p('-- la faza preliminară ea nu există, se negociază pe nivel, la proiectare.');
   p('-- Ce dă e Su-ul nivelului și câte apartamente de fiecare tip stau pe el.');
@@ -824,10 +963,10 @@ function main() {
   p('');
   p('insert into public.analiza_apartament (');
   p('  nivel_id, varianta_id, grup_id, tip_key, tip_eticheta,');
-  p('  mpu_min, mpu_max, mpu_propus, ordine');
+  p('  mpu_min, mpu_max, mpu_propus, ordine' + (totalDuplexuri ? ', duplex_nr' : ''));
   p(')');
   p('select ni.id, ni.varianta_id, ni.grup_id, x.tip, x.eticheta,');
-  p('       x.mpu_min, x.mpu_max, x.mpu_propus, x.ordine');
+  p('       x.mpu_min, x.mpu_max, x.mpu_propus, x.ordine' + (totalDuplexuri ? ', x.duplex_nr' : ''));
   p('  from public.analiza_nivel ni');
   p('  join public.analiza_varianta va on va.id = ni.varianta_id');
   p('  join public.analiza_teren a on a.id = va.analiza_id');
@@ -835,7 +974,7 @@ function main() {
   randuriAp.forEach(function (r, i) {
     p('         ' + r.sql + (i === randuriAp.length - 1 ? '' : ','));
   });
-  p('       ) as x(varianta, nivel, ordine, tip, eticheta, mpu_min, mpu_max, mpu_propus)');
+  p('       ) as x(varianta, nivel, ordine, tip, eticheta, mpu_min, mpu_max, mpu_propus, duplex_nr)');
   p('    on x.varianta = va.nume and x.nivel = ni.nume');
   pUndeAnaliza(' ');
   /* `ordine` deosebește apartamentele de pe același nivel: două de 2 camere pe
@@ -856,7 +995,12 @@ function main() {
   p('select * from (');
   p("  select 1 as ord, 'variantă' as sectiune, va.nume as detaliu,");
   p('         count(distinct ni.id)::text as niveluri,');
-  p('         count(ap.id)::text as apartamente,');
+  /* Cu duplexuri se numără LOCUINȚELE (un duplex o dată), ca să se poată pune
+     cifra lângă `var_apartamente_total` din CSV. Fără duplexuri rămâne forma
+     veche, care nu cere migrația 15. */
+  p(totalDuplexuri
+    ? "         (count(ap.id) filter (where ap.duplex_nr is null) + count(distinct ap.duplex_nr))::text as locuinte,"
+    : '         count(ap.id)::text as apartamente,');
   p('         round(sum(ap.mpu_propus), 2)::text as mp_dati,');
   /* ⚠️ Bugetul se socotește pe NIVELURI, nu din `va.su_total_mp`: subsolul
      nu e nivel la noi, deci pe o variantă cu subsol ieșea o diferență de 90 mp
@@ -951,8 +1095,26 @@ function main() {
   p('    join public.analiza_teren a on a.id = va.analiza_id');
   pUndeAnaliza('   ');
   p('     and va.grup_id <> a.grup_id');
+  if (totalDuplexuri) {
+    p('  union all');
+    p('  -- (e) un duplex are cel puțin două jumătăți, fiecare pe alt nivel. Altfel');
+    p('  --     pagina ar arăta o locuință „pe două niveluri” care stă pe unul.');
+    p("  select 7, 'DUPLEX STRICAT', va.nume || ' · duplex ' || ap.duplex_nr::text,");
+    p('         count(*)::text, count(distinct ap.nivel_id)::text, null, null');
+    p('    from public.analiza_apartament ap');
+    p('    join public.analiza_varianta va on va.id = ap.varianta_id');
+    p('    join public.analiza_teren a on a.id = va.analiza_id');
+    pUndeAnaliza('   ');
+    p('     and ap.duplex_nr is not null');
+    p('   group by va.nume, ap.duplex_nr');
+    p('  having count(*) < 2 or count(distinct ap.nivel_id) < count(*)');
+  }
   p(') x order by ord, detaliu;');
   p('');
+  if (totalDuplexuri) {
+    p('-- Coloana a cincea e „locuinte”: un duplex se numără o dată. Cifrele');
+    p('-- așteptate, din CSV: ' + variante.map(v => v.nume + ' = ' + v.apTotal).join(', ') + '.');
+  }
   p('-- CE TREBUIE SĂ VEZI: doar rânduri „variantă”, câte unul de fiecare.');
   p('-- Orice rând scris cu majuscule e o problemă și oprește proba.');
   p('');
@@ -1050,7 +1212,9 @@ function main() {
     process.stderr.write('\n');
   }
   process.stderr.write('Scris: ' + variante.length + ' variante, ' + totalNiveluri +
-    ' niveluri, ' + randuriAp.length + ' apartamente.\n');
+    ' niveluri, ' + randuriAp.length + ' rânduri de apartament' +
+    (totalDuplexuri ? ' (' + totalLocuinte + ' locuințe, dintre care ' + totalDuplexuri + ' duplexuri)' : '') +
+    '.\n');
 }
 
 main();
