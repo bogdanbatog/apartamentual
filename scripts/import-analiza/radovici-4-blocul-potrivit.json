@@ -1,0 +1,46 @@
+{
+  "_comentariu": [
+    "Analiza Radovici 4, pusă și pe grupul „Blocul potrivit” (29 septembrie 2026).",
+    "Robert, membru în Parcul Circului, a fondat grupul nou și vrea analiza acolo.",
+    "Rămâne și pe Parcul Circului: aceleași CSV-uri, aceleași cifre, același titlu,",
+    "doar grupul e altul. Vezi `radovici-4.json` pentru verificarea costurilor,",
+    "întrebarea deschisă despre V3 și regulile duplexului.",
+    "",
+    "CE NU SE COPIAZĂ: înscrierile pe apartamente, suprafețele trase cu cursorul,",
+    "preferințele, jurnalul și documentele terenului. Sunt ale oamenilor din Parcul",
+    "Circului, iar analiza e a perechii (grup, teren); Blocul potrivit pornește de la",
+    "propunerea arhitectului.",
+    "",
+    "GRUPUL se caută după nume (`grup_cauta`). BLOC 0 arată grupul găsit; dacă ies",
+    "două, BLOC 1 se oprește singur cu „more than one row returned by a subquery”.",
+    "",
+    "TERENUL se pune la favoritele grupului cu",
+    "`db_schema/organizare-apartamente/leaga-radovici-4-de-blocul-potrivit.sql`,",
+    "rulat imediat ÎNAINTE de import.",
+    "",
+    "FIȘIERELE: fișa și KML-ul se urcă DIN NOU în Storage, în folderul cu id-ul",
+    "grupului Blocul potrivit (`analize-fise/<id grup>/`). Cele din folderul Parcului",
+    "Circului nu se văd din grupul nou: politica de citire se uită la primul folder.",
+    "Sursa: `analize din Urban Analyzer/RADOVICI 4/_de-urcat/`, aceleași nume."
+  ],
+  "titlu": "Analiză preliminară Radovici 4",
+  "data_analizei": "2026-09-17",
+  "grup_cauta": "Blocul potrivit",
+  "teren_id": "eed27d0f-fbaa-4561-8d3d-439db03f2441",
+  "cost_teren": 450000,
+  "cost_constructie_mp": 1200,
+  "cost_subsol_pct": 70,
+  "coef_su_sd": 0.7,
+  "suprafata_teren_mp": 632.31,
+  "note": "Analiză preliminară Urban Analyzer, 17 septembrie 2026. Teren 632,31 mp, front 28,73 ml, UTR L1a (Sector 2), reglementare din PUZ: POT max 45%, CUT max 1,60, regim max P+3, spațiu verde min 30%. O singură ipoteză de volum, P+3, cu 960,55 mp construiți, POT obținut 44,81% și CUT obținut 1,519, deci sub plafonul de 1,60. Trei variante, fiecare cu 6 apartamente, fără subsol. Parcarea stă o parte la parter și restul pe teren. V1 și V2 au aceeași suprafață utilă și diferă prin felul în care sunt împărțite etajele; V3 pune un singur apartament mai mare la parter și lasă mai multe locuri de parcare acolo. Costuri de intrare: 1.200 euro pe mp Sd și 450.000 euro terenul. Suprafețele apartamentelor sunt propuneri de pornire, nu suprafețe proiectate: se negociază pe nivel, la proiectare.",
+  "seturi": [
+    {
+      "prefix": "P+3",
+      "csv": "../../analize din Urban Analyzer/RADOVICI 4/analiza-urbanistica (24).csv",
+      "suprafata_teren_mp": 632.31,
+      "pdf_nume": "radovici-4-fisa.pdf",
+      "kml_nume": "radovici-4-volum.kml",
+      "earth_url": "https://earth.google.com/earth/d/1yUOeFqNMxnHVnO3f4AZDGV15YI94XQYj?usp=sharing"
+    }
+  ]
+}
