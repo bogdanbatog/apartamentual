@@ -299,29 +299,13 @@
     align-items:flex-start;
   }
   .cta-group{ display:flex; flex-direction:column; gap:0.5rem; }
-  /* Linkul de WhatsApp de sub butoane: text, nu buton, ca să nu concureze cu
-     cele două de deasupra. Nota „după ce îți faci profilul" spune din start
-     de ce ajungi la înregistrare și nu direct în WhatsApp. */
-  .hero-whatsapp{ margin:0.25rem 0 0; font-size:14px; line-height:1.55; color:var(--ink-2); }
-  .hero-whatsapp a{ color:var(--ink); font-weight:500; text-decoration:underline; text-underline-offset:3px; }
-  .hero-whatsapp a:hover{ text-decoration-thickness:2px; }
-  .hero-whatsapp-nota{ color:var(--ink-3); font-size:13px; margin-left:0.35rem; }
-  .hero-whatsapp[hidden]{ display:none; }
   .cta-note{ font-size:11px; color:var(--ink-3); }
-  /* Rândul de sub butoane care spune ce e site-ul. NU folosește `.cta-note`
-     (11px, `--ink-3`): aceea e mărime de subsol, potrivită pentru o notă de
-     serviciu, nu pentru singura propoziție din primul ecran care numește
-     platforma. 13px pe `--ink-2` se citește fără să concureze cu subtitlul de
-     16px de deasupra. Adăugat pe 31 august. */
-  .hero-platforma{
-    margin:0.5rem 0 0;
-    font-size:13px;
-    line-height:1.55;
-    color:var(--ink-2);
-    /* 680px, nu 600: la 600 fraza se rupea și rămânea „loc." singur pe rândul
-       al doilea. Pe telefon se rupe oricum, dar acolo n-are cum să nu. */
-    max-width:680px;
-  }
+  /* Nota de sub butoane (29 septembrie): singurul text mic din hero, deci o
+     singură mărime și o singură culoare. */
+  .hero-nota-wa{ margin:0.5rem 0 0; font-size:14px; line-height:1.55; color:var(--ink-3); max-width:640px; }
+  /* Subtitlul are două paragrafe: mecanismul și platforma. Primul își
+     pierde marginea mare de jos, ca să se citească împreună. */
+  .hero-sub:has(+ .hero-sub--platforma){ margin-bottom:0.6rem; }
   .cta-primary,
   .cta-secondary{
     display:inline-flex;
@@ -363,6 +347,15 @@
     flex-wrap:wrap;
   }
   .cred-sep{ color:var(--ink-3); }
+  /* Banda de încredere (29 septembrie): 14px, nu 13, ca să nu mai fie cel
+     mai mic text din ecran. */
+  /* Trei coloane egale, nu `space-between`: la 14px textele nu mai încap pe
+     un rând și se rupeau două sus, la capete opuse, și unul singur jos. */
+  .cred-band--incredere{ font-size:14px; line-height:1.5; display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; align-items:start; }
+  @media (max-width:768px){ .cred-band--incredere{ grid-template-columns:1fr; gap:0.6rem; } }
+  .cred-band--incredere b{ color:var(--ink); font-weight:500; }
+  .cred-band--incredere a{ color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+  .cred-band--incredere a:hover{ text-decoration-thickness:2px; }
 
   /* ── HERO PE ROLURI (variante A/B) + BARA DE APARTAMENTE ──
      Tot CSS-ul de mai jos e SCOPAT pe .hero-stage ca să NU afecteze :root
@@ -540,6 +533,12 @@
     grid-template-columns:repeat(22,1fr); }
   .aptbar__cols > span{ border-radius:2px; transition:background .6s ease; }
   .aptbar__big{ flex:none; width:11.5%; border-radius:2px; background:var(--ochre); }
+  /* Nelogat: bara iese (29 septembrie). `atu-logat` o pune scriptul din
+     <head> și o scoate `paginaIntreaga()` când nu e sesiune, deci fără clasă
+     = nelogat. Cei 4rem de aer pe care îi dădea bara deasupra benzii de
+     încredere trec pe blocul filmului (`.dovada-bloc`). */
+  html:not(.atu-logat) .aptbar-doar-logat{ display:none; }
+  .dovada-bloc{ margin-bottom:4rem; }
 
   /* responsive variante A/B */
   @media (max-width:980px){
@@ -2085,7 +2084,17 @@
         Câteva familii își construiesc blocul. Fără dezvoltator.
       </h1>
       <p class="hero-sub">
-        Cumpără împreună un teren, participă la proiectare, aleg constructorul, iar apartamentele rămân ale lor. Se numește Baugruppen, e obișnuit în Germania, iar în București există deja primul bloc construit cu ajutorul apartamen<b class="apt-tu">TU</b>al.
+        Cumpără împreună un teren, participă la proiectare, aleg constructorul, iar apartamentele rămân ale lor.
+      </p>
+      <!-- Rescris pe 29 septembrie. Definiția platformei stătea într-un rând
+           separat de 13px, sub butoane, și era cea mai mică frază din primul
+           ecran. A urcat în subtitlu, la 18px, dar pe rând propriu: în mijlocul
+           frazei, „apartamenTUal" cu literă mică nu se citea (observația lui
+           Lucian). Începe cu „Pe", ca propoziția să nu înceapă cu literă mică.
+           „Se numește Baugruppen, e obișnuit în Germania" a coborât în banda
+           de încredere de sub film. -->
+      <p class="hero-sub hero-sub--platforma">
+        Pe apartamen<b class="apt-tu">TU</b>al se formează aceste grupuri, iar în București există deja primul bloc construit cu ajutorul platformei.
       </p>
       <!-- ⚠️ NU SCRIE AICI „își aleg arhitectul". A fost în subtitlu o zi și a
            ieșit pe 25 august, la cererea lui Lucian, din două motive: mulți
@@ -2105,7 +2114,9 @@
            Decizia lui Lucian, 25 august 2026. -->
 
       <div class="cta-group">
-        <!-- ⚠️ BUTONUL PRINCIPAL NU MAI SCOATE OMUL DE PE SITE. Până acum trei
+        <!-- (Istoric, înlocuit pe 29 septembrie de butonul de WhatsApp, vezi
+             mai jos. Rămâne pentru cifrele despre /terenuri.html.)
+             ⚠️ BUTONUL PRINCIPAL NU MAI SCOATE OMUL DE PE SITE. Până acum trei
              din patru CTA-uri majore duceau la aceeași pagină Luma, deci cine
              intra pe 15 ale lunii era invitat să aștepte până în 3 septembrie.
              Între timp, `/terenuri.html` are cel mai bun comportament din site
@@ -2114,48 +2125,38 @@
              (primarul: webinar → terenuri; secundarul: cum-incepi → webinar).
              Numele evenimentului rămâne `CTA Click`, ca să nu iasă din raportul
              în care se compară toate butoanele între ele. -->
+        <!-- ── BUTONUL PRINCIPAL: GRUPUL DE DISCUȚII PE WHATSAPP ──
+             Decizia lui Lucian, 29 septembrie: principalul trece de pe
+             terenuri pe WhatsApp, iar terenurile și grupurile devin secundare.
+             ⚠️ Duce la ÎNREGISTRARE, NU la WhatsApp. Linkul propriu-zis apare
+             doar pe homepage-ul logat (rândul din „Ce e nou"), iar acolo ajunge
+             doar cine are profil complet, fiindcă `nav.js` nu lasă altfel pe
+             nimeni pe homepage. `register.js` duce `redirect` prin confirmarea
+             de email și prin completarea profilului, deci omul aterizează
+             înapoi aici.
+             ⚠️ Poarta e UȘOARĂ, dinadins: linkul stă în `WHATSAPP_URL`, în
+             sursa paginii. Plasa e „Aprobă membrii noi" din setările grupului.
+             ⚠️ Principalul cere acum cont, spre deosebire de terenuri, care se
+             deschid fără. De urmărit în Plausible: `dest=whatsapp` față de
+             `dest=terenuri` pe `loc=hero`, înainte și după 29 septembrie. -->
+        <!-- Trei butoane alăturate, doar WhatsApp-ul negru (alegerea lui
+             Lucian, 29 septembrie, după ce a văzut și varianta cu un singur
+             buton). Nota de dedesubt spune ce găsești în grup și condiția
+             profilului, ca omul să afle ÎNAINTE de clic că ajunge la
+             înregistrare, nu direct în WhatsApp. -->
         <div class="hero-ctas">
-          <a href="/terenuri.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=terenuri">Vezi terenurile din zona ta <span class="arr">→</span></a>
-          <!-- Aici stătea „Înscrie-te la webinar". A ieșit pe 29 septembrie:
-               webinariile generale se opresc, urmează cele tematice, fără temă
-               încă. Caseta de webinar de mai jos rămâne și spune asta. -->
-          <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=grupuri">Intră într-un grup care se formează</a>
+          <a href="/register.html?redirect=%2F" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=whatsapp">Intră în grupul de WhatsApp <span class="arr">→</span></a>
+          <a href="/terenuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=terenuri">Vezi terenurile</a>
+          <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=grupuri">Intră într-un grup de pe platformă</a>
         </div>
-        <!-- ── GRUPUL DE WHATSAPP AL COMUNITĂȚII ──
-             Duce la înregistrare, NU la WhatsApp. Linkul propriu-zis apare doar
-             pe homepage-ul logat (rândul din „Ce e nou"), iar acolo ajunge doar
-             cine are profil complet, fiindcă `nav.js` nu lasă altfel pe nimeni
-             pe homepage. `register.js` duce `redirect` prin confirmarea de email
-             și prin completarea profilului, deci omul aterizează înapoi aici.
-             ⚠️ Poarta e UȘOARĂ, decizia lui Lucian din 29 septembrie: linkul
-             stă în `WHATSAPP_URL`, în sursa paginii, deci îl găsește oricine se
-             uită în cod. Plasa e „Aprobă membrii noi" din setările grupului.
-             ⚠️ Rămâne `hidden` cât timp `WHATSAPP_URL` e gol (îl arată
-             scriptul), ca să nu ceară cuiva un profil pentru un grup care nu
-             există încă. -->
-        <p class="hero-whatsapp" id="heroWhatsapp" hidden>
-          <a href="/register.html?redirect=%2F" class="plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=whatsapp">Intră în grupul de discuții pe WhatsApp <span aria-hidden="true">→</span></a>
-          <span class="hero-whatsapp-nota">după ce îți faci profilul</span>
-        </p>
+        <p class="hero-nota-wa">În grupul de WhatsApp afli repede ce te interesează și citești ce întreabă și ce răspund ceilalți. Intri după ce îți faci profilul.</p>
         <!-- Sub butoane stătea o notă („București și împrejurimi. Fără cont,
              ca să vezi ce e."). A ieșit la cererea lui Lucian, 25 august.
              Orașul nu se pierde: apare în linia de sub timelapse, la câteva
              sute de pixeli mai jos („Județului Housing, București"). -->
-        <!-- ⚠️ Rândul de mai jos e singurul loc din primul ecran care spune că
-             ăsta e un site pe care faci ceva, nu o pagină de prezentare.
-             Adăugat pe 31 august, la cererea lui Lucian: titlul și subtitlul
-             spun mecanismul (ce fac câteva familii), dar niciunul nu spunea ce
-             e platforma. Măsurat înainte: primul cuvânt despre platformă
-             apărea la 23% adâncime, al treilea ecran pe telefon.
-             ⚠️ Numele apare a doua oară la 150px de prima (subtitlul se
-             termină cu „cu ajutorul apartamenTUal"). E acceptat dinadins: a
-             doua oară e cea care îl definește. Dacă sună repetat, se taie
-             începutul și rămâne „E platforma pe care…".
-             ⚠️ NU scrie aici „îți alegi arhitectul" și nici „găsești
-             arhitecți": vezi regula din comentariul de deasupra subtitlului.
-             „arhitecți, la un loc" spune că sunt acolo, nu că îi alegi dintr-o
-             listă. -->
-        <p class="hero-platforma">apartamen<b class="apt-tu">TU</b>al e platforma pe care se formează aceste grupuri: oameni, terenuri și arhitecți, la un loc.</p>
+        <!-- Aici stătea rândul de 13px „apartamenTUal e platforma pe care se
+             formează aceste grupuri: oameni, terenuri și arhitecți, la un loc"
+             (31 august). Din 29 septembrie definiția e în subtitlu, la 18px. -->
       </div>
     </section>
 
@@ -2227,7 +2228,7 @@
          proporție, potrivește `aspect-ratio` din `.video-ph--live`.
          ⚠️ Blocul stă ÎN `.hero-stage` fiindcă paleta pământie
          (`--terracotta`, `--sage`…) e definită acolo, nu pe `:root`. -->
-    <div class="js-marketing-only">
+    <div class="js-marketing-only dovada-bloc">
       <div class="video-ph video-ph--live">
         <!-- `src` stă direct pe <video>, nu într-un <source>, ca scriptul de
              sesiune să-l poată goli cu removeAttribute, exact cum făcea cu
@@ -2257,8 +2258,11 @@
            oameni din 2.577. Dacă se pune la loc, aici era locul. -->
     </div>
 
-    <!-- ── BARA DE APARTAMENTE (separare prin gap, fără borders) ── -->
-    <div class="aptbar" aria-hidden="true">
+    <!-- ── BARA DE APARTAMENTE (separare prin gap, fără borders) ──
+         ⚠️ Ascunsă pentru NELOGAȚI din 29 septembrie (decizia lui Lucian:
+         „spațiu pierdut"). Rămâne pentru logați: `.aptbar-doar-logat`, vezi
+         CSS-ul de lângă `.aptbar`. -->
+    <div class="aptbar aptbar-doar-logat" aria-hidden="true">
       <div class="aptbar__cols js-aptbar"></div>
       <div class="aptbar__big"></div>
     </div>
@@ -2288,11 +2292,23 @@
        ⚠️ „filtrate" plus „analiză la cerere", NU „terenuri analizate":
        analiza e serviciul pe care îl ceri tu. Regula întreagă e scrisă la
        secțiunea „Cu ce te ajută apartamenTUal".
-       ⚠️ Baugruppen nu se pierde: e în subtitlul hero-ului, cu 400px mai sus. -->
-  <div class="cred-band js-marketing-only">
-    <span>Pe platformă găsești oamenii și grupurile din zona ta</span>
-    <span>Terenuri filtrate de arhitecți, cu analiză la cerere</span>
-    <span>Arhitecți lângă grup, până la mutare</span>
+       (Tot comentariul de mai sus e istoric: banda a fost rescrisă din nou,
+       vezi dedesubt. Baugruppen stă acum AICI, nu în subtitlul hero-ului.) -->
+  <!-- ⚠️ REscrisă din nou pe 29 septembrie, ca BANDĂ DE ÎNCREDERE. Cele trei
+       rânduri despre platformă de mai sus nu mai erau necesare: definiția
+       platformei a urcat în subtitlul hero-ului. În locul lor, ce cerea
+       Lucian: modelul nu e inventat de noi, se face de zeci de ani în alte
+       țări, iar la noi se adaptează la legislația de aici.
+       ⚠️ Încadrare: NU „concept importat" (regula din CLAUDE.md). De aceea al
+       treilea rând spune adaptarea la România, nu doar „vine din Germania".
+       ⚠️ Orașele sunt alese dinadins, fără cifre: Berlin, Hamburg, Tübingen
+       (cartierul francez) și Viena (Seestadt Aspern) au toate proiecte de
+       Baugruppen documentate. Nu pune procente sau „X% din construcții"
+       până nu există o sursă. -->
+  <div class="cred-band cred-band--incredere js-marketing-only">
+    <span>Modelul <b>Baugruppen</b> e uzual în Germania: așa se construiesc blocuri de zeci de ani</span>
+    <span>Berlin, Hamburg, Tübingen, Viena · <a href="/ce-este/exemple-europa.html" class="plausible-event-name=CTA+Click plausible-event-loc=incredere plausible-event-dest=exemple">vezi exemple</a></span>
+    <span><b>Adaptat la România:</b> <a href="/ce-este/legislatia-romania.html" class="plausible-event-name=CTA+Click plausible-event-loc=incredere plausible-event-dest=legislatie">cadrul legal de aici</a></span>
   </div>
 
   <!-- ── CE CÂȘTIGI (contopit din trei blocuri, 26 august) ──
@@ -5563,14 +5579,15 @@
     // „WEBINARUL LUNAR"). În locul lui, linkurile completate de mână: apar
     // doar dacă au o adresă. Tot înainte de `init()`, fiindcă sunt pentru
     // nelogați.
+    // ⚠️ Butonul de WhatsApp din hero NU mai e ascuns după `WHATSAPP_URL`: e
+    // butonul principal, deci nu poate dispărea. Dacă grupul se închide
+    // vreodată, se schimbă butonul din HTML, nu doar constanta.
     (function arataLinkurileDeMana(){
       var trecute = document.getElementById('webinariiTrecute');
       if(trecute && WEBINARII_TRECUTE_URL){
         trecute.href = WEBINARII_TRECUTE_URL;
         trecute.hidden = false;
       }
-      var wa = document.getElementById('heroWhatsapp');
-      if(wa && WHATSAPP_URL) wa.hidden = false;
     })();
     init();
 
