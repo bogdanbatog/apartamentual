@@ -1,6 +1,35 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 3 septembrie 2026** — **Emailul de memento pentru webinar: 89 trimise,
+> **⏭️ ULTIMA SESIUNE: 29 septembrie 2026** — **Homepage: webinariile lunare oprite, grupul de
+> WhatsApp devine butonul principal, bandă de încredere Baugruppen. ✅ COMIS (`454c22e`,
+> `252d04f`) și ÎMPINS. ⏳ NEPUBLICAT din cPanel** (`index.html`, `servicii.html`,
+> `register.html`, independente între ele).
+>
+> **Decizii:** webinariile lunare generale s-au oprit; urmează webinarii tematice, anunțate
+> prin newsletter. Un singur grup general de WhatsApp („apartamenTUal · Discuții generale"
+> sau similar), NU Comunitate; se sparge pe zone abia când o cere grupul. Poartă ușoară:
+> butonul din hero duce la înregistrare, linkul real (`WHATSAPP_URL`) apare doar pe
+> homepage-ul logat, în „Ce e nou"; în WhatsApp e pornit „Aprobă membrii noi".
+>
+> **Hero nelogat acum:** subtitlu pe două paragrafe (platforma la 18px, nu 13), trei butoane
+> (WhatsApp negru, terenuri, grupuri), o notă. Bara grafică ascunsă pentru nelogați. Cele
+> trei texte de sub film → bandă de încredere (Baugruppen în Germania, orașe + „vezi
+> exemple", „Adaptat la România" + legislație). Caseta de webinar și banda de newsletter
+> rescrise; scos „primul mic bloc colaborativ din România" din banda de newsletter.
+> `servicii.html` / `register.html`: promisiuni corectate (nu există email cu grupuri noi;
+> terenurile din zone pleacă doar către conturi, nu către abonații la newsletter).
+>
+> **Problema cu Luma de mai jos (3 septembrie) nu mai contează:** webinarul nu mai are
+> buton pe homepage. `urmatorulWebinar`/`scrieDataWebinarului` sunt oprite, nu șterse.
+>
+> **⏭️ URMĂTORUL:** pagina `ce-este/exemple-europa.html`, pe care o linkuiește acum banda de
+> încredere: poze fără drept, „25%" fără sursă, note de lucru publice, AusbauHaus Neukölln ca
+> prim exemplu. Totul în `handoff/20260929 - handoff-pagina-exemple-europa.md`.
+> **Rămase:** `WEBINARII_TRECUTE_URL` (playlist YouTube, de la Lucian); ~10 em-dash-uri în
+> `servicii.html`; emailul „grupuri noi în zonele tale" (edge function + SQL, sesiune separată);
+> de comparat în Plausible `dest=whatsapp` vs. `dest=terenuri` pe `loc=hero`.
+
+> **ULTIMA SESIUNE ÎNAINTE: 3 septembrie 2026** — **Emailul de memento pentru webinar: 89 trimise,
 > zero eșecuri. ✅ COMIS (`67aa3e7`, `7fa8e49`) și ÎMPINS. Prezentarea de webinar,
 > reconstruită de la zero ca HTML, 25 de slide-uri. 🔴 NECOMISĂ.**
 >
