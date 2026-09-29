@@ -311,7 +311,13 @@ Nu acționa pe niciuna fără confirmare explicită.
   **NU s-au copiat** înscrierile, suprafețele trase, preferințele, jurnalul și documentele: sunt ale oamenilor din Circului. Grupul nou pornește de la propunerea arhitectului.
   Terenul era DEJA la favoritele grupului (pus de Robert), deci `leaga-radovici-4-de-blocul-potrivit.sql` n-a mai fost rulat; rămâne ca tipar cu grupul căutat după nume, nu scris de mână.
   ⚠️ **Fișierele se urcă din nou pentru fiecare grup:** politica bucketului se uită la primul folder, deci fișa din folderul Circului nu se vede din grupul nou.
-  ⏭️ De verificat pe live pagina de împărțire a grupului (duplexuri, fișa, Earth). Robert NU a fost anunțat automat.
+  ✅ Verificat pe live de Lucian (pagina de împărțire a grupului). Robert NU a fost anunțat automat.
+
+- [x] **2026-09-29 — „Cere o analiză” apărea pe terenuri cu Împărțirea apartamentelor gata** (commits `6b7284c`, `1701597`; de urcat în cPanel `grup-details.html` și `index.html`)
+  ⚠️ **„Are analiză” însemna doar `terenuri.nr_apartamente_min/max`.** Un import din Urban Analyzer scrie în `analiza_teren` (perechea grup, teren) și NU atinge cifrele terenului, deci cardul arăta tot „Cere o analiză”. Sunt de acum două surse pentru „are analiză”; oriunde se mai decide asta (pagina terenului `teren-details.js`, cardurile din `terenuri.js`), criteriul vechi încă ratează analizele importate.
+  **Pagina grupului** citește `analiza_teren` pentru grupul deschis (nemembrii primesc listă goală prin RLS, cardul rămâne ca înainte). Pe un teren cu analiză importată, sus nu se mai pune NIMIC: prima formă punea „✓ Analiză · Împărțirea apartamentelor →” lângă titlu, iar Lucian a cerut să rămână doar linia de sub teren (două linkuri spre aceeași pagină = dublură).
+  **Homepage („Terenurile tale”)** folosește `x[20]` (analizele grupurilor mele, deja încărcate): pilula „✓ Analiză” + link „Împărțirea apartamentelor” (`data-dest="impartire-teren"`), fără „Cere o analiză”.
+  ⏭️ De verificat pe live după upload: Blocul potrivit și Parcul Circului (Radovici, Despot Vodă, Galvani).
 
 - [ ] **2026-09-17 — Feedback de la un client al analizei preliminare (trei puncte, nerezolvate, sesiune separată)**
   **1. Nu are unde urca certificatul de urbanism / extrasul CF.** `comanda-analiza.html` n-are niciun `input type="file"`, deși `analize.html:522` cere CU „opțional, dar util". Există deja `teren_atasamente` + bucketul privat `teren-documente`, dar legate de perechea (grup, teren), deci nu merg pentru o comandă (inclusiv fără cont). Variante: **A** câmp „Link către documente (Drive)" + linie în emailul de confirmare, ~1 oră, zero risc (recomandat acum); **B** upload pe ecranul de succes, când există `order_id`, bucket privat nou; **C** upload în formular, înainte de plată, cu fișiere orfane și edge function pentru nelogați.
