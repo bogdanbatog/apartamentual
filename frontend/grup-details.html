@@ -2550,10 +2550,11 @@ function renderTerenuri(terenuri) {
             ? `<div class="teren-analiza">
                         <a class="teren-analiza-gata" href="teren-details.html?id=${teren.id}">✓ Analiză · ${escapeHtml(catApartCard)} →</a>
                     </div>`
+            // Cu analiză importată nu se pune nimic sus: drumul spre ea e deja
+            // linkul „Împărțirea apartamentelor" de sub teren, iar două linkuri
+            // spre aceeași pagină în același card arătau ca o dublură.
             : t.areImpartire
-            ? `<div class="teren-analiza">
-                        <a class="teren-analiza-gata" href="organizare-apartamente.html?grup=${currentGroup.id}&teren=${teren.id}">✓ Analiză · Împărțirea apartamentelor →</a>
-                    </div>`
+            ? ''
             : `<div class="teren-analiza">
                         <a class="btn-cere-analiza" href="analize.html?teren_id=${encodeURIComponent(teren.id)}&teren_titlu=${encodeURIComponent(teren.titlu || '')}">Cere o analiză</a>
                         <span class="teren-analiza-nota">ca să vedeți câte apartamente se pot construi aici și la ce prețuri ar ieși</span>
