@@ -299,6 +299,14 @@
     align-items:flex-start;
   }
   .cta-group{ display:flex; flex-direction:column; gap:0.5rem; }
+  /* Linkul de WhatsApp de sub butoane: text, nu buton, ca să nu concureze cu
+     cele două de deasupra. Nota „după ce îți faci profilul" spune din start
+     de ce ajungi la înregistrare și nu direct în WhatsApp. */
+  .hero-whatsapp{ margin:0.25rem 0 0; font-size:14px; line-height:1.55; color:var(--ink-2); }
+  .hero-whatsapp a{ color:var(--ink); font-weight:500; text-decoration:underline; text-underline-offset:3px; }
+  .hero-whatsapp a:hover{ text-decoration-thickness:2px; }
+  .hero-whatsapp-nota{ color:var(--ink-3); font-size:13px; margin-left:0.35rem; }
+  .hero-whatsapp[hidden]{ display:none; }
   .cta-note{ font-size:11px; color:var(--ink-3); }
   /* Rândul de sub butoane care spune ce e site-ul. NU folosește `.cta-note`
      (11px, `--ink-3`): aceea e mărime de subsol, potrivită pentru o notă de
@@ -775,6 +783,9 @@
     font-size:14px;
   }
   .cta-punchy .cta-secondary:hover{ background:rgba(255,255,255,0.08); }
+  /* `display:inline-flex` de mai sus bate atributul `hidden`. Fără regula
+     asta, „Vezi webinariile de până acum" ar apărea cu `href="#"`. */
+  .cta-punchy .cta-secondary[hidden]{ display:none; }
   .punchy-eyebrow{
     font-size:11px;
     font-weight:500;
@@ -2105,13 +2116,27 @@
              în care se compară toate butoanele între ele. -->
         <div class="hero-ctas">
           <a href="/terenuri.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=terenuri">Vezi terenurile din zona ta <span class="arr">→</span></a>
-          <!-- Data de pe buton îi spune omului din start dacă webinarul e peste
-               trei zile sau peste trei săptămâni. NU e scrisă de mână: o pune
-               `scrieDataWebinarului()`, din aceeași socoteală ca panoul de mai
-               jos (prima joi a lunii). Ce e scris aici e doar plasa de
-               siguranță, pentru cazul în care scriptul nu apucă să ruleze. -->
-          <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=webinar">Înscrie-te la webinar · <span id="webinarDataScurt">joi 3 septembrie</span>, gratuit</a>
+          <!-- Aici stătea „Înscrie-te la webinar". A ieșit pe 29 septembrie:
+               webinariile generale se opresc, urmează cele tematice, fără temă
+               încă. Caseta de webinar de mai jos rămâne și spune asta. -->
+          <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=grupuri">Intră într-un grup care se formează</a>
         </div>
+        <!-- ── GRUPUL DE WHATSAPP AL COMUNITĂȚII ──
+             Duce la înregistrare, NU la WhatsApp. Linkul propriu-zis apare doar
+             pe homepage-ul logat (rândul din „Ce e nou"), iar acolo ajunge doar
+             cine are profil complet, fiindcă `nav.js` nu lasă altfel pe nimeni
+             pe homepage. `register.js` duce `redirect` prin confirmarea de email
+             și prin completarea profilului, deci omul aterizează înapoi aici.
+             ⚠️ Poarta e UȘOARĂ, decizia lui Lucian din 29 septembrie: linkul
+             stă în `WHATSAPP_URL`, în sursa paginii, deci îl găsește oricine se
+             uită în cod. Plasa e „Aprobă membrii noi" din setările grupului.
+             ⚠️ Rămâne `hidden` cât timp `WHATSAPP_URL` e gol (îl arată
+             scriptul), ca să nu ceară cuiva un profil pentru un grup care nu
+             există încă. -->
+        <p class="hero-whatsapp" id="heroWhatsapp" hidden>
+          <a href="/register.html?redirect=%2F" class="plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=whatsapp">Intră în grupul de discuții pe WhatsApp <span aria-hidden="true">→</span></a>
+          <span class="hero-whatsapp-nota">după ce îți faci profilul</span>
+        </p>
         <!-- Sub butoane stătea o notă („București și împrejurimi. Fără cont,
              ca să vezi ce e."). A ieșit la cererea lui Lucian, 25 august.
              Orașul nu se pierde: apare în linia de sub timelapse, la câteva
@@ -2512,30 +2537,37 @@
     <div class="punchy-inner">
       <div class="punchy-text">
         <h2 class="section-title">Nu îți vine să crezi că se poate face asta și în România?</h2>
+        <!-- Rescrisă pe 29 septembrie: webinariile lunare generale s-au oprit.
+             Veneau aceiași oameni, care voiau răspunsuri specifice, nu aceeași
+             poveste. Urmează webinarii tematice, fără temă încă.
+             ⚠️ Promisiunea e doar ce trimite NEWSLETTERUL (episoade + anunțul
+             webinarului). Terenurile din zone pleacă în digestul de luni, doar
+             către conturile cu zone în profil, NU către abonații la newsletter.
+             Grupuri noi în zone: niciun email nu le trimite încă, deci nu le
+             promite aici până nu există. -->
         <p class="section-body">
-          Blocul de pe Strada Județului există. Familiile care l-au construit au decis totul împreună, pe parcurs. În prima joi a fiecărei luni ne întâlnim online și povestim cu voi cum s-a întâmplat, ca tu să poți întreba tot ce vrei și să îți cunoști, poate, viitorii vecini.
+          Blocul de pe Strada Județului există. Familiile care l-au construit au decis totul împreună, pe parcurs. Pregătim webinarii tematice despre cum s-a făcut, fiecare despre o singură întrebare, ca să avem timp de detalii.
         </p>
         <div class="punchy-ctas">
-          <a href="https://luma.com/00ig0k40" target="_blank" rel="noopener" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=bloc-webinar plausible-event-dest=webinar">Înscrie-te la webinar <span class="arr">→</span></a>
-          <a href="/register.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=bloc-webinar plausible-event-dest=register">Creează cont</a>
+          <a href="#newsletter" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=bloc-webinar plausible-event-dest=newsletter">Anunță-mă când e următorul <span class="arr">→</span></a>
+          <!-- Apare doar când `WEBINARII_TRECUTE_URL` are o adresă (vezi
+               scriptul de la finalul paginii).
+               ⚠️ Când se completează adresa, textul de deasupra poate primi
+               înapoi propoziția scoasă pe 29 septembrie: „Am povestit cum s-a
+               întâmplat în câteva webinarii, pe care le poți vedea oricând."
+               Fără playlist, promitea ceva ce omul nu găsea. -->
+          <a href="#" id="webinariiTrecute" hidden target="_blank" rel="noopener" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=bloc-webinar plausible-event-dest=webinarii-trecute">Vezi webinariile de până acum</a>
         </div>
       </div>
       <div class="punchy-info">
-        <p class="punchy-info-header">Următoarea întâlnire</p>
-        <!-- ⚠️ Data și ora de aici se REscriu din JavaScript, din aceeași
-             regulă ca rândul de webinar din fluxul „Ce e nou": prima joi a
-             lunii (vezi `urmatorulWebinar`, în scriptul de la finalul paginii).
-             Ce e scris aici e doar plasa de siguranță, pentru cazul în care
-             scriptul nu apucă să ruleze. Ca plasa să nu mintă, ține-o pe o
-             dată din viitor sau, cel mai simplu, las-o pe cea de la ultima
-             actualizare a paginii. -->
+        <p class="punchy-info-header">Următorul webinar</p>
         <div class="punchy-info-row">
-          <p class="punchy-info-row-label" id="webinarData">Joi · 3 septembrie 2026</p>
-          <p class="punchy-info-row-value" id="webinarOra">11:30 · Zoom</p>
+          <p class="punchy-info-row-label">Tema și data</p>
+          <p class="punchy-info-row-value">Le anunțăm în newsletter</p>
         </div>
         <div class="punchy-info-row">
           <p class="punchy-info-row-label">Format</p>
-          <p class="punchy-info-row-value">1 oră + întrebări</p>
+          <p class="punchy-info-row-value">Online, 1 oră + întrebări</p>
         </div>
         <div class="punchy-info-row">
           <p class="punchy-info-row-label">Preț</p>
@@ -2624,8 +2656,18 @@
     </style>
     <div class="nl-inner">
       <p class="section-eyebrow">Newsletter</p>
-      <h2 class="nl-title">Serialul Județului Housing: povestea reală, pe episoade</h2>
-      <p class="nl-sub">Cum am construit primul mic bloc colaborativ din România: avizele, vecinii, banii, șantierul. Abonează-te și primești fiecare episod nou, plus terenuri noi. Fără spam, te dezabonezi oricând.</p>
+      <!-- Titlul era „Serialul Județului Housing: povestea reală, pe episoade".
+           Schimbat pe 29 septembrie: butonul „Anunță-mă când e următorul" din
+           caseta de webinar duce aici, iar omul venit după webinar dădea peste
+           un titlu doar despre serial. -->
+      <h2 class="nl-title">Episoadele Județului Housing și webinariile tematice, pe email</h2>
+      <!-- Rescris pe 29 septembrie. (1) Scria „primul mic bloc colaborativ din
+           România", formulare interzisă din 25 august. (2) Promitea „terenuri
+           noi", pe care newsletterul nu le trimite: pleacă în digestul de luni,
+           doar către conturile cu zone în profil. De aceea a doua propoziție
+           trimite spre cont. -->
+      <p class="nl-sub">Cum s-a construit blocul de pe Județului: avizele, vecinii, banii, șantierul. Abonează-te și primești fiecare episod nou, plus tema și data fiecărui webinar tematic. Fără spam, te dezabonezi oricând.</p>
+      <p class="nl-sub">Vrei să te anunțăm când apar terenuri noi în zonele tale? <a href="/register.html" class="plausible-event-name=CTA+Click plausible-event-loc=newsletter plausible-event-dest=register" style="color:#c2604a;">Fă-ți cont</a> și alege-ți zonele preferate în profil. Ți le trimitem lunea, când apar.</p>
       <a class="nl-prelink" href="/news.html#judetului-housing-episodul-0">Începe cu episodul 0</a>
       <form class="js-newsletter-form" data-source="homepage_band" novalidate>
         <div class="nl-row">
@@ -3743,8 +3785,26 @@
     // ⚠️ Ora și linkul sunt scrise și în blocul de webinar din pagină (unde e
     // și data, de mână: „Joi · 3 septembrie 2026") și pe Luma. Al treilea loc
     // care poate să nu se potrivească; vezi NOTES.
+    //
+    // ⏸️ OPRIT DIN 29 SEPTEMBRIE: webinariile lunare s-au oprit, urmează cele
+    // tematice, fără dată fixă. `urmatorulWebinar` și `scrieDataWebinarului`
+    // rămân în cod, dar nu le mai cheamă nimeni. Dacă revine un ritm fix,
+    // se repun rândul din flux și apelul de lângă `init()`.
     var WEBINAR_URL = 'https://luma.com/00ig0k40';
     var WEBINAR_ORA = '11:30';
+
+    // ── LINKURI COMPLETATE DE MÂNĂ ──
+    // Cât timp sunt goale, linkurile care duc la ele NU apar în pagină.
+    // Playlistul de YouTube cu webinariile de până acum (caseta de webinar
+    // și rândul din „Ce e nou").
+    var WEBINARII_TRECUTE_URL = '';
+    // Invitația în grupul de WhatsApp al comunității (`chat.whatsapp.com/…`).
+    // ⚠️ E în sursa paginii, deci o vede oricine se uită în cod. Poarta e
+    // ușoară, dinadins: în pagină linkul apare doar logaților (deci cu profil
+    // complet), iar în WhatsApp e pornit „Aprobă membrii noi".
+    // Fără parametrii de după `?` (`s=cl&p=a…`), pe care WhatsApp îi adaugă
+    // la copiere doar ca să urmărească de unde vine clicul.
+    var WHATSAPP_URL = 'https://chat.whatsapp.com/CBkvFTkDyUCALaVB86XS9H';
 
     // Prima joi a lunii, la ora webinarului. Dacă a trecut, cea din luna
     // următoare. `new Date(an, luna + 1, 1)` trece singur în anul următor
@@ -3964,20 +4024,29 @@
           ', unde te poți abona ca să le primești pe email.'));
       }
 
-      // 7. Următorul webinar. Data se calculează, nu se scrie de mână.
-      var w = urmatorulWebinar();
-      var azi = new Date();
-      var eAzi = w.getFullYear() === azi.getFullYear() && w.getMonth() === azi.getMonth() &&
-                 w.getDate() === azi.getDate();
-      var candW = eAzi
-        ? '<b>azi</b>, la ' + WEBINAR_ORA
-        : '<b>' + esc(w.toLocaleDateString('ro-RO', { weekday:'long', day:'numeric', month:'long' })) +
-          '</b>, la ' + WEBINAR_ORA;
-      // Link scris pe loc, nu prin `legatura`: e singurul din flux care duce
-      // în afara site-ului, deci are nevoie de `target` și `rel`.
+      // 7. Grupul de WhatsApp al comunității. Aici aterizează cine a apăsat
+      // în hero pe „Intră în grupul de WhatsApp", după ce și-a făcut profilul.
+      // Linkuri scrise pe loc, nu prin `legatura`: duc în afara site-ului, deci
+      // au nevoie de `target` și `rel`.
+      if(WHATSAPP_URL){
+        randuri.push(randFlux('sage',
+          // NU „al comunității": Lucian vrea cuvântul liber pentru Comunitatea
+          // de WhatsApp de mai târziu, cu grupuri pe zone.
+          'Grupul de discuții pe WhatsApp: întrebări, idei și oameni care caută ca tine. ' +
+          '<a href="' + WHATSAPP_URL + '" target="_blank" rel="noopener" data-dest="flux-whatsapp">Intră în grup</a> →' +
+          ' <span class="sl-cand">Numărul tău de telefon va fi vizibil celorlalți membri.</span>'));
+      }
+
+      // 8. Webinariile. Până pe 29 septembrie rândul dădea data următorului
+      // webinar lunar; acum anunță formatul tematic. Omul logat nu vede banda
+      // de newsletter (`js-marketing-only`), deci linkul duce la /news.html,
+      // unde e formularul de abonare.
       randuri.push(randFlux('sage',
-        'Webinarul lunar despre blocul de pe Județului e ' + candW + '. ' +
-        '<a href="' + WEBINAR_URL + '" target="_blank" rel="noopener" data-dest="flux-webinar">Înscrie-te</a> →'));
+        'Pregătim webinarii tematice, fiecare despre o singură întrebare. Tema și data le anunțăm în newsletter: ' +
+        legatura('/news.html', 'abonează-te aici', 'flux-newsletter') + '.' +
+        (WEBINARII_TRECUTE_URL
+          ? ' Până atunci, le poți vedea pe <a href="' + WEBINARII_TRECUTE_URL + '" target="_blank" rel="noopener" data-dest="flux-webinarii-trecute">cele de până acum</a>.'
+          : '')));
 
       return randuri;
     }
@@ -5490,7 +5559,19 @@
       }
     }
 
-    scrieDataWebinarului();
+    // ⏸️ `scrieDataWebinarului()` se chema aici până pe 29 septembrie (vezi
+    // „WEBINARUL LUNAR"). În locul lui, linkurile completate de mână: apar
+    // doar dacă au o adresă. Tot înainte de `init()`, fiindcă sunt pentru
+    // nelogați.
+    (function arataLinkurileDeMana(){
+      var trecute = document.getElementById('webinariiTrecute');
+      if(trecute && WEBINARII_TRECUTE_URL){
+        trecute.href = WEBINARII_TRECUTE_URL;
+        trecute.hidden = false;
+      }
+      var wa = document.getElementById('heroWhatsapp');
+      if(wa && WHATSAPP_URL) wa.hidden = false;
+    })();
     init();
 
     // ── ÎNTOARCEREA CU BUTONUL „ÎNAPOI" ──
