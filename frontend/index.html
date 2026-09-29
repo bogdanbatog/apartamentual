@@ -680,8 +680,10 @@
        filmul, măsoară-l și potrivește numărul de mai jos, nu-l lăsa moștenit:
        un film mai lat decât caseta primește dungi sus-jos, unul mai îngust
        le primește în stânga-dreapta.
-       Sus stau macaraua, ultimul etaj și ceasul camerei, adică exact ce se
-       vede crescând; de aceea nu se taie de sus. */
+       Sus stau macaraua și ultimul etaj, adică exact ce se vede crescând;
+       de aceea nu se taie de sus. (Ceasul camerei a ieșit din film pe 29
+       septembrie, tăiat din montaj, nu din CSS: cifrele lui se schimbau la
+       fiecare cadru și trăgeau ochiul.) */
     aspect-ratio:854/456;
     /* ⚠️ NU-L ÎNGUSTA. Probat pe 31 august: la 820px lățime (461px înălțime)
        se câștigau ~130px de derulare, dar arăta sărăcăcios, cu un gol în
@@ -709,6 +711,33 @@
     object-fit:cover;
     display:block;
   }
+  /* Butonul de pauză al timelapse-ului. Stă `hidden` în HTML și îl arată
+     scriptul de lângă film: fără JavaScript, filmul nu pornește deloc, deci
+     un buton care nu face nimic n-are ce căuta acolo. */
+  .film-pauza{
+    position:absolute;
+    right:12px;
+    bottom:12px;
+    z-index:1;
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    cursor:pointer;
+  }
+  .film-pauza[hidden]{ display:none; }
+  .film-pauza:hover{ background:rgba(0,0,0,.75); }
+  .film-pauza:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .film-pauza svg{ width:14px; height:14px; fill:currentColor; }
+  .film-pauza .ic-porneste{ display:none; }
+  .film-pauza.e-oprit .ic-porneste{ display:block; }
+  .film-pauza.e-oprit .ic-pauza{ display:none; }
   .video-ph-inner{
     display:flex;
     flex-direction:column;
@@ -2218,7 +2247,7 @@
          convinge (un bloc adevărat, filmat cum crește) era văzut de mai
          puțin de jumătate din oameni. Acum e primul lucru de sub titlu.
          ⚠️ `js-marketing-only`: cine e logat vede în locul lui spațiul de
-         lucru. Filmul are autoplay+loop, deci s-ar descărca și ascuns;
+         lucru. Filmul ar putea începe să se descarce și ascuns;
          scriptul de sesiune îl oprește căutând `.video-ph--live video`,
          așa că cele două clase trebuie să rămână pe el oriunde l-am muta.
          ⚠️ Din 1 septembrie filmul e local, nu mai vine de pe YouTube.
@@ -2233,12 +2262,71 @@
         <!-- `src` stă direct pe <video>, nu într-un <source>, ca scriptul de
              sesiune să-l poată goli cu removeAttribute, exact cum făcea cu
              iframe-ul. Filmul n-are sunet deloc, dar `muted` rămâne
-             obligatoriu: fără el browserul refuză pornirea automată. -->
+             obligatoriu: fără el browserul refuză pornirea automată.
+             ⚠️ Din 29 septembrie NU mai are `autoplay`. Îl pornește scriptul de
+             mai jos, abia când cel puțin jumătate din film e pe ecran. Motivul:
+             pe desktop, sub butoanele din hero se vedea o fâșie de ~125px din
+             partea de SUS a filmului, adică exact cerul, care își schimba
+             culoarea de la o zi la alta cam de două ori pe secundă. Omul citea
+             titlul cu o sclipire dedesubt. Acum fâșia aceea e poza fixă.
+             Tot atunci filmul a fost refăcut: lumina egalizată de la o zi la
+             alta (ffmpeg `deflicker`), fără ceasul camerei, fără un cadru care
+             sclipea la 0,3 s, de 1,5 ori mai lent (34 s, 20 cadre/s).
+             ⚠️ Probată și respinsă varianta cu zilele topite una în alta
+             (`tmix`): cerul ieșea perfect calm, dar imaginea părea încețoșată,
+             „unclean". Decizia lui Lucian: imagine netă, cer doar calmat.
+             ⚠️ Probat și respins și cerul înlocuit cu alb (decupat cadru cu
+             cadru cu SegFormer): marginile clădirilor și detaliile fine
+             ieșeau zimțate sau spălate. -->
         <video src="video/timelapse-judetului.mp4"
                poster="video/timelapse-judetului-poster.jpg"
                title="Timelapse Județului Housing, ApartamenTUal"
-               autoplay muted loop playsinline></video>
+               muted loop playsinline preload="metadata"></video>
+        <button type="button" class="film-pauza" aria-label="Oprește filmul" hidden>
+          <svg class="ic-pauza" viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="1" width="3.5" height="12"/><rect x="8.5" y="1" width="3.5" height="12"/></svg>
+          <svg class="ic-porneste" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1l10 6-10 6z"/></svg>
+        </button>
       </div>
+      <script>
+      // Pornește timelapse-ul doar când e pe ecran și îl oprește când iese.
+      // ⚠️ Cine a cerut „mișcare redusă" în sistem vede poza fixă și butonul
+      // de pornire; filmul merge doar dacă apasă el.
+      // ⚠️ La utilizatorul logat, scriptul de sesiune golește `src`. Verificarea
+      // pe `src` de mai jos e ce împiedică pornirea lui după aceea (blocul e
+      // oricum ascuns, deci nici nu intră pe ecran, dar să nu depindem de asta).
+      (function(){
+        var film = document.querySelector('.video-ph--live video');
+        var buton = document.querySelector('.video-ph--live .film-pauza');
+        if(!film || !buton) return;
+        var opritDeOm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var peEcran = false;
+        function arata(){
+          buton.classList.toggle('e-oprit', film.paused);
+          buton.setAttribute('aria-label', film.paused ? 'Pornește filmul' : 'Oprește filmul');
+        }
+        function potriveste(){
+          if(peEcran && !opritDeOm && film.getAttribute('src')){
+            var p = film.play();
+            if(p && p.catch) p.catch(function(){});
+          } else {
+            film.pause();
+          }
+        }
+        film.addEventListener('play', arata);
+        film.addEventListener('pause', arata);
+        buton.addEventListener('click', function(){
+          if(film.paused){ opritDeOm = false; peEcran = true; potriveste(); }
+          else { opritDeOm = true; film.pause(); }
+        });
+        buton.hidden = false;
+        arata();
+        if(!('IntersectionObserver' in window)){ peEcran = true; potriveste(); return; }
+        new IntersectionObserver(function(intrari){
+          peEcran = intrari[0].intersectionRatio >= 0.5;
+          potriveste();
+        }, { threshold:[0, 0.5] }).observe(film);
+      })();
+      </script>
       <!-- „Primul bloc construit cu ajutorul apartamenTUal" s-a mutat în
            subtitlul de sus, ca să nu se spună de două ori la 400px distanță.
            Aici rămân faptele concrete: ce e terenul, ce s-a construit pe el
@@ -4819,9 +4907,10 @@
         // Confirmă presupunerea din <head> (ex: localStorage golit între timp).
         HTML.classList.add('atu-logat');
 
-        // Timelapse-ul e ascuns cu display:none, dar are autoplay+loop și s-ar
-        // descărca oricum, invizibil. Îl oprim ca să nu plătim degeaba ~8 MB de
-        // trafic. Elementul RĂMÂNE în DOM.
+        // Timelapse-ul e ascuns cu display:none. Din 29 septembrie nu mai are
+        // autoplay (îl pornește scriptul de lângă el, doar pe ecran), dar
+        // `preload="metadata"` tot trage începutul fișierului. Îl oprim ca să
+        // nu plătim degeaba trafic (filmul are ~14 MB). Elementul RĂMÂNE în DOM.
         // ⚠️ Abia AICI, nu mai devreme: dacă am face-o pe baza clasei puse în
         // <head>, o agenție aflată la prima vizită (fără `atu_hero_variant` în
         // localStorage) ar rămâne cu pagina întreagă, dar cu timelapse-ul mort.
