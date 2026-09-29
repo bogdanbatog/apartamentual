@@ -3,30 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exemple din Europa - Proiecte de Succes</title>
+    <title>Exemple din Europa - ApartamenTUal</title>
 <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
 <script>
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
-    <meta name="description" content="Studii de caz și proiecte Baugruppen și co-housing de succes din Germania, Austria și alte țări europene.">
+    <meta name="description" content="Grupuri de construcție din Berlin, Bruxelles, Amsterdam și Leuven: familii care și-au construit împreună blocul.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="../css/apartamentual-v9.css">
     <link rel="stylesheet" href="ce-este.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    maxWidth: {
-                        '6xl': '72rem',
-                    }
-                }
-            }
+    <style>
+        /* ── Exemple: fără casete, o secțiune pe toată lățimea pentru fiecare proiect ── */
+        .ex-intro { max-width: 680px; margin: 0 auto 1rem; }
+        .ex-intro p { font-size: 1.08rem; line-height: 1.7; color: var(--ink-2); margin-bottom: 1rem; }
+
+        .ex { padding-top: 3rem; margin-top: 3.5rem; border-top: 1px solid var(--rule); }
+        .ex-photo img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 4px; background: var(--bg-placeholder); }
+        .ex-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+        .ex-pair img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; background: var(--bg-placeholder); }
+        .ex-pair img.ex-drawing { object-fit: contain; background: #fff; }
+        .ex-credit { font-size: 0.78rem; color: var(--ink-3); margin-top: 0.5rem; }
+
+        .ex-text { max-width: 680px; margin: 2rem auto 0; }
+        .ex-kicker { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 0.5rem; }
+        .ex-kicker .cohousing { color: #a94a35; }
+        .ex h2 { font-size: 2rem; font-weight: 500; letter-spacing: -0.022em; line-height: 1.15; color: var(--ink); margin: 0 0 0.6rem; }
+        .ex-facts { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-2); margin-bottom: 1.5rem; line-height: 1.6; }
+        .ex-facts span { white-space: nowrap; display: inline-block; }
+        .ex-facts span + span::before { content: "·"; margin: 0 0.55rem; color: var(--ink-3); }
+        .ex-text p { font-size: 1.02rem; line-height: 1.75; color: var(--ink-2); margin-bottom: 1rem; }
+
+        /* Legătura cu Județului Housing: o linie pe margine, nu o casetă */
+        .ex-text p.ex-noi { border-left: 2px solid #a94a35; padding-left: 1rem; color: var(--ink); margin-top: 1.5rem; }
+        .ex-noi strong { font-weight: 600; }
+        .ex-source { font-size: 0.88rem; margin-top: 1.25rem; }
+
+        .ex-next { max-width: 680px; margin: 4.5rem auto 0; padding-top: 2.5rem; border-top: 1px solid var(--rule); }
+        .ex-next h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0; }
+
+        @media (max-width: 640px) {
+            .ex { padding-top: 2rem; margin-top: 2.5rem; }
+            .ex h2 { font-size: 1.6rem; }
+            .ex-pair { grid-template-columns: 1fr; }
         }
-    </script>
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="min-h-screen flex flex-col">
@@ -40,447 +64,154 @@
             Exemple din Europa
         </nav>
         <h1>Exemple din Europa</h1>
-        <p>Studii de caz și proiecte de succes din Germania, Austria, Danemarca și alte țări</p>
+        <p>Familii care și-au construit blocul împreună, în Berlin, Bruxelles, Amsterdam și Leuven</p>
     </div>
 
-    <div class="ce-content" style="max-width: 900px;">
-        <div class="ce-content-inner">
+    <div class="ce-content" style="max-width: 920px;">
 
-                    <!-- Overview Stats -->
-                    <section class="ce-section">
-                        <h2 class="text-2xl mb-4">Impactul în Europa</h2>
-                        <div class="grid-3 text-center">
-                            <div>
-                                <div class="text-3xl font-bold text-blue-600">25%</div>
-                                <div class="text-sm subtitle">din construcțiile noi în Germania</div>
-                                <div class="text-xs text-gray-500">sunt proiecte Baugruppen</div>
-                            </div>
-                            <div>
-                                <div class="text-3xl font-bold text-green-600">200+</div>
-                                <div class="text-sm subtitle">proiecte co-housing</div>
-                                <div class="text-xs text-gray-500">active în Danemarca</div>
-                            </div>
-                            <div>
-                                <div class="text-3xl font-bold">
-                                    <span class="text-red-600">0%</span>
-                                    <span class="text-gray-300 mx-1">/</span>
-                                    <span class="text-orange-600">100%</span>
-                                </div>
-                                <div class="text-sm subtitle">profit dezvoltator / valoare în calitate</div>
-                                <div class="text-xs text-gray-500">toți banii investiți merg în apartamentul tău</div>
-                            </div>
-                        </div>
-                    </section>
+        <div class="ex-intro">
+            <p>Nu suntem singurii care au făcut asta. În multe orașe europene, oameni care nu găseau locuința potrivită au cumpărat împreună un teren și și-au construit blocul, preluând ei rolul dezvoltatorului. Mai jos sunt câteva proiecte pe care le urmărim de aproape. Fiecare a răspuns altfel la întrebările pe care și le pune orice grup: cât de mare, cât decidem împreună, cât rămâne al fiecăruia.</p>
+            <p>Ultimele două sunt proiecte de co-housing, un model înrudit: vecinii rămân o comunitate și după mutare și împart spații comune mari. Le-am păstrat pentru că arată bine cum se poate organiza o clădire gândită de locatari, dar le-am marcat separat.</p>
+        </div>
 
-                    <!-- Case Studies -->
-                    <section class="grid gap-6">
-                        <!-- Baugruppe D2 / IFUB* (Berlin, Germania) -->
-                        <div class="ce-section">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="text-2xl">🇩🇪</span>
-                                <div>
-                                    <h2 class="text-xl font-semibold">Baugruppe D2 / IFUB* — Berlin, Germania</h2>
-                                    <p class="text-sm subtitle">Proiect rezidențial sustenabil • 2022</p>
-                                    <a href="https://www.archdaily.com/998430/baugruppe-d2-ifub-star" target="_blank" class="text-blue-600 hover:underline text-xs">Proiectul pe ArchDaily</a>
-                                </div>
-                            </div>
+        <!-- ═══ AusbauHaus Neukölln ═══ -->
+        <!-- Pozele sunt folosite cu acordul Praeger Richter; creditul de mai jos e obligatoriu. -->
+        <article class="ex">
+            <div class="ex-photo">
+                <img src="../assets/images/exemple-europa/ausbauhaus-neukolln-fatada.jpg" alt="AusbauHaus Neukölln, fațada cu loggii, văzută de pe terenul de sport din spate">
+            </div>
+            <div class="ex-pair">
+                <img class="ex-drawing" src="../assets/images/exemple-europa/ausbauhaus-neukolln-raft.png" alt="Desen: structura comună ca un raft și cele trei niveluri de finisaj" loading="lazy">
+                <img src="../assets/images/exemple-europa/ausbauhaus-neukolln-curte.jpg" alt="Curtea comună și fațada cu loggii spre grădină" loading="lazy">
+            </div>
+            <p class="ex-credit">Foto: Andreas Friedel și Christoph Naumann, prin amabilitatea Praeger Richter Architekten.</p>
 
-                            <div class="grid md:grid-cols-3 gap-6">
-                                <div class="md:col-span-2">
-                                    <p class="mb-4 text-sm">
-                                        Proiect rezidențial finalizat în 2022 de IFUB*, orientat spre sustenabilitate, cu accent pe utilizarea lemnului și integrare urbană atentă.
-                                    </p>
+            <div class="ex-text">
+                <p class="ex-kicker">Grup de construcție</p>
+                <h2>AusbauHaus Neukölln</h2>
+                <p class="ex-facts"><span>Berlin</span><span>24 de locuințe și ateliere</span><span>Praeger Richter Architekten</span><span>Deutscher Bauherrenpreis</span></p>
 
-                                    <div class="grid-2 gap-4 mb-4">
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Specificații cheie</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• An finalizare: 2022</li>
-                                                <li>• Localizare: Berlin, Germania</li>
-                                                <li>• Arhitect: IFUB*</li>
-                                                <li>• Material principal: lemn</li>
-                                                <li>• Funcțiune: locuințe rezidențiale</li>
-                                            </ul>
-                                        </div>
+                <p>Un grup de familii din Neukölln nu găsea locuințe bune la un preț rezonabil în Berlin. Așa că au cumpărat împreună terenul, s-au organizat într-o asociație și au construit preluând ei rolul dezvoltatorului. Fiecare familie e proprietară pe apartamentul ei.</p>
+                <p>Partea interesantă e cum au împăcat bugete diferite în aceeași clădire. Structura e comună, un fel de raft din elemente prefabricate: planșee cu deschidere mare și niciun perete portant în interiorul apartamentelor. Fațada are un ritm regulat de ferestre, așa că pereții interiori pot sta aproape oriunde. Toate apartamentele au trei metri înălțime și o loggie spre sud.</p>
+                <p>Restul a fost al fiecăruia. La finisaje, fiecare familie a putut alege între un apartament finisat, o variantă minimală și preluarea la roșu, pentru cine voia să lucreze singur, în ritmul și cu banii lui. Au ieșit 24 de locuințe și niciuna la fel. Regula, spusă chiar de arhitecți: puțină co-decizie la structură, multă libertate în interior.</p>
+                <p>A ieșit și mai repede. Prefabricarea și separarea clară a fazelor au scurtat execuția cu aproximativ 12 luni față de proiecte similare. A fost primul proiect de acest fel din cartier și a primit mai târziu Deutscher Bauherrenpreis, unul dintre cele mai importante premii germane pentru calitatea locuirii.</p>
 
-                                        <div class="bg-blue-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Inovații / Particularități</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Accent pe lemn ca material sustenabil</li>
-                                                <li>• Design modern, fațade cu deschideri mari</li>
-                                                <li>• Publicat recent ca proiect nou (2023)</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                <p class="ex-noi"><strong>Față de Județului Housing:</strong> același drum, la altă scară. Un grup de viitori vecini, teren cumpărat împreună, rolul dezvoltatorului preluat de grup, fiecare proprietar pe apartamentul lui. Acolo 24 de locuințe, la noi cinci familii.</p>
 
-                                    <div class="bg-green-50 p-3 rounded border border-green-200">
-                                        <p class="text-sm"><strong>Ce putem învăța / aplicabilitate:</strong></p>
-                                        <ul class="text-xs space-y-1">
-                                            <li>• Poți evidenția utilizarea lemnului ca reper sustenabil pentru proiecte mici / medii.</li>
-                                            <li>• Ideal ca exemplu vizual de calitate ridicată, cu imagini exterioare și interioare.</li>
-                                            <li>• Chiar dacă nu sunt detalii mari despre spații comune / comunitate, poate fi un „exemplu de design sustenabil în proiecte rezidențiale moderne”.</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                <p class="ex-source"><a href="https://praegerrichter.de/Ausbauhaus-Neukolln-Berlin-2014" target="_blank" rel="noopener">Proiectul pe site-ul Praeger Richter Architekten</a></p>
+            </div>
+        </article>
 
-                                <div class="rounded-lg overflow-hidden">
-                                    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/baugruppe-d2.jpg.jpg" alt="Baugruppe D2 / IFUB*" class="w-full h-48 object-cover rounded-lg">
-                                </div>
-                            </div>
-                        </div>
+        <!-- ═══ Haeck5 ═══ -->
+        <article class="ex">
+            <div class="ex-photo">
+                <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/haeck5.jpg.jpg" alt="Haeck5, clădirea din lemn masiv din Berlin-Johannisthal" loading="lazy">
+            </div>
 
-                        <!-- Haeck5, Berlin-Johannisthal (Germania) -->
-                        <div class="ce-section">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="text-2xl">🇩🇪</span>
-                                <div>
-                                    <h2 class="text-xl font-semibold">Haeck5 — Berlin-Johannisthal, Germania</h2>
-                                    <p class="text-sm subtitle">Baugruppe urbană din lemn masiv • 2023</p>
-                                    <a href="https://www.deimeloelschlaeger.de/projekt/massivholzhaus-haeckelstrasse/" target="_blank" class="text-xs text-accent hover:underline">Proiectul pe deimeloelschlaeger.de</a>
-                                </div>
-                            </div>
+            <div class="ex-text">
+                <p class="ex-kicker">Grup de construcție</p>
+                <h2>Haeck5</h2>
+                <p class="ex-facts"><span>Berlin-Johannisthal</span><span>2023</span><span>5 apartamente</span><span>deimel oelschläger architekten</span></p>
 
-                            <div class="grid md:grid-cols-3 gap-6">
-                                <div class="md:col-span-2">
-                                    <p class="mb-4 text-sm">
-                                        Clădire din lemn masiv pe 3 niveluri pe un lot îngust de 588 m². 5 apartamente și un spațiu comun la parter deschis spre o curte verde partajată.
-                                    </p>
+                <p>Cinci familii, un lot îngust de 588 m² și o clădire din lemn masiv pe trei niveluri. Apartamentele au între 70 și 120 m², iar fiecare familie și-a adaptat planul. La parter e o cameră comună care se deschide spre curtea verde, folosită de toți pentru întâlniri și de copii pentru joacă.</p>
+                <p>Proiectul arată că un grup mic poate construi un bloc urban fără un montaj financiar complicat. Deciziile s-au luat împreună, între arhitect și grup, iar lemnul a fost ales de la început ca material principal.</p>
 
-                                    <div class="grid-2 gap-4 mb-4">
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Specificații cheie</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Locație: Berlin-Johannisthal, Germania</li>
-                                                <li>• An finalizare: 2023</li>
-                                                <li>• Structură: lemn masiv, 3 etaje</li>
-                                                <li>• Unități: 5 apartamente (70–120 m²)</li>
-                                                <li>• Spațiu comun: curte verde + zonă multifuncțională</li>
-                                            </ul>
-                                        </div>
+                <p class="ex-noi"><strong>Față de Județului Housing:</strong> exact aceeași mărime, cinci familii. Diferența e în ce au pus în comun: la Haeck5, o cameră la parter și curtea.</p>
 
-                                        <div class="bg-blue-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Inovații / Particularități</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Lemn ca material principal, amprentă redusă de carbon</li>
-                                                <li>• Planuri flexibile, personalizabile de fiecare familie</li>
-                                                <li>• Curte comună pentru întâlniri și joacă</li>
-                                                <li>• Model financiar simplu, fără dezvoltator</li>
-                                                <li>• Decizii participative arhitect–grup</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                <p class="ex-source"><a href="https://www.deimeloelschlaeger.de/projekt/massivholzhaus-haeckelstrasse/" target="_blank" rel="noopener">Proiectul pe site-ul arhitecților</a></p>
+            </div>
+        </article>
 
-                                    <div class="bg-green-50 p-3 rounded border border-green-200">
-                                        <p class="text-sm"><strong>Ce putem învăța / aplicabilitate:</strong></p>
-                                        <p class="text-xs space-y-1">Haeck5 arată cum un grup restrâns de 4–6 familii poate construi împreună un mic bloc urban cu spațiu comun și costuri controlate, printr-o structură de cooperare directă și o arhitectură sustenabilă din lemn.</p>
-                                        <p class="text-xs space-y-1">Este un model perfect pentru Baugruppen-uri urbane de scară mică, așa cum pot fi dezvoltate și în România: apartamente distincte, curte și resurse comune, finanțare privată și implicare directă a viitorilor locatari.</p>
-                                    </div>
-                                </div>
+        <!-- ═══ D2 / IFUB* ═══ -->
+        <article class="ex">
+            <div class="ex-photo">
+                <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/baugruppe-d2.jpg.jpg" alt="Baugruppe D2, Berlin" loading="lazy">
+            </div>
 
-                                <div class="rounded-lg overflow-hidden">
-                                    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/haeck5.jpg.jpg" alt="Haeck5 Berlin" class="w-full h-48 object-cover rounded-lg">
-                                </div>
-                            </div>
-                        </div>
+            <div class="ex-text">
+                <p class="ex-kicker">Grup de construcție</p>
+                <h2>Baugruppe D2</h2>
+                <p class="ex-facts"><span>Berlin</span><span>2022</span><span>IFUB*</span><span>structură din lemn</span></p>
 
-                        <!-- Scarwafa Co-Housing / Krft (Amsterdam, Olanda) -->
-                        <div class="ce-section">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="text-2xl">🇳🇱</span>
-                                <div>
-                                    <h2 class="text-xl font-semibold">Scarwafa Co‑Housing / Krft — Amsterdam, Olanda</h2>
-                                    <p class="text-sm subtitle">Cohousing urban de scară mică</p>
-                                    <a href="https://www.archdaily.com/914900/scarwafa-co-housing-krft" target="_blank" class="text-blue-600 hover:underline text-xs">Proiectul pe ArchDaily</a>
+                <p>Un bloc de locuințe construit de un grup din Berlin după proiectul biroului IFUB*, terminat în 2022. Materialul principal e lemnul, iar volumul e așezat atent între clădirile vechi din jur, cu fațade larg deschise spre stradă.</p>
 
-                                </div>
-                            </div>
+                <p class="ex-source"><a href="https://www.archdaily.com/998430/baugruppe-d2-ifub-star" target="_blank" rel="noopener">Proiectul pe ArchDaily</a></p>
+            </div>
+        </article>
 
-                            <div class="grid md:grid-cols-3 gap-6">
-                                <div class="md:col-span-2">
-                                    <p class="mb-4 text-sm">
-                                        Trei familii au achiziționat parcele adiacente în Buiksloterham și au creat un ansamblu unitar, compact și colaborativ, proiectat de biroul Krft.
-                                    </p>
+        <!-- ═══ Brutopia ═══ -->
+        <article class="ex">
+            <div class="ex-photo">
+                <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/brutopia.jpg.jpg" alt="Brutopia, Bruxelles" loading="lazy">
+            </div>
 
-                                    <div class="grid-2 gap-4 mb-4">
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Specificații cheie</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Locație: Buiksloterham, Amsterdam</li>
-                                                <li>• Arhitect: Krft</li>
-                                                <li>• Familii: 3</li>
-                                                <li>• 3 parcele adiacente, ansamblu coerent</li>
-                                                <li>• Fațade moderne, ferestre mari, materiale mixte</li>
-                                            </ul>
-                                        </div>
+            <div class="ex-text">
+                <p class="ex-kicker">Grup de construcție</p>
+                <h2>Brutopia</h2>
+                <p class="ex-facts"><span>Bruxelles</span><span>în jur de 2015</span><span>29 de apartamente, birouri și servicii</span><span>stekke + fraas</span></p>
 
-                                        <div class="bg-blue-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Inovații / Particularități</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Organizare minimală, exemplu real de cohousing mic</li>
-                                                <li>• Autonomie privată + coerență colectivă</li>
-                                                <li>• Transparență, iluminare naturală abundentă</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                <p>Aici viitorii locatari au fost chiar dezvoltatorii proiectului: 29 de apartamente, plus spații de birouri și servicii pentru cartier, în două volume cu o curte mare între ele. S-au organizat ca asociație fără scop lucrativ, cu adunare generală și grupuri de lucru pe teme.</p>
+                <p>Două lucruri ies în evidență. Aproape toate apartamentele sunt case pasive, iar câteva consumă net zero energie. Și, ca la Berlin, apartamentele au putut fi preluate la roșu, ca familii cu bugete diferite să poată intra în același proiect.</p>
 
-                                    <div class="bg-green-50 p-3 rounded border border-green-200">
-                                        <p class="text-sm"><strong>Ce putem învăța / aplicabilitate:</strong> </p>
-                                            <p class="text-xs space-y-1">Scarwafa arată că chiar și 3 familii pot forma un proiect de cohousing urban, dacă aderă la viziune comună și folosesc parcele adiacente.</p>
-                                            <p class="text-xs space-y-1">Pentru platforma ta, este un exemplu concret de: </p>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• proiect mic, ușor de comunicat</li>
-                                                <li>• transformare de parcele urbane modeste în comunitate</li>
-                                                <li>• flexibilitate între spații private și elemente comune</li>
-                                                <li>• utilizarea designului și materialelor pentru a armoniza coabitarea</li>
-                                            </ul>
-                                    </div>
-                                </div>
+                <p class="ex-noi"><strong>Față de Județului Housing:</strong> de aproape șase ori mai mare și cu funcțiuni amestecate. La 29 de familii, organizarea pe grupuri de lucru devine necesară.</p>
 
-                                <div class="rounded-lg overflow-hidden">
-                                    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/scarwafa.jpg.jpg" alt="Scarwafa Co-Housing Amsterdam" class="w-full h-48 object-cover rounded-lg">
-                                </div>
-                            </div>
-                        </div>
+                <p class="ex-source"><a href="https://www.archdaily.com/641278/brutopia-stekke-fraas" target="_blank" rel="noopener">Proiectul pe ArchDaily</a></p>
+            </div>
+        </article>
 
-                        <!-- Brutopia / stekke + fraas (Bruxelles, Belgia) -->
-                        <div class="ce-section">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="text-2xl">🇧🇪</span>
-                                <div>
-                                    <h2 class="text-xl font-semibold">Brutopia / stekke + fraas — Bruxelles, Belgia</h2>
-                                    <p class="text-sm subtitle">Comunitate urbană mare, mix funcțional • ~2015</p>
-                                    <a href="https://www.archdaily.com/641278/brutopia-stekke-fraas" target="_blank" class="text-blue-600 hover:underline text-xs">Proiectul pe ArchDaily</a>
+        <!-- ═══ Scarwafa (co-housing) ═══ -->
+        <article class="ex">
+            <div class="ex-photo">
+                <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/scarwafa.jpg.jpg" alt="Scarwafa, Amsterdam" loading="lazy">
+            </div>
 
-                                </div>
-                            </div>
+            <div class="ex-text">
+                <p class="ex-kicker"><span class="cohousing">Co-housing</span>, model înrudit</p>
+                <h2>Scarwafa</h2>
+                <p class="ex-facts"><span>Amsterdam, Buiksloterham</span><span>3 familii</span><span>Krft</span></p>
 
-                            <div class="grid md:grid-cols-3 gap-6">
-                                <div class="md:col-span-2">
-                                    <p class="mb-4 text-sm">
-                                        Proiect cohousing dezvoltat de locuitori ca co‑dezvoltatori: 29 apartamente, spații de birouri și servicii locale, cu performanțe energetice ridicate și guvernanță participativă.
-                                    </p>
+                <p>Cel mai mic proiect de pe pagină. Trei familii au cumpărat parcele alăturate în Buiksloterham, în nordul Amsterdamului, și au construit pe ele o singură clădire, proiectată de biroul Krft. Fiecare casă e a unei familii, dar fațadele, volumul și materialele au fost gândite împreună, ca un ansamblu.</p>
 
-                                    <div class="grid-2 gap-4 mb-4">
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Specificații cheie</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Locație: Bruxelles, Belgia</li>
-                                                <li>• Finalizare: ~2015</li>
-                                                <li>• Unități: 29 apartamente</li>
-                                                <li>• Funcțiuni: locuire + birouri + servicii locale</li>
-                                                <li>• Curte comună mare între două volume</li>
-                                            </ul>
-                                        </div>
+                <p class="ex-noi"><strong>Față de Județului Housing:</strong> aici fiecare familie avea parcela ei și ce au pus în comun a fost proiectul. La noi terenul e unul singur, cumpărat împreună, și de aici vin și regulile de împărțire a costurilor.</p>
 
-                                        <div class="bg-blue-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Inovații / Particularități</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• 27 unități case pasive, 2 very‑low energy</li>
-                                                <li>• 7 unități cu consum zero</li>
-                                                <li>• Panouri solare, recuperare apă pluvială</li>
-                                                <li>• Guvernanță: non‑profit, adunare generală, grupuri de lucru</li>
-                                                <li>• Apartamente livrate „shell” pentru accesibilitate financiară</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                <p class="ex-source"><a href="https://www.archdaily.com/914900/scarwafa-co-housing-krft" target="_blank" rel="noopener">Proiectul pe ArchDaily</a></p>
+            </div>
+        </article>
 
-                                    <div class="bg-green-50 p-3 rounded border border-green-200">
-                                        <p class="text-sm"><strong>Ce putem învăța / aplicabilitate:</strong> </p>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Brutopia este un exemplu extrem de reușit de comunitate urbană mare cu mix funcțional — arată cum co-housing și spații comerciale pot coexista armonios.</li>
-                                                <li>• Modelul de livrare „shell” + personalizare proprie permite grupurilor cu resurse variate să participe.</li>
-                                                <li>• Proiectul demonstrează că eficiența energetică și sustenabilitatea (case pasive, energie zero) sunt realiste chiar și în orașe mari.</li>
-                                                <li>• Structura de organizare comunitară (non-profit + participare directă) e un bun model de guvernare comunitară pentru platforma ta.</li>
-                                            </ul>
-                                    </div>
-                                </div>
+        <!-- ═══ De Sijs (co-housing) ═══ -->
+        <article class="ex">
+            <div class="ex-photo">
+                <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/de-sijs.jpg.jpg" alt="De Sijs, Leuven" loading="lazy">
+            </div>
 
-                                <div class="rounded-lg overflow-hidden">
-                                    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/brutopia.jpg.jpg" alt="Brutopia Bruxelles" class="w-full h-48 object-cover rounded-lg">
-                                </div>
-                            </div>
-                        </div>
+            <div class="ex-text">
+                <p class="ex-kicker"><span class="cohousing">Co-housing</span>, model înrudit</p>
+                <h2>De Sijs</h2>
+                <p class="ex-facts"><span>Leuven</span><span>2021</span><span>de la garsoniere la duplexuri</span><span>OFFICEU architects</span></p>
 
-                        <!-- Cohousing De Sijs / OFFICEU architects (Leuven, Belgia) -->
-                        <div class="ce-section">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="text-2xl">🇧🇪</span>
-                                <div>
-                                    <h2 class="text-xl font-semibold">Cohousing De Sijs / OFFICEU — Leuven, Belgia</h2>
-                                    <p class="text-sm subtitle">Trei volume conectate + spații comune • 2021</p>
-                                    <a href="https://www.archdaily.com/990478/cohousing-de-sijs-officeu-architects" target="_blank" class="text-blue-600 hover:underline text-xs">Proiectul pe ArchDaily</a>
-                                </div>
-                            </div>
+                <p>Trei volume noi, legate printr-o circulație comună în formă de L, gândită ca oamenii să se întâlnească în trecere. Locuințele sunt foarte diferite ca mărime, de la garsoniere la duplexuri cu trei camere. Structura e din lemn, iar fațadele sunt placate cu plută.</p>
+                <p>Inima proiectului e o clădire veche de pe teren, De Sijs, păstrată și transformată în spațiul comun al tuturor. Proiectul a fost desenat împreună cu viitorii locatari.</p>
 
-                            <div class="grid md:grid-cols-3 gap-6">
-                                <div class="md:col-span-2">
-                                    <p class="mb-4 text-sm">
-                                        Proiect finalizat în 2021: trei volume conectate de un ax în formă de L, unități variate și un nucleu comunitar într-o clădire veche „De Sijs”.
-                                    </p>
+                <p class="ex-noi"><strong>Față de Județului Housing:</strong> diferența e ce rămâne după mutare. La De Sijs, clădirea veche e a tuturor și comunitatea e parte din proiect pe termen lung. Într-un grup de construcție, colaborarea se încheie odată cu blocul, iar fiecare rămâne proprietar pe apartamentul lui.</p>
 
-                                    <div class="grid-2 gap-4 mb-4">
-                                        <div class="bg-gray-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Specificații cheie</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Locație: Leuven, Belgia</li>
-                                                <li>• Finalizare: 2021</li>
-                                                <li>• Organizare: 3 volume conectate (ax în L)</li>
-                                                <li>• Unități: de la studiouri la duplexuri 3 camere</li>
-                                                <li>• Materiale: structură lemn, fațadă placată cu plută</li>
-                                            </ul>
-                                        </div>
+                <p class="ex-source"><a href="https://www.archdaily.com/990478/cohousing-de-sijs-officeu-architects" target="_blank" rel="noopener">Proiectul pe ArchDaily</a></p>
+            </div>
+        </article>
 
-                                        <div class="bg-blue-50 p-3 rounded">
-                                            <h4 class="font-semibold text-sm mb-2">Inovații / Particularități</h4>
-                                            <ul class="text-xs space-y-1">
-                                                <li>• Circulație comună care încurajează întâlnirile informale</li>
-                                                <li>• Proiectare participativă cu viitorii locatari</li>
-                                                <li>• Valorificarea clădirii „De Sijs” ca inimă comunitară</li>
-                                                <li>• Panouri de plută: material natural, performant</li>
-                                                <li>• Integrare pe teren cu diferențe de nivel (parcări sub nivel)</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-green-50 p-3 rounded border border-green-200">
-                                        <p class="text-sm"><strong>Ce putem învăța / aplicabilitate:</strong> </p>
-                                        <ul class="text-xs space-y-1">
-                                            <li>• Un proiect urban mediu care combină diversitate locativă + spațiu colectiv central + utilizarea unui edificiu vechi pentru comunitate.</li>
-                                            <li>• Model de integrare între design modern și elemente de patrimoniu (clădirea veche De Sijs).</li>
-                                            <li>• Exemplu excelent de material natural și soluții sustenabile (panouri plută, izolație naturală).</li>
-                                            <li>• Lecție utilă pentru un grup mic sau mediu într-un oraș românesc: poți integra locuințe individuale + spațiu comun în blocuri articulate pe o axă de circulație.</li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="rounded-lg overflow-hidden">
-                                    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/01b1acd7-0079-4633-a3b7-28e653e37bc4/de-sijs.jpg.jpg" alt="Cohousing De Sijs Leuven" class="w-full h-48 object-cover rounded-lg">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Key Learnings -->
-                    <section class="ce-section">
-                        <h2 class="text-2xl mb-4">Lecții Învățate</h2>
-                        
-                        <div class="grid md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <h3 class="text-lg font-semibold mb-3 text-green-600">✅ Factori de Succes</h3>
-                                <ul class="space-y-3 text-sm">
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs">1</span>
-                                        <span><strong>Viziunea comună clară</strong> - Toate proiectele de succes au început cu obiective bine definite și împărtășite</span>
-                                    </li>
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs">2</span>
-                                        <span><strong>Procesul participativ</strong> - Implicarea tuturor membrilor în deciziile importante</span>
-                                    </li>
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs">3</span>
-                                        <span><strong>Expertiză externă</strong> - Colaborarea cu arhitecți și consultanți cu experiență</span>
-                                    </li>
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs">4</span>
-                                        <span><strong>Flexibilitatea în timp</strong> - Adaptarea la circumstanțe și învățarea pe parcurs</span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div>
-                                <h3 class="text-lg font-semibold mb-3 text-red-600">⚠️ Provocări Comune</h3>
-                                <ul class="space-y-3 text-sm">
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs">1</span>
-                                        <span><strong>Conflicte între membri</strong> - Diferențe de opinie care pot bloca progresul</span>
-                                    </li>
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs">2</span>
-                                        <span><strong>Depășiri de buget</strong> - Estimări inițiale prea optimiste</span>
-                                    </li>
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs">3</span>
-                                        <span><strong>Cadrul juridic</strong> - Adaptarea la legislația locală uneori nepreparată</span>
-                                    </li>
-                                    <li class="flex gap-3">
-                                        <span class="flex-shrink-0 w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs">4</span>
-                                        <span><strong>Sustenabilitatea pe termen lung</strong> - Menținerea spiritului comunitar</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Trends and Future -->
-                    <section class="ce-section">
-                        <h2 class="text-2xl mb-4">Tendințe Actuale în Europa</h2>
-                        
-                        <div class="grid-3">
-                            <div class="bg-blue-50 p-4 rounded-lg text-center">
-                                <div class="text-3xl mb-3">🌱</div>
-                                <h3 class="font-semibold mb-2">Sustenabilitate</h3>
-                                <p class="text-sm">Proiecte cu certificări LEED, BREEAM și case passive. Accent pe economia circulară.</p>
-                            </div>
-
-                            <div class="bg-purple-50 p-4 rounded-lg text-center">
-                                <div class="text-3xl mb-3">👴</div>
-                                <h3 class="font-semibold mb-2">Senior Co-housing</h3>
-                                <p class="text-sm">Creșterea rapidă a proiectelor dedicate seniorilor în contextul îmbătrânirii populației.</p>
-                            </div>
-
-                            <div class="bg-orange-50 p-4 rounded-lg text-center">
-                                <div class="text-3xl mb-3">🏙️</div>
-                                <h3 class="font-semibold mb-2">Regenerare Urbană</h3>
-                                <p class="text-sm">Proiecte în zone urbane centrale pentru revitalizarea cartierelor vechi.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Applicability to Romania -->
-                    <section class="ce-section">
-                        <h2 class="text-2xl mb-4">Aplicabilitatea în România</h2>
-                        <p class="mb-4">Experiența europeană oferă lecții valoroase pentru dezvoltarea conceptului în România:</p>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="bg-green-50 p-4 rounded-lg">
-                                <h3 class="font-semibold mb-3 text-green-800">Oportunități</h3>
-                                <ul class="text-sm space-y-2">
-                                    <li>• Costuri mai mici de teren și investiție integrală în calitatea locuirii</li>
-                                    <li>• Formarea de noi micro-comunități</li>
-                                    <li>• Cererea crescândă pentru alternative la dezvoltatorii comerciali</li>
-                                    <li>• Potențialul pentru proiecte pilot cu impact mare</li>
-                                </ul>
-                            </div>
-
-                            <div class="bg-yellow-50 p-4 rounded-lg">
-                                <h3 class="font-semibold mb-3 text-yellow-800">Adaptări necesare</h3>
-                                <ul class="text-sm space-y-2">
-                                    <li>• Educația publicului despre concepte noi</li>
-                                    <li>• Adaptarea la legislația românească și viceversa</li>
-                                    <li>• Dezvoltarea unei rețele de profesioniști specializați - consultanți, arhitecți, constructori, avocați</li>
-                                    <li>• Crearea unor modele de finanțare accesibile</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Next Steps -->
-                    <div class="mt-8 p-6 bg-gray-50 rounded-lg">
-                        <h3 class="text-lg font-semibold mb-4">Continuă să explorezi:</h3>
-                        <div class="grid-2">
-                            <a href="legislatia-romania.html" class="card hover:shadow-soft transition">
-                                <h4 class="font-semibold mb-2">Legislația din România →</h4>
-                                <p class="text-sm subtitle">Cadrul legal pentru grupurile de construcție în România</p>
-                            </a>
-                            <a href="cum-functioneaza.html" class="card hover:shadow-soft transition">
-                                <h4 class="font-semibold mb-2">Cum funcționează - ghid →</h4>
-                                <p class="text-sm subtitle">Procesul practic de organizare a unui grup</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <div class="ex-next">
+            <h3>Continuă să explorezi</h3>
+            <div class="ce-nav-links">
+                <a href="legislatia-romania.html" class="ce-nav-link">
+                    <h4>Legislația din România →</h4>
+                    <p>Cadrul legal pentru grupurile de construcție în România</p>
+                </a>
+                <a href="cum-functioneaza.html" class="ce-nav-link">
+                    <h4>Cum funcționează →</h4>
+                    <p>Procesul practic de organizare a unui grup</p>
+                </a>
             </div>
         </div>
+    </div>
     </main>
 
     <div id="footer"></div>
