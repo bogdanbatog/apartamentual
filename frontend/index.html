@@ -4018,8 +4018,17 @@
       // ducea la ele era mai jos, în cardul desfăcut: citeai un lucru într-un
       // loc și îl apăsai în altul. Acum fiecare fapt e chiar linkul lui, iar
       // lista de acțiuni de dedesubt a rămas cu un singur rând.
+      // A treia stare: grupul are analiza importată (Împărțirea apartamentelor),
+      // dar cifrele n-au fost scrise pe teren. Se socotește tot „cu analiză".
+      var hrefImpartire = t.impartireGrup
+        ? '/organizare-apartamente.html?grup=' + encodeURIComponent(t.impartireGrup) +
+          '&teren=' + encodeURIComponent(t.id)
+        : '';
       var scurt = areAnaliza
         ? '<span class="sl-pill sl-pill--ok">✓ Analiză · ' + esc(apart) + '</span>'
+        : hrefImpartire
+        ? '<span class="sl-pill sl-pill--ok">✓ Analiză</span>' +
+          legatura(hrefImpartire, 'Împărțirea apartamentelor', 'impartire-teren')
         : '<span class="sl-pill sl-pill--todo">Fără analiză</span>';
 
       if(t.interesati > 0){
@@ -4052,7 +4061,7 @@
       // O singură acțiune rămasă, și doar când lipsește. Restul au urcat în
       // rândul de sus, ca linkuri.
       var actiuni = '';
-      if(!areAnaliza){
+      if(!areAnaliza && !hrefImpartire){
         var q = 'teren_id=' + encodeURIComponent(t.id) + '&teren_titlu=' + encodeURIComponent(t.titlu || '');
         // ⚠️ Butonul nu mai stă singur (decizia lui Lucian, 23 august).
         // „Cere o analiză" nu spune ce primești, iar asta e chiar întrebarea
@@ -5042,6 +5051,14 @@
           x[1].forEach(function(l){ grupuriPeTeren[l.teren_id] = (grupuriPeTeren[l.teren_id] || 0) + 1; });
           var noteTeren = {};
           x[2].forEach(function(n){ if(n.content) noteTeren[n.teren_id] = n.content; });
+          // Terenurile pe care un grup de-al lui are Împărțirea apartamentelor.
+          // Analiza importată stă în `analiza_teren`, nu în cifrele terenului,
+          // deci fără asta cardul arăta „Fără analiză" și „Cere o analiză" pe
+          // un teren cu împărțirea gata. Primul grup găsit dă linkul.
+          var impartirePeTeren = {};
+          (x[20] || []).forEach(function(a){
+            if(!impartirePeTeren[a.teren_id]) impartirePeTeren[a.teren_id] = a.grup_id;
+          });
 
           date.terenuri = terenuri.map(function(l){
             var t = l.terenuri;
@@ -5050,6 +5067,7 @@
             return {
               id: t.id, titlu: t.titlu, suprafata: t.suprafata, pret_total: t.pret_total,
               nr_apartamente_min: t.nr_apartamente_min, nr_apartamente_max: t.nr_apartamente_max,
+              impartireGrup: impartirePeTeren[t.id] || null,
               interesati: interesati,
               grupuri: grupuriPeTeren[t.id] || 0,
               nota: noteTeren[t.id] || '',

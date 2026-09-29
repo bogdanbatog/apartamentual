@@ -2038,7 +2038,19 @@ async function loadGroupDetails() {
                     .select('id, titlu, zona, image_url, suprafata, nr_apartamente_min, nr_apartamente_max')
                     .in('id', terenIds);
                 
-                terenuri = (terenuriData || []).map(t => ({ teren: t }));
+                // O analiză importată pentru grup (Împărțirea apartamentelor)
+                // NU scrie cifrele pe teren: stă în `analiza_teren`, pe perechea
+                // (grup, teren). Fără citirea asta, un teren cu împărțire gata
+                // arăta tot „Cere o analiză" (Radovici 4, 29 septembrie).
+                // Pentru cine nu e membru, RLS întoarce listă goală și cardul
+                // rămâne ca înainte.
+                const { data: analizeGrup } = await sb
+                    .from('analiza_teren')
+                    .select('teren_id')
+                    .eq('grup_id', groupId);
+                const cuImpartire = new Set((analizeGrup || []).map(a => a.teren_id));
+
+                terenuri = (terenuriData || []).map(t => ({ teren: t, areImpartire: cuImpartire.has(t.id) }));
             }
         }
         
@@ -2538,6 +2550,10 @@ function renderTerenuri(terenuri) {
             ? `<div class="teren-analiza">
                         <a class="teren-analiza-gata" href="teren-details.html?id=${teren.id}">✓ Analiză · ${escapeHtml(catApartCard)} →</a>
                     </div>`
+            : t.areImpartire
+            ? `<div class="teren-analiza">
+                        <a class="teren-analiza-gata" href="organizare-apartamente.html?grup=${currentGroup.id}&teren=${teren.id}">✓ Analiză · Împărțirea apartamentelor →</a>
+                    </div>`
             : `<div class="teren-analiza">
                         <a class="btn-cere-analiza" href="analize.html?teren_id=${encodeURIComponent(teren.id)}&teren_titlu=${encodeURIComponent(teren.titlu || '')}">Cere o analiză</a>
                         <span class="teren-analiza-nota">ca să vedeți câte apartamente se pot construi aici și la ce prețuri ar ieși</span>
@@ -2581,7 +2597,7 @@ function renderTerenuri(terenuri) {
                      vreo analiză. -->
                 <a class="tv-impartire" href="organizare-apartamente.html?grup=${currentGroup.id}&teren=${teren.id}">
                     <i class="fas fa-table-cells-large"></i>
-                    <span>Împărțirea apartamentelor${areAnalizaCard ? '' : ', notele și documentele terenului'}</span>
+                    <span>Împărțirea apartamentelor${(areAnalizaCard || t.areImpartire) ? '' : ', notele și documentele terenului'}</span>
                     <i class="fas fa-arrow-right tv-impartire-sageata"></i>
                 </a>
 
