@@ -1,6 +1,39 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 29 septembrie 2026 (după-amiaza)** — **Timelapse-ul Județului refăcut:
+> **⏭️ ULTIMA SESIUNE: 30 septembrie 2026** — **„Cum începi” refăcut în 4 pași pe homepage,
+> Terenuri și Grupuri; caseta „Analiză preliminară de teren” pe homepage. ✅ COMIS (`aef9778`,
+> `c6a9b17`) și ÎMPINS. ⏳ NEPUBLICAT din cPanel: se urcă TOATE ȘASE** `frontend/index.html`,
+> `frontend/grupuri.html`, `frontend/grupuri.css`, `frontend/terenuri.html`,
+> `frontend/terenuri.css`, `frontend/css/apartamentual-v9.css`. Fără ultimul, panourile de pe
+> Terenuri și Grupuri apar fără stil.
+>
+> **Cei 4 pași (textul lui Lucian), identici în trei locuri** (`index.html` `.pasi-incepi`;
+> `grupuri.html` + `terenuri.html` `.pasi-panel`, stil comun în `apartamentual-v9.css`):
+> 1 Caută un teren în zona ta · 2 Vezi dacă există deja un grup · 3 Alătură-te grupului (întâi
+> aprobarea fondatorului, apoi WhatsApp: butonul e `member-only`) · 4 Nu e niciun grup pe zona
+> ta? Creează tu unul (buton spre `grup-nou.html`). Etichete „Pasul N”, NU „01” (Lucian: „prea
+> standard de AI”).
+>
+> **Grupuri:** panoul „Cum începi și cum comunicați” scos cu totul, inclusiv caseta despre
+> comunicare și secretariatul „în curând”. **Terenuri:** 4 pași + blocul de analiză dedesubt
+> (ce conține, 99 RON, „Exemplu de analiză”); lista „Ți-a plăcut? Alegi ce faci cu el” scoasă.
+> Pe telefon panourile sunt lungi (filtrele la ~1.200-1.400px); Lucian a acceptat: „tb să existe”.
+> `plieazaPasiiPeTelefon` din `grupuri.js` a rămas, dar nu mai găsește nimic de pliat.
+>
+> **Homepage, „Cu ce te ajută apartamenTUal”:** casetă nouă sub listă, cu textul lui Lucian:
+> „Vezi câte apartamente se pot construi pe un teren. Analiza e făcută de arhitecți și nu se
+> oprește la POT și CUT: îți arată câte apartamente intră pe teren și volumul clădirii în Google
+> Earth, ca tu și grupul să evaluați suprafețele și costurile și să vă împărțiți apartamentele.”
+> + 99 RON + exemplu + „Alege un teren”. Fără listă de conținut, dinadins. Punctul 2 din listă
+> scurtat la „poți cere o analiză preliminară”.
+>
+> **⏭️ URMĂTORUL:** verificare pe live după urcare (cele trei pagini, desktop + telefon).
+> **Rămase:** (1) `ce-este/cum-functioneaza.html` are încă pașii vechi („faci un grup cu cei
+> interesați”), de aliniat la cei 4; (2) volumul în Google Earth e pomenit doar pe homepage:
+> de verificat dacă apare în `analiza-simplificata.html` și de decis dacă intră și în lista din
+> capul paginii Terenuri. Plus tot ce rămâne din blocurile de mai jos.
+
+> **SESIUNEA DINAINTE: 29 septembrie 2026 (după-amiaza)** — **Timelapse-ul Județului refăcut:
 > cerul nu mai „orbește". ✅ COMIS (`af09b20`) și ÎMPINS. ⏳ NEPUBLICAT din cPanel: se urcă
 > TOATE TREI** `frontend/index.html`, `frontend/video/timelapse-judetului.mp4` (13,8 MB, era
 > 8,3), `frontend/video/timelapse-judetului-poster.jpg`. Doar `index.html` = cod nou cu film vechi.
