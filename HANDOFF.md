@@ -1,6 +1,32 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 29 septembrie 2026** — **Homepage: webinariile lunare oprite, grupul de
+> **⏭️ ULTIMA SESIUNE: 29 septembrie 2026 (după-amiaza)** — **Timelapse-ul Județului refăcut:
+> cerul nu mai „orbește". ✅ COMIS (`af09b20`) și ÎMPINS. ⏳ NEPUBLICAT din cPanel: se urcă
+> TOATE TREI** `frontend/index.html`, `frontend/video/timelapse-judetului.mp4` (13,8 MB, era
+> 8,3), `frontend/video/timelapse-judetului-poster.jpg`. Doar `index.html` = cod nou cu film vechi.
+>
+> **Problema, măsurată:** cerul (treimea de sus) sărea în luminozitate ~2 ori/secundă (sub
+> pragul WCAG de 3, deci nu risc medical, dar obositor); plus un cadru-sclipire la 0,3 s, un salt
+> la reluarea buclei și ceasul camerei care se schimba la fiecare cadru. Pe desktop, fâșia de sus
+> a filmului (~125px) stătea chiar sub butoanele hero-ului.
+>
+> **Ce s-a făcut:** filmul refăcut cu ffmpeg (`deflicker`, ceas tăiat cu mărire ~5%, cadrul 8
+> scos, încetinit 1,5x la 20 cadre/s, 34 s); poza fixă fără ceas. Pe homepage: fără `autoplay`,
+> pornește când e jumătate pe ecran, se oprește când iese, buton de pauză, poză fixă pentru
+> „mișcare redusă". `povestea-noastra.html` neatinsă, dar primește automat filmul nou.
+>
+> **Probate și RESPINSE de Lucian** (notate și în comentariul din `index.html`): zile topite
+> una în alta (`tmix`, cer perfect calm dar imagine „blurry, unclean"); format mai lat 16:7 ca pe
+> Povestea noastră (taie acoperișul în a doua parte a filmului); cerul înlocuit cu alb prin
+> SegFormer (margini zimțate la clădiri și detalii fine).
+>
+> **Descrierea grupului de WhatsApp:** rescrisă în sesiune (diacritice, punctele 1-2 scurtate,
+> „în București" scos ca grupul să rămână deschis). Textul final e la Lucian, nu e în repo.
+>
+> **⏭️ URMĂTORUL:** verificare pe live după urcare (poza fixă sub hero, pornire la derulare,
+> butonul de pauză, hero-ul din Povestea noastră). Restul rămâne ca în blocul de mai jos.
+
+> **SESIUNEA DINAINTE: 29 septembrie 2026 (dimineața)** — **Homepage: webinariile lunare oprite, grupul de
 > WhatsApp devine butonul principal, bandă de încredere Baugruppen. ✅ COMIS (`454c22e`,
 > `252d04f`) și ÎMPINS. ⏳ NEPUBLICAT din cPanel** (`index.html`, `servicii.html`,
 > `register.html`, independente între ele).
