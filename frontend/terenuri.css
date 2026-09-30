@@ -275,106 +275,49 @@ img { max-width: 100%; display: block; }
     bottom: -50px; right: 120px;
 }
 
-/* ── PANOUL „ANALIZĂ PRELIMINARĂ" (în hero) ─────────────────────
-   Bandă deschisă peste hero-ul închis, ca în machetă: pașii 1 și 2
-   stivuiți într-o coloană îngustă, 3 și 4 desfășurate alături, cu
-   despărțitor vertical. Butonul de exemplu stă în dreapta, pe toată
-   înălțimea. Culorile sunt cele ale paginii, nu cele ale machetei. */
-.analiza-panel {
-    margin-top: 18px;
-    background: var(--slate-50);
-    color: var(--slate-800);
-    border-radius: var(--radius-lg);
-    padding: 16px 18px;
-    box-shadow: 0 24px 56px -28px rgba(0, 0, 0, 0.6);
+/* ── BLOCUL „ANALIZĂ PRELIMINARĂ" (în panoul „Cum începi") ─────────
+   Din 30 septembrie, cei patru pași de sus au stilul comun din
+   `css/apartamentual-v9.css` (`.pasi-panel`). Aici e doar blocul de
+   analiză de dedesubt: text în stânga, butonul de exemplu în dreapta.
+   ⚠️ Toate regulile pentru `<p>` au două clase: `.hero-content p` impune
+   altfel slate-300 la 16px, adică gri deschis pe fundal deschis. */
+.analiza-bloc {
+    margin-top: 16px;
+    padding: 18px 20px;
+    background: #ffffff;
+    border: 1px solid #e8e3d8;
+    border-radius: 12px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 24px;
     align-items: center;
 }
-.analiza-panel-main { min-width: 0; }
-
-/* ⚠️ Selectorul are DOUĂ clase dinadins. Eticheta și fraza de sub panou sunt
-   amândouă `<p>` în interiorul lui `.hero-content`, iar acolo există de mai
-   demult `.hero-content p { color: var(--slate-300); font-size: 1rem; }`,
-   care are specificitate mai mare decât o singură clasă. Cu un singur nume
-   de clasă, eticheta se randa gri deschis la 16px, deși aici scria teracotă
-   la 11px. Dacă adaugi alt `<p>` în panou, ține minte capcana. */
-.analiza-panel .analiza-panel-tag {
-    display: inline-flex;
-    /* flex-start, nu center: pe ecran îngust eticheta se rupe în două rânduri,
-       iar bulina ar rămâne la mijlocul lor. */
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--coral-dark);
-    margin-bottom: 10px;
-}
-.analiza-dot {
-    flex: none;
-    width: 7px; height: 7px;
-    margin-top: 0.42em;
-    border-radius: 50%;
-    background: var(--coral);
-}
-
-.analiza-steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr) minmax(0, 0.85fr);
-    gap: 10px 22px;
-    align-items: start;
-}
-.analiza-steps > li {
-    font-size: 0.92rem;
-    line-height: 1.45;
-    color: var(--slate-600);
-}
-/* Pașii 3 și 4 (celulele 2 și 3) au numărul lipit de text, ca pașii din
-   stivă, plus despărțitor vertical la stânga. */
-.analiza-steps > li:nth-child(2),
-.analiza-steps > li:nth-child(3) {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding-left: 20px;
-    border-left: 1px solid var(--slate-200);
-}
-/* Stiva pașilor 1 și 2 */
-.analiza-stack {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 10px;
-}
-.analiza-stack li {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    font-size: 0.92rem;
-    line-height: 1.45;
-    color: var(--slate-600);
-}
-.analiza-steps b {
-    color: var(--slate-800);
+.analiza-bloc-text { min-width: 0; }
+.pasi-panel .analiza-bloc-tag {
+    max-width: none;
+    margin: 0 0 8px;
+    font-size: 0.82rem;
     font-weight: 600;
+    color: var(--coral-dark);
 }
+.analiza-bloc summary b {
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--slate-800);
+}
+.pasi-panel .analiza-bloc-pret {
+    max-width: none;
+    margin: 10px 0 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--slate-600);
+}
+.analiza-bloc-pret b { color: var(--slate-800); }
 
-/* ── PAȘII PLIABILI (3 și 4) ────────────────────────────────────
-   Pe desktop arată exact ca înainte și NU se pot închide: rândul nu
-   primește clicuri. Pe telefon devin două rânduri pe care dai clic,
-   cu săgeată, fiindcă acolo panoul avea 576px și împingea primul teren
-   la peste 1100px de sus. */
-.analiza-fold {
-    flex: 1;
-    min-width: 0;
-}
+/* ── PARTEA PLIABILĂ ──
+   Pe desktop arată desfășurată și NU se poate închide: rândul nu primește
+   clicuri. Pe telefon devine rând pe care dai clic, cu săgeată. */
 .analiza-fold > summary {
     list-style: none;
     cursor: pointer;
@@ -388,66 +331,31 @@ img { max-width: 100%; display: block; }
         cursor: default;
     }
 }
-.analiza-step-n {
-    flex: none;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--slate-100);
-    border: 1px solid var(--slate-300);
-    color: var(--slate-800);
-    font-size: 0.72rem;
-    font-weight: 700;
-    display: grid;
-    place-items: center;
-}
 
 .analiza-sub {
     list-style: none;
-    margin: 5px 0 0;
+    margin: 8px 0 0;
     padding: 0;
     display: grid;
-    gap: 1px;
-    font-size: 0.85rem;
-    line-height: 1.4;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 24px;
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: var(--slate-600);
 }
 .analiza-sub li {
     position: relative;
-    padding-left: 13px;
+    padding-left: 14px;
 }
 .analiza-sub li::before {
     content: "";
     position: absolute;
-    left: 0; top: 0.62em;
+    left: 0; top: 0.65em;
     width: 5px; height: 5px;
     border-radius: 50%;
     background: var(--coral);
 }
-.analiza-pret {
-    font-weight: 700;
-    color: var(--slate-800);
-}
 
-/* Rândurile „de văzut", nu „de făcut": scris și bulină mai stinse, ca ochiul
-   să nu le pună în același șir cu „adaugi", „faci", care schimbă ceva.
-   ⚠️ Selectorul are două clase fiindcă bulina coral vine din
-   `.analiza-sub li::before`, care altfel ar câștiga. */
-.analiza-sub li.analiza-sub-secundar {
-    /* slate-500, nu slate-400: la 400 contrastul pe fundalul panoului scădea
-       sub 3:1, adică erau stinse până la a nu se mai putea citi. Diferența
-       față de celelalte trei rânduri se vede oricum. */
-    color: var(--slate-500);
-}
-.analiza-sub li.analiza-sub-secundar::before {
-    background: var(--slate-400);
-}
-
-.analiza-panel-side {
-    display: flex;
-    align-items: center;
-    padding-left: 22px;
-    border-left: 1px solid var(--slate-200);
-}
 .btn-analiza-exemplu {
     display: inline-flex;
     align-items: center;
@@ -456,7 +364,7 @@ img { max-width: 100%; display: block; }
     background: var(--slate-800);
     color: var(--white);
     border-radius: 100px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
     white-space: nowrap;
     transition: all var(--transition-fast);
@@ -467,16 +375,6 @@ img { max-width: 100%; display: block; }
     box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
 }
 .btn-analiza-exemplu i { font-size: 0.75rem; }
-
-/* Două clase, din același motiv ca la etichetă: altfel `.hero-content p`
-   îi impune 1rem și slate-300. */
-.hero-content .analiza-panel-hint {
-    margin-top: 10px;
-    margin-bottom: 0;
-    font-size: 0.82rem;
-    line-height: 1.45;
-    color: var(--slate-400);
-}
 
 /* ── FILTERS ──────────────────────────────── */
 .filters-section {
@@ -1402,15 +1300,9 @@ img { max-width: 100%; display: block; }
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     }
 
-    /* Butonul de exemplu trece sub pași, cu linie deasupra în loc de linie
-       laterală, ca panoul să nu se strângă pe lățime. */
-    .analiza-panel { grid-template-columns: 1fr; gap: 16px; }
-    .analiza-panel-side {
-        padding-left: 0;
-        border-left: 0;
-        border-top: 1px solid var(--slate-200);
-        padding-top: 14px;
-    }
+    /* Butonul de exemplu trece sub text, ca blocul să nu se strângă pe lățime. */
+    .analiza-bloc { grid-template-columns: 1fr; gap: 14px; }
+    .btn-analiza-exemplu { justify-self: start; }
 }
 
 @media (max-width: 768px) {
@@ -1427,30 +1319,10 @@ img { max-width: 100%; display: block; }
        deci fiecare punct de înălțime se simte de 46 de ori. */
     .teren-card-image { height: 150px; }
 
-    /* Pașii unul sub altul. Despărțitorul vertical devine orizontal, altfel
-       cele trei coloane ajung fiecare de un cuvânt pe rând. */
-    .analiza-panel {
-        margin-top: 20px;
-        padding: 16px;
-        border-radius: var(--radius-md);
-    }
-    /* Spațierea dintre litere scade ca eticheta să încapă pe un rând.
-       La 0.14em se rupea în două și costa 20 de puncte degeaba. */
-    .analiza-panel .analiza-panel-tag {
-        font-size: 0.62rem;
-        letter-spacing: 0.06em;
-        margin-bottom: 9px;
-    }
-    .analiza-steps { grid-template-columns: 1fr; gap: 9px; }
-    .analiza-steps > li:nth-child(2),
-    .analiza-steps > li:nth-child(3) {
-        padding-left: 0;
-        border-left: 0;
-        border-top: 1px solid var(--slate-200);
-        padding-top: 9px;
-    }
-    .analiza-steps > li,
-    .analiza-stack li { font-size: 0.88rem; }
+    /* Blocul de analiză: lista pe o coloană, pe telefon. */
+    .analiza-bloc { padding: 14px 16px; }
+    .analiza-sub { grid-template-columns: 1fr; }
+    .analiza-bloc summary b { font-size: 0.95rem; }
 
     /* Rândul pliabil: text la stânga, săgeată la dreapta, tot rândul e
        suprafață de atins. */
@@ -1472,9 +1344,6 @@ img { max-width: 100%; display: block; }
     .analiza-fold[open] .analiza-fold-sageata { transform: rotate(180deg); }
     /* Pe telefon butonul plin devine link scris: e o acțiune secundară, iar
        pastila neagră pe toată lățimea costa un rând întreg din panou. */
-    .analiza-panel-side {
-        padding-top: 10px;
-    }
     .btn-analiza-exemplu {
         width: 100%;
         justify-content: flex-start;
@@ -1489,7 +1358,6 @@ img { max-width: 100%; display: block; }
         transform: none;
         box-shadow: none;
     }
-    .hero-content .analiza-panel-hint { font-size: 0.8rem; }
 
     /* Filtre compacte pe mobil — nu mai stau sticky ca să nu ocupe ecranul,
        padding redus, label-uri mai mici, gap mai mic între ele */

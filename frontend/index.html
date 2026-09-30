@@ -1469,6 +1469,71 @@
     .platforma-lista{ grid-template-columns:1fr; gap:1.5rem; }
   }
 
+  /* ── CASETA „ANALIZA PRELIMINARĂ DE TEREN" (30 septembrie) ──
+     Stă sub lista din „Cu ce te ajută apartamenTUal" și dezvoltă punctul 2.
+     Fundal crem și linie teracotă în stânga: e singurul serviciu cu preț de
+     pe homepage, deci trebuie să se vadă, dar fără să arate a reclamă.
+     ⚠️ `--terracotta` nu e pe `:root` (vezi comentariul de la
+     `.platforma-lista`), deci fiecare `var()` are și valoarea de rezervă. */
+  .analiza-caseta{
+    margin-top:2.5rem;
+    padding:1.75rem 2rem;
+    background:var(--bg-soft);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--terracotta, #c06a4f);
+    border-radius:10px;
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    gap:1.5rem 3rem;
+    align-items:center;
+  }
+  .analiza-caseta-eticheta{
+    margin:0 0 0.5rem;
+    font-size:13px;
+    font-weight:600;
+    color:var(--terracotta, #c06a4f);
+  }
+  .analiza-caseta h3{
+    margin:0 0 0.75rem;
+    font-size:22px;
+    font-weight:600;
+    line-height:1.3;
+    color:var(--ink);
+  }
+  .analiza-caseta-intro{
+    margin:0;
+    font-size:16px;
+    line-height:1.65;
+    color:var(--ink-2);
+    max-width:680px;
+  }
+  .analiza-caseta-actiune{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:0.75rem;
+  }
+  .analiza-caseta-pret{
+    margin:0;
+    font-size:14px;
+    line-height:1.5;
+    color:var(--ink-2);
+  }
+  .analiza-caseta-pret b{
+    font-size:20px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  @media(max-width:1000px){
+    .analiza-caseta{ grid-template-columns:1fr; align-items:start; }
+  }
+  @media(max-width:600px){
+    .analiza-caseta{ padding:1.25rem; }
+    .analiza-caseta h3{ font-size:19px; }
+    .analiza-caseta-intro{ font-size:15px; }
+    .analiza-caseta-actiune{ align-items:stretch; }
+  }
+
   /* ── HERO accent ── */
   .hero-title .title-tau{
     color:var(--ink);
@@ -2483,10 +2548,11 @@
        ⚠️ `js-marketing-only`: pentru cine e logat, homepage-ul e spațiul de
        lucru, iar prezentarea platformei acolo e zgomot. Video-ul de mai jos
        face invers, dinadins; vezi comentariul de acolo.
-       ⚠️ Punctul 2 repetă o formulare care e scrisă de mână în mai multe locuri
-       („câte apartamente se pot construi și la ce prețuri"): și mai jos în
-       pagină, în `grup-details.html` și în emailul de terenuri. Dacă se
-       schimbă, se schimbă în toate.
+       ⚠️ Punctul 2 spunea „o analiză care arată câte apartamente se pot
+       construi și la ce prețuri". Scurtat pe 30 septembrie la „o analiză
+       preliminară": explicația stă acum în caseta de sub listă. Formularea
+       veche e încă scrisă de mână mai jos în pagină, în `grup-details.html`
+       și în emailul de terenuri.
        ⚠️ REGULILE DE FORMULARE PENTRU SERVICII SUNT ACUM AICI, mutate pe 31
        august din caseta „Nu ești singur":
        · „filtrate", NU „analizate": analiza e serviciul pe care îl ceri tu, nu
@@ -2510,10 +2576,40 @@
     </p>
     <ol class="platforma-lista">
       <li><b>Găsești oamenii.</b> Vezi cine mai caută în zonele tale și ce grupuri se formează acum, apoi intri într-unul sau începi tu unul.</li>
-      <li><b>Găsești terenul.</b> Terenurile sunt filtrate de arhitecți, iar pentru fiecare poți cere o analiză care arată câte apartamente se pot construi și la ce prețuri.</li>
+      <li><b>Găsești terenul.</b> Terenurile sunt filtrate de arhitecți, iar pentru fiecare poți cere o analiză preliminară.</li>
       <li><b>Vă organizați.</b> Grupul își ține pașii în ordine, documentele la un loc și jurnalul discuțiilor, ca să nu se piardă nimic pe drum.</li>
       <li><b>Nu vă descurcați singuri.</b> Putem face proiectarea, iar mai departe coordonăm partea juridică, alegerea constructorului, ofertele și șantierul.</li>
     </ol>
+
+    <!-- ── ANALIZA PRELIMINARĂ DE TEREN (adăugată pe 30 septembrie) ──
+         Cerută de Lucian: analiza nu se vedea nicăieri pe homepage, deși e
+         singurul serviciu pe care omul îl poate cumpăra din prima zi. Dezvoltă
+         punctul 2 de mai sus.
+         ⚠️ Fără listă de conținut, dinadins (Lucian, 30 septembrie): caseta
+         spune doar ce primești (câte apartamente, volumul în Google Earth) și
+         la ce-ți folosește. Detaliile stau în capul paginii `terenuri.html`
+         și în exemplul de analiză. Dacă se schimbă ce conține analiza,
+         verifică și acele locuri.
+         ⚠️ Prețul e scris de mână. Pe carduri vine din PRET_ANALIZA
+         (js/terenuri.js); lista tuturor locurilor e în comentariul panoului
+         din `terenuri.html`.
+         ⚠️ „costuri estimative", NU „economisești" și nicio cifră de economie
+         (regula din CLAUDE.md). Analiza arată costuri, nu promite prețuri. -->
+    <div class="analiza-caseta">
+      <div>
+        <p class="analiza-caseta-eticheta">Analiză preliminară de teren</p>
+        <h3>Vezi câte apartamente se pot construi pe un teren</h3>
+        <!-- „nu doar POT și CUT": formularea lui Lucian, 30 septembrie. Indicii
+             urbanistici îi găsești și singur în certificatul de urbanism;
+             analiza îi transformă în apartamente. -->
+        <p class="analiza-caseta-intro">Analiza e făcută de arhitecți și nu se oprește la POT și CUT: îți arată câte apartamente intră pe teren și volumul clădirii în Google Earth, ca tu și grupul să evaluați suprafețele și costurile și să vă împărțiți apartamentele.</p>
+      </div>
+      <div class="analiza-caseta-actiune">
+        <p class="analiza-caseta-pret"><b>99 RON</b> pentru un teren, TVA inclus</p>
+        <a href="/analiza-simplificata.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=analiza-caseta plausible-event-dest=exemplu-analiza">Vezi un exemplu de analiză</a>
+        <a href="/terenuri.html" class="text-link plausible-event-name=CTA+Click plausible-event-loc=analiza-caseta plausible-event-dest=terenuri">Alege un teren →</a>
+      </div>
+    </div>
   </section>
 
   <!-- ── CUM ÎNCEPI (patru pași) ── -->

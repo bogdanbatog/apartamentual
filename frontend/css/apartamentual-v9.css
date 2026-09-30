@@ -227,6 +227,116 @@ body{
   color:var(--ink-3); text-transform:uppercase;
 }
 
+/* ── PANOUL „CUM ÎNCEPI" (4 pași, în capul paginilor Terenuri și Grupuri) ──
+   Aceiași patru pași ca în secțiunea „Cum începi" de pe homepage
+   (`index.html`, `.pasi-incepi`). Din 30 septembrie înlocuiește panourile
+   vechi „Cum începi și cum comunicați" (grupuri) și pașii 1-4 din „Analiză
+   preliminară" (terenuri), care aveau scris mărunt și două căi amestecate.
+   ⚠️ Textul pașilor e copiat în TREI locuri: index.html, grupuri.html,
+   terenuri.html. Dacă se schimbă un pas, se schimbă în toate trei.
+   ⚠️ Stă în hero-ul închis al ambelor pagini, unde există
+   `.hero-content p { ... }` cu specificitate mai mare decât o singură clasă.
+   De aceea toate regulile pentru `<p>` de aici au două clase.
+   Culorile sunt în hex, fiindcă cele două pagini au palete diferite
+   (grupuri fără variabile, terenuri pe slate/coral). */
+.pasi-panel{
+  max-width:1200px;
+  margin:20px auto 0;
+  text-align:left;
+  background:#faf8f3;
+  color:#1a1a1a;
+  border-radius:14px;
+  padding:22px 24px 24px;
+  box-shadow:0 24px 56px -28px rgba(0,0,0,0.6);
+}
+.pasi-panel .pasi-panel-tag{
+  max-width:none;
+  margin:0 0 14px;
+  opacity:1;
+  font-size:0.78rem;
+  font-weight:600;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:#a84f3c;
+}
+.pasi-carduri{
+  list-style:none;
+  counter-reset:pas-card;
+  margin:0;
+  padding:0;
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+}
+.pas-card{
+  counter-increment:pas-card;
+  display:flex;
+  flex-direction:column;
+  background:#ffffff;
+  border:1px solid #e8e3d8;
+  border-radius:12px;
+  padding:18px;
+}
+/* „Pasul 1", nu „01": aceeași etichetă ca pe homepage. */
+.pas-card::before{
+  content:"Pasul " counter(pas-card);
+  font-size:0.82rem;
+  font-weight:600;
+  color:#a84f3c;
+  margin-bottom:6px;
+}
+.pas-card h2{
+  font-size:1.08rem;
+  font-weight:600;
+  line-height:1.3;
+  letter-spacing:0;
+  color:#1a1a1a;
+  margin:0 0 8px;
+}
+.pasi-panel .pas-card p{
+  flex:1;
+  max-width:none;
+  margin:0;
+  opacity:1;
+  font-size:0.95rem;
+  line-height:1.55;
+  color:#444444;
+}
+.pas-card-link{
+  align-self:flex-start;
+  margin-top:14px;
+  font-size:0.92rem;
+  font-weight:600;
+  color:#1a1a1a;
+  text-decoration:none;
+  border-bottom:1px solid rgba(0,0,0,0.25);
+}
+.pas-card-link:hover{ border-bottom-color:#1a1a1a; }
+/* Acțiunea principală a panoului (pasul 4, „Creează un grup"): pastilă
+   neagră, ca butonul care stătea înainte în colțul panoului de grupuri. */
+.pas-card-link.pas-card-buton{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 16px;
+  border:0;
+  border-radius:100px;
+  background:#1a1a1a;
+  color:#ffffff;
+}
+.pas-card-link.pas-card-buton:hover{ background:#333333; }
+@media (max-width:1024px){
+  .pasi-carduri{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width:600px){
+  .pasi-panel{ padding:16px; }
+  .pasi-carduri{ grid-template-columns:1fr; gap:10px; }
+  .pas-card{ padding:14px 16px; }
+  .pas-card h2{ font-size:1.02rem; }
+  .pasi-panel .pas-card p{ font-size:0.92rem; }
+  .pas-card-link.pas-card-buton{ align-self:stretch; justify-content:center; }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width:768px){
   .hero-title{ font-size:32px; }
