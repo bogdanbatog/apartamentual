@@ -947,55 +947,56 @@
     color:var(--ink-3);
   }
 
-  /* ── CUM ÎNCEPI (două căi de intrare) ── */
+  /* ── CUM ÎNCEPI (patru pași, din 30 septembrie) ── */
   #cum-incepi{ scroll-margin-top:88px; }
-  .cai{
+  .pasi-incepi{
+    list-style:none;
+    counter-reset:pas-incepi;
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:3rem;
-    margin-top:2.5rem;
+    grid-template-columns:repeat(4, 1fr);
+    gap:2rem;
+    margin:2.5rem 0 0;
+    padding:0;
   }
-  .cale{
-    padding-top:1.5rem;
+  .pas-incepi{
+    counter-increment:pas-incepi;
+    padding-top:1.25rem;
     border-top:1px solid var(--rule);
     display:flex;
     flex-direction:column;
   }
-  .cale h3{
-    font-size:20px;
+  /* „Pasul 1", nu „01": cifrele mono cu zero în față arătau a machetă
+     generică (observația lui Lucian, 30 septembrie). „Pasul N" e și
+     eticheta casetelor din pagina grupului. */
+  .pas-incepi::before{
+    content:"Pasul " counter(pas-incepi);
+    font-size:13px;
+    font-weight:600;
+    color:var(--terracotta, #c06a4f);
+    margin-bottom:0.5rem;
+  }
+  .pas-incepi h3{
+    font-size:18px;
     font-weight:600;
     line-height:1.3;
-    margin:0 0 1.25rem;
+    margin:0 0 0.75rem;
     color:var(--ink);
   }
-  .cale ol{
-    list-style:none;
-    counter-reset:cale;
-    margin:0 0 1.75rem;
-    padding:0;
-    flex:1;
-  }
-  .cale ol li{
-    counter-increment:cale;
-    position:relative;
-    padding-left:2rem;
+  .pas-incepi p{
     font-size:14px;
     line-height:1.6;
     color:var(--ink-2);
-    margin-bottom:0.875rem;
+    margin:0 0 1.5rem;
+    flex:1;
   }
-  .cale ol li:last-child{ margin-bottom:0; }
-  .cale ol li::before{
-    content:counter(cale);
-    position:absolute;
-    left:0;
-    top:0;
-    font-family:var(--mono);
-    font-size:12px;
-    line-height:1.85;
-    color:var(--terracotta, #c06a4f);
+  .pas-incepi:not(:has(a)) p{ margin-bottom:0; }
+  .pas-incepi .cta-secondary{ align-self:flex-start; }
+  @media(max-width:1024px){
+    .pasi-incepi{ grid-template-columns:repeat(2, 1fr); gap:2.5rem 2rem; }
   }
-  .cale .cta-secondary{ align-self:flex-start; }
+  @media(max-width:600px){
+    .pasi-incepi{ grid-template-columns:1fr; gap:2rem; }
+  }
 
   /* Caseta „Creează-ți un cont" din „Cum începi". Nu e un al treilea card:
      e locul prin care trec amândouă căile, deci stă sub ele, pe toată
@@ -1426,13 +1427,13 @@
   /* ── CE FACE PLATFORMA ──
      Listă numerotată, nu casete. Imediat deasupra sunt deja patru casete cu
      linie sus („Ce câștigi"); dacă și blocul ăsta era o grilă de carduri, cele
-     două secțiuni se citeau ca una singură, repetată. Cifra mono teracotă e
-     aceeași cu cea din `.cale ol` („Cum începi"), ca blocul să se lege de
-     secțiunea care urmează imediat.
+     două secțiuni se citeau ca una singură, repetată. Cifra e teracotă, ca
+     eticheta „Pasul N" din „Cum începi", ca blocul să se lege de secțiunea
+     care urmează imediat (din 30 septembrie acolo nu mai e cifră mono).
      ⚠️ `--terracotta` e definit pe `.hero-stage`, nu pe `:root`, iar secțiunea
      asta e în afara lui. De aceea `var()` are ȘI valoarea de rezervă: fără ea,
      cifrele ar fi rămas fără culoare, fără nicio eroare. Aceeași grijă e
-     luată la `.cale ol li::before`. */
+     luată la `.pas-incepi::before`. */
   .platforma-lista{
     list-style:none;
     counter-reset:platf;
@@ -1714,8 +1715,7 @@
     .site-nav-links{ display:none; }
     .cta-punchy{ padding:2rem 1.5rem; }
     .steps{ grid-template-columns:1fr; }
-    .cai{ grid-template-columns:1fr; gap:2rem; }
-    .cale .cta-secondary{ align-self:stretch; }
+    .pas-incepi .cta-secondary{ align-self:stretch; }
     .avantaje{ grid-template-columns:1fr; }
     /* Banda are de la 31 august trei propoziții, nu trei lozinci de câte
        patru cuvinte. Pe telefon ele se desfac oricum pe câte un rând (prima
@@ -2516,7 +2516,7 @@
     </ol>
   </section>
 
-  <!-- ── CUM ÎNCEPI (două căi de intrare) ── -->
+  <!-- ── CUM ÎNCEPI (patru pași) ── -->
   <section class="section" id="cum-incepi">
     <!-- ⚠️ Eyebrow-ul era „Procesul". Schimbat pe 31 august, din două motive:
          procesul propriu-zis are patru faze și e în „Cum funcționează", pe
@@ -2550,26 +2550,38 @@
       <a href="/register.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=register">Creează-ți un cont <span class="arr">→</span></a>
     </div>
 
-    <div class="cai">
-      <div class="cale">
-        <h3>Pornești de la un teren</h3>
-        <ol>
-          <li>Cauți terenuri în zonele tale și le adaugi la profil</li>
-          <li>Vezi cine mai e interesat de ele, oameni sau grupuri</li>
-          <li>Te alături grupului sau faci unul cu cei interesați</li>
-        </ol>
+    <!-- ── PATRU PAȘI ──
+         Până pe 30 septembrie aici erau două coloane, „Pornești de la un
+         teren" și „Pornești de la o zonă". Omul trebuia să aleagă o cale
+         înainte să înțeleagă ce face, iar cele două se încurcau între ele.
+         Acum e un singur drum, în ordine, iar pasul 4 e ramura „nu există
+         grup", nu o a doua cale.
+         ⚠️ Pasul 3: NU scrie „intri pe WhatsApp" direct. Grupurile sunt toate
+         cu aprobare, iar butonul de WhatsApp e `member-only` în
+         `grup-details.html`. Întâi aprobarea, apoi WhatsApp-ul.
+         ⚠️ Pasul 4: „ți-i arătăm noi" se sprijină pe filtrul „Doar cei cu zone
+         comune cu mine" din `utilizatori.html`. Dacă filtrul dispare, fraza minte. -->
+    <ol class="pasi-incepi">
+      <li class="pas-incepi">
+        <h3>Caută un teren în zona ta</h3>
+        <p>Uită-te prin terenurile de pe platformă și salvează-le pe cele care ți se potrivesc.</p>
         <a href="/terenuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=terenuri">Vezi terenurile</a>
-      </div>
-      <div class="cale">
-        <h3>Pornești de la o zonă</h3>
-        <ol>
-          <li>Creezi un grup pe zona ta, de exemplu „Grup Bucureștii Noi”</li>
-          <li>Adaugi terenurile care îți plac</li>
-          <li>Ceilalți le văd și se alătură</li>
-        </ol>
+      </li>
+      <li class="pas-incepi">
+        <h3>Vezi dacă există deja un grup</h3>
+        <p>Pe fiecare teren vezi ce grupuri îl urmăresc. Caută și grupurile formate pe zona ta preferată.</p>
         <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=grupuri">Vezi grupurile</a>
-      </div>
-    </div>
+      </li>
+      <li class="pas-incepi">
+        <h3>Alătură-te grupului</h3>
+        <p>Ceri să intri, iar după ce fondatorul te acceptă, intri și în grupul lor de WhatsApp. Acolo vezi ce se discută și cum se iau deciziile.</p>
+      </li>
+      <li class="pas-incepi">
+        <h3>Nu e niciun grup pe zona ta? Creează tu unul</h3>
+        <p>Creezi un grup cu numele zonei, de exemplu „Grup Bucureștii Noi”, pui pe el terenul preferat și inviți alți oameni. Pe cei interesați de aceleași zone ți-i arătăm noi.</p>
+        <a href="/grup-nou.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=grup-nou">Creează un grup</a>
+      </li>
+    </ol>
     <!-- ⚠️ Fără cifra „7 etape". Nu există nicăieri: pagina „Cum funcționează"
          are 4 faze, iar checklistul grupului aceleași 4. Enumerarea de aici
          începe după formarea grupului, care e faza 1. -->
