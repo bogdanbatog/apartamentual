@@ -1,6 +1,36 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 1 octombrie 2026** — **Emailul de „trezire” TRIMIS la 41 de oameni.
+> **⏭️ ULTIMA SESIUNE: 1 octombrie 2026 (a doua)** — **Campania „grupul general de WhatsApp”
+> PREGĂTITĂ, NETRIMISĂ. ✅ COMIS (`7e45aae`) și ÎMPINS. Nimic de urcat din cPanel.** Plus primele
+> 3 răspunsuri la „trezire”, notate, nerăspunse încă.
+>
+> **Răspunsurile la „trezire” (3 din 41, în aceeași zi):** Ion M. „nu știu ce vreau încă”, vrea să
+> rămână în orbită (nu e „stop”); Cezar A. neîncrezător, întreabă **cât au plătit participanții
+> reali** pentru 2-3 camere (pe site nu există nicio cifră reală de cost de la Județului); Cristian P.
+> soția/socrii aversivi la risc, context politic, crede că e nevoie **doar de cash** (neînțelegere
+> parțială: `ce-este/legislatia-romania.html` are varianta cu credit individual pe construcție, dar
+> e îngropată). Nimeni în `EXCLUSI_IMPLICIT`. **Decizia lui Lucian: se așteaptă să se adune mai
+> multe** (bănuiește că nu mai vin multe); propunerea mea: până pe ~8 octombrie. Ciornele de răspuns
+> au fost propuse în chat, nu puse în Gmail; la Cezar cifrele [X €/mp] le completează Lucian.
+> Teme de urmărit: **costul real în cifre** și **finanțarea / creditul**.
+>
+> **Campania nouă:** `scripts/emailuri-whatsapp-general/` + `db_schema/emailuri-whatsapp-general/
+> 1-lot-pentru-email.sql`. Destinatari: TOATE conturile personale vii (în grup sau nu, profil
+> complet sau nu, vechi sau noi), minus oamenii casei, agențiile, dezabonații și **cei 41 de la
+> „trezire”**: scriptul îi sare citind `scripts/emailuri-trezire/local/trimise-*.json` și **refuză
+> să pornească dacă jurnalele lipsesc** (sunt doar local, nu pe GitHub; nu le șterge). Textul
+> (aprobat de Lucian): „am observat că grupurile discută mai viu pe WhatsApp” → grup general, te
+> ghidez din experiența de arhitect și de la Județului → „nu trebuie să fii foarte activ”. Cei cu
+> `in_grup = true` primesc fraza „grupul general nu îl înlocuiește pe al vostru”. Sub buton: „Dacă
+> ești deja în grup, poți ignora butonul.”
+>
+> **⏭️ URMĂTORUL:** (1) Lucian scrie în grupurile de WhatsApp ale grupurilor despre grupul general;
+> (2) apoi trimite campania: SQL → CSV pe Desktop → dry (verifică „Sariti … ~41” și citește lista cu
+> ochiul: participanții de la Județului și oamenii casei cu Gmail personal nu sunt prinși de filtru)
+> → `--mod=test` → `--mod=live --confirm-trimit`; (3) aprobat cererile în grupul de WhatsApp;
+> (4) ~8 octombrie: răspunsurile la „trezire” grupate pe motive + răspuns la Ion, Cezar, Cristian.
+
+> **SESIUNEA DINAINTE: 1 octombrie 2026 (prima)** — **Emailul de „trezire” TRIMIS la 41 de oameni.
 > ✅ COMIS (`675ea04`, `aa7f344`) și ÎMPINS. Nimic de urcat din cPanel: niciun fișier din
 > `frontend/` atins.** Destinatari: profil complet, în niciun grup (nici fondator, nici membru,
 > nici cerere în așteptare), cont mai vechi de 30 de zile. Cei proaspeți scoși la decizia lui
