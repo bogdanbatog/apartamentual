@@ -1,6 +1,36 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 30 septembrie 2026** — **„Cum începi” refăcut în 4 pași pe homepage,
+> **⏭️ ULTIMA SESIUNE: 1 octombrie 2026** — **Emailul de „trezire” TRIMIS la 41 de oameni.
+> ✅ COMIS (`675ea04`, `aa7f344`) și ÎMPINS. Nimic de urcat din cPanel: niciun fișier din
+> `frontend/` atins.** Destinatari: profil complet, în niciun grup (nici fondator, nici membru,
+> nici cerere în așteptare), cont mai vechi de 30 de zile. Cei proaspeți scoși la decizia lui
+> Lucian: „nu te-am mai văzut de atunci” le-ar fi sunat a reproș. Analiza din septembrie dădea
+> 44 - 5 = 39; în ziua trimiterii au ieșit 41 (au mai trecut câțiva de pragul de 30 de zile).
+>
+> **Emailul:** personal, la persoana întâi, de la „Lucian Luță de la ApartamenTUal”. Începe cu
+> „Sunt Lucian Luță, arhitect și co-fondator ApartamenTUal”, cere un răspuns de un rând („ce te-a
+> oprit după înscriere?”, cu motivele posibile înșirate), povestește pe scurt Județului („n-a fost
+> ușor, a durat mai mult”), apoi invită în grupul general de WhatsApp. Reformularea pentru „n-ai
+> făcut nimic”: „de atunci nu te-am mai văzut pe platformă”. Textul stă în `continut()` din script.
+>
+> **Fișierele:** `db_schema/emailuri-trezire/0` → `3` (analiza, doar SELECT) + `4-lot-pentru-email.sql`
+> (exportul pentru script); `scripts/emailuri-trezire/` (script + README, tiparul campaniilor:
+> dry → test → live). Scriptul refuză singur orice cont mai nou de 30 de zile. ⚠️ Interogările au
+> lista de excluși scrisă cu adrese personale; Lucian a ales să le urce așa; commitul `aa7f344` și
+> push-ul le-a făcut el din terminal (auto-mode-ul lui Claude le-a refuzat ca date personale).
+>
+> **⚠️ Cheia Resend:** cheia din august și cea socotită „din 2 septembrie” au dat amândouă `401
+> API key is invalid`; a treia a mers. Și: fereastra era **cmd**, nu PowerShell, iar
+> `$env:RESEND_API_KEY=` dă acolo „The filename, directory name, or volume label syntax is incorrect”.
+>
+> **⏭️ URMĂTORUL:** (1) strâns răspunsurile din `apartamentual@ltfbstudio.ro` și grupate pe motive
+> (timp / altă așteptare / nu știu ce să fac / nu înțeleg procesul / altceva), apoi decis ce se
+> schimbă în platformă; (2) aprobat cererile în grupul de WhatsApp („Aprobă membrii noi” e pornit,
+> iar emailul promite „Cererea de intrare o aprob eu”); (3) cine răspunde „stop” → `EXCLUSI_IMPLICIT`
+> din script. Plus: de verificat dacă s-au urcat din cPanel cele șase fișiere din sesiunea de
+> 30 septembrie (blocul de mai jos); în sesiunea asta nu s-a pomenit.
+
+> **SESIUNEA DINAINTE: 30 septembrie 2026** — **„Cum începi” refăcut în 4 pași pe homepage,
 > Terenuri și Grupuri; caseta „Analiză preliminară de teren” pe homepage. ✅ COMIS (`aef9778`,
 > `c6a9b17`) și ÎMPINS. ⏳ NEPUBLICAT din cPanel: se urcă TOATE ȘASE** `frontend/index.html`,
 > `frontend/grupuri.html`, `frontend/grupuri.css`, `frontend/terenuri.html`,
