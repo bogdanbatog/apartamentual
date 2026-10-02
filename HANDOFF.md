@@ -1,7 +1,12 @@
 # HANDOFF — ApartamenTUal
 
+> **✅ ACTUALIZARE 2 octombrie 2026, dimineața: campania „grupul general de WhatsApp” TRIMISĂ.**
+> 51 de emailuri live, 0 eșecuri (+3 teste), jurnal `scripts/emailuri-whatsapp-general/local/
+> trimise-2026-10-02.json` (doar local; nu-l șterge). Cu cei 41 de la „trezire”, invitația a ajuns
+> la 92 de oameni. Oamenii au început să intre în grup. Pașii (1) și (2) de mai jos sunt făcuți.
+>
 > **⏭️ ULTIMA SESIUNE: 1 octombrie 2026 (a doua)** — **Campania „grupul general de WhatsApp”
-> PREGĂTITĂ, NETRIMISĂ. ✅ COMIS (`7e45aae`) și ÎMPINS. Nimic de urcat din cPanel.** Plus primele
+> PREGĂTITĂ (trimisă pe 2 oct., vezi mai sus). ✅ COMIS (`7e45aae`) și ÎMPINS. Nimic de urcat din cPanel.** Plus primele
 > 3 răspunsuri la „trezire”, notate, nerăspunse încă.
 >
 > **Răspunsurile la „trezire” (3 din 41, în aceeași zi):** Ion M. „nu știu ce vreau încă”, vrea să
