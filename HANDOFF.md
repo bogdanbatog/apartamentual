@@ -1,5 +1,31 @@
 # HANDOFF — ApartamenTUal
 
+> **⏭️ ULTIMA SESIUNE: 8 octombrie 2026** — **Invitația în WhatsApp a ieșit din hero-ul nelogat și
+> a intrat în „Cum începi”. ✅ COMIS (`32a5bd6`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel: `frontend/index.html`.**
+>
+> **De ce (spus de Lucian):** butonul „Intră în grupul de WhatsApp” din hero ducea la înregistrare,
+> iar după cont omul ajungea în „spațiul tău” (homepage-ul logat, cu alt conținut), fără să fi citit
+> homepage-ul de nelogați. Confuz.
+>
+> **Ce s-a schimbat în `index.html`:** hero-ul are două butoane, „Vezi terenurile” (negru, ca înainte
+> de 29 sept.) și „Intră într-un grup de pe platformă”; nota de sub butoane a ieșit. În „Cum începi”,
+> caseta cu contul (`.cai-cont`, `js-marketing-only`) are un al doilea paragraf: „După ce ai cont,
+> poți intra și în grupul nostru de discuții pe WhatsApp, unde citești tot ce și-au spus membrii
+> până acum: întrebări, răspunsuri, experiențe.” Butonul „Creează-ți un cont” duce acum la
+> `/register.html?redirect=%2F`, ca omul să aterizeze pe homepage-ul logat, unde e linkul real de
+> WhatsApp (rândul 7 din „Ce e nou”). Paginile `grupuri.html` și `terenuri.html` neatinse.
+>
+> **⚠️ Promisiunea despre istoric:** în mod obișnuit WhatsApp NU arată membrilor noi mesajele de
+> dinainte. Lucian a ales formularea dinadins („mi se pare important”); trebuie verificat că setarea
+> de împărțire a istoricului e pornită în grup, altfel fraza minte.
+>
+> **Plausible:** `loc=hero, dest=whatsapp` se oprește pe 8 oct. Intrările prin casetă se văd ca
+> `loc=cum-incepi, dest=register`.
+>
+> **⏭️ URMĂTORUL:** (1) urcat `index.html` din cPanel; (2) verificat setarea de istoric din grupul de
+> WhatsApp; (3) **sesiune nouă: ce modificăm la „spațiul tău”** (homepage-ul logat), cerut de Lucian;
+> (4) rămân deschise de mai jos: răspunsurile la „trezire” (termen ~8 oct.) și documentul pentru avocat.
+
 > **✅ ACTUALIZARE 2 octombrie 2026, dimineața: campania „grupul general de WhatsApp” TRIMISĂ.**
 > 51 de emailuri live, 0 eșecuri (+3 teste), jurnal `scripts/emailuri-whatsapp-general/local/
 > trimise-2026-10-02.json` (doar local; nu-l șterge). Cu cei 41 de la „trezire”, invitația a ajuns
