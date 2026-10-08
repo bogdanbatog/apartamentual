@@ -300,9 +300,6 @@
   }
   .cta-group{ display:flex; flex-direction:column; gap:0.5rem; }
   .cta-note{ font-size:11px; color:var(--ink-3); }
-  /* Nota de sub butoane (29 septembrie): singurul text mic din hero, deci o
-     singură mărime și o singură culoare. */
-  .hero-nota-wa{ margin:0.5rem 0 0; font-size:14px; line-height:1.55; color:var(--ink-3); max-width:640px; }
   /* Subtitlul are două paragrafe: mecanismul și platforma. Primul își
      pierde marginea mare de jos, ca să se citească împreună. */
   .hero-sub:has(+ .hero-sub--platforma){ margin-bottom:0.6rem; }
@@ -1019,6 +1016,9 @@
     color:var(--ink-2);
     max-width:640px;
   }
+  /* Două paragrafe în casetă (contul, apoi WhatsApp-ul, din 8 octombrie):
+     stau într-un bloc comun, ca butonul să rămână a doua coloană. */
+  .cai-cont-text + .cai-cont-text{ margin-top:0.6rem; }
   .cai-cont .cta-primary{ flex-shrink:0; }
   @media(max-width:768px){
     .cai-cont{ flex-direction:column; align-items:stretch; gap:1.25rem; }
@@ -2238,12 +2238,16 @@
              buton). Nota de dedesubt spune ce găsești în grup și condiția
              profilului, ca omul să afle ÎNAINTE de clic că ajunge la
              înregistrare, nu direct în WhatsApp. -->
+        <!-- ⚠️ 8 octombrie: WhatsApp-ul a IEȘIT din hero, la cererea lui
+             Lucian. Butonul ducea la înregistrare, iar după cont omul ajungea
+             în spațiul de lucru (alt homepage), fără să fi citit pagina asta.
+             Invitația stă acum în caseta cu contul din „Cum începi", după ce
+             omul a citit de ce merită. Terenurile redevin butonul negru.
+             În Plausible: `dest=whatsapp` pe `loc=hero` se oprește aici. -->
         <div class="hero-ctas">
-          <a href="/register.html?redirect=%2F" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=whatsapp">Intră în grupul de WhatsApp <span class="arr">→</span></a>
-          <a href="/terenuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=terenuri">Vezi terenurile</a>
+          <a href="/terenuri.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=terenuri">Vezi terenurile <span class="arr">→</span></a>
           <a href="/grupuri.html" class="cta-secondary plausible-event-name=CTA+Click plausible-event-loc=hero plausible-event-dest=grupuri">Intră într-un grup de pe platformă</a>
         </div>
-        <p class="hero-nota-wa">În grupul de WhatsApp afli repede ce te interesează și citești ce întreabă și ce răspund ceilalți. Intri după ce îți faci profilul.</p>
         <!-- Sub butoane stătea o notă („București și împrejurimi. Fără cont,
              ca să vezi ce e."). A ieșit la cererea lui Lucian, 25 august.
              Orașul nu se pierde: apare în linia de sub timelapse, la câteva
@@ -2642,8 +2646,15 @@
          vizibilă și pentru cine e logat (intenționat), dar butonul de creat
          cont n-are ce căuta acolo. -->
     <div class="cai-cont js-marketing-only">
+      <div class="cai-cont-texte">
       <p class="cai-cont-text">Începe cu un cont. E gratuit, iar numele poate fi un pseudonim. Completezi o singură dată zonele care te interesează și ce fel de apartament cauți, fiindcă pe acestea se face potrivirea cu terenurile, cu grupurile și cu ceilalți oameni.</p>
-      <a href="/register.html" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=register">Creează-ți un cont <span class="arr">→</span></a>
+      <!-- 8 octombrie: invitația în grupul de WhatsApp, mutată aici din hero.
+           Linkul propriu-zis NU e aici: apare pe homepage-ul logat (rândul
+           din „Ce e nou"), de aceea `redirect=%2F` aduce omul înapoi acolo
+           după cont și profil. -->
+      <p class="cai-cont-text">După ce ai cont, poți intra și în grupul nostru de discuții pe WhatsApp, unde citești tot ce și-au spus membrii până acum: întrebări, răspunsuri, experiențe.</p>
+      </div>
+      <a href="/register.html?redirect=%2F" class="cta-primary plausible-event-name=CTA+Click plausible-event-loc=cum-incepi plausible-event-dest=register">Creează-ți un cont <span class="arr">→</span></a>
     </div>
 
     <!-- ── PATRU PAȘI ──
@@ -4236,8 +4247,8 @@
           ', unde te poți abona ca să le primești pe email.'));
       }
 
-      // 7. Grupul de WhatsApp al comunității. Aici aterizează cine a apăsat
-      // în hero pe „Intră în grupul de WhatsApp", după ce și-a făcut profilul.
+      // 7. Grupul de WhatsApp al comunității. Aici aterizează cine și-a făcut
+      // cont din caseta din „Cum începi" (până pe 8 octombrie: butonul din hero).
       // Linkuri scrise pe loc, nu prin `legatura`: duc în afara site-ului, deci
       // au nevoie de `target` și `rel`.
       if(WHATSAPP_URL){
@@ -5776,9 +5787,9 @@
     // „WEBINARUL LUNAR"). În locul lui, linkurile completate de mână: apar
     // doar dacă au o adresă. Tot înainte de `init()`, fiindcă sunt pentru
     // nelogați.
-    // ⚠️ Butonul de WhatsApp din hero NU mai e ascuns după `WHATSAPP_URL`: e
-    // butonul principal, deci nu poate dispărea. Dacă grupul se închide
-    // vreodată, se schimbă butonul din HTML, nu doar constanta.
+    // ⚠️ Invitația în WhatsApp din caseta „Cum începi" NU e ascunsă după
+    // `WHATSAPP_URL`. Dacă grupul se închide vreodată, se schimbă și textul
+    // din HTML, nu doar constanta. (Până pe 8 octombrie era butonul din hero.)
     (function arataLinkurileDeMana(){
       var trecute = document.getElementById('webinariiTrecute');
       if(trecute && WEBINARII_TRECUTE_URL){
