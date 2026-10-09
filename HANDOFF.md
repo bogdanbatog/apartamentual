@@ -1,6 +1,33 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 8 octombrie 2026** — **Invitația în WhatsApp a ieșit din hero-ul nelogat și
+> **⏭️ ULTIMA SESIUNE: 9 octombrie 2026** — **Grupurile exemplu scoase de pe platformă (ARHIVATE, nu
+> șterse). SQL RULAT de Lucian. ✅ COMIS (`4c35759`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel: `frontend/grupuri.html`.**
+>
+> **Ce s-a făcut:** cele 3 grupuri `is_demo` (Comunitate Verde Băneasa, Bloc Eco pentru Medici și
+> Profesioniști, Investiție Inteligentă – Bloc Boutique Central) au trecut pe `status = 'arhivat'`.
+> Dispar singure din pagina de grupuri, homepage, profiluri și pagina terenului (filtrele existau
+> deja în cod). Din `grupuri.html` a ieșit banda „Grupurile marcate cu «Exemplu» arată cum va
+> funcționa…”, devenită falsă. Scripturile: `db_schema/grupuri-exemplu/` (0 și 0b doar citesc,
+> 1a și 1 rulate).
+>
+> **⚠️ Capcana descoperită:** `grupuri_status_check` NU accepta „arhivat” (doar deschis, cu_aprobare,
+> activ, explorare, inchis). Cele patru filtre `status <> 'arhivat'` din cod erau moarte: niciun grup
+> nu fusese vreodată arhivat. Regula a fost lărgită cu „arhivat” (`1a-permite-statusul-arhivat.sql`).
+> Arhivarea se face doar din SQL; nu există buton în interfață.
+>
+> **Oamenii reali din exemple:** Alint, Robert, Alex, Mihai Voda aveau doar cereri `pending` (fără
+> răspuns din iulie/august; adminii erau personaje inventate) și sunt activi în 2-4 grupuri reale.
+> Nu li s-a scris nimic; nu pierd niciun grup.
+>
+> **Ce a rămas neatins:** cei 5 utilizatori-exemplu (`is_demo` pe `profiles`: Cristina Moldovan,
+> Bogdan Radu, Elena Voicu, Ana Dumitrescu, Ioana Nistor) apar încă pe `/utilizatori` cu badge
+> „Exemplu”. Paginile grupurilor arhivate se mai deschid din linkul direct, cu badge „Exemplu”.
+>
+> **⏭️ URMĂTORUL:** (1) urcat `grupuri.html` din cPanel + verificat cu Ctrl+Shift+R că lista nu mai
+> are exemple; (2) de decis: scoatem și utilizatorii-exemplu? (sesiune separată); (3) rămân valabili
+> pașii din 8 octombrie de mai jos (`index.html` din cPanel, istoricul WhatsApp, „spațiul tău”).
+
+> **⏭️ SESIUNEA DIN 8 OCTOMBRIE 2026** — **Invitația în WhatsApp a ieșit din hero-ul nelogat și
 > a intrat în „Cum începi”. ✅ COMIS (`32a5bd6`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel: `frontend/index.html`.**
 >
 > **De ce (spus de Lucian):** butonul „Intră în grupul de WhatsApp” din hero ducea la înregistrare,
