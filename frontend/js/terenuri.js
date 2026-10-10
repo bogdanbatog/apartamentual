@@ -96,7 +96,8 @@ function plieazaPasiiPeTelefon() {
     const ecranMic = window.matchMedia('(max-width: 768px)');
 
     const aplica = () => {
-        document.querySelectorAll('.analiza-fold').forEach(pas => {
+        // `.pasi-fold` = cei patru pași din „Cum începi”, pliați la fel din 10 octombrie.
+        document.querySelectorAll('.analiza-fold, .pasi-fold').forEach(pas => {
             pas.open = !ecranMic.matches;
         });
     };

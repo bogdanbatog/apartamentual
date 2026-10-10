@@ -326,10 +326,36 @@ img { max-width: 100%; display: block; }
 .analiza-fold-sageata { display: none; }
 
 @media (min-width: 769px) {
-    .analiza-fold > summary {
+    .analiza-fold > summary,
+    .pasi-fold > summary {
         pointer-events: none;
         cursor: default;
     }
+}
+
+/* Cei patru pași din „Cum începi": același mecanism, din 10 octombrie. Pe
+   desktop eticheta rămâne etichetă; pe telefon devine rândul pe care îl atingi. */
+.pasi-fold > summary {
+    list-style: none;
+    cursor: pointer;
+}
+.pasi-fold > summary::-webkit-details-marker { display: none; }
+.pasi-fold-sageata { display: none; }
+@media (max-width: 768px) {
+    .pasi-fold > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 3px 0;
+    }
+    .pasi-panel .pasi-fold:not([open]) > summary { margin-bottom: 0; }
+    .pasi-fold-sageata {
+        display: inline-block;
+        font-size: 0.7rem;
+        transition: transform var(--transition-fast);
+    }
+    .pasi-fold[open] .pasi-fold-sageata { transform: rotate(180deg); }
 }
 
 .analiza-sub {

@@ -113,6 +113,16 @@
    oricum, fiindcă cardul e cât ecranul. */
 .td-act .td-btn { width: 100%; margin-top: auto; }
 
+/* Cardul analizei are două butoane („Vezi cum arată analiza", „Cere analiza").
+   Grupul lor stă jos în card; în interior, butoanele nu mai împart spațiul. */
+.td-act-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
+.td-act-btns .td-btn { margin-top: 0; }
+
 /* ── 1. ANTET: galerie + esențialul ──────── */
 .td-top {
     display: grid;
@@ -249,13 +259,9 @@
     letter-spacing: 0;
 }
 
-/* Rândul cu inima și distribuirea. Stă între fapte și rândul de proveniență,
-   nu în blocul de acțiuni: sunt gesturi de o apăsare, nu pași de urmat.
-   ⚠️ Patru butoane, nu trei: inima se arată doar celui logat, deci nelogat
-   rândul pare mai lejer decât e. Măsurat pe site, logat, la 1440 px lățime:
-   erau nevoie de 585 px și existau 581. Se rupea, iar „Facebook" rămânea
-   singur pe rândul al doilea. De aceea butoanele de aici sunt mai strânse
-   decât restul paginii. La orice buton nou pe rândul ăsta, remăsoară LOGAT. */
+/* Rândul cu inima. Stă între fapte și rândul de proveniență, nu în blocul
+   de acțiuni: e un gest de o apăsare, nu un pas de urmat. Distribuirea
+   (Copiază, WhatsApp, Facebook) a fost scoasă pe 10 octombrie. */
 .td-quick {
     display: flex;
     flex-wrap: wrap;
@@ -263,15 +269,8 @@
     gap: 6px;
     margin: 14px 0 0;
 }
-.td-quick-sep {
-    width: 1px;
-    align-self: stretch;
-    background: var(--slate-200);
-    margin: 0 2px;
-}
-/* Nelogatul nu vede inima, deci despărțitorul ar rămâne singur la începutul
-   rândului, ca o liniuță fără rost. */
-#user-action-buttons.hidden + .td-quick-sep { display: none; }
+/* Nelogatul nu vede inima, deci rândul ar rămâne gol, doar cu marginea lui. */
+.td-quick:has(> #user-action-buttons.hidden) { display: none; }
 .td-page .td-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -342,7 +341,9 @@
 
 .td-acts-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+    /* Coloane egale din 10 octombrie: ordinea cardurilor se schimbă din JS
+       (ordoneazaCardurileDeActiune), deci analiza nu mai e mereu prima. */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
     align-items: stretch;
 }
@@ -549,7 +550,9 @@
 /* ── LĂȚIMI MICI ─────────────────────────── */
 @media (max-width: 960px) {
     .td-top { grid-template-columns: 1fr; gap: 18px; }
-    .td-acts-grid { grid-template-columns: 1fr 1fr; }
+    /* `dense`: când analiza (lată cât rândul) nu e prima, golul lăsat lângă
+       cardul de dinaintea ei se umple cu următorul card. */
+    .td-acts-grid { grid-template-columns: 1fr 1fr; grid-auto-flow: row dense; }
     .td-act--lead { grid-column: 1 / -1; }
 }
 
@@ -570,7 +573,4 @@
 
     .td-back { margin-bottom: 12px; }
     .td-desc { margin-top: 24px; padding-top: 18px; }
-
-    /* Distribuirea trece pe rândul ei, ca butoanele să nu se strivească. */
-    .td-quick-sep { display: none; }
 }

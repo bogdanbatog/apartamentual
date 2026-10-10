@@ -164,21 +164,8 @@
                                     <span class="btn-like-text">Adaugă la profilul tău</span>
                                 </button>
                             </div>
-                            <span class="td-quick-sep" aria-hidden="true"></span>
-                            <!-- „Copiază", nu „Copiază link": patru butoane pe rând,
-                                 iar al patrulea cădea singur pe rândul al doilea.
-                                 Veriga de lângă cuvânt și vecinii (WhatsApp,
-                                 Facebook) spun despre ce e vorba; titlul o scrie
-                                 pe litere pentru cine se oprește cu mouse-ul. -->
-                            <button type="button" id="btn-share-copy" class="td-icon-btn" title="Copiază linkul terenului">
-                                <i class="fas fa-link"></i> Copiază
-                            </button>
-                            <a id="btn-share-whatsapp" target="_blank" rel="noopener" class="td-icon-btn">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </a>
-                            <a id="btn-share-facebook" target="_blank" rel="noopener" class="td-icon-btn">
-                                <i class="fab fa-facebook-f"></i> Facebook
-                            </a>
+                            <!-- Butoanele de distribuire (Copiază, WhatsApp, Facebook)
+                                 au fost scoase pe 10 octombrie, la cererea lui Lucian. -->
                         </div>
 
                         <p class="td-origin">
@@ -203,16 +190,18 @@
                              comanda-analiza.html, servicii.html. Vezi NOTES.md. -->
                         <article class="td-act td-act--lead">
                             <p class="td-act-tag"><span class="td-act-dot"></span>Analiză preliminară, făcută de arhitecți</p>
-                            <h3>Cere analiza și vezi ce se poate construi și la ce costuri estimative</h3>
+                            <!-- Din 10 octombrie: întâi vezi modelul, apoi o ceri.
+                                 Butonul principal duce la analiza-exemplu, cererea
+                                 trece pe al doilea. Lista scurtată la două rânduri. -->
+                            <h3>Vezi ce se poate construi pe teren și la ce costuri estimative</h3>
                             <ul class="td-bullets">
-                                <li>câte apartamente încap și câte camere are fiecare</li>
-                                <li>suprafețe utile și la ce etaje sunt</li>
-                                <li>costuri estimative pe mp construit și pe mp util</li>
-                                <li>cât te costă terenul, în funcție de apartamentul pe care îl vrei</li>
-                                <li><b>99 RON</b> pentru un teren, TVA inclus</li>
-                                <li>trebuie să știi adresa sau numărul cadastral</li>
+                                <li>câte apartamente intră, suprafețe și costuri estimative pentru teren și construcție</li>
+                                <li>analiza costă <b>99 RON</b>, TVA inclus</li>
                             </ul>
-                            <button id="btn-cere-analiza" type="button" class="td-btn td-btn--primary">Cere analiza preliminară</button>
+                            <div class="td-act-btns">
+                                <a href="analiza-simplificata.html" class="td-btn td-btn--primary">Vezi cum arată analiza</a>
+                                <button id="btn-cere-analiza" type="button" class="td-btn td-btn--ghost">Cere analiza</button>
+                            </div>
                         </article>
 
                         <!-- Fă un grup pe acest teren ──────────────────────────
@@ -298,32 +287,6 @@
 <script src="js/auth-modal.js"></script>
 <script src="js/app.js"></script>
 <script src="js/teren-details.js"></script>
-<script>
-// Distribuire teren (public). URL canonic = teren-details.html?id=<id>
-(function() {
-    const id = new URLSearchParams(window.location.search).get('id');
-    if (!id) return;
-    const url = 'https://apartamentual.ro/teren-details.html?id=' + encodeURIComponent(id);
-    const waText = 'Am găsit un teren potrivit pentru construcție în grup pe ApartamenTUal: ' + url;
-    const wa = document.getElementById('btn-share-whatsapp');
-    const fb = document.getElementById('btn-share-facebook');
-    if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(waText);
-    if (fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
-    const copy = document.getElementById('btn-share-copy');
-    if (copy) {
-        copy.addEventListener('click', function() {
-            navigator.clipboard.writeText(url).then(function() {
-                const orig = copy.innerHTML;
-                // Fără clasă de culoare: iconițele rândului sunt colorate din
-                // `teren-details.css`. Cu `text-gray-500` de la Tailwind, bifa
-                // ieșea două secunde într-un gri care nu e al paginii.
-                copy.innerHTML = '<i class="fas fa-check"></i> Link copiat';
-                setTimeout(function() { copy.innerHTML = orig; }, 2000);
-            });
-        });
-    }
-})();
-</script>
 </body>
 </html>
     

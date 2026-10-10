@@ -1020,10 +1020,46 @@ async function loadInterestCounts(terenId) {
         if (cardGroups) cardGroups.classList.remove('hidden');
         if (usersCountEl) usersCountEl.textContent = userLikesCount || 0;
         if (groupsCountEl) groupsCountEl.textContent = groupLikesCount || 0;
-        
+
+        ordoneazaCardurileDeActiune(groupLikesCount || 0, userLikesCount || 0);
+
     } catch (e) {
         console.warn('Could not load interest counts:', e);
     }
+}
+
+// Ordinea cardurilor din „Ce poți face cu terenul acesta" (din 10 octombrie):
+//   1. „Adaugă-l la unul din grupurile tale", dacă omul e în cel puțin un grup
+//   2. cardurile de interes (grupuri, utilizatori) care au cifra peste 0
+//   3. analiza, „Fă un grup", apoi „Adaugă-l…" dacă omul n-are grupuri
+//   4. cardurile de interes cu 0, la sfârșit
+// Se mută doar nodurile existente; în HTML ordinea rămâne cea veche, deci
+// nelogatul și agenția (pentru care funcția nu se apelează) o văd neschimbată.
+function ordoneazaCardurileDeActiune(nrGrupuri, nrUtilizatori) {
+    const grila = document.querySelector('.td-acts-grid');
+    if (!grila) return;
+
+    const analiza = grila.querySelector('.td-act--lead');
+    const grupNou = document.getElementById('grup-nou-teren');
+    const grupurileMele = document.getElementById('group-likes-section');
+    const cardGrupuri = document.getElementById('card-interested-groups');
+    const cardUtilizatori = document.getElementById('card-interested-users');
+
+    const eInGrup = currentUserProfile && userGroups.length > 0;
+    const cuInteres = [];
+    const faraInteres = [];
+    (nrGrupuri > 0 ? cuInteres : faraInteres).push(cardGrupuri);
+    (nrUtilizatori > 0 ? cuInteres : faraInteres).push(cardUtilizatori);
+
+    const ordine = [
+        eInGrup ? grupurileMele : null,
+        ...cuInteres,
+        analiza,
+        grupNou,
+        eInGrup ? null : grupurileMele,
+        ...faraInteres
+    ];
+    ordine.forEach(card => { if (card) grila.appendChild(card); });
 }
 
 window.viewInterestedUsersFromDetail = function() {

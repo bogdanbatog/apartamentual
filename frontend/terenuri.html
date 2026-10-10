@@ -73,16 +73,20 @@
              ⚠️ Textul pașilor e copiat în trei locuri (index.html, grupuri.html,
              terenuri.html). Dacă se schimbă unul, se schimbă toate.
              Pasul 1 n-are link aici: terenurile sunt chiar sub panou. -->
+        <!-- Din 10 octombrie, pe telefon pașii stau pliați sub „Cum începi" (`pasi-fold`, închis din terenuri.js,
+             ca analiza de dedesubt): patru carduri unul sub altul împingeau
+             terenurile cu un ecran întreg mai jos. -->
         <div class="pasi-panel">
-            <p class="pasi-panel-tag">Cum începi</p>
+            <details class="pasi-fold" open>
+            <summary class="pasi-panel-tag">Cum începi <i class="fas fa-chevron-down pasi-fold-sageata"></i></summary>
             <ol class="pasi-carduri">
                 <li class="pas-card">
                     <h2>Caută un teren în zona ta</h2>
-                    <p>Uită-te prin terenurile de pe platformă și salvează-le pe cele care ți se potrivesc.</p>
+                    <p>Uită-te prin terenurile de pe platformă, iar pe cele care ți se potrivesc salvează-le pe profilul tău.</p>
                 </li>
                 <li class="pas-card">
                     <h2>Vezi dacă există deja un grup</h2>
-                    <p>Pe fiecare teren vezi ce grupuri îl urmăresc. Caută și grupurile formate pe zona ta preferată.</p>
+                    <p>Pe fiecare teren vezi ce grupuri îl urmăresc. Vezi și ce membri îl urmăresc.</p>
                     <a href="/grupuri.html" class="pas-card-link">Vezi grupurile</a>
                 </li>
                 <li class="pas-card">
@@ -95,6 +99,7 @@
                     <a href="/grup-nou.html" class="pas-card-link pas-card-buton">Creează un grup <i class="fas fa-arrow-right"></i></a>
                 </li>
             </ol>
+            </details>
 
             <!-- ── Analiza preliminară ──
                  `analiza-fold` e pliabil pe telefon: terenuri.js îl închide la
