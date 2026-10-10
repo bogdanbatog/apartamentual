@@ -111,19 +111,14 @@
             <div class="analiza-bloc">
                 <div class="analiza-bloc-text">
                     <p class="analiza-bloc-tag">Analiză preliminară, făcută de arhitecți</p>
-                    <details class="analiza-fold" open>
-                        <summary>
-                            <b>Pentru orice teren de aici poți afla ce se poate construi pe el și la ce costuri estimative:</b>
-                            <i class="fas fa-chevron-down analiza-fold-sageata"></i>
-                        </summary>
-                        <ul class="analiza-sub">
-                            <li>câte apartamente încap și câte camere are fiecare</li>
-                            <li>suprafețe utile și la ce etaje sunt</li>
-                            <li>costuri estimative pe mp construit și pe mp util</li>
-                            <li>cât te costă terenul, în funcție de apartamentul pe care îl vrei</li>
-                        </ul>
-                    </details>
-                    <p class="analiza-bloc-pret"><b>99 RON</b> pentru un teren, TVA inclus. Îți trebuie adresa sau numărul cadastral. O ceri de pe cardul terenului sau din pagina lui.</p>
+                    <!-- Din 10 octombrie: doar două rânduri, ca în pagina terenului.
+                         Fiind atât de scurtă, lista nu mai e pliabilă pe telefon
+                         (`analiza-fold` scos; CSS-ul și JS-ul lui au rămas, nefolosite). -->
+                    <p class="analiza-bloc-titlu"><b>Pentru orice teren de aici poți afla ce se poate construi pe el și la ce costuri estimative:</b></p>
+                    <ul class="analiza-sub">
+                        <li>câte apartamente intră, suprafețe și costuri estimative pentru teren și construcție</li>
+                        <li>analiza costă <b>99 RON</b>, TVA inclus</li>
+                    </ul>
                 </div>
                 <a href="analiza-simplificata.html" class="btn-analiza-exemplu">
                     Exemplu de analiză <i class="fas fa-arrow-right"></i>

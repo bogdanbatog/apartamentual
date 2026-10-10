@@ -1,6 +1,42 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 9 octombrie 2026** — **Grupurile exemplu scoase de pe platformă (ARHIVATE, nu
+> **⏭️ ULTIMA SESIUNE: 10 octombrie 2026** — **Terenuri + Detalii teren: modificările cerute de Lucian.
+> ✅ COMIS (`77d15dd`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel 8 fișiere** (`frontend/`): `index.html`,
+> `grupuri.html`, `terenuri.html`, `terenuri.css`, `js/terenuri.js`, `teren-details.html`,
+> `teren-details.css`, `js/teren-details.js`.
+>
+> **Terenuri:** pe telefon cei 4 pași din „Cum începi” stau pliați (`<details class="pasi-fold">`,
+> închis din `plieazaPasiiPeTelefon` în `terenuri.js`, același mecanism ca `.analiza-fold`); pe
+> desktop arată ca înainte. **Textul pașilor 1 și 2 schimbat în toate cele trei locuri** (terenuri,
+> index, grupuri): pasul 1 „…salvează-le pe profilul tău”; pasul 2 „Vezi și ce membri îl urmăresc”
+> în loc de „Caută și grupurile formate pe zona ta preferată” (confuz, spus de Lucian).
+>
+> **Detalii teren:** (1) scoase butoanele Copiază / WhatsApp / Facebook și scriptul lor; rândul
+> `.td-quick` dispare la nelogat (`:has`). (2) Casetele din „Ce poți face” se reordonează din JS
+> (`ordoneazaCardurileDeActiune`, apelată la finalul `loadInterestCounts`): „Adaugă-l la unul din
+> grupurile tale” primul dacă omul e în grup → casetele de interes cu cifra > 0 → analiza → „Fă un
+> grup” → „Adaugă-l…” (dacă n-are grupuri) → casetele de interes cu 0. Nelogatul și agenția văd
+> ordinea din HTML. Grila: coloane egale, `dense` sub 960px. (3) Caseta analizei: titlu „Vezi ce se
+> poate construi pe teren și la ce costuri estimative”, două rânduri (ce conține; 99 RON TVA inclus),
+> buton principal **„Vezi cum arată analiza”** → `analiza-simplificata.html`, apoi „Cere analiza”
+> (ghost, același `btn-cere-analiza` → `analize.html`). Logica de plată neatinsă.
+>
+> **Verificat local** (8777, iframe 390px pentru telefon; ordinea probată pe trei scenarii simulate).
+> **Neverificat pe live, logat, pe un teren cu interes real.**
+>
+> **Tot pe 10 oct., al doilea commit:** caseta „Analiză preliminară” din panoul de sus al
+> `/terenuri.html` are și ea doar cele două rânduri (ce conține; 99 RON TVA inclus), pe o coloană.
+> Paragraful cu prețul și „Îți trebuie adresa sau numărul cadastral” au ieșit. Lista nu mai e
+> pliabilă pe telefon (`analiza-fold` scos din HTML; CSS-ul și JS-ul lui au rămas, nefolosite).
+> Fișiere: `terenuri.html`, `terenuri.css` (deja în lista de urcat de mai sus).
+>
+> **Rămas neschimbat dinadins:** butonul „Cere analiza” de pe cardurile din lista `/terenuri.html`
+> (cererea a fost doar pentru pagina terenului).
+>
+> **⏭️ URMĂTORUL:** (1) urcat cele 8 fișiere din cPanel + Ctrl+Shift+R, logat, pe un teren cu oameni
+> sau grupuri interesate; (2) rămân valabili pașii din 9 și 8 octombrie de mai jos.
+
+> **⏭️ SESIUNEA DIN 9 OCTOMBRIE 2026** — **Grupurile exemplu scoase de pe platformă (ARHIVATE, nu
 > șterse). SQL RULAT de Lucian. ✅ COMIS (`4c35759`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel: `frontend/grupuri.html`.**
 >
 > **Ce s-a făcut:** cele 3 grupuri `is_demo` (Comunitate Verde Băneasa, Bloc Eco pentru Medici și

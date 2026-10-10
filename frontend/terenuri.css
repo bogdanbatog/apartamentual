@@ -300,6 +300,13 @@ img { max-width: 100%; display: block; }
     font-weight: 600;
     color: var(--coral-dark);
 }
+/* Titlul listei: era `<summary>` până pe 10 octombrie, acum e `<p>`. */
+.pasi-panel .analiza-bloc-titlu {
+    max-width: none;
+    margin: 0;
+    opacity: 1;
+}
+.analiza-bloc-titlu b,
 .analiza-bloc summary b {
     font-size: 1.02rem;
     font-weight: 600;
@@ -362,8 +369,9 @@ img { max-width: 100%; display: block; }
     list-style: none;
     margin: 8px 0 0;
     padding: 0;
+    /* O coloană din 10 octombrie: au rămas două rânduri, unul lung și unul scurt. */
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 4px 24px;
     font-size: 0.95rem;
     line-height: 1.5;
@@ -1348,7 +1356,8 @@ img { max-width: 100%; display: block; }
     /* Blocul de analiză: lista pe o coloană, pe telefon. */
     .analiza-bloc { padding: 14px 16px; }
     .analiza-sub { grid-template-columns: 1fr; }
-    .analiza-bloc summary b { font-size: 0.95rem; }
+    .analiza-bloc summary b,
+    .analiza-bloc-titlu b { font-size: 0.95rem; }
 
     /* Rândul pliabil: text la stânga, săgeată la dreapta, tot rândul e
        suprafață de atins. */
