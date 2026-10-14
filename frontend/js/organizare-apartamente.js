@@ -90,6 +90,13 @@ let suntAdmin = false;         // fondatorul: șterge notele, documentele și ju
    face nimic când îl apeși. */
 let suntSuperAdmin = false;
 
+/* MODUL EXEMPLU (14 octombrie 2026): pagina publică `analiza-simplificata.html`
+   pune în `window.OA_EXEMPLU` o analiză scrisă de mână și refolosește desenul
+   de aici, ca exemplul să arate exact ca pagina pe care o vede grupul. În modul
+   ăsta NU se citește și NU se scrie nimic în bază: cursoarele și înscrierile
+   rămân în pagină și pier la reîncărcare. Vezi `pornesteExemplul`. */
+const EXEMPLU = window.OA_EXEMPLU || null;
+
 /* Simularea de prețuri. `null` înseamnă „cifra din analiză”, nu „zero”: așa se
    deosebește un cursor neatins de unul tras exact pe valoarea de pornire, și tot
    așa se șterge simularea, punând `null` la loc. Nu se salvează nicăieri și nu
@@ -287,6 +294,7 @@ function dinProfil(m){ return m.pref.camere == null && m.pref.mp == null; }
    decât problema.
    ═══════════════════════════════════════════════════════════════════════════ */
 async function salveazaSuprafata(a){
+  if (EXEMPLU) return;
   try {
     const { error } = await sb.from('apartament_suprafata').upsert({
       apartament_id: a.id, grup_id: grupId, mpu: a.mpu,
@@ -306,6 +314,7 @@ async function comutaInteres(caseta){
   const maInscriu = (i < 0);
   if (maInscriu) arr.push(eu); else arr.splice(i, 1);
   render();
+  if (EXEMPLU) return;
   try {
     if (maInscriu) {
       const { error } = await sb.from('apartament_interes')
@@ -1777,6 +1786,15 @@ window.salveazaPreferinte = async function (){
 window.toggleMembri = function (){ membriToti = !membriToti; renderMembri(); };
 
 function render(){
+  /* Exemplul are doar clădirea, simularea și tabelul: membrii, documentele,
+     jurnalul și verificările nu există în pagina lui. */
+  if (EXEMPLU) {
+    renderFile();
+    renderVarianta();
+    renderSimulare();
+    renderCosturi();
+    return;
+  }
   const areAnaliza = variante.length > 0;
   document.getElementById('file').hidden = !areAnaliza;
   document.querySelector('.stare-legenda').hidden = !areAnaliza;
@@ -2124,7 +2142,30 @@ function formatData(iso){
   return Number(p[2]) + ' ' + LUNI[Number(p[1]) - 1] + ' ' + p[0];
 }
 
+/* Exemplul public: aceeași formă a datelor ca după încărcarea din bază, dar
+   scrisă de mână în pagină. Câțiva „doritori” inventați arată cum se vede o
+   casetă cu unul sau mai mulți interesați; cel care citește e `eu`. */
+function pornesteExemplul(){
+  eu = EXEMPLU.eu;
+  membri = (EXEMPLU.membri || []).map(m => ({ id: m.id, nume: m.nume, profil: {}, pref: {} }));
+  interese = JSON.parse(JSON.stringify(EXEMPLU.interese || {}));
+  variante = EXEMPLU.variante.map(function (v) {
+    const ap = v.ap.map(a => Object.assign({}, a, { mpu: a.mpuPropus }));
+    return Object.assign({}, v, {
+      ap: ap, locuinte: legaLocuintele(ap, v.niveluri),
+      costTeren: EXEMPLU.costTeren, costMpSd: EXEMPLU.costMpSd,
+      coefUtil: v.coefUtil || COEF_UTIL_IMPLICIT,
+      subsolSd: v.subsolSd || 0,
+      factorSubsol: EXEMPLU.factorSubsol || FACTOR_SUBSOL_IMPLICIT
+    });
+  });
+  variantaActiva = variante[0].id;
+  legSimulare();
+  render();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+  if (EXEMPLU) { pornesteExemplul(); return; }
   oaPorneste().catch(function (e) {
     console.error('împărțirea apartamentelor:', e);
     arataStarea('Ceva n-a mers', 'Încearcă să reîncarci pagina.', '');

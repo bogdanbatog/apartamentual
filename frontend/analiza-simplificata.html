@@ -3,256 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analiză preliminară - Exemplu - ApartamenTUal</title>
+    <title>Exemplu de analiză preliminară - ApartamenTUal</title>
 <!-- Privacy-friendly analytics by Plausible -->
 <script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
 <script>
   window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
   plausible.init()
 </script>
-    <meta name="description" content="Vezi un exemplu real de analiză urbanistică preliminară — așa cum o vei primi pe email după comandă.">
+    <meta name="description" content="O analiză preliminară reală, pe un teren de 632 mp din Sectorul 2: ce se poate construi, cum se împarte clădirea în apartamente și cum arată volumul pe teren.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/apartamentual-v9.css">
+    <!-- Desenul împărțirii e același cu cel din pagina grupului
+         (organizare-apartamente.html): aceleași stiluri, același JS, pornit în
+         modul exemplu. Orice schimbare de formă acolo se vede și aici. -->
+    <link rel="stylesheet" href="css/organizare-apartamente.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #faf8f3; color: #1a1a1a; line-height: 1.6; }
-        #navigation { margin-bottom: 0; }
+/* ═══════════════════════════════════════════════════════════════════════
+   EXEMPLUL DE ANALIZĂ (refăcut 14 octombrie 2026)
 
-        /* Hero */
-        .ex-hero {
-            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
-            padding: 4rem 1.5rem 2.5rem;
-            text-align: center;
-            color: white;
-        }
-        .ex-back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #d6cfc1;
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            transition: color 0.2s;
-        }
-        .ex-back-link:hover { color: white; }
-        .ex-back-links {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-        .ex-back-links .ex-back-link { margin-bottom: 0; }
-        .ex-back-sep { color: #8a8a8a; font-size: 0.9rem; }
-        .ex-hero h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        .ex-hero h1 span { color: #c2604a; }
-        .ex-hero p {
-            font-size: 1rem;
-            color: #d6cfc1;
-            max-width: 700px;
-            margin: 0 auto 1.5rem;
-        }
-        .ex-hero-actions {
-            display: flex;
-            justify-content: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-        .ex-btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        /* Buton primar pe hero ÎNTUNECAT: alb + text ink (convenția v9 .cta-final) */
-        .ex-btn-primary { background: #fff; color: #1a1a1a; }
-        .ex-btn-primary:hover { background: rgba(255, 255, 255, 0.88); }
-        .ex-btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .ex-btn-secondary:hover { background: rgba(255, 255, 255, 0.18); }
+   Înainte: patru poze ale PDF-ului, una sub alta. Acum: trei părți, în ordinea
+   în care își pune omul întrebările: ce se poate construi, cum se împarte în
+   apartamente (desenul viu din pagina grupului), cum arată pe teren.
 
-        /* Container */
-        .ex-container {
-            max-width: 1100px;
-            margin: -1.5rem auto 3rem;
-            padding: 0 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-        .ex-meta {
-            background: white;
-            border-radius: 12px;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-        }
-        .ex-meta-info {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-        .ex-meta-item .label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: #6f6a61;
-            letter-spacing: 0.04em;
-            font-weight: 600;
-        }
-        .ex-meta-item .value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-        .ex-meta-item .value.price {
-            color: #c2604a;
-            font-size: 1.25rem;
-        }
+   Terenul e Radovici 4 (analiza din 17 sept. 2026, grupul Parcul Circului),
+   ARĂTAT FĂRĂ ADRESĂ, la cererea lui Lucian. Planul și captura Google Earth
+   au strada, numerele cadastrale și reperele estompate. Linkul proiectului
+   Google Earth NU se pune aici: titlul lui conține numărul cadastral.
+   ═══════════════════════════════════════════════════════════════════════ */
+  .ex-cap{padding:28px 0 8px;}
+  .ex-cap h1{font-size:30px;line-height:1.2;margin:6px 0 10px;max-width:760px;}
+  .ex-cap .sub{max-width:720px;}
+  .ex-actiuni{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .ex-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;
+    font-size:15px;font-weight:600;text-decoration:none;}
+  .ex-btn-plin{background:var(--cerneala);color:#fff;}
+  .ex-btn-plin:hover{background:#000;}
+  .ex-btn-gol{background:var(--hartie);color:var(--cerneala);border:1px solid var(--linie);}
+  .ex-btn-gol:hover{border-color:var(--gri);}
 
-        /* PDF preview pages */
-        .ex-pdf-pages {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .ex-pdf-page {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .ex-pdf-page:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
-        }
-        .ex-pdf-page img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .ex-pdf-page-label {
-            padding: 0.875rem 1.5rem;
-            background: #faf8f3;
-            border-top: 1px solid #e8e3d8;
-            font-size: 0.875rem;
-            color: #6f6a61;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .ex-pdf-page-label i {
-            color: #a8a094;
-            font-size: 0.8rem;
-        }
+  /* Cuprinsul: cele trei întrebări, fiecare cu link spre partea ei. */
+  .ex-cuprins{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px;}
+  .ex-cuprins a{display:block;background:var(--hartie);border:1px solid var(--linie);border-radius:12px;
+    padding:14px 16px;text-decoration:none;color:var(--cerneala);}
+  .ex-cuprins a:hover{border-color:var(--teracota);}
+  .ex-cuprins b{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teracota);}
+  .ex-cuprins span{font-size:14.5px;}
 
-        /* Bottom CTA */
-        .ex-cta {
-            background: linear-gradient(135deg, #f6ebe6 0%, #f0e0d8 100%);
-            border-radius: 16px;
-            padding: 2.5rem 2rem;
-            text-align: center;
-            border: 1px solid #efd9d0;
-        }
-        .ex-cta h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 0.625rem;
-        }
-        .ex-cta p {
-            color: #555555;
-            margin-bottom: 1.5rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .ex-cta-actions {
-            display: flex;
-            justify-content: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-        .ex-btn-cta-primary {
-            background: #1a1a1a;
-            color: white;
-            padding: 0.875rem 2rem;
-            font-size: 1rem;
-        }
-        .ex-btn-cta-primary:hover { background: #000000; }
-        .ex-btn-cta-secondary {
-            background: white;
-            color: #1a1a1a;
-            border: 1px solid #d6cfc1;
-            padding: 0.875rem 2rem;
-            font-size: 1rem;
-        }
-        .ex-btn-cta-secondary:hover { background: #f3f0e7; }
+  .ex-parte{scroll-margin-top:90px;}
+  .ex-parte > .eticheta{margin-bottom:2px;}
+  .ex-parte h2{font-size:22px;}
 
-        /* Image modal (lightbox) */
-        .ex-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .ex-modal.open { display: flex; }
-        .ex-modal img {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-        .ex-modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 1.25rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .ex-modal-close:hover { background: rgba(255, 255, 255, 0.25); }
+  /* Partea 1: planul în stânga, cifrele în dreapta. */
+  .ex-teren{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start;}
+  .ex-poza{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;overflow:hidden;
+    cursor:zoom-in;padding:0;display:block;width:100%;}
+  .ex-poza img{display:block;width:100%;height:auto;}
+  .ex-poza figcaption{font-size:12.5px;color:var(--gri);padding:8px 12px;border-top:1px solid var(--linie);
+    text-align:left;}
+  .ex-cifre{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .ex-cifra{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;padding:12px 14px;}
+  .ex-cifra small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gri);font-weight:600;}
+  .ex-cifra b{display:block;font-size:20px;margin-top:2px;}
+  .ex-cifra span{display:block;font-size:12.5px;color:var(--gri);}
+  .ex-nota{font-size:13px;color:var(--gri);margin-top:12px;}
 
-        @media (max-width: 768px) {
-            .ex-hero h1 { font-size: 1.5rem; }
-            .ex-meta { flex-direction: column; align-items: flex-start; }
-            .ex-meta-info { gap: 1.25rem; }
-        }
+  /* Partea 2: un rând care spune că se poate umbla la desen. */
+  .ex-incearca{display:flex;gap:10px;align-items:flex-start;background:var(--salvie-slab);
+    border:1px solid #d5ddcc;border-radius:12px;padding:12px 14px;margin:4px 0 18px;font-size:14px;}
+  .ex-incearca i{color:var(--salvie);margin-top:3px;}
 
+  /* Partea 3. */
+  .ex-volum-text{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;}
+  .ex-volum-text div{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;padding:12px 14px;font-size:14px;}
+  .ex-volum-text b{display:block;margin-bottom:2px;}
+
+  /* Ce NU face analiza. */
+  .ex-limite{background:var(--hartie);border:1px solid var(--linie);border-radius:12px;padding:16px 18px;}
+  .ex-limite ul{margin:8px 0 0;padding-left:18px;font-size:14.5px;}
+  .ex-limite li{margin:4px 0;}
+
+  .ex-final{margin-top:40px;background:var(--cerneala);color:var(--crem);border-radius:16px;padding:28px 24px;}
+  .ex-final h2{color:#fff;font-size:22px;}
+  .ex-final p{color:#d6cfc1;max-width:640px;margin-top:6px;}
+  .ex-final .ex-btn-plin{background:#fff;color:var(--cerneala);}
+  .ex-final .ex-btn-plin:hover{background:rgba(255,255,255,.88);}
+  .ex-final .ex-btn-gol{background:transparent;color:#fff;border-color:rgba(255,255,255,.35);}
+
+  /* Poza mărită. */
+  .ex-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:1000;
+    align-items:center;justify-content:center;padding:2rem;}
+  .ex-modal.open{display:flex;}
+  .ex-modal img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;}
+  .ex-modal-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:none;color:#fff;
+    width:44px;height:44px;border-radius:50%;font-size:1.25rem;cursor:pointer;}
+
+  @media (max-width: 760px){
+    .ex-cap h1{font-size:24px;}
+    .ex-cuprins{grid-template-columns:1fr;}
+    .ex-teren{grid-template-columns:1fr;}
+    .ex-volum-text{grid-template-columns:1fr;}
+  }
     </style>
     <!-- Favicon (toate dimensiunile pentru cross-browser/device) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -262,93 +114,173 @@
     <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#1a1a1a">
 </head>
-<body>
+<body class="oa-fundal">
     <div id="navigation"></div>
 
-    <div class="ex-hero">
-        <a href="analize.html" class="ex-back-link"><i class="fas fa-arrow-left"></i> Înapoi la analize</a>
-        <h1>Exemplu — Analiză <span>preliminară</span></h1>
-        <p>Acesta este un document PDF așa cum îl vei primi pe email după comandă.</p>
-        <div class="ex-hero-actions">
-            <a id="cmdHeroBtn" href="comanda-analiza.html" class="ex-btn ex-btn-primary">
-                <i class="fas fa-shopping-cart"></i> Comandă acum, 99 RON
-            </a>
-        </div>
+<div class="oa-pagina">
+
+  <header class="ex-cap">
+    <div class="eticheta">Exemplu de analiză preliminară</div>
+    <h1>Ce afli dintr-o analiză, pe un teren real</h1>
+    <p class="sub">Un teren de 632 mp din Sectorul 2, analizat în septembrie 2026 pentru un grup de pe
+      platformă. Adresa e ascunsă; cifrele sunt cele din analiză. Așa arată și analiza terenului tău.</p>
+    <div class="ex-actiuni">
+      <a id="cmdHeroBtn" href="comanda-analiza.html" class="ex-btn ex-btn-plin">
+        <i class="fas fa-shopping-cart"></i> Comandă o analiză, 99 RON
+      </a>
+      <a href="analize.html" class="ex-btn ex-btn-gol">Toate analizele</a>
     </div>
 
-    <div class="ex-container">
+    <nav class="ex-cuprins" aria-label="Cuprins">
+      <a href="#teren"><b>1 · Terenul</b><span>Ce se poate construi aici, după regulament</span></a>
+      <a href="#impartire"><b>2 · Apartamentele</b><span>Cum se împarte clădirea și cât costă fiecare</span></a>
+      <a href="#volum"><b>3 · Volumul</b><span>Cum arată clădirea pe teren, între vecini</span></a>
+    </nav>
+  </header>
 
-        <div class="ex-meta">
-            <div class="ex-meta-info">
-                <div class="ex-meta-item">
-                    <div class="label">Tip</div>
-                    <div class="value">Analiză preliminară</div>
-                </div>
-                <div class="ex-meta-item">
-                    <div class="label">Format livrare</div>
-                    <div class="value">PDF — 4 pagini</div>
-                </div>
-                <div class="ex-meta-item">
-                    <div class="label">Termen</div>
-                    <div class="value">3-5 zile lucrătoare</div>
-                </div>
-                <div class="ex-meta-item">
-                    <div class="label">Preț</div>
-                    <div class="value price">99 RON, TVA inclus</div>
-                </div>
-            </div>
+  <!-- ═══ 1. TERENUL ═══ -->
+  <section class="ex-parte" id="teren">
+    <div class="eticheta">Partea 1</div>
+    <h2>Ce se poate construi pe teren</h2>
+    <p class="explica">Analiza citește regulamentul de urbanism al zonei (aici, PUZ Sector 2), desenează
+      zona în care se poate construi, cu retragerile față de stradă și de vecini, și calculează câți metri
+      încap pe ea.</p>
+
+    <div class="ex-teren">
+      <figure class="ex-poza" style="margin:0" onclick="openModal('assets/analize-exemple/exemplu-plan-teren.jpg')">
+        <img src="assets/analize-exemple/exemplu-plan-teren.jpg" width="1220" height="1060"
+             alt="Planul terenului: conturul parcelei, retragerile și zona construibilă de 283 mp">
+        <figcaption><i class="fas fa-search-plus"></i> Planul din fișă. În verde, zona construibilă;
+          strada și vecinii sunt estompați.</figcaption>
+      </figure>
+
+      <div>
+        <div class="ex-cifre">
+          <div class="ex-cifra"><small>Teren</small><b>632 mp</b><span>front la stradă 28,7 m</span></div>
+          <div class="ex-cifra"><small>Regim maxim</small><b>P+3</b><span>înălțime maximă 12 m</span></div>
+          <div class="ex-cifra"><small>POT</small><b>44,8%</b><span>din maximul de 45%</span></div>
+          <div class="ex-cifra"><small>CUT</small><b>1,52</b><span>din maximul de 1,60</span></div>
+          <div class="ex-cifra"><small>Construit</small><b>960 mp</b><span>suprafață desfășurată</span></div>
+          <div class="ex-cifra"><small>Locuibil</small><b>542-581 mp</b><span>suprafață utilă, după variantă</span></div>
+          <div class="ex-cifra"><small>Spațiu verde</small><b>190 mp</b><span>minimul cerut: 30%</span></div>
+          <div class="ex-cifra"><small>Parcare</small><b>9-11 locuri</b><span>la parter și pe teren</span></div>
         </div>
+        <p class="ex-nota">POT înseamnă cât din teren poate acoperi clădirea; CUT, de câte ori se poate
+          construi suprafața terenului, pe toate etajele la un loc. Fișa e un document informativ, nu o
+          documentație de urbanism: cifrele se confirmă prin certificatul de urbanism.</p>
+      </div>
+    </div>
+  </section>
 
-        <div class="ex-pdf-pages">
-            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/simpla-1.jpg')">
-                <img src="assets/analize-exemple/simpla-1.jpg" alt="Analiză preliminară — pagina 1">
-                <div class="ex-pdf-page-label">
-                    <span>Pagina 1 — Plan teren, indicatori urbanistici și estimare apartamente</span>
-                    <i class="fas fa-search-plus"></i>
-                </div>
-            </div>
-            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/simpla-2.jpg')">
-                <img src="assets/analize-exemple/simpla-2.jpg" alt="Analiză preliminară — pagina 2">
-                <div class="ex-pdf-page-label">
-                    <span>Pagina 2 — Varianta 1: 8 apartamente, fără subsol</span>
-                    <i class="fas fa-search-plus"></i>
-                </div>
-            </div>
-            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/simpla-3.jpg')">
-                <img src="assets/analize-exemple/simpla-3.jpg" alt="Analiză preliminară — pagina 3">
-                <div class="ex-pdf-page-label">
-                    <span>Pagina 3 — Varianta 2: 6 apartamente, fără subsol</span>
-                    <i class="fas fa-search-plus"></i>
-                </div>
-            </div>
-            <div class="ex-pdf-page" onclick="openModal('assets/analize-exemple/simpla-4.jpg')">
-                <img src="assets/analize-exemple/simpla-4.jpg" alt="Analiză preliminară — pagina 4">
-                <div class="ex-pdf-page-label">
-                    <span>Pagina 4 — Varianta 3: 9 apartamente, cu subsol</span>
-                    <i class="fas fa-search-plus"></i>
-                </div>
-            </div>
-        </div>
+  <!-- ═══ 2. ÎMPĂRȚIREA ═══
+       Aceleași id-uri ca în organizare-apartamente.html: JS-ul le umple pe ele. -->
+  <section class="ex-parte" id="impartire">
+    <div class="eticheta">Partea 2</div>
+    <h2>Cum se împarte clădirea în apartamente</h2>
+    <p class="explica">Din aceeași clădire ies mai multe împărțiri. Pe terenul acesta, trei variante a câte
+      șase apartamente, două dintre ele cu duplexuri. Pentru fiecare apartament vezi suprafața utilă și
+      costul: partea lui din teren plus partea lui din construcție, fără nicio marjă adăugată.</p>
+    <p class="explica">Costurile sunt calculate la 1.200 € pe metru pătrat construit, un cost de referință
+      din experiența recentă a construcției colaborative. Costul real se stabilește la ofertarea
+      constructorului și poate să difere.</p>
 
-        <div class="ex-cta">
-            <h2>Comandă acum analiza pentru terenul tău</h2>
-            <p>Completează formularul cu numărul cadastral sau adresa exactă. În <strong>3-5 zile lucrătoare</strong> primești pe email un document PDF similar cu cel de mai sus, calibrat exact pentru terenul tău. <strong style="color:#c2604a;">Preț de lansare: 99 RON, TVA inclus.</strong></p>
-            <div class="ex-cta-actions">
-                <a id="cmdCtaBtn" href="comanda-analiza.html" class="ex-btn ex-btn-cta-primary">
-                    <i class="fas fa-shopping-cart"></i> Comandă, 99 RON
-                </a>
-                <a href="analize.html" class="ex-btn ex-btn-cta-secondary">
-                    <i class="fas fa-arrow-left"></i> Toate analizele
-                </a>
-            </div>
-        </div>
-
+    <div class="ex-incearca">
+      <i class="fas fa-hand-pointer" aria-hidden="true"></i>
+      <span>Desenul e viu, ca în pagina unui grup. Trage de marginea din dreapta a unei casete ca să
+        mărești sau să micșorezi apartamentul, apasă pe ea ca să îl alegi. Numele de pe casete sunt
+        inventate; aici nu se salvează nimic.</span>
     </div>
 
-    <!-- Lightbox modal -->
+    <div class="file" id="file"></div>
+    <div class="varianta-corp" id="variantaCorp"></div>
+
+    <div class="stare-legenda">
+      <span><i class="buline"></i> liber</span>
+      <span><i class="buline b1"></i> un doritor</span>
+      <span><i class="buline b2"></i> mai mulți doritori, de discutat</span>
+    </div>
+
+    <div class="oa-sim" id="oaSim" hidden>
+      <div class="oa-sim-cap">
+        <h3>Ce se întâmplă dacă se schimbă prețurile</h3>
+        <button type="button" class="oa-sim-revino" id="oaSimRevino" hidden>Revino la cifrele analizei</button>
+      </div>
+      <label class="oa-sim-rand">
+        <span class="oa-sim-nume">Terenul</span>
+        <input type="range" id="oaSimTeren">
+        <span class="oa-sim-val" id="oaSimTerenVal"></span>
+      </label>
+      <label class="oa-sim-rand">
+        <span class="oa-sim-nume">Construcția, pe mp desfășurat</span>
+        <input type="range" id="oaSimMp">
+        <span class="oa-sim-val" id="oaSimMpVal"></span>
+      </label>
+      <p class="oa-sim-sursa" id="oaSimSursa"></p>
+    </div>
+
+    <details>
+      <summary>Vezi toate costurile variantei în tabel</summary>
+      <div class="scroll-x" id="costuri"></div>
+    </details>
+  </section>
+
+  <!-- ═══ 3. VOLUMUL ═══ -->
+  <section class="ex-parte" id="volum">
+    <div class="eticheta">Partea 3</div>
+    <h2>Cum arată clădirea pe teren</h2>
+    <p class="explica">Odată cu fișa primești volumul clădirii, pus pe teren în Google Earth. Se deschide
+      în browser, fără nimic de instalat.</p>
+
+    <figure class="ex-poza" style="margin:0" onclick="openModal('assets/analize-exemple/exemplu-volum-google-earth.jpg')">
+      <img src="assets/analize-exemple/exemplu-volum-google-earth.jpg" width="1497" height="674"
+           alt="Volumul clădirii, patru niveluri, așezat pe teren între casele vecine, văzut în Google Earth"
+           loading="lazy">
+      <figcaption><i class="fas fa-search-plus"></i> Volumul din analiza de mai sus, în Google Earth:
+        patru niveluri, ultimele două retrase față de vecini.</figcaption>
+    </figure>
+
+    <div class="ex-volum-text">
+      <div><b>Îl vezi din toate părțile</b>Îl rotești, cobori la nivelul străzii, te uiți de unde va
+        intra lumina.</div>
+      <div><b>Îl compari cu vecinii</b>Vezi dacă clădirea iese mai înaltă sau mai joasă decât ce e în
+        jur, și cât spațiu rămâne între ele.</div>
+      <div><b>Arată forma, nu apartamentele</b>Volumul e același pentru toate variantele de împărțire;
+        ce se schimbă între ele e doar interiorul.</div>
+    </div>
+  </section>
+
+  <section class="ex-parte">
+    <h2>Ce nu îți spune o analiză preliminară</h2>
+    <div class="ex-limite">
+      <p class="explica" style="margin:0">E un punct de pornire pentru discuția grupului, nu un proiect.</p>
+      <ul>
+        <li>Suprafețele apartamentelor sunt propuneri de pornire. Se stabilesc la proiectare, după scări,
+          structură și instalații.</li>
+        <li>Costul construcției e o referință. Cifra reală vine din oferta constructorului.</li>
+        <li>Regulamentul e citit din documentele publice. Certificatul de urbanism al terenului îl
+          confirmă sau îl corectează.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="ex-final">
+    <h2>Comandă analiza pentru terenul tău</h2>
+    <p>Completează formularul cu numărul cadastral sau adresa exactă. În 3-5 zile lucrătoare primești
+      fișa și volumul, calculate pentru terenul tău. Preț de lansare: 99 RON, TVA inclus.</p>
+    <div class="ex-actiuni">
+      <a id="cmdCtaBtn" href="comanda-analiza.html" class="ex-btn ex-btn-plin">
+        <i class="fas fa-shopping-cart"></i> Comandă, 99 RON
+      </a>
+      <a href="analize.html" class="ex-btn ex-btn-gol">Toate analizele</a>
+    </div>
+  </div>
+
+</div>
+
+    <!-- Poza mărită -->
     <div class="ex-modal" id="exModal" onclick="closeModal()">
-        <button class="ex-modal-close" onclick="closeModal()" type="button">&times;</button>
-        <img id="exModalImg" src="" alt="Pagină analiză">
+        <button class="ex-modal-close" onclick="closeModal()" type="button" aria-label="Închide">&times;</button>
+        <img id="exModalImg" src="" alt="Imagine din analiză, mărită">
     </div>
 
     <div id="footer"></div>
@@ -363,6 +295,9 @@
             document.getElementById('exModal').classList.remove('open');
             document.body.style.overflow = '';
         }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
 
         // Propagă teren_titlu / teren_id din URL în href-ul butoanelor de comandă,
         // ca formularul de pe comanda-analiza.html să se pre-completeze cu terenul.
@@ -383,16 +318,80 @@
             });
         })();
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
+        /* ═══ ANALIZA EXEMPLULUI ═══
+           Radovici 4, 17 septembrie 2026. Cifrele sunt cele din importul real
+           (`scripts/import-analiza/radovici-4.json`, trecut prin
+           `genereaza-sql.js`): suprafețele propuse, coeficienții Su/Sd și
+           parcările. Dacă analiza se reface, se regenerează și de aici.
+           ⚠️ Numerotarea variantelor e cea din platformă (ordinea din CSV). În
+           fișa PDF, V2 și V3 au ordinea inversă. */
+        (function () {
+            function niv(v, nume, ord, su, parter) {
+                return { id: v + '-' + ord, nume: nume, ord: ord, su: su, suComun: 0, parter: !!parter };
             }
-        });
+            function ap(v, ord, nr, tip, eticheta, min, max, propus, duplex) {
+                return { id: v + '-' + ord + '-' + nr, nivId: v + '-' + ord, ord: nr, tip: tip,
+                         tipEticheta: eticheta, mpuMin: min, mpuMax: max, mpuPropus: propus,
+                         duplex: duplex == null ? null : duplex };
+            }
+            window.OA_EXEMPLU = {
+                costTeren: 450000, costMpSd: 1200, factorSubsol: 0.70,
+                eu: 'tu',
+                membri: [
+                    { id: 'tu', nume: 'Tu' }, { id: 'ana', nume: 'Ana' }, { id: 'mihai', nume: 'Mihai' },
+                    { id: 'ioana', nume: 'Ioana' }, { id: 'radu', nume: 'Radu' }
+                ],
+                // Câteva alegeri inventate, ca să se vadă cum arată o casetă cu un
+                // doritor și una cu doi. Înscrierea la duplex stă pe jumătatea de jos.
+                interese: {
+                    'v1-3-1': ['ana'], 'v1-2-1': ['mihai', 'ioana'], 'v1-0-1': ['radu'],
+                    'v2-3-1': ['ana'], 'v2-1-1': ['mihai'],
+                    'v3-3-1': ['ana'], 'v3-1-2': ['ioana']
+                },
+                variante: [
+                    { id: 'v1', nume: 'V1', coefUtil: 0.645, parcParter: 5, parcSubsol: 0, parcTeren: 5,
+                      desc: '6 apartamente · 2 × 3 camere, 2 × 3-4 camere, 2 × duplex · 2 la parter',
+                      niveluri: [niv('v1', 'Parter', 0, 107.02, true), niv('v1', 'Etaj 1', 1, 198.36),
+                                 niv('v1', 'Etaj 2', 2, 162.42), niv('v1', 'Etaj 3', 3, 113.26)],
+                      ap: [ap('v1', 0, 1, 'studio', 'Studio', 42, 52, 47.68, 2),
+                           ap('v1', 0, 2, 'cam2', '2 cam', 52, 65, 59.34, 1),
+                           ap('v1', 1, 1, 'cam3', '3 cam', 66, 87, 80.29),
+                           ap('v1', 1, 2, 'cam3', '3 cam', 66, 87, 80.29, 2),
+                           ap('v1', 1, 3, 'gars', 'Gars.', 30, 42, 37.78, 1),
+                           ap('v1', 2, 1, 'cam3', '3 cam', 66, 87, 69.03),
+                           ap('v1', 2, 2, 'cam34', '3-4 cam', 87, 120, 93.39),
+                           ap('v1', 3, 1, 'cam34', '3-4 cam', 87, 120, 113.26)] },
+                    { id: 'v2', nume: 'V2', coefUtil: 0.645, parcParter: 5, parcSubsol: 0, parcTeren: 6,
+                      desc: '6 apartamente · 1 × 3 camere, 3 × 3-4 camere, 2 × duplex · 2 la parter',
+                      niveluri: [niv('v2', 'Parter', 0, 107.02, true), niv('v2', 'Etaj 1', 1, 198.36),
+                                 niv('v2', 'Etaj 2', 2, 162.42), niv('v2', 'Etaj 3', 3, 113.26)],
+                      ap: [ap('v2', 0, 1, 'studio', 'Studio', 42, 52, 47.68, 1),
+                           ap('v2', 0, 2, 'cam2', '2 cam', 52, 65, 59.34, 2),
+                           ap('v2', 1, 1, 'cam34', '3-4 cam', 87, 120, 116.98),
+                           ap('v2', 1, 2, 'gars', 'Gars.', 30, 42, 40.69, 1),
+                           ap('v2', 1, 3, 'gars', 'Gars.', 30, 42, 40.69, 2),
+                           ap('v2', 2, 1, 'cam3', '3 cam', 66, 87, 69.03),
+                           ap('v2', 2, 2, 'cam34', '3-4 cam', 87, 120, 93.39),
+                           ap('v2', 3, 1, 'cam34', '3-4 cam', 87, 120, 113.26)] },
+                    { id: 'v3', nume: 'V3', coefUtil: 0.657, parcParter: 6, parcSubsol: 0, parcTeren: 3,
+                      desc: '6 apartamente · 3 × 3 camere, 3 × 3-4 camere · unul la parter',
+                      niveluri: [niv('v3', 'Parter', 0, 68.02, true), niv('v3', 'Etaj 1', 1, 198.36),
+                                 niv('v3', 'Etaj 2', 2, 162.42), niv('v3', 'Etaj 3', 3, 113.26)],
+                      ap: [ap('v3', 0, 1, 'cam3', '3 cam', 66, 87, 68.02),
+                           ap('v3', 1, 1, 'cam3', '3 cam', 66, 87, 84.3),
+                           ap('v3', 1, 2, 'cam34', '3-4 cam', 87, 120, 114.06),
+                           ap('v3', 2, 1, 'cam3', '3 cam', 66, 87, 69.03),
+                           ap('v3', 2, 2, 'cam34', '3-4 cam', 87, 120, 93.39),
+                           ap('v3', 3, 1, 'cam34', '3-4 cam', 87, 120, 113.26)] }
+                ]
+            };
+        })();
     </script>
     <script src="js/nav.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/login-modal.js"></script>
     <script src="js/footer.js"></script>
+    <script src="js/organizare-apartamente.js"></script>
 </body>
 </html>
