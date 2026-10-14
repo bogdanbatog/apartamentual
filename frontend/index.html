@@ -680,7 +680,11 @@
        Sus stau macaraua și ultimul etaj, adică exact ce se vede crescând;
        de aceea nu se taie de sus. (Ceasul camerei a ieșit din film pe 29
        septembrie, tăiat din montaj, nu din CSS: cifrele lui se schimbau la
-       fiecare cadru și trăgeau ochiul.) */
+       fiecare cadru și trăgeau ochiul.)
+       Din 14 octombrie filmul e montajul lui Lucian (randări, șantier, poze
+       de la stradă), 1280x684, adică aceeași proporție, deci numărul rămâne.
+       Data camerei se vede din nou, de data asta intenționat: „arată mai
+       real". */
     aspect-ratio:854/456;
     /* ⚠️ NU-L ÎNGUSTA. Probat pe 31 august: la 820px lățime (461px înălțime)
        se câștigau ~130px de derulare, dar arăta sărăcăcios, cu un gol în
@@ -735,6 +739,24 @@
   .film-pauza .ic-porneste{ display:none; }
   .film-pauza.e-oprit .ic-porneste{ display:block; }
   .film-pauza.e-oprit .ic-pauza{ display:none; }
+  /* Eticheta spune mereu ce vezi: randare sau șantier real. O randare
+     neetichetată ar fi luată drept fotografie, și asta ar costa încredere.
+     ⚠️ Din 14 octombrie stă JOS în stânga, nu sus: sus, la mijloc, e data
+     camerei (lăsată în film intenționat), iar pe telefon s-ar suprapune. */
+  .film-eticheta{
+    position:absolute;
+    left:12px;
+    bottom:12px;
+    z-index:1;
+    margin:0;
+    padding:5px 10px;
+    border-radius:3px;
+    background:rgba(0,0,0,.55);
+    color:#fff;
+    font-size:12px;
+    line-height:1.3;
+    letter-spacing:0.02em;
+  }
   .video-ph-inner{
     display:flex;
     flex-direction:column;
@@ -2320,10 +2342,11 @@
          scriptul de sesiune îl oprește căutând `.video-ph--live video`,
          așa că cele două clase trebuie să rămână pe el oriunde l-am muta.
          ⚠️ Din 1 septembrie filmul e local, nu mai vine de pe YouTube.
-         Fișierul (`video/timelapse-judetului.mp4`) e folosit ȘI de
-         `povestea-noastra.html`, în hero-ul de acolo. Dacă îl schimbi, se
-         schimbă în amândouă locurile deodată; iar dacă noul film are altă
-         proporție, potrivește `aspect-ratio` din `.video-ph--live`.
+         Din 14 octombrie aici e `video/film-judetului.mp4` (montajul lui
+         Lucian). `povestea-noastra.html` rămâne INTENȚIONAT pe vechiul
+         `video/timelapse-judetului.mp4`, doar șantierul, fără randări.
+         Dacă noul film are altă proporție, potrivește `aspect-ratio` din
+         `.video-ph--live`.
          ⚠️ Blocul stă ÎN `.hero-stage` fiindcă paleta pământie
          (`--terracotta`, `--sage`…) e definită acolo, nu pe `:root`. -->
     <div class="js-marketing-only dovada-bloc">
@@ -2346,46 +2369,100 @@
              „unclean". Decizia lui Lucian: imagine netă, cer doar calmat.
              ⚠️ Probat și respins și cerul înlocuit cu alb (decupat cadru cu
              cadru cu SegFormer): marginile clădirilor și detaliile fine
-             ieșeau zimțate sau spălate. -->
-        <video src="video/timelapse-judetului.mp4"
-               poster="video/timelapse-judetului-poster.jpg"
-               title="Timelapse Județului Housing, ApartamenTUal"
+             ieșeau zimțate sau spălate.
+             ⚠️ Din 14 octombrie filmul e montajul lui Lucian: randările,
+             șantierul din curte și pozele de la stradă sunt deja în el, cu
+             pauzele albe între ele (lăsate intenționat, nu sunt sclipiri).
+             Pozele suprapuse peste film și scriptul `PASI` (10 octombrie) au
+             ieșit. Cerul e calmat doar pe bucățile de șantier: luminozitatea
+             fiecărui cadru, adusă spre media vecinilor, cu o mască ce se
+             stinge spre jumătatea imaginii (clădirea rămâne cum era). Dacă
+             Lucian reface montajul, corecția se reface și ea.
+             ⚠️ Benzile negre: montajul din CapCut e 1600x856, dar clipurile
+             din el nu umpleau cadrul (șantierul și pozele, 1522 lățime;
+             randările, 1284 și 844). La conversie: șantierul și pozele mărite
+             cu 5%, plusul tăiat doar de JOS (data de sus rămâne întreagă,
+             semnătura camerei din colț iese); randarea de la stradă mărită
+             să umple cadrul (tăiată egal sus și jos); la randarea din curte,
+             verticală, negrul de pe laterale înlocuit cu crem-ul paginii
+             (#faf8f3).
+             ⚠️ Începutul e remontat la conversie (cererea lui Lucian): în
+             montajul lui, randarea de la stradă stătea ~5 s și omul putea
+             crede că filmul e doar o randare și să treacă mai departe. Acum:
+             randarea de la stradă ~2 s, primele ~4 s de șantier (săpătura),
+             randarea din curte ~4 s (același unghi cu camera), apoi șantierul
+             continuă. Trecerile noi sunt tot prin alb. Restul montajului e
+             neatins. Durata totală: 52 s. -->
+        <video src="video/film-judetului.mp4"
+               poster="video/film-judetului-poster.jpg"
+               title="Județului Housing: randări, șantierul filmat din curte și fotografii de la stradă"
                muted loop playsinline preload="metadata"></video>
+        <!-- Textul din colț urmează filmul; secundele stau în `ETICHETE` din
+             scriptul de mai jos. ⚠️ Fără „terminat"/„gata" și fără liniuță
+             lungă: e text citit de oameni. -->
+        <p class="film-eticheta">Randare dinspre stradă: așa l-am desenat</p>
         <button type="button" class="film-pauza" aria-label="Oprește filmul" hidden>
           <svg class="ic-pauza" viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="1" width="3.5" height="12"/><rect x="8.5" y="1" width="3.5" height="12"/></svg>
           <svg class="ic-porneste" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1l10 6-10 6z"/></svg>
         </button>
       </div>
       <script>
-      // Pornește timelapse-ul doar când e pe ecran și îl oprește când iese.
+      // Pornește filmul doar când cel puțin jumătate din el e pe ecran și îl
+      // oprește când iese.
       // ⚠️ Cine a cerut „mișcare redusă" în sistem vede poza fixă și butonul
       // de pornire; filmul merge doar dacă apasă el.
       // ⚠️ La utilizatorul logat, scriptul de sesiune golește `src`. Verificarea
       // pe `src` de mai jos e ce împiedică pornirea lui după aceea (blocul e
       // oricum ascuns, deci nici nu intră pe ecran, dar să nu depindem de asta).
+      // Eticheta din colț urmează filmul: `de la` = secunda din care se aplică.
+      // Schimbarea cade în mijlocul pauzelor albe, ca să nu se vadă sărind.
+      // ⚠️ Secundele sunt ale montajului din 14 octombrie (52 s). Dacă se
+      // reface montajul, se măsoară din nou, altfel o randare ajunge
+      // etichetată drept șantier real.
       (function(){
         var film = document.querySelector('.video-ph--live video');
         var buton = document.querySelector('.video-ph--live .film-pauza');
-        if(!film || !buton) return;
+        var eticheta = document.querySelector('.video-ph--live .film-eticheta');
+        if(!film || !buton || !eticheta) return;
+        var ETICHETE = [
+          { dela:0,     text:'Randare dinspre stradă: așa l-am desenat' },
+          { dela:2,     text:'Șantierul real, filmat zi de zi din curte' },
+          { dela:6.2,   text:'Randare dinspre curte: așa l-am desenat' },
+          { dela:10.45, text:'Șantierul real, filmat zi de zi din curte' },
+          { dela:17.6,  text:'Fotografie dinspre stradă' },
+          { dela:22.7,  text:'Șantierul real, filmat zi de zi din curte' },
+          { dela:29.7,  text:'Fotografie dinspre stradă' },
+          { dela:37.6,  text:'Șantierul real, filmat zi de zi din curte' },
+          { dela:45.2,  text:'Fotografie dinspre stradă: fațada tencuită' }
+        ];
         var opritDeOm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         var peEcran = false;
+        function merge(){ return peEcran && !opritDeOm && !!film.getAttribute('src'); }
         function arata(){
-          buton.classList.toggle('e-oprit', film.paused);
-          buton.setAttribute('aria-label', film.paused ? 'Pornește filmul' : 'Oprește filmul');
+          var oprit = !merge();
+          buton.classList.toggle('e-oprit', oprit);
+          buton.setAttribute('aria-label', oprit ? 'Pornește filmul' : 'Oprește filmul');
         }
         function potriveste(){
-          if(peEcran && !opritDeOm && film.getAttribute('src')){
-            var p = film.play();
-            if(p && p.catch) p.catch(function(){});
+          if(merge()){
+            var r = film.play();
+            if(r && r.catch) r.catch(function(){});
           } else {
             film.pause();
           }
+          arata();
         }
-        film.addEventListener('play', arata);
-        film.addEventListener('pause', arata);
+        film.addEventListener('timeupdate', function(){
+          var t = film.currentTime, text = ETICHETE[0].text;
+          for(var i = 0; i < ETICHETE.length; i++){
+            if(t >= ETICHETE[i].dela) text = ETICHETE[i].text;
+          }
+          if(eticheta.textContent !== text) eticheta.textContent = text;
+        });
         buton.addEventListener('click', function(){
-          if(film.paused){ opritDeOm = false; peEcran = true; potriveste(); }
-          else { opritDeOm = true; film.pause(); }
+          if(!merge()){ opritDeOm = false; peEcran = true; }
+          else { opritDeOm = true; }
+          potriveste();
         });
         buton.hidden = false;
         arata();
