@@ -1,6 +1,47 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 10 octombrie 2026** — **Terenuri + Detalii teren: modificările cerute de Lucian.
+> **⏭️ ULTIMA SESIUNE: 14 octombrie 2026** — **Exemplul de analiză refăcut (`analiza-simplificata.html`).
+> ✅ COMIS (`42e5a7a`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel 6 fișiere** (`frontend/`):
+> `analiza-simplificata.html`, `organizare-apartamente.html`, `js/organizare-apartamente.js`,
+> `css/organizare-apartamente.css` (NOU), `assets/analize-exemple/exemplu-plan-teren.jpg` (NOU),
+> `assets/analize-exemple/exemplu-volum-google-earth.jpg` (NOU).
+> ⚠️ `organizare-apartamente.html` și `css/organizare-apartamente.css` se urcă ÎMPREUNĂ: stilurile
+> paginii de împărțire au ieșit din `<style>` în fișierul CSS (mutate neschimbate, verificat la
+> caracter). Fără CSS, pagina de împărțire a grupurilor rămâne fără stiluri.
+>
+> **Ce e pagina acum:** în loc de 4 poze de PDF, trei părți: (1) **Terenul**, planul din fișă +
+> 8 cifre (teren, P+3, POT, CUT, construit, locuibil, verde, parcare); (2) **Împărțirea
+> apartamentelor**, desenul VIU din pagina grupului (file V1·V2·V3, prețuri, cursoare, simulare,
+> tabel), cu câteva înscrieri inventate (Ana, Mihai, Ioana, Radu), nimic salvat; (3) **Volumul în
+> Google Earth**, captura din fișă. Plus „Ce nu îți spune o analiză preliminară” și butonul de comandă.
+> Adresa paginii neschimbată, deci linkurile din index, terenuri, teren-details, servicii, analize
+> merg la fel. Parametrii `teren_id`/`teren_titlu` se propagă în continuare spre comandă.
+>
+> **Terenul exemplului: Radovici 4, FĂRĂ ADRESĂ** (decizia lui Lucian): „632 mp din Sectorul 2”.
+> Strada, numerele cadastrale și reperul din captura Earth sunt estompate. **Linkul proiectului
+> Google Earth NU se pune public**: titlul lui conține numărul cadastral (IE 212888).
+>
+> **Cum merge desenul:** `js/organizare-apartamente.js` are un **mod exemplu**: dacă pagina pune
+> `window.OA_EXEMPLU` (datele, scrise în `analiza-simplificata.html`), se cheamă `pornesteExemplul`
+> în loc de `oaPorneste`, iar `salveazaSuprafata`/`comutaInteres` se opresc înainte de Supabase.
+> Fără `OA_EXEMPLU`, pagina grupului merge exact ca înainte (probat local: starea „Trebuie să fii
+> autentificat”, stilurile aplicate). Cifrele exemplului vin din `genereaza-sql.js` pe
+> `radovici-4.json`; dacă analiza se reface, se regenerează și acolo.
+>
+> **Confirmat de Lucian (14 oct.):** cine comandă o analiză primește și volumul Google Earth, nu
+> doar fișa (pagina o promite).
+>
+> **De transmis lui Liviu (îl anunță Lucian):** fișa PDF Radovici are V2 și V3 în ordine inversă
+> față de platformă (CSV-ul). Se vede și în pagina de împărțire a grupului Parcul Circului.
+>
+> **Capcană găsită:** Chrome pornit automat (puppeteer, cu sau fără fereastră) deschide Google
+> Earth dar NU desenează poligoanele KML. Capturi noi de volum le face Lucian din browserul lui.
+>
+> **⏭️ URMĂTORUL:** (1) urcat cele 6 fișiere din cPanel + Ctrl+Shift+R pe exemplu ȘI pe o pagină
+> de împărțire reală (Radovici 4, Parcul Circului); (2) opțional, alte unghiuri din Google Earth
+> (de la nivelul străzii) de la Lucian; (3) rămân valabili pașii din 10, 9 și 8 octombrie de mai jos.
+
+> **⏭️ SESIUNEA DIN 10 OCTOMBRIE 2026** — **Terenuri + Detalii teren: modificările cerute de Lucian.
 > ✅ COMIS (`77d15dd`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel 8 fișiere** (`frontend/`): `index.html`,
 > `grupuri.html`, `terenuri.html`, `terenuri.css`, `js/terenuri.js`, `teren-details.html`,
 > `teren-details.css`, `js/teren-details.js`.
