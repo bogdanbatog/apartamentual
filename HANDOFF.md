@@ -1,6 +1,35 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 14 octombrie 2026** — **Exemplul de analiză refăcut (`analiza-simplificata.html`).
+> **⏭️ ULTIMA SESIUNE: 27 octombrie 2026** — **Site-ul vechi `apartamentual.ltfbstudio.ro`
+> (WordPress din 2019-2021) scos din uz: redirecționează permanent (301) spre apartamentual.ro.**
+> Nimic schimbat în repo; totul s-a făcut din cPanel.
+>
+> **Unde e:** același cont cPanel ca apartamentual.ro (user `ar4`, domeniu principal ar4.ro).
+> Document root `/public_html/apartamentual`. ⚠️ apartamentual.ro stă în `/app.ltfbstudio.ro`,
+> folder DIFERIT; regula de redirecționare pusă acolo ar face site-ul viu să se redirecționeze
+> spre el însuși.
+>
+> **Regula** (la începutul `/public_html/apartamentual/.htaccess`, deasupra `# BEGIN WordPress`):
+> `/etape/` → `ghid.html`, `/pagina-fise-terenuri/` → `terenuri.html`, orice altceva (inclusiv
+> `/chestionar/`, `/wp-admin`, `/wp-login.php`) → prima pagină. Verificat cu curl pe 8 adrese +
+> varianta http; apartamentual.ro, `ghid.html`, `terenuri.html` răspund 200.
+>
+> **Copia de siguranță:** arhiva fișierelor (~248 MB, FĂRĂ baza de date) e descărcată local de
+> Lucian. Arhiva făcută cu Compress în `public_html` era descărcabilă public la
+> `ar4.ro/apartamentual.zip` (conține `wp-config.php` cu parola bazei); ștearsă, verificat 404.
+> Baza de date WordPress NU a fost exportată (opțional, din phpMyAdmin). Dacă trebuie intrat în
+> `/wp-admin` (ex. răspunsuri la chestionar), se comentează temporar ultima `RewriteRule`.
+>
+> **⏭️ URMĂTORUL (24 noiembrie, memento în calendar):** ștergerea fișierelor WordPress din
+> `/public_html/apartamentual` (rămâne doar `.htaccess`, cu cele 4 linii de redirecționare) și a
+> bazei de date + utilizatorului MySQL ai site-ului vechi; apoi re-verificat redirecționarea.
+> Mementoul e în calendarul lui Liviu (conectorul Google Calendar e pe contul lui), cu Lucian
+> invitat pe `luta.lucian.m@gmail.com`.
+>
+> **De discutat:** în același cPanel mai există `wp.ltfbstudio.ro` (`/public_html/wp`), alt
+> WordPress. Dacă nu mai e folosit, are aceeași problemă de securitate.
+
+> **⏭️ SESIUNEA DIN 14 OCTOMBRIE 2026** — **Exemplul de analiză refăcut (`analiza-simplificata.html`).
 > ✅ COMIS (`42e5a7a`) și ÎMPINS. ⚠️ DE URCAT DIN cPanel 6 fișiere** (`frontend/`):
 > `analiza-simplificata.html`, `organizare-apartamente.html`, `js/organizare-apartamente.js`,
 > `css/organizare-apartamente.css` (NOU), `assets/analize-exemple/exemplu-plan-teren.jpg` (NOU),
