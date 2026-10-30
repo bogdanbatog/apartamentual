@@ -1,6 +1,31 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 27 octombrie 2026** — **Site-ul vechi `apartamentual.ltfbstudio.ro`
+> **⏭️ ULTIMA SESIUNE: 30 octombrie 2026** — **News de pe homepage pe rafturi.
+> ✅ COMIS (`3ed6b83`, împreună cu NOTES.md) și ÎMPINS. ⚠️ DE URCAT DIN cPanel: `frontend/index.html`**,
+> apoi Ctrl+Shift+R și privit secțiunea News pe telefon (lățimea de telefon nu s-a putut verifica:
+> Edge headless nu coboară sub ~500 px, iar Chrome-ul conectat nu vede serverul local).
+>
+> **Ce face acum:** lista `RAFTURI` din scriptul News (`index.html`): un raft = o valoare din
+> `articles.category`: `prototip` → „Serialul Județului Housing” (ordinea episoadelor, după numărul
+> din slug), `ghiduri` → „Ghiduri”, `exemple` → „Exemple din Europa”, `primarii` → „Cum ajută
+> primăriile” (ultimele trei de la nou la vechi). Primele 3 articole pe raft, link „Toate cele N …”
+> dacă sunt mai multe (duce deocamdată la `/news.html`, fără filtru). **Raftul fără articole
+> publicate nu apare**; azi se văd doar Serialul (5) și Exemplele (2). `CURATED_EXAMPLES` a dispărut;
+> rămâne `IMAGINI_LOCALE` (Brutopia, De Sijs au `image_url` gol în DB). Pe telefon raftul se
+> derulează lateral. Citirea din Supabase e aceeași, plus coloana `category`.
+>
+> **⏭️ URMĂTORII PAȘI (sesiuni separate):**
+> 1. ❓ **De Sijs** apare acum pe homepage cu „cohousing” în titlu (regula: „co-housing” doar în
+>    `ce-este/`). Lucian decide: titlu schimbat din admin sau scos de pe homepage.
+> 2. **`admin.html`** (select l. ~515, `categoryLabels` l. ~956): adăugat `ghiduri` și `primarii`.
+>    ÎNTÂI Lucian rulează în SQL Editor:
+>    `select conname, pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.articles'::regclass;`
+>    Dacă există CHECK pe `category`, SQL scurt de lărgit.
+> 3. **`news.html`** (filtre l. ~298, `categoryLabels` l. ~426): filtrele = cele 4 rafturi + „Toate”;
+>    dispar Legal / Analize / Noutăți. Eventual `?cat=` în adresă, ca „Toate cele N” să deschidă
+>    direct raftul.
+
+> **⏭️ SESIUNEA DIN 27 OCTOMBRIE 2026** — **Site-ul vechi `apartamentual.ltfbstudio.ro`
 > (WordPress din 2019-2021) scos din uz: redirecționează permanent (301) spre apartamentual.ro.**
 > Nimic schimbat în repo; totul s-a făcut din cPanel.
 >

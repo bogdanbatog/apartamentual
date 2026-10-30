@@ -9,6 +9,7 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 - [ ] **2026-10-30 — News pe rafturi (decis de Lucian, de făcut într-o sesiune nouă)**
   **Decizia:** patru rafturi = categorii: **Serialul Județului Housing** (valoarea din DB `prototip` rămâne, se schimbă doar eticheta), **Ghiduri** (asocierea, apoi banii, constructorul), **Exemple din Europa** (`exemple`), **Cum ajută primăriile** (nouă). Pe **homepage**: câte un raft cu primele 2-3 articole vizibile direct (NU carduri-folder care se deschid). Serialul în ordine de la primul episod; celelalte de la nou la vechi. Pe **news.html**: filtrele = cele 4 rafturi + „Toate”; dispar Legal / Analize / Noutăți (goale).
+  ✅ **Homepage făcut (30 oct., `3ed6b83`)**, vezi HANDOFF. Rămân `admin.html`, `news.html` și De Sijs („cohousing” în titlu).
   **Fișiere:** `frontend/index.html` (secțiunea News ~l. 2995 și scriptul ~l. 3310: azi grilă unică, episoade automat + `CURATED_EXAMPLES` de mână, doar Brutopia), `frontend/news.html` (filtre l. 298, `categoryLabels` l. 426), `frontend/admin.html` (select l. 515, `categoryLabels` l. 956). Exemplele au `image_url` gol în DB și folosesc grafica locală `assets/images/news/files/card-news-*.png`.
   ❓ **De verificat întâi:** are `articles.category` un CHECK? (nimic în `db_schema/`). Interogare: `select conname, pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.articles'::regclass;`. Dacă da, SQL scurt pentru `ghiduri` și `primarii`.
   Stare articole publicate (30 oct.): 5 `prototip` (351-1.433 cuvinte), 2 `exemple` (Brutopia 175, De Sijs 198).
