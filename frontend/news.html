@@ -296,12 +296,13 @@
     <div id="listView">
         <div class="news-container">
             <div class="news-filters" id="categoryFilters">
+                <!-- Aceleași rafturi ca pe homepage (lista RAFTURI din index.html).
+                     Un filtru fără articole publicate se ascunde, ca raftul gol de pe homepage. -->
                 <button class="filter-btn active" data-cat="all">Toate</button>
-                <button class="filter-btn" data-cat="exemple">Exemple</button>
-                <button class="filter-btn" data-cat="legal">Legal</button>
-                <button class="filter-btn" data-cat="analize">Analize</button>
-                <button class="filter-btn" data-cat="noutati">Noutăți</button>
-                <button class="filter-btn" data-cat="prototip">Prototip</button>
+                <button class="filter-btn" data-cat="prototip">Serialul Județului Housing</button>
+                <button class="filter-btn" data-cat="ghiduri">Ghiduri</button>
+                <button class="filter-btn" data-cat="exemple">Exemple din Europa</button>
+                <button class="filter-btn" data-cat="primarii">Cum ajută primăriile</button>
             </div>
             
             <div class="news-loading" id="newsLoading">
@@ -423,17 +424,44 @@
     let articles = [];
     let currentFilter = 'all';
     
+    // Etichetele rafturilor, la fel ca titlurile din RAFTURI (index.html).
+    // ⚠️ Serialul rămâne `prototip` în DB, doar eticheta e alta. Categoriile vechi
+    // (legal, analize, noutati) n-au articole publicate; rămân aici doar ca rezervă.
     const categoryLabels = {
-        exemple: 'Exemple',
+        prototip: 'Serialul Județului Housing',
+        ghiduri: 'Ghiduri',
+        exemple: 'Exemple din Europa',
+        primarii: 'Cum ajută primăriile',
         legal: 'Legal',
         analize: 'Analize',
-        noutati: 'Noutăți',
-        prototip: 'Prototip'
+        noutati: 'Noutăți'
     };
-    
+
+    // Serialul se citește în ordinea episoadelor (ca pe homepage), restul de la nou la vechi.
+    function episodeNo(slug) {
+        const m = /judetului-housing-episodul-(\d+)/.exec(slug || '');
+        return m ? +m[1] : 999;
+    }
+
+    // Filtrul ales stă în adresă (`news.html?cat=primarii`), ca linkul
+    // „Toate cele N” de pe homepage să deschidă direct raftul lui.
+    function setFilter(cat, updateUrl) {
+        const btn = document.querySelector(`.filter-btn[data-cat="${cat}"]`);
+        if (!btn || btn.hidden) cat = 'all';
+        currentFilter = cat;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+        if (updateUrl) {
+            const url = new URL(window.location.href);
+            if (cat === 'all') url.searchParams.delete('cat'); else url.searchParams.set('cat', cat);
+            history.replaceState(null, '', url);
+        }
+        renderArticles();
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         await loadArticles();
-        
+        setFilter(new URLSearchParams(window.location.search).get('cat') || 'all', false);
+
         // Check if URL hash points to an article
         if (window.location.hash) {
             const slug = window.location.hash.slice(1);
@@ -446,11 +474,7 @@
     document.getElementById('categoryFilters').addEventListener('click', (e) => {
         const btn = e.target.closest('.filter-btn');
         if (!btn) return;
-        
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.cat;
-        renderArticles();
+        setFilter(btn.dataset.cat, true);
     });
     
     async function loadArticles() {
@@ -463,6 +487,9 @@
             
             if (error) throw error;
             articles = data || [];
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                if (b.dataset.cat !== 'all') b.hidden = !articles.some(a => a.category === b.dataset.cat);
+            });
             renderArticles();
         } catch (e) {
             console.error('Load articles error:', e);
@@ -478,9 +505,10 @@
         
         loading.style.display = 'none';
         
-        const filtered = currentFilter === 'all' 
-            ? articles 
+        const filtered = currentFilter === 'all'
+            ? articles
             : articles.filter(a => a.category === currentFilter);
+        if (currentFilter === 'prototip') filtered.sort((x, y) => episodeNo(x.slug) - episodeNo(y.slug));
         
         if (filtered.length === 0) {
             grid.style.display = 'none';

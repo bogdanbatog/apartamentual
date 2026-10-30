@@ -3433,7 +3433,7 @@
             return card(a, meta, imagine(a));
           }).join('');
           var toate = lista.length > PE_RAFT
-            ? '<a href="/news.html" class="text-link news-raft-all">Toate cele ' + lista.length + ' ' + esc(raft.toate) + ' →</a>'
+            ? '<a href="/news.html?cat=' + esc(raft.cat) + '" class="text-link news-raft-all">Toate cele ' + lista.length + ' ' + esc(raft.toate) + ' →</a>'
             : '';
           html += '<div class="news-raft">'
             + '<div class="news-raft-head"><h3 class="news-raft-title">' + esc(raft.titlu) + '</h3>' + toate + '</div>'
