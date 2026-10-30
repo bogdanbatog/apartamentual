@@ -260,11 +260,11 @@ function continut(r) {
       // Decizia lui Lucian, 30 oct.: NU „concurenta cu dezvoltatorul” (loturile
       // mici ale grupurilor nu-i tenteaza pe dezvoltatori). Problema reala e
       // ponderea mare a terenului in investitie, pretul celor putini vecini.
-      'Într-un bloc construit în grup nu există marja dezvoltatorului, așa că prețul unui apartament vine în principal din teren, proiect și construcție. Dintre ele, terenul cântărește mult. La Județului Housing, terenul s-a împărțit la doar cinci apartamente, deci fiecăruia i-a revenit o parte mare din preț. E prețul unui avantaj real: puțini vecini, care se cunosc între ei.',
+      'Într-un bloc construit în grup nu există marja dezvoltatorului, așa că prețul unui apartament vine în principal din teren, proiect și construcție. Dintre ele, terenul e un procent mare din investiție. La Județului Housing, terenul s-a împărțit la doar cinci apartamente, deci fiecăruia i-a revenit o parte mare din preț. E prețul plătit pentru a avea puțini vecini, pentru o mică comunitate. Pe lângă cost, terenul e unul dintre pașii cei mai grei de la început: grupurile se fac și se desfac în funcție de terenurile găsite, și e nevoie de răbdare.',
       'Ne-am uitat de unde vine terenul pentru grupurile de construcție din alte țări și am publicat pe site primul articol dintr-o serie despre orașele din Germania. Începem cu Tübingen, unde primăria vinde teren grupurilor din 1991.',
       '**Preț fix, nu licitație.** Prețul îl stabilește un evaluator și e anunțat dinainte. Terenul nu e mai ieftin decât pe piață, dar grupul știe de la început cât costă.',
       '**Câștigă proiectul cel mai bun, nu oferta cea mai mare.** Contează ce aduce clădirea cartierului, nu cine plătește mai mult.',
-      '**Lotul rămâne rezervat câteva luni.** Grupul ales are între 3 și 12 luni să-și completeze membrii, să facă proiectul și să-și pregătească finanțarea, abia apoi cumpără.',
+      '**Lotul rămâne rezervat câteva luni.** Grupul ales are între 3 și 12 luni să-și completeze membrii, să facă proiectul și să-și pregătească finanțarea, abia apoi cumpără. Terenul nu dispare cât timp oamenii se hotărăsc, iar grupul se poate închega în jurul unui lot sigur.',
       'Articolul spune și ce nu a funcționat acolo, pentru că și asta contează.',
     ],
 

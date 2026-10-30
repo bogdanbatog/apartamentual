@@ -1,7 +1,8 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 30 octombrie 2026, noaptea** — **Newsletterul de sâmbătă 31 oct. e GATA DE
-> TRIMIS. ✅ COMIS și ÎMPINS (`8abd6df`). Nimic de urcat din cPanel.**
+> **⏭️ ULTIMA SESIUNE: 30-31 octombrie 2026, noaptea** — **Newsletterul de sâmbătă 31 oct. e GATA DE
+> TRIMIS. ✅ COMIS și ÎMPINS (`8abd6df` + alinierea frazelor despre teren). Nimic de urcat din cPanel.**
+> **Încă NETRIMIS.** Apoi, după newsletter, postările FB/IG/LinkedIn (vezi mai jos).
 >
 > **Ce e pregătit:** `db_schema/emailuri-newsletter-2026-10-31/1-lot-pentru-email.sql` (lotul) +
 > `scripts/emailuri-newsletter-2026-10-31/trimite-newsletter.js` + `README.md` (pașii). Text aprobat de Lucian.
@@ -12,12 +13,28 @@
 >   (lista din 3 oct. e veche); textul merge și pentru cine e deja în grup. Scriptul refuză să pornească
 >   fără jurnalele celor două campanii.
 > - **Încadrarea terenului (decizia lui Lucian):** NU „concurență cu dezvoltatorul” (loturile mici nu-i
->   tentează); problema e ponderea mare a terenului în cost, prețul celor puțini vecini.
+>   tentează). Formularea lui, aceeași în email, articol și postări: „terenul e un procent mare din
+>   investiție”, „e prețul plătit pentru a avea puțini vecini, pentru o mică comunitate”, „grupurile se fac
+>   și se desfac în funcție de terenurile găsite, și e nevoie de răbdare”. Valoarea opțiunii pe lot: „terenul
+>   nu dispare cât timp oamenii se hotărăsc, iar grupul se poate închega în jurul unui lot sigur” (NU „fără
+>   proiect nu aduci oameni și bani”: oamenii se adună înainte de proiect).
 > - Linkul articolului are `utm_source=newsletter&utm_campaign=2026-10-31` (Plausible).
 >
 > **Articolul Tübingen CORECTAT și republicat** (cu `publica-articol.js --publica`, verificat în DB:
 > fraza nouă prezentă, `published_at` neschimbat): al doilea paragraf nu mai spune „în concurență cu un
 > dezvoltator”. Rezumatul și un bullet despre Germania păstrează concurența (adevărat acolo).
+> **Republicat a doua oară (31 oct., ~1 noaptea)**, cu formularea de mai sus și o secțiune nouă „Cum
+> ajută orașul să se formeze grupul” (bursa online „Kontaktbörse Wohnen”, seri de informare, de 4 ori mai
+> mulți candidați decât loturi, pregătirea ~1 an). Sursa: fișa `continut/sprijin institutional
+> Germania/TUBINGEN/` (27 oct.). Verificat în DB; `published_at` rămas 30 oct. 21:28 UTC.
+>
+> **Postările FB / IG / LinkedIn sunt scrise și aprobate**, ca .txt (fără marcaje, de copiat direct) în
+> `calendar postari si episoade/PRIMARII GERMANIA/`: `FB_Tubingen.txt`, `IG_Tubingen.txt`,
+> `LINKEDIN_Tubingen.txt`. Se pun DUPĂ newsletter. LinkedIn = unghiul „ce poate face o primărie fără să dea
+> bani” (pârghia pe terenul privat de la gara de mărfuri, comisia cu toate partidele, de ce nu pierde orașul
+> bani). Poza din postări = vederea aeriană Mühlenviertel, încă FĂRĂ permisiune (alternativa: Wikimedia,
+> Giftzwerg 88). Din fișă s-au lăsat deoparte: prețurile pe m² de la Marienburger (neclar la ce m²) și
+> „modelul juridic Tübingen” (marcat neverificat).
 > ⚠️ Parola `ARTICOLE_SECRET` a fost scrisă în conversație: Lucian poate s-o schimbe în secretele Supabase.
 >
 > **⏭️ SÂMBĂTĂ 31 OCT., pașii (comenzile exacte în README):**
