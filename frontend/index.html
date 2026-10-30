@@ -1371,8 +1371,50 @@
   }
   .steps-cta{ margin-top:2.5rem; display:flex; justify-content:flex-end; }
   .news-more{ margin-top:2.5rem; }
+  /* Rafturile din News: un raft = o categorie (lista RAFTURI din script). */
+  .news-raft{ margin-top:3rem; }
+  .news-raft:first-child{ margin-top:2rem; }
+  .news-raft .news-grid{ margin-top:1.25rem; }
+  .news-raft-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    border-top:1px solid var(--rule);
+    padding-top:1.25rem;
+  }
+  .news-raft-title{
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:-0.012em;
+    color:var(--ink);
+    margin:0;
+  }
+  .news-raft-all{ font-size:14px; white-space:nowrap; }
+  .news-raft-desc{
+    font-size:14px;
+    line-height:1.6;
+    color:var(--ink-2);
+    max-width:640px;
+    margin:0.4rem 0 0;
+  }
   @media(max-width:768px){
     .news-grid{ grid-template-columns:1fr; }
+    /* Pe telefon, raftul se derulează pe orizontală: altfel patru rafturi
+       a câte trei carduri ar face o coloană de 12 carduri. Derularea e în
+       grilă, nu în pagină, deci pagina nu capătă scroll lateral. */
+    .news-raft .news-grid{
+      grid-template-columns:none;
+      grid-auto-flow:column;
+      grid-auto-columns:82%;
+      gap:16px;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      padding-bottom:8px;
+    }
+    .news-raft .article-card{ scroll-snap-align:start; }
+    .news-raft .article-card:hover{ transform:none; }
   }
 
   /* ── FOOTER ── */
@@ -2994,11 +3036,11 @@
   <section class="section" id="news">
     <p class="section-eyebrow">Resurse</p>
     <h2 class="section-title">News</h2>
-    <p class="section-body">Articole și resurse despre Baugruppen din întreaga lume.</p>
-    <!-- Cardurile se randează dinamic din Supabase (vezi scriptul de mai jos):
-         episoadele serialului Județului apar automat (nou→vechi), urmate de
-         exemplele alese manual în CURATED_EXAMPLES. -->
-    <div class="news-grid" id="newsGrid"></div>
+    <p class="section-body">Ce am învățat construind la Județului Housing și ce putem învăța de la grupurile din alte orașe.</p>
+    <!-- Rafturile se randează dinamic din Supabase (vezi scriptul de mai jos,
+         lista RAFTURI): un raft = o categorie din `articles.category`.
+         Raftul fără articole publicate nu apare deloc. -->
+    <div id="newsRafturi"></div>
     <div class="news-more">
       <a href="/news.html" class="text-link">Vezi toate articolele →</a>
     </div>
@@ -3308,27 +3350,54 @@
 
 <script>
   // ── Secțiunea News de pe homepage (read-only din Supabase, date publice) ──
-  // Regulă: episoadele serialului Județului apar automat (nou→vechi), urmate de
-  // exemplele alese manual mai jos. Imaginile: episoadele au imagine proprie în
-  // DB; exemplele au image_url gol în DB, deci folosesc grafica locală.
+  // Regulă (decisă pe 30 oct.): patru rafturi, unul pe categorie, fiecare cu
+  // primele 3 articole. Un raft fără articole publicate nu apare. Articolele
+  // dintr-o categorie care nu e în RAFTURI nu apar pe homepage (doar în news.html).
   (function(){
-    var grid = document.getElementById('newsGrid');
-    if(!grid) return;
+    var root = document.getElementById('newsRafturi');
+    if(!root) return;
 
-    // Exemple alese pentru homepage. Se potrivesc după o bucată STABILĂ din slug,
-    // ca linkul să nu se rupă dacă slug-ul se regenerează la editarea în admin.
-    // Ca să adaugi De Sijs, decomentează linia lui.
-    var CURATED_EXAMPLES = [
-      { match: 'brutopia', image: 'assets/images/news/files/card-news-brutopia.png' }
-      // { match: 'de-sijs', image: 'assets/images/news/files/card-news-desijs.png' }
+    // `cat` = valoarea din `articles.category`. ⚠️ Serialul rămâne `prototip` în
+    // DB, doar eticheta e alta. `ghiduri` și `primarii` trebuie să existe și în
+    // selectul din admin.html, altfel nu ai cum să pui un articol pe raftul lor.
+    // `ordine`: 'serial' = după numărul episodului din slug (de la 0 în sus);
+    // 'nou' = după published_at, de la nou la vechi.
+    var RAFTURI = [
+      { cat: 'prototip', titlu: 'Serialul Județului Housing', ordine: 'serial', toate: 'episoade',
+        desc: 'Povestea grupului nostru din București, în ordinea în care s-a întâmplat. Începe cu episodul 0.' },
+      { cat: 'ghiduri', titlu: 'Ghiduri', ordine: 'nou', toate: 'ghiduri',
+        desc: 'Cum se organizează un grup de construcție: asocierea, banii, constructorul.' },
+      { cat: 'exemple', titlu: 'Exemple din Europa', ordine: 'nou', toate: 'exemple',
+        desc: 'Grupuri care au construit împreună în alte orașe din Europa.' },
+      { cat: 'primarii', titlu: 'Cum ajută primăriile', ordine: 'nou', toate: 'articole',
+        desc: 'Ce fac orașele din Germania pentru grupurile de construcție: teren, consiliere, reguli.' }
+    ];
+    var PE_RAFT = 3;
+
+    // Exemplele au image_url gol în DB, deci folosesc grafica locală. Potrivirea
+    // e pe o bucată STABILĂ din slug, fiindcă slug-ul se regenerează la editarea
+    // titlului în admin. Imaginea din DB, dacă există, are întâietate.
+    var IMAGINI_LOCALE = [
+      { match: 'brutopia', image: 'assets/images/news/files/card-news-brutopia.png' },
+      { match: 'de-sijs',  image: 'assets/images/news/files/card-news-desijs.png' }
     ];
 
     var base = 'https://glbvbbgmcobtswwlktic.supabase.co';
     var key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsYnZiYmdtY29idHN3d2xrdGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4ODgyMDMsImV4cCI6MjA3MjQ2NDIwM30.1Gd2UKwjVOJC_3iHxKOhV5KJkl_D1vpa8j_lHNiQIII';
-    var url = base + '/rest/v1/articles?select=slug,title,summary,image_url,published_at&status=eq.published&order=published_at.desc';
+    var url = base + '/rest/v1/articles?select=slug,title,summary,image_url,category,published_at&status=eq.published&order=published_at.desc';
 
     function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
     function episodeNo(slug){ var m = /judetului-housing-episodul-(\d+)/.exec(slug || ''); return m ? m[1] : null; }
+    function imagine(a){
+      if(a.image_url) return a.image_url;
+      var cfg = IMAGINI_LOCALE.find(function(c){ return (a.slug || '').indexOf(c.match) !== -1; });
+      return cfg ? cfg.image : null;
+    }
+    function data(a){
+      if(!a.published_at) return '';
+      try { return new Date(a.published_at).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }); }
+      catch(e){ return ''; }
+    }
 
     function card(a, meta, imgSrc){
       var img = imgSrc
@@ -3346,24 +3415,34 @@
       .then(function(r){ return r.ok ? r.json() : []; })
       .then(function(rows){
         if(!Array.isArray(rows)) return;
-        // Episoade (rows deja sortate desc după published_at, deci nou→vechi):
-        var episodes = rows.filter(function(a){ return episodeNo(a.slug) !== null; });
-        // Exemple alese, în ordinea din config:
-        var examples = [];
-        CURATED_EXAMPLES.forEach(function(cfg){
-          var a = rows.find(function(r){ return (r.slug || '').indexOf(cfg.match) !== -1; });
-          if(a) examples.push({ a: a, image: cfg.image });
-        });
-
         var html = '';
-        episodes.forEach(function(a){
-          html += card(a, 'Serialul Județului Housing · Episodul ' + episodeNo(a.slug), a.image_url);
-        });
-        examples.forEach(function(e){
-          html += card(e.a, 'Exemple internaționale', e.image || e.a.image_url);
+        RAFTURI.forEach(function(raft){
+          // rows vin deja sortate de la nou la vechi după published_at.
+          var lista = rows.filter(function(a){ return a.category === raft.cat; });
+          if(!lista.length) return;
+          if(raft.ordine === 'serial'){
+            // Episodul fără număr în slug (slug regenerat la editare) ajunge la coadă.
+            lista = lista.slice().sort(function(x, y){
+              var nx = episodeNo(x.slug), ny = episodeNo(y.slug);
+              return (nx === null ? 999 : +nx) - (ny === null ? 999 : +ny);
+            });
+          }
+          var cards = lista.slice(0, PE_RAFT).map(function(a){
+            var nr = episodeNo(a.slug);
+            var meta = (raft.ordine === 'serial' && nr !== null) ? 'Episodul ' + nr : data(a);
+            return card(a, meta, imagine(a));
+          }).join('');
+          var toate = lista.length > PE_RAFT
+            ? '<a href="/news.html" class="text-link news-raft-all">Toate cele ' + lista.length + ' ' + esc(raft.toate) + ' →</a>'
+            : '';
+          html += '<div class="news-raft">'
+            + '<div class="news-raft-head"><h3 class="news-raft-title">' + esc(raft.titlu) + '</h3>' + toate + '</div>'
+            + '<p class="news-raft-desc">' + esc(raft.desc) + '</p>'
+            + '<div class="news-grid">' + cards + '</div>'
+            + '</div>';
         });
 
-        if(html) grid.innerHTML = html;
+        if(html) root.innerHTML = html;
       })
       .catch(function(){ /* lasă secțiunea goală dacă pică fetch-ul */ });
   })();
