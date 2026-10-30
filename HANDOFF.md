@@ -1,5 +1,32 @@
 # HANDOFF — ApartamenTUal
 
+> **⏭️ ULTIMA SESIUNE: 30 octombrie 2026, noaptea** — **Newsletterul de sâmbătă 31 oct. e GATA DE
+> TRIMIS. ✅ COMIS și ÎMPINS (`8abd6df`). Nimic de urcat din cPanel.**
+>
+> **Ce e pregătit:** `db_schema/emailuri-newsletter-2026-10-31/1-lot-pentru-email.sql` (lotul) +
+> `scripts/emailuri-newsletter-2026-10-31/trimite-newsletter.js` + `README.md` (pașii). Text aprobat de Lucian.
+> - **Destinatari:** conturile personale vii (filtrele de la campania WhatsApp din 2 oct.) PLUS abonații
+>   `confirmed` fără niciun cont; dedublare pe `LOWER(email)`. Subsolul diferă: „ai un cont” / „te-ai abonat”.
+> - **WhatsApp, două variante:** „reamintire” pentru cei din jurnalele campaniilor trezire (1 oct.) și
+>   whatsapp-general (2 oct.); „invitație” pentru ceilalți. NU se potrivește pe membrii reali ai grupului
+>   (lista din 3 oct. e veche); textul merge și pentru cine e deja în grup. Scriptul refuză să pornească
+>   fără jurnalele celor două campanii.
+> - **Încadrarea terenului (decizia lui Lucian):** NU „concurență cu dezvoltatorul” (loturile mici nu-i
+>   tentează); problema e ponderea mare a terenului în cost, prețul celor puțini vecini.
+> - Linkul articolului are `utm_source=newsletter&utm_campaign=2026-10-31` (Plausible).
+>
+> **Articolul Tübingen CORECTAT și republicat** (cu `publica-articol.js --publica`, verificat în DB:
+> fraza nouă prezentă, `published_at` neschimbat): al doilea paragraf nu mai spune „în concurență cu un
+> dezvoltator”. Rezumatul și un bullet despre Germania păstrează concurența (adevărat acolo).
+> ⚠️ Parola `ARTICOLE_SECRET` a fost scrisă în conversație: Lucian poate s-o schimbe în secretele Supabase.
+>
+> **⏭️ SÂMBĂTĂ 31 OCT., pașii (comenzile exacte în README):**
+> 1. SQL Editor → `1-lot-pentru-email.sql` → Download CSV → `C:\Users\lucia\Desktop\newsletter.csv`.
+> 2. Proba (dry) → `local\previzualizare.html`; lista de adrese citită cu ochiul (Gmail-uri ale casei,
+>    adrese de test abonate) → ce se scoate, cu `--fara=` pe toate rulările.
+> 3. `--mod=test` (cheia Resend se cere lui Lucian) → până la 3 emailuri la apartamentual@ltfbstudio.ro.
+> 4. `--mod=live --confirm-trimit`. După: aprobat cererile în grupul de WhatsApp; „stop” → `EXCLUSI_IMPLICIT`.
+
 > **⏭️ ULTIMA SESIUNE: 30 octombrie 2026, seara** — **Articolul Tübingen PUBLICAT + filtrele din
 > `news.html` = rafturile homepage-ului. ✅ COMIS (`590301f`, `14f3bad`), ÎMPINS și DEPLOYAT din cPanel
 > (verificat pe live cu curl + captură).**
