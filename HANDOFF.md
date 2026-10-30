@@ -14,9 +14,26 @@
 > rămâne `IMAGINI_LOCALE` (Brutopia, De Sijs au `image_url` gol în DB). Pe telefon raftul se
 > derulează lateral. Citirea din Supabase e aceeași, plus coloana `category`.
 >
+> **🆕 ARTICOLELE SE PUBLICĂ FĂRĂ ADMIN (tot 30 oct., ✅ COMIS `24717c5` și ÎMPINS, funcția DEPLOYATĂ):**
+> edge function `publica-articol` (deploy `--no-verify-jwt`, poarta = antetul `x-articole-secret`,
+> secretul `ARTICOLE_SECRET`) + scriptul `scripts/articole/publica-articol.js` (probă → `--ciorna` →
+> `--publica`; pașii în `scripts/articole/README.md`). Funcția atinge doar `articles` și bucketul
+> `articles`, fără ștergere; slug fix, `published_at` pus o singură dată, nu retrage în ciornă.
+> **Parola o are doar Lucian** (cea care începe cu `750a`; primele două generate pe 30 oct. nu mai merg);
+> nu e în niciun fișier, se cere la fiecare sesiune. ⚠️ Articolele urcate așa NU se mai salvează din admin.
+> ✅ **Publicat așa: Ausbauhaus Neukölln** (`news.html#ausbauhaus-neukolln-berlin`, categoria `exemple`);
+> sursa în `calendar postari si episoade/20260901 exemplul 2 Berlin Neukölln/articol-site-neukolln.md`.
+> Pe homepage apare abia după urcarea `index.html`. ❓ Deschise în nota articolului: premiul
+> „Deutscher Bauherrenpreis” (scos, neconfirmat; găsit doar Heinze ArchitektenAWARD 2016) și linkul
+> arhitecților din primul comentariu al postării.
+> ❓ **Poza pentru Tübingen** (`calendar postari si episoade/PRIMARII GERMANIA/3686885_1_detail_...jpg`)
+> pare fotografie de presă (probabil Schwäbisches Tagblatt), 670×374: fără permisiune nu se folosește.
+>
 > **⏭️ URMĂTORII PAȘI (sesiuni separate):**
 > 1. ❓ **De Sijs** apare acum pe homepage cu „cohousing” în titlu (regula: „co-housing” doar în
->    `ce-este/`). Lucian decide: titlu schimbat din admin sau scos de pe homepage.
+>    `ce-este/`). Lucian decide: titlu nou sau scos de pe homepage. Corectura se poate face din script
+>    (fișier-articol cu slug-ul existent `de-sijs-leuven-cohousing-in-jurul-unei-foste-cafenele-mrjryu7q`
+>    și `--publica`); slug-ul vechi rămâne, ca linkurile să nu se rupă.
 > 2. **`admin.html`** (select l. ~515, `categoryLabels` l. ~956): adăugat `ghiduri` și `primarii`.
 >    ÎNTÂI Lucian rulează în SQL Editor:
 >    `select conname, pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.articles'::regclass;`
