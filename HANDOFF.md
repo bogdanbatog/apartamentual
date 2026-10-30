@@ -1,6 +1,47 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 30 octombrie 2026** — **News de pe homepage pe rafturi.
+> **⏭️ ULTIMA SESIUNE: 30 octombrie 2026, seara** — **Articolul Tübingen PUBLICAT + filtrele din
+> `news.html` = rafturile homepage-ului. ✅ COMIS (`590301f`, `14f3bad`), ÎMPINS și DEPLOYAT din cPanel
+> (verificat pe live cu curl + captură).**
+>
+> **Articolul:** „Tübingen, Germania: cum vinde primăria terenul grupurilor de construcție”,
+> `https://apartamentual.ro/news.html#tubingen-de-unde-vine-terenul`, categoria `primarii` (baza a
+> acceptat-o: nu există CHECK pe `articles.category`, deci pasul 2 de mai jos nu mai cere SQL).
+> Sursa: `calendar postari si episoade/PRIMARII GERMANIA/articol-site-tubingen.md` (folder negit).
+> ⚠️ **Pozele sunt publicate FĂRĂ permisiune, la decizia lui Lucian** (riscul explicat: Copytrack/Pixsy,
+> relația cu primăriile germane): sus = vederea aeriană Mühlenviertel din albumul tuebingen.de (luată
+> de Lucian de pe The Urbanist, care n-o creditase); în text = Angela Hammer, Reutlinger
+> General-Anzeiger, 5 mai 2014, servită din `frontend/assets/images/news/files/tubingen-alte-weberei-2014.jpg`
+> (scriptul urcă doar poza principală; o poză din text = fișier în `frontend/` + deploy cPanel).
+> **Emailurile de cerere le trimite Lucian** (textele în germană au fost date în sesiune):
+> presse@tuebingen.de (adresa citită dintr-o imagine, de verificat) și gea@gea.de. Dacă refuză cineva:
+> poze libere pe Wikimedia, „Ansichten aus dem französischen Viertel Tübingen 30/32” (Giftzwerg 88,
+> CC BY-SA 4.0); poza principală se schimbă cu `--imagine-noua`.
+>
+> **`news.html`:** filtrele = Toate · Serialul Județului Housing · Ghiduri · Exemple din Europa · Cum ajută
+> primăriile (filtrul fără articole publicate se ascunde); etichetele de pe carduri la fel; serialul în
+> ordinea episoadelor; filtrul în adresă (`?cat=primarii`). Pe homepage, „Toate cele N …” duce la
+> `/news.html?cat=<raft>`. Adminul arată conținutul articolelor ca cod: pozele din text nu se văd acolo.
+>
+> **⏭️ URMĂTOAREA SESIUNE: NEWSLETTER, de trimis SÂMBĂTĂ 31 OCTOMBRIE** (cerut de Lucian):
+> - **Conținut:** (1) articolul nou despre Tübingen (link spre `news.html#tubingen-de-unde-vine-terenul`);
+>   (2) reminder despre grupul de WhatsApp „Discuții generale”, unde încurajăm ORICE întrebare
+>   (link: `WHATSAPP_URL` din `scripts/emailuri-whatsapp-general/trimite-emailuri-whatsapp.js`).
+> - **Destinatari (ales de Lucian: varianta 1):** toți cei cu cont personal viu PLUS abonații la
+>   newsletter fără cont, fiecare o singură dată (dedublare pe email, fără diferențe de majuscule).
+>   De găsit tabela abonaților (formularul din footer, `js/newsletter.js`) și cum se potrivește cu `profiles`.
+>   Cine e deja în grupul de WhatsApp primește o frază diferită (potrivire pe telefon, ca în
+>   `db_schema/grupuri-whatsapp/`; dacă nu iese sigur, o frază valabilă pentru toți).
+> - **Tipar:** script nou `scripts/emailuri-newsletter-<data>/` + SQL de lot în `db_schema/`, după
+>   `emailuri-whatsapp-general` (dry → test → live `--confirm-trimit`, jurnal anti-dublare,
+>   `EXCLUSI_IMPLICIT` cu cei care au cerut „stop”, `List-Unsubscribe`). Verifică `scripts/*/local/`
+>   în `.gitignore`. Cheia Resend se cere lui Lucian; treapta `test` arată dacă e vie.
+> - **Reguli de text:** fără „—”, fără procente de economie, ton „arhitect care povestește”, numele „Luță”.
+>
+> **Rămase din sesiunile anterioare:** De Sijs cu „cohousing” în titlu pe homepage (pasul 1 de mai jos);
+> `admin.html` cu `ghiduri`/`primarii` (pasul 2, fără SQL).
+
+> **SESIUNEA DIN 30 OCTOMBRIE 2026, dimineața** — **News de pe homepage pe rafturi.
 > ✅ COMIS (`3ed6b83`, împreună cu NOTES.md) și ÎMPINS. ⚠️ DE URCAT DIN cPanel: `frontend/index.html`**,
 > apoi Ctrl+Shift+R și privit secțiunea News pe telefon (lățimea de telefon nu s-a putut verifica:
 > Edge headless nu coboară sub ~500 px, iar Chrome-ul conectat nu vede serverul local).
@@ -38,7 +79,7 @@
 >    ÎNTÂI Lucian rulează în SQL Editor:
 >    `select conname, pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.articles'::regclass;`
 >    Dacă există CHECK pe `category`, SQL scurt de lărgit.
-> 3. **`news.html`** (filtre l. ~298, `categoryLabels` l. ~426): filtrele = cele 4 rafturi + „Toate”;
+> 3. ✅ FĂCUT seara (`590301f`). **`news.html`** (filtre l. ~298, `categoryLabels` l. ~426): filtrele = cele 4 rafturi + „Toate”;
 >    dispar Legal / Analize / Noutăți. Eventual `?cat=` în adresă, ca „Toate cele N” să deschidă
 >    direct raftul.
 
