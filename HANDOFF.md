@@ -1,8 +1,53 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 30-31 octombrie 2026, noaptea** — **Newsletterul de sâmbătă 31 oct. e GATA DE
+> **⏭️ ULTIMA SESIUNE: 31 octombrie 2026, ziua** — **Newsletterul TRIMIS (101/101, zero eșecuri) +
+> banda de newsletter de pe homepage rescrisă (`aea960c`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN cPanel:
+> `frontend/index.html` și `frontend/register.html`**, apoi Ctrl+Shift+R, nelogat (banda e `js-marketing-only`).
+>
+> **Newsletterul:** 93 conturi + 8 abonați fără cont; 92 „reamintire” WhatsApp, 9 „invitație”. Lucian n-a
+> scos pe nimeni (nici bogdanbatog@gmail.com, nici riltabutru@necub.com). Jurnal:
+> `scripts/emailuri-newsletter-2026-10-31/local/trimise-2026-10-31.json`. Cine răspunde „stop” →
+> `EXCLUSI_IMPLICIT`. De aprobat cererile de intrare în grupul de WhatsApp.
+>
+> **LinkedIn Tübingen POSTAT** (31 oct.), cu o întrebare nouă pentru cei din administrație (penultimul
+> paragraf din `LINKEDIN_Tubingen.txt`: „cum ar putea o primărie din România să-și vândă terenurile…? Ce ar
+> împiedica azi un model ca la Tübingen…?”). Răspunsurile din comentarii = material pentru o postare.
+> ❓ FB/IG Tübingen: neclar dacă sunt puse.
+>
+> **Banda de newsletter (homepage):** două coloane, câte o întrebare și o acțiune: „Vrei să afli când apare
+> un teren în zona ta preferată?” → **Fă-ți cont** (terenurile pleacă DOAR la conturi, digestul de luni) |
+> „Vrei noutăți despre construirea colaborativă și despre experiența noastră de la Județului?” → formularul
+> de email (neschimbat). „afli primul” evitat (digestul pleacă la toți deodată). Bifa din `register.html`
+> aliniată: „Vreau și noutăți despre construirea colaborativă și despre experiența de la Județului Housing…”
+> (scos „blocul ridicat colaborativ prin ApartamenTUal”, inexact).
+>
+> **⏭️ URMĂTOAREA SESIUNE: calendarul de articole și postări, ca `calendar postari si episoade/
+> APARTAMENTUAL_CALENDAR_POSTARI_v9.xlsx`, în formatul v8.** Structura aprobată de Lucian (31 oct.):
+> - **Articol + newsletter la 2 săptămâni, sâmbăta**, alternând Județului ↔ Germania/Europa;
+>   **2 postări pe săptămână**: marți = educativ (exemplu, oraș german, întrebare din WhatsApp),
+>   joi = Județului (șantier, transparență); un loc liber pentru neprevăzute.
+> - 3 nov. Zeppelin (postare, nu articol) · 5 nov. FB/IG Tübingen dacă nu sunt puse · 10 nov. întrebare
+>   WhatsApp · 12 nov. Județului acum · **14 nov. articol „Cât durează”** · 17 nov. Lucia #1 · 19 nov.
+>   „Ce se întâmplă dacă cineva se retrage” · 24 nov. răspunsurile de la LinkedIn · 26 nov. balustradele
+>   (sau „aceeași fereastră, trei momente”) · **28 nov. articol Hamburg** (fișa în
+>   `continut/sprijin institutional Germania/HAMBURG/`) · 1 dec. Lucia #2 · 3 dec. harta cererii, cifre noi ·
+>   8 dec. WhatsApp · 10 dec. șantier · **12 dec. articol „Finanțarea”** · 15 dec. Lucia #3 · pauză.
+> - Ianuarie: München, „Costuri”, „Cum am ales constructorul”, Asocierea (după răspunsul notarului),
+>   interviu cu Lucia.
+> - ⚠️ **„Cum am ales constructorul” DUPĂ terminarea lucrărilor:** acum e dispută cu constructorul (pauză de
+>   o lună, a plecat la alte lucrări, taxează scump finisajele mici), iar Mozaic Engineering e partener
+>   pe site. Scris acum se citește ca reproș.
+> - Costuri + finanțare răspund celor de la trezirea din 1 oct. (fără răspuns încă): de trimis linkul personal.
+> - **Lucia Landenberger** (lucia-landenberger.de): coordonatoare de proiect („Projektsteuerung”) pentru
+>   grupuri de construcție din Tübingen din 2002, fost board Bundesverband Baugemeinschaften. 4 proiecte:
+>   Licht+Luft și EN FAMILLE (Alte Weberei), Plan G și Familien(t)raum (fosta gară de mărfuri) → mini-seria
+>   „Tübingen, clădire cu clădire”. Plan G = locuință comună pentru 8 oameni cu demență, organizată de grup.
+>   Fotografiile DOAR cu acord scris; NU preluăm costul pe m² de la EN FAMILLE. De scris: email către ea
+>   (poze + interviu), dacă Lucian confirmă că e în legătură cu ea.
+
+> **SESIUNEA DIN 30-31 octombrie 2026, noaptea** — **Newsletterul de sâmbătă 31 oct. e GATA DE
 > TRIMIS. ✅ COMIS și ÎMPINS (`8abd6df` + alinierea frazelor despre teren). Nimic de urcat din cPanel.**
-> **Încă NETRIMIS.** Apoi, după newsletter, postările FB/IG/LinkedIn (vezi mai jos).
+> **(TRIMIS pe 31 oct., vezi mai sus.)**
 >
 > **Ce e pregătit:** `db_schema/emailuri-newsletter-2026-10-31/1-lot-pentru-email.sql` (lotul) +
 > `scripts/emailuri-newsletter-2026-10-31/trimite-newsletter.js` + `README.md` (pașii). Text aprobat de Lucian.
