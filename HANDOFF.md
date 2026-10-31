@@ -12,7 +12,15 @@
 > **LinkedIn Tübingen POSTAT** (31 oct.), cu o întrebare nouă pentru cei din administrație (penultimul
 > paragraf din `LINKEDIN_Tubingen.txt`: „cum ar putea o primărie din România să-și vândă terenurile…? Ce ar
 > împiedica azi un model ca la Tübingen…?”). Răspunsurile din comentarii = material pentru o postare.
-> ❓ FB/IG Tübingen: neclar dacă sunt puse.
+> ✅ FB/IG Tübingen: puse și ele (confirmat de Lucian, 31 oct.).
+>
+> **✅ CALENDARUL v9 FĂCUT (31 oct., seara):** `calendar postari si episoade/APARTAMENTUAL_CALENDAR_POSTARI_v9.xlsx`
+> (folder negit). **Ritmul s-a schimbat față de structura de mai jos:** Lucian nu ține pasul cu 3 pe
+> săptămână, deci **2 apariții pe săptămână în total, marți + sâmbătă**; sâmbăta alternează articol +
+> newsletter (14 nov., 28 nov., 12 dec.) / postare Județului (7 nov., 21 nov., 5 dec.); marțea = postare
+> scurtă, poate rămâne goală. Regulă nouă: ce nu s-a postat la timp se SARE, nu se mută. Format simplificat:
+> o filă, coloanele Data · Ziua · Ce · Subiect · Material de pornire · Stare. Datele de mai jos (joi etc.)
+> sunt depășite; sursa e Excelul. ❓ Zeppelin (3 nov.): subiect neprecizat în repo.
 >
 > **Banda de newsletter (homepage):** două coloane, câte o întrebare și o acțiune: „Vrei să afli când apare
 > un teren în zona ta preferată?” → **Fă-ți cont** (terenurile pleacă DOAR la conturi, digestul de luni) |
