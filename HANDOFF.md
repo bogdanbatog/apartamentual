@@ -21,6 +21,11 @@
 > scurtă, poate rămâne goală. Regulă nouă: ce nu s-a postat la timp se SARE, nu se mută. Format simplificat:
 > o filă, coloanele Data · Ziua · Ce · Subiect · Material de pornire · Stare. Datele de mai jos (joi etc.)
 > sunt depășite; sursa e Excelul. ❓ Zeppelin (3 nov.): subiect neprecizat în repo.
+> **Modificat 31 oct., târziu:** 7 nov. NU mai e Județului (Lucian nu are ce spune încă) → acolo vine
+> **articolul despre asociere** (din ianuarie), pornind de la singura întrebare din WhatsApp (forma de
+> asociere); sursa `ASOCIERE/` varianta 06 + discuția lui Lucian cu notara, săptămâna viitoare. Fără
+> newsletter separat: intră în cel din 14 nov. Rubrica „întrebare din WhatsApp” scoasă (oamenii nu întreabă);
+> 10 nov. = harta cererii, cifre noi (adusă de pe 8 dec., care rămâne liber).
 >
 > **Banda de newsletter (homepage):** două coloane, câte o întrebare și o acțiune: „Vrei să afli când apare
 > un teren în zona ta preferată?” → **Fă-ți cont** (terenurile pleacă DOAR la conturi, digestul de luni) |
@@ -50,8 +55,10 @@
 >   grupuri de construcție din Tübingen din 2002, fost board Bundesverband Baugemeinschaften. 4 proiecte:
 >   Licht+Luft și EN FAMILLE (Alte Weberei), Plan G și Familien(t)raum (fosta gară de mărfuri) → mini-seria
 >   „Tübingen, clădire cu clădire”. Plan G = locuință comună pentru 8 oameni cu demență, organizată de grup.
->   Fotografiile DOAR cu acord scris; NU preluăm costul pe m² de la EN FAMILLE. De scris: email către ea
->   (poze + interviu), dacă Lucian confirmă că e în legătură cu ea.
+>   Fotografiile DOAR cu acord scris; NU preluăm costul pe m² de la EN FAMILLE. ✅ Emailul către ea SCRIS (31 oct.), în germană:
+>   `PRIMARII GERMANIA/TUBINGEN/EMAIL_Lucia_Landenberger.txt`. Cere pozele 01-03 Licht+Luft, 04-05 EN FAMILLE (capturi
+>   atașate de Lucian), drepturile/creditul fotografului, acordul scris, plus două întrebări despre coordonare
+>   (ce e cel mai greu, unde se blochează grupurile) cu voie de citare. Îl trimite Lucian.
 
 > **SESIUNEA DIN 30-31 octombrie 2026, noaptea** — **Newsletterul de sâmbătă 31 oct. e GATA DE
 > TRIMIS. ✅ COMIS și ÎMPINS (`8abd6df` + alinierea frazelor despre teren). Nimic de urcat din cPanel.**
@@ -82,7 +89,7 @@
 > Germania/TUBINGEN/` (27 oct.). Verificat în DB; `published_at` rămas 30 oct. 21:28 UTC.
 >
 > **Postările FB / IG / LinkedIn sunt scrise și aprobate**, ca .txt (fără marcaje, de copiat direct) în
-> `calendar postari si episoade/PRIMARII GERMANIA/`: `FB_Tubingen.txt`, `IG_Tubingen.txt`,
+> `calendar postari si episoade/PRIMARII GERMANIA/TUBINGEN/`: `FB_Tubingen.txt`, `IG_Tubingen.txt`,
 > `LINKEDIN_Tubingen.txt`. Se pun DUPĂ newsletter. LinkedIn = unghiul „ce poate face o primărie fără să dea
 > bani” (pârghia pe terenul privat de la gara de mărfuri, comisia cu toate partidele, de ce nu pierde orașul
 > bani). Poza din postări = vederea aeriană Mühlenviertel, încă FĂRĂ permisiune (alternativa: Wikimedia,
@@ -104,7 +111,7 @@
 > **Articolul:** „Tübingen, Germania: cum vinde primăria terenul grupurilor de construcție”,
 > `https://apartamentual.ro/news.html#tubingen-de-unde-vine-terenul`, categoria `primarii` (baza a
 > acceptat-o: nu există CHECK pe `articles.category`, deci pasul 2 de mai jos nu mai cere SQL).
-> Sursa: `calendar postari si episoade/PRIMARII GERMANIA/articol-site-tubingen.md` (folder negit).
+> Sursa: `calendar postari si episoade/PRIMARII GERMANIA/TUBINGEN/articol-site-tubingen.md` (folder negit).
 > ⚠️ **Pozele sunt publicate FĂRĂ permisiune, la decizia lui Lucian** (riscul explicat: Copytrack/Pixsy,
 > relația cu primăriile germane): sus = vederea aeriană Mühlenviertel din albumul tuebingen.de (luată
 > de Lucian de pe The Urbanist, care n-o creditase); în text = Angela Hammer, Reutlinger
@@ -164,7 +171,7 @@
 > Pe homepage apare abia după urcarea `index.html`. ❓ Deschise în nota articolului: premiul
 > „Deutscher Bauherrenpreis” (scos, neconfirmat; găsit doar Heinze ArchitektenAWARD 2016) și linkul
 > arhitecților din primul comentariu al postării.
-> ❓ **Poza pentru Tübingen** (`calendar postari si episoade/PRIMARII GERMANIA/3686885_1_detail_...jpg`)
+> ❓ **Poza pentru Tübingen** (`calendar postari si episoade/PRIMARII GERMANIA/TUBINGEN/3686885_1_detail_...jpg`)
 > pare fotografie de presă (probabil Schwäbisches Tagblatt), 670×374: fără permisiune nu se folosește.
 >
 > **⏭️ URMĂTORII PAȘI (sesiuni separate):**
