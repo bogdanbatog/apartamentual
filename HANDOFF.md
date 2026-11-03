@@ -1,6 +1,39 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 31 octombrie 2026, ziua** — **Newsletterul TRIMIS (101/101, zero eșecuri) +
+> **⏭️ ULTIMA SESIUNE: 3 noiembrie 2026** — **Zeppelin #179: postare FB/IG/WhatsApp făcută, articol PUBLICAT
+> pe site, buton „Vezi toate articolele” la finalul articolelor (`37e410e`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN
+> cPanel: `frontend/news.html`**, apoi Ctrl+Shift+R pe un articol și verificat butonul de jos.
+>
+> **Zeppelin #179** (toamnă 2026, „Catalonia: Locuire în colaborare”; la p. 118 articolul LTFB despre Județului,
+> titlul revistei e „Primul cohousing din România”, deci în textele NOASTRE: fără „primul”, fără „cohousing”).
+> - **Reel FB/IG postat** (video 18,8 s, 1080×1920, cu muzică din CapCut): https://www.facebook.com/reel/1507421164540409.
+>   Textul final al lui Lucian; pe FB un comentariu cu librăriile + expoziția. Trimis și în comunitatea WhatsApp
+>   și în grupurile WhatsApp de pe platformă (variantă cu „idei bune de discutat când veți ajunge la proiectarea
+>   blocului vostru”). Sunetul e un pic încet (−22 LUFS); n-a contat.
+> - **Articol PUBLICAT 3 nov.**: `news.html#zeppelin-179-locuire-in-colaborare`, raftul `exemple`, 405 cuvinte.
+>   Sursa: `calendar postari si episoade/2026.11.03 revista zeppelin/articol-site-zeppelin-179.md`; card =
+>   `card-site-zeppelin.jpg`, din poza `20261103_135714.jpg` (revista oblic pe masă; telefonul salvează pozele
+>   orizontale întoarse, deci `transpose=2` în ffmpeg). Lucian a scos fraza „scara și holul cât mai mici, nu aduc
+>   profit” (nici la Județului n-au mărit circulațiile); titlul de secțiune e „Se poate și în România?”.
+>   ⚠️ **Paragraful cu expoziția expiră pe 22 nov.**: de scos sau trecut la trecut (corectura nu schimbă data).
+>   ❓ Ar câștiga cu un exemplu concret din revistă și un citat din interviuri (Davidovici, Suditu), dacă Lucian le dă.
+> - **Expoziția „Catalonia: Locuirea în colaborare”** (Zeppelin + UrbanEye): ARCUB, Sala Arcelor, Lipscani 84-90,
+>   până pe **22 nov.**, mie-dum 12-20, intrare liberă. Pagina: e-zeppelin.ro/catalonia-locuirea-in-colaborare-o-expozitie-in-cadrul-festivalului-de-film-urbaneye-bucuresti-2026/
+>   Numărul #179 NU are încă pagină de vânzare pe e-zeppelin.ro (magazinul merge până la #178); librării: e-zeppelin.ro/librarii/
+> - **Pozele de pe e-zeppelin.ro NU le-am folosit**: sunt ale fotografilor (La Chalmeta = José Hevia, La Morada =
+>   Leyre Pérez). Idee neexecutată: mesaj către redacție pentru coperta #179 oficială și acordul pe o fotografie;
+>   schimbarea pe site = `--imagine-noua`.
+>
+> **⏭️ URMĂTOARELE:**
+> 1. **Newsletter cu Zeppelin + expoziția**: recomandat ~7-10 nov. (ultimul a plecat pe 31 oct., prea devreme
+>    acum), cât e încă deschisă expoziția. În calendarul v9, 7 nov. = articolul despre asociere și 14 nov. =
+>    articol + newsletter: de decis cu Lucian dacă Zeppelin intră în newsletterul din 14 nov.
+> 2. **Email de bun venit** (pus deoparte de Lucian, „o să revin”): propunerea și întrebarea deschisă sunt în
+>    NOTES.md, TODO 2026-11-03.
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 31 octombrie 2026, ziua** — **Newsletterul TRIMIS (101/101, zero eșecuri) +
 > banda de newsletter de pe homepage rescrisă (`aea960c`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN cPanel:
 > `frontend/index.html` și `frontend/register.html`**, apoi Ctrl+Shift+R, nelogat (banda e `js-marketing-only`).
 >
