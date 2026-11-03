@@ -412,6 +412,16 @@
                 <a id="shareFacebook" class="article-share__btn" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i> Facebook</a>
             </div>
         </div>
+
+        <!-- Înapoi la listă și la finalul articolului, ca să nu urci până sus -->
+        <style>
+            .article-end-back{ margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+            .article-end-back a{ display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.2rem; font-size: 0.95rem; font-weight: 600; color: #1a1a1a; text-decoration: none; border: 1px solid rgba(0,0,0,0.18); border-radius: 0.6rem; transition: background .2s ease, color .2s ease; }
+            .article-end-back a:hover{ background: #1a1a1a; color: #fff; }
+        </style>
+        <div class="article-end-back">
+            <a href="#" onclick="showList(); return false;"><i class="fas fa-arrow-left"></i> Vezi toate articolele</a>
+        </div>
     </div>
 
     <div id="footer"></div>
@@ -681,6 +691,8 @@
         document.querySelector('.news-hero').style.display = 'block';
         window.location.hash = '';
         document.title = 'Articole - ApartamenTUal';
+        // Cine apasă „înapoi” de la finalul articolului ar rămâne jos în pagină.
+        window.scrollTo(0, 0);
     }
     
     // Handle back button
