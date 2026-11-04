@@ -19,7 +19,11 @@
 >     câteva spații comune”. ❓ Neconfirmat: vernisajul a fost la ARCUB, Sala Arcelor?
 >
 > **⏭️ URMĂTOARELE:** emailul de bun venit pentru conturile noi (NOTES, TODO 2026-11-03), sesiune nouă. Decis: Lucian
-> semnează și tot el răspunde; de ales adresa de reply-to.
+> semnează și tot el răspunde, reply-to `apartamentual@ltfbstudio.ro` (o citește). **4 nov.: TEXTUL E APROBAT**
+> (literal în NOTES, TODO 2026-11-03, inclusiv rândul despre grupul de WhatsApp din „Spațiul tău”).
+> **4 nov. seara: CONSTRUIT ȘI PORNIT.** Edge function `email-bun-venit` (deployată), SQL `db_schema/email-bun-venit/`
+> (rulat), cron jobid 3, zilnic la 10:09. ⏳ **5 nov., după 10:09:** pe Slack trebuie să apară „6 trimise”; altfel
+> PASUL 2 din `2-programare.sql`. „Stop” → `insert into public.emailuri_stop`.
 >
 > ---
 >
