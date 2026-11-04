@@ -7,7 +7,7 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## TODO
 
-- [ ] **2026-11-04 — Neconcordanțe rămase după rescrierea paginii de legislație (de corectat într-o sesiune separată)**
+- [x] **2026-11-04 — Neconcordanțe rămase după rescrierea paginii de legislație** ✅ **FĂCUT 4 nov., `bdb9075`** (urcat din cPanel și verificat de Lucian). Toate 4 corectate; întrebările FAQ neschimbate. Pre-apartamentarea rămâne în așteptare (mai jos).
   (1) `ce-este/cum-functioneaza.html` ~l. 600: „de verificat cu un expert contabil” dacă trecerea de la SRL la membri e vânzare cu TVA; pe legislație scrie acum că ESTE vânzare. (2) `js/faq.js` „Ce forme juridice pot folosi?”: cooperativa „potrivită pentru proiecte mai mari”. (3) `faq.js` „Ce se întâmplă dacă un membru vrea să se retragă?”: „își recuperează contribuțiile, minus penalități”; pagina spune că banii vin de la înlocuitor, nu de la grup. (4) `faq.js` finanțare: contribuții „proporționale cu suprafața”, pe pagini e „după cotă”. ⚠️ FAQ-ul are top 6 pe potrivire de text EXACT (vezi memoria `faq-doua-moduri-top-si-complet`).
   ⏳ Pre-apartamentarea: Lucian vorbește cu un cadastrist înainte să scriem ceva concret (pe legislație rămâne „de verificat cu OCPI”; de pe finanțare scos).
 
@@ -24,7 +24,7 @@ Nu acționa pe niciuna fără confirmare explicită.
   **Propunerea:** un email trimis DUPĂ completarea profilului (atunci știm numele, zonele, ce caută), semnat de Lucian ca om, nu de „Echipa”: un rând despre Județului; personalizat cu zonele alese („acolo sunt acum N oameni și G grupuri”); un singur pas următor; sinceritate despre durată și implicare; întrebarea „ce te-a adus aici?”, la care se poate răspunde. Ciorna textului e în conversația din 2 nov. (subiect „Ce urmează după ce ți-ai făcut cont”). Mai târziu, eventual un al doilea email la 7 zile, doar pentru cei fără primul pas.
   **Tehnic, recomandat:** cron zilnic (ca digestul de terenuri) + edge function nouă + tabelă-jurnal anti-dublare, NU agățat de `?welcome=1` (intrările prin invitație îl pot pierde; `notify-admins` întoarce mereu 200). Zero atingere a plăților.
   ⚠️ **Condiția:** emailul cu „răspunde-mi” merge doar dacă cineva chiar răspunde; cele 3 răspunsuri la trezirea din 1 oct. erau încă fără răspuns. Reply-to pe o adresă citită zilnic, nu `apartamentual@ltfbstudio.ro`.
-  ❓ **Întrebarea deschisă pentru Lucian:** cine semnează și cine răspunde (Lucian singur sau Lucian + Liviu)?
+  ✅ **Decis 4 nov.:** Lucian semnează și tot Lucian răspunde. ❓ Rămâne de ales adresa de reply-to (una citită zilnic de Lucian).
 
 - [ ] **2026-10-30 — News pe rafturi (decis de Lucian, de făcut într-o sesiune nouă)**
   **Decizia:** patru rafturi = categorii: **Serialul Județului Housing** (valoarea din DB `prototip` rămâne, se schimbă doar eticheta), **Ghiduri** (asocierea, apoi banii, constructorul), **Exemple din Europa** (`exemple`), **Cum ajută primăriile** (nouă). Pe **homepage**: câte un raft cu primele 2-3 articole vizibile direct (NU carduri-folder care se deschid). Serialul în ordine de la primul episod; celelalte de la nou la vechi. Pe **news.html**: filtrele = cele 4 rafturi + „Toate”; dispar Legal / Analize / Noutăți (goale).

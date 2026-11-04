@@ -1,9 +1,30 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 4 noiembrie 2026** — **Pagina de legislație rescrisă din articolul despre asociere +
-> pagină nouă de finanțare (`1cf0c0e`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN cPanel: `frontend/ce-este/legislatia-romania.html`,
-> `frontend/ce-este/finantarea.html` (NOUĂ), `frontend/ce-este/index.html`, `frontend/ce-este/cum-functioneaza.html`,
-> `frontend/js/faq.js`**, apoi Ctrl+Shift+R pe `/ce-este/legislatia-romania.html` și `/ce-este/finantarea.html`.
+> **⏭️ ULTIMA SESIUNE: 4 noiembrie 2026, după-amiaza** — **Cele 4 neconcordanțe corectate (`bdb9075`, ✅ COMIS,
+> ÎMPINS și URCAT din cPanel, verificat de Lucian) + postările UrbanEye / vernisaj Zeppelin pregătite.**
+>
+> - **Corecturile:** `cum-functioneaza.html` (SRL = vânzare cu TVA, calculul cu expertul contabil de la înființare);
+>   `faq.js`: formele juridice (cele două modele, cooperativa fără „proiecte mai mari”), retragerea (banii de la
+>   înlocuitor, preț plafonat de formulă), finanțarea (după cotă, nu după suprafață). Întrebările FAQ neschimbate.
+> - **Postarea UrbanEye + vernisaj Zeppelin (3 nov.)**, în `calendar postari si episoade/2026.11.04 urbaneye si
+>   vernisaj zeppelin/` (negit): conferința Vaivera Arquitectura (Fina Urpí, Ivan Mata, de la care a pornit dosarul
+>   Zeppelin) + discuția de la vernisaj, cu Liviu, despre cooperativa lor (au început ca noi, acum cel puțin 20 de ani).
+>   - `fb/` = 5 poze întregi (întoarse, ușor corectate), `ig/` = aceleași, pătrate 1080 (pe scenă se pierde femeia
+>     din dreapta). `text-postare-fb-ig.txt` = pagina FB/IG + varianta pentru grupul FB „Comunitatea ApartamenTUal”.
+>   - `text-postare-linkedin.txt` = revista + seara de ieri (nu exista postare LinkedIn despre revistă). 4 poze:
+>     `card-site-zeppelin.jpg` (din folderul 3 nov.), `fb/1`, `fb/3`, `fb/2`.
+>   - Întrebarea din grup și LinkedIn (formularea lui Lucian): avans mic + chirie fixă + drept de folosință pe viață,
+>     fără proprietate, sau proprietatea contează mai mult? Răspunsurile = material pentru o postare.
+>   - Liviu pe LinkedIn: „arh. Liviu Fabian, cofondator LTFB Studio”. Județului = „un bloc cu cinci apartamente și
+>     câteva spații comune”. ❓ Neconfirmat: vernisajul a fost la ARCUB, Sala Arcelor?
+>
+> **⏭️ URMĂTOARELE:** emailul de bun venit pentru conturile noi (NOTES, TODO 2026-11-03), sesiune nouă. Decis: Lucian
+> semnează și tot el răspunde; de ales adresa de reply-to.
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 4 noiembrie 2026, dimineața** — **Pagina de legislație rescrisă din articolul despre asociere +
+> pagină nouă de finanțare (`1cf0c0e`, ✅ COMIS, ÎMPINS și URCAT).**
 >
 > - **Legislația = doar partea juridică:** cele două modele (1 proprietate la final: 1a societate simplă/GbR,
 >   1b SRL; 2 cooperativa, cu chirie), „Contractul de asociere: ce cuprinde” (după Heinzmann, ancora
@@ -17,8 +38,7 @@
 >   pre-apartamentare vorbește întâi cu un cadastrist).
 > - Articolul despre asociere (programat 7 nov.) poate trimite acum la pagină; după urcare, linkul e valid.
 >
-> **⏭️ URMĂTOARELE (din sesiunea asta):** corectarea celor 4 neconcordanțe din `cum-functioneaza.html` și
-> `faq.js`, listate în NOTES.md, TODO 2026-11-04. Sesiune separată.
+> ✅ Cele 4 neconcordanțe din `cum-functioneaza.html` și `faq.js`: corectate în sesiunea următoare (`bdb9075`).
 >
 > ---
 >
@@ -26,7 +46,7 @@
 > pe site, buton „Vezi toate articolele” la finalul articolelor (`37e410e`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN
 > cPanel: `frontend/news.html`**, apoi Ctrl+Shift+R pe un articol și verificat butonul de jos.
 >
-> **Zeppelin #179** (toamnă 2026, „Catalonia: Locuire în colaborare”; la p. 118 articolul LTFB despre Județului,
+> **Zeppelin #179** (toamnă 2026, „Catalonia: Locuire în colaborare”; la p. 118 articolul REVISTEI (nu scris de noi) despre Județului,
 > titlul revistei e „Primul cohousing din România”, deci în textele NOASTRE: fără „primul”, fără „cohousing”).
 > - **Reel FB/IG postat** (video 18,8 s, 1080×1920, cu muzică din CapCut): https://www.facebook.com/reel/1507421164540409.
 >   Textul final al lui Lucian; pe FB un comentariu cu librăriile + expoziția. Trimis și în comunitatea WhatsApp
