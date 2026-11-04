@@ -1,6 +1,28 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 3 noiembrie 2026** — **Zeppelin #179: postare FB/IG/WhatsApp făcută, articol PUBLICAT
+> **⏭️ ULTIMA SESIUNE: 4 noiembrie 2026** — **Pagina de legislație rescrisă din articolul despre asociere +
+> pagină nouă de finanțare (`1cf0c0e`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN cPanel: `frontend/ce-este/legislatia-romania.html`,
+> `frontend/ce-este/finantarea.html` (NOUĂ), `frontend/ce-este/index.html`, `frontend/ce-este/cum-functioneaza.html`,
+> `frontend/js/faq.js`**, apoi Ctrl+Shift+R pe `/ce-este/legislatia-romania.html` și `/ce-este/finantarea.html`.
+>
+> - **Legislația = doar partea juridică:** cele două modele (1 proprietate la final: 1a societate simplă/GbR,
+>   1b SRL; 2 cooperativa, cu chirie), „Contractul de asociere: ce cuprinde” (după Heinzmann, ancora
+>   `#contractul-de-asociere`), caseta cu notările în CF, pre-apartamentarea („de verificat cu OCPI”), „Legile care
+>   se aplică” (Codul civil, 114/1996, 196/2018, 31/1990, 1/2005, Strategia). Diacritice peste tot.
+> - **Scoase, la decizia lui Lucian:** contractul Județului (Art. 1-11) + anexele cu planuri (pozele rămân în
+>   `ce-este/img/`), fazele de avizare/autorizare (revin doar dacă le cere cineva), legile de construcție
+>   (50/1991, 10/1995, 350/2001, HG 343, Ord. 839), „30 de zile la organul fiscal”.
+> - **`ce-este/finantarea.html`**: cele două variante de finanțare, mutate; fără fraza „proiectul rămâne solid” și
+>   fără trimiterea la excepția pentru bancă/pre-apartamentare (Lucian: detaliile se discută cu banca; la
+>   pre-apartamentare vorbește întâi cu un cadastrist).
+> - Articolul despre asociere (programat 7 nov.) poate trimite acum la pagină; după urcare, linkul e valid.
+>
+> **⏭️ URMĂTOARELE (din sesiunea asta):** corectarea celor 4 neconcordanțe din `cum-functioneaza.html` și
+> `faq.js`, listate în NOTES.md, TODO 2026-11-04. Sesiune separată.
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 3 noiembrie 2026** — **Zeppelin #179: postare FB/IG/WhatsApp făcută, articol PUBLICAT
 > pe site, buton „Vezi toate articolele” la finalul articolelor (`37e410e`, ✅ COMIS și ÎMPINS). ⚠️ DE URCAT DIN
 > cPanel: `frontend/news.html`**, apoi Ctrl+Shift+R pe un articol și verificat butonul de jos.
 >
