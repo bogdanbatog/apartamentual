@@ -1,6 +1,47 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 4 noiembrie 2026, după-amiaza** — **Cele 4 neconcordanțe corectate (`bdb9075`, ✅ COMIS,
+> **⏭️ ULTIMA SESIUNE: 5 noiembrie 2026, seara** — **Seria TVR „Intrare liberă”: toate 5 postările PROGRAMATE în
+> Business Suite (FB + IG, 9:00, cu Facebook story).** Sursa: `calendar postari si episoade/2026.11.05 postari cu
+> emisiunea Intrare Libera TVR Cultural/postari-facebook.txt` (negit, actualizat cu textele aprobate).
+>
+> - **Datele:** 1 = vin. 6 nov. · 2 = **mar. 10** (Lucian a programat-o din greșeală marți; decis să rămână, restul
+>   decalat) · 3 = joi 12 · 4 = sâm. 14 · 5 = lun. 16.
+> - **Postarea 2 = testul:** linkurile DOAR în primul comentariu (în text: „Momentul din emisiune și articolul complet:
+>   în primul comentariu.”). Marți 10, la 9:00, Lucian scrie comentariul (text în fișier) + etichetele.
+> - **Miercuri 11 nov.:** Insights, postarea 1 vs 2 (Reach + clicuri pe link). Dacă câștigă comentariul, se modifică
+>   3-5 înainte de joi (sunt programate cu linkurile în text).
+> - **Retușuri aprobate:** 2 („o știm cu toții”, „a explicat diferența: de data aceasta…”, scos „Nimeni nu e obligat
+>   să stea cu nimeni”); 3 „ministerul dezvoltării”; 4 Suditu „expert în politici urbane și conferențiar la Facultatea
+>   de Geografie din București” + fraza cu citatul refăcută; 5 Ghenciulescu „(arhitect, redactor-șef adjunct al
+>   revistei Zeppelin)”. Hashtagurile rămân și pe FB (decis: aceeași formă pe toată seria).
+> - ⏳ Citatul din 4 („dezvoltat, testat, sprijinit”, ~18:11) de verificat de Lucian pe video înainte de 14 nov.
+> - Etichetele (TVR Cultural, invitații, Zeppelin, LTFB) se pun după publicare, din „Editează postarea” pe FB.
+> - Tehnic: în Business Suite poza se urcă interceptând `HTMLInputElement.prototype.click` (altfel fereastră nativă);
+>   „Schedule” îl apasă Lucian (clicul e blocat pentru Claude). Data scrisă în câmp trebuie confirmată (clic în afară).
+> - **Emailul cu Zeppelin #179 NU a fost trimis încă.** Newsletterul din 31 oct. a fost Tübingen + WhatsApp; Zeppelin
+>   intră în emailul din 7 nov. (asocierea + Zeppelin/UrbanEye/ARCUB + TVR), vezi NOTES, TODO 2026-11-05 URGENT.
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 5 noiembrie 2026** — **Emailul de bun venit MERGE (confirmat de Lucian) + 3 retușuri de text
+> (`a0b8ba3`, `0ea9f3c`, `50d4aa4`, `dfc72f3`, ✅ COMISE, ÎMPINSE și DEPLOYATE în Supabase, `--no-verify-jwt`).**
+>
+> - **După buton, în toate variantele (A / B / B0):** „În „Spațiul tău” de pe platformă vei găsi primii pași, iar dacă
+>   ai vreo dificultate ne poți întreba oricând, gratuit.” + „Tot acolo găsești și grupul de discuții generale pe
+>   WhatsApp.” (înlocuiesc „Te vom ghida și noi pas cu pas…” și „Avem și un grup… Îl găsești în „Spațiul tău”…”).
+>   Actualizat și în NOTES (TODO 2026-11-03), cu formulările vechi păstrate.
+> - **B0 (nimeni altcineva în zone):** text aprobat de Lucian pe 4 nov. (comentariul din `index.ts`, ~rândul 240).
+>   Ultima frază: „Apoi veți putea vorbi pe WhatsApp și veți putea căuta împreună terenuri.” (fraza cu „iar noi îți
+>   arătăm pașii” a fost pusă și scoasă azi, se repeta cu fraza de după buton). B0 NU e literal în NOTES, doar în cod.
+> - Textele noi pleacă de la trimiterea din 6 nov., 10:09. Lucian: nu e nevoie de email de probă.
+> - **B0, „zonele apropiate” (`dfc72f3`, deployat):** acum spune cum: „Poți filtra utilizatorii după oraș și zonă, ca
+>   să vezi cine caută în zonele apropiate de ale tale, și îi poți invita în grupul creat de tine.” (filtrul Oraș →
+>   Zonă din `utilizatori.html`, o zonă o dată). Lăsat așa: „pe platformă” pe buton și în fraza de după.
+> - Necommitate în continuare: `db_schema/email-bun-venit/3-diagnostic.sql`, `4-reparatie-secret.sql`, NOTES, HANDOFF.
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 4 noiembrie 2026, după-amiaza** — **Cele 4 neconcordanțe corectate (`bdb9075`, ✅ COMIS,
 > ÎMPINS și URCAT din cPanel, verificat de Lucian) + postările UrbanEye / vernisaj Zeppelin pregătite.**
 >
 > - **Corecturile:** `cum-functioneaza.html` (SRL = vânzare cu TVA, calculul cu expertul contabil de la înființare);
@@ -22,8 +63,10 @@
 > semnează și tot el răspunde, reply-to `apartamentual@ltfbstudio.ro` (o citește). **4 nov.: TEXTUL E APROBAT**
 > (literal în NOTES, TODO 2026-11-03, inclusiv rândul despre grupul de WhatsApp din „Spațiul tău”).
 > **4 nov. seara: CONSTRUIT ȘI PORNIT.** Edge function `email-bun-venit` (deployată), SQL `db_schema/email-bun-venit/`
-> (rulat), cron jobid 3, zilnic la 10:09. ⏳ **5 nov., după 10:09:** pe Slack trebuie să apară „6 trimise”; altfel
-> PASUL 2 din `2-programare.sql`. „Stop” → `insert into public.emailuri_stop`.
+> (rulat), cron jobid 3, zilnic la 10:09. **5 nov.: la 10:09 n-a plecat nimic** (401, secret greșit lipit în cron);
+> reparat cu `4-reparatie-secret.sql`, secretul e acum identic cu al digesturilor. ✅ **5 nov.: confirmat de Lucian că
+> a mers** (vezi sesiunea de sus). Dacă pare vreodată că nu pleacă: `db_schema/email-bun-venit/3-diagnostic.sql`. Necommitate: `3-diagnostic.sql`,
+> `4-reparatie-secret.sql`, NOTES, HANDOFF. „Stop” → `insert into public.emailuri_stop`.
 >
 > ---
 >
