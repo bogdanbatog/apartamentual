@@ -243,7 +243,7 @@ function continut(om: Om) {
     paragrafVarianta = [
       `În zonele pe care le-ai ales (${zone}) încă nu s-a mai înscris nimeni în afară de tine și nu există niciun grup. ` +
       'Un grup începe cu cineva care îl creează și îi invită pe ceilalți. ' +
-      'Poți vedea cine caută în zonele apropiate și îi poți invita în grupul creat de tine. ' +
+      'Poți filtra utilizatorii după oraș și zonă, ca să vezi cine caută în zonele apropiate de ale tale, și îi poți invita în grupul creat de tine. ' +
       'Apoi veți putea vorbi pe WhatsApp și veți putea căuta împreună terenuri.',
     ]
     buton = { text: 'Vezi cine mai caută pe platformă', href: LINK_UTILIZATORI }
