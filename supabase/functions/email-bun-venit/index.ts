@@ -259,8 +259,8 @@ function continut(om: Om) {
     ],
     buton,
     dupaButon: [
-      'Te vom ghida și noi pas cu pas și ne poți întreba oricând.',
-      'Avem și un grup de discuții generale pe WhatsApp. Îl găsești în „Spațiul tău”, după ce te autentifici.',
+      'În „Spațiul tău” de pe platformă vei găsi primii pași, iar dacă ai vreo dificultate ne poți întreba oricând, gratuit.',
+      'Tot acolo găsești și grupul de discuții generale pe WhatsApp.',
       '**Am o singură întrebare: ce te-a adus aici?** Poți răspunde direct la acest email, chiar și cu un rând. Citesc tot ce primesc.',
     ],
     semnatura: ['Mulțumesc,', 'Lucian Luță', 'arhitect, co-fondator ApartamenTUal'],
