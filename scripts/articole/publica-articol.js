@@ -200,6 +200,11 @@ if (!secret) {
     return;
   }
   console.log(`\n✅ ${date.actiune} · ${date.status} · ${date.imagine}`);
-  if (date.status === 'published') console.log(`   ${date.adresa}`);
+  if (date.status === 'published') {
+    console.log(`   ${date.adresa}`);
+    console.log('\n   Pentru previzualizarea pe Facebook/WhatsApp (cu poza articolului):');
+    console.log('     node scripts/articole/pagini-distribuire.js');
+    console.log(`   apoi commit + push + cPanel. Linkul de distribuit: https://apartamentual.ro/a/${articol.slug}.html`);
+  }
   else console.log('   Ciorna: o vezi in admin. Cand e buna, ruleaza din nou cu --publica.');
 })().catch(e => { console.error('\n⛔ ' + e.message); process.exitCode = 1; });
