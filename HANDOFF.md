@@ -1,6 +1,55 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ ULTIMA SESIUNE: 5 noiembrie 2026, seara** — **Seria TVR „Intrare liberă”: toate 5 postările PROGRAMATE în
+> **⏭️ SESIUNEA URMĂTOARE: EMAILUL CĂTRE UTILIZATORI** (asocierea = buton mare; la final Zeppelin #179 +
+> UrbanEye/ARCUB și TVR, linkuri simple). Planul complet în NOTES, TODO 2026-11-05 URGENT. Folosește linkurile noi
+> `/a/<slug>.html` (au previzualizare proprie). Infrastructura: `scripts/emailuri-*` (probă → test → trimitere).
+>
+> ---
+>
+> **SESIUNEA 7 nov. (după-amiază): PREVIZUALIZAREA LA DISTRIBUIRE ✅ FĂCUTĂ, pe site, probată pe Facebook.**
+>
+> - **Commit `27714c4`** (push + deploy cPanel de Lucian): `scripts/articole/pagini-distribuire.js` citește
+>   articolele publicate (cheia anonimă, doar citire) și scrie `frontend/a/<slug>.html` cu og:title/description/
+>   image (= `image_url`) + dimensiunile pozei; `og:url` și canonical = pagina `/a/` însăși; `noindex`;
+>   redirect **doar JS** spre `/news.html#<slug>` (fără meta refresh: crawlerul FB îl urmează și ar lua din nou
+>   og-ul din news). 12 pagini generate. `publica-articol.js` amintește de generator după `--publica`.
+>   `news.html`: og/twitter description fără „primului mic bloc”.
+> - **Verificat:** curl cu UA `facebookexternalhit` = 200 + og corect; în Chrome `/a/...` duce la articol;
+>   Lucian: Sharing Debugger „Scrape Again” OK.
+> - **La fiecare articol nou:** `node scripts/articole/pagini-distribuire.js` → commit → push → cPanel.
+>   Linkul de distribuit: `https://apartamentual.ro/a/<slug>.html`.
+> - **⏳ De corectat:** rezumatul episodului 4 (`judetului-housing-episodul-4-spatiile-comune`) are „spaţii”
+>   cu ţ cu sedilă (din Supabase): din admin, apoi generatorul din nou. Brutopia și De Sijs n-au poză
+>   (previzualizare = randarea Județului).
+> - Migrarea mare (SEO, articole ca pagini reale) rămâne separată: memoria articole-fara-url-propriu.
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 6-7 noiembrie 2026** — **Articolul despre asociere ✅ PUBLICAT sâmbătă 7 nov. ~12:14**, cu
+> coperta cărții lui Heinzmann pe card (verificat cu cheia anonimă). Mesaj pe WhatsApp cu articolul TVR + anunțul
+> articolului despre asociere: scris împreună cu Lucian, trimis de el.
+>
+> - **Fișierul:** `calendar postari si episoade/ASOCIERE/articol-site-asociere.md` (negit). Slug
+>   `cum-se-asociaza-un-grup-de-constructie`, raftul `ghiduri`, titlu „Cum se asociază un grup care își construiește
+>   blocul”, ~1.330 de cuvinte.
+> - **Textul = ciorna 06 aproape literal** (decis de Lucian: „oamenii poate citesc doar acest articol, e ok dacă se
+>   repetă” cu `ce-este/legislatia-romania.html`). Schimbat doar: cele două modele numerotate 1. / 2. (nu puncte),
+>   timp neutru la notările din CF (fără „le verificăm acum”), fără ANAF, pre-apartamentarea paragraf separat
+>   („rămâne de verificat cu OCPI”), „vom scrie un articol despre finanțare” → linkuri spre `finantarea.html` și
+>   `legislatia-romania.html`, notă finală în italic (caracter general, avocat + notar).
+> - **Cardul:** coperta reală a cărții lui Heinzmann (de pe Amazon, după ISBN; 346×500, pusă ca obiect pe fundal
+>   bej) + schema „Forme de asociere în România, azi” (1 / 1a / 1b / 2). Fișier `card-site-asociere-coperta.jpg`,
+>   **încă neurcat**: ciorna din Supabase are varianta veche (`card-site-asociere.jpg`, foto pagina de titlu).
+> - ✅ (făcut 7 nov.) **Sâmbătă 7 nov.:** Lucian dă parola → `$env:ARTICOLE_SECRET="..."; node scripts/articole/publica-articol.js
+>   "calendar postari si episoade/ASOCIERE/articol-site-asociere.md" --publica --imagine-noua` (fără `--imagine-noua`
+>   rămâne poza veche). Verificare după: `news.html#cum-se-asociaza-un-grup-de-constructie`.
+> - ⏭️ **Apoi, sesiune separată: emailul către utilizatori** (asocierea = buton mare; la final, linkuri simple:
+>   Zeppelin #179 + UrbanEye/ARCUB, TVR cu fraza aprobată). Tot planul în NOTES, TODO 2026-11-05 URGENT.
+> - ⚠️ Parola a fost scrisă în conversație pe 6 nov.; Lucian poate s-o schimbe când vrea (README din `scripts/articole/`).
+>
+> ---
+>
+> **SESIUNEA DINAINTE: 5 noiembrie 2026, seara** — **Seria TVR „Intrare liberă”: toate 5 postările PROGRAMATE în
 > Business Suite (FB + IG, 9:00, cu Facebook story).** Sursa: `calendar postari si episoade/2026.11.05 postari cu
 > emisiunea Intrare Libera TVR Cultural/postari-facebook.txt` (negit, actualizat cu textele aprobate).
 >
