@@ -1,8 +1,12 @@
 # HANDOFF — ApartamenTUal
 
-> **⏭️ SESIUNEA URMĂTOARE: EMAILUL CĂTRE UTILIZATORI** (asocierea = buton mare; la final Zeppelin #179 +
-> UrbanEye/ARCUB și TVR, linkuri simple). Planul complet în NOTES, TODO 2026-11-05 URGENT. Folosește linkurile noi
-> `/a/<slug>.html` (au previzualizare proprie). Infrastructura: `scripts/emailuri-*` (probă → test → trimitere).
+> **SESIUNEA 7 nov. (după-amiază, 2): NEWSLETTERUL DESPRE ASOCIERE ✅ TRIMIS** ~14:09, 107 destinatari
+> (98 conturi + 9 abonați), zero eșecuri. Scos `riltabutru@necub.com` (decizia lui Lucian, în `EXCLUSI_IMPLICIT`).
+> Fișiere: `db_schema/emailuri-newsletter-2026-11-07/1-lot-pentru-email.sql` (ca 31 oct. + exclude `emailuri_stop`),
+> `scripts/emailuri-newsletter-2026-11-07/` (script + README). Linkurile duc pe `news.html?utm_campaign=2026-11-07#slug`,
+> nu pe `/a/` (redirectul `/a/` pierde `utm`). Banii, formulat la cererea lui Lucian: „fiecare familie a plătit separat
+> partea ei din facturi, după cota din contract” (nu „direct constructorului”: sună a bani în mână).
+> **⏭️ De urmărit:** răspunsurile la apartamentual@ (cine zice „stop” → `emailuri_stop`); Plausible, campania `2026-11-07`.
 >
 > ---
 >
