@@ -7,6 +7,12 @@ Nu acționa pe niciuna fără confirmare explicită.
 
 ## TODO
 
+- [ ] **2026-11-13 — Homepage-ul leagă articolele spre `news.html#slug`** (`index.html` ~3428, ~4399, ~4423). Merge prin
+  redirectul din `news.html` (HEAD pe `/a/<slug>.html`), dar cu un salt în plus și fără link direct pentru Google.
+  De schimbat la `/a/<slug>.html`. Vezi SEO Etapa 2 (`ba89f55`).
+- [ ] **2026-11-13 — Paginile `/a/` se regenerează de mână.** Orice articol nou/corectură = `node scripts/articole/pagini-distribuire.js`
+  + commit + cPanel. Dacă se uită, Google vede textul vechi. De automatizat odată cu deploy-ul (vezi memoria homepage-v9-next-steps).
+
 - [ ] **2026-11-10 — Grup pe Dămăroaia? Așteptăm omul din grupul Parcul Circului** (Lucian i-a scris pe 10 nov.)
   **Cifre (10 nov.):** 8 oameni au Dămăroaia (105) sau Dămăroaia / Petrom (107); fără utilizatorul care a bifat tot orașul (numele în `db_schema/grupuri-whatsapp/2-…sql`, local) rămân **7**. Niciunul nu caută țintit (toți > 5 zone). Zonele comune lor: Domenii, Aviației (6 din 7), București Noi, Pajura, Romexpo (5). Cu vecinii (Domenii, 1 Mai, Romexpo, București Noi, Pajura, Chitila - Triaj): 34 de oameni, Domenii singură 29.
   **Interogări:** `db_schema/zona-damaroaia/` 1 (cifre pe zone), 2 (ce alte zone au bifat), 3 (lista nominală, cu emailuri; rezultatul NU se salvează în repo).

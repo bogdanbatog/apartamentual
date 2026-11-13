@@ -1,5 +1,29 @@
 # HANDOFF — ApartamenTUal
 
+> **SESIUNEA 13 nov. (3): SEO ETAPA 2 FĂCUTĂ — commit `ba89f55`, push făcut. ⏳ NEURCATĂ pe cPanel.**
+>
+> - `/a/<slug>.html` = pagina reală a articolului: text complet scris în HTML, meniu/subsol, poza, CTA din mijloc,
+>   distribuire, navigare episoade + newsletter la episoade, Article JSON-LD, **fără `noindex`, fără redirect**.
+>   Stilurile în `frontend/css/articol.css` (copiate din vederea de articol din `news.html`).
+> - Generatorul `scripts/articole/pagini-distribuire.js` scrie și blocul ARTICOLE din `sitemap.xml` (12 articole,
+>   `lastmod` = `updated_at`). Articol retras / slug schimbat → pagina devine `noindex` + trimite la `/news.html`.
+>   ⚠️ **Se rulează după FIECARE articol nou și FIECARE corectură** (altfel pagina rămâne cu textul vechi).
+> - `news.html`: `#slug` și cardurile → `HEAD /a/<slug>.html` → dacă există, merge acolo; altfel arată articolul
+>   ca înainte. Linkurile vechi distribuite merg.
+> - `nav.js`: pe `/a/` nicio secțiune activă (slug-ul cu „teren” marca „Terenuri”).
+> - Probat local (port 8778): episod 3, Zeppelin, Tübingen, TVR, lățime telefon 390px, redirectul `#slug`, click
+>   pe card, consola fără erori.
+> - **⏭️ Lucian:** (1) urcă în cPanel cele 18 fișiere din `git show --name-only ba89f55`; (2) probă live cu
+>   Ctrl+Shift+R: `/a/judetului-housing-episodul-3-terenul.html` și `/news.html#tubingen-de-unde-vine-terenul`;
+>   (3) Search Console → Sitemaps → retrimite `sitemap.xml` (39 de URL-uri); (4) FB Sharing Debugger „Scrape Again”
+>   pe un articol.
+> - Rămas: homepage-ul leagă încă spre `news.html#slug` (merge, un salt în plus; de schimbat la `/a/`). Plausible
+>   numără de acum citirile la `/a/<slug>.html`. Episodul 4 are încă sedile (de corectat din admin + generator).
+> - **Etapa 3** (peste câteva zile, când are date Search Console): conținut după căutările reale, titlurile cu „ - ”,
+>   date structurate Organization pe homepage.
+>
+> ---
+>
 > **SESIUNEA 13 nov. (2): SEO ETAPA 1 FĂCUTĂ — commit `6870ce0`, push făcut. ⏳ NEURCATĂ pe cPanel.**
 >
 > - `frontend/robots.txt` (Allow tot + linia Sitemap; NU blocăm nimic, altfel Google nu vede `noindex`).
