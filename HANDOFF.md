@@ -1,6 +1,22 @@
 # HANDOFF — ApartamenTUal
 
-> **SESIUNEA 13 nov. (3): SEO ETAPA 2 FĂCUTĂ — commit `ba89f55`, push făcut. ⏳ NEURCATĂ pe cPanel.**
+> **SESIUNEA 13 nov. (4): HOMEPAGE → `/a/` — commit `61c1a6f`, push făcut, ✅ LIVE (urcat în cPanel, verificat).**
+>
+> - Verificat pe live: **Etapa 2 e urcată** (`/a/<slug>.html` = 200, fără `noindex`, fără redirect; `sitemap.xml`
+>   are 39 de `<loc>`; `robots.txt` = 200). Deci pașii (1)-(2) de la sesiunea (3) de mai jos sunt făcuți.
+> - `frontend/index.html`, 3 linkuri: cardurile de articol din rafturi, rândul „Articol nou” și rândul
+>   „Episodul N” din cardul de activitate duc direct la `/a/<slug>.html` (nu mai trec prin `news.html#slug`).
+> - ⚠️ Consecință: articol publicat fără să rulezi generatorul = card cu 404 pe homepage (înainte `news.html`
+>   îl arăta oricum). Regula rămâne: `node scripts/articole/pagini-distribuire.js` după FIECARE articol/corectură.
+> - Neatinse, intenționat: `admin.html` („Vezi pe site” rămâne `news.html#`, merge și înainte de generator);
+>   butoanele de distribuire din `news.html` (apar doar când `/a/` lipsește, deci adresa lor e corectă).
+> - **⏭️ Rămas:** Search Console → Sitemaps → retrimite `sitemap.xml`, dacă nu e făcut; sedilele din episodul 4
+>   (admin + generator); **Etapa 3** când Search Console are date (~15-16 nov.): conținut după căutările reale,
+>   titlurile cu „ - ”, date structurate Organization pe homepage.
+>
+> ---
+>
+> **SESIUNEA 13 nov. (3): SEO ETAPA 2 FĂCUTĂ — commit `ba89f55`, push făcut. ✅ URCATĂ pe cPanel (verificat în sesiunea 4).**
 >
 > - `/a/<slug>.html` = pagina reală a articolului: text complet scris în HTML, meniu/subsol, poza, CTA din mijloc,
 >   distribuire, navigare episoade + newsletter la episoade, Article JSON-LD, **fără `noindex`, fără redirect**.
