@@ -3425,7 +3425,8 @@
       var img = imgSrc
         ? '<div class="article-image"><img src="' + esc(imgSrc) + '" alt="' + esc(a.title) + '" loading="lazy"></div>'
         : '<div class="article-image placeholder"></div>';
-      return '<a href="news.html#' + esc(a.slug) + '" class="article-card">'
+      // Direct la pagina articolului (din 13 nov. 2026), ca Google să vadă linkul.
+      return '<a href="/a/' + encodeURIComponent(a.slug || '') + '.html" class="article-card">'
         + img
         + '<p class="article-meta">' + esc(meta) + '</p>'
         + '<h3 class="article-title">' + esc(a.title) + '</h3>'
@@ -4396,7 +4397,7 @@
         var ep = a.slug ? /judetului-housing-episodul-(\d+)/.exec(a.slug) : null;
         randuri.push(randFlux('ochre',
           (ep ? 'Episodul ' + ep[1] + ' din serialul Județului Housing: ' : 'Articol nou: ') +
-          legatura('/news.html#' + encodeURIComponent(a.slug || ''), a.title || 'citește', 'flux-articol') + '.',
+          legatura('/a/' + encodeURIComponent(a.slug || '') + '.html', a.title || 'citește', 'flux-articol') + '.',
           candva(a.published_at)));
       }
 
@@ -4420,7 +4421,7 @@
         var nrEp = e.slug ? /judetului-housing-episodul-(\d+)/.exec(e.slug) : null;
         randuri.push(randFlux('ochre',
           (nrEp ? 'Episodul ' + nrEp[1] + ' din serialul Județului Housing: ' : 'Din serialul Județului Housing: ') +
-          legatura('/news.html#' + encodeURIComponent(e.slug || ''), e.title || 'citește', 'flux-episod') + '. ' +
+          legatura('/a/' + encodeURIComponent(e.slug || '') + '.html', e.title || 'citește', 'flux-episod') + '. ' +
           legatura('/news.html', 'Toate episoadele', 'flux-serial') +
           ', unde te poți abona ca să le primești pe email.'));
       }
