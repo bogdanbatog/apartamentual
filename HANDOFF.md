@@ -1,5 +1,59 @@
 # HANDOFF — ApartamenTUal
 
+> **SESIUNEA 13 nov. (2): SEO ETAPA 1 FĂCUTĂ — commit `6870ce0`, push făcut. ⏳ NEURCATĂ pe cPanel.**
+>
+> - `frontend/robots.txt` (Allow tot + linia Sitemap; NU blocăm nimic, altfel Google nu vede `noindex`).
+> - `frontend/sitemap.xml`: 27 de pagini publice (fără `/a/`, intră în Etapa 2; fără `grup-details`/`teren-details`).
+> - `noindex` pe 22 de pagini: 8 admin, accept-invite, register, 4 profile*, **utilizatori** (decis de Lucian:
+>   lista de oameni nu apare în Google), grup-edit/form/nou/terenuri-edit, terenuri-propune, terenuri-old, prototip.
+> - `canonical` pe toate cele 27 publice (**`www.apartamentual.ro` răspunde 200 fără redirect** = pagini dublate;
+>   canonical-ul rezolvă pentru Google). **✅ Redirect www → fără www FĂCUT și verificat** (301, păstrează calea
+>   și `?id=`), scris de mână în `/home/ar4/app.ltfbstudio.ro/.htaccess` (doar pe server, nu în repo), înaintea
+>   regulii http → https. Pagina cPanel „Redirects” l-a pus greșit (după regula https), de aceea nu mergea.
+> - ✅ Paginile urcate în cPanel, `robots.txt` + `sitemap.xml` live (200), canonical/descriere verificate pe live.
+> - `og:` pe 14 pagini care nu-l aveau; description nou pe homepage + terenuri; testimoniale rescris; „—” scos din
+>   8 titluri. Scriptul folosit: inserare după `<title>`, cu indentarea și EOL-ul fișierului.
+> - **⏭️ Lucian:** (1) urcă în cPanel cele 52 de fișiere din `git show --name-only 6870ce0` (inclusiv
+>   `ce-este/*`, `robots.txt`, `sitemap.xml`); (2) verifică `https://apartamentual.ro/robots.txt` și
+>   `/sitemap.xml` (nu 404); (3) Search Console → Sitemaps → `sitemap.xml` → Trimite.
+> - Rămas pentru Etapa 3: titlurile cu „ - ” (ex. „Grupuri - ApartamenTUal”) de rescris după căutările reale.
+>
+> ---
+>
+> **SESIUNEA 13 nov.: SEO, PORNIRE. ✅ Google Search Console ACTIVAT** (fără cod, nimic în repo).
+>
+> - Proprietate de tip **„Domeniu”** pentru `apartamentual.ro`, verificată cu un TXT `google-site-verification=...`
+>   adăugat de Lucian în **cPanel → Zone Editor**. Verificat din afară pe toate 3 NS (romania-webhosting, clausweb,
+>   registar) + 8.8.8.8; SPF/DKIM/DMARC/_acme-challenge neatinse. **Linia TXT nu se șterge niciodată** (= acces pierdut).
+> - Panoul arată „Date în curs de procesare”: normal, datele apar în 2-3 zile.
+> - **⏭️ Lucian:** adaugă-l pe Liviu (Setări → Utilizatori și permisiuni → Complet).
+>
+> **Auditul SEO (13 nov., doar citit):**
+> - `robots.txt` și `sitemap.xml` lipsesc (404 pe live).
+> - `index.html` și `terenuri.html` fără `meta description`; nicio pagină cu `canonical`; `og:` doar pe 7 pagini.
+> - Admin, profil, editări, `accept-invite` fără `noindex` (au doar `newsletter-confirmat`, `organizare-apartamente`,
+>   `reset-parola`).
+> - **Articolele invizibile pentru Google:** `/a/<slug>.html` = `noindex` + redirect JS la `news.html#slug`
+>   (conținut încărcat din JS, totul după `#` = o singură pagină).
+>
+> **Planul (o sesiune pe etapă, `/clear` între ele):**
+> 1. **⏭️ URMĂTOAREA: Etapa 1, fundația** (~20-25% context, fără plăți/Supabase): `frontend/robots.txt`,
+>    `frontend/sitemap.xml` (doar paginile publice), description pe homepage + terenuri, `noindex` pe paginile
+>    private, `canonical` + `og:` pe paginile publice principale. Diff → aprobare → commit → cPanel. Apoi Lucian:
+>    Search Console → Sitemaps → `sitemap.xml` → Trimite.
+> 2. **Etapa 2, articolele indexabile:** `scripts/articole/pagini-distribuire.js` să scrie textul complet al
+>    articolului în `/a/<slug>.html`, fără `noindex` și fără redirect; în sitemap. Se explică întâi schimbarea.
+> 3. **Etapa 3, conținut după căutările reale** din Search Console + date structurate (Organization, Article).
+>
+> ---
+>
+> **SESIUNEA 8-9 nov.: DISTRIBUIREA ARTICOLULUI DESPRE ASOCIERE** (fără cod). Texte scrise cu Lucian pentru pagina FB,
+> grupul de FB, pagina LTFB, LinkedIn; story vertical `calendar postari si episoade/ASOCIERE/story-asociere-1080x1920.jpg`.
+> Postat înainte de testul TVR din 10 nov.; link în text. Detalii + problema Plausible (`/a/` → Facebook apare „Direct”)
+> în NOTES, TODO 2026-11-09. **⏭️ Miercuri 11 nov.:** Insights TVR 1 vs 2 (vezi mai jos).
+>
+> ---
+>
 > **SESIUNEA 7 nov. (după-amiază, 2): NEWSLETTERUL DESPRE ASOCIERE ✅ TRIMIS** ~14:09, 107 destinatari
 > (98 conturi + 9 abonați), zero eșecuri. Scos `riltabutru@necub.com` (decizia lui Lucian, în `EXCLUSI_IMPLICIT`).
 > Fișiere: `db_schema/emailuri-newsletter-2026-11-07/1-lot-pentru-email.sql` (ca 31 oct. + exclude `emailuri_stop`),
