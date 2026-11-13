@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Doar paginile publice. Articolele (/a/<slug>.html) intră aici în Etapa 2. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://apartamentual.ro/</loc></url>
+  <url><loc>https://apartamentual.ro/terenuri.html</loc></url>
+  <url><loc>https://apartamentual.ro/grupuri.html</loc></url>
+  <url><loc>https://apartamentual.ro/news.html</loc></url>
+  <url><loc>https://apartamentual.ro/povestea-noastra.html</loc></url>
+  <url><loc>https://apartamentual.ro/servicii.html</loc></url>
+  <url><loc>https://apartamentual.ro/analize.html</loc></url>
+  <url><loc>https://apartamentual.ro/analiza-simplificata.html</loc></url>
+  <url><loc>https://apartamentual.ro/analiza-detaliata.html</loc></url>
+  <url><loc>https://apartamentual.ro/comanda-analiza.html</loc></url>
+  <url><loc>https://apartamentual.ro/consultanta.html</loc></url>
+  <url><loc>https://apartamentual.ro/parteneri.html</loc></url>
+  <url><loc>https://apartamentual.ro/devino-partener.html</loc></url>
+  <url><loc>https://apartamentual.ro/contact.html</loc></url>
+  <url><loc>https://apartamentual.ro/ghid.html</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/prezentare-generala.html</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/cum-functioneaza.html</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/exemple-europa.html</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/finantarea.html</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/legislatia-romania.html</loc></url>
+  <url><loc>https://apartamentual.ro/ce-este/testimoniale.html</loc></url>
+  <url><loc>https://apartamentual.ro/termeni.html</loc></url>
+  <url><loc>https://apartamentual.ro/termeni-analize.html</loc></url>
+  <url><loc>https://apartamentual.ro/gdpr.html</loc></url>
+  <url><loc>https://apartamentual.ro/politica-livrare.html</loc></url>
+  <url><loc>https://apartamentual.ro/politica-retur.html</loc></url>
+</urlset>

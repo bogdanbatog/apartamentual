@@ -1,0 +1,7 @@
+# robots.txt — apartamentual.ro
+# Nu blocăm nimic aici: paginile private au <meta name="robots" content="noindex">,
+# iar Google trebuie să le poată citi ca să vadă acel noindex.
+User-agent: *
+Allow: /
+
+Sitemap: https://apartamentual.ro/sitemap.xml
