@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Pagina de distribuire, generata de scripts/articole/pagini-distribuire.js. Nu se editeaza de mana. -->
+    <!-- Pagina articolului, generată de scripts/articole/pagini-distribuire.js. Nu se editează de mână:
+         textul vine din Supabase (tabela articles), se rulează scriptul din nou. -->
     <title>Cum se construiește de fapt un apartament în grup - ApartamenTUal</title>
     <meta name="description" content="Pornesc un serial despre primul Baugruppen dus până la capăt în România. În episodul 0: ce o să-ți arăt">
-    <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="https://apartamentual.ro/a/judetului-housing-episodul-0.html">
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="ApartamenTUal">
     <meta property="og:locale" content="ro_RO">
@@ -21,17 +27,160 @@
     <meta name="twitter:title" content="Cum se construiește de fapt un apartament în grup">
     <meta name="twitter:description" content="Pornesc un serial despre primul Baugruppen dus până la capăt în România. În episodul 0: ce o să-ți arăt">
     <meta name="twitter:image" content="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1782213494808.jpg">
-    <script>location.replace("/news.html#judetului-housing-episodul-0");</script>
-    <style>
-        body { font-family: system-ui, sans-serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; line-height: 1.6; }
-        img { width: 100%; border-radius: 4px; }
-        a { color: #1a1a1a; }
-    </style>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Cum se construiește de fapt un apartament în grup",
+  "description": "Pornesc un serial despre primul Baugruppen dus până la capăt în România. În episodul 0: ce o să-ți arăt",
+  "image": [
+    "https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1782213494808.jpg"
+  ],
+  "datePublished": "2026-07-16T23:15:10.592+00:00",
+  "dateModified": "2026-07-16T23:15:09.44233+00:00",
+  "inLanguage": "ro",
+  "mainEntityOfPage": "https://apartamentual.ro/a/judetului-housing-episodul-0.html",
+  "author": {
+    "@type": "Organization",
+    "name": "ApartamenTUal",
+    "url": "https://apartamentual.ro/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ApartamenTUal",
+    "url": "https://apartamentual.ro/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://apartamentual.ro/apple-touch-icon.png"
+    }
+  }
+}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/css/apartamentual-v9.css">
+    <link rel="stylesheet" href="/css/articol.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#0f172a">
 </head>
 <body>
-    <p><a href="/news.html#judetului-housing-episodul-0">Cum se construiește de fapt un apartament în grup</a></p>
-    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1782213494808.jpg" alt="">
-    <p>Pornesc un serial despre primul Baugruppen dus până la capăt în România. În episodul 0: ce o să-ți arăt</p>
-    <p><a href="/news.html#judetului-housing-episodul-0">Citește articolul pe ApartamenTUal</a></p>
+    <div id="navigation"></div>
+
+    <article class="article-full">
+        <a href="/news.html" class="article-full-back"><i class="fas fa-arrow-left"></i> Înapoi la articole</a>
+        <h1>Cum se construiește de fapt un apartament în grup</h1>
+        <div class="article-full-meta">
+            <a class="article-category-badge" href="/news.html?cat=prototip">Serialul Județului Housing</a>
+            <time datetime="2026-07-16T23:15:10.592+00:00">17 iulie 2026</time>
+        </div>
+        <img class="article-full-image" src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1782213494808.jpg" alt="Cum se construiește de fapt un apartament în grup">
+        <div class="article-full-content" id="articleContent">
+<p><em>Serialul Județului Housing, episodul 0</em></p>
+
+<p>Sunt Lucian Luța, arhitect. Dar lucrul despre care vreau să-ți scriu nu l-am proiectat de la birou, ci l-am trăit.</p>
+
+<p>Acum cinci ani, împreună cu alte câteva familii pe care le-am cunoscut printr-o pagină de Facebook, ApartamenTUal, din care avea să crească mai târziu platforma de azi, am cumpărat un teren în București și am pornit să ne construim singuri un mic bloc cu cinci apartamente. Fără dezvoltator între noi și locuință. Fiecare a rămas proprietar pe apartamentul lui, iar banii fiecăruia s-au dus în apartamentul lui, nu în marja cuiva. Modelul se numește Baugruppen, adică grup de construcție, iar Județului Housing e primul de acest fel dus până la capăt în România. Acum suntem la finisaje.</p>
+
+<p>N-a fost nici rapid, nici ușor. Dar vom avea apartamentele noastre așa cum ni le-am dorit.</p>
+
+<p>Pe ApartamenTUal scriu mult despre cum <em>ar trebui</em> să meargă lucrurile. Aici, în serialul acesta, vreau să-ți arăt cum au mers de fapt lucrurile la noi. Lunile în care așteptam să iasă autorizația și ne întrebam dacă mai are rost să continuăm. Vecinii pe care a trebuit să-i convingem, unul câte unul, pentru acorduri. Membrul care a fost nevoit să iasă din grup și cum ne-am redresat destul de rapid. Constructorul, banii, surpriza de la săpătură. Și, da, faptul că ne-a costat mai mult decât crezusem la început.</p>
+
+<p>Îți scriu toate astea din două motive.</p>
+
+<p>1. Ca să poți decide singur dacă modelul acesta e pentru tine. Nu e pentru toată lumea, cere timp și răbdare și o să fiu cinstit despre asta. Mai bine afli acum, dintr-o poveste reală, decât peste doi ani.</p>
+
+<p>2. Ca să vezi că se poate. Suntem familii obișnuite, nu dezvoltatori. Dacă noi am dus-o la capăt, cu tot ce a ieșit în cale, înseamnă că există un drum și o să ți-l arăt pas cu pas.</p>
+
+<p>În episoadele care vin luăm pe rând lucrurile concrete și grele: cum s-a format grupul, cum am găsit terenul, avizele, vecinii, juridicul, banii, constructorul, șantierul.</p>
+
+<p>Primul episod începe cu partea cea mai omenească dintre toate: vecinii.</p>
+
+<p>Ne citim în curând.<br>Lucian</p>
+        </div>
+        <div class="article-extra-images">
+            <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/extra-1782309410995.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+        </div>
+        <nav class="episode-nav" aria-label="Episoadele serialului">
+            <a class="episode-nav__next" href="/a/judetului-housing-episodul-1-acordul-vecinilor.html"><span class="episode-nav__label">Episodul 1 →</span><span class="episode-nav__title">Acordul vecinilor: cum i-am convins, unul câte unul</span></a>
+        </nav>
+        <div class="episode-outro">
+            <p class="episode-outro__lead">Primește episoadele direct pe email:</p>
+            <form class="js-newsletter-form episode-outro__form" data-source="news_episod" data-plausible-goal="Newsletter Episod" data-success-msg="Aproape gata: verifică-ți emailul și confirmă abonarea." novalidate>
+                <div class="eo-row">
+                    <input type="email" placeholder="adresa ta de email" aria-label="Adresa ta de email" required>
+                    <button type="submit">Abonează-mă</button>
+                </div>
+                <p class="episode-outro__micro">Un email pe săptămână, doar când avem ceva de spus. Fără spam.</p>
+                <label class="episode-outro__consent">
+                    <input type="checkbox" required>
+                    <span>Sunt de acord să primesc newsletterul ApartamenTUal și am citit <a href="/gdpr.html">politica de confidențialitate</a>.</span>
+                </label>
+                <p class="js-newsletter-msg" style="display:none;"></p>
+            </form>
+            <p class="episode-outro__story">Nu ne cunoști încă? <a href="/povestea-noastra.html">Povestea noastră, de la o pagină de Facebook la un bloc construit împreună →</a></p>
+            <p class="episode-outro__story">Vrei să vezi ce se întâmplă acum? <a href="/grupuri.html">Grupurile de construcție care se formează</a> și <a href="/terenuri.html">terenurile căutate pentru ele</a> →</p>
+        </div>
+
+        <div class="article-share">
+            <span class="article-share__label">Distribuie articolul</span>
+            <div class="article-share__btns">
+                <button type="button" id="shareCopy" class="article-share__btn"><i class="fas fa-link"></i> Copiază link</button>
+                <a class="article-share__btn" target="_blank" rel="noopener" href="https://wa.me/?text=Cum%20se%20construie%C8%99te%20de%20fapt%20un%20apartament%20%C3%AEn%20grup%20%C2%B7%20ApartamenTUal%20https%3A%2F%2Fapartamentual.ro%2Fa%2Fjudetului-housing-episodul-0.html"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a class="article-share__btn" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fapartamentual.ro%2Fa%2Fjudetului-housing-episodul-0.html"><i class="fab fa-facebook-f"></i> Facebook</a>
+            </div>
+        </div>
+
+        <div class="article-end-back">
+            <a href="/news.html"><i class="fas fa-arrow-left"></i> Vezi toate articolele</a>
+        </div>
+    </article>
+
+    <div id="footer"></div>
+
+    <script src="/js/supabase-config.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/footer.js"></script>
+    <script src="/js/login-modal.js"></script>
+    <script>
+    // Butonul „Copiază link”
+    (function () {
+        var btn = document.getElementById('shareCopy');
+        if (!btn) return;
+        btn.onclick = function () {
+            navigator.clipboard.writeText("https://apartamentual.ro/a/judetului-housing-episodul-0.html").then(function () {
+                var orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Link copiat';
+                setTimeout(function () { btn.innerHTML = orig; }, 2000);
+            });
+        };
+    })();
+
+    // CTA discret după ~40% din articol, spre /grupuri.html și /terenuri.html
+    // (același ca în news.html, insertMidArticleCta). Doar pe articolele cu cel
+    // puțin 8 paragrafe: pe cele scurte ar fi mai lung decât textul din jur.
+    (function () {
+        var c = document.getElementById('articleContent');
+        if (!c) return;
+        var paras = Array.prototype.filter.call(c.children, function (el) { return el.tagName === 'P'; });
+        if (paras.length < 8) return;
+        var anchor = paras[Math.floor(paras.length * 0.4)];
+        if (!anchor) return;
+        var cta = document.createElement('aside');
+        cta.className = 'article-midcta';
+        cta.innerHTML =
+            '<p class="article-midcta__text">Povestea asta e despre un grup care s-a format acum câțiva ani. ' +
+            'Între timp se formează altele, și se caută terenuri pentru ele.</p>' +
+            '<div class="article-midcta__links">' +
+                '<a href="/grupuri.html">Vezi grupurile de construcție</a>' +
+                '<a href="/terenuri.html">Vezi terenurile</a>' +
+            '</div>';
+        anchor.insertAdjacentElement('afterend', cta);
+    })();
+    </script>
 </body>
 </html>

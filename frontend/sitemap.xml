@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Doar paginile publice. Articolele (/a/<slug>.html) intră aici în Etapa 2. -->
+<!-- Doar paginile publice. Lista articolelor (/a/<slug>.html) o scrie scripts/articole/pagini-distribuire.js. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://apartamentual.ro/</loc></url>
   <url><loc>https://apartamentual.ro/terenuri.html</loc></url>
@@ -28,4 +28,18 @@
   <url><loc>https://apartamentual.ro/gdpr.html</loc></url>
   <url><loc>https://apartamentual.ro/politica-livrare.html</loc></url>
   <url><loc>https://apartamentual.ro/politica-retur.html</loc></url>
+  <!-- ARTICOLE: generat de scripts/articole/pagini-distribuire.js, nu se editează de mână -->
+  <url><loc>https://apartamentual.ro/a/cum-se-asociaza-un-grup-de-constructie.html</loc><lastmod>2026-11-07</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/tvr-intrare-libera-locuirea-accesibila.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/zeppelin-179-locuire-in-colaborare.html</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/tubingen-de-unde-vine-terenul.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/ausbauhaus-neukolln-berlin.html</loc><lastmod>2026-10-30</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/judetului-housing-episodul-4-spatiile-comune.html</loc><lastmod>2026-08-22</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/judetului-housing-episodul-3-terenul.html</loc><lastmod>2026-08-21</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/judetului-housing-episodul-2-grupul-cum-ne-am-gasit.html</loc><lastmod>2026-07-17</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/judetului-housing-episodul-0.html</loc><lastmod>2026-07-16</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/judetului-housing-episodul-1-acordul-vecinilor.html</loc><lastmod>2026-07-16</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/brutopia-bruxelles-29-de-familii-care-au-construit-impreuna-mrjs6pp9.html</loc><lastmod>2026-07-13</lastmod></url>
+  <url><loc>https://apartamentual.ro/a/de-sijs-leuven-cohousing-in-jurul-unei-foste-cafenele-mrjryu7q.html</loc><lastmod>2026-07-13</lastmod></url>
+  <!-- /ARTICOLE -->
 </urlset>

@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Pagina de distribuire, generata de scripts/articole/pagini-distribuire.js. Nu se editeaza de mana. -->
+    <!-- Pagina articolului, generată de scripts/articole/pagini-distribuire.js. Nu se editează de mână:
+         textul vine din Supabase (tabela articles), se rulează scriptul din nou. -->
     <title>Terenul: cum am căutat golurile din oraș - ApartamenTUal</title>
     <meta name="description" content="Sunt terenuri în București care rămân goluri în oraș: prea mici pentru un dezvoltator, prea scumpe pentru cine ar vrea o casă. Exact pe astea le căutam. Episodul 3: cum căutam, ce refuzam și cum a apărut terenul de pe Județului.">
-    <meta name="robots" content="noindex, follow">
     <link rel="canonical" href="https://apartamentual.ro/a/judetului-housing-episodul-3-terenul.html">
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-DV5BzzPUWOAnlwlSZU8LW.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="ApartamenTUal">
     <meta property="og:locale" content="ro_RO">
@@ -21,17 +27,229 @@
     <meta name="twitter:title" content="Terenul: cum am căutat golurile din oraș">
     <meta name="twitter:description" content="Sunt terenuri în București care rămân goluri în oraș: prea mici pentru un dezvoltator, prea scumpe pentru cine ar vrea o casă. Exact pe astea le căutam. Episodul 3: cum căutam, ce refuzam și cum a apărut terenul de pe Județului.">
     <meta name="twitter:image" content="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1785582296968.jpg">
-    <script>location.replace("/news.html#judetului-housing-episodul-3-terenul");</script>
-    <style>
-        body { font-family: system-ui, sans-serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; color: #1a1a1a; line-height: 1.6; }
-        img { width: 100%; border-radius: 4px; }
-        a { color: #1a1a1a; }
-    </style>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Terenul: cum am căutat golurile din oraș",
+  "description": "Sunt terenuri în București care rămân goluri în oraș: prea mici pentru un dezvoltator, prea scumpe pentru cine ar vrea o casă. Exact pe astea le căutam. Episodul 3: cum căutam, ce refuzam și cum a apărut terenul de pe Județului.",
+  "image": [
+    "https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1785582296968.jpg"
+  ],
+  "datePublished": "2026-08-21T22:01:07.823+00:00",
+  "dateModified": "2026-08-21T22:01:07.097308+00:00",
+  "inLanguage": "ro",
+  "mainEntityOfPage": "https://apartamentual.ro/a/judetului-housing-episodul-3-terenul.html",
+  "author": {
+    "@type": "Organization",
+    "name": "ApartamenTUal",
+    "url": "https://apartamentual.ro/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ApartamenTUal",
+    "url": "https://apartamentual.ro/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://apartamentual.ro/apple-touch-icon.png"
+    }
+  }
+}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/css/apartamentual-v9.css">
+    <link rel="stylesheet" href="/css/articol.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#0f172a">
 </head>
 <body>
-    <p><a href="/news.html#judetului-housing-episodul-3-terenul">Terenul: cum am căutat golurile din oraș</a></p>
-    <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1785582296968.jpg" alt="">
-    <p>Sunt terenuri în București care rămân goluri în oraș: prea mici pentru un dezvoltator, prea scumpe pentru cine ar vrea o casă. Exact pe astea le căutam. Episodul 3: cum căutam, ce refuzam și cum a apărut terenul de pe Județului.</p>
-    <p><a href="/news.html#judetului-housing-episodul-3-terenul">Citește articolul pe ApartamenTUal</a></p>
+    <div id="navigation"></div>
+
+    <article class="article-full">
+        <a href="/news.html" class="article-full-back"><i class="fas fa-arrow-left"></i> Înapoi la articole</a>
+        <h1>Terenul: cum am căutat golurile din oraș</h1>
+        <div class="article-full-meta">
+            <a class="article-category-badge" href="/news.html?cat=prototip">Serialul Județului Housing</a>
+            <time datetime="2026-08-21T22:01:07.823+00:00">22 august 2026</time>
+        </div>
+        <img class="article-full-image" src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/main-1785582296968.jpg" alt="Terenul: cum am căutat golurile din oraș">
+        <div class="article-full-content" id="articleContent">
+<p>Sunt terenuri în București care stau nevândute mult timp, deși sunt în zone bune. Au suprafețe prea mici pentru un dezvoltator, ies puține apartamente și rezultă un cost prea mare al terenului pentru fiecare dintre ele. Dar sunt și prea scumpe pentru cine ar vrea să își facă o casă. Există în ultimii ani o tendință de a construi blocuri mici, de tip boutique, însă prețurile de vânzare sunt foarte mari. Așa că terenurile astea rămân goluri în țesutul orașului, goluri pe care orașul le închide greu.</p>
+
+<p>Exact astea sunt terenurile pe care le căutam noi.</p>
+
+<p>Un grup de câteva familii poate cumpăra un asemenea teren, iar în felul ăsta oamenii ajung la o locuire de calitate în zone centrale și semicentrale. Se mută centrul de greutate pe nevoia celui care chiar va locui acolo și pe transparența costurilor. Orașul crește natural și își umple golurile cu comunități formate chiar prin procesul ăsta.</p>
+
+<h2>Cum căutam</h2>
+
+<p>Am început să caut pe site-urile de imobiliare și să sun agenții ca să vizitez.</p>
+
+<p>O vizită la teren aducea informații pe care anunțul nu le are: atmosfera zonei, ce vecini sunt, uneori o discuție cu proprietarul, căruia îi ceream actele pentru o verificare notarială a istoricului și cu care puteam discuta o rezervare. De multe ori verificam dacă e dispus să ceară un certificat de urbanism pentru ce propuneam noi să construim. După depunerea certificatului puteam avea și o consultare la serviciul de urbanism al primăriei, iar de acolo lucrurile deveneau mult mai clare.</p>
+
+<h3>Suprafața</h3>
+
+<p>Căutam terenuri în jur de 500 până la 700 de metri pătrați.</p>
+
+<p>La Județului, pe 460 de metri au ieșit inițial șase apartamente: trei de două camere, în jur de 60 de metri pătrați, și trei de trei camere, în jur de 90. Ulterior au rămas cinci, prin comasarea a două apartamente de două camere într-un duplex.</p>
+
+<p>Un grup de cinci sau șase familii se coordonează mai ușor decât unul numeros. E adevărat că, pe un teren mai mare, raportul dintre costul terenului și cel al construcției devine mai bun. Dar un grup mare e și greu de condus. În alte țări există într-adevăr grupuri de zeci de familii, numai că acolo au și o legislație și o experiență îndelungată care le sprijină. Noi am început cu un grup pe măsura noastră.</p>
+
+<p>În sens invers, terenurile mai mici sunt ineficiente: ies puține apartamente și ajungi să plătești prea mult pe teren pentru fiecare apartament care rezultă.</p>
+
+<h3>Zonele protejate</h3>
+
+<p>Le evitam.</p>
+
+<p>Sunt delimitate clar pe hartă în regulamentul local de urbanism și au reglementări specifice. Mai important, cer avizul Ministerului Culturii și o documentație de urbanism depusă la Primăria Generală, unde aprobarea durează mult mai mult decât la primăriile de sector. Așa că încercam să găsim terenuri cât mai centrale, dar imediat în afara perimetrelor protejate. Se întâmplă și acolo să fie nevoie de un PUD la sector, însă durează mai puțin.</p>
+
+<h3>Calcanele</h3>
+
+<p>Aici lucrurile sunt mai nuanțate.</p>
+
+<p>Un calcan pe limita laterală poate fi un avantaj: regulamentul te obligă să îl acoperi, deci te lipești de limita de proprietate și câștigi distanță față de cealaltă latură. Mai multe calcane înseamnă însă neclarități în amplasare și, de multe ori, un PUD pentru detalierea propunerii. Iar orice calcan înseamnă acordul vecinilor, despre care am scris în primul episod.</p>
+
+<h2>Ce se întâmpla după vizită</h2>
+
+<p>După fiecare vizită făceam o analiză preliminară.</p>
+
+<p>Din ea ieșeau amplasarea clădirii, gabaritul, înălțimea, numărul aproximativ de apartamente, suprafețele și câteva randări. Le postam pe pagina de Facebook ApartamenTUal. Evaluam și un cost estimativ pe metru pătrat construit, destul de grosier.</p>
+
+<p>Așa aveam elementele pentru fezabilitatea terenului: costul terenului, suprafața totală construită și numărul de apartamente. De acolo rezulta un cost de teren plus construcție pentru fiecare familie.</p>
+
+<p>Costul terenului era de obicei determinant, pentru că acei bani trebuie să îi ai atunci, la cumpărare. Costurile construcției se întind pe o perioadă mult mai lungă, dar despre asta într-un episod viitor.</p>
+
+<p>Un lucru care ne-a ajutat: terenurile astea nu se vând repede.</p>
+
+<p>Am observat asta de-a lungul vizitelor. Rămâneau pe piață suficient cât grupul să aibă timp să se consulte, să ceară analize, să discute soluția la primărie, să mai vadă și alte terenuri. Cel de la Județului a așteptat câteva luni din momentul în care l-am găsit până când l-am cumpărat. Iar vânzătorul era chiar un dezvoltator, care probabil nu îl mai vedea profitabil.</p>
+
+<h2>Cum se formau grupurile</h2>
+
+<p>La început, grupurile se formau în jurul unui teren anume.</p>
+
+<p>În urma postărilor cu analize s-a strâns un grup mai mare de oameni care urmăreau ce mai apare. Publicam terenul cu analiza preliminară, câțiva spuneau că sunt interesați, iar apoi urma o vizită la fața locului, unde oamenii se cunoșteau între ei și vedeau zona și vecinii. Îmi aduc aminte de o vizită la un teren prin zona străzii Toamnei, cu vreo cincisprezece sau douăzeci de persoane și un agent oarecum șocat. Am organizat și câteva întâlniri tehnice, de informare despre proces.</p>
+
+<p>Terenurile aveau însă mereu câte un defect.</p>
+
+<p>Multe au picat după vizite: unul avea vecini zgomotoși, altul nu avea actele în regulă, altul avea mai mulți proprietari și nu toți erau în țară, altul avea o orientare proastă. Unii oameni erau fixați pe o singură zonă, alții erau mai flexibili și au continuat să caute.</p>
+
+<p>Apoi s-a întâmplat ceva ce nu plănuisem.</p>
+
+<p>S-a coagulat un nucleu constant, oameni interesați de proces în sine, nu de un teren anume. Mai degrabă de câteva zone cu anumite caracteristici: aproape de un parc, liniștite, în inelul central, cu terenuri bune la preț accesibil. Începuseră să caute și ei și să ne propună terenuri pentru analiză.</p>
+
+<h2>Terenul de pe Județului</h2>
+
+<p>A fost propus de unul dintre membrii grupului.</p>
+
+<p>L-am analizat imediat. Avea o suprafață potrivită pentru cinci sau șase apartamente, un preț convenabil pentru fiecare familie și era chiar lângă parc. Câțiva oameni din grupul mare au fost interesați și s-au strâns repede câteva familii care au început să discute opțiunile de apartamente.</p>
+
+<p>Au trecut câteva luni de la rezervare până la cumpărare.</p>
+
+<p>Am cerut actele și notarul a confirmat că e în regulă. Am verificat repede și ieftin natura terenului de fundare, cu două foraje și o dezvelire de fundație la calcan; dacă ieșea prost, trebuia să fundăm adânc și creșteau costurile. Am discutat cu grupul și am detaliat configurațiile apartamentelor, suprafețele, câteva imagini, iar soluția am confirmat-o și la primărie.</p>
+
+<h2>De ce a fost bun și ce am acceptat</h2>
+
+<p>Județului întrunea aproape tot ce căutam: suprafață potrivită, un singur calcan, în afara zonei protejate, autorizare directă fără PUD nici măcar la sector, un PUZ de sector clar și detaliat, teren bun de fundare. Iar cel mai mare atu era apropierea de parc.</p>
+
+<p>A avut și un dezavantaj serios: orientarea, cu fațada lungă spre nord-nord-vest.</p>
+
+<p>Grupul a acceptat compromisul. Iluminarea naturală e ceva mai deficitară, dar am atenuat-o prin arhitectură, cu ferestre mari și un studiu de însorire mai detaliat.</p>
+
+<h2>La final</h2>
+
+<p>Terenul e doar o scânteie care adună un grup pe o zonă.</p>
+
+<p>Grupul crește acolo, dar nu mai rămâne neapărat fixat pe acel teren; caută și altele. Urmează vizite, discuții pe platformă și pe WhatsApp, întâlniri. Încep să se cristalizeze principii de locuire și compatibilități între oameni. Fiecare înțelege mai clar ce își dorește și ce compromisuri poate face. Se pot desprinde de aici alte grupuri, poate cu membri noi. Totul se așază încet, până se limpezește.</p>
+
+<p>Așa au început să se formeze acum, pe platformă, grupurile <a href="/grup-details.html?id=75a1c2cf-6683-4802-8ff8-1a236661f82f">Parcul Circului</a> și <a href="/grup-details.html?id=041eb6f5-ef07-4812-b56c-c325a84ee3f8">Rond Coșbuc</a>. Sperăm să își găsească terenul potrivit.</p>
+
+<p>În episodul următor: spațiile comune. Cum am ajuns să avem câteva, deși la început nu le voia nimeni.</p>
+        </div>
+        <div class="article-extra-images">
+            <img src="https://glbvbbgmcobtswwlktic.supabase.co/storage/v1/object/public/articles/extra-1785582273758.png" alt="" loading="lazy" onerror="this.style.display='none'">
+        </div>
+        <nav class="episode-nav" aria-label="Episoadele serialului">
+            <a class="episode-nav__prev" href="/a/judetului-housing-episodul-2-grupul-cum-ne-am-gasit.html"><span class="episode-nav__label">← Episodul 2</span><span class="episode-nav__title">Grupul: cum ne-am găsit (de două ori)</span></a>
+            <a class="episode-nav__next" href="/a/judetului-housing-episodul-4-spatiile-comune.html"><span class="episode-nav__label">Episodul 4 →</span><span class="episode-nav__title">Cum am ajuns la spații comune fără să le căutăm</span></a>
+        </nav>
+        <div class="episode-outro">
+            <p class="episode-outro__lead">Primește episoadele direct pe email:</p>
+            <form class="js-newsletter-form episode-outro__form" data-source="news_episod" data-plausible-goal="Newsletter Episod" data-success-msg="Aproape gata: verifică-ți emailul și confirmă abonarea." novalidate>
+                <div class="eo-row">
+                    <input type="email" placeholder="adresa ta de email" aria-label="Adresa ta de email" required>
+                    <button type="submit">Abonează-mă</button>
+                </div>
+                <p class="episode-outro__micro">Un email pe săptămână, doar când avem ceva de spus. Fără spam.</p>
+                <label class="episode-outro__consent">
+                    <input type="checkbox" required>
+                    <span>Sunt de acord să primesc newsletterul ApartamenTUal și am citit <a href="/gdpr.html">politica de confidențialitate</a>.</span>
+                </label>
+                <p class="js-newsletter-msg" style="display:none;"></p>
+            </form>
+            <p class="episode-outro__story">Nu ne cunoști încă? <a href="/povestea-noastra.html">Povestea noastră, de la o pagină de Facebook la un bloc construit împreună →</a></p>
+            <p class="episode-outro__story">Vrei să vezi ce se întâmplă acum? <a href="/grupuri.html">Grupurile de construcție care se formează</a> și <a href="/terenuri.html">terenurile căutate pentru ele</a> →</p>
+        </div>
+
+        <div class="article-share">
+            <span class="article-share__label">Distribuie articolul</span>
+            <div class="article-share__btns">
+                <button type="button" id="shareCopy" class="article-share__btn"><i class="fas fa-link"></i> Copiază link</button>
+                <a class="article-share__btn" target="_blank" rel="noopener" href="https://wa.me/?text=Terenul%3A%20cum%20am%20c%C4%83utat%20golurile%20din%20ora%C8%99%20%C2%B7%20ApartamenTUal%20https%3A%2F%2Fapartamentual.ro%2Fa%2Fjudetului-housing-episodul-3-terenul.html"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a class="article-share__btn" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fapartamentual.ro%2Fa%2Fjudetului-housing-episodul-3-terenul.html"><i class="fab fa-facebook-f"></i> Facebook</a>
+            </div>
+        </div>
+
+        <div class="article-end-back">
+            <a href="/news.html"><i class="fas fa-arrow-left"></i> Vezi toate articolele</a>
+        </div>
+    </article>
+
+    <div id="footer"></div>
+
+    <script src="/js/supabase-config.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/footer.js"></script>
+    <script src="/js/login-modal.js"></script>
+    <script>
+    // Butonul „Copiază link”
+    (function () {
+        var btn = document.getElementById('shareCopy');
+        if (!btn) return;
+        btn.onclick = function () {
+            navigator.clipboard.writeText("https://apartamentual.ro/a/judetului-housing-episodul-3-terenul.html").then(function () {
+                var orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Link copiat';
+                setTimeout(function () { btn.innerHTML = orig; }, 2000);
+            });
+        };
+    })();
+
+    // CTA discret după ~40% din articol, spre /grupuri.html și /terenuri.html
+    // (același ca în news.html, insertMidArticleCta). Doar pe articolele cu cel
+    // puțin 8 paragrafe: pe cele scurte ar fi mai lung decât textul din jur.
+    (function () {
+        var c = document.getElementById('articleContent');
+        if (!c) return;
+        var paras = Array.prototype.filter.call(c.children, function (el) { return el.tagName === 'P'; });
+        if (paras.length < 8) return;
+        var anchor = paras[Math.floor(paras.length * 0.4)];
+        if (!anchor) return;
+        var cta = document.createElement('aside');
+        cta.className = 'article-midcta';
+        cta.innerHTML =
+            '<p class="article-midcta__text">Povestea asta e despre un grup care s-a format acum câțiva ani. ' +
+            'Între timp se formează altele, și se caută terenuri pentru ele.</p>' +
+            '<div class="article-midcta__links">' +
+                '<a href="/grupuri.html">Vezi grupurile de construcție</a>' +
+                '<a href="/terenuri.html">Vezi terenurile</a>' +
+            '</div>';
+        anchor.insertAdjacentElement('afterend', cta);
+    })();
+    </script>
 </body>
 </html>

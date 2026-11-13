@@ -339,7 +339,10 @@ function getPageConfig() {
     let currentPage = '';
     let ctaButton = null;
 
-    if (path === '/' || (path.endsWith('/index.html') && !path.includes('ce-este'))) {
+    if (path.startsWith('/a/')) {
+        // Paginile articolelor: slug-ul conține des „teren”/„grup”, nu marcăm nicio secțiune.
+        currentPage = 'article';
+    } else if (path === '/' || (path.endsWith('/index.html') && !path.includes('ce-este'))) {
         currentPage = 'home';
     } else if (path.includes('ce-este')) {
         currentPage = 'about';

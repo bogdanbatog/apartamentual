@@ -20,6 +20,17 @@ $env:ARTICOLE_SECRET="..."; node scripts/articole/publica-articol.js "cale/artic
 Formatul fișierului e descris în capul scriptului. Exemplu complet:
 `calendar postari si episoade/20260901 exemplul 2 Berlin Neukölln/articol-site-neukolln.md`.
 
+## După publicare sau corectură: paginile articolelor
+
+```powershell
+node scripts/articole/pagini-distribuire.js
+```
+
+Scrie `frontend/a/<slug>.html` (pagina reală a articolului, citită de Google)
+și lista din `frontend/sitemap.xml`. Apoi commit + push + cPanel. Fără pasul
+ăsta, pagina articolului rămâne cu textul vechi (sau lipsește, și `news.html`
+îl arată ca înainte).
+
 ## De știut
 
 - **Parola** (`ARTICOLE_SECRET`) stă doar în Supabase (nu se poate citi înapoi) și la Lucian.

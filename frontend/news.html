@@ -477,9 +477,27 @@
         if (window.location.hash) {
             const slug = window.location.hash.slice(1);
             const article = articles.find(a => a.slug === slug);
-            if (article) showArticle(article);
+            if (article) openArticle(article, true);
         }
     });
+
+    // Din 13 nov. 2026 fiecare articol are pagina lui, /a/<slug>.html (generată de
+    // scripts/articole/pagini-distribuire.js), pe care o citește și Google.
+    // news.html#slug rămâne valabil pentru linkurile vechi și trimite acolo.
+    // Dacă pagina nu e încă generată (articol publicat azi, scriptul nerulat),
+    // articolul se arată aici, ca înainte.
+    async function openArticle(article, replace) {
+        if (!article) return;
+        const url = '/a/' + encodeURIComponent(article.slug) + '.html';
+        try {
+            const r = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+            if (r.ok) {
+                if (replace) location.replace(url); else location.href = url;
+                return;
+            }
+        } catch (e) { /* fără rețea: rămânem pe news.html */ }
+        showArticle(article);
+    }
     
     // Category filters
     document.getElementById('categoryFilters').addEventListener('click', (e) => {
@@ -535,7 +553,7 @@
             const summary = a.summary || (a.content ? a.content.replace(/<[^>]*>/g, '').slice(0, 150) + '...' : '');
             
             return `
-                <a class="article-card" onclick="showArticle(articles.find(x => x.id === '${a.id}'))">
+                <a class="article-card" href="/a/${escapeHtml(a.slug)}.html" onclick="openArticle(articles.find(x => x.id === '${a.id}'), false); return false;">
                     <div class="article-card-image">
                         ${a.image_url 
                             ? `<img src="${a.image_url}" alt="${escapeHtml(a.title)}">`
@@ -703,10 +721,10 @@
         } else {
             const slug = window.location.hash.slice(1);
             const article = articles.find(a => a.slug === slug);
-            if (article) showArticle(article);
+            if (article) openArticle(article, true);
         }
     });
-    
+
     function escapeHtml(str) {
         if (!str) return '';
         const div = document.createElement('div');
