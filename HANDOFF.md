@@ -1,5 +1,23 @@
 # HANDOFF — ApartamenTUal
 
+> **SESIUNEA 16 nov.: SEO ETAPA 3, PARTEA TEHNICĂ — commit `55ef5af`, push făcut. ✅ LIVE (urcat 16 nov. 09:51; validator.schema.org: WebSite + Organization, fără erori. Rich Results Test zice „Nu s-au detectat elemente”: normal, testul Google arată doar tipurile care dau rezultate speciale).**
+>
+> - `index.html`: JSON-LD Organization + WebSite (`@id` `/#organizatie`, `/#site`; logo `apple-touch-icon.png`;
+>   sameAs `facebook.com/ltfbstudio`). Invizibil în pagină.
+> - Titluri: „ - ApartamenTUal” → „ | ApartamenTUal” pe 14 pagini publice + 12 articole `/a/` + generator
+>   (`pagini-distribuire.js`). `analiza-detaliata` → „Exemplu de analiză detaliată”. Paginile private au rămas cu „ - ”
+>   (au `noindex`, nu contează).
+> - `teren-details.html`: `noindex` (decizia lui Lucian, 16 nov.). Fișele de teren indexabile = sesiune separată,
+>   doar dacă Search Console arată căutări pe terenuri/zone.
+> - **⏭️ Lucian:** (1) urcă în cPanel cele 28 de fișiere din `frontend/` listate de `git show --name-only 55ef5af`
+>   (`scripts/articole/pagini-distribuire.js` rămâne doar local); (2) Rich Results Test pe `https://apartamentual.ro/`
+>   → trebuie să găsească „Organization”.
+> - **Rămas, partea de conținut (Etapa 3):** titlurile după căutările reale din Search Console → Performanță;
+>   cele 5 titluri din `ce-este/` fără „ApartamenTUal”; titlul Brutopia are „Bruxelles :” (spațiu înainte de
+>   două puncte, din DB → admin + generator); sedilele din episodul 4.
+>
+> ---
+
 > **SESIUNEA 13 nov. (4): HOMEPAGE → `/a/` — commit `61c1a6f`, push făcut, ✅ LIVE (urcat în cPanel, verificat).**
 >
 > - Verificat pe live: **Etapa 2 e urcată** (`/a/<slug>.html` = 200, fără `noindex`, fără redirect; `sitemap.xml`
