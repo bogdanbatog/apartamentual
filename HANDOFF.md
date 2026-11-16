@@ -1,5 +1,21 @@
 # HANDOFF — ApartamenTUal
 
+> **SESIUNEA 16 nov. (2): SERIA TVR „INTRARE LIBERĂ” ÎNCHEIATĂ — fără cod, fără commit de cod.**
+>
+> - FB: postarea 5 (Județului Housing, 18:51) a ieșit azi, conform programării → seria de 5 e completă.
+> - **LinkedIn POSTAT** (profilul lui Lucian), text în `calendar postari si episoade/2026.11.05 postari cu emisiunea
+>   Intrare Libera TVR Cultural/text-postare-linkedin.txt`: citatul „ceartă productivă” + Județului + întrebarea
+>   „ce v-a ajutat ca discuțiile grele să rămână productive?” (pentru cei cu proiecte cu mulți decidenți).
+>   Link spre `/a/tvr-intrare-libera-locuirea-accesibila.html` în primul comentariu.
+> - **Redistribuire în grupul FB „Comunitatea ApartamenTUal”**, cu textul lui Lucian: prietenul care întreabă
+>   „voi nu vă certați?” + „cultura disputei” de la Heinzmann + dinamica „certei productive” la Județului.
+>   „Cultura disputei” (probabil „Streitkultur”) nu e în notele noastre despre Heinzmann; Lucian o are din carte.
+> - **⏭️ În câteva zile:** răspunsurile la întrebarea de pe LinkedIn și comentariile din grup.
+> - **Idee (nedecisă):** povestea cu „voi nu vă certați?” + Heinzmann, ca articol/newsletter despre cum se iau
+>   deciziile într-un grup.
+>
+> ---
+
 > **SESIUNEA 16 nov.: SEO ETAPA 3, PARTEA TEHNICĂ — commit `55ef5af`, push făcut. ✅ LIVE (urcat 16 nov. 09:51; validator.schema.org: WebSite + Organization, fără erori. Rich Results Test zice „Nu s-au detectat elemente”: normal, testul Google arată doar tipurile care dau rezultate speciale).**
 >
 > - `index.html`: JSON-LD Organization + WebSite (`@id` `/#organizatie`, `/#site`; logo `apple-touch-icon.png`;
