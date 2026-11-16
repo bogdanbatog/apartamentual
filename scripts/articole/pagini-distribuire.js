@@ -178,7 +178,7 @@ ${extra.map(u => `            <img src="${esc(u)}" alt="" loading="lazy" onerror
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Pagina articolului, generată de scripts/articole/pagini-distribuire.js. Nu se editează de mână:
          textul vine din Supabase (tabela articles), se rulează scriptul din nou. -->
-    <title>${esc(titlu)} - ApartamenTUal</title>
+    <title>${esc(titlu)} | ApartamenTUal</title>
     <meta name="description" content="${esc(descriere)}">
     <link rel="canonical" href="${url}">
 <!-- Privacy-friendly analytics by Plausible -->
