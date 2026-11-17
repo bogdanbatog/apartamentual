@@ -1,5 +1,11 @@
 # HANDOFF — ApartamenTUal
 
+> **17 nov.: SEDILELE DIN EPISODUL 4 RĂMÂN AȘA (decizia lui Lucian).** Punctul „sedilele din episodul 4” din
+> sesiunile de mai jos e închis, nu se mai propune. Tot pe 17 nov.: Lucian i-a răspuns Luciei Landenberger
+> (chestionare de început cu grupurile; ieșiri din grup și înlocuitori); de așteptat răspunsul ei.
+>
+> ---
+
 > **SESIUNEA 16 nov. (2): SERIA TVR „INTRARE LIBERĂ” ÎNCHEIATĂ — fără cod, fără commit de cod.**
 >
 > - FB: postarea 5 (Județului Housing, 18:51) a ieșit azi, conform programării → seria de 5 e completă.
